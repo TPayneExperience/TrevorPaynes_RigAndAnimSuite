@@ -1,0 +1,3 @@
+In Windows Explorer, paste below, then open UI file
+
+%PROGRAMFILES%\Autodesk\Maya2019\bin\designer.exe
