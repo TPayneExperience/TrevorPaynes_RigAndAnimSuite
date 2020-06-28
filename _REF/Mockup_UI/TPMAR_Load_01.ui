@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>282</width>
-    <height>272</height>
+    <width>333</width>
+    <height>271</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -53,6 +53,16 @@
         </widget>
        </item>
        <item>
+        <widget class="QLabel" name="label_9">
+         <property name="text">
+          <string>VERSION</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item>
         <widget class="QLabel" name="label_7">
          <property name="text">
           <string>DATE</string>
@@ -65,7 +75,7 @@
        <item>
         <widget class="QLabel" name="label_8">
          <property name="text">
-          <string>VERSION</string>
+          <string>  </string>
          </property>
          <property name="alignment">
           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -87,6 +97,16 @@
         </widget>
        </item>
        <item>
+        <widget class="QLabel" name="label_10">
+         <property name="text">
+          <string>001</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item>
         <widget class="QLabel" name="label">
          <property name="text">
           <string>10/28/19 05:54:58 PM</string>
@@ -94,15 +114,28 @@
         </widget>
        </item>
        <item>
-        <widget class="QSpinBox" name="spinBox">
+        <widget class="QPushButton" name="pushButton_3">
          <property name="maximumSize">
           <size>
-           <width>40</width>
+           <width>30</width>
            <height>16777215</height>
           </size>
          </property>
-         <property name="value">
-          <number>3</number>
+         <property name="text">
+          <string>&lt;</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="pushButton_4">
+         <property name="maximumSize">
+          <size>
+           <width>30</width>
+           <height>16777215</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>&gt;</string>
          </property>
         </widget>
        </item>
@@ -128,6 +161,16 @@
         </widget>
        </item>
        <item>
+        <widget class="QLabel" name="label_11">
+         <property name="text">
+          <string>001</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item>
         <widget class="QLabel" name="label_3">
          <property name="text">
           <string>10/28/19 05:54:58 PM</string>
@@ -135,15 +178,28 @@
         </widget>
        </item>
        <item>
-        <widget class="QSpinBox" name="spinBox_3">
+        <widget class="QPushButton" name="pushButton_5">
          <property name="maximumSize">
           <size>
-           <width>40</width>
+           <width>30</width>
            <height>16777215</height>
           </size>
          </property>
-         <property name="value">
-          <number>3</number>
+         <property name="text">
+          <string>&lt;</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="pushButton_8">
+         <property name="maximumSize">
+          <size>
+           <width>30</width>
+           <height>16777215</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>&gt;</string>
          </property>
         </widget>
        </item>
@@ -169,6 +225,16 @@
         </widget>
        </item>
        <item>
+        <widget class="QLabel" name="label_12">
+         <property name="text">
+          <string>001</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item>
         <widget class="QLabel" name="label_4">
          <property name="text">
           <string>10/28/19 05:54:58 PM</string>
@@ -176,15 +242,28 @@
         </widget>
        </item>
        <item>
-        <widget class="QSpinBox" name="spinBox_2">
+        <widget class="QPushButton" name="pushButton_6">
          <property name="maximumSize">
           <size>
-           <width>40</width>
+           <width>30</width>
            <height>16777215</height>
           </size>
          </property>
-         <property name="value">
-          <number>3</number>
+         <property name="text">
+          <string>&lt;</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="pushButton_9">
+         <property name="maximumSize">
+          <size>
+           <width>30</width>
+           <height>16777215</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>&gt;</string>
          </property>
         </widget>
        </item>
@@ -210,6 +289,16 @@
         </widget>
        </item>
        <item>
+        <widget class="QLabel" name="label_13">
+         <property name="text">
+          <string>001</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item>
         <widget class="QLabel" name="label_2">
          <property name="text">
           <string>10/28/19 05:54:58 PM</string>
@@ -217,15 +306,28 @@
         </widget>
        </item>
        <item>
-        <widget class="QSpinBox" name="spinBox_4">
+        <widget class="QPushButton" name="pushButton_7">
          <property name="maximumSize">
           <size>
-           <width>40</width>
+           <width>30</width>
            <height>16777215</height>
           </size>
          </property>
-         <property name="value">
-          <number>3</number>
+         <property name="text">
+          <string>&lt;</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="pushButton_10">
+         <property name="maximumSize">
+          <size>
+           <width>30</width>
+           <height>16777215</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>&gt;</string>
          </property>
         </widget>
        </item>
