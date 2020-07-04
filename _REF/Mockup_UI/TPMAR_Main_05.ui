@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>621</width>
+    <width>637</width>
     <height>568</height>
    </rect>
   </property>
@@ -97,7 +97,7 @@
          <bool>true</bool>
         </property>
         <property name="currentIndex">
-         <number>1</number>
+         <number>0</number>
         </property>
         <widget class="QWidget" name="tab">
          <attribute name="title">
@@ -279,11 +279,21 @@
                        </property>
                        <item>
                         <property name="text">
-                         <string>Arm (M)</string>
+                         <string>Arm (R)</string>
                         </property>
                         <item>
                          <property name="text">
-                          <string>Hand</string>
+                          <string>Hand (R)</string>
+                         </property>
+                        </item>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>Arm (L)</string>
+                        </property>
+                        <item>
+                         <property name="text">
+                          <string>Hand (L)</string>
                          </property>
                         </item>
                        </item>
@@ -320,68 +330,29 @@
                  <item>
                   <layout class="QVBoxLayout" name="verticalLayout_25">
                    <item>
-                    <widget class="QTreeWidget" name="treeWidget_3">
+                    <widget class="QListWidget" name="listWidget_3">
                      <property name="alternatingRowColors">
                       <bool>true</bool>
                      </property>
-                     <property name="selectionMode">
-                      <enum>QAbstractItemView::ExtendedSelection</enum>
-                     </property>
-                     <property name="indentation">
-                      <number>10</number>
-                     </property>
-                     <property name="headerHidden">
-                      <bool>true</bool>
-                     </property>
-                     <column>
-                      <property name="text">
-                       <string>1</string>
-                      </property>
-                     </column>
                      <item>
                       <property name="text">
-                       <string>LIMB: ARM</string>
+                       <string>Clavicle</string>
                       </property>
-                      <item>
-                       <property name="text">
-                        <string>CLV [R]</string>
-                       </property>
-                       <item>
-                        <property name="text">
-                         <string>SLD [R]</string>
-                        </property>
-                        <item>
-                         <property name="text">
-                          <string>ELB [R]</string>
-                         </property>
-                         <item>
-                          <property name="text">
-                           <string>WRS [R]</string>
-                          </property>
-                         </item>
-                        </item>
-                       </item>
-                      </item>
-                      <item>
-                       <property name="text">
-                        <string>CLV [L]</string>
-                       </property>
-                       <item>
-                        <property name="text">
-                         <string>SLD [L]</string>
-                        </property>
-                        <item>
-                         <property name="text">
-                          <string>ELB [L]</string>
-                         </property>
-                         <item>
-                          <property name="text">
-                           <string>WRS [L]</string>
-                          </property>
-                         </item>
-                        </item>
-                       </item>
-                      </item>
+                     </item>
+                     <item>
+                      <property name="text">
+                       <string>Shoulder</string>
+                      </property>
+                     </item>
+                     <item>
+                      <property name="text">
+                       <string>Elbow</string>
+                      </property>
+                     </item>
+                     <item>
+                      <property name="text">
+                       <string>Wrist</string>
+                      </property>
                      </item>
                     </widget>
                    </item>
@@ -404,7 +375,7 @@
               <item>
                <widget class="QGroupBox" name="groupBox_3">
                 <property name="title">
-                 <string>Inspector</string>
+                 <string>Properties</string>
                 </property>
                 <layout class="QHBoxLayout" name="horizontalLayout_6">
                  <item>
@@ -423,30 +394,6 @@
                         <property name="spacing">
                          <number>6</number>
                         </property>
-                        <item>
-                         <layout class="QHBoxLayout" name="horizontalLayout_13">
-                          <item>
-                           <widget class="QLabel" name="label_5">
-                            <property name="text">
-                             <string>Name</string>
-                            </property>
-                           </widget>
-                          </item>
-                          <item>
-                           <widget class="QLineEdit" name="lineEdit_7">
-                            <property name="sizePolicy">
-                             <sizepolicy hsizetype="Ignored" vsizetype="Fixed">
-                              <horstretch>0</horstretch>
-                              <verstretch>0</verstretch>
-                             </sizepolicy>
-                            </property>
-                            <property name="text">
-                             <string>ARM</string>
-                            </property>
-                           </widget>
-                          </item>
-                         </layout>
-                        </item>
                         <item>
                          <layout class="QHBoxLayout" name="horizontalLayout_38">
                           <item>
@@ -521,24 +468,6 @@
                          </layout>
                         </item>
                         <item>
-                         <layout class="QHBoxLayout" name="horizontalLayout_41">
-                          <item>
-                           <widget class="QLabel" name="label_6">
-                            <property name="text">
-                             <string>BranchCount</string>
-                            </property>
-                           </widget>
-                          </item>
-                          <item>
-                           <widget class="QSpinBox" name="spinBox_2">
-                            <property name="value">
-                             <number>1</number>
-                            </property>
-                           </widget>
-                          </item>
-                         </layout>
-                        </item>
-                        <item>
                          <layout class="QHBoxLayout" name="horizontalLayout_42">
                           <item>
                            <widget class="QLabel" name="label_7">
@@ -557,16 +486,153 @@
                          </layout>
                         </item>
                         <item>
+                         <layout class="QHBoxLayout" name="horizontalLayout_41">
+                          <item>
+                           <widget class="QLabel" name="label_6">
+                            <property name="text">
+                             <string>BranchCount</string>
+                            </property>
+                           </widget>
+                          </item>
+                          <item>
+                           <widget class="QSpinBox" name="spinBox_2">
+                            <property name="value">
+                             <number>1</number>
+                            </property>
+                           </widget>
+                          </item>
+                         </layout>
+                        </item>
+                        <item>
+                         <widget class="QPushButton" name="pushButton_8">
+                          <property name="text">
+                           <string>Add Joints AT Selected Verts</string>
+                          </property>
+                         </widget>
+                        </item>
+                       </layout>
+                      </item>
+                     </layout>
+                    </widget>
+                   </item>
+                   <item>
+                    <widget class="QGroupBox" name="groupBox_26">
+                     <property name="title">
+                      <string>Joint Options</string>
+                     </property>
+                     <layout class="QVBoxLayout" name="verticalLayout_33">
+                      <item>
+                       <layout class="QVBoxLayout" name="verticalLayout_51">
+                        <property name="spacing">
+                         <number>6</number>
+                        </property>
+                        <item>
                          <layout class="QHBoxLayout" name="horizontalLayout_11">
                           <item>
                            <widget class="QLabel" name="label_3">
+                            <property name="text">
+                             <string>Aim Axis</string>
+                            </property>
+                           </widget>
+                          </item>
+                          <item>
+                           <widget class="QComboBox" name="comboBox_2">
+                            <property name="currentIndex">
+                             <number>-1</number>
+                            </property>
+                            <item>
+                             <property name="text">
+                              <string>X</string>
+                             </property>
+                            </item>
+                            <item>
+                             <property name="text">
+                              <string>-X</string>
+                             </property>
+                            </item>
+                            <item>
+                             <property name="text">
+                              <string>Y</string>
+                             </property>
+                            </item>
+                            <item>
+                             <property name="text">
+                              <string>-Y</string>
+                             </property>
+                            </item>
+                            <item>
+                             <property name="text">
+                              <string>Z</string>
+                             </property>
+                            </item>
+                            <item>
+                             <property name="text">
+                              <string>-Z</string>
+                             </property>
+                            </item>
+                           </widget>
+                          </item>
+                         </layout>
+                        </item>
+                        <item>
+                         <layout class="QHBoxLayout" name="horizontalLayout_13">
+                          <item>
+                           <widget class="QLabel" name="label_5">
+                            <property name="text">
+                             <string>Up Axis</string>
+                            </property>
+                           </widget>
+                          </item>
+                          <item>
+                           <widget class="QComboBox" name="comboBox_12">
+                            <property name="currentIndex">
+                             <number>3</number>
+                            </property>
+                            <item>
+                             <property name="text">
+                              <string>X</string>
+                             </property>
+                            </item>
+                            <item>
+                             <property name="text">
+                              <string>-X</string>
+                             </property>
+                            </item>
+                            <item>
+                             <property name="text">
+                              <string>Y</string>
+                             </property>
+                            </item>
+                            <item>
+                             <property name="text">
+                              <string>-Y</string>
+                             </property>
+                            </item>
+                            <item>
+                             <property name="text">
+                              <string>Z</string>
+                             </property>
+                            </item>
+                            <item>
+                             <property name="text">
+                              <string>-Z</string>
+                             </property>
+                            </item>
+                           </widget>
+                          </item>
+                         </layout>
+                        </item>
+                        <item>
+                         <layout class="QHBoxLayout" name="horizontalLayout_40">
+                          <item>
+                           <widget class="QLabel" name="label_20">
                             <property name="text">
                              <string>Rot Order</string>
                             </property>
                            </widget>
                           </item>
                           <item>
-                           <widget class="QComboBox" name="comboBox_2">
+                           <widget class="QComboBox" name="comboBox_10">
                             <item>
                              <property name="text">
                               <string>XYZ</string>
@@ -979,7 +1045,7 @@
               <item>
                <widget class="QGroupBox" name="groupBox_36">
                 <property name="title">
-                 <string>Inspector</string>
+                 <string>Properties</string>
                 </property>
                 <layout class="QHBoxLayout" name="horizontalLayout_46">
                  <item>
@@ -1540,7 +1606,7 @@
               <item>
                <widget class="QGroupBox" name="groupBox_11">
                 <property name="title">
-                 <string>Inspector</string>
+                 <string>Properties</string>
                 </property>
                 <layout class="QHBoxLayout" name="horizontalLayout_16">
                  <item>
@@ -2099,7 +2165,7 @@
                  </sizepolicy>
                 </property>
                 <property name="title">
-                 <string>Inspector</string>
+                 <string>Properties</string>
                 </property>
                 <layout class="QHBoxLayout" name="horizontalLayout_23">
                  <item>
@@ -2745,7 +2811,7 @@
               <item>
                <widget class="QGroupBox" name="groupBox_23">
                 <property name="title">
-                 <string>Inspector</string>
+                 <string>Properties</string>
                 </property>
                 <layout class="QHBoxLayout" name="horizontalLayout_31">
                  <item>
@@ -3130,7 +3196,7 @@
                  </sizepolicy>
                 </property>
                 <property name="title">
-                 <string>Inspector</string>
+                 <string>Properties</string>
                 </property>
                 <layout class="QHBoxLayout" name="horizontalLayout_56">
                  <item>
@@ -3769,7 +3835,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>621</width>
+     <width>637</width>
      <height>21</height>
     </rect>
    </property>

@@ -4,6 +4,7 @@ import unittest
 
 from Name_Manager import Name_Manager
 from File_Manager import File_Manager
+from Json_Manager import Json_Manager
 
 @unittest.skip("skipping...")
 class Test_Name_Manager(unittest.TestCase):
@@ -35,7 +36,6 @@ class Test_Name_Manager(unittest.TestCase):
                                     limb='ARM', 
                                     limbPart='ELBOW', 
                                     side='L', 
-                                    number='01',
                                     objType='JNT')
         self.assertTrue(name == 'CAT_ARM_ELBOW_L_01_JNT')
 
@@ -44,13 +44,11 @@ class Test_Name_Manager(unittest.TestCase):
                                 limb=3, 
                                 limbPart=2, 
                                 side=1, 
-                                number=4,
-                                objType=5)
+                                objType=4)
         name = self.nameMng.GetName(prefix='CAT',
                                     limb='ARM', 
                                     limbPart='ELBOW', 
                                     side='L', 
-                                    number='01',
                                     objType='JNT')
         self.assertTrue(name == 'CAT_L_ELBOW_ARM_01_JNT')
 
@@ -133,7 +131,6 @@ class Test_File_Manager_Behaviors(unittest.TestCase):
         if (data):
             print(data.path)
 
-
 @unittest.skip("skipping...")
 class Test_File_Manager_Appearance(unittest.TestCase):
     def setUp(self):
@@ -171,7 +168,7 @@ class Test_File_Manager_Appearance(unittest.TestCase):
         if (data):
             print(data.path)
 
-
+@unittest.skip("skipping...")
 class Test_File_Manager_Skinning(unittest.TestCase):
     def setUp(self):
         self.fileMng = File_Manager(r'D:\Assets\Programming\Python\Maya\ModularAutoRigger\Templates')
@@ -203,6 +200,24 @@ class Test_File_Manager_Skinning(unittest.TestCase):
         if (data):
             print(data.path)
 
+@unittest.skip("skipping...")
+class Test_Json_Manager(unittest.TestCase):
+    def setUp(self):
+        self.jsonMng = Json_Manager()
+
+    def tearDown(self):
+        del(self.jsonMng)
+
+    def test_Save(self):
+        x = {1:'123', 'B': 654}
+        path = r'C:\Users\crash\Documents\TPRAS_BuildFiles\_TESTS\test.json'
+        self.jsonMng.Save(path, x)
+        self.assertTrue(os.path.isfile(path))
+    
+    def test_Load(self):
+        path = r'C:\Users\crash\Documents\TPRAS_BuildFiles\_TESTS\test.json'
+        data = self.jsonMng.Load(path)
+        self.assertTrue(data)
 
 
 if __name__ == '__main__':

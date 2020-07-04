@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>219</width>
-    <height>441</height>
+    <width>217</width>
+    <height>429</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -71,6 +71,12 @@
                </item>
                <item>
                 <widget class="QToolButton" name="toolButton">
+                 <property name="maximumSize">
+                  <size>
+                   <width>25</width>
+                   <height>16777215</height>
+                  </size>
+                 </property>
                  <property name="text">
                   <string>...</string>
                  </property>
@@ -93,9 +99,19 @@
        </property>
        <layout class="QVBoxLayout" name="verticalLayout_2">
         <item>
+         <widget class="QCheckBox" name="checkBox">
+          <property name="text">
+           <string>Show Prefix</string>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
          <widget class="QLabel" name="label_4">
           <property name="text">
-           <string>Prfx_Limb_LimbPart_Side_Num_Type</string>
+           <string>Prfx_Limb_Joint_Side_Type</string>
           </property>
          </widget>
         </item>
@@ -110,7 +126,13 @@
           <property name="minimumSize">
            <size>
             <width>0</width>
-            <height>107</height>
+            <height>90</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>16777215</width>
+            <height>16777215</height>
            </size>
           </property>
           <property name="dragDropMode">
@@ -141,11 +163,6 @@
           </item>
           <item>
            <property name="text">
-            <string>NUMBER (03, 07)</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
             <string>TYPE (Jnt, Ctr)</string>
            </property>
           </item>
@@ -163,14 +180,14 @@
         <item>
          <widget class="QLabel" name="label_3">
           <property name="text">
-           <string>CAT_LegF_Knee_L_01_JNT</string>
+           <string>CAT_LegF_Knee_L_JNT</string>
           </property>
          </widget>
         </item>
         <item>
          <widget class="QLabel" name="label_2">
           <property name="text">
-           <string>ELF_Arm_Elbow_R_01_CTR</string>
+           <string>ELF_Arm_Elbow_R_CTR</string>
           </property>
          </widget>
         </item>
@@ -195,6 +212,9 @@
        </item>
        <item>
         <widget class="QPushButton" name="pushButton">
+         <property name="enabled">
+          <bool>true</bool>
+         </property>
          <property name="text">
           <string>Save</string>
          </property>
