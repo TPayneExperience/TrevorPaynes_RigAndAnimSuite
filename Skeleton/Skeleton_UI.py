@@ -4,15 +4,17 @@ from Qt import QtWidgets, QtCore
 class Skeleton_UI_TabWidget(QtWidgets.QTabWidget):
     def __init__(self, parent=None):
         super(Skeleton_UI_TabWidget, self).__init__(parent)
-        self._setup()
+        self._Setup()
 
-    def _setup(self):
+#=========== SETUP ====================================
+
+    def _Setup(self):
         h_layout = QtWidgets.QHBoxLayout(self)
-        h_layout.addLayout(self._setup_Templates())
-        h_layout.addLayout(self._setup_LimbJointHierarchy())
-        h_layout.addLayout(self._setup_Inspector())
+        h_layout.addLayout(self._Setup_Templates())
+        h_layout.addLayout(self._Setup_LimbJointHierarchy())
+        h_layout.addLayout(self._Setup_Inspector())
     
-    def _setup_Templates(self):
+    def _Setup_Templates(self):
         v_layout = QtWidgets.QVBoxLayout()
 
         gb1 = QtWidgets.QGroupBox('Limb Templates')
@@ -34,7 +36,7 @@ class Skeleton_UI_TabWidget(QtWidgets.QTabWidget):
 
         return v_layout
     
-    def _setup_LimbJointHierarchy(self):
+    def _Setup_LimbJointHierarchy(self):
         v_layout = QtWidgets.QVBoxLayout()
 
         gb1 = QtWidgets.QGroupBox('Limb Hierarchy')
@@ -57,22 +59,22 @@ class Skeleton_UI_TabWidget(QtWidgets.QTabWidget):
 
         return v_layout
     
-    def _setup_Inspector(self):
+    def _Setup_Inspector(self):
         v_layout = QtWidgets.QVBoxLayout()
 
         gb = QtWidgets.QGroupBox('Inspector')
         vl = QtWidgets.QVBoxLayout(gb)
 
-        vl.addWidget(self._setup_Inspector_LimbOptions())
-        vl.addWidget(self._setup_Inspector_JointOptions())
+        vl.addWidget(self._Setup_Inspector_LimbOptions())
+        vl.addWidget(self._Setup_Inspector_JointOptions())
         vl.addStretch()
-        vl.addWidget(self._setup_Inspector_Tools())
+        vl.addWidget(self._Setup_Inspector_Tools())
         
         v_layout.addWidget(gb)
 
         return v_layout
     
-    def _setup_Inspector_LimbOptions(self):
+    def _Setup_Inspector_LimbOptions(self):
         self.limbOptions_gb = QtWidgets.QGroupBox('Limb Options')
         vl = QtWidgets.QVBoxLayout(self.limbOptions_gb)
 
@@ -112,7 +114,7 @@ class Skeleton_UI_TabWidget(QtWidgets.QTabWidget):
 
         return self.limbOptions_gb
 
-    def _setup_Inspector_JointOptions(self):
+    def _Setup_Inspector_JointOptions(self):
         self.jointOptions_gb = QtWidgets.QGroupBox('Joint Options')
         vl = QtWidgets.QVBoxLayout(self.jointOptions_gb)
 
@@ -125,7 +127,7 @@ class Skeleton_UI_TabWidget(QtWidgets.QTabWidget):
 
         return self.jointOptions_gb
 
-    def _setup_Inspector_Tools(self):
+    def _Setup_Inspector_Tools(self):
         gb = QtWidgets.QGroupBox('Tools')
         vl = QtWidgets.QVBoxLayout(gb)
 
@@ -146,6 +148,8 @@ class Skeleton_UI_TabWidget(QtWidgets.QTabWidget):
         vl.addWidget(self.jointCount_l)
 
         return gb
+
+#=========== FUNCTIONALITY ====================================
 
 
 

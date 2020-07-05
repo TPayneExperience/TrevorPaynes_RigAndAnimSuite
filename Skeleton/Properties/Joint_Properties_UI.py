@@ -3,13 +3,12 @@ import sys
 
 from Qt import QtWidgets, QtCore, QtGui
 
-from Joint_Data import AXES, ROT_AXES
 from Joint_Properties import Joint_Properties
 
-class Joint_Properties_UI(QtWidgets.QWidget):
-    def __init__(self, parent=None):
+class Joint_Properties_UI(QtWidgets.QGroupBox):
+    def __init__(self, jointProperties, parent=None):
         super(Joint_Properties_UI, self).__init__(parent)
-        self._jntProp = Joint_Properties()
+        self._jntProp = jointProperties
         self._Setup()
         self._Setup_Connections()
         self._populatingData = False #use for reading in data
@@ -17,21 +16,18 @@ class Joint_Properties_UI(QtWidgets.QWidget):
 #========== SETUP ===============================
 
     def _Setup(self):
-        v_layout = QtWidgets.QVBoxLayout(self)
-        gb = QtWidgets.QGroupBox('BRANCH Limb Options')
-        vl = QtWidgets.QVBoxLayout(gb)
+        self.setTitle('BRANCH Limb Options')
+        vl = QtWidgets.QVBoxLayout(self)
 
         vl.addLayout(self._Setup_AimAxis())
         vl.addLayout(self._Setup_UpAxis())
         vl.addLayout(self._Setup_RotationOrder())
 
-        v_layout.addWidget(gb)
-
     def _Setup_AimAxis(self):
         hl = QtWidgets.QHBoxLayout()
         l = QtWidgets.QLabel('Aim Axis')
         self.aimAxis_cb = QtWidgets.QComboBox()
-        self.aimAxis_cb.addItems(AXES)
+        self.aimAxis_cb.addItems(self._jntProp.jntMng.GetAxes())
         hl.addWidget(l)
         hl.addWidget(self.aimAxis_cb)
         return hl
@@ -40,7 +36,7 @@ class Joint_Properties_UI(QtWidgets.QWidget):
         hl = QtWidgets.QHBoxLayout()
         l = QtWidgets.QLabel('Up Axis')
         self.upAxis_cb = QtWidgets.QComboBox()
-        self.upAxis_cb.addItems(AXES)
+        self.upAxis_cb.addItems(self._jntProp.jntMng.GetAxes())
         hl.addWidget(l)
         hl.addWidget(self.upAxis_cb)
         return hl
@@ -49,7 +45,7 @@ class Joint_Properties_UI(QtWidgets.QWidget):
         hl = QtWidgets.QHBoxLayout()
         l = QtWidgets.QLabel('Rotation Order')
         self.rotationOrder_cb = QtWidgets.QComboBox()
-        self.rotationOrder_cb.addItems(ROT_AXES)
+        self.rotationOrder_cb.addItems(self._jntProp.jntMng.GetRotAxes())
         hl.addWidget(l)
         hl.addWidget(self.rotationOrder_cb)
         return hl
@@ -73,31 +69,27 @@ class Joint_Properties_UI(QtWidgets.QWidget):
         if not self._populatingData:
             self._jntProp.SetRotationOrder(self.rotationOrder_cb.currentText())
 
-
 #========== POPULATE ===============================
 
-    def SetJointData(self, jointDataList):
+    def SetJointIDs(self, idList):
         self._populatingData = True
+        self._jntProp.SetJointData(idList)
 
-        self._jntProp.SetJointData(jointDataList)
+        self.aimAxis_cb.setCurrentIndex(-1)
+        self.upAxis_cb.setCurrentIndex(-1)
+        self.rotationOrder_cb.setCurrentIndex(-1)
 
         aimAxis = self._jntProp.GetAimAxis()
         if aimAxis:
             self.aimAxis_cb.setCurrentIndex(AXES.index(aimAxis))
-        else:
-            self.aimAxis_cb.setCurrentIndex(-1)
 
         upAxis = self._jntProp.GetUpAxis()
         if upAxis:
             self.upAxis_cb.setCurrentIndex(AXES.index(upAxis))
-        else:
-            self.upAxis_cb.setCurrentIndex(-1)
 
         rotationOrder = self._jntProp.GetRotationOrder()
         if rotationOrder:
             self.rotationOrder_cb.setCurrentIndex(ROT_AXES.index(rotationOrder))
-        else:
-            self.rotationOrder_cb.setCurrentIndex(-1)
 
         self._populatingData = False
 
@@ -113,24 +105,12 @@ class Joint_Properties_UI(QtWidgets.QWidget):
 
 
 
-if __name__ == '__main__':
-    app = QtWidgets.QApplication(sys.argv)
-    ex = Joint_Properties_UI()
+# if __name__ == '__main__':
+#     app = QtWidgets.QApplication(sys.argv)
+#     ex = Joint_Properties_UI(None)
 
-    from Joint_Data import Joint_Data
-    j = Joint_Data()
-    j.rotationOrder = 'ZXY'
-    j.upAxis = 'X'
-    j.aimAxis = 'Y'
-    j2 = Joint_Data()
-    j2.rotationOrder = 'ZXY'
-    j2.upAxis = 'Z'
-    j2.aimAxis = 'Y'
-
-    ex.SetJointData([j, j2])
-
-    ex.show()
-    sys.exit(app.exec_())
+#     ex.show()
+#     sys.exit(app.exec_())
 
 
 
