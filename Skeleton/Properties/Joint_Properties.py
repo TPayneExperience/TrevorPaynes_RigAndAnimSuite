@@ -5,8 +5,8 @@ class Joint_Properties():
         self.jntMng = jointManager
         self._joints = []
 
-    def SetJointIDs(self, idList):
-        self._joints = self.jntMng.GetJoints(idList)
+    def SetJoint(self, jointList):
+        self._joints = jointList
 
 #========= ACCESSORS + MUTATORS ===================================
 

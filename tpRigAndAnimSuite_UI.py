@@ -4,7 +4,7 @@ import sys
 
 import Qt
 from Qt import QtWidgets, QtCore, QtGui
-from Skeleton.Skeleton_UI import Skeleton_UI_TabWidget
+from Skeleton.Skeleton_UI import Skeleton_UI
 # import tpRigAndAnimSuite as tpras
 
 
@@ -19,16 +19,16 @@ PY_VER = sys.version[:3]
 class TPRigAndAnimSuite_UI_MainWindow(QtWidgets.QMainWindow):
     def __init__(self, parent=None):
         super(TPRigAndAnimSuite_UI_MainWindow, self).__init__(parent)
-        self._setup()
+        self._Setup()
 
-    def _setup(self):
+    def _Setup(self):
         self.setCentralWidget(TPRigAndAnimSuite_UI_Widget(self))
         self.setWindowTitle("Trevor Payne's Rig & Anim Suite v" + __version__)
-        self._setup_MenuBar()
+        self._Setup_MenuBar()
         self.statusBar().showMessage('Drag & drop or Right Click on stuff!')
         self.resize(600, 500)
     
-    def _setup_MenuBar(self):
+    def _Setup_MenuBar(self):
         mb = self.menuBar()
         fileMenu = mb.addMenu('File')
         newRigAct = fileMenu.addAction('New Rig...')
@@ -44,14 +44,17 @@ class TPRigAndAnimSuite_UI_MainWindow(QtWidgets.QMainWindow):
 class TPRigAndAnimSuite_UI_Widget(QtWidgets.QWidget):
     def __init__(self, parent=None):
         super(TPRigAndAnimSuite_UI_Widget, self).__init__(parent)
-        self._setup()
+        self._Setup()
+        self.Populate()
 
-    def _setup(self):
+#=========== SETUP ====================================
+
+    def _Setup(self):
         v_layout = QtWidgets.QVBoxLayout(self)
-        v_layout.addLayout(self._setup_HeaderButtons())
-        v_layout.addWidget(self._setup_TabWidget())
+        v_layout.addLayout(self._Setup_HeaderButtons())
+        v_layout.addWidget(self._Setup_TabWidget())
     
-    def _setup_HeaderButtons(self):
+    def _Setup_HeaderButtons(self):
         h_layout = QtWidgets.QHBoxLayout()
         self.saveBtn = QtWidgets.QPushButton('Save')
         self.loadBtn = QtWidgets.QPushButton('Load')
@@ -60,10 +63,16 @@ class TPRigAndAnimSuite_UI_Widget(QtWidgets.QWidget):
         h_layout.addStretch()
         return h_layout
     
-    def _setup_TabWidget(self):
+    def _Setup_TabWidget(self):
         self.tabWgt = QtWidgets.QTabWidget()
-        self.tabWgt.addTab(Skeleton_UI_TabWidget(self.tabWgt), 'Skeleton')
+        self.skel_ui = Skeleton_UI(self.tabWgt)
+        self.tabWgt.addTab(self.skel_ui, 'Skeleton')
         return self.tabWgt
+    
+#=========== FUNCTIONALITY ====================================
+
+    def Populate(self):
+        self.skel_ui.Populate()
 
 
 

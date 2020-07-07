@@ -3,8 +3,6 @@ import sys
 
 from Qt import QtWidgets, QtCore, QtGui
 
-from Joint_Properties import Joint_Properties
-
 class Joint_Properties_UI(QtWidgets.QGroupBox):
     def __init__(self, jointProperties, parent=None):
         super(Joint_Properties_UI, self).__init__(parent)
@@ -71,9 +69,9 @@ class Joint_Properties_UI(QtWidgets.QGroupBox):
 
 #========== POPULATE ===============================
 
-    def SetJointIDs(self, idList):
+    def SetJoints(self, jointList):
         self._populatingData = True
-        self._jntProp.SetJointData(idList)
+        self._jntProp.SetJointData(jointList)
 
         self.aimAxis_cb.setCurrentIndex(-1)
         self.upAxis_cb.setCurrentIndex(-1)

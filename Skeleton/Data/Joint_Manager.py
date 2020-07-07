@@ -1,5 +1,5 @@
 
-from Joint_Data import Joint_Data
+from .Joint_Data import Joint_Data
 
 class Joint_Manager():
     def __init__(self):
@@ -29,7 +29,7 @@ class Joint_Manager():
 
 #============= FUNCTIONALITY ============================
 
-    def AddJoints(self, count, jointNameStartIndex):
+    def Add(self, count, jointNameStartIndex):
         jointIdList = []
         for i in range(count):
             ID = self._nextJointID
@@ -39,12 +39,12 @@ class Joint_Manager():
             self._nextJointID += 1
         return jointIdList
     
-    def RemoveJoints(self, idList):
+    def Remove(self, idList):
         for ID in idList:
             del(self._joints[ID])
 
-    def DuplicateJoints(self, sourceIdList):
-        targetIdList = self.AddJoints(len(sourceIdList), 0)
+    def Duplicate(self, sourceIdList):
+        targetIdList = self.Add(len(sourceIdList), 0)
         for sourceID, targetID in zip(sourceIdList, targetIdList):
             source = self._joints[sourceID]
             target = self._joints[targetID]
@@ -57,8 +57,8 @@ class Joint_Manager():
             target.upAxis       = source.upAxis
         return targetIdList
 
-    def MirrorJoints(self, sourceIdList, axis):
-        targetIdList = self.DuplicateJoints(sourceIdList)
+    def Mirror(self, sourceIdList, axis):
+        targetIdList = self.Duplicate(sourceIdList)
         # MISSING: FLIP OVER AXIS
         # MISSING: FIX ROTATIONS
         return targetIdList

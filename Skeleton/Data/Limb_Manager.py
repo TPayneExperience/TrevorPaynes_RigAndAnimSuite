@@ -1,9 +1,9 @@
 
-from Limb_Data import Limb_Data
+from .Limb_Data import Limb_Data
 
 class Limb_Manager():
     def __init__(self):
-        self._nextLimbID = 0
+        self._nextLimbID = 1
         self._limbs = {} # ID: LimbData
         self._limbParents = {} # limbID : parentID 
         self._limbSides = ['M', 'L', 'R']
@@ -21,20 +21,24 @@ class Limb_Manager():
         return self._limbTypes
     
     def GetLimbIDs(self):
-        return self._limbs.keys()
+        return list(self._limbs.keys()) # python 3.7 fix
 
     def GetNames(self, limbIdList):
         return [self._limbs[ID].name for ID in limbIdList]
     
     def GetLimbParentID(self, limbID):
         return self._limbParents[limbID]
+    
+    def GetLimbParentDictCopy(self):
+        return dict(self._limbParents)
         
 #============= ADD + REMOVE LIMBS ============================
 
-    def AddLimb(self, limbType):
-        side = LIMB_SIDES[0]
+    def Add(self):
+        side = self._limbSides[0]
+        limbType = self._limbTypes[0]
         ID = self._nextLimbID
-        name = '%s_%03d' % (limbType, ID)
+        name = 'Limb_%03d' % (ID)
         
         limb = Limb_Data(ID, name, limbType, side)
         self._limbs[ID] = limb
@@ -43,46 +47,34 @@ class Limb_Manager():
         self._nextLimbID += 1
         return limb
 
-    def _RemoveLimb(self, limbID):
+    def _Remove(self, limbID):
         del(self._limbParents[limbID])
         del(self._limbs[limbID])
 
-    def RemoveLimb_Individual(self, limbID):
+    def Remove(self, limbID):
         childIDs = []
         for k, v in self._limbParents.items():
             if v == limbID:
-                childIDs.add(k)
-        if limbID in self._limbParents: # REPARENT CHILDREN
-            parentID = self._limbParents[limbID]
-            for childID in childIDs:
-                self._limbParents[childID] = parentID
-        else:
-            del(self._limbParents[childID])
-        self._RemoveLimb(limbID)
-
-    def RemoveLimb_AndChildren(self, limbID):
-        childIDs = []
-        for k, v in self._limbParents.items():
-            if v == limbID:
-                childIDs.add(k)
+                childIDs.append(k)
         for childID in childIDs:
-            self.RemoveLimb_AndChildren(childID)
-        self._RemoveLimb(limbID)
+            self.Remove(childID)
+        self._Remove(limbID)
 
-    def MirrorLimb(self, limb_01, newJointIdList):
-        limb_02 = self.DuplicateLimb(limbID, newJointIdList)
-        limb_01.side = LIMB_SIDES[1]
-        limb_02.side = LIMB_SIDES[2]
+    def Mirror(self, limb_01, newJointIdList):
+        limb_02 = self.Duplicate(limb_01, newJointIdList)
+        limb_01.side = self._limbSides[1]
+        limb_02.side = self._limbSides[2]
         limb_01.mirrorLimbID = limb_02.ID
         limb_02.mirrorLimbID = limb_01.ID
         return limb_02
 
-    def DuplicateLimb(self, limb_01, newJointIdList):
-        limb_02 = self.AddLimb(limb_01.limbType)
+    def Duplicate(self, limb_01, newJointIdList):
+        limb_02 = self.Add()
         limb_02.name            = limb_01.name
         limb_02.parentJointID   = limb_01.parentJointID
         limb_02.nextJointName   = limb_01.nextJointName
         limb_02.jointIDs = newJointIdList
+        self._limbParents[limb_02.ID] = self._limbParents[limb_01.ID]
         return limb_02
 
 #============= ADD + REMOVE JOINTS ============================

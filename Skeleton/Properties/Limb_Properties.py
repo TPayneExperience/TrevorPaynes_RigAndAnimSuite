@@ -10,9 +10,9 @@ class Limb_Properties():
         self._jointNamesToIds = {} # used to convert UI selection back to id
         self.msg = ''
 
-    def SetLimbData(self, limbID):
-        self._limb = limbManger.GetLimb(limbID)
-        ids = self.limbMng.GetLimbParentJointIdList(limbID)
+    def SetLimb(self, limb):
+        self._limb = limb
+        ids = self.limbMng.GetLimbParentJointIdList(limb.ID)
         names = self.jntMng.GetNames(ids)
         self._namesToIds = zip(names, ids)
 
@@ -20,6 +20,9 @@ class Limb_Properties():
 
     def GetLimbType(self):
         return self._limb.limbType
+
+    def GetLimbTypes(self):
+        return self.limbMng.GetLimbTypes()
 
     # PARENT JOINTS
     def GetParentJointNames(self):
@@ -35,8 +38,8 @@ class Limb_Properties():
         self._limb.parentJointID = self._jointNamesToIds[name]
 
     # SIDE
-    def GetSideList(self):
-        self.limbMng.GetLimbSides()
+    def GetLimbSides(self):
+        return self.limbMng.GetLimbSides()
     
     def GetSide(self):
         return self._limb.side

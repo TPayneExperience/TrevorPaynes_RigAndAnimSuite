@@ -14,8 +14,9 @@ class Limb_Properties_UI(QtWidgets.QGroupBox):
 
     def _Setup(self):
         vl = QtWidgets.QVBoxLayout(self)
-
+        self.setTitle('LIMB Properties')
         vl.addLayout(self._Setup_ParentJoint())
+        vl.addLayout(self._Setup_Types())
         vl.addLayout(self._Setup_Side())
         vl.addLayout(self._Setup_JointCount())
 
@@ -27,11 +28,20 @@ class Limb_Properties_UI(QtWidgets.QGroupBox):
         hl.addWidget(self.parentJoint_cb)
         return hl
 
+    def _Setup_Types(self):
+        hl = QtWidgets.QHBoxLayout()
+        l = QtWidgets.QLabel('Type')
+        self.type_cb = QtWidgets.QComboBox()
+        self.type_cb.addItems(self._limbProps.GetLimbTypes())
+        hl.addWidget(l)
+        hl.addWidget(self.type_cb)
+        return hl
+
     def _Setup_Side(self):
         hl = QtWidgets.QHBoxLayout()
         l = QtWidgets.QLabel('Side')
         self.side_cb = QtWidgets.QComboBox()
-        self.side_cb.addItems(self._limbProps.GetSideList())
+        self.side_cb.addItems(self._limbProps.GetLimbSides())
         hl.addWidget(l)
         hl.addWidget(self.side_cb)
         return hl
@@ -46,10 +56,10 @@ class Limb_Properties_UI(QtWidgets.QGroupBox):
 
 #=========== SETUP UI VALUES ==============================================
 
-    def Populate(self, limbID):
-        self._limbProps.SetLimbData(limbID)
-        self.setText(self._limbProps.GetLimbType().upper() + ' Limb Options')
+    def SetLimb(self, limb):
+        self._limbProps.SetLimb(limb)
         self._SetParentJoint()
+        self._SetType()
         self._SetSide()
         self._SetJointCount()
 
@@ -63,7 +73,13 @@ class Limb_Properties_UI(QtWidgets.QGroupBox):
         else:
             index = -1
         self.parentJoint_cb.setCurrentIndex(index)
-        
+    
+    def _SetType(self):
+        limbType = self._limbProps.GetLimbType()
+        types = self._limbProps.GetLimbTypes()
+        index = types.index(limbTypes)
+        self.type_cb.setCurrentIndex(index)
+
     def _SetSide(self):
         side = self._limbProps.GetSide()
         index = self._limbProps.GetSideList().index(side)

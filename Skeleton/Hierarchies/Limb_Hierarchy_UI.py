@@ -6,8 +6,9 @@ from Qt import QtWidgets, QtCore, QtGui
 
 class Limb_Hierarchy_UI(QtWidgets.QTreeWidget):
     def __init__(self, limbHierarchy, parent=None):
-        super(Joint_Hierarchy_UI, self).__init__(parent)
+        super(Limb_Hierarchy_UI, self).__init__(parent)
         self.limbHier = limbHierarchy
+        self._items = {} # ID : Item
         self._isPopulating = False
         self._Setup()
         self._Setup_Connections()
@@ -17,32 +18,71 @@ class Limb_Hierarchy_UI(QtWidgets.QTreeWidget):
         self.clear()
         ids = self.limbHier.limbMng.GetLimbIDs()
         names = self.limbHier.limbMng.GetNames(ids)
-        items = {} # ID : Item
-        for i in range(len(ids)):
-            item = QtWidgets.QTreeWidgetItem(self, names[i])
-            item.ID = ids[i]
-            item.setFlags(item.flags() | QtCore.Qt.ItemIsEditable)
-            items[ids[i]] = item
-        for ID in ids:
+        print(names)
+        self._items.clear()
+        # PARENTS FIRST ALGORITHM
+        limbParents = self.limbHier.limbMng.GetLimbParentDictCopy()
+        idOrder = []
+        while (limbParents):
+            for k,v in limbParents.items():
+                if (v == -1) or (v in idOrder):
+                    idOrder.append(k)
+                    del(limbParents[k])
+                    break
+        # CREATE ITEMS, IN ORDER
+        for ID in idOrder:
+            name = self.limbHier.limbMng.GetLimb(ID).name
             parentID = self.limbHier.limbMng.GetLimbParentID(ID)
-            if (parentID != -1)
-                items[ID].
+            if (parentID != -1):
+                parentItem = self._items[parentID]
+                item = QtWidgets.QTreeWidgetItem(parentItem, [name])
+            else:
+                item = QtWidgets.QTreeWidgetItem(self, [name])
+            item.ID = ID
+            item.setFlags(item.flags() | QtCore.Qt.ItemIsEditable)
+            self._items[ID] = item
+        self.expandAll()
         self._isPopulating = False
 
 #=========== SETUP ====================================
+
     def _Setup(self):
         self.setAlternatingRowColors(True)
         self.setDragDropMode(self.InternalMove)
-
+        self.setHeaderHidden(True)
         self.installEventFilter(self)
 
         self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
     
     def _RightClickMenu(self):
         menu = QtWidgets.QMenu(self)
-        add = QtWidgets.QAction('Add', self, triggered=self._AddJoint)
-        remove = QtWidgets.QAction('Remove', self, triggered=self._RemoveJoints)
+        add = QtWidgets.QAction('Add Limb', 
+                                self, 
+                                triggered=self._Add)
+        duplicate = QtWidgets.QAction(  'Duplicate', 
+                                        self, 
+                                        triggered=self._Duplicate)
+        remove = QtWidgets.QAction( 'Remove Limb + Children', 
+                                    self, 
+                                    triggered=self._Remove)
+        mirrorX = QtWidgets.QAction('X Axis', 
+                                    self, 
+                                    triggered=self._Mirror_X)
+        mirrorY = QtWidgets.QAction('Y Axis', 
+                                    self, 
+                                    triggered=self._Mirror_Y)
+        mirrorZ = QtWidgets.QAction('Z Axis', 
+                                    self, 
+                                    triggered=self._Mirror_Z)
         menu.addAction(add)
+
+        mirrorMenu = menu.addMenu('Mirror')
+        mirrorMenu.addAction(mirrorX)
+        mirrorMenu.addAction(mirrorY)
+        mirrorMenu.addAction(mirrorZ)
+
+        menu.addAction(duplicate)
+        menu.addSeparator()
         menu.addAction(remove)
         menu.exec_(QtGui.QCursor.pos())
     
@@ -57,26 +97,56 @@ class Limb_Hierarchy_UI(QtWidgets.QTreeWidget):
 
 #=========== FUNCTIONALITY ====================================
 
-    def _AddJoint(self):
-        index = self.currentRow()
-        self.jntHier.AddJoint(index)
-        self._Populate()
-    
-    def _RemoveJoints(self):
-        ids = [item.ID for item in self.selectedItems()]
-        self.jntHier.RemoveJoints(ids)
-        self._Populate()
+    def _Add(self):
+        # try:
+        #     index = self.currentRow()
+        # except:
+        #     index = 0
+        self.limbHier.Add()
+        self.Populate()
+
+    def _Remove(self):
+        # MISSING WARNING CONFIRMATION DIALOG
+        ID = self.currentItem().ID
+        self.limbHier.Remove(ID)
+        self.Populate()
 
     def _Rename(self, item):
         if not self._isPopulating:
-            self.jntHier.RenameJoint(item.ID, item.text())
-            self._Populate()
+            self.limbHier.Rename(item.ID, item.text(0))
+            self.Populate()
 
     def _Reorder(self):
         if not self._isPopulating:
-            ids = [item.ID for item in self.selectedItems()]
-            self.jntHier.Reorder(ids)
-            self._Populate()
+            newChildParentDict = {}
+            for item in list(self._items.values()):
+                newChildParentDict[item.ID] = -1
+                parent = item.parent()
+                if parent:
+                    newChildParentDict[item.ID] = parent.ID
+            self.limbHier.Reorder(newChildParentDict)
+            print(newChildParentDict)
+            self.Populate()
+    
+    def _Duplicate(self):
+        limbID = self.currentItem().ID
+        self.limbHier.Duplicate(limbID)
+        self.Populate()
+
+    def _Mirror_X(self):
+        limbID = self.currentItem().ID
+        self.limbHier.Mirror(limbID, 'X')
+        self.Populate()
+
+    def _Mirror_Y(self):
+        limbID = self.currentItem().ID
+        self.limbHier.Mirror(limbID, 'Y')
+        self.Populate()
+
+    def _Mirror_Z(self):
+        limbID = self.currentItem().ID
+        self.limbHier.Mirror(limbID, 'Z')
+        self.Populate()
     
 
 
