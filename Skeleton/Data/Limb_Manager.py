@@ -6,6 +6,7 @@ class Limb_Manager():
         self._nextLimbID = 1
         self._limbs = {} # ID: LimbData
         self._limbParents = {} # limbID : parentID 
+        self._limbMirrors = {} # limbID_01 : limbID_02 (was mirrorLimbID)
         self._limbSides = ['M', 'L', 'R']
         self._limbTypes = ['Chain', 'Branch']
 
@@ -13,25 +14,30 @@ class Limb_Manager():
 
     def GetLimb(self, ID):
         return self._limbs[ID]
+
+    def GetLimbs(self, idList):
+        return [self._limbs[ID] for ID in idList]
     
-    def GetLimbSides(self):
+    def GetSides(self):
         return self._limbSides
     
-    def GetLimbTypes(self):
+    def GetTypes(self):
         return self._limbTypes
     
-    def GetLimbIDs(self):
-        return list(self._limbs.keys()) # python 3.7 fix
-
-    def GetNames(self, limbIdList):
-        return [self._limbs[ID].name for ID in limbIdList]
-    
-    def GetLimbParentID(self, limbID):
+    def GetParentID(self, limbID):
         return self._limbParents[limbID]
     
-    def GetLimbParentDictCopy(self):
+    def GetLimbParentDict(self):
         return dict(self._limbParents)
-        
+    
+    def SetLimbSide(self, limbID, sideIndex):
+        limb = self._limbs[limbID]
+        newIndex = 1 if sideIndex == 2 else 2
+        limb.side = self._limbSides[newIndex]
+        mirrorLimb = self._limbs[self._limbMirrors[limbID]]
+        mirrorLimb.side = self._limbSides[sideIndex]
+    
+
 #============= ADD + REMOVE LIMBS ============================
 
     def Add(self):
@@ -43,12 +49,17 @@ class Limb_Manager():
         limb = Limb_Data(ID, name, limbType, side)
         self._limbs[ID] = limb
         self._limbParents[ID] = -1
+        self._limbMirrors[ID] = -1
 
         self._nextLimbID += 1
         return limb
 
     def _Remove(self, limbID):
         del(self._limbParents[limbID])
+        if self._limbMirrors[ID] != -1:
+            mirror = self._limbMirrors[ID]
+            self._limbMirrors[mirror] = -1
+        del(self._limbMirrors[ID])
         del(self._limbs[limbID])
 
     def Remove(self, limbID):
@@ -60,32 +71,20 @@ class Limb_Manager():
             self.Remove(childID)
         self._Remove(limbID)
 
-    def Mirror(self, limb_01, newJointIdList):
-        limb_02 = self.Duplicate(limb_01, newJointIdList)
+    def Mirror(self, limb_01):
+        limb_02 = self.Duplicate(limb_01)
         limb_01.side = self._limbSides[1]
         limb_02.side = self._limbSides[2]
-        limb_01.mirrorLimbID = limb_02.ID
-        limb_02.mirrorLimbID = limb_01.ID
+        self._limbMirrors[limb_01.ID] = limb_02.ID
+        self._limbMirrors[limb_02.ID] = limb_01.ID
         return limb_02
 
-    def Duplicate(self, limb_01, newJointIdList):
+    def Duplicate(self, limb_01):
         limb_02 = self.Add()
-        limb_02.name            = limb_01.name
-        limb_02.parentJointID   = limb_01.parentJointID
-        limb_02.nextJointName   = limb_01.nextJointName
-        limb_02.jointIDs = newJointIdList
-        self._limbParents[limb_02.ID] = self._limbParents[limb_01.ID]
+        limb_02.name = limb_01.name
+        limb_02.type = limb_01.type
+        self.SetParent(limb_02.ID, self._limbParents[limb_01.ID])
         return limb_02
-
-#============= ADD + REMOVE JOINTS ============================
-
-    def AddJointIDs(self, jointIdList, limbId):
-        self._limbs[limbId].jointIDs += jointIdList
-
-    def RemoveJointIDs(self, jointIdList, limbId):
-        limb = self._limbs[limbId]
-        for ID in jointIdList:
-            limb.jointIDs.remove(ID)
 
 #============= TREE MANIPULATION ============================
 

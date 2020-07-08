@@ -18,11 +18,19 @@ class Joint_Hierarchy_UI(QtWidgets.QListWidget):
     def _Populate(self):
         self._isPopulating = True
         self.clear()
-        self.addItems(self.jntHier.jntMng.GetNames(limb.jointIDs))
-        for i in range(self.count()):
-            item = self.item(i)
-            item.ID = jointIdList[i]
+        jointIDs = self.jntHier.jntMng.GetLimbJointIDs(self.jntHier.limb.ID)
+        joints = self.jntHier.jntMng.GetJoints(jointIDs)
+        for j in joints:
+            item = QtWidgets.QListWidgetItem(self)
+            item.ID = j.ID
+            item.setText = j.name
             item.setFlags(item.flags() | QtCore.Qt.ItemIsEditable)
+        # names = self.jntHier.jntMng.GetNames(jointIDs)
+        # self.addItems(names)
+        # for i in range(self.count()):
+        #     item = self.item(i)
+        #     item.ID = jointIDs[i]
+        #     item.setFlags(item.flags() | QtCore.Qt.ItemIsEditable)
         self._isPopulating = False
 
 #=========== SETUP ====================================
@@ -36,8 +44,8 @@ class Joint_Hierarchy_UI(QtWidgets.QListWidget):
     
     def _RightClickMenu(self):
         menu = QtWidgets.QMenu(self)
-        add = QtWidgets.QAction('Add', self, triggered=self._AddJoint)
-        remove = QtWidgets.QAction('Remove', self, triggered=self._RemoveJoints)
+        add = QtWidgets.QAction('Add', self, triggered=self._Add)
+        remove = QtWidgets.QAction('Remove', self, triggered=self._Remove)
         menu.addAction(add)
         menu.addAction(remove)
         menu.exec_(QtGui.QCursor.pos())
@@ -53,14 +61,14 @@ class Joint_Hierarchy_UI(QtWidgets.QListWidget):
 
 #=========== FUNCTIONALITY ====================================
 
-    def _AddJoint(self):
+    def _Add(self):
         index = self.currentRow()
-        self.jntHier.AddJoint(index)
+        self.jntHier.jntMng.Add(self.jntHier.limb.ID, 1)
         self._Populate()
     
-    def _RemoveJoints(self):
+    def _Remove(self):
         ids = [item.ID for item in self.selectedItems()]
-        self.jntHier.RemoveJoints(ids)
+        self.jntHier.jntMng.Remove(self.jntHier.limb.ID, ids)
         self._Populate()
 
     def _Rename(self, item):
@@ -71,7 +79,7 @@ class Joint_Hierarchy_UI(QtWidgets.QListWidget):
     def _Reorder(self):
         if not self._isPopulating:
             ids = [item.ID for item in self.selectedItems()]
-            self.jntHier.Reorder(ids)
+            self.jntHier.jntMng.SetLimbJointIDs(self.jntHier.limb.ID, ids)
             self._Populate()
     
 

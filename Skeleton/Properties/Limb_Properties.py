@@ -4,65 +4,60 @@ class Limb_Properties():
     def __init__(self, limbManager, jointManager):
         self.limbMng = limbManager
         self.jntMng = jointManager
-        self._limb = None
-        self._limbID = None
-        self._limbTreeData = None
-        self._jointNamesToIds = {} # used to convert UI selection back to id
-        self.msg = ''
+        self.limb = None
+        # self.limbTreeData = None
+        # self._jointNamesToIds = {} # used to convert UI selection back to id
+        # self._parentJointNamesToIDs = {}
 
     def SetLimb(self, limb):
-        self._limb = limb
-        ids = self.limbMng.GetLimbParentJointIdList(limb.ID)
-        names = self.jntMng.GetNames(ids)
-        self._namesToIds = zip(names, ids)
+        self.limb = limb
+        # self._parentJointNamesToIDs.clear()
+        # parentID = self.limbMng.GetParentID(limb.ID)
+        # if (parentID != -1):
+        #     ids = self.limbMng.GetLimb(parentID).jointIDs
+        #     names = self.jntMng.GetNames(ids)
+        #     self._parentJointNamesToIDs = zip(names, ids)
 
 #========= ACCESSORS + MUTATORS ===================================
 
-    def GetLimbType(self):
-        return self._limb.limbType
+    def SetJointCount(self, newJointCount):
+        oldJointCount = len(self.limb.jointIDs)
+        if (newJointCount > oldJointCount):
+            amount = newJointCount - oldJointCount
+            startIndex = self.limb.nextJointName
+            jointIDs = self.jntMng.Add(amount, startIndex)
+            self.limb.jointIDs += jointIDs
+            self.limb.nextJointName += amount
+        elif (newJointCount < oldJointCount):
+            amount =  oldJointCount - newJointCount
+            jointIDs = self.limb.jointIDs[newJointCount:oldJointCount]
+            for ID in jointIdList:
+                self.limb.jointIDs.remove(ID)
 
-    def GetLimbTypes(self):
-        return self.limbMng.GetLimbTypes()
+    # # PARENT JOINTS
+    # def GetParentJointNames(self):
+    #     return list(self._parentJointNamesToIDs.keys())
 
-    # PARENT JOINTS
-    def GetParentJointNames(self):
-        return self._namesToIds.keys()
-
-    def GetParentJointName(self):
-        ID = self._limb.parentJointID
-        if ID != -1:
-            return self.jntMng.GetJoint[ID].name
-        return None
+    # def GetParentJointName(self):
+    #     ID = self.limb.parentJointID
+    #     if ID != -1:
+    #         return self.jntMng.GetJoint[ID].name
+    #     return None
     
-    def SetParentJoint(self, name):
-        self._limb.parentJointID = self._jointNamesToIds[name]
+    # def SetParentJoint(self, name):
+    #     self.limb.parentJointID = self._jointNamesToIds[name]
 
-    # SIDE
-    def GetLimbSides(self):
-        return self.limbMng.GetLimbSides()
+    # # SIDE
+    # def GetSide(self):
+    #     return self.limb.side
     
-    def GetSide(self):
-        return self._limb.side
+    # def SetSide(self, side):
+    #     self.limb.side = side
+
+    # # JOINT COUNT
+    # def GetJointCount(self):
+    #     return len(self.limb.jointIDs)
     
-    def SetSide(self, side):
-        self._limb.side = side
-
-    # JOINT COUNT
-    def GetJointCount(self):
-        return len(self._limb.joints)
-    
-    def IsJointCountValid(self, count):
-        if (count <= 0):
-            self.msg = 'Count must be greater than 0'
-            return -1
-        if (count < len(self._limb.joints)-1):
-            self.msg = 'Last Joints will be removed'
-            return 0
-        return 1
-
-    def SetJointCount(self, count):
-        self.limbMng.SetJointCount(self._limb.ID, count)
-
 
 
 

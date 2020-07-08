@@ -14,6 +14,7 @@ class Skeleton_UI(QtWidgets.QTabWidget):
         super(Skeleton_UI, self).__init__(parent)
         self.skel = Skeleton()
         self._Setup()
+        self._Setup_Connections()
 
 #=========== SETUP ====================================
 

@@ -5,11 +5,18 @@ from Qt import QtWidgets, QtCore, QtGui
 class Limb_Properties_UI(QtWidgets.QGroupBox):
     def __init__(self, Limb_Properties, parent=None):
         super(Limb_Properties_UI, self).__init__(parent)
-        self._limbProps = Limb_Properties
+        self.limbProps = Limb_Properties
         self._parentJoints = []
         self._Setup()
         self._Setup_Connections()
     
+    def SetLimb(self, limb):
+        self.limbProps.SetLimb(limb)
+        self._SetParentJoint()
+        self._SetType()
+        self._SetSide()
+        self._SetJointCount()
+
 #=========== SETUP UI ==============================================
 
     def _Setup(self):
@@ -32,17 +39,17 @@ class Limb_Properties_UI(QtWidgets.QGroupBox):
         hl = QtWidgets.QHBoxLayout()
         l = QtWidgets.QLabel('Type')
         self.type_cb = QtWidgets.QComboBox()
-        self.type_cb.addItems(self._limbProps.GetLimbTypes())
+        self.type_cb.addItems(self.limbProps.limbMng.GetTypes())
         hl.addWidget(l)
         hl.addWidget(self.type_cb)
         return hl
 
     def _Setup_Side(self):
         hl = QtWidgets.QHBoxLayout()
-        l = QtWidgets.QLabel('Side')
+        self.side_l = QtWidgets.QLabel('Side')
         self.side_cb = QtWidgets.QComboBox()
-        self.side_cb.addItems(self._limbProps.GetLimbSides())
-        hl.addWidget(l)
+        self.side_cb.addItems(self.limbProps.limbMng.GetSides()[1:])
+        hl.addWidget(self.side_l)
         hl.addWidget(self.side_cb)
         return hl
 
@@ -54,39 +61,41 @@ class Limb_Properties_UI(QtWidgets.QGroupBox):
         hl.addWidget(self.jointCount_sb)
         return hl
 
-#=========== SETUP UI VALUES ==============================================
-
-    def SetLimb(self, limb):
-        self._limbProps.SetLimb(limb)
-        self._SetParentJoint()
-        self._SetType()
-        self._SetSide()
-        self._SetJointCount()
+#=========== POPULATE ==============================================
 
     def _SetParentJoint(self):
         self.parentJoint_cb.clear()
-        names = self._limbProps.GetParentJointNames()
-        self.parentJoint_cb.addItems(names)
-        parentName = self._limbProps.GetParentJointName()
-        if parentName:
-            index = names.index(parentName)
-        else:
-            index = -1
-        self.parentJoint_cb.setCurrentIndex(index)
+        limbID = self.limbProps.limb.ID
+        parentID = self.limbProps.limbMng.GetParentID(limbID)
+        self.parentJoint_cb.setCurrentIndex(-1)
+        if (parentID != -1):
+            self.parentJointIDs = self.limbProps.jntMng.GetLimbJointIDs(parentID)
+            names = [joint.name for joint in self.limbProps.jntMng.GetJoints(self.parentJointIDs)]
+            self.parentJoint_cb.addItems(names)
+            parentName = self.limbProps.jntMng.GetParentJointId(limbID)
+            if parentName:
+                self.parentJoint_cb.setCurrentIndex(names.index(parentName))
     
     def _SetType(self):
-        limbType = self._limbProps.GetLimbType()
-        types = self._limbProps.GetLimbTypes()
-        index = types.index(limbTypes)
+        types = self.limbProps.limbMng.GetTypes()
+        index = types.index(self.limbProps.limb.limbType)
         self.type_cb.setCurrentIndex(index)
 
     def _SetSide(self):
-        side = self._limbProps.GetSide()
-        index = self._limbProps.GetSideList().index(side)
-        self.side_cb.setCurrentIndex(index)
+        side = self.limbProps.limb.side
+        sides = self.limbProps.limbMng.GetSides()[1:]
+        if side in sides:
+            index = sides.index(side)
+            self.side_l.show()
+            self.side_cb.show()
+            self.side_cb.setCurrentIndex(index)
+        else:
+            self.side_l.hide()
+            self.side_cb.hide()
 
     def _SetJointCount(self):
-        self.jointCount_sb.setValue(self._limbProps.GetJointCount())
+        jointIDs = self.limbProps.jntMng.GetLimbJointIDs(self.limbProps.limb.ID)
+        self.jointCount_sb.setValue(len(jointIDs))
     
 #=========== FUNCTIONALITY ==============================================
 
@@ -96,20 +105,22 @@ class Limb_Properties_UI(QtWidgets.QGroupBox):
         self.jointCount_sb.valueChanged.connect(self._JointCount_Changed)
         
     def _ParentJoint_Changed(self):
-        self._limbProps.SetParentJoint(self.parentJoint_cb.currentText())
+        index = self.parentJoint_cb.currentIndex()
+        self.limbProps.jntMng.SetParentJointId(self.parentJointIDs[index])
 
     def _Side_Changed(self):
-        self._limbProps.SetSide(self.side_cb.currentText())
+        side = self.side_cb.currentText()
+        self.limbProps.limbMng.SetLimbSide(self.limbProps.limb.ID, side)
 
     def _JointCount_Changed(self):
         count = self.jointCount_sb.value()
-        val = self._limbProps.IsJointCountValid(count)
+        val = self.limbProps.IsJointCountValid(count)
         if val == 1:
-            self._limbProps.SetJointCount(count)
+            self.limbProps.SetJointCount(count)
         elif val == 0:
             result = QtWidgets.QMessageBox.warning( self, 
                                                     'Joint Warning',
-                                                    self._limbProps.msg,
+                                                    self.limbProps.msg,
                                                     QtWidgets.QMessageBox.Ok,
                                                     QtWidgets.QMessageBox.Cancel)
             print (result)

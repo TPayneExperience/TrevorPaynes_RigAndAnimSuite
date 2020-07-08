@@ -16,12 +16,10 @@ class Limb_Hierarchy_UI(QtWidgets.QTreeWidget):
     def Populate(self):
         self._isPopulating = True
         self.clear()
-        ids = self.limbHier.limbMng.GetLimbIDs()
-        names = self.limbHier.limbMng.GetNames(ids)
-        print(names)
         self._items.clear()
+
         # PARENTS FIRST ALGORITHM
-        limbParents = self.limbHier.limbMng.GetLimbParentDictCopy()
+        limbParents = self.limbHier.limbMng.GetLimbParentDict()
         idOrder = []
         while (limbParents):
             for k,v in limbParents.items():
@@ -29,10 +27,11 @@ class Limb_Hierarchy_UI(QtWidgets.QTreeWidget):
                     idOrder.append(k)
                     del(limbParents[k])
                     break
+
         # CREATE ITEMS, IN ORDER
         for ID in idOrder:
             name = self.limbHier.limbMng.GetLimb(ID).name
-            parentID = self.limbHier.limbMng.GetLimbParentID(ID)
+            parentID = self.limbHier.limbMng.GetParentID(ID)
             if (parentID != -1):
                 parentItem = self._items[parentID]
                 item = QtWidgets.QTreeWidgetItem(parentItem, [name])
@@ -98,10 +97,6 @@ class Limb_Hierarchy_UI(QtWidgets.QTreeWidget):
 #=========== FUNCTIONALITY ====================================
 
     def _Add(self):
-        # try:
-        #     index = self.currentRow()
-        # except:
-        #     index = 0
         self.limbHier.Add()
         self.Populate()
 
@@ -113,7 +108,7 @@ class Limb_Hierarchy_UI(QtWidgets.QTreeWidget):
 
     def _Rename(self, item):
         if not self._isPopulating:
-            self.limbHier.Rename(item.ID, item.text(0))
+            self.limbHier.limbMng.GetLimb(item.ID).name = item.text(0)
             self.Populate()
 
     def _Reorder(self):
@@ -124,8 +119,7 @@ class Limb_Hierarchy_UI(QtWidgets.QTreeWidget):
                 parent = item.parent()
                 if parent:
                     newChildParentDict[item.ID] = parent.ID
-            self.limbHier.Reorder(newChildParentDict)
-            print(newChildParentDict)
+            self.limbHier.limbMng.ReorderTree(newChildParentDict)
             self.Populate()
     
     def _Duplicate(self):

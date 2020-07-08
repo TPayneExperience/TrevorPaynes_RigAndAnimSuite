@@ -5,7 +5,6 @@ import sys
 import Qt
 from Qt import QtWidgets, QtCore, QtGui
 from Skeleton.Skeleton_UI import Skeleton_UI
-# import tpRigAndAnimSuite as tpras
 
 
 __author__ = 'Trevor Payne'

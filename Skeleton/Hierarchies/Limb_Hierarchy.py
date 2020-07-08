@@ -5,19 +5,16 @@ class Limb_Hierarchy():
         self.limbMng = limbManager
         self.jntMng = jointManager
     
-#========= ACCESSORS + MUTATORS===========================================
+#========= FUNCTIONALITY ===========================================
 
     def Add(self):
         limb = self.limbMng.Add()
+        self.jntMng.AddLimb(limb.ID)
+        self.jntMng.Add(limb.ID, 1)
     
     def Remove(self, limbID):
+        self.jntMng.RemoveLimb(limbID)
         self.limbMng.Remove(limbID)
-
-    def Rename(self, limbID, newName):
-        self.limbMng.GetLimb(limbID).name = newName
-    
-    def Reorder(self, limbParentDict):
-        self.limbMng.ReorderTree(limbParentDict)
 
     def Mirror(self, limbID, axis):
         sourceIDs = self._GetLimbCreationOrder(limbID)
@@ -25,9 +22,9 @@ class Limb_Hierarchy():
         for i in range(len(sourceIDs)):
             sourceID = sourceIDs[i]
             limbSource = self.limbMng.GetLimb(sourceID)
-            jointIDs = self.jntMng.Mirror(limbSource.jointIDs, axis)
-            limbTarget = self.limbMng.Mirror(limbSource, jointIDs)
+            limbTarget = self.limbMng.Mirror(limbSource)
             targetID = limbTarget.ID
+            self.jntMng.Mirror(sourceID, targetID, axis)
             sourceToTargetIDs[sourceID] = targetID
             sourceParentID = self.limbMng.GetLimbParentID(sourceID)
             if sourceParentID in sourceToTargetIDs:
@@ -41,9 +38,9 @@ class Limb_Hierarchy():
         for i in range(len(sourceIDs)):
             sourceID = sourceIDs[i]
             limbSource = self.limbMng.GetLimb(sourceID)
-            jointIDs = self.jntMng.Duplicate(limbSource.jointIDs)
-            limbTarget = self.limbMng.Duplicate(limbSource, jointIDs)
+            limbTarget = self.limbMng.Duplicate(limbSource)
             targetID = limbTarget.ID
+            self.jntMng.Duplicate(sourceID, targetID)
             sourceToTargetIDs[sourceID] = targetID
             sourceParentID = self.limbMng.GetLimbParentID(sourceID)
             if sourceParentID in sourceToTargetIDs:
@@ -52,7 +49,7 @@ class Limb_Hierarchy():
                 self.limbMng.SetParent(targetID, sourceParentID)
     
     def _GetLimbCreationOrder(self, limbID):
-        limbParents = self.limbMng.GetLimbParentDictCopy()
+        limbParents = self.limbMng.GetLimbParentDict()
         sourceIDs = [limbID]
         complete = False
         while (limbParents and not complete):

@@ -4,30 +4,17 @@ class Joint_Hierarchy():
     def __init__(self, jointManager):
         self.jntMng = jointManager
         self._jointIDs = []
+        self.limb = None
 
     def SetLimb(self, limb):
-        self._limb = limb
+        self.limb = limb
 
-#========= ACCESSORS + MUTATORS===========================================
-
-    def AddJoint(self, index = 0):
-        jointID = self.jntMng.AddJoints(1, limb.nextJointName)[0]
-        if (index < len(limb.jointIDs)):
-            limb.jointIDs.insert(index, jointID)
-        limb.nextJointName += 1
-
-    def RemoveJoints(self, jointIdList):
-        for ID in jointIdList:
-            limb.jointIDs.remove(ID)
-        self.jntMng.RemoveJoints(jointIdList)
-
-    def RenameJoint(self, ID, newName):
-        names = self.jntMng.GetNames(self._limb.jointIDs)
+    def Rename(self, ID, newName):
+        ids = self.jntMng.GetLimbJointIDs(self.limb.ID)
+        names = [joint.name for joint in self.jntMng.GetJoints(ids)]
         if newName not in names:
             self.jntMng.GetJoint(ID).name = newName
     
-    def Reorder(self, newOrder):
-        self._limb.jointIDs = newOrder
     
 
 
