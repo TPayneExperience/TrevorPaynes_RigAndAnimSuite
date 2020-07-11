@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>634</width>
-    <height>600</height>
+    <width>701</width>
+    <height>677</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -97,7 +97,7 @@
          <bool>true</bool>
         </property>
         <property name="currentIndex">
-         <number>0</number>
+         <number>2</number>
         </property>
         <widget class="QWidget" name="tab">
          <attribute name="title">
@@ -337,6 +337,9 @@
                      <property name="alternatingRowColors">
                       <bool>true</bool>
                      </property>
+                     <property name="selectionMode">
+                      <enum>QAbstractItemView::ExtendedSelection</enum>
+                     </property>
                      <item>
                       <property name="text">
                        <string>Clavicle</string>
@@ -518,6 +521,13 @@
                            </widget>
                           </item>
                          </layout>
+                        </item>
+                        <item>
+                         <widget class="QPushButton" name="pushButton_23">
+                          <property name="text">
+                           <string>Linear Placement</string>
+                          </property>
+                         </widget>
                         </item>
                        </layout>
                       </item>
@@ -1589,13 +1599,6 @@
                          </widget>
                         </item>
                         <item>
-                         <widget class="QPushButton" name="pushButton_3">
-                          <property name="text">
-                           <string>Color Picker</string>
-                          </property>
-                         </widget>
-                        </item>
-                        <item>
                          <widget class="Line" name="line_19">
                           <property name="orientation">
                            <enum>Qt::Horizontal</enum>
@@ -1620,13 +1623,6 @@
                          <widget class="QCheckBox" name="checkBox_9">
                           <property name="text">
                            <string>Lock + Hide SCALE</string>
-                          </property>
-                         </widget>
-                        </item>
-                        <item>
-                         <widget class="QCheckBox" name="checkBox_10">
-                          <property name="text">
-                           <string>Lock + Hide VIS</string>
                           </property>
                          </widget>
                         </item>
@@ -1811,13 +1807,51 @@
                  <item>
                   <layout class="QVBoxLayout" name="verticalLayout_20">
                    <item>
-                    <widget class="QCheckBox" name="checkBox_5">
-                     <property name="text">
-                      <string>Is Skinned</string>
+                    <widget class="QGroupBox" name="groupBox_16">
+                     <property name="title">
+                      <string>Limb Options</string>
                      </property>
-                     <property name="checked">
-                      <bool>true</bool>
-                     </property>
+                     <layout class="QVBoxLayout" name="verticalLayout_32">
+                      <item>
+                       <layout class="QVBoxLayout" name="verticalLayout_47">
+                        <item>
+                         <widget class="QCheckBox" name="checkBox_6">
+                          <property name="text">
+                           <string>Limb Skinned</string>
+                          </property>
+                         </widget>
+                        </item>
+                        <item>
+                         <widget class="Line" name="line_18">
+                          <property name="orientation">
+                           <enum>Qt::Horizontal</enum>
+                          </property>
+                         </widget>
+                        </item>
+                        <item>
+                         <widget class="QCheckBox" name="checkBox_10">
+                          <property name="text">
+                           <string>Joint 01 Skinned</string>
+                          </property>
+                         </widget>
+                        </item>
+                        <item>
+                         <widget class="QCheckBox" name="checkBox_11">
+                          <property name="text">
+                           <string>Joint 02 Skinned</string>
+                          </property>
+                         </widget>
+                        </item>
+                        <item>
+                         <widget class="QCheckBox" name="checkBox_12">
+                          <property name="text">
+                           <string>Joint 03 Skinned</string>
+                          </property>
+                         </widget>
+                        </item>
+                       </layout>
+                      </item>
+                     </layout>
                     </widget>
                    </item>
                    <item>
@@ -1835,16 +1869,9 @@
                     </widget>
                    </item>
                    <item>
-                    <widget class="QPushButton" name="pushButton_16">
-                     <property name="text">
-                      <string>Apply / Remove Testing Anim</string>
-                     </property>
-                    </widget>
-                   </item>
-                   <item>
                     <widget class="QGroupBox" name="groupBox_4">
                      <property name="title">
-                      <string>Brush Settings</string>
+                      <string>Joint Brush Settings</string>
                      </property>
                      <layout class="QVBoxLayout" name="verticalLayout_17">
                       <item>
@@ -2106,7 +2133,7 @@
                         </property>
                         <layout class="QVBoxLayout" name="verticalLayout_44">
                          <item>
-                          <layout class="QVBoxLayout" name="verticalLayout_45">
+                          <layout class="QHBoxLayout" name="horizontalLayout_70">
                            <item>
                             <widget class="QComboBox" name="comboBox_3">
                              <item>
@@ -2158,6 +2185,16 @@
                       </size>
                      </property>
                     </spacer>
+                   </item>
+                   <item>
+                    <widget class="QLabel" name="label_27">
+                     <property name="text">
+                      <string>Total Influence Joints: 125</string>
+                     </property>
+                     <property name="alignment">
+                      <set>Qt::AlignCenter</set>
+                     </property>
+                    </widget>
                    </item>
                   </layout>
                  </item>
@@ -2263,73 +2300,26 @@
                  <item>
                   <layout class="QVBoxLayout" name="verticalLayout_70">
                    <item>
-                    <widget class="QTreeWidget" name="treeWidget_17">
-                     <property name="alternatingRowColors">
-                      <bool>true</bool>
-                     </property>
-                     <property name="selectionMode">
-                      <enum>QAbstractItemView::SingleSelection</enum>
-                     </property>
-                     <property name="indentation">
-                      <number>10</number>
-                     </property>
-                     <property name="headerHidden">
-                      <bool>true</bool>
-                     </property>
-                     <column>
-                      <property name="text">
-                       <string>1</string>
-                      </property>
-                     </column>
+                    <widget class="QListWidget" name="listWidget_5">
                      <item>
                       <property name="text">
-                       <string>MASK</string>
+                       <string>Clavical</string>
                       </property>
                      </item>
                      <item>
                       <property name="text">
-                       <string>LIMB: ARM</string>
+                       <string>Shoulder</string>
                       </property>
-                      <item>
-                       <property name="text">
-                        <string>CLV [R]</string>
-                       </property>
-                       <item>
-                        <property name="text">
-                         <string>SLD [R]</string>
-                        </property>
-                        <item>
-                         <property name="text">
-                          <string>ELB [R]</string>
-                         </property>
-                         <item>
-                          <property name="text">
-                           <string>WRS [R]</string>
-                          </property>
-                         </item>
-                        </item>
-                       </item>
-                      </item>
-                      <item>
-                       <property name="text">
-                        <string>CLV [L]</string>
-                       </property>
-                       <item>
-                        <property name="text">
-                         <string>SLD [L]</string>
-                        </property>
-                        <item>
-                         <property name="text">
-                          <string>ELB [L]</string>
-                         </property>
-                         <item>
-                          <property name="text">
-                           <string>WRS [L]</string>
-                          </property>
-                         </item>
-                        </item>
-                       </item>
-                      </item>
+                     </item>
+                     <item>
+                      <property name="text">
+                       <string>Elbow</string>
+                      </property>
+                     </item>
+                     <item>
+                      <property name="text">
+                       <string>Wrist</string>
+                      </property>
                      </item>
                     </widget>
                    </item>
@@ -2688,6 +2678,16 @@
                      </property>
                     </spacer>
                    </item>
+                   <item>
+                    <widget class="QLabel" name="label_28">
+                     <property name="text">
+                      <string>Total Influence Joints: 256</string>
+                     </property>
+                     <property name="alignment">
+                      <set>Qt::AlignCenter</set>
+                     </property>
+                    </widget>
+                   </item>
                   </layout>
                  </item>
                 </layout>
@@ -2745,6 +2745,11 @@
                      <property name="alternatingRowColors">
                       <bool>true</bool>
                      </property>
+                     <item>
+                      <property name="text">
+                       <string>Reset [Base Pose]</string>
+                      </property>
+                     </item>
                      <item>
                       <property name="text">
                        <string>Sit</string>
@@ -3003,30 +3008,50 @@
                  <item>
                   <layout class="QVBoxLayout" name="verticalLayout_28">
                    <item>
-                    <widget class="QPushButton" name="pushButton_7">
-                     <property name="text">
-                      <string>Mirror Limb Pose</string>
+                    <widget class="QGroupBox" name="groupBox_13">
+                     <property name="title">
+                      <string>Limb Mode</string>
                      </property>
-                    </widget>
-                   </item>
-                   <item>
-                    <widget class="QPushButton" name="pushButton_14">
-                     <property name="text">
-                      <string>Mirror Limb Animation</string>
-                     </property>
-                    </widget>
-                   </item>
-                   <item>
-                    <widget class="QPushButton" name="pushButton_20">
-                     <property name="text">
-                      <string>Switch To IK / FK</string>
-                     </property>
+                     <layout class="QHBoxLayout" name="horizontalLayout_68">
+                      <item>
+                       <layout class="QHBoxLayout" name="horizontalLayout_69">
+                        <item>
+                         <widget class="QComboBox" name="comboBox_9">
+                          <item>
+                           <property name="text">
+                            <string>IK</string>
+                           </property>
+                          </item>
+                          <item>
+                           <property name="text">
+                            <string>FK</string>
+                           </property>
+                          </item>
+                         </widget>
+                        </item>
+                        <item>
+                         <widget class="QPushButton" name="pushButton_7">
+                          <property name="text">
+                           <string>Keyframe</string>
+                          </property>
+                         </widget>
+                        </item>
+                       </layout>
+                      </item>
+                     </layout>
                     </widget>
                    </item>
                    <item>
                     <widget class="Line" name="line_5">
                      <property name="orientation">
                       <enum>Qt::Horizontal</enum>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <widget class="QPushButton" name="pushButton_14">
+                     <property name="text">
+                      <string>Mirror Pose / Animation</string>
                      </property>
                     </widget>
                    </item>
@@ -3052,6 +3077,187 @@
                      <property name="text">
                       <string>Prepare for FBX Export</string>
                      </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <widget class="QGroupBox" name="groupBox_7">
+                     <property name="title">
+                      <string>Pose / Anim Weights</string>
+                     </property>
+                     <layout class="QVBoxLayout" name="verticalLayout_15">
+                      <item>
+                       <layout class="QVBoxLayout" name="verticalLayout_24">
+                        <item>
+                         <layout class="QHBoxLayout" name="horizontalLayout_19">
+                          <item>
+                           <widget class="QLabel" name="label_6">
+                            <property name="text">
+                             <string>Limb</string>
+                            </property>
+                           </widget>
+                          </item>
+                          <item>
+                           <widget class="QSlider" name="horizontalSlider_9">
+                            <property name="value">
+                             <number>50</number>
+                            </property>
+                            <property name="orientation">
+                             <enum>Qt::Horizontal</enum>
+                            </property>
+                           </widget>
+                          </item>
+                          <item>
+                           <widget class="QLineEdit" name="lineEdit_9">
+                            <property name="maximumSize">
+                             <size>
+                              <width>20</width>
+                              <height>16777215</height>
+                             </size>
+                            </property>
+                            <property name="text">
+                             <string>0.5</string>
+                            </property>
+                           </widget>
+                          </item>
+                         </layout>
+                        </item>
+                        <item>
+                         <widget class="Line" name="line_7">
+                          <property name="orientation">
+                           <enum>Qt::Horizontal</enum>
+                          </property>
+                         </widget>
+                        </item>
+                        <item>
+                         <layout class="QHBoxLayout" name="horizontalLayout_20">
+                          <item>
+                           <widget class="QLabel" name="label_16">
+                            <property name="text">
+                             <string>FK Ctr 01</string>
+                            </property>
+                           </widget>
+                          </item>
+                          <item>
+                           <widget class="QSlider" name="horizontalSlider_10">
+                            <property name="value">
+                             <number>50</number>
+                            </property>
+                            <property name="orientation">
+                             <enum>Qt::Horizontal</enum>
+                            </property>
+                           </widget>
+                          </item>
+                          <item>
+                           <widget class="QLineEdit" name="lineEdit_10">
+                            <property name="maximumSize">
+                             <size>
+                              <width>20</width>
+                              <height>16777215</height>
+                             </size>
+                            </property>
+                            <property name="text">
+                             <string>0.5</string>
+                            </property>
+                           </widget>
+                          </item>
+                         </layout>
+                        </item>
+                        <item>
+                         <layout class="QHBoxLayout" name="horizontalLayout_41">
+                          <item>
+                           <widget class="QLabel" name="label_25">
+                            <property name="text">
+                             <string>FK Ctr 02</string>
+                            </property>
+                           </widget>
+                          </item>
+                          <item>
+                           <widget class="QSlider" name="horizontalSlider_11">
+                            <property name="value">
+                             <number>50</number>
+                            </property>
+                            <property name="orientation">
+                             <enum>Qt::Horizontal</enum>
+                            </property>
+                           </widget>
+                          </item>
+                          <item>
+                           <widget class="QLineEdit" name="lineEdit_11">
+                            <property name="maximumSize">
+                             <size>
+                              <width>20</width>
+                              <height>16777215</height>
+                             </size>
+                            </property>
+                            <property name="text">
+                             <string>0.5</string>
+                            </property>
+                           </widget>
+                          </item>
+                         </layout>
+                        </item>
+                        <item>
+                         <layout class="QHBoxLayout" name="horizontalLayout_50">
+                          <item>
+                           <widget class="QLabel" name="label_26">
+                            <property name="text">
+                             <string>FK Ctr 03</string>
+                            </property>
+                           </widget>
+                          </item>
+                          <item>
+                           <widget class="QSlider" name="horizontalSlider_12">
+                            <property name="value">
+                             <number>50</number>
+                            </property>
+                            <property name="orientation">
+                             <enum>Qt::Horizontal</enum>
+                            </property>
+                           </widget>
+                          </item>
+                          <item>
+                           <widget class="QLineEdit" name="lineEdit_12">
+                            <property name="maximumSize">
+                             <size>
+                              <width>20</width>
+                              <height>16777215</height>
+                             </size>
+                            </property>
+                            <property name="text">
+                             <string>0.5</string>
+                            </property>
+                           </widget>
+                          </item>
+                         </layout>
+                        </item>
+                        <item>
+                         <widget class="Line" name="line_16">
+                          <property name="orientation">
+                           <enum>Qt::Horizontal</enum>
+                          </property>
+                         </widget>
+                        </item>
+                        <item>
+                         <layout class="QHBoxLayout" name="horizontalLayout_67">
+                          <item>
+                           <widget class="QPushButton" name="pushButton_21">
+                            <property name="text">
+                             <string>Done</string>
+                            </property>
+                           </widget>
+                          </item>
+                          <item>
+                           <widget class="QPushButton" name="pushButton_22">
+                            <property name="text">
+                             <string>Keyframe</string>
+                            </property>
+                           </widget>
+                          </item>
+                         </layout>
+                        </item>
+                       </layout>
+                      </item>
+                     </layout>
                     </widget>
                    </item>
                    <item>
@@ -3369,7 +3575,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>634</width>
+     <width>701</width>
      <height>21</height>
     </rect>
    </property>

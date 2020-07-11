@@ -3,27 +3,33 @@
 # from maya import cmds
 # cmds.flushUndo()
 # try:
-#     cmds.unloadPlugin('tpRigAndAnimSuite')
+#     cmds.unloadPlugin('tpRigAndAnimSuite_Plugin')
 # except:
 #     pass
-# cmds.loadPlugin('tpRigAndAnimSuite')
+# cmds.loadPlugin('tpRigAndAnimSuite_Plugin')
 # reload(cmds)
-# cmds.tpRigAndAnimSuite()
+# cmds.tpRigAndAnimSuite_Plugin()
 
 import sys
 
 import maya.api.OpenMaya as om
+from maya import OpenMayaUI as omui 
+from shiboken2 import wrapInstance
 
-# import Skeleton.test as ttt
-# reload(ttt)
-import tpRigAndAnimSuite_UI as UI
+import Qt
+from Qt import QtWidgets, QtCore, QtGui
+import tpRigAndAnimSuite_UI as tpras_ui
+reload(tpras_ui)
 
+
+QT_VER = Qt.__binding__
+PY_VER = sys.version[:3]
 
 def maya_useNewAPI():
     pass
 
 class TrevorPayneRigAndAnimSuite_Plugin(om.MPxCommand):
-    kPluginCmdName = "tpRigAndAnimSuite"
+    kPluginCmdName = "tpRigAndAnimSuite_Plugin"
 
     def __init__(self):
         om.MPxCommand.__init__(self)
@@ -33,7 +39,13 @@ class TrevorPayneRigAndAnimSuite_Plugin(om.MPxCommand):
         return TrevorPayneRigAndAnimSuite_Plugin()
 
     def doIt(self, args):
-        pass
+        print (PY_VER)
+        print (QT_VER)
+        print ('asdf')
+        mayaMainWindowPtr = omui.MQtUtil.mainWindow()
+        mayaMainWindow = wrapInstance(long(mayaMainWindowPtr), QtWidgets.QWidget) 
+        ex = tpras_ui.TPRigAndAnimSuite_UI_MainWindow(mayaMainWindow)
+        ex.show()
 
 
 def initializePlugin(plugin):

@@ -4,20 +4,17 @@ import sys
 
 import Qt
 from Qt import QtWidgets, QtCore, QtGui
-from Skeleton.Skeleton_UI import Skeleton_UI
-
+import Skeleton.Skeleton_UI as skel_UI
+reload(skel_UI)
 
 __author__ = 'Trevor Payne'
 __version__ = '1.0'
 
 
-
-QT_VER = Qt.__binding__
-PY_VER = sys.version[:3]
-
 class TPRigAndAnimSuite_UI_MainWindow(QtWidgets.QMainWindow):
     def __init__(self, parent=None):
         super(TPRigAndAnimSuite_UI_MainWindow, self).__init__(parent)
+        print (333)
         self._Setup()
 
     def _Setup(self):
@@ -64,7 +61,7 @@ class TPRigAndAnimSuite_UI_Widget(QtWidgets.QWidget):
     
     def _Setup_TabWidget(self):
         self.tabWgt = QtWidgets.QTabWidget()
-        self.skel_ui = Skeleton_UI(self.tabWgt)
+        self.skel_ui = skel_UI.Skeleton_UI(self.tabWgt)
         self.tabWgt.addTab(self.skel_ui, 'Skeleton')
         return self.tabWgt
     
@@ -76,8 +73,6 @@ class TPRigAndAnimSuite_UI_Widget(QtWidgets.QWidget):
 
 
 if __name__ == '__main__':
-    print (PY_VER)
-    print (QT_VER)
     app = QtWidgets.QApplication(sys.argv)
     
     ex = TPRigAndAnimSuite_UI_MainWindow()

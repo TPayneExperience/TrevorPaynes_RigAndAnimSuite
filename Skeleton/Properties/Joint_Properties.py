@@ -1,11 +1,12 @@
 
 
 class Joint_Properties():
-    def __init__(self, jointManager):
+    def __init__(self, limbManager, jointManager):
+        self.limbMng = limbManager
         self.jntMng = jointManager
         self._joints = []
 
-    def SetJoint(self, jointList):
+    def SetJoints(self, jointList):
         self._joints = jointList
 
 #========= ACCESSORS + MUTATORS ===================================
@@ -19,8 +20,7 @@ class Joint_Properties():
         return rotationOrder
 
     def SetRotationOrder(self, rotationOrder):
-        for j in self._joints:
-            j.rotationOrder = rotationOrder
+        self.jntMng.SetRotationOrder(self._joints, rotationOrder)
     
     # AIM AXIS
     def GetAimAxis(self):

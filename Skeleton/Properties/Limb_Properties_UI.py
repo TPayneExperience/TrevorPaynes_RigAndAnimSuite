@@ -5,17 +5,16 @@ from Qt import QtWidgets, QtCore, QtGui
 class Limb_Properties_UI(QtWidgets.QGroupBox):
     def __init__(self, Limb_Properties, parent=None):
         super(Limb_Properties_UI, self).__init__(parent)
+        self.parent = parent
         self.limbProps = Limb_Properties
         self._parentJoints = []
+        self._isPopulating = False
         self._Setup()
         self._Setup_Connections()
     
     def SetLimb(self, limb):
         self.limbProps.SetLimb(limb)
-        self._SetParentJoint()
-        self._SetType()
-        self._SetSide()
-        self._SetJointCount()
+        self.Populate()
 
 #=========== SETUP UI ==============================================
 
@@ -63,26 +62,29 @@ class Limb_Properties_UI(QtWidgets.QGroupBox):
 
 #=========== POPULATE ==============================================
 
-    def _SetParentJoint(self):
+    def Populate(self):
+        # PARENT JOINTS
+        self._isPopulating = True
         self.parentJoint_cb.clear()
-        limbID = self.limbProps.limb.ID
-        parentID = self.limbProps.limbMng.GetParentID(limbID)
+        limbID = self.limbProps.limbID
+        parentLimbID = self.limbProps.limbMng.GetParentID(limbID)
         self.parentJoint_cb.setCurrentIndex(-1)
-        if (parentID != -1):
-            self.parentJointIDs = self.limbProps.jntMng.GetLimbJointIDs(parentID)
-            names = [joint.name for joint in self.limbProps.jntMng.GetJoints(self.parentJointIDs)]
-            self.parentJoint_cb.addItems(names)
-            parentName = self.limbProps.jntMng.GetParentJointId(limbID)
-            if parentName:
-                self.parentJoint_cb.setCurrentIndex(names.index(parentName))
+        if (parentLimbID != -1):
+            self.parentJointIDs = self.limbProps.jntMng.GetLimbJointIDs(parentLimbID)
+            jointNames = [joint.name for joint in self.limbProps.jntMng.GetJoints(self.parentJointIDs)]
+            self.parentJoint_cb.addItems(jointNames)
+            parentJointID = self.limbProps.jntMng.GetParentJointId(limbID)
+            if parentJointID != -1 and parentJointID in self.parentJointIDs:
+                index = self.parentJointIDs.index(parentJointID)
+                self.parentJoint_cb.setCurrentIndex(index)
     
-    def _SetType(self):
+        # TYPE
         types = self.limbProps.limbMng.GetTypes()
-        index = types.index(self.limbProps.limb.limbType)
+        index = types.index(self.limbProps.limbMng.GetType(limbID))
         self.type_cb.setCurrentIndex(index)
 
-    def _SetSide(self):
-        side = self.limbProps.limb.side
+        # SIDE
+        side = self.limbProps.limbMng.GetSide(limbID)
         sides = self.limbProps.limbMng.GetSides()[1:]
         if side in sides:
             index = sides.index(side)
@@ -93,46 +95,47 @@ class Limb_Properties_UI(QtWidgets.QGroupBox):
             self.side_l.hide()
             self.side_cb.hide()
 
-    def _SetJointCount(self):
-        jointIDs = self.limbProps.jntMng.GetLimbJointIDs(self.limbProps.limb.ID)
+        # JOINT COUT
+        jointIDs = self.limbProps.jntMng.GetLimbJointIDs(self.limbProps.limbID)
         self.jointCount_sb.setValue(len(jointIDs))
+        self._isPopulating = False
     
 #=========== FUNCTIONALITY ==============================================
 
     def _Setup_Connections(self):
         self.parentJoint_cb.currentIndexChanged.connect(self._ParentJoint_Changed)
         self.side_cb.currentIndexChanged.connect(self._Side_Changed)
+        self.type_cb.currentIndexChanged.connect(self._Type_Changed)
         self.jointCount_sb.valueChanged.connect(self._JointCount_Changed)
         
     def _ParentJoint_Changed(self):
-        index = self.parentJoint_cb.currentIndex()
-        self.limbProps.jntMng.SetParentJointId(self.parentJointIDs[index])
+        if not self._isPopulating:
+            jointID = self.parentJointIDs[self.parentJoint_cb.currentIndex()]
+            limbID = self.limbProps.limbID
+            self.limbProps.jntMng.SetParentJointId(limbID, jointID)
+
+    def _Type_Changed(self):
+        if not self._isPopulating:
+            limbType = self.type_cb.currentText()
+            self.limbProps.limbMng.SetType(self.limbProps.limbID, limbType)
+            self.parent.UpdateLimbs()
 
     def _Side_Changed(self):
-        side = self.side_cb.currentText()
-        self.limbProps.limbMng.SetLimbSide(self.limbProps.limb.ID, side)
+        if not self._isPopulating:
+            side = self.side_cb.currentText()
+            self.limbProps.limbMng.SetSide(self.limbProps.limbID, side)
+            self.parent.UpdateLimbs()
 
     def _JointCount_Changed(self):
-        count = self.jointCount_sb.value()
-        val = self.limbProps.IsJointCountValid(count)
-        if val == 1:
+        if not self._isPopulating:
+            count = self.jointCount_sb.value()
             self.limbProps.SetJointCount(count)
-        elif val == 0:
-            result = QtWidgets.QMessageBox.warning( self, 
-                                                    'Joint Warning',
-                                                    self.limbProps.msg,
-                                                    QtWidgets.QMessageBox.Ok,
-                                                    QtWidgets.QMessageBox.Cancel)
-            print (result)
+            self.parent.UpdateJoints()
 
 
 if __name__ == '__main__':
     app = QtWidgets.QApplication(sys.argv)
     ex = Limb_Properties_UI()
-    ex._Populate_ParentJoint_CB(['joint1', 'joint2','joint3'])
-    ex._SetParentJoint('joint2')
-    ex._SetSide('R')
-    ex._SetJointCount(3)
 
     ex.show()
     sys.exit(app.exec_())

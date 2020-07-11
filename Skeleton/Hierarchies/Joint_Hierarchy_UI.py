@@ -6,45 +6,42 @@ from Qt import QtWidgets, QtCore, QtGui
 class Joint_Hierarchy_UI(QtWidgets.QListWidget):
     def __init__(self, jointHierarchy, parent=None):
         super(Joint_Hierarchy_UI, self).__init__(parent)
+        self.parent = parent
         self.jntHier = jointHierarchy
         self._isPopulating = False
         self._Setup()
         self._Setup_Connections()
 
-    def SetLimb(self, limb):
-        self.jntHier.SetLimb(limb)
-        self._Populate()
+    def SetLimb(self, limbID):
+        self.jntHier.SetLimb(limbID)
+        self.Populate()
 
-    def _Populate(self):
+    def Populate(self):
         self._isPopulating = True
         self.clear()
-        jointIDs = self.jntHier.jntMng.GetLimbJointIDs(self.jntHier.limb.ID)
+        jointIDs = self.jntHier.jntMng.GetLimbJointIDs(self.jntHier.limbID)
         joints = self.jntHier.jntMng.GetJoints(jointIDs)
         for j in joints:
             item = QtWidgets.QListWidgetItem(self)
             item.ID = j.ID
-            item.setText = j.name
+            item.setText(j.name)
             item.setFlags(item.flags() | QtCore.Qt.ItemIsEditable)
-        # names = self.jntHier.jntMng.GetNames(jointIDs)
-        # self.addItems(names)
-        # for i in range(self.count()):
-        #     item = self.item(i)
-        #     item.ID = jointIDs[i]
-        #     item.setFlags(item.flags() | QtCore.Qt.ItemIsEditable)
+            self.addItem(item)
         self._isPopulating = False
 
+
 #=========== SETUP ====================================
+
     def _Setup(self):
         self.setAlternatingRowColors(True)
         self.setDragDropMode(self.InternalMove)
-
-        self.installEventFilter(self)
+        self.setSelectionMode(self.ExtendedSelection)
 
         self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
     
     def _RightClickMenu(self):
         menu = QtWidgets.QMenu(self)
-        add = QtWidgets.QAction('Add', self, triggered=self._Add)
+        add = QtWidgets.QAction('Add', self, triggered=self.Add)
         remove = QtWidgets.QAction('Remove', self, triggered=self._Remove)
         menu.addAction(add)
         menu.addAction(remove)
@@ -56,31 +53,40 @@ class Joint_Hierarchy_UI(QtWidgets.QListWidget):
         return False
     
     def _Setup_Connections(self):
+        self.installEventFilter(self)
         self.customContextMenuRequested[QtCore.QPoint].connect(self._RightClickMenu)
         self.itemChanged.connect(self._Rename)
 
 #=========== FUNCTIONALITY ====================================
 
-    def _Add(self):
+    def Add(self):
         index = self.currentRow()
-        self.jntHier.jntMng.Add(self.jntHier.limb.ID, 1)
-        self._Populate()
+        limbID = self.jntHier.limbID
+        mirrorID = self.jntHier.limbMng.GetMirror(limbID)
+        self.jntHier.jntMng.Add(limbID, mirrorID, 1)
+        self.parent.UpdateJoints()
     
     def _Remove(self):
         ids = [item.ID for item in self.selectedItems()]
-        self.jntHier.jntMng.Remove(self.jntHier.limb.ID, ids)
-        self._Populate()
+        limbID = self.jntHier.limbID
+        mirrorLimbID = self.jntHier.limbMng.GetMirror(limbID)
+        self.jntHier.jntMng.Remove(limbID, mirrorLimbID, ids)
+        self.parent.UpdateJoints()
 
     def _Rename(self, item):
         if not self._isPopulating:
-            self.jntHier.RenameJoint(item.ID, item.text())
-            self._Populate()
+            newName = item.text()
+            limbID = self.jntHier.limbID
+            self.jntHier.jntMng.SetName(limbID, item.ID, newName)
+            self.Populate()
 
     def _Reorder(self):
         if not self._isPopulating:
-            ids = [item.ID for item in self.selectedItems()]
-            self.jntHier.jntMng.SetLimbJointIDs(self.jntHier.limb.ID, ids)
-            self._Populate()
+            ids = [self.item(i).ID for i in range(self.count())]
+            limbID = self.jntHier.limbID
+            mirrorID = self.jntHier.limbMng.GetMirror(limbID)
+            self.jntHier.jntMng.SetLimbJointIDs(limbID, mirrorID, ids)
+            self.Populate()
     
 
 

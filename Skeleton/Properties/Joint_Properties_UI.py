@@ -7,6 +7,8 @@ class Joint_Properties_UI(QtWidgets.QGroupBox):
     def __init__(self, jointProperties, parent=None):
         super(Joint_Properties_UI, self).__init__(parent)
         self._jntProp = jointProperties
+        self.axes = self._jntProp.jntMng.GetAxes()
+        self.rotAxes = self._jntProp.jntMng.GetRotAxes()
         self._Setup()
         self._Setup_Connections()
         self._populatingData = False #use for reading in data
@@ -14,7 +16,7 @@ class Joint_Properties_UI(QtWidgets.QGroupBox):
 #========== SETUP ===============================
 
     def _Setup(self):
-        self.setTitle('BRANCH Limb Options')
+        self.setTitle('Joint Options')
         vl = QtWidgets.QVBoxLayout(self)
 
         vl.addLayout(self._Setup_AimAxis())
@@ -25,7 +27,7 @@ class Joint_Properties_UI(QtWidgets.QGroupBox):
         hl = QtWidgets.QHBoxLayout()
         l = QtWidgets.QLabel('Aim Axis')
         self.aimAxis_cb = QtWidgets.QComboBox()
-        self.aimAxis_cb.addItems(self._jntProp.jntMng.GetAxes())
+        self.aimAxis_cb.addItems(self.axes)
         hl.addWidget(l)
         hl.addWidget(self.aimAxis_cb)
         return hl
@@ -34,7 +36,7 @@ class Joint_Properties_UI(QtWidgets.QGroupBox):
         hl = QtWidgets.QHBoxLayout()
         l = QtWidgets.QLabel('Up Axis')
         self.upAxis_cb = QtWidgets.QComboBox()
-        self.upAxis_cb.addItems(self._jntProp.jntMng.GetAxes())
+        self.upAxis_cb.addItems(self.axes)
         hl.addWidget(l)
         hl.addWidget(self.upAxis_cb)
         return hl
@@ -43,7 +45,7 @@ class Joint_Properties_UI(QtWidgets.QGroupBox):
         hl = QtWidgets.QHBoxLayout()
         l = QtWidgets.QLabel('Rotation Order')
         self.rotationOrder_cb = QtWidgets.QComboBox()
-        self.rotationOrder_cb.addItems(self._jntProp.jntMng.GetRotAxes())
+        self.rotationOrder_cb.addItems(self.rotAxes)
         hl.addWidget(l)
         hl.addWidget(self.rotationOrder_cb)
         return hl
@@ -71,7 +73,7 @@ class Joint_Properties_UI(QtWidgets.QGroupBox):
 
     def SetJoints(self, jointList):
         self._populatingData = True
-        self._jntProp.SetJointData(jointList)
+        self._jntProp.SetJoints(jointList)
 
         self.aimAxis_cb.setCurrentIndex(-1)
         self.upAxis_cb.setCurrentIndex(-1)
@@ -79,15 +81,16 @@ class Joint_Properties_UI(QtWidgets.QGroupBox):
 
         aimAxis = self._jntProp.GetAimAxis()
         if aimAxis:
-            self.aimAxis_cb.setCurrentIndex(AXES.index(aimAxis))
+            self.aimAxis_cb.setCurrentIndex(self.axes.index(aimAxis))
 
         upAxis = self._jntProp.GetUpAxis()
         if upAxis:
-            self.upAxis_cb.setCurrentIndex(AXES.index(upAxis))
+            self.upAxis_cb.setCurrentIndex(self.axes.index(upAxis))
 
         rotationOrder = self._jntProp.GetRotationOrder()
         if rotationOrder:
-            self.rotationOrder_cb.setCurrentIndex(ROT_AXES.index(rotationOrder))
+            index = self.rotAxes.index(rotationOrder)
+            self.rotationOrder_cb.setCurrentIndex(index)
 
         self._populatingData = False
 

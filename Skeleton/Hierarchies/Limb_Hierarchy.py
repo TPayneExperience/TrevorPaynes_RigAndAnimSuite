@@ -8,9 +8,9 @@ class Limb_Hierarchy():
 #========= FUNCTIONALITY ===========================================
 
     def Add(self):
-        limb = self.limbMng.Add()
-        self.jntMng.AddLimb(limb.ID)
-        self.jntMng.Add(limb.ID, 1)
+        limbID = self.limbMng.Add()
+        self.jntMng.AddLimb(limbID)
+        self.jntMng.Add(limbID, -1, 1)
     
     def Remove(self, limbID):
         self.jntMng.RemoveLimb(limbID)
@@ -21,12 +21,10 @@ class Limb_Hierarchy():
         sourceToTargetIDs = {}
         for i in range(len(sourceIDs)):
             sourceID = sourceIDs[i]
-            limbSource = self.limbMng.GetLimb(sourceID)
-            limbTarget = self.limbMng.Mirror(limbSource)
-            targetID = limbTarget.ID
+            targetID = self.limbMng.Mirror(sourceID)
             self.jntMng.Mirror(sourceID, targetID, axis)
             sourceToTargetIDs[sourceID] = targetID
-            sourceParentID = self.limbMng.GetLimbParentID(sourceID)
+            sourceParentID = self.limbMng.GetParentID(sourceID)
             if sourceParentID in sourceToTargetIDs:
                 self.limbMng.SetParent(targetID, sourceToTargetIDs[sourceParentID])
             else:
@@ -37,12 +35,10 @@ class Limb_Hierarchy():
         sourceToTargetIDs = {}
         for i in range(len(sourceIDs)):
             sourceID = sourceIDs[i]
-            limbSource = self.limbMng.GetLimb(sourceID)
-            limbTarget = self.limbMng.Duplicate(limbSource)
-            targetID = limbTarget.ID
+            targetID = self.limbMng.Duplicate(sourceID)
             self.jntMng.Duplicate(sourceID, targetID)
             sourceToTargetIDs[sourceID] = targetID
-            sourceParentID = self.limbMng.GetLimbParentID(sourceID)
+            sourceParentID = self.limbMng.GetParentID(sourceID)
             if sourceParentID in sourceToTargetIDs:
                 self.limbMng.SetParent(targetID, sourceToTargetIDs[sourceParentID])
             else:

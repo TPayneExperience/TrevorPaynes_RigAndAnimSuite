@@ -1,132 +1,163 @@
 
-from .Limb_Data import Limb_Data
 
 class Limb_Manager():
     def __init__(self):
         self._nextLimbID = 1
-        self._limbs = {} # ID: LimbData
-        self._limbParents = {} # limbID : parentID 
-        self._limbMirrors = {} # limbID_01 : limbID_02 (was mirrorLimbID)
-        self._limbSides = ['M', 'L', 'R']
+        self._limbName = {} # ID : Name
+        self._limbType = {} # ID : string
+        self._limbSide = {} # ID : side, ['M', 'L', 'R']
+        self._limbParent = {} # limbID : parentID 
+        self._limbMirror = {} # limbID_01 : limbID_02 (was mirrorLimbID)
+        
+        self._limbSidesOptions = ['M', 'L', 'R']
         self._limbTypes = ['Chain', 'Branch']
 
-#============= ACCESSORS ============================
+#============= ACCESSORS + MUTATORS ============================
 
-    def GetLimb(self, ID):
-        return self._limbs[ID]
+    # NAMES
+    def GetName(self, ID):
+        return self._limbName[ID]
 
-    def GetLimbs(self, idList):
-        return [self._limbs[ID] for ID in idList]
+    def SetLimbName(self, limbID, newName):
+        self._limbName[limbID] = newName
+        mirrorID = self._limbMirror[limbID]
+        if (mirrorID != -1):
+            self._limbName[mirrorID] = newName
     
-    def GetSides(self):
-        return self._limbSides
+    # MIRROR
+    def GetMirror(self, ID):
+        return self._limbMirror[ID]
+
+    # TYPES
+    def GetType(self, ID):
+        return self._limbType[ID]
     
+    def SetType(self, ID, limbType):
+        self._limbType[ID] = limbType
+        mirrorID = self._limbMirror[ID]
+        if (mirrorID != -1):
+            self._limbType[mirrorID] = limbType
+
     def GetTypes(self):
         return self._limbTypes
     
+    # SIDES
+    def GetSide(self, ID):
+        return self._limbSide[ID]
+    
+    def SetSide(self, limbID, side):
+        sideIndex = self._limbSidesOptions.index(side)
+        mirrorSideIndex = 1 if sideIndex == 2 else 2
+
+        mirrorID = self._limbMirror[limbID]
+        self._limbSide[limbID] = self._limbSidesOptions[sideIndex]
+        self._limbSide[mirrorID] = self._limbSidesOptions[mirrorSideIndex]
+        
+    def GetSides(self):
+        return self._limbSidesOptions
+    
+#============= PARENTS / TREE MANIPULATION ============================
+
     def GetParentID(self, limbID):
-        return self._limbParents[limbID]
+        return self._limbParent[limbID]
     
     def GetLimbParentDict(self):
-        return dict(self._limbParents)
+        return dict(self._limbParent)
     
-    def SetLimbSide(self, limbID, sideIndex):
-        limb = self._limbs[limbID]
-        newIndex = 1 if sideIndex == 2 else 2
-        limb.side = self._limbSides[newIndex]
-        mirrorLimb = self._limbs[self._limbMirrors[limbID]]
-        mirrorLimb.side = self._limbSides[sideIndex]
-    
-
-#============= ADD + REMOVE LIMBS ============================
-
-    def Add(self):
-        side = self._limbSides[0]
-        limbType = self._limbTypes[0]
-        ID = self._nextLimbID
-        name = 'Limb_%03d' % (ID)
-        
-        limb = Limb_Data(ID, name, limbType, side)
-        self._limbs[ID] = limb
-        self._limbParents[ID] = -1
-        self._limbMirrors[ID] = -1
-
-        self._nextLimbID += 1
-        return limb
-
-    def _Remove(self, limbID):
-        del(self._limbParents[limbID])
-        if self._limbMirrors[ID] != -1:
-            mirror = self._limbMirrors[ID]
-            self._limbMirrors[mirror] = -1
-        del(self._limbMirrors[ID])
-        del(self._limbs[limbID])
-
-    def Remove(self, limbID):
-        childIDs = []
-        for k, v in self._limbParents.items():
-            if v == limbID:
-                childIDs.append(k)
-        for childID in childIDs:
-            self.Remove(childID)
-        self._Remove(limbID)
-
-    def Mirror(self, limb_01):
-        limb_02 = self.Duplicate(limb_01)
-        limb_01.side = self._limbSides[1]
-        limb_02.side = self._limbSides[2]
-        self._limbMirrors[limb_01.ID] = limb_02.ID
-        self._limbMirrors[limb_02.ID] = limb_01.ID
-        return limb_02
-
-    def Duplicate(self, limb_01):
-        limb_02 = self.Add()
-        limb_02.name = limb_01.name
-        limb_02.type = limb_01.type
-        self.SetParent(limb_02.ID, self._limbParents[limb_01.ID])
-        return limb_02
-
-#============= TREE MANIPULATION ============================
-
     def ReorderTree(self, limbParentDict):
-        self._limbParents = limbParentDict
+        self._limbParent = limbParentDict
     
     def SetParent(self, childID, parentID):
         if(self._IsValidParent(childID, parentID)):
-            self._limbParents[childID] = parentID
+            self._limbParent[childID] = parentID
 
     def _IsValidParent(self, childID, parentID):
         while(parentID != -1):
             if (childID == parentID):
                 return False
-            parentID = self._limbParents[parentID]
+            parentID = self._limbParent[parentID]
         return True
 
-#============= TEMPLATE ============================
+#============= ADD + REMOVE LIMBS ============================
 
-    def AddTemplate_Limbs(self, limbDataList, 
-                                limbChildParentDict,
-                                oldToNewJointIds):
+    def Add(self):
+        ID = self._nextLimbID
         
-        oldToNewLimbIds = {} # REMAP LIMB IDS TO AVOID CONFLICTS
-        for limb in limbDataList:
-            limbID = self._nextLimbID
-            oldToNewLimbIds[limb.ID] = limbID
-            limb.ID = limbID
+        self._limbName[ID] = 'Limb_%03d' % (ID)
+        self._limbType[ID] = self._limbTypes[0]
+        self._limbSide[ID] = self._limbSidesOptions[0]
+        self._limbParent[ID] = -1
+        self._limbMirror[ID] = -1
+
+        self._nextLimbID += 1
+        return ID
+
+    def _Remove(self, ID):
+        mirrorID = self._limbMirror[ID]
+        if mirrorID != -1:
+            self._limbSide[mirrorID] = self._limbSidesOptions[0]
+            self._limbMirror[mirrorID] = -1
+        del(self._limbType[ID])
+        del(self._limbSide[ID])
+        del(self._limbParent[ID])
+        del(self._limbMirror[ID])
+
+    def Remove(self, ID): # Remove Children first, then parent
+        childIDs = []
+        for child, parent in self._limbParent.items():
+            if parent == ID:
+                childIDs.append(child)
+        for childID in childIDs:
+            self.Remove(childID)
+        self._Remove(ID)
+
+    def Mirror(self, ID_01):
+        ID_02 = self.Duplicate(ID_01)
+        self._limbSide[ID_01] = self._limbSidesOptions[1]
+        self._limbSide[ID_02] = self._limbSidesOptions[2]
+        self._limbMirror[ID_01] = ID_02
+        self._limbMirror[ID_02] = ID_01
+        return ID_02
+
+    def Duplicate(self, ID_01):
+        ID_02 = self.Add()
+        self._limbName[ID_02] = self._limbName[ID_01]
+        self._limbType[ID_02] = self._limbType[ID_01]
+        self.SetParent(ID_02, self._limbParent[ID_01])
+        return ID_02
+
+
+#============= SAVE + LOAD ============================
+
+    def GetSaveData(self, limbID):
+        pass
+
+    def LoadData(self, limbID):
+        pass
+
+    # def AddTemplate_Limbs(self, limbDataList, 
+    #                             limbChildParentDict,
+    #                             oldToNewJointIds):
+        
+    #     oldToNewLimbIds = {} # REMAP LIMB IDS TO AVOID CONFLICTS
+    #     for limb in limbDataList:
+    #         limbID = self._nextLimbID
+    #         oldToNewLimbIds[limb.ID] = limbID
+    #         limb.ID = limbID
             
-            for i in range(len(limb.jointIDs)): # REMAP JOINT IDS 
-                jointID = limb.jointIDs[i]
-                limb.jointIDs[i] = oldToNewJointIds[jointID]
-            if (limb.parentJointID != -1): # REMAP PARENT JOINT ID
-                limb.parentJointID = oldToNewJointIds[limb.parentJointID]
-            self._nextLimbID += 1
+    #         for i in range(len(limb.jointIDs)): # REMAP JOINT IDS 
+    #             jointID = limb.jointIDs[i]
+    #             limb.jointIDs[i] = oldToNewJointIds[jointID]
+    #         if (limb.parentJointID != -1): # REMAP PARENT JOINT ID
+    #             limb.parentJointID = oldToNewJointIds[limb.parentJointID]
+    #         self._nextLimbID += 1
         
-        for limb in limbDataList:
-            if (limb.mirrorLimbID != -1): # REMAP MIRROR LIMB ID
-                limb.mirrorLimbID = oldToNewLimbIds[limb.mirrorLimbID]
-            self._limbs[limb.ID] = limb # ADD TO DICTIONARY
+    #     for limb in limbDataList:
+    #         if (limb.mirrorLimbID != -1): # REMAP MIRROR LIMB ID
+    #             limb.mirrorLimbID = oldToNewLimbIds[limb.mirrorLimbID]
+    #         self._limbs[limb.ID] = limb # ADD TO DICTIONARY
         
-        for oldChildID, oldParentID in limbChildParentDict.items():
-            newChildID = oldToNewLimbIds[oldChildID]
-            newParentID = oldToNewLimbIds[oldParentID]
-            self.SetParent(newChildID, newParentID)
+    #     for oldChildID, oldParentID in limbChildParentDict.items():
+    #         newChildID = oldToNewLimbIds[oldChildID]
+    #         newParentID = oldToNewLimbIds[oldParentID]
+    #         self.SetParent(newChildID, newParentID)

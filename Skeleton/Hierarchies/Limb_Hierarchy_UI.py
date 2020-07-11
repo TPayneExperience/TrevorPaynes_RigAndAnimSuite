@@ -1,4 +1,5 @@
 
+import os
 import sys
 
 from Qt import QtWidgets, QtCore, QtGui
@@ -7,6 +8,7 @@ from Qt import QtWidgets, QtCore, QtGui
 class Limb_Hierarchy_UI(QtWidgets.QTreeWidget):
     def __init__(self, limbHierarchy, parent=None):
         super(Limb_Hierarchy_UI, self).__init__(parent)
+        self.parent = parent
         self.limbHier = limbHierarchy
         self._items = {} # ID : Item
         self._isPopulating = False
@@ -30,7 +32,8 @@ class Limb_Hierarchy_UI(QtWidgets.QTreeWidget):
 
         # CREATE ITEMS, IN ORDER
         for ID in idOrder:
-            name = self.limbHier.limbMng.GetLimb(ID).name
+            name = self.limbHier.limbMng.GetName(ID)
+            side = self.limbHier.limbMng.GetSide(ID)
             parentID = self.limbHier.limbMng.GetParentID(ID)
             if (parentID != -1):
                 parentItem = self._items[parentID]
@@ -38,6 +41,12 @@ class Limb_Hierarchy_UI(QtWidgets.QTreeWidget):
             else:
                 item = QtWidgets.QTreeWidgetItem(self, [name])
             item.ID = ID
+            if (side == 'L'):
+                item.setIcon(0, self.l_icon)
+            elif (side == 'R'):
+                item.setIcon(0, self.r_icon)
+            elif (side == 'M'):
+                item.setIcon(0, self.m_icon)
             item.setFlags(item.flags() | QtCore.Qt.ItemIsEditable)
             self._items[ID] = item
         self.expandAll()
@@ -46,22 +55,30 @@ class Limb_Hierarchy_UI(QtWidgets.QTreeWidget):
 #=========== SETUP ====================================
 
     def _Setup(self):
+        path = os.path.dirname(__file__)
+        path = os.path.dirname(path)
+        path = os.path.dirname(path)
+        self.l_icon = QtGui.QIcon(os.path.join(path, 'Images/Skel_L.png'))
+        self.r_icon =  QtGui.QIcon(os.path.join(path, 'Images/Skel_R.png'))
+        self.m_icon =  QtGui.QIcon(os.path.join(path, 'Images/Skel_M.png'))
+
         self.setAlternatingRowColors(True)
         self.setDragDropMode(self.InternalMove)
         self.setHeaderHidden(True)
+        self.setIndentation(10)
         self.installEventFilter(self)
 
         self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
-    
+        
     def _RightClickMenu(self):
         menu = QtWidgets.QMenu(self)
-        add = QtWidgets.QAction('Add Limb', 
+        add = QtWidgets.QAction('Add', 
                                 self, 
-                                triggered=self._Add)
+                                triggered=self.Add)
         duplicate = QtWidgets.QAction(  'Duplicate', 
                                         self, 
                                         triggered=self._Duplicate)
-        remove = QtWidgets.QAction( 'Remove Limb + Children', 
+        remove = QtWidgets.QAction( 'Remove', 
                                     self, 
                                     triggered=self._Remove)
         mirrorX = QtWidgets.QAction('X Axis', 
@@ -96,7 +113,7 @@ class Limb_Hierarchy_UI(QtWidgets.QTreeWidget):
 
 #=========== FUNCTIONALITY ====================================
 
-    def _Add(self):
+    def Add(self):
         self.limbHier.Add()
         self.Populate()
 
@@ -108,8 +125,8 @@ class Limb_Hierarchy_UI(QtWidgets.QTreeWidget):
 
     def _Rename(self, item):
         if not self._isPopulating:
-            self.limbHier.limbMng.GetLimb(item.ID).name = item.text(0)
-            self.Populate()
+            self.limbHier.limbMng.SetLimbName(item.ID, item.text(0))
+            self.parent.UpdateLimbs()
 
     def _Reorder(self):
         if not self._isPopulating:
