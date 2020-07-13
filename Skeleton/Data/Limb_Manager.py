@@ -14,6 +14,9 @@ class Limb_Manager():
 
 #============= ACCESSORS + MUTATORS ============================
 
+    def GetLimbIDs(self):
+        return list(self._limbName.keys())
+
     # NAMES
     def GetName(self, ID):
         return self._limbName[ID]

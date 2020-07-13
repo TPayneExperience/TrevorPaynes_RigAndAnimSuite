@@ -1,21 +1,24 @@
 
 import os
 
-from Name_Manager import Name_Manager
+# from Name_Manager import Name_Manager
+import Name_Manager as nm
+
+reload(nm)
 
 class RigSetup():
     def __init__(self):
+        self.nameMng = nm.Name_Manager()
         self.prefixErrorMsg = ''
         self._prefix = ''
         self._startPrefix = ''
         self._meshPath = ''
         self._startMeshPath = ''
-        self._nameMng = Name_Manager()
         self._startOrder = []
         self._showPrefix = True
 
     def GetStartOrder(self):
-        self._startOrder = self._nameMng.GetOrder()
+        self._startOrder = self.nameMng.GetOrder()
         self._startPrefix = self._prefix
         self._startMeshPath = self._meshPath
         return self._startOrder
@@ -40,14 +43,14 @@ class RigSetup():
 #======= VALIDATION ========================================
 
     def IsPrefixValid(self):
-        if (not self._nameMng.IsValidCharacterLength(self._prefix)):
-            self.prefixErrorMsg = self._nameMng.errorMsg
+        if (not self.nameMng.IsValidCharacterLength(self._prefix)):
+            self.prefixErrorMsg = self.nameMng.errorMsg
             return False
-        elif (not self._nameMng.DoesNotStartWithNumber(self._prefix)):
-            self.prefixErrorMsg = self._nameMng.errorMsg
+        elif (not self.nameMng.DoesNotStartWithNumber(self._prefix)):
+            self.prefixErrorMsg = self.nameMng.errorMsg
             return False
-        elif (not self._nameMng.AreAllValidCharacters(self._prefix)):
-            self.prefixErrorMsg = self._nameMng.errorMsg
+        elif (not self.nameMng.AreAllValidCharacters(self._prefix)):
+            self.prefixErrorMsg = self.nameMng.errorMsg
             return False
         self.prefixErrorMsg = ''
         return True
@@ -69,7 +72,7 @@ class RigSetup():
                 jointIndex, 
                 sideIndex,
                 typeIndex):
-        self._nameMng.Reorder(  prefixIndex, 
+        self.nameMng.Reorder(  prefixIndex, 
                                 limbIndex, 
                                 jointIndex, 
                                 sideIndex,
@@ -84,13 +87,13 @@ class RigSetup():
 
     def GetName(self, prefix, limb, joint, side, objType):
         if(self._showPrefix):
-            return self._nameMng.GetName(   prefix, 
+            return self.nameMng.GetName(   prefix, 
                                             limb, 
                                             joint, 
                                             side, 
                                             objType)
         else:
-            return self._nameMng.GetNameWithoutPrefix(  limb, 
+            return self.nameMng.GetNameWithoutPrefix(  limb, 
                                                         joint, 
                                                         side, 
                                                         objType)
@@ -98,14 +101,14 @@ class RigSetup():
     def Cancel(self):
         self._prefix = self._startPrefix
         self._meshPath = self._startMeshPath
-        self._nameMng.Reorder(  self._startOrder[0],
+        self.nameMng.Reorder(  self._startOrder[0],
                                 self._startOrder[1],
                                 self._startOrder[2],
                                 self._startOrder[3],
                                 self._startOrder[4])
     
     def Save(self):
-        self._startOrder = self._nameMng.GetOrder()
+        self._startOrder = self.nameMng.GetOrder()
         self._startPrefix = self._prefix
         self._startMeshPath = self._meshPath
 

@@ -4,6 +4,7 @@ import re
 class Name_Manager():
     def __init__(self):
         self._order = [0,1,2,3,4]
+        self._prefix = ''
         self.errorMsg = ''
     
     def IsValidCharacterLength(self, name):
@@ -44,6 +45,15 @@ class Name_Manager():
         self._order[side] = 3
         self._order[objType] = 4
 
+    def SetPrefx(self, newPrefix):
+        self._prefix = newPrefix
+
+    def GetName(self,   limb='LIMB', 
+                        joint='JOINT', 
+                        side='M',
+                        objType='JNT'):
+        return self.GetName(self._prefix, limb, joint, side, objType)
+    
     def GetName(self,   prefix= 'PREFIX',
                         limb='LIMB', 
                         joint='JOINT', 
@@ -56,7 +66,7 @@ class Name_Manager():
                 4:objType}
         order = [temp[i] for i in self._order]
         return '_'.join(order)
-    
+
     def GetNameWithoutPrefix(self,  limb='LIMB', 
                                     joint='JOINT', 
                                     side='M',

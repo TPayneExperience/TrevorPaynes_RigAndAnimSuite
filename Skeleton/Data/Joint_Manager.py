@@ -1,5 +1,7 @@
 
-from .Joint_Data import Joint_Data
+import Joint_Data as jd
+
+reload(jd)
 
 class Joint_Manager():
     def __init__(self):
@@ -95,7 +97,7 @@ class Joint_Manager():
         self._mirrorJoints[jointID] = -1
         self._limbJoints[limbID].append(jointID)
         name = 'Joint_%03d' % (jointIndex)
-        self._joints[jointID] = Joint_Data( jointID, 
+        self._joints[jointID] = jd.Joint_Data( jointID, 
                                             name, 
                                             self._rotAxes[0], 
                                             self._axes[0], 

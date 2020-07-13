@@ -1,16 +1,12 @@
 
 from Qt import QtWidgets, QtCore
 
-from Skeleton import Skeleton
-
-import Skeleton as skel
 
 import Hierarchies.Joint_Hierarchy_UI as jointHier_UI
 import Hierarchies.Limb_Hierarchy_UI as limbHier_UI
 import Properties.Joint_Properties_UI as jointProp_UI
 import Properties.Limb_Properties_UI as limbProp_UI
 
-reload(skel)
 reload(jointHier_UI)
 reload(limbHier_UI)
 reload(jointProp_UI)
@@ -18,15 +14,11 @@ reload(limbProp_UI)
 
 
 class Skeleton_UI(QtWidgets.QTabWidget):
-    def __init__(self, parent=None):
+    def __init__(self, skeleton, parent=None):
         super(Skeleton_UI, self).__init__(parent)
-        self.skel = skel.Skeleton()
-        print(111)
+        self.skel = skeleton
         self._Setup()
         self._Setup_Connections()
-        self.limbHier_tw.Add()
-        self.limbHier_tw.Add()
-        # self.Populate()
 
 #=========== SETUP ====================================
 
@@ -99,6 +91,8 @@ class Skeleton_UI(QtWidgets.QTabWidget):
 
         self.moveToVertCenter_btn = QtWidgets.QPushButton('Move To Verts Center')
         vl.addWidget(self.moveToVertCenter_btn)
+        self.linearPlacementMode_btn = QtWidgets.QPushButton('Linear Placement Mode')
+        vl.addWidget(self.linearPlacementMode_btn)
 
         hl = QtWidgets.QHBoxLayout()
         hl.addWidget(QtWidgets.QLabel('Joint Size'))
@@ -135,10 +129,14 @@ class Skeleton_UI(QtWidgets.QTabWidget):
         self.limbProp_gb.hide()
         self.jntProp_gb.show()
 
-    def Populate(self):
+    def Populate(self): # CALLED BY MAIN WINDOW
+        self.limbHier_tw.Add()
+        self.limbHier_tw.Add()
         self.limbHier_tw.Populate()
         self.limbProp_gb.hide()
         self.jntProp_gb.hide()
+        self.skel.sceneMng.SetSkeletonUI(self)
+        self.skel.sceneMng.Setup_Editable()
     
     def UpdateJoints(self):
         self.jntHier_lw.Populate()

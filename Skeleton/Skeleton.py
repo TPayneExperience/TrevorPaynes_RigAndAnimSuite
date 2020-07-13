@@ -1,24 +1,35 @@
 
-from .Data.Joint_Manager import Joint_Manager
-from .Data.Limb_Manager import Limb_Manager
+import Data.Joint_Manager as jm
+import Data.Limb_Manager as lm
 
-from .Properties.Joint_Properties import Joint_Properties
-from .Properties.Limb_Properties import Limb_Properties
+import Properties.Joint_Properties as jp
+import Properties.Limb_Properties as lp
 
-from .Hierarchies.Joint_Hierarchy import Joint_Hierarchy
-from .Hierarchies.Limb_Hierarchy import Limb_Hierarchy
+import Hierarchies.Joint_Hierarchy as jh
+import Hierarchies.Limb_Hierarchy as lh
+
+import Scene.Scene_Manager as sm
+
+reload(jm)
+reload(lm)
+reload(jp)
+reload(lp)
+reload(jh)
+reload(lh)
+reload(sm)
+
 
 # MISSING TEMPLATE STUFF
 
 class Skeleton():
-    def __init__(self):
-        self.jntMng = Joint_Manager()
-        self.limbMng = Limb_Manager()
-        self.jntProp = Joint_Properties(self.limbMng, self.jntMng)
-        self.limbProp = Limb_Properties(self.limbMng, self.jntMng)
-        self.jntHier = Joint_Hierarchy(self.limbMng, self.jntMng)
-        self.limbHier = Limb_Hierarchy(self.limbMng,self.jntMng)
-
+    def __init__(self, nameManager):
+        self.jntMng = jm.Joint_Manager()
+        self.limbMng = lm.Limb_Manager()
+        self.jntProp = jp.Joint_Properties(self.limbMng, self.jntMng)
+        self.limbProp = lp.Limb_Properties(self.limbMng, self.jntMng)
+        self.jntHier = jh.Joint_Hierarchy(self.limbMng, self.jntMng)
+        self.limbHier = lh.Limb_Hierarchy(self.limbMng,self.jntMng)
+        self.sceneMng = sm.Scene_Manager(self.limbMng, self.jntMng, nameManager)
 
 
 

@@ -6,12 +6,12 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>701</width>
+    <width>702</width>
     <height>677</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Trevor Payne's Rig &amp; Anim Suite</string>
+   <string>Trevor Payne Free Rig &amp; Anim Suite</string>
   </property>
   <property name="toolTip">
    <string/>
@@ -97,7 +97,7 @@
          <bool>true</bool>
         </property>
         <property name="currentIndex">
-         <number>2</number>
+         <number>0</number>
         </property>
         <widget class="QWidget" name="tab">
          <attribute name="title">
@@ -522,13 +522,6 @@
                           </item>
                          </layout>
                         </item>
-                        <item>
-                         <widget class="QPushButton" name="pushButton_23">
-                          <property name="text">
-                           <string>Linear Placement</string>
-                          </property>
-                         </widget>
-                        </item>
                        </layout>
                       </item>
                      </layout>
@@ -537,7 +530,7 @@
                    <item>
                     <widget class="QGroupBox" name="groupBox_26">
                      <property name="title">
-                      <string>Joint Options</string>
+                      <string>Chain Joint Options</string>
                      </property>
                      <layout class="QVBoxLayout" name="verticalLayout_33">
                       <item>
@@ -557,7 +550,7 @@
                           <item>
                            <widget class="QComboBox" name="comboBox_2">
                             <property name="currentIndex">
-                             <number>-1</number>
+                             <number>1</number>
                             </property>
                             <item>
                              <property name="text">
@@ -686,6 +679,27 @@
                           </item>
                          </layout>
                         </item>
+                        <item>
+                         <layout class="QHBoxLayout" name="horizontalLayout_71">
+                          <item>
+                           <widget class="QLabel" name="label_29">
+                            <property name="text">
+                             <string>Rotation Offset</string>
+                            </property>
+                           </widget>
+                          </item>
+                          <item>
+                           <widget class="QSlider" name="horizontalSlider_13">
+                            <property name="value">
+                             <number>50</number>
+                            </property>
+                            <property name="orientation">
+                             <enum>Qt::Horizontal</enum>
+                            </property>
+                           </widget>
+                          </item>
+                         </layout>
+                        </item>
                        </layout>
                       </item>
                      </layout>
@@ -716,19 +730,26 @@
                          <number>6</number>
                         </property>
                         <item>
-                         <widget class="QPushButton" name="pushButton_8">
-                          <property name="text">
-                           <string>Add Joints AT Selected Verts</string>
-                          </property>
-                         </widget>
-                        </item>
-                        <item>
                          <widget class="QPushButton" name="pushButton_19">
                           <property name="toolTip">
                            <string>Moves last selected object to center of verts, edges or faces</string>
                           </property>
                           <property name="text">
                            <string>Move To Verts Center</string>
+                          </property>
+                         </widget>
+                        </item>
+                        <item>
+                         <widget class="Line" name="line_20">
+                          <property name="orientation">
+                           <enum>Qt::Horizontal</enum>
+                          </property>
+                         </widget>
+                        </item>
+                        <item>
+                         <widget class="QPushButton" name="pushButton_16">
+                          <property name="text">
+                           <string>Linear Placement Mode</string>
                           </property>
                          </widget>
                         </item>
@@ -3575,7 +3596,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>701</width>
+     <width>702</width>
      <height>21</height>
     </rect>
    </property>

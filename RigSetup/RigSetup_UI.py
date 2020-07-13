@@ -6,9 +6,9 @@ from Qt import QtWidgets, QtCore, QtGui
 from RigSetup import RigSetup
 
 class RigSetup_UI(QtWidgets.QWidget):
-    def __init__(self, parent=None, prefix='', meshPath=''):
+    def __init__(self, RigSetup, parent=None, prefix='', meshPath=''):
         super(RigSetup_UI, self).__init__(parent)
-        self._rigSetup = RigSetup()
+        self._rigSetup = RigSetup
         self._Setup()
         self._Populate_AssetDetails()
         self._Populate_RigNaming()
