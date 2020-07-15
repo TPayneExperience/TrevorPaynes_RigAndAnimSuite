@@ -62,6 +62,9 @@ class Joint_Manager():
             if (mirrorID != -1):
                 self.GetJoint(mirrorID).name = newName
 
+    def GetJointCount(self): # for Skel tool label
+        return len(self._joints.keys())
+
 
 #============= FUNCTIONALITY ============================
 
@@ -83,6 +86,8 @@ class Joint_Manager():
         addCount = limit - currentCount
         startIndex = self._limbNextJointIndex[limbID]
         self._limbNextJointIndex[limbID] += addCount
+        if (mirrorID != -1):
+            self._limbNextJointIndex[mirrorID] += addCount
         IDs = []
         for i in range(addCount):
             IDs.append(self._AddJoint(limbID, startIndex + i))
@@ -93,6 +98,11 @@ class Joint_Manager():
                 self._mirrorJoints[mirrorID] = IDs[i]
     
     def _AddJoint(self, limbID, jointIndex):
+        position = [0,0,0]
+        limbJointIDs = self._limbJoints[limbID]
+        if (limbJointIDs):
+            pos = self._joints[limbJointIDs[-1]].position
+            position = [pos[0], pos[1]-5, pos[2]]
         jointID = self._nextJointID
         self._mirrorJoints[jointID] = -1
         self._limbJoints[limbID].append(jointID)
@@ -102,16 +112,15 @@ class Joint_Manager():
                                             self._rotAxes[0], 
                                             self._axes[0], 
                                             self._axes[2])
+        self._joints[jointID].position = position
         self._nextJointID += 1
         return jointID
     
-    def Remove(self, limbID, mirrorLimbID, jointIdList):
-        for jointID in jointIdList:
-            if (mirrorLimbID != -1):
-                mirrorID = self._mirrorJoints[jointID]
-                self._limbJoints[mirrorLimbID].remove(mirrorID)
-                del(self._mirrorJoints[mirrorID])
-                del(self._joints[mirrorID])
+    def Remove(self, limbID, jointIDs):
+        for jointID in jointIDs:
+            mirrorID = self._mirrorJoints[jointID]
+            if (mirrorID != -1):
+                self._mirrorJoints[mirrorID] = -1
             self._limbJoints[limbID].remove(jointID)
             del(self._mirrorJoints[jointID])
             del(self._joints[jointID])

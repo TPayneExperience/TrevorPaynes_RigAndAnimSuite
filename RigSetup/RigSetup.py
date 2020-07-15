@@ -1,14 +1,10 @@
 
 import os
 
-# from Name_Manager import Name_Manager
-import Name_Manager as nm
-
-reload(nm)
 
 class RigSetup():
-    def __init__(self):
-        self.nameMng = nm.Name_Manager()
+    def __init__(self, nameManager):
+        self.nameMng = nameManager
         self.prefixErrorMsg = ''
         self._prefix = ''
         self._startPrefix = ''

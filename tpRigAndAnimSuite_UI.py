@@ -5,14 +5,12 @@ import sys
 import Qt
 from Qt import QtWidgets, QtCore, QtGui
 
-import Skeleton.Skeleton as skel
+import RigAndAnim_Manager as rig
 import Skeleton.Skeleton_UI as skel_ui
-import RigSetup.RigSetup as rs
 import RigSetup.RigSetup_UI as rs_ui
 
-reload(skel)
+reload(rig)
 reload(skel_ui)
-reload(rs)
 reload(rs_ui)
 
 __author__ = 'Trevor Payne'
@@ -49,8 +47,9 @@ class TPRigAndAnimSuite_UI_Widget(QtWidgets.QWidget):
     def __init__(self, parent=None):
         super(TPRigAndAnimSuite_UI_Widget, self).__init__(parent)
 
-        self.rigSetup = rs.RigSetup()
-        self.skel = skel.Skeleton(self.rigSetup.nameMng)
+        # self.rigSetup = rs.RigSetup()
+        # self.skel = skel.Skeleton(self.rigSetup.nameMng)
+        self.rigMng = rig.RigAndAnim_Manager()
 
         self._Setup()
         self.Populate()
@@ -73,7 +72,7 @@ class TPRigAndAnimSuite_UI_Widget(QtWidgets.QWidget):
     
     def _Setup_TabWidget(self):
         self.tabWgt = QtWidgets.QTabWidget()
-        self.skel_ui = skel_ui.Skeleton_UI(self.skel, self.tabWgt)
+        self.skel_ui = skel_ui.Skeleton_UI(self.rigMng.skel, self.tabWgt)
         self.tabWgt.addTab(self.skel_ui, 'Skeleton')
         return self.tabWgt
     

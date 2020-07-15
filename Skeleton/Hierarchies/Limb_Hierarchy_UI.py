@@ -16,6 +16,11 @@ class Limb_Hierarchy_UI(QtWidgets.QTreeWidget):
         self._Setup_Connections()
 
     def Populate(self):
+        selectemItem = None
+        selectedID = -1
+        items = self.selectedItems()
+        if (items):
+            selectedID = items[0].ID
         self._isPopulating = True
         self.clear()
         self._items.clear()
@@ -41,16 +46,24 @@ class Limb_Hierarchy_UI(QtWidgets.QTreeWidget):
             else:
                 item = QtWidgets.QTreeWidgetItem(self, [name])
             item.ID = ID
-            if (side == 'L'):
-                item.setIcon(0, self.l_icon)
-            elif (side == 'R'):
-                item.setIcon(0, self.r_icon)
-            elif (side == 'M'):
+            if (side == 'M'):
                 item.setIcon(0, self.m_icon)
-            item.setFlags(item.flags() | QtCore.Qt.ItemIsEditable)
+                item.setFlags(item.flags() | QtCore.Qt.ItemIsEditable)
+            else:
+                if (side == 'L'):
+                    item.setIcon(0, self.l_icon)
+                elif (side == 'R'):
+                    item.setIcon(0, self.r_icon)
+                item.setFlags(  QtCore.Qt.ItemIsEditable |
+                                QtCore.Qt.ItemIsSelectable |
+                                QtCore.Qt.ItemIsEnabled)
             self._items[ID] = item
+            if (ID == selectedID):
+                selectemItem = item
         self.expandAll()
         self._isPopulating = False
+        if (selectemItem):
+            self.setCurrentItem(selectemItem)
 
 #=========== SETUP ====================================
 
@@ -97,6 +110,13 @@ class Limb_Hierarchy_UI(QtWidgets.QTreeWidget):
         mirrorMenu.addAction(mirrorY)
         mirrorMenu.addAction(mirrorZ)
 
+        items = self.selectedItems()
+        if items:
+            limbID = items[0].ID
+            mirrorID = self.limbHier.limbMng.GetMirror(limbID)
+            if (mirrorID != -1):
+                mirrorMenu.setEnabled(False)
+
         menu.addAction(duplicate)
         menu.addSeparator()
         menu.addAction(remove)
@@ -114,19 +134,18 @@ class Limb_Hierarchy_UI(QtWidgets.QTreeWidget):
 #=========== FUNCTIONALITY ====================================
 
     def Add(self):
-        self.limbHier.Add()
-        self.Populate()
+        self.parent.AddLimb(self.limbHier.Add())
 
     def _Remove(self):
         # MISSING WARNING CONFIRMATION DIALOG
         ID = self.currentItem().ID
         self.limbHier.Remove(ID)
-        self.Populate()
+        self.parent.RemoveLimb(ID)
 
     def _Rename(self, item):
         if not self._isPopulating:
             self.limbHier.limbMng.SetLimbName(item.ID, item.text(0))
-            self.parent.UpdateLimbs()
+            self.parent.LimbModified(item.ID)
 
     def _Reorder(self):
         if not self._isPopulating:
@@ -137,27 +156,35 @@ class Limb_Hierarchy_UI(QtWidgets.QTreeWidget):
                 if parent:
                     newChildParentDict[item.ID] = parent.ID
             self.limbHier.limbMng.ReorderTree(newChildParentDict)
-            self.Populate()
+            # TRY TO SET PARENT JOINT OF LIMB TO NEW LIMB
+            for limbID in self.limbHier.limbMng.GetLimbIDs():
+                parentLimbID = self.limbHier.limbMng.GetParentID(limbID)
+                if (parentLimbID != -1):
+                    jointIDs = self.limbHier.jntMng.GetLimbJointIDs(parentLimbID)
+                    parentJointID = self.limbHier.jntMng.GetParentJointId(limbID)
+                    if jointIDs and parentJointID not in jointIDs:
+                        self.limbHier.jntMng.SetParentJointId(limbID, jointIDs[0])
+            self.parent.RebuildHierarchy()
     
     def _Duplicate(self):
         limbID = self.currentItem().ID
         self.limbHier.Duplicate(limbID)
-        self.Populate()
+        self.parent.RebuildHierarchy()
 
     def _Mirror_X(self):
         limbID = self.currentItem().ID
         self.limbHier.Mirror(limbID, 'X')
-        self.Populate()
+        self.parent.RebuildHierarchy()
 
     def _Mirror_Y(self):
         limbID = self.currentItem().ID
         self.limbHier.Mirror(limbID, 'Y')
-        self.Populate()
+        self.parent.RebuildHierarchy()
 
     def _Mirror_Z(self):
         limbID = self.currentItem().ID
         self.limbHier.Mirror(limbID, 'Z')
-        self.Populate()
+        self.parent.RebuildHierarchy()
     
 
 

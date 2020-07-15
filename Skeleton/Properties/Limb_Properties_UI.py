@@ -56,6 +56,7 @@ class Limb_Properties_UI(QtWidgets.QGroupBox):
         hl = QtWidgets.QHBoxLayout()
         l = QtWidgets.QLabel('Joint Count')
         self.jointCount_sb = QtWidgets.QSpinBox()
+        self.jointCount_sb.setKeyboardTracking(False)
         hl.addWidget(l)
         hl.addWidget(self.jointCount_sb)
         return hl
@@ -113,24 +114,27 @@ class Limb_Properties_UI(QtWidgets.QGroupBox):
             jointID = self.parentJointIDs[self.parentJoint_cb.currentIndex()]
             limbID = self.limbProps.limbID
             self.limbProps.jntMng.SetParentJointId(limbID, jointID)
+            self.parent.LimbModified(limbID)
 
     def _Type_Changed(self):
         if not self._isPopulating:
             limbType = self.type_cb.currentText()
-            self.limbProps.limbMng.SetType(self.limbProps.limbID, limbType)
-            self.parent.UpdateLimbs()
+            limbID = self.limbProps.limbID
+            self.limbProps.limbMng.SetType(limbID, limbType)
+            self.parent.LimbModified(limbID)
 
     def _Side_Changed(self):
         if not self._isPopulating:
             side = self.side_cb.currentText()
-            self.limbProps.limbMng.SetSide(self.limbProps.limbID, side)
-            self.parent.UpdateLimbs()
+            limbID = self.limbProps.limbID
+            self.limbProps.limbMng.SetSide(limbID, side)
+            self.parent.RebuildHierarchy()
 
     def _JointCount_Changed(self):
         if not self._isPopulating:
             count = self.jointCount_sb.value()
             self.limbProps.SetJointCount(count)
-            self.parent.UpdateJoints()
+            self.parent.JointsModified()
 
 
 if __name__ == '__main__':

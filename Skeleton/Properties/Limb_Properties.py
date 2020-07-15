@@ -17,7 +17,7 @@ class Limb_Properties():
             self.jntMng.Add(self.limbID, mirrorID, amount)
         elif (newJointCount < oldJointCount):
             jointIDs = self.jntMng.GetLimbJointIDs(self.limbID)
-            self.jntMng.Remove(self.limbID, mirrorID, jointIDs[newJointCount:oldJointCount])
+            self.jntMng.Remove(self.limbID, jointIDs[newJointCount:oldJointCount])
 
 
 

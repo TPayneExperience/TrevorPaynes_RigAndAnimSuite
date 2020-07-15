@@ -2,6 +2,7 @@
 ## TO RUN:
 # from maya import cmds
 # cmds.flushUndo()
+# cmds.file(newFile=1, force=1)
 # try:
 #     cmds.unloadPlugin('tpRigAndAnimSuite_Plugin')
 # except:

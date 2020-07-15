@@ -1,7 +1,7 @@
 
 from maya import cmds
 
-class Scene_Limb_Chain_Position():
+class Scene_Limb_LinearChain():
     def __init__(self, limbManager, jointManager, nameManager, limbID):
         self.limbMng = limbManager
         self.jntMng = jointManager

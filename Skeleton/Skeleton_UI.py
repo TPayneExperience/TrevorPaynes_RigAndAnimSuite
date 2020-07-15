@@ -20,6 +20,16 @@ class Skeleton_UI(QtWidgets.QTabWidget):
         self._Setup()
         self._Setup_Connections()
 
+    def Populate(self): # CALLED BY MAIN WINDOW
+        # self.limbHier_tw.Add()
+        # self.limbHier_tw.Add()
+        self.limbHier_tw.Populate()
+        self.limbProp_gb.hide()
+        self.jntProp_gb.hide()
+        self.skel.sceneMng.SetSkeletonUI(self)
+        self.skel.sceneMng.Setup_Editable()
+        self._UpdateJointCountLabel()
+    
 #=========== SETUP ====================================
 
     def _Setup(self):
@@ -89,10 +99,10 @@ class Skeleton_UI(QtWidgets.QTabWidget):
         gb = QtWidgets.QGroupBox('Tools')
         vl = QtWidgets.QVBoxLayout(gb)
 
-        self.moveToVertCenter_btn = QtWidgets.QPushButton('Move To Verts Center')
+        self.moveToVertCenter_btn = QtWidgets.QPushButton('Move To Selected Center')
+        msg = 'Select control in Scene, then select verts/edges/faces..., then press this'
+        self.moveToVertCenter_btn.setToolTip(msg)
         vl.addWidget(self.moveToVertCenter_btn)
-        self.linearPlacementMode_btn = QtWidgets.QPushButton('Linear Placement Mode')
-        vl.addWidget(self.linearPlacementMode_btn)
 
         hl = QtWidgets.QHBoxLayout()
         hl.addWidget(QtWidgets.QLabel('Joint Size'))
@@ -114,6 +124,11 @@ class Skeleton_UI(QtWidgets.QTabWidget):
     def _Setup_Connections(self):
         self.limbHier_tw.itemClicked.connect(self._LimbSelected)
         self.jntHier_lw.itemClicked.connect(self._JointSelected)
+        self.moveToVertCenter_btn.clicked.connect(self.skel.sceneMng.MoveToVertsCenter)
+
+    def _UpdateJointCountLabel(self):
+        count = self.skel.jntMng.GetJointCount()
+        self.jointCount_l.setText('Total Joints: ' + str(count))
 
     def _LimbSelected(self):
         limbID = self.limbHier_tw.currentItem().ID
@@ -121,30 +136,55 @@ class Skeleton_UI(QtWidgets.QTabWidget):
         self.limbProp_gb.SetLimb(limbID)
         self.limbProp_gb.show()
         self.jntProp_gb.hide()
+        self.skel.sceneMng.SelectLimbControl(limbID)
     
     def _JointSelected(self):
-        ids = [item.ID for item in self.jntHier_lw.selectedItems()]
-        joints = self.skel.jntMng.GetJoints(ids)
+        jointIDs = [item.ID for item in self.jntHier_lw.selectedItems()]
+        joints = self.skel.jntMng.GetJoints(jointIDs)
         self.jntProp_gb.SetJoints(joints)
         self.limbProp_gb.hide()
-        self.jntProp_gb.show()
+        limbID = self.limbHier_tw.currentItem().ID
+        limbType = self.skel.limbMng.GetType(limbID)
+        if 'Chain' in limbType:
+            self.jntProp_gb.show()
+        self.skel.sceneMng.SelectJointControls(jointIDs)
 
-    def Populate(self): # CALLED BY MAIN WINDOW
-        self.limbHier_tw.Add()
-        self.limbHier_tw.Add()
-        self.limbHier_tw.Populate()
-        self.limbProp_gb.hide()
-        self.jntProp_gb.hide()
-        self.skel.sceneMng.SetSkeletonUI(self)
-        self.skel.sceneMng.Setup_Editable()
-    
-    def UpdateJoints(self):
+    def JointCountChanged(self): # Add, Remove
         self.jntHier_lw.Populate()
         self.limbProp_gb.Populate()
+        limbID = self.limbHier_tw.currentItem().ID
+        self.skel.sceneMng.Rebuild_Editable_Limb(limbID)
+        self._UpdateJointCountLabel()
+    
+    def JointsModified(self): # Reordered, Renamed
+        self.jntHier_lw.Populate()
+        limbID = self.limbHier_tw.currentItem().ID
+        self.skel.sceneMng.Rebuild_Editable_Limb(limbID)
+        mirrorID = self.skel.limbMng.GetMirror(limbID)
+        if (mirrorID != -1):
+            self.skel.sceneMng.Rebuild_Editable_Limb(mirrorID)
+        self._UpdateJointCountLabel()
 
-    def UpdateLimbs(self):
+    def AddLimb(self, limbID):
         self.limbHier_tw.Populate()
+        self.skel.sceneMng.Add_Editable_Limb(limbID)
+        self._UpdateJointCountLabel()
 
+    def RemoveLimb(self, limbID):
+        self.limbHier_tw.Populate()
+        self.skel.sceneMng.Remove_Editable_Limb(limbID)
+        self._UpdateJointCountLabel()
+
+    def LimbModified(self, limbID):
+        self.limbHier_tw.Populate()
+        self.skel.sceneMng.Rebuild_Editable_Limb(limbID)
+
+    def RebuildHierarchy(self):
+        self.limbHier_tw.Populate()
+        self.skel.sceneMng.Teardown_Editable()
+        self.skel.sceneMng.Setup_Editable()
+    
+    
 
 # if __name__ == '__main__':
 #     app = QtWidgets.QApplication(sys.argv)

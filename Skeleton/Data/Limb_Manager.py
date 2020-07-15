@@ -4,13 +4,13 @@ class Limb_Manager():
     def __init__(self):
         self._nextLimbID = 1
         self._limbName = {} # ID : Name
-        self._limbType = {} # ID : string
+        self._limbType = {} # ID : string,  ['Chain', 'Branch', 'Linear_Chain']
         self._limbSide = {} # ID : side, ['M', 'L', 'R']
         self._limbParent = {} # limbID : parentID 
         self._limbMirror = {} # limbID_01 : limbID_02 (was mirrorLimbID)
         
         self._limbSidesOptions = ['M', 'L', 'R']
-        self._limbTypes = ['Chain', 'Branch']
+        self._limbTypes = ['Chain', 'Branch', 'Linear_Chain']
 
 #============= ACCESSORS + MUTATORS ============================
 
@@ -100,6 +100,7 @@ class Limb_Manager():
         if mirrorID != -1:
             self._limbSide[mirrorID] = self._limbSidesOptions[0]
             self._limbMirror[mirrorID] = -1
+        del(self._limbName[ID])
         del(self._limbType[ID])
         del(self._limbSide[ID])
         del(self._limbParent[ID])
@@ -120,11 +121,11 @@ class Limb_Manager():
         self._limbSide[ID_02] = self._limbSidesOptions[2]
         self._limbMirror[ID_01] = ID_02
         self._limbMirror[ID_02] = ID_01
+        self._limbName[ID_02] = self._limbName[ID_01] 
         return ID_02
 
     def Duplicate(self, ID_01):
         ID_02 = self.Add()
-        self._limbName[ID_02] = self._limbName[ID_01]
         self._limbType[ID_02] = self._limbType[ID_01]
         self.SetParent(ID_02, self._limbParent[ID_01])
         return ID_02
