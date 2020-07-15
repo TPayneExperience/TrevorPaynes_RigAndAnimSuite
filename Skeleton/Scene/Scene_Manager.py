@@ -15,10 +15,7 @@ class Scene_Manager():
         self.limbCtrs = {} # limbID : limbCtr
         self.limbCsts = {} # limbID : jointConstraintList
         self.limbJoints = {} #limbID : jointIdList, track old joints for removal
-        self.limbBuildTypes = {
-            'Chain': cl.Scene_Limb_Chain(   limbManager,
-                                            jointManager,
-                                            nameManager)}
+        self.limbBuildTypes = { 'Chain': cl.Scene_Limb_Chain(self) }
         cmds.select(d=1)
         self.rootJointGrp = cmds.group(name='Joint_GRP',em=1)
         self.rootCtrGrp = cmds.group(name='Control_GRP', em=1)
@@ -31,46 +28,46 @@ class Scene_Manager():
 #======= SETUP / TEARDOWN OF EDITABLE / FINAL ========================
 
     def Setup_Editable(self):
-        # DISPLAY LAYER
-        if not self.skelLayer: 
+        if not self.skelLayer: # DISPLAY LAYER
             self.skelLayer = cmds.createDisplayLayer(n='Skel Joints', e=1)
             cmds.setAttr(self.skelLayer + '.displayType', 2)
-        # JOINTS
-        limbIDs = self.limbMng.GetLimbIDs()
+        
+        limbIDs = self.limbMng.GetLimbIDs() # JOINTS
         for limbID in limbIDs:
             self.Setup_Joints(limbID)
-        # JOINT PARENTS
-        for limbID in limbIDs:
+        
+        for limbID in limbIDs: # JOINT PARENTS
             limbType = self.limbMng.GetType(limbID)
             limbBuilder = self.limbBuildTypes[limbType]
             limbBuilder.Setup_Internal_JointParents(limbID, self.sceneJoints)
-            limbBuilder.Setup_External_JointParents(limbID, self.sceneJoints)
-        # JOINT CONTROLS
-        for limbID in limbIDs:
+            limbBuilder.Setup_External_JointParents(limbID, 
+                                                    self.sceneJoints, 
+                                                    self.rootJointGrp)
+        
+        for limbID in limbIDs: # JOINT CONTROLS
             limbType = self.limbMng.GetType(limbID)
             limbBuilder = self.limbBuildTypes[limbType]
             limbBuilder.Setup_JointControls(limbID, 
                                             self.sceneJoints,
-                                            self.jointCtrs,
-                                            self.limbCsts)
-        # LIMB CONTROLS
-        for limbID in limbIDs:
+                                            self.jointCtrs)
+        
+        for limbID in limbIDs: # LIMB CONTROLS
             self.Setup_LimbControl(limbID)
         # MISSING: LISTENERS
 
     def Teardown_Editable(self):
         limbIDs = list(self.limbJoints.keys())
-        # LIMB CONTROLS
-        for limbID in limbIDs: 
+       
+        for limbID in limbIDs:  # LIMB CONTROLS
             self.Teardown_LimbControl(limbID)
-        # JOINT CONTROLS
-        for limbID in limbIDs: 
+       
+        for limbID in limbIDs:  # JOINT CONTROLS
             self.Teardown_JointControls(limbID)
-        # JOINT PARENTS
-        for limbID in limbIDs: 
+       
+        for limbID in limbIDs:  # JOINT PARENTS
             self.Teardown_JointParents(limbID)
-        # JOINTS
-        for limbID in limbIDs:
+       
+        for limbID in limbIDs: # JOINTS
             self.Teardown_Joints(limbID)
         # MISSING: LISTENERS
 
@@ -89,11 +86,12 @@ class Scene_Manager():
         limbType = self.limbMng.GetType(limbID)
         limbBuilder = self.limbBuildTypes[limbType]
         limbBuilder.Setup_Internal_JointParents(limbID, self.sceneJoints)
-        limbBuilder.Setup_External_JointParents(limbID, self.sceneJoints)
+        limbBuilder.Setup_External_JointParents(limbID, 
+                                                self.sceneJoints, 
+                                                self.rootJointGrp)
         limbBuilder.Setup_JointControls(limbID, 
                                         self.sceneJoints,
-                                        self.jointCtrs,
-                                        self.limbCsts)
+                                        self.jointCtrs)
         self.Setup_LimbControl(limbID)
 
     def Remove_Editable_Limb(self, limbID):
@@ -108,16 +106,23 @@ class Scene_Manager():
         self.Add_Editable_Limb(limbID)
         for childID, parentID in self.limbMng.GetLimbParentDict().items():
             if parentID == limbID:
-                limbType = self.limbMng.GetType(childID)
-                limbBuilder = self.limbBuildTypes[limbType]
-                limbBuilder.Setup_External_JointParents(childID, self.sceneJoints)
+                self.Reparent_Editable_Limb(childID)
+
+    def Reparent_Editable_Limb(self, limbID):
+        limbType = self.limbMng.GetType(limbID)
+        limbBuilder = self.limbBuildTypes[limbType]
+        limbBuilder.Setup_External_JointParents(limbID, 
+                                                self.sceneJoints, 
+                                                self.rootJointGrp)
 
     def Add_Final_Limb(self, limbID):
         self.Setup_Joints(limbID)
         limbType = self.limbMng.GetType(limbID)
         limbBuilder = self.limbBuildTypes[limbType]
         limbBuilder.Setup_Internal_JointParents(limbID, self.sceneJoints)
-        limbBuilder.Setup_External_JointParents(limbID, self.sceneJoints)
+        limbBuilder.Setup_External_JointParents(limbID, 
+                                                self.sceneJoints, 
+                                                self.rootJointGrp)
         # BEHAVIORS SETS UP REAL CONTROLS
 
     def Remove_Final_Limb(self, limbID):
@@ -128,20 +133,13 @@ class Scene_Manager():
 #======= SETUP JOINTS, LIMBS, CTRS ===================================
 
     def Setup_Joints(self, limbID):
-        limbName = self.limbMng.GetName(limbID)
-        limbSide = self.limbMng.GetSide(limbID)
         jointIDs = self.jntMng.GetLimbJointIDs(limbID)
         tempSceneJoints = []
         for ID in jointIDs:
             cmds.select(d=1)
             jointData = self.jntMng.GetJoint(ID)
-            name = self.nameMng.GetName('TEMP',
-                                        limbName,
-                                        jointData.name,
-                                        limbSide,
-                                        'JNT')
-            jnt = cmds.joint(   self.rootJointGrp,
-                                name=name, 
+            name = self.GetJointName(limbID, ID)
+            jnt = cmds.joint(   name=name, 
                                 position=jointData.position, 
                                 orientation=jointData.rotation, 
                                 rotationOrder=jointData.rotationOrder)
@@ -163,13 +161,7 @@ class Scene_Manager():
     def Setup_LimbControl(self, limbID):
         jointIDs = self.limbJoints[limbID]
         if (jointIDs): # IF NOT EMPTY LIMB
-            limbName = self.limbMng.GetName(limbID)
-            limbSide = self.limbMng.GetSide(limbID)
-            name = self.nameMng.GetName('TEMP',
-                                        limbName,
-                                        'ROOT',
-                                        limbSide,
-                                        'LCTR')
+            name = self.GetLimbCtrName(limbID)
             ctr = cmds.circle(name=name, r=5)[0]
             jointData = self.jntMng.GetJoint(jointIDs[0])
             cmds.xform(ctr, t=jointData.position, ro=[90,0,0])
@@ -238,5 +230,52 @@ class Scene_Manager():
         pos = ((bb[0] + bb[3]) / 2, (bb[1] + bb[4]) / 2, (bb[2] + bb[5]) / 2)
         cmds.xform(ctr, t=pos, ws=1)
 
+#======= NAMING  ===================================
+
+    def GetJointName(self, limbID, jointID):
+        jointData = self.jntMng.GetJoint(jointID)
+        name = self.nameMng.GetName('TEMP',
+                                    self.limbMng.GetName(limbID),
+                                    jointData.name,
+                                    self.limbMng.GetSide(limbID),
+                                    'JNT')
+        return name
+
+    def GetJointCtrName(self, limbID, jointID):
+        jointData = self.jntMng.GetJoint(jointID)
+        name = self.nameMng.GetName('TEMP',
+                                    self.limbMng.GetName(limbID),
+                                    jointData.name,
+                                    self.limbMng.GetSide(limbID),
+                                    'JCTR')
+        return name
+    
+    def GetLimbCtrName(self, limbID):
+        name = self.nameMng.GetName('TEMP',
+                                    self.limbMng.GetName(limbID),
+                                    'ROOT',
+                                    self.limbMng.GetSide(limbID),
+                                    'LCTR')
+        return name
+
+    def RenameLimb(self, limbID):
+        oldLimbCtrName = self.limbCtrs[limbID]
+        newLimbCtrName = self.GetLimbCtrName(limbID)
+        cmds.rename(oldLimbCtrName, newLimbCtrName)
+        self.limbCtrs[limbID] = newLimbCtrName
+
+        for jointID in self.jntMng.GetLimbJointIDs(limbID):
+            self.RenameJoint(limbID, jointID)
+
+    def RenameJoint(self, limbID, jointID):
+        oldJntName = self.sceneJoints[jointID]
+        newJntName = self.GetJointName(limbID, jointID)
+        cmds.rename(oldJntName, newJntName)
+        self.sceneJoints[jointID] = newJntName
+
+        oldCtrName = self.jointCtrs[jointID]
+        newCtrName = self.GetJointCtrName(limbID, jointID)
+        cmds.rename(oldCtrName, newCtrName)
+        self.jointCtrs[jointID] = newCtrName
 
 

@@ -19,31 +19,37 @@ class Limb_Hierarchy():
 
     def Mirror(self, limbID, axis):
         sourceLimbIDs = self._GetLimbCreationOrder(limbID)
-        sourceTotargetLimbIDs = {}
+        sourceToTargetLimbIDs = {}
         for i in range(len(sourceLimbIDs)):
             sourceLimbID = sourceLimbIDs[i]
             targetLimbID = self.limbMng.Mirror(sourceLimbID)
             self.jntMng.Mirror(sourceLimbID, targetLimbID, axis)
-            sourceTotargetLimbIDs[sourceLimbID] = targetLimbID
+            sourceToTargetLimbIDs[sourceLimbID] = targetLimbID
             sourceParentID = self.limbMng.GetParentID(sourceLimbID)
-            if sourceParentID in sourceTotargetLimbIDs:
-                self.limbMng.SetParent(targetLimbID, sourceTotargetLimbIDs[sourceParentID])
+            if sourceParentID in sourceToTargetLimbIDs:
+                self.limbMng.SetParent(targetLimbID, sourceToTargetLimbIDs[sourceParentID])
+                self.jntMng.SetParentLimb(targetLimbID, sourceToTargetLimbIDs[sourceParentID])
             else:
                 self.limbMng.SetParent(targetLimbID, sourceParentID)
+                self.jntMng.SetParentLimb(targetLimbID, sourceParentID)
+        return sourceToTargetLimbIDs
 
     def Duplicate(self, limbID):
         sourceLimbIDs = self._GetLimbCreationOrder(limbID)
-        sourceTotargetLimbIDs = {}
+        sourceToTargetLimbIDs = {}
         for i in range(len(sourceLimbIDs)):
             sourceLimbID = sourceLimbIDs[i]
             targetLimbID = self.limbMng.Duplicate(sourceLimbID)
             self.jntMng.Duplicate(sourceLimbID, targetLimbID)
-            sourceTotargetLimbIDs[sourceLimbID] = targetLimbID
+            sourceToTargetLimbIDs[sourceLimbID] = targetLimbID
             sourceParentID = self.limbMng.GetParentID(sourceLimbID)
-            if sourceParentID in sourceTotargetLimbIDs:
-                self.limbMng.SetParent(targetLimbID, sourceTotargetLimbIDs[sourceParentID])
+            if sourceParentID in sourceToTargetLimbIDs:
+                self.limbMng.SetParent(targetLimbID, sourceToTargetLimbIDs[sourceParentID])
+                self.jntMng.SetParentLimb(targetLimbID, sourceToTargetLimbIDs[sourceParentID])
             else:
                 self.limbMng.SetParent(targetLimbID, sourceParentID)
+                self.jntMng.SetParentLimb(targetLimbID, sourceParentID)
+        return list(sourceToTargetLimbIDs.values())
     
     def _GetLimbCreationOrder(self, limbID):
         limbParents = self.limbMng.GetLimbParentDict()

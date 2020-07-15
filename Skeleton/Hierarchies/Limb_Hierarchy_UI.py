@@ -116,6 +116,8 @@ class Limb_Hierarchy_UI(QtWidgets.QTreeWidget):
             mirrorID = self.limbHier.limbMng.GetMirror(limbID)
             if (mirrorID != -1):
                 mirrorMenu.setEnabled(False)
+                if (mirrorID not in self.limbHier.limbMng.GetLimbMirrorRoots()):
+                    remove.setEnabled(False)
 
         menu.addAction(duplicate)
         menu.addSeparator()
@@ -124,7 +126,7 @@ class Limb_Hierarchy_UI(QtWidgets.QTreeWidget):
     
     def eventFilter(self, sender, event):
         if (event.type() == QtCore.QEvent.ChildRemoved):
-            self._Reorder()
+            self._Reparent()
         return False
     
     def _Setup_Connections(self):
@@ -144,47 +146,53 @@ class Limb_Hierarchy_UI(QtWidgets.QTreeWidget):
 
     def _Rename(self, item):
         if not self._isPopulating:
-            self.limbHier.limbMng.SetLimbName(item.ID, item.text(0))
-            self.parent.LimbModified(item.ID)
+            limbID = item.ID
+            self.limbHier.limbMng.SetLimbName(limbID, item.text(0))
+            self.parent.RenameLimb(limbID)
+            mirrorID = self.limbHier.limbMng.GetMirror(limbID)
+            if (mirrorID != -1):
+                self.parent.RenameLimb(mirrorID)
+                self.Populate()
 
-    def _Reorder(self):
+
+    def _Reparent(self):
         if not self._isPopulating:
-            newChildParentDict = {}
-            for item in list(self._items.values()):
-                newChildParentDict[item.ID] = -1
-                parent = item.parent()
-                if parent:
-                    newChildParentDict[item.ID] = parent.ID
-            self.limbHier.limbMng.ReorderTree(newChildParentDict)
-            # TRY TO SET PARENT JOINT OF LIMB TO NEW LIMB
-            for limbID in self.limbHier.limbMng.GetLimbIDs():
-                parentLimbID = self.limbHier.limbMng.GetParentID(limbID)
-                if (parentLimbID != -1):
-                    jointIDs = self.limbHier.jntMng.GetLimbJointIDs(parentLimbID)
-                    parentJointID = self.limbHier.jntMng.GetParentJointId(limbID)
-                    if jointIDs and parentJointID not in jointIDs:
-                        self.limbHier.jntMng.SetParentJointId(limbID, jointIDs[0])
-            self.parent.RebuildHierarchy()
-    
+            limbParentDict = self.limbHier.limbMng.GetLimbParentDict()
+            for item in self._items.values():
+                childID = item.ID
+                parentID = -1
+                if (item.parent()):
+                    parentID = item.parent().ID
+                if (limbParentDict[childID] != parentID):
+                    self.limbHier.limbMng.SetParent(childID, parentID)
+                    self.limbHier.jntMng.SetParentLimb(childID, parentID)
+                    self.parent.ReparentLimb(childID)
+                    self.expandAll()
+                    break
+
     def _Duplicate(self):
-        limbID = self.currentItem().ID
-        self.limbHier.Duplicate(limbID)
-        self.parent.RebuildHierarchy()
+        newLimbIDs = self.limbHier.Duplicate(self.currentItem().ID)
+        for limbID in newLimbIDs:
+            self.parent.AddLimb(limbID)
+        # self.parent.RebuildHierarchy()
 
     def _Mirror_X(self):
-        limbID = self.currentItem().ID
-        self.limbHier.Mirror(limbID, 'X')
-        self.parent.RebuildHierarchy()
+        self._Mirror('X')
 
     def _Mirror_Y(self):
-        limbID = self.currentItem().ID
-        self.limbHier.Mirror(limbID, 'Y')
-        self.parent.RebuildHierarchy()
+        self._Mirror('Y')
 
     def _Mirror_Z(self):
+        self._Mirror('Z')
+    
+    def _Mirror(self, axis):
         limbID = self.currentItem().ID
-        self.limbHier.Mirror(limbID, 'Z')
-        self.parent.RebuildHierarchy()
+        limbMirrorDict = self.limbHier.Mirror(limbID, axis) 
+        self.limbHier.limbMng.SetLimbMirrorRoot(limbID)
+        for ID_01, ID_02 in limbMirrorDict.items():
+            self.parent.AddLimb(ID_02)
+            self.parent.RenameLimb(ID_01)
+        # self.parent.RebuildHierarchy()      
     
 
 

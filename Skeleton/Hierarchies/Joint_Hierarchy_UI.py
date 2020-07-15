@@ -77,7 +77,7 @@ class Joint_Hierarchy_UI(QtWidgets.QListWidget):
             newName = item.text()
             limbID = self.jntHier.limbID
             self.jntHier.jntMng.SetName(limbID, item.ID, newName)
-            self.parent.JointsModified()
+            self.parent.RenameJoint(limbID, item.ID)
 
     def _Reorder(self):
         if not self._isPopulating:
@@ -85,7 +85,7 @@ class Joint_Hierarchy_UI(QtWidgets.QListWidget):
             limbID = self.jntHier.limbID
             mirrorID = self.jntHier.limbMng.GetMirror(limbID)
             self.jntHier.jntMng.SetLimbJointIDs(limbID, mirrorID, ids)
-            self.parent.JointsModified()
+            self.parent.ReorderJoints()
     
 
 

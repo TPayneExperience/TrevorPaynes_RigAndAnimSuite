@@ -87,7 +87,8 @@ class Limb_Properties_UI(QtWidgets.QGroupBox):
         # SIDE
         side = self.limbProps.limbMng.GetSide(limbID)
         sides = self.limbProps.limbMng.GetSides()[1:]
-        if side in sides:
+        mirrorRoots = self.limbProps.limbMng.GetLimbMirrorRoots()
+        if side in sides and limbID in mirrorRoots:
             index = sides.index(side)
             self.side_l.show()
             self.side_cb.show()
@@ -114,27 +115,25 @@ class Limb_Properties_UI(QtWidgets.QGroupBox):
             jointID = self.parentJointIDs[self.parentJoint_cb.currentIndex()]
             limbID = self.limbProps.limbID
             self.limbProps.jntMng.SetParentJointId(limbID, jointID)
-            self.parent.LimbModified(limbID)
+            self.parent.ReparentLimb(limbID)
 
     def _Type_Changed(self):
         if not self._isPopulating:
             limbType = self.type_cb.currentText()
             limbID = self.limbProps.limbID
             self.limbProps.limbMng.SetType(limbID, limbType)
-            self.parent.LimbModified(limbID)
+            self.parent.RebuildLimb(limbID)
 
     def _Side_Changed(self):
         if not self._isPopulating:
-            side = self.side_cb.currentText()
             limbID = self.limbProps.limbID
-            self.limbProps.limbMng.SetSide(limbID, side)
-            self.parent.RebuildHierarchy()
+            self.parent.FlipLimbSides(limbID)
 
     def _JointCount_Changed(self):
         if not self._isPopulating:
             count = self.jointCount_sb.value()
             self.limbProps.SetJointCount(count)
-            self.parent.JointsModified()
+            self.parent.JointCountChanged()
 
 
 if __name__ == '__main__':

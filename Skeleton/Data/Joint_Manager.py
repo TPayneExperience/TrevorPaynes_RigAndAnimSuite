@@ -23,12 +23,14 @@ class Joint_Manager():
     def GetJoints(self, idList):
         return [self._joints[ID] for ID in idList]
 
+    # GET AXES FOR COMBOBOXES
     def GetAxes(self):
         return self._axes
     
     def GetRotAxes(self):
         return self._rotAxes
     
+    # ROTATION ORDER
     def SetRotationOrder(self, jointList, rotationOrder):
         for joint in jointList:
             joint.rotationOrder = rotationOrder
@@ -37,6 +39,7 @@ class Joint_Manager():
                 mirrorJoint = self._joints[mirrorID]
                 mirrorJoint.rotationOrder = rotationOrder
     
+    # LIMB JOINT IDS
     def GetLimbJointIDs(self, limbID):
         return self._limbJoints[limbID]
 
@@ -46,13 +49,22 @@ class Joint_Manager():
             mirrorIDs = [self._mirrorJoints[ID] for ID in jointIDs]
             self._limbJoints[mirrorLimbID] = mirrorIDs
 
-
+    # PARENT JOINT
     def GetParentJointId(self, limbID):
         return self._limbParentJoint[limbID]
 
     def SetParentJointId(self, limbID, jointID):
         self._limbParentJoint[limbID] = jointID
 
+    def SetParentLimb(self, childLimbID, parentLimbID):
+        self.SetParentJointId(childLimbID, -1)
+        if (parentLimbID != -1):
+            parentJointID = self.GetParentJointId(childLimbID)
+            parentJointIDs = self.GetLimbJointIDs(parentLimbID)
+            if parentJointIDs and parentJointID not in parentJointIDs:
+                self.SetParentJointId(childLimbID, parentJointIDs[0])
+
+    # MISC
     def SetName(self, limbID, jointID, newName):
         ids = self.GetLimbJointIDs(limbID)
         names = [joint.name for joint in self.GetJoints(ids)]
@@ -65,6 +77,8 @@ class Joint_Manager():
     def GetJointCount(self): # for Skel tool label
         return len(self._joints.keys())
 
+    def GetMirrorJoint(self, jointID):
+        return self._mirrorJoints[jointID]
 
 #============= FUNCTIONALITY ============================
 

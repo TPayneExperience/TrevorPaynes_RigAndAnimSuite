@@ -8,6 +8,7 @@ class Limb_Manager():
         self._limbSide = {} # ID : side, ['M', 'L', 'R']
         self._limbParent = {} # limbID : parentID 
         self._limbMirror = {} # limbID_01 : limbID_02 (was mirrorLimbID)
+        self._limbMirrorRoots = []
         
         self._limbSidesOptions = ['M', 'L', 'R']
         self._limbTypes = ['Chain', 'Branch', 'Linear_Chain']
@@ -30,6 +31,14 @@ class Limb_Manager():
     # MIRROR
     def GetMirror(self, ID):
         return self._limbMirror[ID]
+    
+    def SetLimbMirrorRoot(self, ID):
+        mirrorID = self.GetMirror(ID)
+        self._limbMirrorRoots.append(ID)
+        self._limbMirrorRoots.append(mirrorID)
+    
+    def GetLimbMirrorRoots(self):
+        return self._limbMirrorRoots
 
     # TYPES
     def GetType(self, ID):
@@ -49,12 +58,13 @@ class Limb_Manager():
         return self._limbSide[ID]
     
     def SetSide(self, limbID, side):
-        sideIndex = self._limbSidesOptions.index(side)
-        mirrorSideIndex = 1 if sideIndex == 2 else 2
+        self._limbSide[limbID] = side
+        # sideIndex = self._limbSidesOptions.index(side)
+        # mirrorSideIndex = 1 if sideIndex == 2 else 2
 
-        mirrorID = self._limbMirror[limbID]
-        self._limbSide[limbID] = self._limbSidesOptions[sideIndex]
-        self._limbSide[mirrorID] = self._limbSidesOptions[mirrorSideIndex]
+        # mirrorID = self._limbMirror[limbID]
+        # self._limbSide[limbID] = self._limbSidesOptions[sideIndex]
+        # self._limbSide[mirrorID] = self._limbSidesOptions[mirrorSideIndex]
         
     def GetSides(self):
         return self._limbSidesOptions
@@ -67,9 +77,13 @@ class Limb_Manager():
     def GetLimbParentDict(self):
         return dict(self._limbParent)
     
-    def ReorderTree(self, limbParentDict):
-        self._limbParent = limbParentDict
-    
+    def GetChildrenIDs(self, limbID):
+        children = []
+        for childID, parentID in self._limbParent.items():
+            if (parentID == limbID):
+                children.append(childID)
+        return children
+
     def SetParent(self, childID, parentID):
         if(self._IsValidParent(childID, parentID)):
             self._limbParent[childID] = parentID
@@ -96,10 +110,13 @@ class Limb_Manager():
         return ID
 
     def _Remove(self, ID):
-        mirrorID = self._limbMirror[ID]
+        mirrorID = self.GetMirror(ID)
         if mirrorID != -1:
             self._limbSide[mirrorID] = self._limbSidesOptions[0]
             self._limbMirror[mirrorID] = -1
+            if mirrorID in self.GetLimbMirrorRoots():
+                self._limbMirrorRoots.remove(ID)
+                self._limbMirrorRoots.remove(mirrorID)
         del(self._limbName[ID])
         del(self._limbType[ID])
         del(self._limbSide[ID])
