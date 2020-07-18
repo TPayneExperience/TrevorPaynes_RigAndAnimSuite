@@ -82,6 +82,9 @@ class Joint_Manager():
 
 #============= FUNCTIONALITY ============================
 
+    def DoesLimbHaveJoints(self, limbID):
+        return (len(self._limbJoints[limbID]) > 0)
+
     def AddLimb(self, limbID):
         self._limbJoints[limbID] = []
         self._limbParentJoint[limbID] = -1

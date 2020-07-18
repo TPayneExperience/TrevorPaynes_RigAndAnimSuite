@@ -74,15 +74,38 @@ class Limb_Manager():
     def GetParentID(self, limbID):
         return self._limbParent[limbID]
     
+    def GetAllParents(self, limbID):
+        parents = []
+        parentID = self.GetParentID(limbID)
+        while(parentID != -1):
+            parents.append(parentID)
+            parentID = self.GetParentID(parentID)
+        return parents
+
+    def GetImmediateChildren(self, limbID):
+        childIDs = []
+        for childID, parentID in self.GetLimbParentDict():
+            if (parentID == limbID):
+                childIDs.append(childID)
+        return childIDs
+
     def GetLimbParentDict(self):
         return dict(self._limbParent)
     
-    def GetChildrenIDs(self, limbID):
-        children = []
-        for childID, parentID in self._limbParent.items():
-            if (parentID == limbID):
-                children.append(childID)
-        return children
+    def GetLimbCreationOrder(self, rootLimbID):
+        '''Returns a list of children from bottommost to root'''
+        limbParents = self.GetLimbParentDict()
+        limbIDs = [rootLimbID]
+        complete = False
+        while(limbParents and not complete):
+            complete = True
+            for childID, parentID in limbParents.items():
+                if (parentID in limbIDs):
+                    complete = False
+                    limbIDs.append(childID)
+                    del(limbParents[childID])
+                    break
+        return limbIDs
 
     def SetParent(self, childID, parentID):
         if(self._IsValidParent(childID, parentID)):

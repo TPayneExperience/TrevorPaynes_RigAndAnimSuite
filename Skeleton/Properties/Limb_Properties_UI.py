@@ -115,14 +115,16 @@ class Limb_Properties_UI(QtWidgets.QGroupBox):
             jointID = self.parentJointIDs[self.parentJoint_cb.currentIndex()]
             limbID = self.limbProps.limbID
             self.limbProps.jntMng.SetParentJointId(limbID, jointID)
-            self.parent.ReparentLimb(limbID)
+            if (self.limbProps.jntMng.DoesLimbHaveJoints(limbID)):
+                self.parent.ReparentLimb(limbID)
 
     def _Type_Changed(self):
         if not self._isPopulating:
             limbType = self.type_cb.currentText()
             limbID = self.limbProps.limbID
             self.limbProps.limbMng.SetType(limbID, limbType)
-            self.parent.RebuildLimb(limbID)
+            if (self.limbProps.jntMng.DoesLimbHaveJoints(limbID)):
+                self.parent.RebuildLimb(limbID)
 
     def _Side_Changed(self):
         if not self._isPopulating:
@@ -131,9 +133,8 @@ class Limb_Properties_UI(QtWidgets.QGroupBox):
 
     def _JointCount_Changed(self):
         if not self._isPopulating:
-            count = self.jointCount_sb.value()
-            self.limbProps.SetJointCount(count)
-            self.parent.JointCountChanged()
+            self.parent.SetJointCount(self.limbProps.limbID, self.jointCount_sb.value())
+
 
 
 if __name__ == '__main__':

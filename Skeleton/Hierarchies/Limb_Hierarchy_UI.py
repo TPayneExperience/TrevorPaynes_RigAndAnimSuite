@@ -56,7 +56,8 @@ class Limb_Hierarchy_UI(QtWidgets.QTreeWidget):
                     item.setIcon(0, self.r_icon)
                 item.setFlags(  QtCore.Qt.ItemIsEditable |
                                 QtCore.Qt.ItemIsSelectable |
-                                QtCore.Qt.ItemIsEnabled)
+                                QtCore.Qt.ItemIsEnabled |
+                                QtCore.Qt.ItemIsDropEnabled)
             self._items[ID] = item
             if (ID == selectedID):
                 selectemItem = item
@@ -110,19 +111,37 @@ class Limb_Hierarchy_UI(QtWidgets.QTreeWidget):
         mirrorMenu.addAction(mirrorY)
         mirrorMenu.addAction(mirrorZ)
 
+        menu.addAction(duplicate)
+        menu.addSeparator()
+        menu.addAction(remove)
+        
+        # DISABLE ACTIONS
         items = self.selectedItems()
         if items:
             limbID = items[0].ID
             mirrorID = self.limbHier.limbMng.GetMirror(limbID)
+
+            # DISABLE MIRROR ON ALREADY MIRRORED + REMOVE ON CHILDREN
             if (mirrorID != -1):
                 mirrorMenu.setEnabled(False)
                 if (mirrorID not in self.limbHier.limbMng.GetLimbMirrorRoots()):
                     remove.setEnabled(False)
 
-        menu.addAction(duplicate)
-        menu.addSeparator()
-        menu.addAction(remove)
+            # DISABLE MIRROR ON NON MIRRORED CHILD OF MIRRORED LIMBS
+            for parentID in self.limbHier.limbMng.GetAllParents(limbID):
+                mirrorID = self.limbHier.limbMng.GetMirror(parentID)
+                if (mirrorID != -1):
+                    mirrorMenu.setEnabled(False)
+                    break
+
+        # DISABLE IF NOTHING SELECTED
+        else:
+            mirrorMenu.setEnabled(False)
+            duplicate.setEnabled(False)
+            remove.setEnabled(False)
+
         menu.exec_(QtGui.QCursor.pos())
+
     
     def eventFilter(self, sender, event):
         if (event.type() == QtCore.QEvent.ChildRemoved):
@@ -139,10 +158,17 @@ class Limb_Hierarchy_UI(QtWidgets.QTreeWidget):
         self.parent.AddLimb(self.limbHier.Add())
 
     def _Remove(self):
+        '''Remove children then remove this limb'''
         # MISSING WARNING CONFIRMATION DIALOG
         ID = self.currentItem().ID
-        self.limbHier.Remove(ID)
-        self.parent.RemoveLimb(ID)
+        limbIDs = self.limbHier.limbMng.GetLimbCreationOrder(ID)
+        for limbID in limbIDs[::-1]:
+            mirrorID = self.limbHier.limbMng.GetMirror(limbID)
+            self.limbHier.Remove(limbID)
+            self.parent.RemoveLimb(limbID)
+            if (mirrorID != -1):
+                self.parent.RenameLimb(mirrorID)
+        self.Populate()
 
     def _Rename(self, item):
         if not self._isPopulating:
@@ -164,9 +190,10 @@ class Limb_Hierarchy_UI(QtWidgets.QTreeWidget):
                 if (item.parent()):
                     parentID = item.parent().ID
                 if (limbParentDict[childID] != parentID):
+                    oldParentID = self.limbHier.limbMng.GetParentID(childID)
                     self.limbHier.limbMng.SetParent(childID, parentID)
                     self.limbHier.jntMng.SetParentLimb(childID, parentID)
-                    self.parent.ReparentLimb(childID)
+                    self.parent.ReparentLimb(childID, oldParentID)
                     self.expandAll()
                     break
 
@@ -192,7 +219,8 @@ class Limb_Hierarchy_UI(QtWidgets.QTreeWidget):
         for ID_01, ID_02 in limbMirrorDict.items():
             self.parent.AddLimb(ID_02)
             self.parent.RenameLimb(ID_01)
-        # self.parent.RebuildHierarchy()      
+        self.parent.Mirror()
+        
     
 
 

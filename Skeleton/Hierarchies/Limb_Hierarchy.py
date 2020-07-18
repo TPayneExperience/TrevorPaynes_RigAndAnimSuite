@@ -18,7 +18,7 @@ class Limb_Hierarchy():
         self.limbMng.Remove(limbID)
 
     def Mirror(self, limbID, axis):
-        sourceLimbIDs = self._GetLimbCreationOrder(limbID)
+        sourceLimbIDs = self.limbMng.GetLimbCreationOrder(limbID)
         sourceToTargetLimbIDs = {}
         for i in range(len(sourceLimbIDs)):
             sourceLimbID = sourceLimbIDs[i]
@@ -35,7 +35,7 @@ class Limb_Hierarchy():
         return sourceToTargetLimbIDs
 
     def Duplicate(self, limbID):
-        sourceLimbIDs = self._GetLimbCreationOrder(limbID)
+        sourceLimbIDs = self.limbMng.GetLimbCreationOrder(limbID)
         sourceToTargetLimbIDs = {}
         for i in range(len(sourceLimbIDs)):
             sourceLimbID = sourceLimbIDs[i]
@@ -51,19 +51,19 @@ class Limb_Hierarchy():
                 self.jntMng.SetParentLimb(targetLimbID, sourceParentID)
         return list(sourceToTargetLimbIDs.values())
     
-    def _GetLimbCreationOrder(self, limbID):
-        limbParents = self.limbMng.GetLimbParentDict()
-        sourceLimbIDs = [limbID]
-        complete = False
-        while (limbParents and not complete):
-            complete = True
-            for k,v in limbParents.items():
-                if (v in sourceLimbIDs):
-                    complete = False
-                    sourceLimbIDs.append(k)
-                    del(limbParents[k])
-                    break
-        return sourceLimbIDs
+    # def _GetLimbCreationOrder(self, limbID):
+    #     limbParents = self.limbMng.GetLimbParentDict()
+    #     sourceLimbIDs = [limbID]
+    #     complete = False
+    #     while (limbParents and not complete):
+    #         complete = True
+    #         for k,v in limbParents.items():
+    #             if (v in sourceLimbIDs):
+    #                 complete = False
+    #                 sourceLimbIDs.append(k)
+    #                 del(limbParents[k])
+    #                 break
+    #     return sourceLimbIDs
         
 
 

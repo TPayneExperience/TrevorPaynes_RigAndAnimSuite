@@ -60,17 +60,19 @@ class Joint_Hierarchy_UI(QtWidgets.QListWidget):
 #=========== FUNCTIONALITY ====================================
 
     def Add(self):
-        index = self.currentRow()
-        limbID = self.jntHier.limbID
-        mirrorID = self.jntHier.limbMng.GetMirror(limbID)
-        self.jntHier.jntMng.Add(limbID, mirrorID, 1)
-        self.parent.JointCountChanged()
+        self.parent.AddJoints(self.jntHier.limbID, 1)
+        # index = self.currentRow()
+        # limbID = self.jntHier.limbID
+        # mirrorID = self.jntHier.limbMng.GetMirror(limbID)
+        # self.jntHier.jntMng.Add(limbID, mirrorID, 1)
+        # self.parent.JointCountChanged()
     
     def _Remove(self):
-        ids = [item.ID for item in self.selectedItems()]
-        limbID = self.jntHier.limbID
-        self.jntHier.jntMng.Remove(limbID, ids)
-        self.parent.JointCountChanged()
+        jointIDs = [item.ID for item in self.selectedItems()]
+        self.parent.RemoveJoints(self.jntHier.limbID, jointIDs)
+        # limbID = self.jntHier.limbID
+        # self.jntHier.jntMng.Remove(limbID, ids)
+        # self.parent.JointCountChanged()
 
     def _Rename(self, item):
         if not self._isPopulating:

@@ -16,7 +16,7 @@ class RigAndAnim_Manager():
         self.skel = skel.Skeleton(self.rigSetup.nameMng)
 
         self.rootGrp = cmds.group(n='ROOT', em=1)
-        cmds.parent(self.skel.sceneMng.rootJointGrp, self.rootGrp)
+        cmds.parent(self.skel.sceneMng.rootJntGrp, self.rootGrp)
         cmds.parent(self.skel.sceneMng.rootCtrGrp, self.rootGrp)
     
     
