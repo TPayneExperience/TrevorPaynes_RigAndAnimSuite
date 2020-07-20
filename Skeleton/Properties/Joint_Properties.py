@@ -33,7 +33,13 @@ class Joint_Properties():
     def SetAimAxis(self, aimAxis):
         for j in self._joints:
             j.aimAxis = aimAxis
-
+        upAxis = self.GetUpAxis()
+        if not upAxis or upAxis in self.jntMng.axisPairs[aimAxis]:
+            axes = self.jntMng.GetAxes()
+            index = (axes.index(aimAxis) + 2) % len(axes)
+            upAxis = axes[index]
+        return upAxis
+        
     # UP AXIS
     def GetUpAxis(self):
         upAxis = self._joints[0].upAxis
@@ -45,6 +51,12 @@ class Joint_Properties():
     def SetUpAxis(self, upAxis):
         for j in self._joints:
             j.upAxis = upAxis
+        aimAxis = self.GetAimAxis()
+        if not aimAxis or aimAxis in self.jntMng.axisPairs[upAxis]:
+            axes = self.jntMng.GetAxes()
+            index = (axes.index(upAxis) + 2) % len(axes)
+            aimAxis = axes[index]
+        return aimAxis
     
 
 

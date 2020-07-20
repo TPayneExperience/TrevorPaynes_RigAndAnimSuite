@@ -9,7 +9,7 @@ class Name_Manager():
     
     def IsValidCharacterLength(self, name):
         if (len(name) < 2):
-            self.errorMsg = 'Must be 2 or more characters'
+            self.errorMsg = 'NAME ERROR: Must be 2 or more characters'
             return False
         else:
             self.errorMsg = ''
@@ -17,7 +17,7 @@ class Name_Manager():
 
     def DoesNotStartWithNumber(self, name):
         if (name[0] in ['0','1','2','3','4','5','6','7','8','9', '_']):
-            self.errorMsg = 'Cannot start with number OR _'
+            self.errorMsg = 'NAME ERROR: Cannot start with number OR _'
             return False
         else:
             self.errorMsg = ''
@@ -30,7 +30,7 @@ class Name_Manager():
                 self.errorMsg = ''
                 return True
         except:
-            self.errorMsg = 'May only contain A-Z, a-z, 0-9, _'
+            self.errorMsg = 'NAME ERROR: May only contain A-Z, a-z, 0-9, _'
             return False
 
     def Reorder(self,   prefix=0,
@@ -48,12 +48,6 @@ class Name_Manager():
     def SetPrefix(self, newPrefix):
         self._prefix = newPrefix
 
-    # def GetName(self,   limb, 
-    #                     joint, 
-    #                     side,
-    #                     objType):
-    #     return self.GetName(self._prefix, limb, joint, side, objType)
-    
     def GetName(self,   prefix,
                         limb, 
                         joint, 

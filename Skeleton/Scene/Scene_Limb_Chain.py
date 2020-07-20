@@ -35,24 +35,23 @@ class Scene_Limb_Chain():
         ctrs = []
         jointIDs = self.sceneMng.jntMng.GetLimbJointIDs(limbID)
         ID = jointIDs[0]
-        jointData = self.sceneMng.jntMng.GetJoint(ID)
-        name = self.sceneMng.GetJointCtrName(limbID, ID)
-        ctr = cmds.spaceLocator(name=name, position=jointData.position)[0]
-        cmds.pointConstraint(ctr, sceneJoints[ID])
-        jntCtrDict[ID] = ctr
-        ctrs.append(ctr)
+        ctrs.append(self._Setup_JointControl(limbID, ID, sceneJoints, jntCtrDict))
         for i in range(1, len(jointIDs)):
             ID_01 = jointIDs[i-1]
             ID_02 = jointIDs[i]
-            jointData_02 = self.sceneMng.jntMng.GetJoint(ID_02)
-            name = self.sceneMng.GetJointCtrName(limbID, ID_02)
-            ctr = cmds.spaceLocator(name=name)[0]
-            cmds.xform(ctr, t=jointData_02.position)
-            cmds.pointConstraint(ctr, sceneJoints[ID_02])
+            ctr = self._Setup_JointControl(limbID, ID_02, sceneJoints, jntCtrDict)
             cmds.aimConstraint(ctr, sceneJoints[ID_01])
-            jntCtrDict[ID_02] = ctr
             ctrs.append(ctr)
         return ctrs
+
+    def _Setup_JointControl(self, limbID, jointID, sceneJoints, jntCtrDict):
+        jointData = self.sceneMng.jntMng.GetJoint(jointID)
+        name = self.sceneMng.GetJointCtrName(limbID, jointID)
+        ctr = cmds.spaceLocator(name=name)[0]
+        cmds.xform(ctr, t=jointData.position)
+        cmds.pointConstraint(ctr, sceneJoints[jointID])
+        jntCtrDict[jointID] = ctr
+        return ctr
 
     def Teardown_JointControls(self, oldJntIDs, jntCtrDict):
         ctrs = [jntCtrDict[ID] for ID in oldJntIDs]

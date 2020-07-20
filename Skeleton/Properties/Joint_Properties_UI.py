@@ -67,11 +67,21 @@ class Joint_Properties_UI(QtWidgets.QWidget):
     
     def _AimAxis_Changed(self):
         if not self._isPopulating:
-            self._jntProp.SetAimAxis(self.aimAxis_cb.currentText())
+            aimAxis = self.aimAxis_cb.currentText()
+            upAxis = self._jntProp.SetAimAxis(aimAxis)
+            if (upAxis != self.upAxis_cb.currentText()):
+                self._isPopulating = True
+                self.upAxis_cb.setCurrentIndex(self.axes.index(upAxis))
+                self._isPopulating = False
 
     def _UpAxis_Changed(self):
         if not self._isPopulating:
-            self._jntProp.SetUpAxis(self.upAxis_cb.currentText())
+            upAxis = self.upAxis_cb.currentText()
+            aimAxis = self._jntProp.SetUpAxis(upAxis)
+            if (aimAxis != self.aimAxis_cb.currentText()):
+                self._isPopulating = True
+                self.aimAxis_cb.setCurrentIndex(self.axes.index(aimAxis))
+                self._isPopulating = False
 
     def _RotationOrder_Changed(self):
         if not self._isPopulating:

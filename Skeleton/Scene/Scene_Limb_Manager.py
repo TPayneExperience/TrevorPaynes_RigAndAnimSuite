@@ -2,8 +2,12 @@
 from maya import cmds
 
 import Scene_Limb_Chain as cl
+import Scene_Limb_Branch as bl
+import Scene_Limb_LinearChain as lcl
 
 reload(cl)
+reload(bl)
+reload(lcl)
 
 
 class Scene_Limb_Manager():
@@ -19,7 +23,11 @@ class Scene_Limb_Manager():
         self.limbJoints = {} #limbID : jointIdList
         self.limbTypes = {} # limbID : str Type, 'chain', 'branch'...
         
-        self.limbBuildTypes = { 'Chain': cl.Scene_Limb_Chain(self) }
+        self.limbBuildTypes = { 
+            self.limbMng.GetTypes()[0]: cl.Scene_Limb_Chain(self),
+            self.limbMng.GetTypes()[1]: bl.Scene_Limb_Branch(self),
+            self.limbMng.GetTypes()[2]: lcl.Scene_Limb_LinearChain(self)
+            }
 
 #======= SETUP + TEARDOWNS ===================================
 
@@ -31,6 +39,7 @@ class Scene_Limb_Manager():
             cmds.select(d=1)
             jointData = self.jntMng.GetJoint(ID)
             name = self.GetJointName(limbID, ID)
+            print ('creating joint at: ' + str(jointData.position))
             jnt = cmds.joint(   name=name, 
                                 position=jointData.position, 
                                 orientation=jointData.rotation, 
@@ -86,6 +95,9 @@ class Scene_Limb_Manager():
         for ctr in ctrs:
             cmds.addAttr(ctr, longName = 'limbID', at='short')
             cmds.setAttr(ctr + '.limbID', limbID)
+            for attr in ['sx', 'sy', 'sz']:
+                cmds.setAttr(ctr + '.' + attr, k=0)
+            cmds.setAttr(ctr + '.v', l=1, k=0)
         
     def Teardown_JointControls(self, limbID):
         limbType = self.limbTypes[limbID]
@@ -97,7 +109,7 @@ class Scene_Limb_Manager():
     def Setup_LimbControl(self, limbID, rootCtrGrp):
         jointIDs = self.limbJoints[limbID]
         name = self.GetLimbCtrName(limbID)
-        ctr = cmds.circle(name=name, r=5)[0]
+        ctr = cmds.circle(name=name)[0]
         jointData = self.jntMng.GetJoint(jointIDs[0])
         cmds.xform(ctr, t=jointData.position, ro=[90,0,0])
         for ID in jointIDs:
@@ -106,6 +118,7 @@ class Scene_Limb_Manager():
         self.limbCtrs[limbID] = ctr
         cmds.addAttr(ctr, longName = 'limbID', at='short')
         cmds.setAttr(ctr + '.limbID', limbID)
+        cmds.setAttr(ctr + '.v', l=1, k=0)
 
     def Teardown_LimbControl(self, limbID, rootCtrGrp):
         jointIDs = self.limbJoints[limbID]

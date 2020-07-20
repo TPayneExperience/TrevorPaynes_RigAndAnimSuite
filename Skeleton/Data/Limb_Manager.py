@@ -11,7 +11,7 @@ class Limb_Manager():
         self._limbMirrorRoots = []
         
         self._limbSidesOptions = ['M', 'L', 'R']
-        self._limbTypes = ['Chain', 'Branch', 'Linear_Chain']
+        self._limbTypes = ['Chain', 'Branch', 'Linear_Chain', 'Linear_Branch']
 
 #============= ACCESSORS + MUTATORS ============================
 

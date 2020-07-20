@@ -12,6 +12,12 @@ class Joint_Manager():
         self._limbNextJointIndex = {} # limbID: nextJointIndex (was nextJointName)
         self._mirrorJoints = {} # jointID_01 : jointID_02
         self._axes = ['X', '-X', 'Y', '-Y', 'Z', '-Z']
+        self.axisPairs = {  'X': ['X', '-X'],
+                            '-X': ['X', '-X'],
+                            'Y': ['Y', '-Y'],
+                            '-Y': ['Y', '-Y'],
+                            'Z': ['Z', '-Z'],
+                            '-Z': ['Z', '-Z']}
         self._rotAxes = ['XYZ', 'XZY', 'YXZ', 'YZX', 'ZXY', 'ZYX']
 
 
@@ -153,7 +159,7 @@ class Joint_Manager():
             target.name         = source.name
             target.position     = source.position[:]
             target.rotation     = source.rotation[:]
-            target.scale        = source.scale[:]
+            # target.scale        = source.scale[:]
             target.rotationOrder= source.rotationOrder
             target.aimAxis      = source.aimAxis
             target.upAxis       = source.upAxis
@@ -165,7 +171,17 @@ class Joint_Manager():
         for sourceID, targetID in zip(sourceJointIDs, targetJointIDs):
             self._mirrorJoints[sourceID] = targetID
             self._mirrorJoints[targetID] = sourceID
-        # MISSING: FLIP OVER AXIS
+        flip = [-1,1,1]
+        if (axis == 'Y'):
+            flip = [1,-1,1]
+        elif (axis == 'Z'):
+            flip = [1,1,-1]
+        for jointID in targetJointIDs:
+            joint = self._joints[jointID]
+            pos = joint.position
+            joint.position = [  pos[0] * flip[0],
+                                pos[1] * flip[1],
+                                pos[2] * flip[2]]
         # MISSING: FIX ROTATIONS
 
 #============= SAVE LOAD ============================

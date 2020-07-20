@@ -193,11 +193,12 @@ class Scene_Manager():
         for joint in list(self.sceneLimbMng.sceneJoints.values()):
             cmds.joint(joint, e=1, rad=size)
         for ctr in list(self.sceneLimbMng.limbCtrs.values()):
-            cmds.xform(ctr, s=[size, size, size])
+            #cmds.xform(ctr, s=[size, size, size])
+            cmds.circle(ctr, e=1, r=size*5)
         for ctr in list(self.sceneLimbMng.jointCtrs.values()):
-            cmds.xform(ctr, s=[1, 1, 1])
+            cmds.xform(ctr, s=[size, size, size])
 
-#======= SELECTION + SAVING ===================================
+#======= SELECTION ===================================
 
     def SelectJointControls(self, jointIDs):
         ctrs = [self.sceneLimbMng.jointCtrs[ID] for ID in jointIDs]
@@ -208,6 +209,8 @@ class Scene_Manager():
     
     def DeselectAll(self):
         cmds.select(d=1)
+
+#======= SCRIPT JOBS ===================================
 
     def SelectionChanged(self):
         print('selection changed')
@@ -243,8 +246,8 @@ class Scene_Manager():
             for jointID in self.jntMng.GetLimbJointIDs(limbID):
                 jointData = self.jntMng.GetJoint(jointID)
                 sceneJoint = self.sceneLimbMng.sceneJoints[jointID]
-                jointData.position = cmds.xform(sceneJoint, q=1, t=1)
-                jointData.rotation = cmds.xform(sceneJoint, q=1, ro=1)
+                jointData.position = cmds.xform(sceneJoint, q=1, t=1, ws=1)
+                jointData.rotation = cmds.xform(sceneJoint, q=1, ro=1, ws=1)
                 print('saving: ' + jointData.name)
                 print('pos: ' + str(jointData.position))
                 print('rot: ' + str(jointData.rotation))
