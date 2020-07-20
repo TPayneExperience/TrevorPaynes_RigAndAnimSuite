@@ -32,6 +32,7 @@ class Scene_Limb_Chain():
 
     # EDITABLE CONTROLS
     def Setup_JointControls(self, limbID, sceneJoints, jntCtrDict):
+        ctrs = []
         jointIDs = self.sceneMng.jntMng.GetLimbJointIDs(limbID)
         ID = jointIDs[0]
         jointData = self.sceneMng.jntMng.GetJoint(ID)
@@ -39,6 +40,7 @@ class Scene_Limb_Chain():
         ctr = cmds.spaceLocator(name=name, position=jointData.position)[0]
         cmds.pointConstraint(ctr, sceneJoints[ID])
         jntCtrDict[ID] = ctr
+        ctrs.append(ctr)
         for i in range(1, len(jointIDs)):
             ID_01 = jointIDs[i-1]
             ID_02 = jointIDs[i]
@@ -49,6 +51,8 @@ class Scene_Limb_Chain():
             cmds.pointConstraint(ctr, sceneJoints[ID_02])
             cmds.aimConstraint(ctr, sceneJoints[ID_01])
             jntCtrDict[ID_02] = ctr
+            ctrs.append(ctr)
+        return ctrs
 
     def Teardown_JointControls(self, oldJntIDs, jntCtrDict):
         ctrs = [jntCtrDict[ID] for ID in oldJntIDs]

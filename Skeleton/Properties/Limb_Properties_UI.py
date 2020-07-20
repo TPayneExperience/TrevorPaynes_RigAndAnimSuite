@@ -2,7 +2,8 @@ import sys
 
 from Qt import QtWidgets, QtCore, QtGui
 
-class Limb_Properties_UI(QtWidgets.QGroupBox):
+# class Limb_Properties_UI(QtWidgets.QGroupBox)
+class Limb_Properties_UI(QtWidgets.QWidget):
     def __init__(self, Limb_Properties, parent=None):
         super(Limb_Properties_UI, self).__init__(parent)
         self.parent = parent
@@ -20,7 +21,6 @@ class Limb_Properties_UI(QtWidgets.QGroupBox):
 
     def _Setup(self):
         vl = QtWidgets.QVBoxLayout(self)
-        self.setTitle('LIMB Properties')
         vl.addLayout(self._Setup_ParentJoint())
         vl.addLayout(self._Setup_Types())
         vl.addLayout(self._Setup_Side())
@@ -97,7 +97,7 @@ class Limb_Properties_UI(QtWidgets.QGroupBox):
             self.side_l.hide()
             self.side_cb.hide()
 
-        # JOINT COUT
+        # JOINT COUNT
         jointIDs = self.limbProps.jntMng.GetLimbJointIDs(self.limbProps.limbID)
         self.jointCount_sb.setValue(len(jointIDs))
         self._isPopulating = False
@@ -115,8 +115,7 @@ class Limb_Properties_UI(QtWidgets.QGroupBox):
             jointID = self.parentJointIDs[self.parentJoint_cb.currentIndex()]
             limbID = self.limbProps.limbID
             self.limbProps.jntMng.SetParentJointId(limbID, jointID)
-            if (self.limbProps.jntMng.DoesLimbHaveJoints(limbID)):
-                self.parent.ReparentLimb(limbID)
+            self.parent.LimbParentJointChanged(limbID)
 
     def _Type_Changed(self):
         if not self._isPopulating:

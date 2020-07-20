@@ -12,10 +12,12 @@ class Scene_Limb_Manager():
         self.jntMng = jointManager
         self.nameMng = nameManager
 
+        # Always track old data, for teardowns
         self.sceneJoints = {} # ID : sceneJoint 
         self.jointCtrs = {} # jointID : jointCtr
         self.limbCtrs = {} # limbID : limbCtr
-        self.limbJoints = {} #limbID : jointIdList, track old joints for removal
+        self.limbJoints = {} #limbID : jointIdList
+        self.limbTypes = {} # limbID : str Type, 'chain', 'branch'...
         
         self.limbBuildTypes = { 'Chain': cl.Scene_Limb_Chain(self) }
 
@@ -51,37 +53,42 @@ class Scene_Limb_Manager():
     # JOINT INTERNAL PARENTS
     def Setup_Internal_JointParents(self, limbID):
         limbType = self.limbMng.GetType(limbID)
+        self.limbTypes[limbID] = limbType
         limbBuilder = self.limbBuildTypes[limbType]
         limbBuilder.Setup_Internal_JointParents(limbID, self.sceneJoints)
     
     def Teardown_Internal_JointParents(self, limbID, rootJntGrp):
-        limbType = self.limbMng.GetType(limbID)
+        limbType = self.limbTypes[limbID]
         limbBuilder = self.limbBuildTypes[limbType]
         jointIDs = self.limbJoints[limbID]
         limbBuilder.Teardown_Internal_JointParents(jointIDs, self.sceneJoints, rootJntGrp)
+        del(self.limbTypes[limbID])
 
     # JOINT EXTERNAL PARENTS
     def Setup_External_JointParents(self, limbID):
-        limbType = self.limbMng.GetType(limbID)
+        limbType = self.limbTypes[limbID]
         limbBuilder = self.limbBuildTypes[limbType]
         limbBuilder.Setup_External_JointParents(limbID, self.sceneJoints)
     
     def Teardown_External_JointParents(self, limbID, rootJntGrp):
-        limbType = self.limbMng.GetType(limbID)
+        limbType = self.limbTypes[limbID]
         limbBuilder = self.limbBuildTypes[limbType]
         jointIDs = self.limbJoints[limbID]
         limbBuilder.Teardown_External_JointParents(jointIDs, self.sceneJoints, rootJntGrp)
 
     # JOINT CONTROLS
     def Setup_JointControls(self, limbID):
-        limbType = self.limbMng.GetType(limbID)
+        limbType = self.limbTypes[limbID]
         limbBuilder = self.limbBuildTypes[limbType]
-        limbBuilder.Setup_JointControls(limbID, 
-                                        self.sceneJoints,
-                                        self.jointCtrs)
+        ctrs = limbBuilder.Setup_JointControls( limbID, 
+                                                self.sceneJoints,
+                                                self.jointCtrs)
+        for ctr in ctrs:
+            cmds.addAttr(ctr, longName = 'limbID', at='short')
+            cmds.setAttr(ctr + '.limbID', limbID)
         
     def Teardown_JointControls(self, limbID):
-        limbType = self.limbMng.GetType(limbID)
+        limbType = self.limbTypes[limbID]
         limbBuilder = self.limbBuildTypes[limbType]
         limbBuilder.Teardown_JointControls(self.limbJoints[limbID], 
                                             self.jointCtrs)
@@ -97,6 +104,8 @@ class Scene_Limb_Manager():
             cmds.parent(self.jointCtrs[ID], ctr)
         cmds.parent(ctr, rootCtrGrp)
         self.limbCtrs[limbID] = ctr
+        cmds.addAttr(ctr, longName = 'limbID', at='short')
+        cmds.setAttr(ctr + '.limbID', limbID)
 
     def Teardown_LimbControl(self, limbID, rootCtrGrp):
         jointIDs = self.limbJoints[limbID]

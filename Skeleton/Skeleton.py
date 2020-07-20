@@ -27,8 +27,8 @@ class Skeleton():
         self.limbMng = lm.Limb_Manager()
         self.jntProp = jp.Joint_Properties(self.limbMng, self.jntMng)
         self.limbProp = lp.Limb_Properties(self.limbMng, self.jntMng)
-        self.jntHier = jh.Joint_Hierarchy(self.limbMng, self.jntMng)
-        self.limbHier = lh.Limb_Hierarchy(self.limbMng,self.jntMng)
+        self.jntHier = jh.Joint_Hierarchy(self.limbMng, self.jntMng, nameManager)
+        self.limbHier = lh.Limb_Hierarchy(self.limbMng,self.jntMng, nameManager)
         self.sceneMng = sm.Scene_Manager(self.limbMng, self.jntMng, nameManager)
 
 

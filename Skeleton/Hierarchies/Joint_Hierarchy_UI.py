@@ -61,25 +61,32 @@ class Joint_Hierarchy_UI(QtWidgets.QListWidget):
 
     def Add(self):
         self.parent.AddJoints(self.jntHier.limbID, 1)
-        # index = self.currentRow()
-        # limbID = self.jntHier.limbID
-        # mirrorID = self.jntHier.limbMng.GetMirror(limbID)
-        # self.jntHier.jntMng.Add(limbID, mirrorID, 1)
-        # self.parent.JointCountChanged()
     
     def _Remove(self):
         jointIDs = [item.ID for item in self.selectedItems()]
-        self.parent.RemoveJoints(self.jntHier.limbID, jointIDs)
-        # limbID = self.jntHier.limbID
-        # self.jntHier.jntMng.Remove(limbID, ids)
-        # self.parent.JointCountChanged()
+        count = len(jointIDs)
+        result = QtWidgets.QMessageBox.warning(self, 
+                            'REMOVE LIMBS',
+                            'Are you sure you want to remove %d joints?' % count,
+                            QtWidgets.QMessageBox.Cancel, 
+                            QtWidgets.QMessageBox.Ok
+                            )
+        if (result==QtWidgets.QMessageBox.Ok):
+            self.parent.RemoveJoints(self.jntHier.limbID, jointIDs)
 
     def _Rename(self, item):
         if not self._isPopulating:
             newName = item.text()
-            limbID = self.jntHier.limbID
-            self.jntHier.jntMng.SetName(limbID, item.ID, newName)
-            self.parent.RenameJoint(limbID, item.ID)
+            validLen = self.jntHier.nameMng.IsValidCharacterLength(newName)
+            validStart = self.jntHier.nameMng.DoesNotStartWithNumber(newName)
+            allValid = self.jntHier.nameMng.AreAllValidCharacters(newName)
+            if validLen and validStart and allValid:
+                limbID = self.jntHier.limbID
+                self.jntHier.jntMng.SetName(limbID, item.ID, newName)
+                self.parent.RenameJoint(limbID, item.ID)
+            else:
+                item.setText(self.jntHier.jntMng.GetJoint(item.ID).name)
+                self.parent.DisplayLogMsg(self.jntHier.nameMng.errorMsg)
 
     def _Reorder(self):
         if not self._isPopulating:

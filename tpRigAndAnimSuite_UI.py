@@ -24,7 +24,8 @@ class TPRigAndAnimSuite_UI_MainWindow(QtWidgets.QMainWindow):
         self._Setup()
 
     def _Setup(self):
-        self.setCentralWidget(TPRigAndAnimSuite_UI_Widget(self))
+        self.toolUI = TPRigAndAnimSuite_UI_Widget(self)
+        self.setCentralWidget(self.toolUI)
         self.setWindowTitle("Trevor Payne Free Rig & Anim Suite v" + __version__)
         self._Setup_MenuBar()
         self.statusBar().showMessage('Drag & drop or Right Click on stuff!')
@@ -42,13 +43,17 @@ class TPRigAndAnimSuite_UI_MainWindow(QtWidgets.QMainWindow):
         quitAct = fileMenu.addAction('Quit')
         quitAct.triggered.connect(self.close)
 
+    def closeEvent(self, e):
+        self.toolUI.skel_ui.skel.sceneMng.KillScriptJobs()
+        self.toolUI.skel_ui.skel.sceneMng.KillSelectionJob()
+        super(TPRigAndAnimSuite_UI_MainWindow, self).closeEvent(e)
+
     
 class TPRigAndAnimSuite_UI_Widget(QtWidgets.QWidget):
     def __init__(self, parent=None):
         super(TPRigAndAnimSuite_UI_Widget, self).__init__(parent)
+        self.parent = parent
 
-        # self.rigSetup = rs.RigSetup()
-        # self.skel = skel.Skeleton(self.rigSetup.nameMng)
         self.rigMng = rig.RigAndAnim_Manager()
 
         self._Setup()
@@ -73,6 +78,7 @@ class TPRigAndAnimSuite_UI_Widget(QtWidgets.QWidget):
     def _Setup_TabWidget(self):
         self.tabWgt = QtWidgets.QTabWidget()
         self.skel_ui = skel_ui.Skeleton_UI(self.rigMng.skel, self.tabWgt)
+        self.skel_ui.SetMainWindow(self.parent)
         self.tabWgt.addTab(self.skel_ui, 'Skeleton')
         return self.tabWgt
     

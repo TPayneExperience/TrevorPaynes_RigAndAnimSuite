@@ -3,7 +3,7 @@ import sys
 
 from Qt import QtWidgets, QtCore, QtGui
 
-class Joint_Properties_UI(QtWidgets.QGroupBox):
+class Joint_Properties_UI(QtWidgets.QWidget):
     def __init__(self, jointProperties, parent=None):
         super(Joint_Properties_UI, self).__init__(parent)
         self._jntProp = jointProperties
@@ -16,7 +16,6 @@ class Joint_Properties_UI(QtWidgets.QGroupBox):
 #========== SETUP ===============================
 
     def _Setup(self):
-        self.setTitle('Chain Joint Options')
         vl = QtWidgets.QVBoxLayout(self)
 
         vl.addLayout(self._Setup_AimAxis())

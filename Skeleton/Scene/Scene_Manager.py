@@ -11,19 +11,24 @@ class Scene_Manager():
         self.jntMng = jointManager
         self.nameMng = nameManager
         self.limbsWithJoints = [] # limbID : bool for has Joints
-        
+        self.limbParents = {} # limbID : parentLimbID
+        self.scriptJobs = []
         self.sceneLimbMng = slm.Scene_Limb_Manager(limbManager, jointManager, nameManager)
 
         self.lastDisplaySize = 1
-
+        self._SetupScene()
+    
+    def _SetupScene(self):
         cmds.select(d=1)
         self.rootJntGrp = cmds.group(name='Joint_GRP',em=1)
         self.rootCtrGrp = cmds.group(name='Control_GRP', em=1)
         self.skelLayer = cmds.createDisplayLayer(n='Skel Joints', e=1)
         cmds.setAttr(self.skelLayer + '.displayType', 2)
+        cmds.select(d=1)
+        self.selectionScriptJob = cmds.scriptJob(e=['SelectionChanged', self.SelectionChanged])
         
 
-#======= SETUP / TEARDOWN OF EDITABLE / FINAL ========================
+# ======= SETUP / TEARDOWN OF EDITABLE / FINAL ========================
 
     def Setup_Editable(self):
         limbIDs = self.limbMng.GetLimbIDs()
@@ -45,8 +50,6 @@ class Scene_Manager():
         # MISSING: LISTENERS
 
     def Teardown_Editable(self):
-        limbIDs = list(self.sceneLimbMng.limbJoints.keys())
-       
         for limbID in self.limbsWithJoints:  # LIMB CONTROLS
             self.Teardown_LimbControl(limbID)
        
@@ -112,11 +115,13 @@ class Scene_Manager():
     # JOINT EXTERNAL PARENTS
     def Setup_External_JointParents(self, limbID):
         parentID = self.limbMng.GetParentID(limbID)
+        self.limbParents[limbID] = parentID
         if parentID in self.limbsWithJoints:
             self.sceneLimbMng.Setup_External_JointParents(limbID)
 
     def Teardown_External_JointParents(self, limbID):
-        parentID = self.limbMng.GetParentID(limbID)
+        parentID = self.limbParents[limbID]
+        del(self.limbParents[limbID])
         if parentID in self.limbsWithJoints:
             self.sceneLimbMng.Teardown_External_JointParents(limbID, self.rootJntGrp)
 
@@ -144,12 +149,14 @@ class Scene_Manager():
             self.Setup_External_JointParents(limbID)
             self.Setup_JointControls(limbID)
             self.Setup_LimbControl(limbID)
+            self.Setup_Children_External_JointParents(limbID)
             self._SetDisplaySize()
 
     def Remove_Editable_Limb(self, limbID): # when limb removed or joint count 0
         if limbID in self.limbsWithJoints:
+            self.Teardown_Children_External_JointParents(limbID)
             self.Teardown_LimbControl(limbID)
-            self.sceneLimbMng.Teardown_JointControls(limbID)
+            self.Teardown_JointControls(limbID)
             self.Teardown_External_JointParents(limbID)
             self.Teardown_Internal_JointParents(limbID)
             self.Teardown_Joints(limbID)
@@ -157,17 +164,22 @@ class Scene_Manager():
     def Rebuild_Editable_Limb(self, limbID):
         self.Remove_Editable_Limb(limbID)
         self.Add_Editable_Limb(limbID)
-        for childID, parentID in self.limbMng.GetLimbParentDict().items():
-            if parentID == limbID:
-                self.Reparent_Editable_Limb(childID, parentID)
 
     def Reparent_Editable_Limb(self, limbID, oldParentID):
         if self.jntMng.DoesLimbHaveJoints(limbID):
             if (oldParentID in self.limbsWithJoints):
-                self.sceneLimbMng.Teardown_External_JointParents(limbID)
+                self.Teardown_External_JointParents(limbID)
             newParentID = self.limbMng.GetParentID(limbID)
             if (newParentID in self.limbsWithJoints):
-                self.sceneLimbMng.Setup_External_JointParents(limbID)
+                self.Setup_External_JointParents(limbID)
+
+    def Setup_Children_External_JointParents(self, limbID):
+        for childID in self.limbMng.GetImmediateChildren(limbID):
+            self.Setup_External_JointParents(childID)
+
+    def Teardown_Children_External_JointParents(self, limbID):
+        for childID in self.limbMng.GetImmediateChildren(limbID):
+            self.Teardown_External_JointParents(childID)
 
 
 #======= DISPLAY SIZE : JOINT + CONTROL ===================================
@@ -197,7 +209,47 @@ class Scene_Manager():
     def DeselectAll(self):
         cmds.select(d=1)
 
-#======= MISC  ===================================
+    def SelectionChanged(self):
+        print('selection changed')
+        self.KillScriptJobs()
+        attrs = [   'tx', 'ty', 'tz', 
+                    'rx', 'ry', 'rz', 
+                    'sx', 'sy', 'sz']
+        for sel in cmds.ls(sl=1):
+            for attr in attrs:
+                job = cmds.scriptJob(ac=[sel + '.' + attr, self.SaveChanges])
+                self.scriptJobs.append(job)
+
+    def KillScriptJobs(self):
+        print('killing attr changes script jobs')
+        for job in self.scriptJobs:
+            cmds.scriptJob(kill=job, force=True)
+        self.scriptJobs = []
+
+    def KillSelectionJob(self):
+        print('killing selection script job')
+        cmds.scriptJob(kill=self.selectionScriptJob, force=True)
+
+    def SaveChanges(self):
+        print('saving changes...')
+        limbIDs = set()
+        for sel in cmds.ls(sl=1):
+            try:
+                ID = cmds.getAttr(sel + '.limbID')
+                limbIDs.add(ID)
+            except:
+                print('Save is Skipping: ' + sel)
+        for limbID in list(limbIDs):
+            for jointID in self.jntMng.GetLimbJointIDs(limbID):
+                jointData = self.jntMng.GetJoint(jointID)
+                sceneJoint = self.sceneLimbMng.sceneJoints[jointID]
+                jointData.position = cmds.xform(sceneJoint, q=1, t=1)
+                jointData.rotation = cmds.xform(sceneJoint, q=1, ro=1)
+                print('saving: ' + jointData.name)
+                print('pos: ' + str(jointData.position))
+                print('rot: ' + str(jointData.rotation))
+
+# ======= MISC  ===================================
 
     def MoveToVertsCenter(self):
         sel = cmds.ls(sl=1)

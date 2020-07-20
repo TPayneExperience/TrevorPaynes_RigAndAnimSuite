@@ -9,7 +9,7 @@ class Joint_Data():
 
         self.position = [0,0,0]
         self.rotation = [0,0,0]
-        self.scale = [1,1,1]
+        # self.scale = [1,1,1]
         
 
 

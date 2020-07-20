@@ -59,13 +59,7 @@ class Limb_Manager():
     
     def SetSide(self, limbID, side):
         self._limbSide[limbID] = side
-        # sideIndex = self._limbSidesOptions.index(side)
-        # mirrorSideIndex = 1 if sideIndex == 2 else 2
 
-        # mirrorID = self._limbMirror[limbID]
-        # self._limbSide[limbID] = self._limbSidesOptions[sideIndex]
-        # self._limbSide[mirrorID] = self._limbSidesOptions[mirrorSideIndex]
-        
     def GetSides(self):
         return self._limbSidesOptions
     
@@ -84,7 +78,7 @@ class Limb_Manager():
 
     def GetImmediateChildren(self, limbID):
         childIDs = []
-        for childID, parentID in self.GetLimbParentDict():
+        for childID, parentID in self.GetLimbParentDict().items():
             if (parentID == limbID):
                 childIDs.append(childID)
         return childIDs

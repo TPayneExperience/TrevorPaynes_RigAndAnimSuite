@@ -21,6 +21,9 @@ class Skeleton_UI(QtWidgets.QTabWidget):
         self._Setup()
         self._Setup_Connections()
 
+    def SetMainWindow(self, window):
+        self.mainWindow = window
+
     def Populate(self): # CALLED BY MAIN WINDOW
         self.limbHier_tw.Populate()
         self.limbProp_gb.hide()
@@ -78,7 +81,7 @@ class Skeleton_UI(QtWidgets.QTabWidget):
     def _Setup_Properties(self):
         v_layout = QtWidgets.QVBoxLayout()
 
-        gb = QtWidgets.QGroupBox('Inspector')
+        gb = QtWidgets.QGroupBox('Properties')
         vl = QtWidgets.QVBoxLayout(gb)
 
         self.limbProp_gb = limbProp_UI.Limb_Properties_UI(self.skel.limbProp, self)
@@ -86,9 +89,9 @@ class Skeleton_UI(QtWidgets.QTabWidget):
         self.jntProp_gb = jointProp_UI.Joint_Properties_UI(self.skel.jntProp)
         vl.addWidget(self.jntProp_gb)
         vl.addStretch()
-        vl.addWidget(self._Setup_Properties_Tools())
         
         v_layout.addWidget(gb)
+        v_layout.addWidget(self._Setup_Properties_Tools())
 
         return v_layout
     
@@ -122,6 +125,9 @@ class Skeleton_UI(QtWidgets.QTabWidget):
         self.moveToVertCenter_btn.clicked.connect(self.skel.sceneMng.MoveToVertsCenter)
         self.displaySize_sb.valueChanged.connect(self._UpdateDisplaySize)
 
+    def DisplayLogMsg(self, message):
+        self.mainWindow.statusBar().showMessage(message)
+
 #=========== LIMBS ====================================
 
     def _LimbSelected(self):
@@ -137,8 +143,9 @@ class Skeleton_UI(QtWidgets.QTabWidget):
             self.skel.sceneMng.DeselectAll()
     
     def AddLimb(self, limbID):
-        self.limbHier_tw.Populate()
+        self.limbHier_tw.Populate(limbID)
         self.skel.sceneMng.Add_Editable_Limb(limbID)
+        self._LimbSelected()
         self._UpdateJointCountLabel()
 
     def RemoveLimb(self, limbID):
@@ -147,6 +154,10 @@ class Skeleton_UI(QtWidgets.QTabWidget):
 
     def ReparentLimb(self, limbID, oldParentID):
         self.skel.sceneMng.Reparent_Editable_Limb(limbID, oldParentID)
+
+    def LimbParentJointChanged(self, limbID):
+        self.skel.sceneMng.Teardown_External_JointParents(limbID)
+        self.skel.sceneMng.Setup_External_JointParents(limbID)
 
     def RenameLimb(self, limbID):
         self.skel.sceneMng.sceneLimbMng.RenameLimb(limbID)
@@ -175,10 +186,11 @@ class Skeleton_UI(QtWidgets.QTabWidget):
 
         self.limbHier_tw.Populate()
 
-    def Mirror(self): # called by limb hier UI
+    def Mirror(self, limbID): # called by limb hier UI
+        self.limbProp_gb.SetLimb(limbID)
         self.limbProp_gb.Populate()
 
-#=========== JOINTS ====================================
+#=========== MANIPULATE JOINTS ====================================
 
     def _JointSelected(self):
         jointIDs = [item.ID for item in self.jntHier_lw.selectedItems()]
@@ -216,41 +228,48 @@ class Skeleton_UI(QtWidgets.QTabWidget):
             amount = newJointCount - oldJointCount
             self.AddJoints(limbID, amount)
 
+    def _UpdateJointWidgets(self, limbID):
+        self.jntHier_lw.Populate()
+        self.limbProp_gb.Populate()
+        self._UpdateJointCountLabel()
+
+
+#=========== ADD + REMOVE JOINTS ====================================
+
     def RemoveJoints(self, limbID, removeJointIDs):
         mirrorID = self.skel.limbMng.GetMirror(limbID)
         if (mirrorID != -1):
             mirrorJointIDs = [self.skel.jntMng.GetMirrorJoint(ID) for ID in removeJointIDs]
-            self.skel.jntMng.Remove(mirrorID, mirrorJointIDs)
-            if (self.skel.jntMng.DoesLimbHaveJoints(mirrorID)):
-                self.skel.sceneMng.Rebuild_Editable_Limb(mirrorID)
-            else:
-                self.skel.sceneMng.Remove_Editable_Limb(mirrorID)
-
+            self._RemoveJoints(mirrorID, mirrorJointIDs)
+        self._RemoveJoints(limbID, removeJointIDs)
+        self._UpdateJointWidgets(limbID)
+    
+    def _RemoveJoints(self, limbID, removeJointIDs):
         self.skel.jntMng.Remove(limbID, removeJointIDs)
         if (self.skel.jntMng.DoesLimbHaveJoints(limbID)):
             self.skel.sceneMng.Rebuild_Editable_Limb(limbID)
         else:
+            for childID in self.skel.limbMng.GetImmediateChildren(limbID):
+                self.skel.jntMng.SetParentJointId(childID, -1)
             self.skel.sceneMng.Remove_Editable_Limb(limbID)
-        self._UpdateJointWidgets(limbID)
 
     def AddJoints(self, limbID, count):
         hadJoints = self.skel.jntMng.DoesLimbHaveJoints(limbID)
         mirrorID = self.skel.limbMng.GetMirror(limbID)
         self.skel.jntMng.Add(limbID, mirrorID, count)
-        if not hadJoints:
-            self.skel.sceneMng.Add_Editable_Limb(limbID)
-            if (mirrorID != -1):
-                self.skel.sceneMng.Add_Editable_Limb(mirrorID)
-        else:
-            self.skel.sceneMng.Rebuild_Editable_Limb(limbID)
-            if (mirrorID != -1):
-                self.skel.sceneMng.Rebuild_Editable_Limb(mirrorID)
+        self._AddJoints(hadJoints, limbID, count)
+        if (mirrorID != -1):
+            self._AddJoints(hadJoints, mirrorID, count)
         self._UpdateJointWidgets(limbID)
 
-    def _UpdateJointWidgets(self, limbID):
-        self.jntHier_lw.Populate()
-        self.limbProp_gb.Populate()
-        self._UpdateJointCountLabel()
+    def _AddJoints(self, hadJoints, limbID, count):
+        if hadJoints:
+            self.skel.sceneMng.Rebuild_Editable_Limb(limbID)
+        else:
+            jointID = self.skel.jntMng.GetLimbJointIDs(limbID)[0]
+            for childID in self.skel.limbMng.GetImmediateChildren(limbID):
+                self.skel.jntMng.SetParentJointId(childID, jointID)
+            self.skel.sceneMng.Add_Editable_Limb(limbID)
 
 #=========== DISPLAY SIZE ====================================
 

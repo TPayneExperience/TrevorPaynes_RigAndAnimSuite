@@ -1,9 +1,10 @@
 
 
 class Joint_Hierarchy():
-    def __init__(self, limbManager, jointManager):
+    def __init__(self, limbManager, jointManager, nameManager):
         self.limbMng = limbManager
         self.jntMng = jointManager
+        self.nameMng = nameManager # For ui
         self._jointIDs = []
         self.limbID = -1
 

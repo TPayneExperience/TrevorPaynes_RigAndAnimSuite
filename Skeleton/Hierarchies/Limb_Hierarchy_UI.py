@@ -15,9 +15,8 @@ class Limb_Hierarchy_UI(QtWidgets.QTreeWidget):
         self._Setup()
         self._Setup_Connections()
 
-    def Populate(self):
+    def Populate(self, selectedID = -1):
         selectemItem = None
-        selectedID = -1
         items = self.selectedItems()
         if (items):
             selectedID = items[0].ID
@@ -159,26 +158,44 @@ class Limb_Hierarchy_UI(QtWidgets.QTreeWidget):
 
     def _Remove(self):
         '''Remove children then remove this limb'''
-        # MISSING WARNING CONFIRMATION DIALOG
         ID = self.currentItem().ID
-        limbIDs = self.limbHier.limbMng.GetLimbCreationOrder(ID)
-        for limbID in limbIDs[::-1]:
-            mirrorID = self.limbHier.limbMng.GetMirror(limbID)
-            self.limbHier.Remove(limbID)
-            self.parent.RemoveLimb(limbID)
-            if (mirrorID != -1):
-                self.parent.RenameLimb(mirrorID)
-        self.Populate()
+        name = self.limbHier.limbMng.GetName(ID)
+        result = QtWidgets.QMessageBox.warning(self, 
+                            'REMOVE LIMBS',
+                            'Are you sure you want to remove limb "' + name + '"?',
+                            QtWidgets.QMessageBox.Cancel, 
+                            QtWidgets.QMessageBox.Ok
+                            )
+        if (result==QtWidgets.QMessageBox.Ok):
+            limbIDs = self.limbHier.limbMng.GetLimbCreationOrder(ID)
+            for limbID in limbIDs[::-1]:
+                mirrorID = self.limbHier.limbMng.GetMirror(limbID)
+                self.limbHier.Remove(limbID)
+                self.parent.RemoveLimb(limbID)
+                if (mirrorID != -1):
+                    self.parent.RenameLimb(mirrorID)
+            self.Populate()
 
     def _Rename(self, item):
         if not self._isPopulating:
             limbID = item.ID
-            self.limbHier.limbMng.SetLimbName(limbID, item.text(0))
-            self.parent.RenameLimb(limbID)
-            mirrorID = self.limbHier.limbMng.GetMirror(limbID)
-            if (mirrorID != -1):
-                self.parent.RenameLimb(mirrorID)
-                self.Populate()
+            newName = item.text(0)
+            valid = False
+            if self.limbHier.nameMng.IsValidCharacterLength(newName):
+                if self.limbHier.nameMng.DoesNotStartWithNumber(newName):
+                    if self.limbHier.nameMng.AreAllValidCharacters(newName):
+                        self.limbHier.limbMng.SetLimbName(limbID, newName)
+                        self.parent.RenameLimb(limbID)
+                        mirrorID = self.limbHier.limbMng.GetMirror(limbID)
+                        if (mirrorID != -1):
+                            self.parent.RenameLimb(mirrorID)
+                            self.Populate()
+                        valid = True
+            if not valid:
+                self._isPopulating = True
+                item.setText(0, self.limbHier.limbMng.GetName(limbID))
+                self.parent.DisplayLogMsg(self.limbHier.nameMng.errorMsg)
+                self._isPopulating = False
 
 
     def _Reparent(self):
@@ -198,10 +215,8 @@ class Limb_Hierarchy_UI(QtWidgets.QTreeWidget):
                     break
 
     def _Duplicate(self):
-        newLimbIDs = self.limbHier.Duplicate(self.currentItem().ID)
-        for limbID in newLimbIDs:
+        for limbID in self.limbHier.Duplicate(self.currentItem().ID):
             self.parent.AddLimb(limbID)
-        # self.parent.RebuildHierarchy()
 
     def _Mirror_X(self):
         self._Mirror('X')
@@ -214,12 +229,11 @@ class Limb_Hierarchy_UI(QtWidgets.QTreeWidget):
     
     def _Mirror(self, axis):
         limbID = self.currentItem().ID
-        limbMirrorDict = self.limbHier.Mirror(limbID, axis) 
-        self.limbHier.limbMng.SetLimbMirrorRoot(limbID)
-        for ID_01, ID_02 in limbMirrorDict.items():
+        for ID_01, ID_02 in self.limbHier.Mirror(limbID, axis):
             self.parent.AddLimb(ID_02)
             self.parent.RenameLimb(ID_01)
-        self.parent.Mirror()
+        self.limbHier.limbMng.SetLimbMirrorRoot(limbID)
+        self.parent.Mirror(limbID)
         
     
 
