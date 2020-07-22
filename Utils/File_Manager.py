@@ -3,8 +3,7 @@ import os
 import time
 
 class File_Manager():
-    def __init__(self, templateFolderPath):
-        self._templatePath = templateFolderPath
+    def __init__(self):
         self._buildFolderPath = ''
         self._customTemplatePath = ''
         self._meshPath = ''
@@ -20,7 +19,12 @@ class File_Manager():
         self._appearanceCustomTemplates = {}
         self._skinningTemplates = {}
 
+        path = os.path.dirname(__file__)
+        path = os.path.dirname(path)
+        self._templatePath = os.path.join(path, 'Templates')
+
 #========== ACCESSORS + MUTATORS ==================================
+
     def SetCustomTemplatePath(self, path):
         self._customTemplatePath = path
     

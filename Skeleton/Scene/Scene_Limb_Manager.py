@@ -4,10 +4,12 @@ from maya import cmds
 import Scene_Limb_Chain as cl
 import Scene_Limb_Branch as bl
 import Scene_Limb_LinearChain as lcl
+import Scene_Limb_LinearBranch as lbl
 
 reload(cl)
 reload(bl)
 reload(lcl)
+reload(lbl)
 
 
 class Scene_Limb_Manager():
@@ -26,7 +28,8 @@ class Scene_Limb_Manager():
         self.limbBuildTypes = { 
             self.limbMng.GetTypes()[0]: cl.Scene_Limb_Chain(self),
             self.limbMng.GetTypes()[1]: bl.Scene_Limb_Branch(self),
-            self.limbMng.GetTypes()[2]: lcl.Scene_Limb_LinearChain(self)
+            self.limbMng.GetTypes()[2]: lcl.Scene_Limb_LinearChain(self),
+            self.limbMng.GetTypes()[3]: lbl.Scene_Limb_LinearBranch(self)
             }
 
 #======= SETUP + TEARDOWNS ===================================

@@ -1,10 +1,14 @@
 
 from maya import cmds
 
-class Scene_Limb_Branch():
+class Scene_Limb_LinearBranch():
     def __init__(self, sceneManager):
         self.sceneMng = sceneManager
-        self.type = self.sceneMng.limbMng.GetTypes()[1] # 'Branch'
+        self.type = self.sceneMng.limbMng.GetTypes()[3] # 'Linear Branch'
+        self.lockAttrs = [  'tx', 'ty', 'tz',
+                            'rx', 'ry', 'rz',
+                            'sx', 'sy', 'sz',
+                            'v']
 
 #========== JOINTS ========================
 
@@ -14,7 +18,7 @@ class Scene_Limb_Branch():
 
     def Teardown_Internal_JointParents(self, oldJntIDs, sceneJoints, jntGrp):
         pass
-
+    
     # EXTERNAL PARENTS
     def Setup_External_JointParents(self, limbID, sceneJoints):
         jointIDs = self.sceneMng.jntMng.GetLimbJointIDs(limbID)
@@ -38,6 +42,18 @@ class Scene_Limb_Branch():
             cmds.parentConstraint(ctr, sceneJoints[jointID])
             jntCtrDict[jointID] = ctr
             ctrs.append(ctr)
+        jointCount = len(jointIDs)
+        for i in range(1, jointCount-1):
+            ctr = ctrs[i]
+            lerp = float(i) / max(1, (jointCount-1))
+            cmds.parentConstraint(ctrs[0], ctrs[-1], ctr)
+            cmds.parentConstraint(ctrs[0], ctr, e=1, w=(1-lerp))
+            cmds.parentConstraint(ctrs[-1], ctr, e=1, w=lerp)
+            # LOCK + HIDE ATTRS + CTR
+            cmds.setAttr(ctr + '.v', 0)
+            for attr in self.lockAttrs:
+                cmds.setAttr(ctr + '.' + attr, l=1, k=0)
+        
         return ctrs
 
     def Teardown_JointControls(self, oldJntIDs, jntCtrDict):

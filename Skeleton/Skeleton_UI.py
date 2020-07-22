@@ -28,6 +28,7 @@ class Skeleton_UI(QtWidgets.QTabWidget):
         self.limbHier_tw.Populate()
         self.limbProp_gb.hide()
         self.jntProp_gb.hide()
+        self.skel.sceneMng.Teardown_Editable()
         self.skel.sceneMng.Setup_Editable()
         self._UpdateJointCountLabel()
     
@@ -240,12 +241,20 @@ class Skeleton_UI(QtWidgets.QTabWidget):
 #=========== ADD + REMOVE JOINTS ====================================
 
     def RemoveJoints(self, limbID, removeJointIDs):
-        mirrorID = self.skel.limbMng.GetMirror(limbID)
-        if (mirrorID != -1):
-            mirrorJointIDs = [self.skel.jntMng.GetMirrorJoint(ID) for ID in removeJointIDs]
-            self._RemoveJoints(mirrorID, mirrorJointIDs)
-        self._RemoveJoints(limbID, removeJointIDs)
-        self._UpdateJointWidgets(limbID)
+        count = len(removeJointIDs)
+        result = QtWidgets.QMessageBox.warning(self, 
+                            'REMOVE LIMBS',
+                            'Are you sure you want to remove %d joints?' % count,
+                            QtWidgets.QMessageBox.Cancel, 
+                            QtWidgets.QMessageBox.Ok
+                            )
+        if (result==QtWidgets.QMessageBox.Ok):
+            mirrorID = self.skel.limbMng.GetMirror(limbID)
+            if (mirrorID != -1):
+                mirrorJointIDs = [self.skel.jntMng.GetMirrorJoint(ID) for ID in removeJointIDs]
+                self._RemoveJoints(mirrorID, mirrorJointIDs)
+            self._RemoveJoints(limbID, removeJointIDs)
+            self._UpdateJointWidgets(limbID)
     
     def _RemoveJoints(self, limbID, removeJointIDs):
         self.skel.jntMng.Remove(limbID, removeJointIDs)

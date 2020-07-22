@@ -71,9 +71,9 @@ class Limb_Hierarchy_UI(QtWidgets.QTreeWidget):
         path = os.path.dirname(__file__)
         path = os.path.dirname(path)
         path = os.path.dirname(path)
-        self.l_icon = QtGui.QIcon(os.path.join(path, 'Images/Skel_L.png'))
-        self.r_icon =  QtGui.QIcon(os.path.join(path, 'Images/Skel_R.png'))
-        self.m_icon =  QtGui.QIcon(os.path.join(path, 'Images/Skel_M.png'))
+        self.l_icon = QtGui.QIcon(os.path.join(path, 'Images', 'Skel_L.png'))
+        self.r_icon =  QtGui.QIcon(os.path.join(path, 'Images', 'Skel_R.png'))
+        self.m_icon =  QtGui.QIcon(os.path.join(path, 'Images', 'Skel_M.png'))
 
         self.setAlternatingRowColors(True)
         self.setDragDropMode(self.InternalMove)

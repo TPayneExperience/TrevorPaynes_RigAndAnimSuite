@@ -5,8 +5,8 @@ reload(jd)
 
 class Joint_Manager():
     def __init__(self):
-        self._nextJointID = 0
-        self._joints = {} # ID: jointData
+        self._nextJointID = 1
+        self._joints = {} # jointID: jointData
         self._limbJoints = {} # limbID: jointIdList (was jointIDs)
         self._limbParentJoint = {} # limbID: parentJointID (was parentJointID)
         self._limbNextJointIndex = {} # limbID: nextJointIndex (was nextJointName)
@@ -24,9 +24,11 @@ class Joint_Manager():
 #============= ACCESSORS + MUTATORS ============================
 
     def GetJoint(self, ID):
+        '''AVOID USING!'''
         return self._joints[ID]
 
     def GetJoints(self, idList):
+        '''AVOID USING!'''
         return [self._joints[ID] for ID in idList]
 
     # GET AXES FOR COMBOBOXES
@@ -48,7 +50,7 @@ class Joint_Manager():
     # LIMB JOINT IDS
     def GetLimbJointIDs(self, limbID):
         return self._limbJoints[limbID]
-
+    
     def SetLimbJointIDs(self, limbID, mirrorLimbID, jointIDs):
         self._limbJoints[limbID] = jointIDs
         if (mirrorLimbID != -1):
@@ -71,6 +73,12 @@ class Joint_Manager():
                 self.SetParentJointId(childLimbID, parentJointIDs[0])
 
     # MISC
+    def GetAllJointIDs(self):        
+        return list(self._joints.keys())
+
+    def GetName(self, jointID):
+        return self._joints[jointID].name
+
     def SetName(self, limbID, jointID, newName):
         ids = self.GetLimbJointIDs(limbID)
         names = [joint.name for joint in self.GetJoints(ids)]

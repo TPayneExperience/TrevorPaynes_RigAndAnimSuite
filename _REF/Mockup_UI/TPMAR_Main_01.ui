@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Trevor Payne Free Rig &amp; Anim Suite</string>
+   <string>Payne Free Rig Suite - by Trevor Payne</string>
   </property>
   <property name="toolTip">
    <string/>
@@ -947,7 +947,7 @@
                       <enum>QAbstractItemView::SingleSelection</enum>
                      </property>
                      <property name="autoExpandDelay">
-                      <number>-1</number>
+                      <number>0</number>
                      </property>
                      <property name="indentation">
                       <number>10</number>
@@ -962,15 +962,15 @@
                      </column>
                      <item>
                       <property name="text">
-                       <string>Root</string>
+                       <string>Root_M [FK]</string>
                       </property>
                       <item>
                        <property name="text">
-                        <string>Spine</string>
+                        <string>Spine_M [FK/IKS]</string>
                        </property>
                        <item>
                         <property name="text">
-                         <string>Arm (M)</string>
+                         <string>Arm_M [FK/IKS/IKR]</string>
                         </property>
                         <item>
                          <property name="text">

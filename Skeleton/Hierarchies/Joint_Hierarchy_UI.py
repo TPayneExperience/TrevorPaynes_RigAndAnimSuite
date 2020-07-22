@@ -64,15 +64,7 @@ class Joint_Hierarchy_UI(QtWidgets.QListWidget):
     
     def _Remove(self):
         jointIDs = [item.ID for item in self.selectedItems()]
-        count = len(jointIDs)
-        result = QtWidgets.QMessageBox.warning(self, 
-                            'REMOVE LIMBS',
-                            'Are you sure you want to remove %d joints?' % count,
-                            QtWidgets.QMessageBox.Cancel, 
-                            QtWidgets.QMessageBox.Ok
-                            )
-        if (result==QtWidgets.QMessageBox.Ok):
-            self.parent.RemoveJoints(self.jntHier.limbID, jointIDs)
+        self.parent.RemoveJoints(self.jntHier.limbID, jointIDs)
 
     def _Rename(self, item):
         if not self._isPopulating:

@@ -47,6 +47,7 @@ class Scene_Manager():
         for limbID in self.limbsWithJoints: # LIMB CONTROLS
             self.Setup_LimbControl(limbID)
         
+        self.UpdateDisplaySize()
         # MISSING: LISTENERS
 
     def Teardown_Editable(self):
@@ -150,7 +151,7 @@ class Scene_Manager():
             self.Setup_JointControls(limbID)
             self.Setup_LimbControl(limbID)
             self.Setup_Children_External_JointParents(limbID)
-            self._SetDisplaySize()
+            self.UpdateDisplaySize()
 
     def Remove_Editable_Limb(self, limbID): # when limb removed or joint count 0
         if limbID in self.limbsWithJoints:
@@ -186,9 +187,9 @@ class Scene_Manager():
 
     def SetDisplaySize(self, size):
         self.lastDisplaySize = size
-        self._SetDisplaySize()
+        self.UpdateDisplaySize()
 
-    def _SetDisplaySize(self):
+    def UpdateDisplaySize(self):
         size = self.lastDisplaySize
         for joint in list(self.sceneLimbMng.sceneJoints.values()):
             cmds.joint(joint, e=1, rad=size)
