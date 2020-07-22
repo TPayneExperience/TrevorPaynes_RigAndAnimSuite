@@ -25,7 +25,6 @@ __version__ = '0.1'
 class TPRigAndAnimSuite_UI_MainWindow(QtWidgets.QMainWindow):
     def __init__(self, parent=None):
         super(TPRigAndAnimSuite_UI_MainWindow, self).__init__(parent)
-        print (333)
         self._Setup()
 
     def _Setup(self):
@@ -97,18 +96,14 @@ class TPRigAndAnimSuite_UI_Widget(QtWidgets.QWidget):
         self.load_btn.clicked.connect(self.Load)
 
     def Save(self):
-        print('Saving...')
         testPath = os.path.join(self.fileMng._templatePath, 'test.json')
-        print(testPath)
-        data = self.skel_ui.skel.saveLoadMng.GetData()
+        data = self.skel_ui.skel.saveLoadSkel.GetAllData()
         self.jsonMng.Save(testPath, data)
 
     def Load(self):
-        print('Loading...')
         testPath = os.path.join(self.fileMng._templatePath, 'test.json')
-        print(testPath)
         data = self.jsonMng.Load(testPath)
-        self.skel_ui.skel.saveLoadMng.LoadData(data)
+        self.skel_ui.skel.saveLoadSkel.LoadData(data)
         self.Populate()
 
     def Populate(self):

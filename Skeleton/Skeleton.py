@@ -1,10 +1,10 @@
 
 import Data.Joint_Manager as jm
 import Data.Limb_Manager as lm
-import Data.SaveLoad_Manager as slm
+import Data.SaveLoad_Skeleton as sls
 reload(jm)
 reload(lm)
-reload(slm)
+reload(sls)
 
 import Properties.Joint_Properties as jp
 import Properties.Limb_Properties as lp
@@ -31,7 +31,7 @@ class Skeleton():
         self.jntHier = jh.Joint_Hierarchy(self.limbMng, self.jntMng, nameManager)
         self.limbHier = lh.Limb_Hierarchy(self.limbMng,self.jntMng, nameManager)
         self.sceneMng = sm.Scene_Manager(self.limbMng, self.jntMng, nameManager)
-        self.saveLoadMng = slm.SaveLoad_Manager(self.limbMng, self.jntMng)
+        self.saveLoadSkel = sls.SaveLoad_Skeleton(self.limbMng, self.jntMng)
 
 
 

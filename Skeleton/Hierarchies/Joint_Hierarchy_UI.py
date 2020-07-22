@@ -9,6 +9,8 @@ class Joint_Hierarchy_UI(QtWidgets.QListWidget):
         self.parent = parent
         self.jntHier = jointHierarchy
         self._isPopulating = False
+        self._lastItemEdited = -1 # jointID
+
         self._Setup()
         self._Setup_Connections()
 
@@ -50,6 +52,9 @@ class Joint_Hierarchy_UI(QtWidgets.QListWidget):
     def eventFilter(self, sender, event):
         if (event.type() == QtCore.QEvent.ChildRemoved):
             self._Reorder()
+        elif (event.type() == QtCore.QEvent.KeyPress and event.key() == QtCore.Qt.Key_Tab):
+            self._TabPressed()
+            return True
         return False
     
     def _Setup_Connections(self):
@@ -88,7 +93,16 @@ class Joint_Hierarchy_UI(QtWidgets.QListWidget):
             self.jntHier.jntMng.SetLimbJointIDs(limbID, mirrorID, ids)
             self.parent.ReorderJoints()
     
-
+    def _TabPressed(self):
+        item = self.currentItem()
+        if (item):
+            row = self.currentRow()
+            if (item.ID == self._lastItemEdited):
+                row = (row + 1) % self.count()
+            index = (self.model().index(row))
+            self.edit(index)
+            self._lastItemEdited = item.ID
+        
 
 
 

@@ -31,6 +31,12 @@ class Joint_Manager():
         '''AVOID USING!'''
         return [self._joints[ID] for ID in idList]
 
+    def GetNextJointIndex(self, limbID):
+        return self._limbNextJointIndex[limbID]
+
+    def SetNextJointIndex(self, limbID, index):
+        self._limbNextJointIndex[limbID] = index
+
     # GET AXES FOR COMBOBOXES
     def GetAxes(self):
         return self._axes
@@ -93,6 +99,9 @@ class Joint_Manager():
 
     def GetMirrorJoint(self, jointID):
         return self._mirrorJoints[jointID]
+
+    def SetMirrorJoint(self, jointID_01, jointID_02):
+        self._mirrorJoints[jointID_01] = jointID_02
 
 #============= FUNCTIONALITY ============================
 

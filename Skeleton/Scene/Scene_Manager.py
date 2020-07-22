@@ -194,7 +194,6 @@ class Scene_Manager():
         for joint in list(self.sceneLimbMng.sceneJoints.values()):
             cmds.joint(joint, e=1, rad=size)
         for ctr in list(self.sceneLimbMng.limbCtrs.values()):
-            #cmds.xform(ctr, s=[size, size, size])
             cmds.circle(ctr, e=1, r=size*5)
         for ctr in list(self.sceneLimbMng.jointCtrs.values()):
             cmds.xform(ctr, s=[size, size, size])
@@ -214,7 +213,6 @@ class Scene_Manager():
 #======= SCRIPT JOBS ===================================
 
     def SelectionChanged(self):
-        print('selection changed')
         self.KillScriptJobs()
         attrs = [   'tx', 'ty', 'tz', 
                     'rx', 'ry', 'rz', 
@@ -225,17 +223,14 @@ class Scene_Manager():
                 self.scriptJobs.append(job)
 
     def KillScriptJobs(self):
-        print('killing attr changes script jobs')
         for job in self.scriptJobs:
             cmds.scriptJob(kill=job, force=True)
         self.scriptJobs = []
 
     def KillSelectionJob(self):
-        print('killing selection script job')
         cmds.scriptJob(kill=self.selectionScriptJob, force=True)
 
     def SaveChanges(self):
-        print('saving changes...')
         limbIDs = set()
         for sel in cmds.ls(sl=1):
             try:
@@ -249,9 +244,6 @@ class Scene_Manager():
                 sceneJoint = self.sceneLimbMng.sceneJoints[jointID]
                 jointData.position = cmds.xform(sceneJoint, q=1, t=1, ws=1)
                 jointData.rotation = cmds.xform(sceneJoint, q=1, ro=1, ws=1)
-                print('saving: ' + jointData.name)
-                print('pos: ' + str(jointData.position))
-                print('rot: ' + str(jointData.rotation))
 
 # ======= MISC  ===================================
 

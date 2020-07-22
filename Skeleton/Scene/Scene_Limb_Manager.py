@@ -42,7 +42,6 @@ class Scene_Limb_Manager():
             cmds.select(d=1)
             jointData = self.jntMng.GetJoint(ID)
             name = self.GetJointName(limbID, ID)
-            print ('creating joint at: ' + str(jointData.position))
             jnt = cmds.joint(   name=name, 
                                 position=jointData.position, 
                                 orientation=jointData.rotation, 

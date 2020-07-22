@@ -12,6 +12,8 @@ class Limb_Hierarchy_UI(QtWidgets.QTreeWidget):
         self.limbHier = limbHierarchy
         self._items = {} # ID : Item
         self._isPopulating = False
+        self._lastItemEdited = -1
+
         self._Setup()
         self._Setup_Connections()
 
@@ -235,9 +237,6 @@ class Limb_Hierarchy_UI(QtWidgets.QTreeWidget):
         self.limbHier.limbMng.SetLimbMirrorRoot(limbID)
         self.parent.Mirror(limbID)
         
-    
-
-
 
 
 
