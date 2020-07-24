@@ -6,16 +6,25 @@ import Qt
 from Qt import QtWidgets, QtCore, QtGui
 
 import RigAndAnim_Manager as rig
+reload(rig)
+
 import Skeleton.Skeleton_UI as skel_ui
+reload(skel_ui)
+
 import RigSetup.RigSetup_UI as rs_ui
+reload(rs_ui)
+
 import Utils.File_Manager as fm
 import Utils.Json_Manager as js
-
-reload(rig)
-reload(skel_ui)
-reload(rs_ui)
 reload(fm)
 reload(js)
+
+import SaveLoad.SaveLoad_Manager as slm
+import SaveLoad.Save_Manager_UI as smUI
+import SaveLoad.Load_Manager_UI as lmUI
+reload(slm)
+reload(smUI)
+reload(lmUI)
 
 
 __author__ = 'Trevor Payne'
@@ -61,6 +70,12 @@ class TPRigAndAnimSuite_UI_Widget(QtWidgets.QWidget):
         self.rigMng = rig.RigAndAnim_Manager()
         self.fileMng = fm.File_Manager()
         self.jsonMng = js.Json_Manager()
+        self.saveLoadMng = slm.SaveLoad_Manager(
+                                self.jsonMng,
+                                self.rigMng.skel.saveLoadSkel,
+                                None,
+                                None, 
+                                None)
 
         self._Setup()
         self._Setup_Connections()
@@ -96,14 +111,22 @@ class TPRigAndAnimSuite_UI_Widget(QtWidgets.QWidget):
         self.load_btn.clicked.connect(self.Load)
 
     def Save(self):
-        testPath = os.path.join(self.fileMng._templatePath, 'test.json')
-        data = self.skel_ui.skel.saveLoadSkel.GetAllData()
-        self.jsonMng.Save(testPath, data)
+        saveDialog = smUI.Save_Manager_UI(  self.fileMng, 
+                                            self.saveLoadMng,
+                                            self)
+        saveDialog.exec_()
+        # testPath = os.path.join(self.fileMng._templatePath, 'test.json')
+        # data = self.skel_ui.skel.saveLoadSkel.GetAllData()
+        # self.jsonMng.Save(testPath, data)
 
     def Load(self):
-        testPath = os.path.join(self.fileMng._templatePath, 'test.json')
-        data = self.jsonMng.Load(testPath)
-        self.skel_ui.skel.saveLoadSkel.LoadData(data)
+        # testPath = os.path.join(self.fileMng._templatePath, 'test.json')
+        # data = self.jsonMng.Load(testPath)
+        # self.skel_ui.skel.saveLoadSkel.LoadData(data)
+        loadDialog = lmUI.Load_Manager_UI(  self.fileMng, 
+                                            self.saveLoadMng,
+                                            self)
+        loadDialog.exec_()
         self.Populate()
 
     def Populate(self):

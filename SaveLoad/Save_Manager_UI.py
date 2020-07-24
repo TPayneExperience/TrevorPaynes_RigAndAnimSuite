@@ -5,8 +5,11 @@ import sys
 from Qt import QtWidgets, QtCore, QtGui
 
 class Save_Manager_UI(QtWidgets.QDialog):
-    def __init__(self, parent=None):
+    def __init__(self, fileMng, saveLoadMng, parent=None):
         super(Save_Manager_UI, self).__init__(parent)
+
+        self.fileMng = fileMng
+        self.saveLoadMng = saveLoadMng
 
         self._Setup()
         self._Setup_Connections()
@@ -77,57 +80,27 @@ class Save_Manager_UI(QtWidgets.QDialog):
         bhv = self.bhv_cb.isChecked()
         app = self.app_cb.isChecked()
         skin = self.skin_cb.isChecked()
-
+        
+        self.folderPath_l.setText(self.fileMng.GetBuildFolderPath())
         pathValid = os.path.isdir(self.folderPath_l.text())
         cbValid = any([skel, bhv, app, skin])
 
         self.save_btn.setEnabled(pathValid and cbValid)
     
     def _Save(self):
+        self.fileMng.InitBuildFilesInfo()
+        if self.skel_cb.isChecked():
+            skelPath = self.fileMng.GetNextSkeletonBuildPath('Test')
+            self.saveLoadMng.Save_Skeleton(skelPath)
+
         self.accept()
 
     def _NavigateToFolder(self):
         filePath = QtWidgets.QFileDialog.getExistingDirectory(self, 
                                                 'Select Save Folder')
         if (os.path.isdir(filePath)):
-            self.folderPath_l.setText(filePath)
+            self.fileMng.SetBuildFolderPath(filePath)
         self._Update_SaveBtn()
-
-
-
-if __name__ == '__main__':
-    app = QtWidgets.QApplication(sys.argv)
-    
-    ex = Save_Manager_UI()
-    ex.show()
-    sys.exit(app.exec_())
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

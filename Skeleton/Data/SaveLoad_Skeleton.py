@@ -60,33 +60,6 @@ class SaveLoad_Skeleton():
         data['Limb Data'] = limbData
         return data
 
-
-    # def GetData(self):
-    #     data = {}
-
-    # # JOINT ------------------------------
-    #     jointData = {}
-    #     jointData['Joints'] = {}
-    #     for jointID in self.jntMng.GetAllJointIDs():
-    #         jointData['Joints'][jointID] = self.jntMng.GetJoint(jointID).__dict__
-    #     jointData['Limb Joints'] = self.jntMng._limbJoints
-    #     jointData['Limb Parent Joint'] = self.jntMng._limbParentJoint
-    #     jointData['Limb Next Joint Index'] = self.jntMng._limbNextJointIndex
-    #     jointData['Mirror Joints'] = self.jntMng._mirrorJoints
-
-    # # LIMB ------------------------------
-    #     limbData = {}
-    #     limbData['Limb Name'] = self.limbMng._limbName
-    #     limbData['Limb Type'] = self.limbMng._limbType
-    #     limbData['Limb Side'] = self.limbMng._limbSide
-    #     limbData['Limb Parent'] = self.limbMng._limbParent
-    #     limbData['Limb Mirror'] = self.limbMng._limbMirror
-    #     limbData['Limb Mirror Roots'] = self.limbMng._limbMirrorRoots
-
-    #     data['Joint Data'] = jointData
-    #     data['Limb Data'] = limbData
-    #     return data
-
     def LoadData(self, data):
         nextJointID = self.jntMng._nextJointID
         nextLimbID = self.limbMng._nextLimbID
