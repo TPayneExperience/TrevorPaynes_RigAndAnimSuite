@@ -7,14 +7,18 @@ class SaveLoad_Skeleton():
     def __init__(self, limbManager, jointManager):
         self.limbMng = limbManager
         self.jntMng = jointManager
+        self.saveLoadMng = None     # set in the managers constructor
     
+    def SetSaveLoadManager(self, saveLoadMng):
+        self.saveLoadMng = saveLoadMng
+
     def GetAllData(self):
         limbIDs = self.limbMng.GetLimbIDs()
         return self.GetData(limbIDs, True)
 
     def GetData(self, limbIDs, saveMirrorData=False):
         data = {}
-
+    
     # JOINT ------------------------------
         jointData = {}
         jointData['Joints'] = {}

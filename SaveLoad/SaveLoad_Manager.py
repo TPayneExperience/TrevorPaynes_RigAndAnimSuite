@@ -9,6 +9,7 @@ class SaveLoad_Manager():
                 saveLoadSkin):
         self.jsonMng = jsonMng
         self.saveLoadSkel = saveLoadSkel
+        self.saveLoadSkel.SetSaveLoadManager(self)
         self.saveLoadBhv = saveLoadBhv
         self.saveLoadApp = saveLoadApp
         self.saveLoadSkin = saveLoadSkin

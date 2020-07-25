@@ -27,6 +27,7 @@ class Joint_Hierarchy_UI(QtWidgets.QListWidget):
             item = QtWidgets.QListWidgetItem(self)
             item.ID = j.ID
             item.setText(j.name)
+            item.isJoint = True # used by limb hier to prevent adding
             item.setFlags(item.flags() | QtCore.Qt.ItemIsEditable)
             self.addItem(item)
         self._isPopulating = False

@@ -36,6 +36,8 @@ class TPRigAndAnimSuite_UI_MainWindow(QtWidgets.QMainWindow):
         super(TPRigAndAnimSuite_UI_MainWindow, self).__init__(parent)
         self._Setup()
 
+#=========== SETUP ====================================
+
     def _Setup(self):
         self.toolUI = TPRigAndAnimSuite_UI_Widget(self)
         self.setCentralWidget(self.toolUI)
@@ -48,28 +50,53 @@ class TPRigAndAnimSuite_UI_MainWindow(QtWidgets.QMainWindow):
         mb = self.menuBar()
         fileMenu = mb.addMenu('File')
         newRigAct = fileMenu.addAction('New Rig...')
-        newRigAct = fileMenu.addAction('Open Rig...')
-        newRigAct = fileMenu.addAction('Rig Settings...')
+        openRigAct = fileMenu.addAction('Open Rig...')
+        rigSettings = fileMenu.addAction('Rig Settings...')
 
         fileMenu.addSeparator()
 
         quitAct = fileMenu.addAction('Quit')
         quitAct.triggered.connect(self.close)
 
+        optionsMenu = mb.addMenu('Options')
+        settingsAct = fileMenu.addAction('Settings...')
+        fileMenu.addSeparator()
+        setCustomTempPathAct = optionsMenu.addAction('Set Custom Templates Path...')
+        setCustomTempPathAct.triggered.connect(self._SetCustomTemplatesPath)
+
+        quitAct = fileMenu.addAction('Quit')
+        quitAct.triggered.connect(self.close)
+
+#=========== FUNCTIONALITY ====================================
+
     def closeEvent(self, e):
         self.toolUI.skel_ui.skel.sceneMng.KillScriptJobs()
         self.toolUI.skel_ui.skel.sceneMng.KillSelectionJob()
         super(TPRigAndAnimSuite_UI_MainWindow, self).closeEvent(e)
+    
+    def _SetCustomTemplatesPath(self):
+        oldPath = self.toolUI.fileMng.GetCustomTemplatePath()
+        if os.path.isdir(oldPath):
+            filePath = QtWidgets.QFileDialog.getExistingDirectory(self, 
+                                            'Select Custom Template Folder',
+                                            oldPath)
+        else:
+            filePath = QtWidgets.QFileDialog.getExistingDirectory(self, 
+                                            'Select Custom Template Folder')
+        if (os.path.isdir(filePath)):
+            self.toolUI.fileMng.SetCustomTemplatePath(filePath)
+            self.toolUI.Populate_CustomWidgets()
 
+#============================================================
     
 class TPRigAndAnimSuite_UI_Widget(QtWidgets.QWidget):
     def __init__(self, parent=None):
         super(TPRigAndAnimSuite_UI_Widget, self).__init__(parent)
         self.parent = parent
 
-        self.rigMng = rig.RigAndAnim_Manager()
         self.fileMng = fm.File_Manager()
         self.jsonMng = js.Json_Manager()
+        self.rigMng = rig.RigAndAnim_Manager(self.fileMng)
         self.saveLoadMng = slm.SaveLoad_Manager(
                                 self.jsonMng,
                                 self.rigMng.skel.saveLoadSkel,
@@ -131,6 +158,9 @@ class TPRigAndAnimSuite_UI_Widget(QtWidgets.QWidget):
 
     def Populate(self):
         self.skel_ui.Populate()
+    
+    def Populate_CustomWidgets(self):
+        self.skel_ui.customTemplates_lw.Populate()
 
 
 

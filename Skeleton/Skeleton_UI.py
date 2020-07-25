@@ -2,13 +2,20 @@
 from Qt import QtWidgets, QtCore
 
 
+import Templates.Default_Templates_UI as defTemp_UI
+import Templates.Custom_Templates_UI as cusTemp_UI
+import Templates.Save_CustomLimb_UI as saveLimb_UI
+reload(defTemp_UI)
+reload(cusTemp_UI)
+reload(saveLimb_UI)
+
 import Hierarchies.Joint_Hierarchy_UI as jointHier_UI
 import Hierarchies.Limb_Hierarchy_UI as limbHier_UI
-import Properties.Joint_Properties_UI as jointProp_UI
-import Properties.Limb_Properties_UI as limbProp_UI
-
 reload(jointHier_UI)
 reload(limbHier_UI)
+
+import Properties.Joint_Properties_UI as jointProp_UI
+import Properties.Limb_Properties_UI as limbProp_UI
 reload(jointProp_UI)
 reload(limbProp_UI)
 
@@ -17,7 +24,11 @@ class Skeleton_UI(QtWidgets.QTabWidget):
     def __init__(self, skeleton, parent=None):
         super(Skeleton_UI, self).__init__(parent)
         self.skel = skeleton
+        self.parent = parent
+
         self._isPopulating = False
+        self.templatePath = '' # '', 'custom', or 'default' templates
+
         self._Setup()
         self._Setup_Connections()
 
@@ -30,6 +41,8 @@ class Skeleton_UI(QtWidgets.QTabWidget):
         self.jntProp_gb.hide()
         self.skel.sceneMng.Teardown_Editable()
         self.skel.sceneMng.Setup_Editable()
+        self.defaultTemplates_lw.Populate()
+        self.customTemplates_lw.Populate()
         self._UpdateJointCountLabel()
     
 #=========== SETUP ====================================
@@ -43,20 +56,15 @@ class Skeleton_UI(QtWidgets.QTabWidget):
     def _Setup_Templates(self):
         v_layout = QtWidgets.QVBoxLayout()
 
-        gb1 = QtWidgets.QGroupBox('Limb Templates')
+        gb1 = QtWidgets.QGroupBox('Default Limb Templates')
         vl = QtWidgets.QVBoxLayout(gb1)
-        self.limbTemplates_lw = QtWidgets.QListWidget()
-        self.limbTemplates_lw.addItem('test1')
-        vl.addWidget(self.limbTemplates_lw)
+        self.defaultTemplates_lw = defTemp_UI.Default_Templates_UI(self.skel.fileMng, self)
+        vl.addWidget(self.defaultTemplates_lw)
         v_layout.addWidget(gb1)
 
         gb2 = QtWidgets.QGroupBox('Custom Limb Templates')
         vl = QtWidgets.QVBoxLayout(gb2)
-        self.searchCustomTemplates_le = QtWidgets.QLineEdit()
-        self.searchCustomTemplates_le.setPlaceholderText('Search...')
-        vl.addWidget(self.searchCustomTemplates_le)
-        self.customTemplates_lw = QtWidgets.QListWidget()
-        self.customTemplates_lw.addItem('test2')
+        self.customTemplates_lw = cusTemp_UI.Custom_Templates_UI(self.skel.fileMng, self)
         vl.addWidget(self.customTemplates_lw)
         v_layout.addWidget(gb2)
 
@@ -96,7 +104,6 @@ class Skeleton_UI(QtWidgets.QTabWidget):
 
         return v_layout
     
-
     def _Setup_Properties_Tools(self):
         gb = QtWidgets.QGroupBox('Tools')
         vl = QtWidgets.QVBoxLayout(gb)
@@ -126,8 +133,36 @@ class Skeleton_UI(QtWidgets.QTabWidget):
         self.moveToVertCenter_btn.clicked.connect(self.skel.sceneMng.MoveToVertsCenter)
         self.displaySize_sb.valueChanged.connect(self._UpdateDisplaySize)
 
+        # DRAG DROP
+        self.defaultTemplates_lw.itemPressed.connect(self.DragDefaultTemplate)
+        self.customTemplates_lw.itemPressed.connect(self.DragCustomTemplate)
+        self.jntHier_lw.itemPressed.connect(self.DragNull)
+        self.limbHier_tw.itemPressed.connect(self.DragNull)
+
     def DisplayLogMsg(self, message):
         self.mainWindow.statusBar().showMessage(message)
+
+    def LoadTemplate(self, filePath):
+        self.skel.saveLoadSkel.saveLoadMng.Load_Skel_Limbs(filePath)
+        self.Populate()
+
+    def DragDefaultTemplate(self):
+        self.templatePath = self.defaultTemplates_lw.currentItem().toolTip()
+
+    def DragCustomTemplate(self):
+        self.templatePath = self.customTemplates_lw.currentItem().toolTip()
+    
+    def DragNull(self):
+        self.templatePath = ''
+
+    def SaveCustomLimb(self):
+        limbID = self.limbHier_tw.currentItem().ID
+        limbIDs = self.skel.limbMng.GetLimbCreationOrder(limbID)
+
+        saveUI = saveLimb_UI.Save_CustomLimb_UI(limbIDs, self)
+        saveUI.exec_()
+
+        self.customTemplates_lw.Populate()
 
 #=========== LIMBS ====================================
 

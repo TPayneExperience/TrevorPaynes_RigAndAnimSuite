@@ -19,12 +19,12 @@ class Scene_Manager():
         self._SetupScene()
     
     def _SetupScene(self):
-        cmds.select(d=1)
-        self.rootJntGrp = cmds.group(name='Joint_GRP',em=1)
-        self.rootCtrGrp = cmds.group(name='Control_GRP', em=1)
-        self.skelLayer = cmds.createDisplayLayer(n='Skel Joints', e=1)
+        cmds.select(d=True)
+        self.rootJntGrp = cmds.group(name='Joint_GRP',em=True)
+        self.rootCtrGrp = cmds.group(name='Control_GRP', em=True)
+        self.skelLayer = cmds.createDisplayLayer(n='Skel Joints', e=True)
         cmds.setAttr(self.skelLayer + '.displayType', 2)
-        cmds.select(d=1)
+        cmds.select(d=True)
         self.selectionScriptJob = cmds.scriptJob(e=['SelectionChanged', self.SelectionChanged])
         
 
@@ -192,9 +192,9 @@ class Scene_Manager():
     def UpdateDisplaySize(self):
         size = self.lastDisplaySize
         for joint in list(self.sceneLimbMng.sceneJoints.values()):
-            cmds.joint(joint, e=1, rad=size)
+            cmds.joint(joint, e=True, rad=size)
         for ctr in list(self.sceneLimbMng.limbCtrs.values()):
-            cmds.circle(ctr, e=1, r=size*5)
+            cmds.circle(ctr, e=True, r=size*5)
         for ctr in list(self.sceneLimbMng.jointCtrs.values()):
             cmds.xform(ctr, s=[size, size, size])
 
@@ -208,7 +208,7 @@ class Scene_Manager():
         cmds.select(self.sceneLimbMng.limbCtrs[limbID])
     
     def DeselectAll(self):
-        cmds.select(d=1)
+        cmds.select(d=True)
 
 #======= SCRIPT JOBS ===================================
 
@@ -217,10 +217,13 @@ class Scene_Manager():
         attrs = [   'tx', 'ty', 'tz', 
                     'rx', 'ry', 'rz', 
                     'sx', 'sy', 'sz']
-        for sel in cmds.ls(sl=1):
-            for attr in attrs:
-                job = cmds.scriptJob(ac=[sel + '.' + attr, self.SaveChanges])
-                self.scriptJobs.append(job)
+        jntCtrs = self.sceneLimbMng.jointCtrs
+        limbCtrs = self.sceneLimbMng.limbCtrs
+        for sel in cmds.ls(sl=True):
+            if sel in jntCtrs or sel in limbCtrs:
+                for attr in attrs:
+                    job = cmds.scriptJob(ac=[sel + '.' + attr, self.SaveChanges])
+                    self.scriptJobs.append(job)
 
     def KillScriptJobs(self):
         for job in self.scriptJobs:
@@ -232,7 +235,7 @@ class Scene_Manager():
 
     def SaveChanges(self):
         limbIDs = set()
-        for sel in cmds.ls(sl=1):
+        for sel in cmds.ls(sl=True):
             try:
                 ID = cmds.getAttr(sel + '.limbID')
                 limbIDs.add(ID)
@@ -242,15 +245,15 @@ class Scene_Manager():
             for jointID in self.jntMng.GetLimbJointIDs(limbID):
                 jointData = self.jntMng.GetJoint(jointID)
                 sceneJoint = self.sceneLimbMng.sceneJoints[jointID]
-                jointData.position = cmds.xform(sceneJoint, q=1, t=1, ws=1)
-                jointData.rotation = cmds.xform(sceneJoint, q=1, ro=1, ws=1)
+                jointData.position = cmds.xform(sceneJoint, q=True, t=True, ws=True)
+                jointData.rotation = cmds.xform(sceneJoint, q=True, ro=True, ws=True)
 
 # ======= MISC  ===================================
 
     def MoveToVertsCenter(self):
-        sel = cmds.ls(sl=1)
+        sel = cmds.ls(sl=True)
         ctr = sel[0]
         bb = cmds.exactWorldBoundingBox(sel[1:])
         pos = ((bb[0] + bb[3]) / 2, (bb[1] + bb[4]) / 2, (bb[2] + bb[5]) / 2)
-        cmds.xform(ctr, t=pos, ws=1)
+        cmds.xform(ctr, t=pos, ws=True)
 

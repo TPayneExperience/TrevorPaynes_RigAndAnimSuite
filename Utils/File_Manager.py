@@ -8,7 +8,10 @@ class File_Manager():
         self._customTemplatePath = ''
         self._meshPath = ''
         self._buildFileData = {}
-        self._nextBuildVersion = {}
+        self._nextBuildVersion = {  'Skeleton': 0, 
+                                    'Behavior': 0,
+                                    'Appearance': 0,
+                                    'Skinning': 0}
 
         # name : filePath
         self._skeletonTemplates = {}
@@ -77,28 +80,34 @@ class File_Manager():
 #========== SKELETON ==================================
 
     # TEMPLATES
-    def GetSkeletonTemplates(self):
+    def GetSkeletonDefaultTemplates(self):
         self._skeletonTemplates.clear()
         skelPath = os.path.join(self._templatePath, 'Skeleton')
         for f in os.listdir(skelPath):
             filePath = os.path.join(skelPath, f)
             fileName, ext = os.path.splitext(f)
             self._skeletonTemplates[fileName] = filePath
-        return self._skeletonTemplates.keys()
-
-    def GetSkeletonTemplatePath(self, name):
-        return self._skeletonTemplates[name]
+        return self._skeletonTemplates
 
     # CUSTOM TEMPLATES
     def GetSkeletonCustomTemplates(self):
-        self._skeletonCustomTemplates.clear()
-        skelPath = os.path.join(self._customTemplatePath, 'Skeleton')
-        if not os.path.isdir(skelPath):
-            os.mkdir(skelPath)
-        for f in os.listdir(skelPath):
-            filePath = os.path.join(skelPath, f)
-            fileName, ext = os.path.splitext(f)
-            self._skeletonCustomTemplates[fileName] = filePath
+        if (os.path.isdir(self._customTemplatePath)):
+            self._skeletonCustomTemplates.clear()
+            skelPath = os.path.join(self._customTemplatePath, 'Skeleton')
+            if not os.path.isdir(skelPath):
+                os.mkdir(skelPath)
+            for f in os.listdir(skelPath):
+                filePath = os.path.join(skelPath, f)
+                fileName, ext = os.path.splitext(f)
+                self._skeletonCustomTemplates[fileName] = filePath
+            return dict(self._skeletonCustomTemplates)
+        else:
+            return {}
+
+    def DeleteSkeletonCustomTemplate(self, fileName):
+        filePath = self._skeletonCustomTemplates[fileName]
+        os.remove(filePath)
+        del(self._skeletonCustomTemplates[fileName])
 
     def GetSkeletonCustomTemplatePath(self, name=None):
         '''Returns folder path if no name designated'''
@@ -107,12 +116,18 @@ class File_Manager():
         return self._skeletonCustomTemplates[name]
 
     # SAVING
+    def GetNextSkeletonCustomTemplatePath(self, name = ''):
+        return self.GetNextSkeletonPath(self._customTemplatePath, name)
+        
     def GetNextSkeletonBuildPath(self, name = ''):
-        skelPath = os.path.join(self._buildFolderPath, 'Skeleton')
+        return self.GetNextSkeletonPath(self._buildFolderPath, name)
+
+    def GetNextSkeletonPath(self, folderPath, name = ''):
+        skelPath = os.path.join(folderPath, 'Skeleton')
         fileName = '%s_%03d.json' %(name, self._nextBuildVersion['Skeleton'])
         self._nextBuildVersion['Skeleton'] += 1
         if (os.path.isfile(fileName)):
-            return self.GetNextSkeletonBuildPath(name)
+            return self.GetNextSkeletonPath(name)
         return os.path.join(skelPath, fileName)
     
     # LOADING

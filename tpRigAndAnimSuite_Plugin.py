@@ -45,7 +45,6 @@ class TrevorPayneRigAndAnimSuite_Plugin(om.MPxCommand):
     def doIt(self, args):
         print (PY_VER)
         print (QT_VER)
-        print ('asdf')
         mayaMainWindowPtr = omui.MQtUtil.mainWindow()
         mayaMainWindow = wrapInstance(long(mayaMainWindowPtr), QtWidgets.QWidget) 
         ex = tpras_ui.TPRigAndAnimSuite_UI_MainWindow(mayaMainWindow)
