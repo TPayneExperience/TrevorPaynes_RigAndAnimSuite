@@ -21,10 +21,12 @@ reload(limbProp_UI)
 
 
 class Skeleton_UI(QtWidgets.QTabWidget):
-    def __init__(self, skeleton, parent=None):
+    def __init__(self, skeleton, mainWindow, parent=None):
         super(Skeleton_UI, self).__init__(parent)
         self.skel = skeleton
+        self.skel.parent = self
         self.parent = parent
+        self.mainWindow = mainWindow
 
         self._isPopulating = False
         self.templatePath = '' # '', 'custom', or 'default' templates
@@ -139,8 +141,8 @@ class Skeleton_UI(QtWidgets.QTabWidget):
         self.jntHier_lw.itemPressed.connect(self.DragNull)
         self.limbHier_tw.itemPressed.connect(self.DragNull)
 
-    def DisplayLogMsg(self, message):
-        self.mainWindow.statusBar().showMessage(message)
+    # def DisplayLogMsg(self, message):
+    #     self.mainWindow.statusBar().showMessage(message)
 
     def LoadTemplate(self, filePath):
         self.skel.saveLoadSkel.saveLoadMng.Load_Skel_Limbs(filePath)
@@ -187,6 +189,8 @@ class Skeleton_UI(QtWidgets.QTabWidget):
     def RemoveLimb(self, limbID):
         self.skel.sceneMng.Remove_Editable_Limb(limbID)
         self._UpdateJointCountLabel()
+        msg = 'Added limb "%s"' % self.skel.limbMng.GetName(limbID)
+        self.StatusMsg(msg)
 
     def ReparentLimb(self, limbID, oldParentID): # limb hier changed
         self.skel.sceneMng.Reparent_Editable_Limb(limbID, oldParentID)
@@ -292,6 +296,8 @@ class Skeleton_UI(QtWidgets.QTabWidget):
             self._UpdateJointWidgets(limbID)
     
     def _RemoveJoints(self, limbID, removeJointIDs):
+        jointNames = [self.skel.jntMng.GetName(ID) for ID in removeJointIDs]
+        limbName = self.skel.limbMng.GetName(limbID)
         self.skel.jntMng.Remove(limbID, removeJointIDs)
         if (self.skel.jntMng.DoesLimbHaveJoints(limbID)):
             self.skel.sceneMng.Rebuild_Editable_Limb(limbID)
@@ -299,6 +305,9 @@ class Skeleton_UI(QtWidgets.QTabWidget):
             for childID in self.skel.limbMng.GetImmediateChildren(limbID):
                 self.skel.jntMng.SetParentJointId(childID, -1)
             self.skel.sceneMng.Remove_Editable_Limb(limbID)
+        msg = 'Removed joints "%s"' % str(jointNames)
+        msg += ' from limb "%s"' % limbName
+        self.StatusMsg(msg)
 
     def AddJoints(self, limbID, count):
         hadJoints = self.skel.jntMng.DoesLimbHaveJoints(limbID)
@@ -310,6 +319,7 @@ class Skeleton_UI(QtWidgets.QTabWidget):
         self._UpdateJointWidgets(limbID)
 
     def _AddJoints(self, hadJoints, limbID, count):
+        limbName = self.skel.limbMng.GetName(limbID)
         if hadJoints:
             self.skel.sceneMng.Rebuild_Editable_Limb(limbID)
         else:
@@ -317,6 +327,8 @@ class Skeleton_UI(QtWidgets.QTabWidget):
             for childID in self.skel.limbMng.GetImmediateChildren(limbID):
                 self.skel.jntMng.SetParentJointId(childID, jointID)
             self.skel.sceneMng.Add_Editable_Limb(limbID)
+        msg = 'Added %d joints to limb "%s"' % (count, limbName)
+        self.StatusMsg(msg)
 
 #=========== DISPLAY SIZE ====================================
 
@@ -329,6 +341,8 @@ class Skeleton_UI(QtWidgets.QTabWidget):
         count = self.skel.jntMng.GetJointCount()
         self.jointCount_l.setText('Total Joints: ' + str(count))
 
+    def StatusMsg(self, message):
+        self.mainWindow.StatusMsg(message)
 
 # if __name__ == '__main__':
 #     app = QtWidgets.QApplication(sys.argv)

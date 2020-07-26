@@ -8,6 +8,7 @@ class Save_Manager_UI(QtWidgets.QDialog):
     def __init__(self, fileMng, saveLoadMng, parent=None):
         super(Save_Manager_UI, self).__init__(parent)
 
+        self.parent = parent
         self.fileMng = fileMng
         self.saveLoadMng = saveLoadMng
 
@@ -92,7 +93,7 @@ class Save_Manager_UI(QtWidgets.QDialog):
         if self.skel_cb.isChecked():
             skelPath = self.fileMng.GetNextSkeletonBuildPath('Test')
             self.saveLoadMng.Save_Skeleton(skelPath)
-
+            self.parent.parent.StatusMsg('Saved skeleton: "%s"' % skelPath)
         self.accept()
 
     def _NavigateToFolder(self):

@@ -9,6 +9,7 @@ class Load_Manager_UI(QtWidgets.QDialog):
         super(Load_Manager_UI, self).__init__(parent)
         self.fileMng = fileMng
         self.saveLoadMng = saveLoadMng
+        self.parent = parent
 
         self.skel_fileIndex = -1
         self.skel_data = None
@@ -268,6 +269,7 @@ class Load_Manager_UI(QtWidgets.QDialog):
         self.fileMng.InitBuildFilesInfo()
         if self.skel_cb.isChecked():
             self.saveLoadMng.Load_Skel_Limbs(self.skel_data.path)
+            self.parent.parent.StatusMsg('Loaded skeleton: "%s"' % self.skel_data.path)
         if self.bhv_cb.isChecked():
             pass
         if self.app_cb.isChecked():

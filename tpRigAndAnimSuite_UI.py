@@ -87,6 +87,9 @@ class TPRigAndAnimSuite_UI_MainWindow(QtWidgets.QMainWindow):
             self.toolUI.fileMng.SetCustomTemplatePath(filePath)
             self.toolUI.Populate_CustomWidgets()
 
+    def StatusMsg(self, message):
+        self.statusBar().showMessage(message)
+
 #============================================================
     
 class TPRigAndAnimSuite_UI_Widget(QtWidgets.QWidget):
@@ -126,7 +129,7 @@ class TPRigAndAnimSuite_UI_Widget(QtWidgets.QWidget):
     
     def _Setup_TabWidget(self):
         self.tabWgt = QtWidgets.QTabWidget()
-        self.skel_ui = skel_ui.Skeleton_UI(self.rigMng.skel, self.tabWgt)
+        self.skel_ui = skel_ui.Skeleton_UI(self.rigMng.skel, self.parent, self.tabWgt)
         self.skel_ui.SetMainWindow(self.parent)
         self.tabWgt.addTab(self.skel_ui, 'Skeleton')
         return self.tabWgt

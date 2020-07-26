@@ -46,24 +46,26 @@ class Custom_Templates_UI(QtWidgets.QListWidget):
     
     def _RightClickMenu(self):
         menu = QtWidgets.QMenu(self)
-        remove = QtWidgets.QAction('Remove', self, triggered=self._Remove)
-        menu.addAction(remove)
+        deleteAct = QtWidgets.QAction('Delete', self, triggered=self._Delete)
+        menu.addAction(deleteAct)
         menu.exec_(QtGui.QCursor.pos())
     
-    def _Remove(self):
+    def _Delete(self):
         item = self.currentItem()
         if item:
+            name = item.fullName
             msg = 'Are you sure you want to delete custom '
-            msg += 'template "%s"?' % item.fullName
+            msg += 'template "%s"?' % name
             result = QtWidgets.QMessageBox.warning(self, 
                                 'Delete Custom Template',
                                 msg,
                                 QtWidgets.QMessageBox.Ok,
                                 QtWidgets.QMessageBox.Cancel)
             if (result == QtWidgets.QMessageBox.Ok):
-                self.fileMng.DeleteSkeletonCustomTemplate(item.fullName)
+                self.fileMng.DeleteSkeletonCustomTemplate(name)
                 self.takeItem(self.currentRow())
                 del(item)
+                self.parent.StatusMsg('Deleted custom limb: "%s"' % name)
     
 
 

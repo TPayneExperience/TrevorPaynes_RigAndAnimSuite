@@ -6,6 +6,7 @@ class Save_CustomLimb_UI(QtWidgets.QDialog):
         super(Save_CustomLimb_UI, self).__init__(parent)
 
         self.limbIDs = limbIDs
+        self.parent = parent
 
         skel = parent.skel
         self.nameMng = skel.namgMng
@@ -53,5 +54,6 @@ class Save_CustomLimb_UI(QtWidgets.QDialog):
         name = self.name_le.text()
         filePath = self.fileMng.GetNextSkeletonCustomTemplatePath(name)
         self.saveLoadMng.Save_Skel_Limbs(filePath, self.limbIDs)
+        self.parent.StatusMsg('Added custom limb: "%s"' % name)
         self.accept()
 

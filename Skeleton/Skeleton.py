@@ -32,8 +32,9 @@ class Skeleton():
         self.limbProp = lp.Limb_Properties(self.limbMng, self.jntMng)
         self.jntHier = jh.Joint_Hierarchy(self.limbMng, self.jntMng, nameManager)
         self.limbHier = lh.Limb_Hierarchy(self.limbMng,self.jntMng, nameManager)
-        self.sceneMng = sm.Scene_Manager(self.limbMng, self.jntMng, nameManager)
+        self.sceneMng = sm.Scene_Manager(self.limbMng, self.jntMng, nameManager, self)
         self.saveLoadSkel = sls.SaveLoad_Skeleton(self.limbMng, self.jntMng)
+        self.parent = None # set to skel ui later
 
 
 

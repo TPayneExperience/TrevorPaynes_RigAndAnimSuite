@@ -79,6 +79,7 @@ class Limb_Hierarchy_UI(QtWidgets.QTreeWidget):
 
         self.setAlternatingRowColors(True)
         self.setDragDropMode(self.DragDrop)
+        self.setDefaultDropAction(QtCore.Qt.MoveAction)
         self.setHeaderHidden(True)
         self.setIndentation(10)
         self.viewport().installEventFilter(self)
@@ -162,7 +163,10 @@ class Limb_Hierarchy_UI(QtWidgets.QTreeWidget):
 #=========== FUNCTIONALITY ====================================
 
     def Add(self):
-        self.parent.AddLimb(self.limbHier.Add())
+        limbID = self.limbHier.Add()
+        self.parent.AddLimb(limbID)
+        msg = 'Added limb "%s"' % self.limbHier.limbMng.GetName(limbID)
+        self.parent.StatusMsg(msg)
 
     def _Remove(self):
         '''Remove children then remove this limb'''
@@ -176,66 +180,66 @@ class Limb_Hierarchy_UI(QtWidgets.QTreeWidget):
                             )
         if (result==QtWidgets.QMessageBox.Ok):
             limbIDs = self.limbHier.limbMng.GetLimbCreationOrder(ID)
+            limbNames = [self.limbHier.limbMng.GetName(lID) for lID in limbIDs]
             for limbID in limbIDs[::-1]:
                 mirrorID = self.limbHier.limbMng.GetMirror(limbID)
                 self.limbHier.Remove(limbID)
                 self.parent.RemoveLimb(limbID)
                 if (mirrorID != -1):
                     self.parent.RenameLimb(mirrorID)
+            msg = 'Removed limbs ' + str(limbNames)
+            self.parent.StatusMsg(msg)
             self.Populate()
 
-    def _Rename(self, item):
+    def _Rename(self, item, column):
         if not self._isPopulating:
-            if self._IsChangedInternally():
-                limbID = item.ID
-                newName = item.text(0)
-                valid = False
-                if self.limbHier.nameMng.IsValidCharacterLength(newName):
-                    if self.limbHier.nameMng.DoesNotStartWithNumber(newName):
-                        if self.limbHier.nameMng.AreAllValidCharacters(newName):
-                            self.limbHier.limbMng.SetLimbName(limbID, newName)
-                            self.parent.RenameLimb(limbID)
-                            mirrorID = self.limbHier.limbMng.GetMirror(limbID)
-                            if (mirrorID != -1):
-                                self.parent.RenameLimb(mirrorID)
-                                self.Populate()
-                            valid = True
-                if not valid:
-                    self._isPopulating = True
-                    item.setText(0, self.limbHier.limbMng.GetName(limbID))
-                    self.parent.DisplayLogMsg(self.limbHier.nameMng.errorMsg)
-                    self._isPopulating = False
+            limbID = item.ID
+            newName = item.text(0)
+            oldName = self.limbHier.limbMng.GetName(limbID)
+            valid = False
+            if self.limbHier.nameMng.IsValidCharacterLength(newName):
+                if self.limbHier.nameMng.DoesNotStartWithNumber(newName):
+                    if self.limbHier.nameMng.AreAllValidCharacters(newName):
+                        self.limbHier.limbMng.SetLimbName(limbID, newName)
+                        self.parent.RenameLimb(limbID)
+                        mirrorID = self.limbHier.limbMng.GetMirror(limbID)
+                        if (mirrorID != -1):
+                            self.parent.RenameLimb(mirrorID)
+                            self.Populate()
+                        valid = True
+                        msg = 'Renamed limb "%s" to "%s"' %(oldName, newName)
+                        self.parent.StatusMsg(msg)
+            if not valid:
+                self._isPopulating = True
+                item.setText(0, oldName)
+                self.parent.StatusMsg(self.limbHier.nameMng.errorMsg)
+                self._isPopulating = False
 
 
     def _Reparent(self):
         if not self._isPopulating:
-            if self._IsChangedInternally():
-                limbParentDict = self.limbHier.limbMng.GetLimbParentDict()
-                for item in self._items.values():
-                    childID = item.ID
-                    parentID = -1
-                    if (item.parent()):
-                        parentID = item.parent().ID
-                    if (limbParentDict[childID] != parentID):
-                        oldParentID = self.limbHier.limbMng.GetParentID(childID)
-                        self.limbHier.limbMng.SetParent(childID, parentID)
-                        self.limbHier.jntMng.SetParentLimb(childID, parentID)
-                        self.parent.ReparentLimb(childID, oldParentID)
-                        self.expandAll()
-                        break
-            else:
-                self.Populate()
-
-    
-    def _IsChangedInternally(self):
-        # for i in self.count():
-        #     item = self.item(i)
-        #     if hasattr(item, 'path'): # template item
-        #         self.parent.LoadTemplate(item.path)
-        #         return False
-        #     if hasattr(item, 'isJoint'): # joint item
-        #         return False
-        return True
+            limbParentDict = self.limbHier.limbMng.GetLimbParentDict()
+            for item in self._items.values():
+                childID = item.ID
+                parentID = -1
+                if (item.parent()):
+                    parentID = item.parent().ID
+                if (limbParentDict[childID] != parentID):
+                    oldParentID = self.limbHier.limbMng.GetParentID(childID)
+                    self.limbHier.limbMng.SetParent(childID, parentID)
+                    self.limbHier.jntMng.SetParentLimb(childID, parentID)
+                    self.parent.ReparentLimb(childID, oldParentID)
+                    self.expandAll()
+                    if (parentID == -1):
+                        newParentName = 'World'
+                    else:
+                        newParentName = self.limbHier.limbMng.GetName(parentID)
+                    limbName = self.limbHier.limbMng.GetName(childID)
+                    msg = 'Reparenting "%s" to "%s"' % (limbName, newParentName)
+                    self.parent.StatusMsg(msg)
+                    break
+            # else:
+            #     self.Populate()
 
     def _Duplicate(self):
         for limbID in self.limbHier.Duplicate(self.currentItem().ID):

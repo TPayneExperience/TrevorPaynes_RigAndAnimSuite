@@ -75,24 +75,32 @@ class Joint_Hierarchy_UI(QtWidgets.QListWidget):
     def _Rename(self, item):
         if not self._isPopulating:
             newName = item.text()
-            validLen = self.jntHier.nameMng.IsValidCharacterLength(newName)
-            validStart = self.jntHier.nameMng.DoesNotStartWithNumber(newName)
-            allValid = self.jntHier.nameMng.AreAllValidCharacters(newName)
-            if validLen and validStart and allValid:
-                limbID = self.jntHier.limbID
-                self.jntHier.jntMng.SetName(limbID, item.ID, newName)
-                self.parent.RenameJoint(limbID, item.ID)
-            else:
-                item.setText(self.jntHier.jntMng.GetJoint(item.ID).name)
-                self.parent.DisplayLogMsg(self.jntHier.nameMng.errorMsg)
+            oldName = self.jntHier.jntMng.GetName(item.ID)
+            valid = False
+            if self.jntHier.nameMng.IsValidCharacterLength(newName):
+                if self.jntHier.nameMng.DoesNotStartWithNumber(newName):
+                    if self.jntHier.nameMng.AreAllValidCharacters(newName):
+                        limbID = self.jntHier.limbID
+                        self.jntHier.jntMng.SetName(limbID, item.ID, newName)
+                        self.parent.RenameJoint(limbID, item.ID)
+                        valid = True
+                        msg = 'Renamed joint "%s" to "%s"' %(oldName, newName)
+                        self.parent.StatusMsg(msg)
+            if not valid:
+                self._isPopulating = True
+                item.setText(oldName)
+                self.parent.StatusMsg(self.jntHier.nameMng.errorMsg)
+                self._isPopulating = False
 
     def _Reorder(self):
         if not self._isPopulating:
             ids = [self.item(i).ID for i in range(self.count())]
             limbID = self.jntHier.limbID
+            limbName = self.jntHier.limbMng.GetName(limbID)
             mirrorID = self.jntHier.limbMng.GetMirror(limbID)
             self.jntHier.jntMng.SetLimbJointIDs(limbID, mirrorID, ids)
             self.parent.ReorderJoints()
+            self.parent.StatusMsg('Reording joints of limb "%s"' % limbName)
     
     def _TabPressed(self):
         item = self.currentItem()

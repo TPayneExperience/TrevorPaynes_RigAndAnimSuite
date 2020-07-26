@@ -6,13 +6,17 @@ import Scene_Limb_Manager as slm
 reload(slm)
 
 class Scene_Manager():
-    def __init__(self, limbManager, jointManager, nameManager):
+    def __init__(self, limbManager, jointManager, nameManager, parent=None):
         self.limbMng = limbManager
         self.jntMng = jointManager
         self.nameMng = nameManager
+        self.parent = parent
+
         self.limbsWithJoints = [] # limbID : bool for has Joints
         self.limbParents = {} # limbID : parentLimbID
         self.scriptJobs = []
+        self.selectedLimbs = set()
+
         self.sceneLimbMng = slm.Scene_Limb_Manager(limbManager, jointManager, nameManager)
 
         self.lastDisplaySize = 1
@@ -217,10 +221,13 @@ class Scene_Manager():
         attrs = [   'tx', 'ty', 'tz', 
                     'rx', 'ry', 'rz', 
                     'sx', 'sy', 'sz']
-        jntCtrs = self.sceneLimbMng.jointCtrs
-        limbCtrs = self.sceneLimbMng.limbCtrs
+        jntCtrs = list(self.sceneLimbMng.jointCtrs.values())
+        limbCtrs = list(self.sceneLimbMng.limbCtrs.values())
+        ctrs = []
         for sel in cmds.ls(sl=True):
             if sel in jntCtrs or sel in limbCtrs:
+                ctrs.append(sel)
+                self.selectedLimbs.add(cmds.getAttr(sel + '.limbID'))
                 for attr in attrs:
                     job = cmds.scriptJob(ac=[sel + '.' + attr, self.SaveChanges])
                     self.scriptJobs.append(job)
@@ -234,19 +241,16 @@ class Scene_Manager():
         cmds.scriptJob(kill=self.selectionScriptJob, force=True)
 
     def SaveChanges(self):
-        limbIDs = set()
-        for sel in cmds.ls(sl=True):
-            try:
-                ID = cmds.getAttr(sel + '.limbID')
-                limbIDs.add(ID)
-            except:
-                print('Save is Skipping: ' + sel)
-        for limbID in list(limbIDs):
+        limbNames = []
+        for limbID in list(self.selectedLimbs):
+            limbNames.append(self.limbMng.GetName(limbID))
             for jointID in self.jntMng.GetLimbJointIDs(limbID):
                 jointData = self.jntMng.GetJoint(jointID)
                 sceneJoint = self.sceneLimbMng.sceneJoints[jointID]
                 jointData.position = cmds.xform(sceneJoint, q=True, t=True, ws=True)
                 jointData.rotation = cmds.xform(sceneJoint, q=True, ro=True, ws=True)
+        msg = 'Updating joint data for limbs: ' + str(limbNames)
+        self.parent.parent.StatusMsg(msg)
 
 # ======= MISC  ===================================
 
