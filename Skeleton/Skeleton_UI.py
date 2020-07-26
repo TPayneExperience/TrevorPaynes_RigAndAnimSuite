@@ -189,8 +189,6 @@ class Skeleton_UI(QtWidgets.QTabWidget):
     def RemoveLimb(self, limbID):
         self.skel.sceneMng.Remove_Editable_Limb(limbID)
         self._UpdateJointCountLabel()
-        msg = 'Added limb "%s"' % self.skel.limbMng.GetName(limbID)
-        self.StatusMsg(msg)
 
     def ReparentLimb(self, limbID, oldParentID): # limb hier changed
         self.skel.sceneMng.Reparent_Editable_Limb(limbID, oldParentID)
