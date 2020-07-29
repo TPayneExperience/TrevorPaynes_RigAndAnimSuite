@@ -47,25 +47,57 @@ class TPRigAndAnimSuite_UI_MainWindow(QtWidgets.QMainWindow):
         self.resize(600, 500)
     
     def _Setup_MenuBar(self):
-        mb = self.menuBar()
-        fileMenu = mb.addMenu('File')
+        self._Setup_MenuBar_FileMenu()
+        self._Setup_MenuBar_Limbs()
+        self._Setup_MenuBar_Settings()
+        self._Setup_MenuBar_Help()
+        
+    
+    def _Setup_MenuBar_FileMenu(self):
+        fileMenu = self.menuBar().addMenu('File')
         newRigAct = fileMenu.addAction('New Rig...')
-        openRigAct = fileMenu.addAction('Open Rig...')
-        rigSettings = fileMenu.addAction('Rig Settings...')
+        fileMenu.addAction('Load Rig...')
+        fileMenu.addSeparator()
 
+        fileMenu.addAction('Save')
+        fileMenu.addAction('Save As...')
+        fileMenu.addSeparator()
+
+        fileMenu.addAction('Build from FBX...')
         fileMenu.addSeparator()
 
         quitAct = fileMenu.addAction('Quit')
         quitAct.triggered.connect(self.close)
+    
+    def _Setup_MenuBar_Limbs(self):
+        limbsMenu = self.menuBar().addMenu('Limbs')
+        mirrorMenu = QtWidgets.QMenu('Mirror Limb')
+        mirrorMenu.addAction('X Axis')
+        mirrorMenu.addAction('Y Axis')
+        mirrorMenu.addAction('Z Axis')
+        limbsMenu.addMenu(mirrorMenu)
 
-        optionsMenu = mb.addMenu('Options')
-        settingsAct = fileMenu.addAction('Settings...')
-        fileMenu.addSeparator()
-        setCustomTempPathAct = optionsMenu.addAction('Set Custom Templates Path...')
-        setCustomTempPathAct.triggered.connect(self._SetCustomTemplatesPath)
+        limbsMenu.addAction('Duplicate Limb')
+        limbsMenu.addSeparator()
+        
+        limbsMenu.addAction('Load Default Template')
+        limbsMenu.addSeparator()
 
-        quitAct = fileMenu.addAction('Quit')
-        quitAct.triggered.connect(self.close)
+        limbsMenu.addAction('Load Custom Template')
+        limbsMenu.addAction('Save Custom Template')
+
+    def _Setup_MenuBar_Settings(self):
+        settingsMenu = self.menuBar().addMenu('Settings')
+        settingsMenu.addAction('Rig Settings...')
+        settingsMenu.addAction('Set Animation Library Folder...')
+        settingsMenu.addSeparator()
+        settingsMenu.addAction('Tool Settings...')
+
+    def _Setup_MenuBar_Help(self):
+        helpMenu = self.menuBar().addMenu('Help')
+        helpMenu.addAction('Documentation')
+        helpMenu.addAction('Tutorials')
+
 
 #=========== FUNCTIONALITY ====================================
 

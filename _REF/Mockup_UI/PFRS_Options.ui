@@ -28,12 +28,12 @@
        </widget>
        <widget class="QWidget" name="tab_2">
         <attribute name="title">
-         <string>Controller Behaviors</string>
+         <string>Behaviors</string>
         </attribute>
        </widget>
        <widget class="QWidget" name="tab_3">
         <attribute name="title">
-         <string>Controller Appearance</string>
+         <string>Appearance</string>
         </attribute>
        </widget>
        <widget class="QWidget" name="tab_4">
