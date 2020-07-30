@@ -53,7 +53,7 @@ class TPRigAndAnimSuite_UI_MainWindow(QtWidgets.QMainWindow):
     def _Setup(self):
         self.setWindowTitle("Payne Free Rig Suite v%s - by Trevor Payne" % __version__)
         self.statusBar().showMessage('Drag & drop or Right Click on stuff!')
-        self.resize(600, 500)
+        self.resize(400, 500)
 
         self._Setup_MenuBar()
         self._Setup_MainTabWidget()

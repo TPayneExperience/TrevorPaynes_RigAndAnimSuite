@@ -11,7 +11,6 @@ reload(rs)
 
 class RigAndAnim_Manager():
     def __init__(self, fileManager):
-        # pass
         self.nameMng = nm.Name_Manager()
         self.fileMng = fileManager
         self.rigSetup = rs.RigSetup(self.nameMng)

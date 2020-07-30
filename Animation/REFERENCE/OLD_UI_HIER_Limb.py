@@ -78,8 +78,9 @@ class Limb_Hierarchy_UI(QtWidgets.QTreeWidget):
         self.m_icon =  QtGui.QIcon(os.path.join(path, 'Images', 'Skel_M.png'))
 
         self.setAlternatingRowColors(True)
-        self.setDragDropMode(self.DragDrop)
-        self.setDefaultDropAction(QtCore.Qt.MoveAction)
+        # self.setDragDropMode(self.DragDrop)
+        self.setDragDropMode(self.InteralMove)
+        # self.setDefaultDropAction(QtCore.Qt.MoveAction)
         self.setHeaderHidden(True)
         self.setIndentation(10)
         self.viewport().installEventFilter(self)
@@ -149,11 +150,11 @@ class Limb_Hierarchy_UI(QtWidgets.QTreeWidget):
     def eventFilter(self, sender, event):
         if (event.type() == QtCore.QEvent.ChildRemoved):
             self._Reparent()
-        if (event.type() == QtCore.QEvent.Drop):
-            filePath = self.parent.templatePath
-            if os.path.isfile(filePath):
-                self.parent.LoadTemplate(filePath)
-                return True
+        # if (event.type() == QtCore.QEvent.Drop):
+        #     filePath = self.parent.templatePath
+        #     if os.path.isfile(filePath):
+        #         self.parent.LoadTemplate(filePath)
+        #         return True
         return False
     
     def _Setup_Connections(self):
