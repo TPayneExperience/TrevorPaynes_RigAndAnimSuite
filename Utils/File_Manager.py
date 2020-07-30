@@ -24,7 +24,7 @@ class File_Manager():
 
         path = os.path.dirname(__file__)
         path = os.path.dirname(path)
-        self._templatePath = os.path.join(path, 'Templates')
+        self._templatePath = os.path.join(path, 'LimbSetup', 'Templates')
 
 #========== ACCESSORS + MUTATORS ==================================
 

@@ -1,7 +1,7 @@
 
 from maya import cmds
 
-import Skeleton.Skeleton as skel
+import LimbSetup.Skeleton.Skeleton as skel
 import RigSetup.RigSetup as rs
 import Name_Manager as nm
 
@@ -11,6 +11,7 @@ reload(rs)
 
 class RigAndAnim_Manager():
     def __init__(self, fileManager):
+        # pass
         self.nameMng = nm.Name_Manager()
         self.fileMng = fileManager
         self.rigSetup = rs.RigSetup(self.nameMng)

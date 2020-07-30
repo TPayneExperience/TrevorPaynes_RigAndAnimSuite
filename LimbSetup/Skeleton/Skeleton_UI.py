@@ -34,9 +34,6 @@ class Skeleton_UI(QtWidgets.QTabWidget):
         self._Setup()
         self._Setup_Connections()
 
-    def SetMainWindow(self, window):
-        self.mainWindow = window
-
     def Populate(self): # CALLED BY MAIN WINDOW
         self.limbHier_tw.Populate()
         self.limbProp_gb.hide()
