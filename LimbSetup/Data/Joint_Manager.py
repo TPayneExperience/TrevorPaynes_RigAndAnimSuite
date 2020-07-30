@@ -201,24 +201,6 @@ class Joint_Manager():
                                 pos[2] * flip[2]]
         # MISSING: FIX ROTATIONS
 
-#============= SAVE LOAD ============================
-
-    # def GetSaveData(self, limbID):
-    #     pass
-
-    # def LoadData(self, data):
-    #     pass
-
-    # def AddTemplate_Joints(self, jointDataList):
-    #     oldToNewJointIds = {}
-    #     for joint in jointDataList:
-    #         newID = self._nextJointID
-    #         oldToNewIds[joint.ID] = newID
-    #         joint.ID = newID
-    #         self._joints[newID] = joint
-    #         self._nextJointID += 1
-    #     return oldToNewJointIds
-
 
 
 if __name__ == '__main__':

@@ -22,8 +22,8 @@ from shiboken2 import wrapInstance
 
 import Qt
 from Qt import QtWidgets, QtCore, QtGui
-import tpRigAndAnimSuite_UI as tpras_ui
-reload(tpras_ui)
+import payneFreeRigSuite_UI as pfrs_ui
+reload(pfrs_ui)
 
 
 QT_VER = Qt.__binding__
@@ -32,22 +32,22 @@ PY_VER = sys.version[:3]
 def maya_useNewAPI():
     pass
 
-class TrevorPayneRigAndAnimSuite_Plugin(om.MPxCommand):
-    kPluginCmdName = "tpRigAndAnimSuite_Plugin"
+class PayneFreeRigSuite_Plugin(om.MPxCommand):
+    kPluginCmdName = "payneFreeRigSuite_Plugin"
 
     def __init__(self):
         om.MPxCommand.__init__(self)
 
     @staticmethod
     def cmdCreator():
-        return TrevorPayneRigAndAnimSuite_Plugin()
+        return PayneFreeRigSuite_Plugin()
 
     def doIt(self, args):
         print (PY_VER)
         print (QT_VER)
         mayaMainWindowPtr = omui.MQtUtil.mainWindow()
         mayaMainWindow = wrapInstance(long(mayaMainWindowPtr), QtWidgets.QWidget) 
-        ex = tpras_ui.TPRigAndAnimSuite_UI_MainWindow(mayaMainWindow)
+        ex = pfrs_ui.PayneFreeRigSuite_UI(mayaMainWindow)
         ex.show()
 
 
@@ -55,11 +55,11 @@ def initializePlugin(plugin):
     pluginFn = om.MFnPlugin(plugin)
     try:
         pluginFn.registerCommand(
-            TrevorPayneRigAndAnimSuite_Plugin.kPluginCmdName, TrevorPayneRigAndAnimSuite_Plugin.cmdCreator
+            PayneFreeRigSuite_Plugin.kPluginCmdName, PayneFreeRigSuite_Plugin.cmdCreator
         )
     except:
         sys.stderr.write(
-            "Failed to register command: %s\n" % TrevorPayneRigAndAnimSuite_Plugin.kPluginCmdName
+            "Failed to register command: %s\n" % PayneFreeRigSuite_Plugin.kPluginCmdName
         )
         raise
 
@@ -67,9 +67,9 @@ def initializePlugin(plugin):
 def uninitializePlugin(plugin):
     pluginFn = om.MFnPlugin(plugin)
     try:
-        pluginFn.deregisterCommand(TrevorPayneRigAndAnimSuite_Plugin.kPluginCmdName)
+        pluginFn.deregisterCommand(PayneFreeRigSuite_Plugin.kPluginCmdName)
     except:
         sys.stderr.write(
-            "Failed to unregister command: %s\n" % TrevorPayneRigAndAnimSuite_Plugin.kPluginCmdName
+            "Failed to unregister command: %s\n" % PayneFreeRigSuite_Plugin.kPluginCmdName
         )
         raise

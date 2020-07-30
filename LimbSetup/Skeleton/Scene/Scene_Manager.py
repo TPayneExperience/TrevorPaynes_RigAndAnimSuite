@@ -250,7 +250,7 @@ class Scene_Manager():
                 jointData.position = cmds.xform(sceneJoint, q=True, t=True, ws=True)
                 jointData.rotation = cmds.xform(sceneJoint, q=True, ro=True, ws=True)
         msg = 'Updating joint data for limbs: ' + str(limbNames)
-        self.parent.parent.StatusMsg(msg)
+        print(msg)
 
 # ======= MISC  ===================================
 

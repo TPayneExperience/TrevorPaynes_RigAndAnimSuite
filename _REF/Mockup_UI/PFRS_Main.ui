@@ -34,7 +34,7 @@
         <item>
          <widget class="QTabWidget" name="tabWidget">
           <property name="currentIndex">
-           <number>0</number>
+           <number>2</number>
           </property>
           <widget class="QWidget" name="tab">
            <attribute name="title">
@@ -1368,6 +1368,9 @@
                             <widget class="QTreeWidget" name="treeWidget_8">
                              <property name="autoScrollMargin">
                               <number>16</number>
+                             </property>
+                             <property name="dragDropMode">
+                              <enum>QAbstractItemView::InternalMove</enum>
                              </property>
                              <property name="alternatingRowColors">
                               <bool>true</bool>
@@ -2801,13 +2804,6 @@
                       </widget>
                      </item>
                      <item>
-                      <widget class="QPushButton" name="pushButton_31">
-                       <property name="text">
-                        <string>Mirror Pose / Animation</string>
-                       </property>
-                      </widget>
-                     </item>
-                     <item>
                       <widget class="QPushButton" name="pushButton_32">
                        <property name="text">
                         <string>Convert Keys to IK / FK</string>
@@ -2818,16 +2814,6 @@
                       <widget class="Line" name="line_34">
                        <property name="orientation">
                         <enum>Qt::Horizontal</enum>
-                       </property>
-                      </widget>
-                     </item>
-                     <item>
-                      <widget class="QPushButton" name="pushButton_33">
-                       <property name="toolTip">
-                        <string>Bake animation to joints, deleted unnecessary groups...</string>
-                       </property>
-                       <property name="text">
-                        <string>Prepare for FBX Export</string>
                        </property>
                       </widget>
                      </item>
@@ -3077,6 +3063,7 @@
     <addaction name="actionSave_As"/>
     <addaction name="separator"/>
     <addaction name="actionBuild_From_Imported_FBX"/>
+    <addaction name="actionExport_FBX"/>
     <addaction name="separator"/>
     <addaction name="actionQuit"/>
    </widget>
@@ -3159,7 +3146,7 @@
   </action>
   <action name="actionBuild_From_Imported_FBX">
    <property name="text">
-    <string>Build From FBX</string>
+    <string>Import FBX</string>
    </property>
   </action>
   <action name="actionSettings">
@@ -3240,6 +3227,11 @@
   <action name="actionZ_Axis">
    <property name="text">
     <string>Z Axis</string>
+   </property>
+  </action>
+  <action name="actionExport_FBX">
+   <property name="text">
+    <string>Export FBX</string>
    </property>
   </action>
  </widget>

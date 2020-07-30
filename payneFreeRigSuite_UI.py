@@ -5,19 +5,26 @@ import sys
 import Qt
 from Qt import QtWidgets, QtCore, QtGui
 
-import RigAndAnim_Manager as rig
-reload(rig)
+# import RigAndAnim_Manager as rig
+# reload(rig)
 
-import LimbSetup.Skeleton.Skeleton_UI as skel_ui
-reload(skel_ui)
+import payneFreeRigSuite as pfrs
+reload(pfrs)
 
-import RigSetup.RigSetup_UI as rs_ui
-reload(rs_ui)
+# import LimbSetup.Skeleton.Skeleton_UI as skel_ui
+# reload(skel_ui)
+import LimbSetup.LimbSetup as limbSetup
+import LimbSetup.LimbSetup_UI as limbSetup_ui
+reload(limbSetup)
+reload(limbSetup_ui)
 
-import Utils.File_Manager as fm
-import Utils.Json_Manager as js
-reload(fm)
-reload(js)
+# import RigSetup.RigSetup_UI as rs_ui
+# reload(rs_ui)
+
+# import Utils.File_Manager as fm
+# import Utils.Json_Manager as js
+# reload(fm)
+# reload(js)
 
 import SaveLoad.SaveLoad_Manager as slm
 import SaveLoad.Save_Manager_UI as smUI
@@ -27,37 +34,49 @@ reload(smUI)
 reload(lmUI)
 
 
+
 __author__ = 'Trevor Payne'
 __version__ = '0.1'
 
 
-class TPRigAndAnimSuite_UI_MainWindow(QtWidgets.QMainWindow):
+class PayneFreeRigSuite_UI(QtWidgets.QMainWindow):
     def __init__(self, parent=None):
-        super(TPRigAndAnimSuite_UI_MainWindow, self).__init__(parent)
+        super(PayneFreeRigSuite_UI, self).__init__(parent)
 
-        self.fileMng = fm.File_Manager()
-        self.jsonMng = js.Json_Manager()
-        self.rigMng = rig.RigAndAnim_Manager(self.fileMng)
-        self.saveLoadMng = slm.SaveLoad_Manager(
-                                self.jsonMng,
-                                self.rigMng.skel.saveLoadSkel,
-                                None,
-                                None, 
-                                None)
+        self.utils = pfrs.PayneFreeRigSuite()
+        self.limbSetup = limbSetup.LimbSetup(   self.utils.nameMng,
+                                                self.utils.fileMng,
+                                                self.utils.jsonMng)
+        # self.fileMng = fm.File_Manager()
+        # self.jsonMng = js.Json_Manager()
+        # self.rigMng = rig.RigAndAnim_Manager(self.fileMng)
+        # self.rigMng = rig.RigAndAnim_Manager()
+        # self.saveLoadMng = slm.SaveLoad_Manager(
+        #                         self.jsonMng,
+        #                         self.rigMng.skel.saveLoadSkel,
+        #                         None,
+        #                         None, 
+        #                         None)
 
         self._Setup()
         self.Populate()
+
+    def Populate(self):
+        self.limbs_tw.Populate()
+        # self.skel_ui.Populate()
 
 #=========== SETUP ====================================
 
     def _Setup(self):
         self.setWindowTitle("Payne Free Rig Suite v%s - by Trevor Payne" % __version__)
-        self.statusBar().showMessage('Drag & drop or Right Click on stuff!')
+        self.StatusMsg('Drag & drop or Right Click on stuff!')
         self.resize(400, 500)
 
         self._Setup_MenuBar()
         self._Setup_MainTabWidget()
     
+#=========== SETUP MENUBAR ====================================
+
     def _Setup_MenuBar(self):
         self._Setup_MenuBar_FileMenu()
         self._Setup_MenuBar_Limbs()
@@ -109,33 +128,31 @@ class TPRigAndAnimSuite_UI_MainWindow(QtWidgets.QMainWindow):
         helpMenu.addAction('Documentation')
         helpMenu.addAction('Tutorials')
 
+#=========== SETUP MAIN WIDGET====================================
+
     def _Setup_MainTabWidget(self):
+        main_w = QtWidgets.QWidget(self)
+        vl = QtWidgets.QVBoxLayout(main_w)
         self.main_tw = QtWidgets.QTabWidget()
-        self.setCentralWidget(self.main_tw)
-        self.main_tw.addTab(self._Setup_LimbTabWidgets(), 'Limb Setup')
+        # self.setCentralWidget(self.main_tw)
+        self.limbs_tw = limbSetup_ui.LimbSetup_UI(self.limbSetup, self, self.main_tw)
+        self.main_tw.addTab(self.limbs_tw, 'Limb Setup')
         self.main_tw.addTab(QtWidgets.QTabWidget(), 'Mesh Deformation')
         self.main_tw.addTab(QtWidgets.QTabWidget(), 'Animation')
+        vl.addWidget(self.main_tw)
+        self.setCentralWidget(main_w)
         
-    def _Setup_LimbTabWidgets(self):
-        self.limbs_tw = QtWidgets.QTabWidget()
-        self.skel_ui = skel_ui.Skeleton_UI(self.rigMng.skel, self, self.limbs_tw)
-        self.limbs_tw.addTab(self.skel_ui, 'Skeleton')
-        self.limbs_tw.addTab(QtWidgets.QTabWidget(), 'Behaviors')
-        self.limbs_tw.addTab(QtWidgets.QTabWidget(), 'Appearance')
-        return self.limbs_tw
     
 #=========== FUNCTIONALITY ====================================
 
     def closeEvent(self, e):
-        self.skel_ui.skel.sceneMng.KillScriptJobs()
-        self.skel_ui.skel.sceneMng.KillSelectionJob()
-        super(TPRigAndAnimSuite_UI_MainWindow, self).closeEvent(e)
+        self.limbSetup.skel.sceneMng.KillScriptJobs()
+        self.limbSetup.skel.sceneMng.KillSelectionJob()
+        super(PayneFreeRigSuite_UI, self).closeEvent(e)
     
     def StatusMsg(self, message):
         self.statusBar().showMessage(message)
 
-    def Populate(self):
-        self.skel_ui.Populate()
     
 #============================================================
     
@@ -211,6 +228,6 @@ class TPRigAndAnimSuite_UI_MainWindow(QtWidgets.QMainWindow):
 if __name__ == '__main__':
     app = QtWidgets.QApplication(sys.argv)
     
-    ex = TPRigAndAnimSuite_UI_MainWindow()
+    ex = PayneFreeRigSuite_UI()
     ex.show()
     sys.exit(app.exec_())

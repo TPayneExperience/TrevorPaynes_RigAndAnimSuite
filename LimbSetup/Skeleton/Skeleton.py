@@ -1,10 +1,11 @@
 
-import Data.Joint_Manager as jm
-import Data.Limb_Manager as lm
-import Data.SaveLoad_Skeleton as sls
-reload(jm)
-reload(lm)
-reload(sls)
+# import Data.Joint_Manager as jm
+# import Data.Limb_Manager as lm
+# reload(jm)
+# reload(lm)
+
+# import Data.SaveLoad_Skeleton as sls
+# reload(sls)
 
 import Properties.Joint_Properties as jp
 import Properties.Limb_Properties as lp
@@ -23,18 +24,20 @@ reload(sm)
 # MISSING TEMPLATE STUFF
 
 class Skeleton():
-    def __init__(self, nameManager, fileManager):
-        self.jntMng = jm.Joint_Manager()
-        self.limbMng = lm.Limb_Manager()
-        self.fileMng = fileManager
-        self.namgMng = nameManager
-        self.jntProp = jp.Joint_Properties(self.limbMng, self.jntMng)
-        self.limbProp = lp.Limb_Properties(self.limbMng, self.jntMng)
-        self.jntHier = jh.Joint_Hierarchy(self.limbMng, self.jntMng, nameManager)
-        self.limbHier = lh.Limb_Hierarchy(self.limbMng,self.jntMng, nameManager)
-        self.sceneMng = sm.Scene_Manager(self.limbMng, self.jntMng, nameManager, self)
-        self.saveLoadSkel = sls.SaveLoad_Skeleton(self.limbMng, self.jntMng)
-        self.parent = None # set to skel ui later
+    def __init__(self, nameMng, fileMng, jntMng, limbMng):
+        # self.jntMng = jm.Joint_Manager()
+        # self.limbMng = lm.Limb_Manager()
+        self.namgMng = nameMng
+        self.fileMng = fileMng
+        self.jntMng = jntMng
+        self.limbMng = limbMng
+        self.jntProp = jp.Joint_Properties(limbMng, jntMng)
+        self.limbProp = lp.Limb_Properties(limbMng, jntMng)
+        self.jntHier = jh.Joint_Hierarchy(limbMng, jntMng, nameMng)
+        self.limbHier = lh.Limb_Hierarchy(limbMng,jntMng, nameMng)
+        self.sceneMng = sm.Scene_Manager(limbMng, jntMng, nameMng, self)
+        # self.saveLoadSkel = sls.SaveLoad_Skeleton(limbMng, jntMng)
+        # self.parent = None # set to skel ui later
 
 
 
