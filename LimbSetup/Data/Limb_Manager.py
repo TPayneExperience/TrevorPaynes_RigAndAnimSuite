@@ -76,6 +76,13 @@ class Limb_Manager():
             parentID = self.GetParentID(parentID)
         return parents
 
+    def GetRootLimbs(self):
+        rootLimbIDs = []
+        for childID, parentID in self.GetLimbParentDict().items():
+            if (parentID == -1):
+                rootLimbIDs.append(childID)
+        return rootLimbIDs
+
     def GetImmediateChildren(self, limbID):
         childIDs = []
         for childID, parentID in self.GetLimbParentDict().items():
@@ -99,6 +106,13 @@ class Limb_Manager():
                     limbIDs.append(childID)
                     del(limbParents[childID])
                     break
+        return limbIDs
+    
+    def GetAllLimbsCreationOrder(self):
+        limbIDs = []
+        for childID, parentID in self._limbParent.items():
+            if (parentID == -1):
+                limbIDs += self.GetLimbCreationOrder(childID)
         return limbIDs
 
     def SetParent(self, childID, parentID):

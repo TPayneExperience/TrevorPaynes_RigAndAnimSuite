@@ -26,12 +26,12 @@ reload(limbSetup_ui)
 # reload(fm)
 # reload(js)
 
-import SaveLoad.SaveLoad_Manager as slm
-import SaveLoad.Save_Manager_UI as smUI
-import SaveLoad.Load_Manager_UI as lmUI
-reload(slm)
-reload(smUI)
-reload(lmUI)
+# import SaveLoad.SaveLoad_Manager as slm
+# import SaveLoad.Save_Manager_UI as smUI
+# import SaveLoad.Load_Manager_UI as lmUI
+# reload(slm)
+# reload(smUI)
+# reload(lmUI)
 
 
 
@@ -71,9 +71,11 @@ class PayneFreeRigSuite_UI(QtWidgets.QMainWindow):
         self.setWindowTitle("Payne Free Rig Suite v%s - by Trevor Payne" % __version__)
         self.StatusMsg('Drag & drop or Right Click on stuff!')
         self.resize(400, 500)
+        self.setWindowFlags(self.windowFlags() ^ QtCore.Qt.WindowMinMaxButtonsHint)
 
-        self._Setup_MenuBar()
+
         self._Setup_MainTabWidget()
+        self._Setup_MenuBar()
     
 #=========== SETUP MENUBAR ====================================
 
@@ -93,7 +95,8 @@ class PayneFreeRigSuite_UI(QtWidgets.QMainWindow):
         fileMenu.addAction('Save As...')
         fileMenu.addSeparator()
 
-        fileMenu.addAction('Build from FBX...')
+        fileMenu.addAction('Import FBX...')
+        fileMenu.addAction('Export FBX...')
         fileMenu.addSeparator()
 
         quitAct = fileMenu.addAction('Quit')
@@ -102,12 +105,27 @@ class PayneFreeRigSuite_UI(QtWidgets.QMainWindow):
     def _Setup_MenuBar_Limbs(self):
         limbsMenu = self.menuBar().addMenu('Limbs')
         mirrorMenu = QtWidgets.QMenu('Mirror Limb')
-        mirrorMenu.addAction('X Axis')
-        mirrorMenu.addAction('Y Axis')
-        mirrorMenu.addAction('Z Axis')
+
+        mirrorX = QtWidgets.QAction('X Axis', 
+                                    self, 
+                                    triggered=self.limbs_tw.Mirror_X)
+        mirrorY = QtWidgets.QAction('Y Axis', 
+                                    self, 
+                                    triggered=self.limbs_tw.Mirror_Y)
+        mirrorZ = QtWidgets.QAction('Z Axis', 
+                                    self, 
+                                    triggered=self.limbs_tw.Mirror_Z)
+        duplicate = QtWidgets.QAction('Duplicate', 
+                                    self, 
+                                    triggered=self.limbs_tw.Duplicate_Dialog)
+        
+        mirrorMenu.addAction(mirrorX)
+        mirrorMenu.addAction(mirrorY)
+        mirrorMenu.addAction(mirrorZ)
+
         limbsMenu.addMenu(mirrorMenu)
 
-        limbsMenu.addAction('Duplicate Limb')
+        limbsMenu.addAction(duplicate)
         limbsMenu.addSeparator()
         
         limbsMenu.addAction('Load Default Template')
@@ -134,7 +152,6 @@ class PayneFreeRigSuite_UI(QtWidgets.QMainWindow):
         main_w = QtWidgets.QWidget(self)
         vl = QtWidgets.QVBoxLayout(main_w)
         self.main_tw = QtWidgets.QTabWidget()
-        # self.setCentralWidget(self.main_tw)
         self.limbs_tw = limbSetup_ui.LimbSetup_UI(self.limbSetup, self, self.main_tw)
         self.main_tw.addTab(self.limbs_tw, 'Limb Setup')
         self.main_tw.addTab(QtWidgets.QTabWidget(), 'Mesh Deformation')

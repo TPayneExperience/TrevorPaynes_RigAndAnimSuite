@@ -221,9 +221,10 @@ class Skeleton_UI(QtWidgets.QTabWidget):
 
         self.limbHier_tw.Populate()
 
-    def Mirror(self, limbID): # called by limb hier UI
-        self.limbProp_gb.SetLimb(limbID)
-        self.limbProp_gb.Populate()
+    # def Mirror(self, limbID): # called by limb hier UI
+    #     self.limbProp_gb.SetLimb(limbID)
+    #     self.limbProp_gb.Populate()
+
 
 #=========== MANIPULATE JOINTS ====================================
 

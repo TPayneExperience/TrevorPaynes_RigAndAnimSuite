@@ -1,6 +1,5 @@
 
 import os
-import sys
 
 from Qt import QtWidgets, QtCore, QtGui
 
@@ -27,14 +26,15 @@ class Limb_Hierarchy_UI(QtWidgets.QTreeWidget):
         self._items.clear()
 
         # PARENTS FIRST ALGORITHM
-        limbParents = self.limbHier.limbMng.GetLimbParentDict()
-        idOrder = []
-        while (limbParents):
-            for k,v in limbParents.items():
-                if (v == -1) or (v in idOrder):
-                    idOrder.append(k)
-                    del(limbParents[k])
-                    break
+        # limbParents = self.limbHier.limbMng.GetLimbParentDict()
+        # idOrder = []
+        # while (limbParents):
+        #     for k,v in limbParents.items():
+        #         if (v == -1) or (v in idOrder):
+        #             idOrder.append(k)
+        #             del(limbParents[k])
+        #             break
+        idOrder = self.limbHier.limbMng.GetAllLimbsCreationOrder()
 
         # CREATE ITEMS, IN ORDER
         for ID in idOrder:
@@ -70,24 +70,29 @@ class Limb_Hierarchy_UI(QtWidgets.QTreeWidget):
 #=========== SETUP ====================================
 
     def _Setup(self):
-        path = os.path.dirname(__file__)
-        path = os.path.dirname(path)
-        path = os.path.dirname(path)
-        self.l_icon = QtGui.QIcon(os.path.join(path, 'Images', 'Skel_L.png'))
-        self.r_icon =  QtGui.QIcon(os.path.join(path, 'Images', 'Skel_R.png'))
-        self.m_icon =  QtGui.QIcon(os.path.join(path, 'Images', 'Skel_M.png'))
-
         self.setAlternatingRowColors(True)
         # self.setDragDropMode(self.DragDrop)
         self.setDragDropMode(self.InternalMove)
         # self.setDefaultDropAction(QtCore.Qt.MoveAction)
         self.setHeaderHidden(True)
         self.setIndentation(10)
-        self.viewport().installEventFilter(self)
+        # self.viewport().installEventFilter(self)
         self.installEventFilter(self)
 
         self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
-        
+
+        self._Setup_Icons()
+    
+    def _Setup_Icons(self):
+        path = os.path.dirname(__file__)
+        path = os.path.dirname(path)
+        path = os.path.dirname(path)
+        path = os.path.dirname(path)
+        self.l_icon = QtGui.QIcon(os.path.join(path, 'Images', 'Skel_L.png'))
+        self.r_icon =  QtGui.QIcon(os.path.join(path, 'Images', 'Skel_R.png'))
+        self.m_icon =  QtGui.QIcon(os.path.join(path, 'Images', 'Skel_M.png'))
+
+
     def _RightClickMenu(self):
         menu = QtWidgets.QMenu(self)
         add = QtWidgets.QAction('Add', 
