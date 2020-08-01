@@ -1,14 +1,20 @@
 
-
 from Qt import QtWidgets, QtCore
+
 
 import Skeleton.Skeleton_UI as skel_ui
 reload(skel_ui)
 
 import Popups.MirrorLimbs_UI as mir_ui
-import Popups.DuplicateLimbs_UI as dup_ui
 reload(mir_ui)
+import Popups.DuplicateLimbs_UI as dup_ui
 reload(dup_ui)
+
+import Popups.SaveTemplate_UI as save_ui
+reload(save_ui)
+import Popups.LoadTemplate_UI as load_ui
+reload(load_ui)
+
 
 class LimbSetup_UI(QtWidgets.QTabWidget):
     def __init__(self, limbSetup, mainWindow, parent=None):
@@ -39,7 +45,7 @@ class LimbSetup_UI(QtWidgets.QTabWidget):
         vl.addWidget(self.limbs_tw)
     
     
-#=========== SETUP ====================================
+#=========== MIRROR ====================================
 
     def Mirror_X(self):
         self.mirror_axis = 'X'
@@ -80,6 +86,8 @@ class LimbSetup_UI(QtWidgets.QTabWidget):
             self.skel_ui.limbProp_gb.SetLimb(limbID)
             self.skel_ui.limbProp_gb.Populate()
     
+#=========== DUPLICATE ====================================
+
     def Duplicate_Dialog(self):
         dupUI = dup_ui.DuplicateLimbs_UI(self.limbSetup.limbMng, self)
         dupUI.exec_()
@@ -105,11 +113,33 @@ class LimbSetup_UI(QtWidgets.QTabWidget):
                 # MISSING LOGIC TO ADD TO SCENE BASED ON TAB
                 # Missing Behavior + appearace logic too
     
+#=========== SAVE ====================================
+
+    def Save_Dialog(self):
+        saveUI = save_ui.SaveTemplate_UI(   self.limbSetup.limbMng, 
+                                            self.limbSetup.nameMng,
+                                            self)
+        saveUI.exec_()
+
+    def _Save_Template(self, limbIDs, templateName):
+        data = self.limbSetup.saveLoadSkel.GetData(limbIDs)
+        filePath = self.limbSetup.fileMng.GetTemplatePath(templateName)
+        self.limbSetup.jsonMng.Save(filePath, data)
 
 
+#=========== LOAD ====================================
+
+    def Load_Dialog(self):
+        templateFiles = self.limbSetup.fileMng.GetTemplateFiles()
+        loadUI = load_ui.LoadTemplate_UI(templateFiles, self)
+        loadUI.exec_()
 
 
-
+    def _Load_Template(self, filePaths):
+        for filePath in filePaths:
+            data = self.limbSetup.jsonMng.Load(filePath)
+            self.limbSetup.saveLoadSkel.LoadData(data)
+        self.skel_ui.Populate()
 
 
 

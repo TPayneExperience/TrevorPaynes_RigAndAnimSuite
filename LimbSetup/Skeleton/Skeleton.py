@@ -24,11 +24,12 @@ reload(sm)
 # MISSING TEMPLATE STUFF
 
 class Skeleton():
-    def __init__(self, nameMng, fileMng, jntMng, limbMng):
+    # def __init__(self, nameMng, fileMng, jntMng, limbMng):
+    def __init__(self, nameMng, jntMng, limbMng):
         # self.jntMng = jm.Joint_Manager()
         # self.limbMng = lm.Limb_Manager()
         self.namgMng = nameMng
-        self.fileMng = fileMng
+        # self.fileMng = fileMng
         self.jntMng = jntMng
         self.limbMng = limbMng
         self.jntProp = jp.Joint_Properties(limbMng, jntMng)

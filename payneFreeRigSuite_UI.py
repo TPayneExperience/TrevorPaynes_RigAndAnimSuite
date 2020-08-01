@@ -62,6 +62,9 @@ class PayneFreeRigSuite_UI(QtWidgets.QMainWindow):
         self.Populate()
 
     def Populate(self):
+        # TEMP
+        temp = r'D:\Assets\Programming\Python\Maya\ModularAutoRigger\TEST_OUTPUT'
+        self.limbSetup.fileMng.SetBuildFolderPath(temp)
         self.limbs_tw.Populate()
         # self.skel_ui.Populate()
 
@@ -119,6 +122,16 @@ class PayneFreeRigSuite_UI(QtWidgets.QMainWindow):
                                     self, 
                                     triggered=self.limbs_tw.Duplicate_Dialog)
         
+        
+        save = QtWidgets.QAction('Save Template', 
+                                    self, 
+                                    triggered=self.limbs_tw.Save_Dialog)
+        
+        load = QtWidgets.QAction('Load Template', 
+                                    self, 
+                                    triggered=self.limbs_tw.Load_Dialog)
+        
+
         mirrorMenu.addAction(mirrorX)
         mirrorMenu.addAction(mirrorY)
         mirrorMenu.addAction(mirrorZ)
@@ -127,12 +140,9 @@ class PayneFreeRigSuite_UI(QtWidgets.QMainWindow):
 
         limbsMenu.addAction(duplicate)
         limbsMenu.addSeparator()
-        
-        limbsMenu.addAction('Load Default Template')
-        limbsMenu.addSeparator()
 
-        limbsMenu.addAction('Load Custom Template')
-        limbsMenu.addAction('Save Custom Template')
+        limbsMenu.addAction(load)
+        limbsMenu.addAction(save)
 
     def _Setup_MenuBar_Settings(self):
         settingsMenu = self.menuBar().addMenu('Settings')

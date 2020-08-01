@@ -2826,9 +2826,7 @@
     <addaction name="actionDuplicate"/>
     <addaction name="separator"/>
     <addaction name="actionLoad_Template"/>
-    <addaction name="separator"/>
     <addaction name="actionSagve_Custom_Template"/>
-    <addaction name="actionLoad_Custom_Template"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuTemplates"/>
@@ -2888,12 +2886,12 @@
   </action>
   <action name="actionLoad_Template">
    <property name="text">
-    <string>Load Default Template...</string>
+    <string>Load Template...</string>
    </property>
   </action>
   <action name="actionSagve_Custom_Template">
    <property name="text">
-    <string>Save Custom Template...</string>
+    <string>Save Template...</string>
    </property>
   </action>
   <action name="actionLoad_Custom_Template">
