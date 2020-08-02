@@ -4,8 +4,8 @@ import time
 
 class File_Manager():
     def __init__(self):
-        self._buildFolderPath = '[Missing Folder Path]'
-        self._meshPath = ''
+        self._outputFolder = '[Missing Folder Path]'
+        self._meshFile = ''
         # self._buildFileData = {}
 
         path = os.path.dirname(__file__)
@@ -30,24 +30,26 @@ class File_Manager():
 #========== ACCESSORS + MUTATORS ==================================
 
     def GetMeshPath(self):
-        return self._meshPath
+        return self._meshFile
 
     def SetMeshPath(self, path):
-        self._meshPath = path
+        self._meshFile = path
 
-    def GetBuildFolderPath(self):
-        return self._buildFolderPath
+    # def GetBuildFolderPath(self):
+    def GetOutputFolder(self):
+        return self._outputFolder
 
-    def SetBuildFolderPath(self, path):
-        self._buildFolderPath = path
+    # def SetBuildFolderPath(self, path):
+    def SetOutputFolder(self, path):
+        self._outputFolder = path
 
     def GetLimbSetupPath(self, prefix):
         fileName = '%s_LimbSetup.json' % prefix
-        return os.path.join(self._buildFolderPath, fileName)
+        return os.path.join(self._outputFolder, fileName)
 
     def GetMeshDeformationPath(self, prefix):
         fileName = '%s_MeshDeformation.json' % prefix
-        return os.path.join(self._buildFolderPath, fileName)
+        return os.path.join(self._outputFolder, fileName)
 
     def GetTemplateFiles(self):
         temp = {}
@@ -74,10 +76,10 @@ class File_Manager():
     #     self._buildFileData.clear()
     #     self._nextBuildVersion.clear()
         
-    #     skelPath = os.path.join(self._buildFolderPath, 'Skeleton')
-    #     bhvPath = os.path.join(self._buildFolderPath, 'Behavior')
-    #     appPath = os.path.join(self._buildFolderPath, 'Appearance')
-    #     skinPath = os.path.join(self._buildFolderPath, 'Skinning')
+    #     skelPath = os.path.join(self._outputFolder, 'Skeleton')
+    #     bhvPath = os.path.join(self._outputFolder, 'Behavior')
+    #     appPath = os.path.join(self._outputFolder, 'Appearance')
+    #     skinPath = os.path.join(self._outputFolder, 'Skinning')
 
     #     temp = {'Skeleton': skelPath, 
     #             'Behavior': bhvPath,
@@ -143,7 +145,7 @@ class File_Manager():
     #     return self.GetNextSkeletonPath(self._customTemplatePath, name)
         
     # def GetNextSkeletonBuildPath(self, name = ''):
-    #     return self.GetNextSkeletonPath(self._buildFolderPath, name)
+    #     return self.GetNextSkeletonPath(self._outputFolder, name)
 
     # def GetNextSkeletonPath(self, folderPath, name = ''):
     #     skelPath = os.path.join(folderPath, 'Skeleton')
@@ -166,7 +168,7 @@ class File_Manager():
 
 #     # SAVING
 #     def GetNextBehaviorBuildPath(self, name = ''):
-#         path = os.path.join(self._buildFolderPath, 'Behavior')
+#         path = os.path.join(self._outputFolder, 'Behavior')
 #         fileName = '%s_%03d.json' %(name, self._nextBuildVersion['Behavior'])
 #         self._nextBuildVersion['Behavior'] += 1
 #         if (os.path.isfile(fileName)):
@@ -186,7 +188,7 @@ class File_Manager():
 
 #     # SAVING
 #     def GetNextAppearanceBuildPath(self, name = ''):
-#         path = os.path.join(self._buildFolderPath, 'Appearance')
+#         path = os.path.join(self._outputFolder, 'Appearance')
 #         fileName = '%s_%03d.json' %(name, self._nextBuildVersion['Appearance'])
 #         self._nextBuildVersion['Appearance'] += 1
 #         if (os.path.isfile(fileName)):
@@ -207,7 +209,7 @@ class File_Manager():
 
 #     # SAVING
 #     def GetNextSkinningBuildPath(self, name = ''):
-#         path = os.path.join(self._buildFolderPath, 'Skinning')
+#         path = os.path.join(self._outputFolder, 'Skinning')
 #         fileName = '%s_%03d.json' %(name, self._nextBuildVersion['Skinning'])
 #         self._nextBuildVersion['Skinning'] += 1
 #         if (os.path.isfile(fileName)):

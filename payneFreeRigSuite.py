@@ -7,7 +7,8 @@ import sys
 
 import Utils.File_Manager as fm
 import Utils.Json_Manager as js
-import Utils.Name_Manager as nm
+# import Utils.Name_Manager as nm
+import RigSetup.Name_Manager as nm
 reload(fm)
 reload(js)
 reload(nm)

@@ -2785,6 +2785,7 @@
     </property>
     <addaction name="actionNew"/>
     <addaction name="actionOpen_Skeleton"/>
+    <addaction name="actionEdit_Rig"/>
     <addaction name="separator"/>
     <addaction name="actionSave"/>
     <addaction name="actionSave_As"/>
@@ -2805,7 +2806,6 @@
     <property name="title">
      <string>Settings</string>
     </property>
-    <addaction name="actionRig_Settings_2"/>
     <addaction name="actionAnimation_Library_Folder"/>
     <addaction name="separator"/>
     <addaction name="actionSettings"/>
@@ -2957,6 +2957,11 @@
   <action name="actionExport_FBX">
    <property name="text">
     <string>Export FBX</string>
+   </property>
+  </action>
+  <action name="actionEdit_Rig">
+   <property name="text">
+    <string>Edit Rig...</string>
    </property>
   </action>
  </widget>

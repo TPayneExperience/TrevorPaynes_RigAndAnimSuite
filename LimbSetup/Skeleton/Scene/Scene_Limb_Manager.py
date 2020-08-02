@@ -135,7 +135,7 @@ class Scene_Limb_Manager():
 
     def GetJointName(self, limbID, jointID):
         jointData = self.jntMng.GetJoint(jointID)
-        name = self.nameMng.GetName('TEMP',
+        name = self.nameMng.GetName(self.nameMng.GetPrefix(),
                                     self.limbMng.GetName(limbID),
                                     jointData.name,
                                     self.limbMng.GetSide(limbID),
@@ -144,7 +144,7 @@ class Scene_Limb_Manager():
 
     def GetJointCtrName(self, limbID, jointID):
         jointData = self.jntMng.GetJoint(jointID)
-        name = self.nameMng.GetName('TEMP',
+        name = self.nameMng.GetName(self.nameMng.GetPrefix(),
                                     self.limbMng.GetName(limbID),
                                     jointData.name,
                                     self.limbMng.GetSide(limbID),
@@ -152,7 +152,7 @@ class Scene_Limb_Manager():
         return name
     
     def GetLimbCtrName(self, limbID):
-        name = self.nameMng.GetName('TEMP',
+        name = self.nameMng.GetName(self.nameMng.GetPrefix(),
                                     self.limbMng.GetName(limbID),
                                     'ROOT',
                                     self.limbMng.GetSide(limbID),

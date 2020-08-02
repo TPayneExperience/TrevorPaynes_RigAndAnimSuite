@@ -18,8 +18,8 @@ import LimbSetup.LimbSetup_UI as limbSetup_ui
 reload(limbSetup)
 reload(limbSetup_ui)
 
-# import RigSetup.RigSetup_UI as rs_ui
-# reload(rs_ui)
+import RigSetup.RigSetup_UI as rs_ui
+reload(rs_ui)
 
 # import Utils.File_Manager as fm
 # import Utils.Json_Manager as js
@@ -63,8 +63,9 @@ class PayneFreeRigSuite_UI(QtWidgets.QMainWindow):
 
     def Populate(self):
         # TEMP
-        temp = r'D:\Assets\Programming\Python\Maya\ModularAutoRigger\TEST_OUTPUT'
-        self.limbSetup.fileMng.SetBuildFolderPath(temp)
+        output = r'D:\Assets\Programming\Python\Maya\ModularAutoRigger\TEST_OUTPUT'
+        self.limbSetup.fileMng.SetOutputFolder(output)
+        self.limbSetup.fileMng.SetMeshPath(os.path.join(output, 'temp.ma'))
         self.limbs_tw.Populate()
         # self.skel_ui.Populate()
 
@@ -75,7 +76,6 @@ class PayneFreeRigSuite_UI(QtWidgets.QMainWindow):
         self.StatusMsg('Drag & drop or Right Click on stuff!')
         self.resize(400, 500)
         self.setWindowFlags(self.windowFlags() ^ QtCore.Qt.WindowMinMaxButtonsHint)
-
 
         self._Setup_MainTabWidget()
         self._Setup_MenuBar()
@@ -90,16 +90,31 @@ class PayneFreeRigSuite_UI(QtWidgets.QMainWindow):
         
     def _Setup_MenuBar_FileMenu(self):
         fileMenu = self.menuBar().addMenu('File')
-        newRigAct = fileMenu.addAction('New Rig...')
+        
+        newRigSetup = QtWidgets.QAction('New Rig...', 
+                                    self, 
+                                    triggered=self.NewRig_Dialog)
+
+        editRigSetup = QtWidgets.QAction('Edit Rig...', 
+                                    self, 
+                                    triggered=self.EditRig_Dialog)
+
+        newRigAct = fileMenu.addAction(newRigSetup)
         fileMenu.addAction('Load Rig...')
+        fileMenu.addAction(editRigSetup)
         fileMenu.addSeparator()
 
         fileMenu.addAction('Save')
         fileMenu.addAction('Save As...')
         fileMenu.addSeparator()
 
-        fileMenu.addAction('Import FBX...')
-        fileMenu.addAction('Export FBX...')
+        importFBX = QtWidgets.QAction('Import FBX...', self)
+        importFBX.setEnabled(False)
+        exportFBX = QtWidgets.QAction('Export FBX...', self)
+        exportFBX.setEnabled(False)
+        
+        fileMenu.addAction(importFBX)
+        fileMenu.addAction(exportFBX)
         fileMenu.addSeparator()
 
         quitAct = fileMenu.addAction('Quit')
@@ -180,6 +195,23 @@ class PayneFreeRigSuite_UI(QtWidgets.QMainWindow):
     def StatusMsg(self, message):
         self.statusBar().showMessage(message)
 
+    def NewRig_Dialog(self):
+        rigUI = rs_ui.RigSetup_UI(  self.utils.nameMng,
+                                    self.utils.fileMng,
+                                    self)
+        rigUI.exec_()
+
+    def EditRig_Dialog(self):
+        rigUI = rs_ui.RigSetup_UI(  self.utils.nameMng,
+                                    self.utils.fileMng,
+                                    self)
+        rigUI.SetData(  self.utils.nameMng.GetPrefix(),
+                        self.utils.fileMng.GetMeshPath(),
+                        self.utils.fileMng.GetOutputFolder(),
+                        self.utils.nameMng.GetShowPrefix(),
+                        self.utils.nameMng.GetNamingOrder())
+
+        rigUI.exec_()
     
 #============================================================
     
