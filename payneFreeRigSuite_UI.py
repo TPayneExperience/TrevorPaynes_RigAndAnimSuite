@@ -13,9 +13,7 @@ reload(pfrs)
 
 # import LimbSetup.Skeleton.Skeleton_UI as skel_ui
 # reload(skel_ui)
-import LimbSetup.LimbSetup as limbSetup
 import LimbSetup.LimbSetup_UI as limbSetup_ui
-reload(limbSetup)
 reload(limbSetup_ui)
 
 import RigSetup.RigSetup_UI as rs_ui
@@ -43,10 +41,7 @@ class PayneFreeRigSuite_UI(QtWidgets.QMainWindow):
     def __init__(self, parent=None):
         super(PayneFreeRigSuite_UI, self).__init__(parent)
 
-        self.utils = pfrs.PayneFreeRigSuite()
-        self.limbSetup = limbSetup.LimbSetup(   self.utils.nameMng,
-                                                self.utils.fileMng,
-                                                self.utils.jsonMng)
+        self.pfrs = pfrs.PayneFreeRigSuite()
         # self.fileMng = fm.File_Manager()
         # self.jsonMng = js.Json_Manager()
         # self.rigMng = rig.RigAndAnim_Manager(self.fileMng)
@@ -63,9 +58,9 @@ class PayneFreeRigSuite_UI(QtWidgets.QMainWindow):
 
     def Populate(self):
         # TEMP
-        output = r'D:\Assets\Programming\Python\Maya\ModularAutoRigger\TEST_OUTPUT'
-        self.limbSetup.fileMng.SetOutputFolder(output)
-        self.limbSetup.fileMng.SetMeshPath(os.path.join(output, 'temp.ma'))
+        folder = os.path.join(os.path.dirname(__file__), 'TEST_OUTPUT')
+        self.pfrs.limbSetup.fileMng.SetOutputFile(os.path.join(folder, 'temp.json'))
+        self.pfrs.limbSetup.fileMng.SetMeshPath(os.path.join(folder, 'temp.ma'))
         self.limbs_tw.Populate()
         # self.skel_ui.Populate()
 
@@ -89,30 +84,38 @@ class PayneFreeRigSuite_UI(QtWidgets.QMainWindow):
         self._Setup_MenuBar_Help()
         
     def _Setup_MenuBar_FileMenu(self):
-        fileMenu = self.menuBar().addMenu('File')
-        
-        newRigSetup = QtWidgets.QAction('New Rig...', 
+        # ACTIONS
+        save = QtWidgets.QAction(   'Save', 
+                                    self, 
+                                    triggered=self.pfrs.saveLoadRig.Save)
+        saveAs = QtWidgets.QAction( 'Save As...', 
+                                    self, 
+                                    triggered=self.SaveAs_Dialog)
+        newRig = QtWidgets.QAction( 'New Rig...', 
                                     self, 
                                     triggered=self.NewRig_Dialog)
-
-        editRigSetup = QtWidgets.QAction('Edit Rig...', 
+        loadRig = QtWidgets.QAction('Load Rig...', 
+                                    self, 
+                                    triggered=self.LoadRig_Dialog)
+        editRig = QtWidgets.QAction('Edit Rig...', 
                                     self, 
                                     triggered=self.EditRig_Dialog)
-
-        newRigAct = fileMenu.addAction(newRigSetup)
-        fileMenu.addAction('Load Rig...')
-        fileMenu.addAction(editRigSetup)
-        fileMenu.addSeparator()
-
-        fileMenu.addAction('Save')
-        fileMenu.addAction('Save As...')
-        fileMenu.addSeparator()
-
         importFBX = QtWidgets.QAction('Import FBX...', self)
         importFBX.setEnabled(False)
         exportFBX = QtWidgets.QAction('Export FBX...', self)
         exportFBX.setEnabled(False)
-        
+
+        # ADD TO FILEMENU
+        fileMenu = self.menuBar().addMenu('File')
+        fileMenu.addAction(save)
+        fileMenu.addAction(saveAs)
+        fileMenu.addSeparator()
+
+        fileMenu.addAction(newRig)
+        fileMenu.addAction(loadRig)
+        fileMenu.addAction(editRig)
+        fileMenu.addSeparator()
+
         fileMenu.addAction(importFBX)
         fileMenu.addAction(exportFBX)
         fileMenu.addSeparator()
@@ -160,16 +163,32 @@ class PayneFreeRigSuite_UI(QtWidgets.QMainWindow):
         limbsMenu.addAction(save)
 
     def _Setup_MenuBar_Settings(self):
+        # ACTIONS
+        animFolder = QtWidgets.QAction(   'Set Animation Library Folder...', 
+                                    self)
+        animFolder.setEnabled(False)
+        tool = QtWidgets.QAction(   'Tool Settings...', 
+                                    self)
+        tool.setEnabled(False)
+
+        # ADD TO FILEMENU
         settingsMenu = self.menuBar().addMenu('Settings')
-        settingsMenu.addAction('Rig Settings...')
-        settingsMenu.addAction('Set Animation Library Folder...')
-        settingsMenu.addSeparator()
-        settingsMenu.addAction('Tool Settings...')
+        settingsMenu.addAction(animFolder)
+        settingsMenu.addAction(tool)
 
     def _Setup_MenuBar_Help(self):
+        # ACTIONS
+        doc = QtWidgets.QAction('Documentation...', 
+                                self)
+        doc.setEnabled(False)
+        tut = QtWidgets.QAction('Tutorials...', 
+                                self)
+        tut.setEnabled(False)
+
+        # ADD TO FILEMENU
         helpMenu = self.menuBar().addMenu('Help')
-        helpMenu.addAction('Documentation')
-        helpMenu.addAction('Tutorials')
+        helpMenu.addAction(doc)
+        helpMenu.addAction(tut)
 
 #=========== SETUP MAIN WIDGET====================================
 
@@ -177,10 +196,12 @@ class PayneFreeRigSuite_UI(QtWidgets.QMainWindow):
         main_w = QtWidgets.QWidget(self)
         vl = QtWidgets.QVBoxLayout(main_w)
         self.main_tw = QtWidgets.QTabWidget()
-        self.limbs_tw = limbSetup_ui.LimbSetup_UI(self.limbSetup, self, self.main_tw)
+        self.limbs_tw = limbSetup_ui.LimbSetup_UI(self.pfrs.limbSetup, self, self.main_tw)
         self.main_tw.addTab(self.limbs_tw, 'Limb Setup')
-        self.main_tw.addTab(QtWidgets.QTabWidget(), 'Mesh Deformation')
-        self.main_tw.addTab(QtWidgets.QTabWidget(), 'Animation')
+        index = self.main_tw.addTab(QtWidgets.QTabWidget(), 'Mesh Deformation')
+        self.main_tw.setTabEnabled(index, False)
+        index = self.main_tw.addTab(QtWidgets.QTabWidget(), 'Animation')
+        self.main_tw.setTabEnabled(index, False)
         vl.addWidget(self.main_tw)
         self.setCentralWidget(main_w)
         
@@ -188,30 +209,50 @@ class PayneFreeRigSuite_UI(QtWidgets.QMainWindow):
 #=========== FUNCTIONALITY ====================================
 
     def closeEvent(self, e):
-        self.limbSetup.skel.sceneMng.KillScriptJobs()
-        self.limbSetup.skel.sceneMng.KillSelectionJob()
+        self.pfrs.limbSetup.skel.sceneMng.KillScriptJobs()
+        self.pfrs.limbSetup.skel.sceneMng.KillSelectionJob()
         super(PayneFreeRigSuite_UI, self).closeEvent(e)
     
     def StatusMsg(self, message):
         self.statusBar().showMessage(message)
 
     def NewRig_Dialog(self):
-        rigUI = rs_ui.RigSetup_UI(  self.utils.nameMng,
-                                    self.utils.fileMng,
+        rigUI = rs_ui.RigSetup_UI(  self.pfrs.nameMng,
+                                    self.pfrs.fileMng,
                                     self)
         rigUI.exec_()
 
     def EditRig_Dialog(self):
-        rigUI = rs_ui.RigSetup_UI(  self.utils.nameMng,
-                                    self.utils.fileMng,
+        rigUI = rs_ui.RigSetup_UI(  self.pfrs.nameMng,
+                                    self.pfrs.fileMng,
                                     self)
-        rigUI.SetData(  self.utils.nameMng.GetPrefix(),
-                        self.utils.fileMng.GetMeshPath(),
-                        self.utils.fileMng.GetOutputFolder(),
-                        self.utils.nameMng.GetShowPrefix(),
-                        self.utils.nameMng.GetNamingOrder())
-
+        rigUI.SetData(  self.pfrs.nameMng.GetPrefix(),
+                        self.pfrs.fileMng.GetMeshPath(),
+                        self.pfrs.fileMng.GetOutputFile(),
+                        self.pfrs.nameMng.GetShowPrefix(),
+                        self.pfrs.nameMng.GetNamingOrder())
         rigUI.exec_()
+
+    def LoadRig_Dialog(self):
+        filePath, ignore = QtWidgets.QFileDialog.getOpenFileName(
+                                                self, 
+                                                'Load Rig File',
+                                                __file__,
+                                                '*.json')
+        if (os.path.isfile(filePath)):
+            self.pfrs.saveLoadRig.Load(filePath)
+            self.limbs_tw.Populate()
+    
+    def SaveAs_Dialog(self):
+        filePath, ignore = QtWidgets.QFileDialog.getSaveFileName(self, 
+                                                        'Save Rig File',
+                                                        os.path.dirname(__file__),
+                                                        '*.json')
+        if (filePath):
+            self.pfrs.fileMng.SetOutputFile(filePath)
+            self.pfrs.saveLoadRig.Save()
+
+
     
 #============================================================
     

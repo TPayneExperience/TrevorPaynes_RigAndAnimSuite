@@ -18,7 +18,7 @@ class RigSetup_UI(QtWidgets.QDialog):
         self.fileMng = fileManager
         self.tempNameMng = nm.Name_Manager()
         self.meshFile = ''
-        self.outputFolder = ''
+        self.outputFile = ''
         self._isPopulating = False
 
         self.rigNaming = [ 'Prefix (CAT, ELF)',
@@ -36,15 +36,15 @@ class RigSetup_UI(QtWidgets.QDialog):
         self.Update_SaveBtn()
         self._Setup_Connections()
 
-    def SetData(self, prefix, meshFile, outputFolder, showPrefix, nameOrder):
+    def SetData(self, prefix, meshFile, outputFile, showPrefix, nameOrder):
         self._isPopulating = True
         self.prefix_le.setText(prefix)
 
         self.meshFile = meshFile
         self.meshPath_l.setText('MESH FILE | ' + meshFile)
 
-        self.outputFolder = outputFolder
-        self.outputFolder_l.setText('OUTPUT FOLDER | ' + outputFolder)
+        self.outputFile = outputFile
+        self.outputFile_l.setText('OUTPUT FOLDER | ' + outputFile)
 
         self.showPrefix_cb.setChecked(showPrefix)
         self.tempNameMng.SetShowPrefix(showPrefix)
@@ -104,11 +104,11 @@ class RigSetup_UI(QtWidgets.QDialog):
         # vl.addWidget(gb2)
         
         hl3  = QtWidgets.QHBoxLayout()
-        self.outputFolder_l = QtWidgets.QLabel('OUTPUT FOLDER | [Missing]')
-        self.outputFolder_btn = QtWidgets.QPushButton('...')
-        self.outputFolder_btn.setMaximumSize(25, 100)
-        hl3.addWidget(self.outputFolder_l)
-        hl3.addWidget(self.outputFolder_btn)
+        self.outputFile_l = QtWidgets.QLabel('OUTPUT FOLDER | [Missing]')
+        self.outputFile_btn = QtWidgets.QPushButton('...')
+        self.outputFile_btn.setMaximumSize(25, 100)
+        hl3.addWidget(self.outputFile_l)
+        hl3.addWidget(self.outputFile_btn)
         vl.addLayout(hl3)
 
         return gb
@@ -180,7 +180,7 @@ class RigSetup_UI(QtWidgets.QDialog):
         if not self._isPopulating:
             prefixValid = self.IsPrefixValid()
             meshFileValid = os.path.isfile(self.meshFile)
-            outputValid = os.path.isdir(self.outputFolder)
+            outputValid = bool(self.outputFile)
             combo = prefixValid and meshFileValid and outputValid
             self.save_btn.setEnabled(combo)
             if combo:
@@ -219,22 +219,12 @@ class RigSetup_UI(QtWidgets.QDialog):
     def _Setup_Connections(self):
         self.prefix_le.textChanged.connect(self.Update_SaveBtn)
         self.meshPath_btn.clicked.connect(self.FindMeshFile)
-        self.outputFolder_btn.clicked.connect(self.FindOutputFolder)
+        self.outputFile_btn.clicked.connect(self.SetOutputFile)
         
         self.showPrefix_cb.clicked.connect(self.ToggleShowPrefix)
 
         self.cancel_btn.clicked.connect(self.reject)
         self.save_btn.clicked.connect(self.Save)
-
-    def Save(self):
-        # self._rigSetup.Save()
-        if not self._isPopulating:
-            self.nameMng.SetPrefix(self.tempNameMng.GetPrefix())
-            self.nameMng.SetNamingOrder(self.tempNameMng.GetNamingOrder())
-            self.nameMng.SetShowPrefix(self.tempNameMng.GetShowPrefix())
-            self.fileMng.SetMeshPath(self.meshFile)
-            self.fileMng.SetOutputFolder(self.outputFolder)
-            self.accept()
 
     # def closeEvent(self, event):
     #     self._rigSetup.Cancel()
@@ -266,12 +256,14 @@ class RigSetup_UI(QtWidgets.QDialog):
             self.meshPath_l.setText('MESH FILE | ' + filePath)
             self.Update_SaveBtn()
 
-    def FindOutputFolder(self):
-        folderPath = QtWidgets.QFileDialog.getExistingDirectory(self, 
-                                                'Select Save Folder')
-        if (os.path.isdir(folderPath)):
-            self.outputFolder = folderPath
-            self.outputFolder_l.setText('OUTPUT FOLDER | ' + folderPath)
+    def SetOutputFile(self):
+        filePath, ignore = QtWidgets.QFileDialog.getSaveFileName(self, 
+                                                        'Save Rig File',
+                                                        os.path.dirname(__file__),
+                                                        '*.json')
+        if (filePath):
+            self.outputFile = filePath
+            self.outputFile_l.setText('OUTPUT FOLDER | ' + filePath)
             self.Update_SaveBtn()
 
     def ToggleShowPrefix(self):
@@ -279,8 +271,17 @@ class RigSetup_UI(QtWidgets.QDialog):
         self.tempNameMng.SetShowPrefix(self.showPrefix_cb.isChecked())
         self.Update_ExampleLabels()
 
-        
+    def Save(self):
+        # self._rigSetup.Save()
+        if not self._isPopulating:
+            self.nameMng.SetPrefix(self.tempNameMng.GetPrefix())
+            self.nameMng.SetNamingOrder(self.tempNameMng.GetNamingOrder())
+            self.nameMng.SetShowPrefix(self.tempNameMng.GetShowPrefix())
+            self.fileMng.SetMeshPath(self.meshFile)
+            self.fileMng.SetOutputFile(self.outputFile)
+            self.accept()
 
+        
 #======= CUSTOM REORDER WIDGET ========================================
 
 

@@ -40,8 +40,10 @@ class LimbSetup_UI(QtWidgets.QTabWidget):
                                             self.mainWindow, 
                                             self.limbs_tw)
         self.limbs_tw.addTab(self.skel_ui, 'Skeleton')
-        self.limbs_tw.addTab(QtWidgets.QTabWidget(self.limbs_tw), 'Behaviors')
-        self.limbs_tw.addTab(QtWidgets.QTabWidget(self.limbs_tw), 'Appearance')
+        index = self.limbs_tw.addTab(QtWidgets.QTabWidget(self.limbs_tw), 'Behaviors')
+        self.limbs_tw.setTabEnabled(index, False)
+        index = self.limbs_tw.addTab(QtWidgets.QTabWidget(self.limbs_tw), 'Appearance')
+        self.limbs_tw.setTabEnabled(index, False)
         vl.addWidget(self.limbs_tw)
     
     

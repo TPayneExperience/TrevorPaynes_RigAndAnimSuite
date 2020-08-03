@@ -35,21 +35,19 @@ class File_Manager():
     def SetMeshPath(self, path):
         self._meshFile = path
 
-    # def GetBuildFolderPath(self):
-    def GetOutputFolder(self):
+    def GetOutputFile(self):
         return self._outputFolder
 
-    # def SetBuildFolderPath(self, path):
-    def SetOutputFolder(self, path):
-        self._outputFolder = path
+    def SetOutputFile(self, filePath):
+        self._outputFolder = filePath
 
-    def GetLimbSetupPath(self, prefix):
-        fileName = '%s_LimbSetup.json' % prefix
-        return os.path.join(self._outputFolder, fileName)
+    # def GetRigPath(self, prefix):
+    #     fileName = '%s_PFRS_Rig.json' % prefix
+    #     return os.path.join(self._outputFolder, fileName)
 
-    def GetMeshDeformationPath(self, prefix):
-        fileName = '%s_MeshDeformation.json' % prefix
-        return os.path.join(self._outputFolder, fileName)
+    # def GetMeshDeformationPath(self, prefix):
+    #     fileName = '%s_MeshDeformation.json' % prefix
+    #     return os.path.join(self._outputFolder, fileName)
 
     def GetTemplateFiles(self):
         temp = {}
@@ -62,7 +60,8 @@ class File_Manager():
     def GetTemplatePath(self, templateName):
         fileName = '%s_LimbTemplate.json' % templateName
         return os.path.join(self._templatePath, fileName)
-
+    
+    
 #========== OLD ==================================
 
     # def SetCustomTemplatePath(self, path):
