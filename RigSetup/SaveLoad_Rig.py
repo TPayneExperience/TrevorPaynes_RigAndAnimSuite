@@ -25,7 +25,7 @@ class SaveLoad_Rig():
     def Load(self, filePath):
         self.fileMng.SetOutputFile(filePath)
         data = self.jsonMng.Load(filePath)
-        self._SetRigData(data['Rig Data'])
+        self._SetRigData(data['Rig Data'], filePath)
         self.saveLoadSkel.LoadData(data)
 
     def _GetRigData(self):
@@ -34,15 +34,13 @@ class SaveLoad_Rig():
         data['Naming Order'] = self.nameMng.GetNamingOrder()
         data['Show Prefix'] = self.nameMng.GetShowPrefix()
         data['Mesh File'] = self.fileMng.GetMeshPath()
-        data['Output File'] = self.fileMng.GetOutputFile()
         return data
 
-    def _SetRigData(self, data):
+    def _SetRigData(self, data, filePath):
         self.nameMng.SetPrefix(data['Prefix'])
         self.nameMng.SetNamingOrder(data['Naming Order'])
         self.nameMng.SetShowPrefix(data['Show Prefix'])
         self.fileMng.SetMeshPath(data['Mesh File'])
-        self.fileMng.SetOutputFile(data['Output File'])
 
 
 

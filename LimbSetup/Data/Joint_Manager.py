@@ -5,12 +5,6 @@ reload(jd)
 
 class Joint_Manager():
     def __init__(self):
-        self._nextJointID = 1
-        self._joints = {} # jointID: jointData
-        self._limbJoints = {} # limbID: jointIdList (was jointIDs)
-        self._limbParentJoint = {} # limbID: parentJointID (was parentJointID)
-        self._limbNextJointIndex = {} # limbID: nextJointIndex (was nextJointName)
-        self._mirrorJoints = {} # jointID_01 : jointID_02
         self._axes = ['X', '-X', 'Y', '-Y', 'Z', '-Z']
         self.axisPairs = {  'X': ['X', '-X'],
                             '-X': ['X', '-X'],
@@ -19,6 +13,16 @@ class Joint_Manager():
                             'Z': ['Z', '-Z'],
                             '-Z': ['Z', '-Z']}
         self._rotAxes = ['XYZ', 'XZY', 'YXZ', 'YZX', 'ZXY', 'ZYX']
+
+        self.NewRig()
+
+    def NewRig(self):
+        self._nextJointID = 1
+        self._joints = {} # jointID: jointData
+        self._limbJoints = {} # limbID: jointIdList (was jointIDs)
+        self._limbParentJoint = {} # limbID: parentJointID (was parentJointID)
+        self._limbNextJointIndex = {} # limbID: nextJointIndex (was nextJointName)
+        self._mirrorJoints = {} # jointID_01 : jointID_02
 
 
 #============= ACCESSORS + MUTATORS ============================

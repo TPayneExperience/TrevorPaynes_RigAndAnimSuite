@@ -28,7 +28,7 @@ class Skeleton():
     def __init__(self, nameMng, jntMng, limbMng):
         # self.jntMng = jm.Joint_Manager()
         # self.limbMng = lm.Limb_Manager()
-        self.namgMng = nameMng
+        self.nameMng = nameMng
         # self.fileMng = fileMng
         self.jntMng = jntMng
         self.limbMng = limbMng

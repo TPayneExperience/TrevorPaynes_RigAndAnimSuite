@@ -1,0 +1,112 @@
+{
+    "Limb Data": {
+        "Limb Mirror": {
+            "4": -1
+        }, 
+        "Limb Side": {
+            "4": "M"
+        }, 
+        "Limb Type": {
+            "4": "Chain"
+        }, 
+        "Limb Parent": {
+            "4": -1
+        }, 
+        "Limb Name": {
+            "4": "Arm_Biped"
+        }, 
+        "Limb Mirror Roots": []
+    }, 
+    "Joint Data": {
+        "Limb Joints": {
+            "4": [
+                15, 
+                16, 
+                17, 
+                18
+            ]
+        }, 
+        "Joints": {
+            "16": {
+                "upAxis": "Y", 
+                "name": "Shoulder", 
+                "rotationOrder": "XYZ", 
+                "position": [
+                    0.26436580228296336, 
+                    40.83987395383337, 
+                    -5.646695877715161
+                ], 
+                "rotation": [
+                    0.0, 
+                    89.99999999999999, 
+                    0.0
+                ], 
+                "ID": 16, 
+                "aimAxis": "X"
+            }, 
+            "17": {
+                "upAxis": "Y", 
+                "name": "Elbow", 
+                "rotationOrder": "XYZ", 
+                "position": [
+                    0.2643658022829638, 
+                    40.83987395383336, 
+                    -15.321275263005735
+                ], 
+                "rotation": [
+                    0.0, 
+                    90.0, 
+                    0.0
+                ], 
+                "ID": 17, 
+                "aimAxis": "X"
+            }, 
+            "18": {
+                "upAxis": "Y", 
+                "name": "Wrist", 
+                "rotationOrder": "XYZ", 
+                "position": [
+                    0.2643658022829636, 
+                    40.83987395383336, 
+                    -24.40246141948375
+                ], 
+                "rotation": [
+                    0.0, 
+                    90.0, 
+                    0.0
+                ], 
+                "ID": 18, 
+                "aimAxis": "X"
+            }, 
+            "15": {
+                "upAxis": "Y", 
+                "name": "Clavical", 
+                "rotationOrder": "XYZ", 
+                "position": [
+                    1.9977125820864217, 
+                    40.839873953833354, 
+                    -0.6466958777151577
+                ], 
+                "rotation": [
+                    0.0, 
+                    109.11986388405185, 
+                    0.0
+                ], 
+                "ID": 15, 
+                "aimAxis": "X"
+            }
+        }, 
+        "Mirror Joints": {
+            "16": -1, 
+            "17": -1, 
+            "18": -1, 
+            "15": -1
+        }, 
+        "Limb Next Joint Index": {
+            "4": 5
+        }, 
+        "Limb Parent Joint": {
+            "4": -1
+        }
+    }
+}

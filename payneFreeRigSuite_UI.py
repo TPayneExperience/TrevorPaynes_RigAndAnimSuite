@@ -61,8 +61,9 @@ class PayneFreeRigSuite_UI(QtWidgets.QMainWindow):
         folder = os.path.join(os.path.dirname(__file__), 'TEST_OUTPUT')
         self.pfrs.limbSetup.fileMng.SetOutputFile(os.path.join(folder, 'temp.json'))
         self.pfrs.limbSetup.fileMng.SetMeshPath(os.path.join(folder, 'temp.ma'))
-        self.limbs_tw.Populate()
+        # self.limbs_tw.Populate()
         # self.skel_ui.Populate()
+        self._NewRig()
 
 #=========== SETUP ====================================
 
@@ -220,7 +221,12 @@ class PayneFreeRigSuite_UI(QtWidgets.QMainWindow):
         rigUI = rs_ui.RigSetup_UI(  self.pfrs.nameMng,
                                     self.pfrs.fileMng,
                                     self)
-        rigUI.exec_()
+        if (rigUI.exec_()):
+            self._NewRig()
+
+    def _NewRig(self):
+        self.limbs_tw.NewRig()
+        self.pfrs.saveLoadRig.Save()
 
     def EditRig_Dialog(self):
         rigUI = rs_ui.RigSetup_UI(  self.pfrs.nameMng,
@@ -231,7 +237,8 @@ class PayneFreeRigSuite_UI(QtWidgets.QMainWindow):
                         self.pfrs.fileMng.GetOutputFile(),
                         self.pfrs.nameMng.GetShowPrefix(),
                         self.pfrs.nameMng.GetNamingOrder())
-        rigUI.exec_()
+        if (rigUI.exec_()):
+            self.limbs_tw.RigEditted()
 
     def LoadRig_Dialog(self):
         filePath, ignore = QtWidgets.QFileDialog.getOpenFileName(

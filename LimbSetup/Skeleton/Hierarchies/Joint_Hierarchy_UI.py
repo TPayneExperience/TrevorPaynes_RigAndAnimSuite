@@ -31,6 +31,11 @@ class Joint_Hierarchy_UI(QtWidgets.QListWidget):
             item.setFlags(item.flags() | QtCore.Qt.ItemIsEditable)
             self.addItem(item)
         self._isPopulating = False
+    
+    def Depopulate(self):
+        self._isPopulating = True
+        self.clear()
+        self._isPopulating = False
 
 
 #=========== SETUP ====================================

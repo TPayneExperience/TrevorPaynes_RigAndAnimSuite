@@ -2,6 +2,12 @@
 
 class Limb_Manager():
     def __init__(self):
+        self._limbSidesOptions = ['M', 'L', 'R']
+        self._limbTypes = ['Chain', 'Branch', 'Linear_Chain', 'Linear_Branch']
+
+        self.NewRig()
+
+    def NewRig(self):
         self._nextLimbID = 1
         self._limbName = {} # ID : Name
         self._limbType = {} # ID : string,  ['Chain', 'Branch', 'Linear_Chain']
@@ -9,9 +15,6 @@ class Limb_Manager():
         self._limbParent = {} # limbID : parentID 
         self._limbMirror = {} # limbID_01 : limbID_02 (was mirrorLimbID)
         self._limbMirrorRoots = []
-        
-        self._limbSidesOptions = ['M', 'L', 'R']
-        self._limbTypes = ['Chain', 'Branch', 'Linear_Chain', 'Linear_Branch']
 
 #============= ACCESSORS + MUTATORS ============================
 
@@ -175,17 +178,18 @@ class Limb_Manager():
     def Duplicate(self, ID_01):
         ID_02 = self.Add()
         self._limbType[ID_02] = self._limbType[ID_01]
+        self._limbName[ID_02] = self._limbName[ID_01] + '_2'
         self.SetParent(ID_02, self._limbParent[ID_01])
         return ID_02
 
 
 #============= SAVE + LOAD ============================
 
-    def GetSaveData(self, limbID):
-        pass
+    # def GetSaveData(self, limbID):
+    #     pass
 
-    def LoadData(self, limbID):
-        pass
+    # def LoadData(self, limbID):
+    #     pass
 
     # def AddTemplate_Limbs(self, limbDataList, 
     #                             limbChildParentDict,

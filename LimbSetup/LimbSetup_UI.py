@@ -115,6 +115,7 @@ class LimbSetup_UI(QtWidgets.QTabWidget):
                 # MISSING LOGIC TO ADD TO SCENE BASED ON TAB
                 # Missing Behavior + appearace logic too
     
+
 #=========== SAVE ====================================
 
     def Save_Dialog(self):
@@ -144,8 +145,12 @@ class LimbSetup_UI(QtWidgets.QTabWidget):
         self.skel_ui.Populate()
 
 
+#=========== MISC ====================================
 
+    def NewRig(self):
+        self.skel_ui.NewRig()
 
-
+    def RigEditted(self):
+        self.skel_ui.RigEditted()
 
 

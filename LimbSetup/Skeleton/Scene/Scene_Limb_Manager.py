@@ -18,19 +18,23 @@ class Scene_Limb_Manager():
         self.jntMng = jointManager
         self.nameMng = nameManager
 
-        # Always track old data, for teardowns
-        self.sceneJoints = {} # ID : sceneJoint 
-        self.jointCtrs = {} # jointID : jointCtr
-        self.limbCtrs = {} # limbID : limbCtr
-        self.limbJoints = {} #limbID : jointIdList
-        self.limbTypes = {} # limbID : str Type, 'chain', 'branch'...
-        
         self.limbBuildTypes = { 
             self.limbMng.GetTypes()[0]: cl.Scene_Limb_Chain(self),
             self.limbMng.GetTypes()[1]: bl.Scene_Limb_Branch(self),
             self.limbMng.GetTypes()[2]: lcl.Scene_Limb_LinearChain(self),
             self.limbMng.GetTypes()[3]: lbl.Scene_Limb_LinearBranch(self)
             }
+        
+        self.NewRig()
+
+    def NewRig(self):
+        # Always track old data, for teardowns
+        self.sceneJoints = {} # ID : sceneJoint 
+        self.jointCtrs = {} # jointID : jointCtr
+        self.limbCtrs = {} # limbID : limbCtr
+        self.limbJoints = {} #limbID : jointIdList
+        self.limbTypes = {} # limbID : str Type, 'chain', 'branch'...
+
 
 #======= SETUP + TEARDOWNS ===================================
 

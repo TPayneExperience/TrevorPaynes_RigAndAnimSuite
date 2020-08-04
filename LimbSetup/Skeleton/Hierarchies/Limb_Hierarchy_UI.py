@@ -177,26 +177,27 @@ class Limb_Hierarchy_UI(QtWidgets.QTreeWidget):
 
     def _Remove(self):
         '''Remove children then remove this limb'''
-        ID = self.currentItem().ID
-        name = self.limbHier.limbMng.GetName(ID)
+        limbID = self.currentItem().ID
+        name = self.limbHier.limbMng.GetName(limbID)
         result = QtWidgets.QMessageBox.warning(self, 
                             'REMOVE LIMBS',
-                            'Are you sure you want to remove limb "' + name + '"?',
+                            'Are you sure you want to remove limb "%s"?' % name,
                             QtWidgets.QMessageBox.Cancel, 
                             QtWidgets.QMessageBox.Ok
                             )
         if (result==QtWidgets.QMessageBox.Ok):
-            limbIDs = self.limbHier.limbMng.GetLimbCreationOrder(ID)
-            limbNames = [self.limbHier.limbMng.GetName(lID) for lID in limbIDs]
-            for limbID in limbIDs[::-1]:
-                mirrorID = self.limbHier.limbMng.GetMirror(limbID)
-                self.limbHier.Remove(limbID)
-                self.parent.RemoveLimb(limbID)
-                if (mirrorID != -1):
-                    self.parent.RenameLimb(mirrorID)
-            msg = 'Removed limbs ' + str(limbNames)
-            self.parent.StatusMsg(msg)
-            self.Populate()
+            self.parent.RemoveLimb(limbID)
+            # limbIDs = self.limbHier.limbMng.GetLimbCreationOrder(ID)
+            # limbNames = [self.limbHier.limbMng.GetName(lID) for lID in limbIDs]
+            # for limbID in limbIDs[::-1]:
+            #     mirrorID = self.limbHier.limbMng.GetMirror(limbID)
+            #     self.limbHier.Remove(limbID)
+            #     self.parent.RemoveLimb(limbID)
+            #     if (mirrorID != -1):
+            #         self.parent.RenameLimb(mirrorID)
+            # msg = 'Removed limbs ' + str(limbNames)
+            # self.parent.StatusMsg(msg)
+            # self.Populate()
 
     def _Rename(self, item, column):
         if not self._isPopulating:
@@ -235,15 +236,8 @@ class Limb_Hierarchy_UI(QtWidgets.QTreeWidget):
                     oldParentID = self.limbHier.limbMng.GetParentID(childID)
                     self.limbHier.limbMng.SetParent(childID, parentID)
                     self.limbHier.jntMng.SetParentLimb(childID, parentID)
-                    self.parent.ReparentLimb(childID, oldParentID)
                     self.expandAll()
-                    if (parentID == -1):
-                        newParentName = 'World'
-                    else:
-                        newParentName = self.limbHier.limbMng.GetName(parentID)
-                    limbName = self.limbHier.limbMng.GetName(childID)
-                    msg = 'Reparenting "%s" to "%s"' % (limbName, newParentName)
-                    self.parent.StatusMsg(msg)
+                    self.parent.ReparentLimb(childID, oldParentID)
                     break
             # else:
             #     self.Populate()

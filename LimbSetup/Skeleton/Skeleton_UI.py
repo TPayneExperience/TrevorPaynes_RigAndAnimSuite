@@ -36,6 +36,7 @@ class Skeleton_UI(QtWidgets.QTabWidget):
 
     def Populate(self): # CALLED BY MAIN WINDOW
         self.limbHier_tw.Populate()
+        self.jntHier_lw.clear()
         self.limbProp_gb.hide()
         self.jntProp_gb.hide()
         self.skel.sceneMng.Teardown_Editable()
@@ -120,6 +121,7 @@ class Skeleton_UI(QtWidgets.QTabWidget):
         vl.addLayout(hl)
 
         self.jointCount_l = QtWidgets.QLabel('Total Joints: 128')
+        self.jointCount_l.setAlignment(QtCore.Qt.AlignHCenter)
         vl.addWidget(self.jointCount_l)
 
         return gb
@@ -180,12 +182,39 @@ class Skeleton_UI(QtWidgets.QTabWidget):
         self._LimbSelected()
         self._UpdateJointCountLabel()
 
-    def RemoveLimb(self, limbID):
-        self.skel.sceneMng.Remove_Editable_Limb(limbID)
+    def RemoveLimb(self, rootLimbID):
+        limbIDs = self.skel.limbMng.GetLimbCreationOrder(rootLimbID)
+        limbNames = [self.skel.limbMng.GetName(ID) for ID in limbIDs]
+        for limbID in limbIDs[::-1]:
+            mirrorID = self.skel.limbMng.GetMirror(limbID)
+            self.limbHier_tw.limbHier.Remove(limbID)
+            # self.RemoveLimb(limbID)
+            if (mirrorID != -1):
+                self.RenameLimb(mirrorID)
+        self.StatusMsg('Removed limbs ' + str(limbNames))
+        self.limbHier_tw.Populate()
+        self.jntHier_lw.Depopulate()
+        self.limbProp_gb.hide()
+        self.jntProp_gb.hide()
+        self.skel.sceneMng.Remove_Editable_Limb(rootLimbID)
         self._UpdateJointCountLabel()
 
     def ReparentLimb(self, limbID, oldParentID): # limb hier changed
         self.skel.sceneMng.Reparent_Editable_Limb(limbID, oldParentID)
+        items = self.limbHier_tw.selectedItems()
+        if (items):
+            limbID = items[0].ID
+            self.limbProp_gb.SetLimb(limbID)
+            self.limbProp_gb.Populate()
+
+        newParentID = self.skel.limbMng.GetParentID(limbID)
+        limbName = self.skel.limbMng.GetName(limbID)
+        if (newParentID == -1):
+            newParentName = 'World'
+        else:
+            newParentName = self.skel.limbMng.GetName(newParentID)
+        msg = 'Reparenting "%s" to "%s"' % (limbName, newParentName)
+        self.StatusMsg(msg)
 
     def RebuildLimb(self, limbID): # limb type changed
         self.skel.sceneMng.Rebuild_Editable_Limb(limbID)
@@ -193,6 +222,7 @@ class Skeleton_UI(QtWidgets.QTabWidget):
     def LimbParentJointChanged(self, limbID):
         self.skel.sceneMng.Teardown_External_JointParents(limbID)
         self.skel.sceneMng.Setup_External_JointParents(limbID)
+        self.skel.sceneMng.SelectLimbControl(limbID)
 
     def RenameLimb(self, limbID):
         self.skel.sceneMng.sceneLimbMng.RenameLimb(limbID)
@@ -336,6 +366,19 @@ class Skeleton_UI(QtWidgets.QTabWidget):
 
     def StatusMsg(self, message):
         self.mainWindow.StatusMsg(message)
+    
+    def NewRig(self):
+        self.skel.jntMng.NewRig()
+        self.skel.limbMng.NewRig()
+        self.skel.sceneMng.NewRig()
+        self.Populate()
+    
+    def RigEditted(self):
+        # populate limbhier, jnt hier, 
+        # scene mng
+        self.skel.sceneMng.Teardown_Editable()
+        self.skel.sceneMng.Setup_Editable()
+        self.skel.sceneMng.SetPrefix(self.skel.nameMng.GetPrefix())
 
 # if __name__ == '__main__':
 #     app = QtWidgets.QApplication(sys.argv)

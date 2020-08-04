@@ -16,16 +16,28 @@ class Scene_Manager():
         self.limbParents = {} # limbID : parentLimbID
         self.scriptJobs = []
         self.selectedLimbs = set()
+        self.lastDisplaySize = 1
 
         self.sceneLimbMng = slm.Scene_Limb_Manager(limbManager, jointManager, nameManager)
 
-        self.lastDisplaySize = 1
-        self._SetupScene()
+        self.NewRig()
     
-    def _SetupScene(self):
+    def NewRig(self):
+        self.Teardown_Editable()
+        self.KillScriptJobs()
+        cmds.flushUndo()
+        cmds.file(newFile=1, force=1)
         cmds.select(d=True)
+        self.lastDisplaySize = 1
+        self.sceneLimbMng.NewRig()
+
+        self.rootGrp = cmds.group(name='Temp', em=True)
+        prefix = self.nameMng.GetPrefix()
+        self.SetPrefix(prefix)
         self.rootJntGrp = cmds.group(name='Joint_GRP',em=True)
         self.rootCtrGrp = cmds.group(name='Control_GRP', em=True)
+        cmds.parent(self.rootJntGrp, self.rootGrp)
+        cmds.parent(self.rootCtrGrp, self.rootGrp)
         self.skelLayer = cmds.createDisplayLayer(n='Skel Joints', e=True)
         cmds.setAttr(self.skelLayer + '.displayType', 2)
         cmds.select(d=True)
@@ -236,6 +248,7 @@ class Scene_Manager():
         for job in self.scriptJobs:
             cmds.scriptJob(kill=job, force=True)
         self.scriptJobs = []
+        self.selectedLimbs.clear()
 
     def KillSelectionJob(self):
         cmds.scriptJob(kill=self.selectionScriptJob, force=True)
@@ -253,6 +266,10 @@ class Scene_Manager():
         print(msg)
 
 # ======= MISC  ===================================
+
+    def SetPrefix(self, prefix):
+        newName = '%s_ROOT' % prefix
+        self.rootGrp = cmds.rename(self.rootGrp, newName)
 
     def MoveToVertsCenter(self):
         sel = cmds.ls(sl=True)

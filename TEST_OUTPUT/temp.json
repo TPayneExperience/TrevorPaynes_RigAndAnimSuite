@@ -7,7 +7,6 @@
             3, 
             4
         ], 
-        "Output File": "D:/Assets/Programming/Python/Maya/ModularAutoRigger\\TEST_OUTPUT\\temp.json", 
         "Prefix": "PREFIX", 
         "Mesh File": "D:/Assets/Programming/Python/Maya/ModularAutoRigger\\TEST_OUTPUT\\temp.ma", 
         "Show Prefix": true
