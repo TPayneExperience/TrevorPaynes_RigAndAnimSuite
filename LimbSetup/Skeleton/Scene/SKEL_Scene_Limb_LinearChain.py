@@ -1,7 +1,7 @@
 
 from maya import cmds
 
-class Scene_Limb_LinearChain():
+class SKEL_Scene_Limb_LinearChain():
     def __init__(self, sceneManager):
         self.sceneMng = sceneManager
         self.type = self.sceneMng.limbMng.GetTypes()[2] # 'Linear Chain'

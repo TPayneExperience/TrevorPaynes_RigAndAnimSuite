@@ -1,7 +1,7 @@
 
 from maya import cmds
 
-class Scene_Limb_Branch():
+class SKEL_Scene_Limb_Branch():
     def __init__(self, sceneManager):
         self.sceneMng = sceneManager
         self.type = self.sceneMng.limbMng.GetTypes()[1] # 'Branch'

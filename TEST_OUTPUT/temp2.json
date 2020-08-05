@@ -1,0 +1,95 @@
+{
+    "Rig Data": {
+        "Naming Order": [
+            0, 
+            1, 
+            2, 
+            3, 
+            4
+        ], 
+        "Prefix": "MyPrefix", 
+        "Mesh File": "D:/Assets/Programming/Python/Maya/ModularAutoRigger/TEST_OUTPUT/temp_sphere.ma", 
+        "Show Prefix": true
+    }, 
+    "Limb Data": {
+        "Limb Mirror": {
+            "1": -1, 
+            "2": -1
+        }, 
+        "Limb Side": {
+            "1": "M", 
+            "2": "M"
+        }, 
+        "Limb Type": {
+            "1": "Chain", 
+            "2": "Chain"
+        }, 
+        "Limb Parent": {
+            "1": -1, 
+            "2": 1
+        }, 
+        "Limb Name": {
+            "1": "asdfasdf", 
+            "2": "fdfdf"
+        }, 
+        "Limb Mirror Roots": []
+    }, 
+    "Joint Data": {
+        "Limb Joints": {
+            "1": [
+                1
+            ], 
+            "2": [
+                2
+            ]
+        }, 
+        "Joints": {
+            "1": {
+                "upAxis": "Y", 
+                "name": "Joint_001", 
+                "rotationOrder": "XYZ", 
+                "position": [
+                    0, 
+                    0, 
+                    0
+                ], 
+                "rotation": [
+                    0, 
+                    0, 
+                    0
+                ], 
+                "ID": 1, 
+                "aimAxis": "X"
+            }, 
+            "2": {
+                "upAxis": "Y", 
+                "name": "Joint_001", 
+                "rotationOrder": "XYZ", 
+                "position": [
+                    0, 
+                    0, 
+                    0
+                ], 
+                "rotation": [
+                    0, 
+                    0, 
+                    0
+                ], 
+                "ID": 2, 
+                "aimAxis": "X"
+            }
+        }, 
+        "Mirror Joints": {
+            "1": -1, 
+            "2": -1
+        }, 
+        "Limb Next Joint Index": {
+            "1": 2, 
+            "2": 2
+        }, 
+        "Limb Parent Joint": {
+            "1": -1, 
+            "2": 1
+        }
+    }
+}

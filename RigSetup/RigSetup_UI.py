@@ -247,7 +247,7 @@ class RigSetup_UI(QtWidgets.QDialog):
         filePath, ignore = QtWidgets.QFileDialog.getOpenFileName(self, 
                                                     'Select Mesh File',
                                                     # self._rigSetup.GetMeshPath(),
-                                                    __file__,
+                                                    self.fileMng.GetMeshPath(),
                                                     '*.ma')
         if (os.path.isfile(filePath)):
             # self._rigSetup.SetMeshPath(filePath)
@@ -259,7 +259,7 @@ class RigSetup_UI(QtWidgets.QDialog):
     def SetOutputFile(self):
         filePath, ignore = QtWidgets.QFileDialog.getSaveFileName(self, 
                                                         'Save Rig File',
-                                                        os.path.dirname(__file__),
+                                                        self.fileMng.GetOutputFile(),
                                                         '*.json')
         if (filePath):
             self.outputFile = filePath

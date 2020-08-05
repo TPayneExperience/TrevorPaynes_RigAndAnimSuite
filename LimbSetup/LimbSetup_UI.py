@@ -147,10 +147,10 @@ class LimbSetup_UI(QtWidgets.QTabWidget):
 
 #=========== MISC ====================================
 
-    def NewRig(self):
-        self.skel_ui.NewRig()
+    def NewRig(self, rootGrp):
+        self.skel_ui.NewRig(rootGrp)
 
-    def RigEditted(self):
-        self.skel_ui.RigEditted()
+    def UpdateNaming(self):
+        self.skel_ui.UpdateNaming()
 
 

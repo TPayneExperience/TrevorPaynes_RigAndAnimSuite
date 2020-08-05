@@ -17,7 +17,7 @@ import Hierarchies.Limb_Hierarchy as lh
 reload(jh)
 reload(lh)
 
-import Scene.Scene_Manager as sm
+import Scene.SKEL_Scene_Manager as sm
 reload(sm)
 
 
@@ -36,7 +36,7 @@ class Skeleton():
         self.limbProp = lp.Limb_Properties(limbMng, jntMng)
         self.jntHier = jh.Joint_Hierarchy(limbMng, jntMng, nameMng)
         self.limbHier = lh.Limb_Hierarchy(limbMng,jntMng, nameMng)
-        self.sceneMng = sm.Scene_Manager(limbMng, jntMng, nameMng, self)
+        self.sceneMng = sm.SKEL_Scene_Manager(limbMng, jntMng, nameMng, self)
         # self.saveLoadSkel = sls.SaveLoad_Skeleton(limbMng, jntMng)
         # self.parent = None # set to skel ui later
 

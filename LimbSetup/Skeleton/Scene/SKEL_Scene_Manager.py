@@ -1,11 +1,11 @@
 
 from maya import cmds
 
-import Scene_Limb_Manager as slm
+import SKEL_Scene_Limb_Manager as slm
 
 reload(slm)
 
-class Scene_Manager():
+class SKEL_Scene_Manager():
     def __init__(self, limbManager, jointManager, nameManager, parent=None):
         self.limbMng = limbManager
         self.jntMng = jointManager
@@ -18,31 +18,10 @@ class Scene_Manager():
         self.selectedLimbs = set()
         self.lastDisplaySize = 1
 
-        self.sceneLimbMng = slm.Scene_Limb_Manager(limbManager, jointManager, nameManager)
+        self.sceneLimbMng = slm.SKEL_Scene_Limb_Manager(limbManager, jointManager, nameManager)
 
-        self.NewRig()
+        # self.NewRig()
     
-    def NewRig(self):
-        self.Teardown_Editable()
-        self.KillScriptJobs()
-        cmds.flushUndo()
-        cmds.file(newFile=1, force=1)
-        cmds.select(d=True)
-        self.lastDisplaySize = 1
-        self.sceneLimbMng.NewRig()
-
-        self.rootGrp = cmds.group(name='Temp', em=True)
-        prefix = self.nameMng.GetPrefix()
-        self.SetPrefix(prefix)
-        self.rootJntGrp = cmds.group(name='Joint_GRP',em=True)
-        self.rootCtrGrp = cmds.group(name='Control_GRP', em=True)
-        cmds.parent(self.rootJntGrp, self.rootGrp)
-        cmds.parent(self.rootCtrGrp, self.rootGrp)
-        self.skelLayer = cmds.createDisplayLayer(n='Skel Joints', e=True)
-        cmds.setAttr(self.skelLayer + '.displayType', 2)
-        cmds.select(d=True)
-        self.selectionScriptJob = cmds.scriptJob(e=['SelectionChanged', self.SelectionChanged])
-        
 
 # ======= SETUP / TEARDOWN OF EDITABLE / FINAL ========================
 
@@ -267,9 +246,9 @@ class Scene_Manager():
 
 # ======= MISC  ===================================
 
-    def SetPrefix(self, prefix):
-        newName = '%s_ROOT' % prefix
-        self.rootGrp = cmds.rename(self.rootGrp, newName)
+    # def SetPrefix(self, prefix):
+    #     newName = '%s_ROOT' % prefix
+    #     self.rootGrp = cmds.rename(self.rootGrp, newName)
 
     def MoveToVertsCenter(self):
         sel = cmds.ls(sl=True)
@@ -278,3 +257,23 @@ class Scene_Manager():
         pos = ((bb[0] + bb[3]) / 2, (bb[1] + bb[4]) / 2, (bb[2] + bb[5]) / 2)
         cmds.xform(ctr, t=pos, ws=True)
 
+    def NewRig(self, rootGrp):
+        # self.Teardown_Editable()
+        # self.KillScriptJobs()
+        cmds.select(d=True)
+        self.lastDisplaySize = 1
+        self.sceneLimbMng.NewRig()
+
+        # self.rootGrp = cmds.group(name='Temp', em=True)
+        # prefix = self.nameMng.GetPrefix()
+        # self.SetPrefix(prefix)
+        self.rootJntGrp = cmds.group(name='Joint_GRP',em=True)
+        self.rootCtrGrp = cmds.group(name='Control_GRP', em=True)
+        cmds.parent(self.rootJntGrp, rootGrp)
+        cmds.parent(self.rootCtrGrp, rootGrp)
+        self.skelLayer = cmds.createDisplayLayer(n='Skel Joints', e=True)
+        cmds.setAttr(self.skelLayer + '.displayType', 2)
+        cmds.select(d=True)
+        self.selectionScriptJob = cmds.scriptJob(e=['SelectionChanged', self.SelectionChanged])
+        
+    

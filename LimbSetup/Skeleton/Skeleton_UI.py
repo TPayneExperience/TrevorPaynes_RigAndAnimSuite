@@ -367,18 +367,22 @@ class Skeleton_UI(QtWidgets.QTabWidget):
     def StatusMsg(self, message):
         self.mainWindow.StatusMsg(message)
     
-    def NewRig(self):
+    def NewRig(self, rootGrp):
         self.skel.jntMng.NewRig()
         self.skel.limbMng.NewRig()
-        self.skel.sceneMng.NewRig()
+        self.skel.sceneMng.NewRig(rootGrp)
         self.Populate()
     
-    def RigEditted(self):
+    def UpdateNaming(self):
         # populate limbhier, jnt hier, 
         # scene mng
         self.skel.sceneMng.Teardown_Editable()
         self.skel.sceneMng.Setup_Editable()
-        self.skel.sceneMng.SetPrefix(self.skel.nameMng.GetPrefix())
+        # self.skel.sceneMng.SetPrefix(self.skel.nameMng.GetPrefix())
+
+    def TeardownRig(self):
+        self.skel.sceneMng.Teardown_Editable()
+        self.skel.sceneMng.KillScriptJobs()
 
 # if __name__ == '__main__':
 #     app = QtWidgets.QApplication(sys.argv)

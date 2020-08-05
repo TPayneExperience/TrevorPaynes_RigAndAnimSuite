@@ -5,7 +5,7 @@ All LimbSetup, MeshDeformation and Animation data will be
 packaged here for saving.
 '''
 
-class SaveLoad_Rig():
+class RIG_SaveLoad():
     def __init__(   self, 
                     nameMng,
                     fileMng,

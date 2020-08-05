@@ -1,10 +1,10 @@
 
 from maya import cmds
 
-import Scene_Limb_Chain as cl
-import Scene_Limb_Branch as bl
-import Scene_Limb_LinearChain as lcl
-import Scene_Limb_LinearBranch as lbl
+import SKEL_Scene_Limb_Chain as cl
+import SKEL_Scene_Limb_Branch as bl
+import SKEL_Scene_Limb_LinearChain as lcl
+import SKEL_Scene_Limb_LinearBranch as lbl
 
 reload(cl)
 reload(bl)
@@ -12,17 +12,17 @@ reload(lcl)
 reload(lbl)
 
 
-class Scene_Limb_Manager():
+class SKEL_Scene_Limb_Manager():
     def __init__(self, limbManager, jointManager, nameManager):
         self.limbMng = limbManager
         self.jntMng = jointManager
         self.nameMng = nameManager
 
         self.limbBuildTypes = { 
-            self.limbMng.GetTypes()[0]: cl.Scene_Limb_Chain(self),
-            self.limbMng.GetTypes()[1]: bl.Scene_Limb_Branch(self),
-            self.limbMng.GetTypes()[2]: lcl.Scene_Limb_LinearChain(self),
-            self.limbMng.GetTypes()[3]: lbl.Scene_Limb_LinearBranch(self)
+            self.limbMng.GetTypes()[0]: cl.SKEL_Scene_Limb_Chain(self),
+            self.limbMng.GetTypes()[1]: bl.SKEL_Scene_Limb_Branch(self),
+            self.limbMng.GetTypes()[2]: lcl.SKEL_Scene_Limb_LinearChain(self),
+            self.limbMng.GetTypes()[3]: lbl.SKEL_Scene_Limb_LinearBranch(self)
             }
         
         self.NewRig()

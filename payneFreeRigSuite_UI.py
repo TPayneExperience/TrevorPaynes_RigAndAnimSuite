@@ -225,10 +225,17 @@ class PayneFreeRigSuite_UI(QtWidgets.QMainWindow):
             self._NewRig()
 
     def _NewRig(self):
-        self.limbs_tw.NewRig()
+        self.pfrs.rigSceneMng.NewRig()
+        self.limbs_tw.NewRig(self.pfrs.rigSceneMng.rootGrp)
         self.pfrs.saveLoadRig.Save()
 
     def EditRig_Dialog(self):
+        tempPrefix = self.pfrs.nameMng.GetPrefix()
+        tempMeshPath = self.pfrs.fileMng.GetMeshPath()
+        tempOutputPath = self.pfrs.fileMng.GetOutputFile()
+        tempShowPrefix = self.pfrs.nameMng.GetShowPrefix()
+        tempOrder = self.pfrs.nameMng.GetNamingOrder()
+
         rigUI = rs_ui.RigSetup_UI(  self.pfrs.nameMng,
                                     self.pfrs.fileMng,
                                     self)
@@ -237,8 +244,21 @@ class PayneFreeRigSuite_UI(QtWidgets.QMainWindow):
                         self.pfrs.fileMng.GetOutputFile(),
                         self.pfrs.nameMng.GetShowPrefix(),
                         self.pfrs.nameMng.GetNamingOrder())
+
         if (rigUI.exec_()):
-            self.limbs_tw.RigEditted()
+            prefix = (tempPrefix != self.pfrs.nameMng.GetPrefix())
+            meshPath = (tempMeshPath != self.pfrs.fileMng.GetMeshPath())
+            outputPath = (tempOutputPath != self.pfrs.fileMng.GetOutputFile())
+            showPrefix = (tempShowPrefix != self.pfrs.nameMng.GetShowPrefix())
+            order = (tempOrder != self.pfrs.nameMng.GetNamingOrder())
+            if (prefix):
+                self.pfrs.rigSceneMng.UpdatePrefix()
+            if (prefix or showPrefix or order):
+                self.limbs_tw.UpdateNaming()
+            if meshPath:
+                self.pfrs.rigSceneMng.UpdateMeshes()
+            if outputPath:
+                self.pfrs.saveLoadRig.Save()
 
     def LoadRig_Dialog(self):
         filePath, ignore = QtWidgets.QFileDialog.getOpenFileName(
