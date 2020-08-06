@@ -1,44 +1,28 @@
 
-# import Data.Joint_Manager as jm
-# import Data.Limb_Manager as lm
-# reload(jm)
-# reload(lm)
-
-# import Data.SaveLoad_Skeleton as sls
-# reload(sls)
-
-import Properties.Joint_Properties as jp
-import Properties.Limb_Properties as lp
+import Properties.SKEL_Joint_Properties as jp
 reload(jp)
+import Properties.SKEL_Limb_Properties as lp
 reload(lp)
 
-import Hierarchies.Joint_Hierarchy as jh
-import Hierarchies.Limb_Hierarchy as lh
+import Hierarchies.SKEL_Joint_Hierarchy as jh
 reload(jh)
+import Hierarchies.SKEL_Limb_Hierarchy as lh
 reload(lh)
 
 import Scene.SKEL_Scene_Manager as sm
 reload(sm)
 
 
-# MISSING TEMPLATE STUFF
-
 class Skeleton():
-    # def __init__(self, nameMng, fileMng, jntMng, limbMng):
     def __init__(self, nameMng, jntMng, limbMng):
-        # self.jntMng = jm.Joint_Manager()
-        # self.limbMng = lm.Limb_Manager()
         self.nameMng = nameMng
-        # self.fileMng = fileMng
         self.jntMng = jntMng
         self.limbMng = limbMng
-        self.jntProp = jp.Joint_Properties(limbMng, jntMng)
-        self.limbProp = lp.Limb_Properties(limbMng, jntMng)
-        self.jntHier = jh.Joint_Hierarchy(limbMng, jntMng, nameMng)
-        self.limbHier = lh.Limb_Hierarchy(limbMng,jntMng, nameMng)
+        self.jntProp = jp.SKEL_Joint_Properties(limbMng, jntMng)
+        self.limbProp = lp.SKEL_Limb_Properties(limbMng, jntMng)
+        self.jntHier = jh.SKEL_Joint_Hierarchy(limbMng, jntMng, nameMng)
+        self.limbHier = lh.SKEL_Limb_Hierarchy(limbMng,jntMng, nameMng)
         self.sceneMng = sm.SKEL_Scene_Manager(limbMng, jntMng, nameMng, self)
-        # self.saveLoadSkel = sls.SaveLoad_Skeleton(limbMng, jntMng)
-        # self.parent = None # set to skel ui later
 
 
 

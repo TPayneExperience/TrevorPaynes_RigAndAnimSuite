@@ -2,10 +2,9 @@ import sys
 
 from Qt import QtWidgets, QtCore, QtGui
 
-# class Limb_Properties_UI(QtWidgets.QGroupBox)
-class Limb_Properties_UI(QtWidgets.QWidget):
+class SKEL_Limb_Properties_UI(QtWidgets.QWidget):
     def __init__(self, Limb_Properties, parent=None):
-        super(Limb_Properties_UI, self).__init__(parent)
+        super(SKEL_Limb_Properties_UI, self).__init__(parent)
         self.parent = parent
         self.limbProps = Limb_Properties
         self._parentJoints = []
@@ -133,17 +132,6 @@ class Limb_Properties_UI(QtWidgets.QWidget):
     def _JointCount_Changed(self):
         if not self._isPopulating:
             self.parent.SetJointCount(self.limbProps.limbID, self.jointCount_sb.value())
-
-
-
-if __name__ == '__main__':
-    app = QtWidgets.QApplication(sys.argv)
-    ex = Limb_Properties_UI()
-
-    ex.show()
-    sys.exit(app.exec_())
-
-
 
 
 

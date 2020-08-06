@@ -116,16 +116,3 @@ class MirrorLimbs_UI(QtWidgets.QDialog):
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-

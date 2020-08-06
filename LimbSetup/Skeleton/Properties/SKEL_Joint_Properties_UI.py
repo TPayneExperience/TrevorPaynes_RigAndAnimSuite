@@ -3,9 +3,9 @@ import sys
 
 from Qt import QtWidgets, QtCore, QtGui
 
-class Joint_Properties_UI(QtWidgets.QWidget):
+class SKEL_Joint_Properties_UI(QtWidgets.QWidget):
     def __init__(self, jointProperties, parent=None):
-        super(Joint_Properties_UI, self).__init__(parent)
+        super(SKEL_Joint_Properties_UI, self).__init__(parent)
         self._jntProp = jointProperties
         self.axes = self._jntProp.jntMng.GetAxes()
         self.rotAxes = self._jntProp.jntMng.GetRotAxes()
@@ -111,30 +111,6 @@ class Joint_Properties_UI(QtWidgets.QWidget):
             self.rotationOrder_cb.setCurrentIndex(index)
 
         self._isPopulating = False
-
-
-
-
-
-
-
-
-
-
-
-
-
-# if __name__ == '__main__':
-#     app = QtWidgets.QApplication(sys.argv)
-#     ex = Joint_Properties_UI(None)
-
-#     ex.show()
-#     sys.exit(app.exec_())
-
-
-
-
-
 
 
 

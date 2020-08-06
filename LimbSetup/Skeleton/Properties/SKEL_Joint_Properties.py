@@ -1,6 +1,6 @@
 
 
-class Joint_Properties():
+class SKEL_Joint_Properties():
     def __init__(self, limbManager, jointManager):
         self.limbMng = limbManager
         self.jntMng = jointManager

@@ -1,13 +1,11 @@
 
 import Data.Joint_Manager as jm
-import Data.Limb_Manager as lm
-import Data.SaveLoad_Skeleton as saveLoadSkel
 reload(jm)
+import Data.Limb_Manager as lm
 reload(lm)
+import Data.SaveLoad_Skeleton as saveLoadSkel
 reload(saveLoadSkel)
 
-# import Skeleton.Skeleton_UI as skel_ui
-# reload(skel_ui)
 import Skeleton.Skeleton as skel
 reload(skel)
 

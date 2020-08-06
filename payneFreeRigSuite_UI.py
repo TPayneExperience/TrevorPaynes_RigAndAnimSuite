@@ -5,32 +5,15 @@ import sys
 import Qt
 from Qt import QtWidgets, QtCore, QtGui
 
-# import RigAndAnim_Manager as rig
-# reload(rig)
 
 import payneFreeRigSuite as pfrs
 reload(pfrs)
 
-# import LimbSetup.Skeleton.Skeleton_UI as skel_ui
-# reload(skel_ui)
 import LimbSetup.LimbSetup_UI as limbSetup_ui
 reload(limbSetup_ui)
 
 import RigSetup.RigSetup_UI as rs_ui
 reload(rs_ui)
-
-# import Utils.File_Manager as fm
-# import Utils.Json_Manager as js
-# reload(fm)
-# reload(js)
-
-# import SaveLoad.SaveLoad_Manager as slm
-# import SaveLoad.Save_Manager_UI as smUI
-# import SaveLoad.Load_Manager_UI as lmUI
-# reload(slm)
-# reload(smUI)
-# reload(lmUI)
-
 
 
 __author__ = 'Trevor Payne'
@@ -42,27 +25,15 @@ class PayneFreeRigSuite_UI(QtWidgets.QMainWindow):
         super(PayneFreeRigSuite_UI, self).__init__(parent)
 
         self.pfrs = pfrs.PayneFreeRigSuite()
-        # self.fileMng = fm.File_Manager()
-        # self.jsonMng = js.Json_Manager()
-        # self.rigMng = rig.RigAndAnim_Manager(self.fileMng)
-        # self.rigMng = rig.RigAndAnim_Manager()
-        # self.saveLoadMng = slm.SaveLoad_Manager(
-        #                         self.jsonMng,
-        #                         self.rigMng.skel.saveLoadSkel,
-        #                         None,
-        #                         None, 
-        #                         None)
 
         self._Setup()
         self.Populate()
 
     def Populate(self):
-        # TEMP
         folder = os.path.join(os.path.dirname(__file__), 'TEST_OUTPUT')
         self.pfrs.limbSetup.fileMng.SetOutputFile(os.path.join(folder, 'temp.json'))
         self.pfrs.limbSetup.fileMng.SetMeshPath(os.path.join(folder, 'temp.ma'))
-        # self.limbs_tw.Populate()
-        # self.skel_ui.Populate()
+        
         self._NewRig()
 
 #=========== SETUP ====================================
@@ -281,76 +252,6 @@ class PayneFreeRigSuite_UI(QtWidgets.QMainWindow):
 
 
     
-#============================================================
-    
-# class TPRigAndAnimSuite_UI_Widget(QtWidgets.QWidget):
-#     def __init__(self, parent=None):
-#         super(TPRigAndAnimSuite_UI_Widget, self).__init__(parent)
-#         self.parent = parent
-
-#         self.fileMng = fm.File_Manager()
-#         self.jsonMng = js.Json_Manager()
-#         self.rigMng = rig.RigAndAnim_Manager(self.fileMng)
-#         self.saveLoadMng = slm.SaveLoad_Manager(
-#                                 self.jsonMng,
-#                                 self.rigMng.skel.saveLoadSkel,
-#                                 None,
-#                                 None, 
-#                                 None)
-
-#         self._Setup()
-#         self._Setup_Connections()
-#         self.Populate()
-
-# #=========== SETUP ====================================
-
-#     def _Setup(self):
-#         v_layout = QtWidgets.QVBoxLayout(self)
-#         v_layout.addLayout(self._Setup_HeaderButtons())
-#         v_layout.addWidget(self._Setup_TabWidget())
-    
-#     def _Setup_HeaderButtons(self):
-#         h_layout = QtWidgets.QHBoxLayout()
-#         self.save_btn = QtWidgets.QPushButton('Save')
-#         self.load_btn = QtWidgets.QPushButton('Load')
-#         h_layout.addWidget(self.save_btn)
-#         h_layout.addWidget(self.load_btn)
-#         h_layout.addStretch()
-#         return h_layout
-    
-#     def _Setup_TabWidget(self):
-#         self.tabWgt = QtWidgets.QTabWidget()
-#         self.skel_ui = skel_ui.Skeleton_UI(self.rigMng.skel, self.parent, self.tabWgt)
-#         self.skel_ui.SetMainWindow(self.parent)
-#         self.tabWgt.addTab(self.skel_ui, 'Skeleton')
-#         return self.tabWgt
-    
-# #=========== FUNCTIONALITY ====================================
-
-#     def _Setup_Connections(self):
-#         self.save_btn.clicked.connect(self.Save)
-#         self.load_btn.clicked.connect(self.Load)
-
-#     def Save(self):
-#         saveDialog = smUI.Save_Manager_UI(  self.fileMng, 
-#                                             self.saveLoadMng,
-#                                             self)
-#         saveDialog.exec_()
-
-#     def Load(self):
-#         loadDialog = lmUI.Load_Manager_UI(  self.fileMng, 
-#                                             self.saveLoadMng,
-#                                             self)
-#         loadDialog.exec_()
-#         self.Populate()
-
-#     def Populate(self):
-#         self.skel_ui.Populate()
-    
-#     def Populate_CustomWidgets(self):
-#         self.skel_ui.customTemplates_lw.Populate()
-
-
 
 if __name__ == '__main__':
     app = QtWidgets.QApplication(sys.argv)

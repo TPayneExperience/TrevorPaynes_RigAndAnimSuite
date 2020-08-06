@@ -40,19 +40,6 @@ class Name_Manager():
         partNames = [temp[i] for i in orderCopy]
         return '_'.join(partNames)
 
-    # def GetNameWithoutPrefix(self,  limb='LIMB', 
-    #                                 joint='JOINT', 
-    #                                 side='M',
-    #                                 objType='JNT'):
-    #     temp = {1:limb,
-    #             2:joint,
-    #             3:side,
-    #             4:objType}
-    #     orderCopy = self._order[:]
-    #     orderCopy.remove(0) 
-    #     order = [temp[i] for i in orderCopy]
-    #     return '_'.join(order)
-    
 
 #======= VALIDATION ========================================
 
@@ -81,17 +68,6 @@ class Name_Manager():
         except:
             self.errorMsg = 'NAME ERROR: May only contain A-Z, a-z, 0-9, _'
             return False
-
-
-
-
-
-
-
-
-
-
-
 
 
 

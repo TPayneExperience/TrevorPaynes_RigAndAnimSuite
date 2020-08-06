@@ -1,6 +1,6 @@
 
 
-class Joint_Hierarchy():
+class SKEL_Joint_Hierarchy():
     def __init__(self, limbManager, jointManager, nameManager):
         self.limbMng = limbManager
         self.jntMng = jointManager

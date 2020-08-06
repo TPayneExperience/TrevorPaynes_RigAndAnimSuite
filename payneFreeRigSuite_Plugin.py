@@ -1,11 +1,10 @@
 
 ## TO RUN:
+# 
 # import ptvsd
 # ptvsd.enable_attach(address=('0.0.0.0', 3000), redirect_output=True)
 
 # from maya import cmds
-# # cmds.flushUndo()
-# # cmds.file(newFile=1, force=1)
 # try:
 #     cmds.unloadPlugin('tpRigAndAnimSuite_Plugin')
 # except:

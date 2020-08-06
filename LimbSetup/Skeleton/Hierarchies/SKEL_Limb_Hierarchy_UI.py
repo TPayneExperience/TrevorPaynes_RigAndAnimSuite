@@ -4,9 +4,9 @@ import os
 from Qt import QtWidgets, QtCore, QtGui
 
 
-class Limb_Hierarchy_UI(QtWidgets.QTreeWidget):
+class SKEL_Limb_Hierarchy_UI(QtWidgets.QTreeWidget):
     def __init__(self, limbHierarchy, parent=None):
-        super(Limb_Hierarchy_UI, self).__init__(parent)
+        super(SKEL_Limb_Hierarchy_UI, self).__init__(parent)
         self.parent = parent
         self.limbHier = limbHierarchy
         self._items = {} # ID : Item
@@ -25,15 +25,6 @@ class Limb_Hierarchy_UI(QtWidgets.QTreeWidget):
         self.clear()
         self._items.clear()
 
-        # PARENTS FIRST ALGORITHM
-        # limbParents = self.limbHier.limbMng.GetLimbParentDict()
-        # idOrder = []
-        # while (limbParents):
-        #     for k,v in limbParents.items():
-        #         if (v == -1) or (v in idOrder):
-        #             idOrder.append(k)
-        #             del(limbParents[k])
-        #             break
         idOrder = self.limbHier.limbMng.GetAllLimbsCreationOrder()
 
         # CREATE ITEMS, IN ORDER
@@ -71,12 +62,9 @@ class Limb_Hierarchy_UI(QtWidgets.QTreeWidget):
 
     def _Setup(self):
         self.setAlternatingRowColors(True)
-        # self.setDragDropMode(self.DragDrop)
         self.setDragDropMode(self.InternalMove)
-        # self.setDefaultDropAction(QtCore.Qt.MoveAction)
         self.setHeaderHidden(True)
         self.setIndentation(10)
-        # self.viewport().installEventFilter(self)
         self.installEventFilter(self)
 
         self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
@@ -98,69 +86,23 @@ class Limb_Hierarchy_UI(QtWidgets.QTreeWidget):
         add = QtWidgets.QAction('Add', 
                                 self, 
                                 triggered=self.Add)
-        # duplicate = QtWidgets.QAction(  'Duplicate', 
-        #                                 self, 
-        #                                 triggered=self._Duplicate)
         remove = QtWidgets.QAction( 'Remove', 
                                     self, 
                                     triggered=self._Remove)
-        # mirrorX = QtWidgets.QAction('X Axis', 
-        #                             self, 
-        #                             triggered=self._Mirror_X)
-        # mirrorY = QtWidgets.QAction('Y Axis', 
-        #                             self, 
-        #                             triggered=self._Mirror_Y)
-        # mirrorZ = QtWidgets.QAction('Z Axis', 
-        #                             self, 
-        #                             triggered=self._Mirror_Z)
         menu.addAction(add)
 
-        # mirrorMenu = menu.addMenu('Mirror')
-        # mirrorMenu.addAction(mirrorX)
-        # mirrorMenu.addAction(mirrorY)
-        # mirrorMenu.addAction(mirrorZ)
-
-        # menu.addAction(duplicate)
         menu.addSeparator()
         menu.addAction(remove)
         
         # DISABLE ACTIONS
         items = self.selectedItems()
         remove.setEnabled(bool(items))
-        # if items:
-            # limbID = items[0].ID
-            # mirrorID = self.limbHier.limbMng.GetMirror(limbID)
-
-            # # DISABLE MIRROR ON ALREADY MIRRORED + REMOVE ON CHILDREN
-            # if (mirrorID != -1):
-            #     mirrorMenu.setEnabled(False)
-            #     if (mirrorID not in self.limbHier.limbMng.GetLimbMirrorRoots()):
-            #         remove.setEnabled(False)
-
-            # # DISABLE MIRROR ON NON MIRRORED CHILD OF MIRRORED LIMBS
-            # for parentID in self.limbHier.limbMng.GetAllParents(limbID):
-            #     mirrorID = self.limbHier.limbMng.GetMirror(parentID)
-            #     if (mirrorID != -1):
-            #         mirrorMenu.setEnabled(False)
-            #         break
-
-        # DISABLE IF NOTHING SELECTED
-        # else:
-            # mirrorMenu.setEnabled(False)
-            # # duplicate.setEnabled(False)
-            # remove.setEnabled(False)
-
         menu.exec_(QtGui.QCursor.pos())
 
     
     def eventFilter(self, sender, event):
         if (event.type() == QtCore.QEvent.ChildRemoved):
             self._Reparent()
-        # if (event.type() == QtCore.QEvent.Drop):
-        #     filePath = self.parent.templatePath
-        #     if os.path.isfile(filePath):
-        #         self.parent.LoadTemplate(filePath)
-        #         return True
         return False
     
     def _Setup_Connections(self):
@@ -187,17 +129,6 @@ class Limb_Hierarchy_UI(QtWidgets.QTreeWidget):
                             )
         if (result==QtWidgets.QMessageBox.Ok):
             self.parent.RemoveLimb(limbID)
-            # limbIDs = self.limbHier.limbMng.GetLimbCreationOrder(ID)
-            # limbNames = [self.limbHier.limbMng.GetName(lID) for lID in limbIDs]
-            # for limbID in limbIDs[::-1]:
-            #     mirrorID = self.limbHier.limbMng.GetMirror(limbID)
-            #     self.limbHier.Remove(limbID)
-            #     self.parent.RemoveLimb(limbID)
-            #     if (mirrorID != -1):
-            #         self.parent.RenameLimb(mirrorID)
-            # msg = 'Removed limbs ' + str(limbNames)
-            # self.parent.StatusMsg(msg)
-            # self.Populate()
 
     def _Rename(self, item, column):
         if not self._isPopulating:
@@ -239,54 +170,7 @@ class Limb_Hierarchy_UI(QtWidgets.QTreeWidget):
                     self.expandAll()
                     self.parent.ReparentLimb(childID, oldParentID)
                     break
-            # else:
-            #     self.Populate()
-
-    # def _Duplicate(self):
-    #     for limbID in self.limbHier.Duplicate(self.currentItem().ID):
-    #         self.parent.AddLimb(limbID)
-
-    # def _Mirror_X(self):
-    #     self._Mirror('X')
-
-    # def _Mirror_Y(self):
-    #     self._Mirror('Y')
-
-    # def _Mirror_Z(self):
-    #     self._Mirror('Z')
-    
-    # def _Mirror(self, axis):
-    #     limbID = self.currentItem().ID
-    #     for ID_01, ID_02 in self.limbHier.Mirror(limbID, axis):
-    #         self.parent.AddLimb(ID_02)
-    #         self.parent.RenameLimb(ID_01)
-    #     self.limbHier.limbMng.SetLimbMirrorRoot(limbID)
-    #     self.parent.Mirror(limbID)
         
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

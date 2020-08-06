@@ -182,38 +182,3 @@ class Limb_Manager():
         self.SetParent(ID_02, self._limbParent[ID_01])
         return ID_02
 
-
-#============= SAVE + LOAD ============================
-
-    # def GetSaveData(self, limbID):
-    #     pass
-
-    # def LoadData(self, limbID):
-    #     pass
-
-    # def AddTemplate_Limbs(self, limbDataList, 
-    #                             limbChildParentDict,
-    #                             oldToNewJointIds):
-        
-    #     oldToNewLimbIds = {} # REMAP LIMB IDS TO AVOID CONFLICTS
-    #     for limb in limbDataList:
-    #         limbID = self._nextLimbID
-    #         oldToNewLimbIds[limb.ID] = limbID
-    #         limb.ID = limbID
-            
-    #         for i in range(len(limb.jointIDs)): # REMAP JOINT IDS 
-    #             jointID = limb.jointIDs[i]
-    #             limb.jointIDs[i] = oldToNewJointIds[jointID]
-    #         if (limb.parentJointID != -1): # REMAP PARENT JOINT ID
-    #             limb.parentJointID = oldToNewJointIds[limb.parentJointID]
-    #         self._nextLimbID += 1
-        
-    #     for limb in limbDataList:
-    #         if (limb.mirrorLimbID != -1): # REMAP MIRROR LIMB ID
-    #             limb.mirrorLimbID = oldToNewLimbIds[limb.mirrorLimbID]
-    #         self._limbs[limb.ID] = limb # ADD TO DICTIONARY
-        
-    #     for oldChildID, oldParentID in limbChildParentDict.items():
-    #         newChildID = oldToNewLimbIds[oldChildID]
-    #         newParentID = oldToNewLimbIds[oldParentID]
-    #         self.SetParent(newChildID, newParentID)

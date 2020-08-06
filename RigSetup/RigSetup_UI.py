@@ -6,13 +6,10 @@ from Qt import QtWidgets, QtCore, QtGui
 import Name_Manager as nm
 reload(nm)
 
-# from RigSetup import RigSetup
 
 class RigSetup_UI(QtWidgets.QDialog):
-    # def __init__(self, RigSetup, parent=None, prefix='', meshPath=''):
     def __init__(self, nameManager, fileManager, parent=None):
         super(RigSetup_UI, self).__init__(parent)
-        # self._rigSetup = RigSetup
 
         self.nameMng = nameManager
         self.fileMng = fileManager
@@ -28,11 +25,7 @@ class RigSetup_UI(QtWidgets.QDialog):
                             'Type (JNT, CTR)']
 
         self._Setup()
-        # self._Populate_AssetDetails()
-        # self._Populate_RigNaming()
         self.Update_ExampleLabels()
-        # self._Update_MeshPathLabel()
-        # self.IsPrefixValid()
         self.Update_SaveBtn()
         self._Setup_Connections()
 
@@ -89,11 +82,6 @@ class RigSetup_UI(QtWidgets.QDialog):
         hl1.addWidget(self.prefix_le)
         vl.addLayout(hl1)
 
-        # self.prefixErrorMsg_l = QtWidgets.QLabel('SomeError')
-        # self.prefixErrorMsg_l.setAlignment(QtCore.Qt.AlignRight)
-        # vl.addWidget(self.prefixErrorMsg_l)
-
-        # gb2 = QtWidgets.QGroupBox('MESH PATH: ')
         hl2  = QtWidgets.QHBoxLayout()
         self.meshPath_l = QtWidgets.QLabel('MESH FILE | [Missing]')
         self.meshPath_btn = QtWidgets.QPushButton('...')
@@ -101,7 +89,6 @@ class RigSetup_UI(QtWidgets.QDialog):
         hl2.addWidget(self.meshPath_l)
         hl2.addWidget(self.meshPath_btn)
         vl.addLayout(hl2)
-        # vl.addWidget(gb2)
         
         hl3  = QtWidgets.QHBoxLayout()
         self.outputFile_l = QtWidgets.QLabel('OUTPUT FOLDER | [Missing]')
@@ -120,8 +107,6 @@ class RigSetup_UI(QtWidgets.QDialog):
         self.showPrefix_cb = QtWidgets.QCheckBox('Include Prefix')
         self.showPrefix_cb.setChecked(True)
         vl.addWidget(self.showPrefix_cb)
-        # self.resultNaming_l = QtWidgets.QLabel('asdf')
-        # vl.addWidget(self.resultNaming_l)
 
         self.namingOrder_lw = ReorderListWidget(self)
         self.namingOrder_lw.addItems(self.rigNaming)
@@ -156,15 +141,6 @@ class RigSetup_UI(QtWidgets.QDialog):
 
 #============ POPULATE + UPDATE ============================
 
-    # def _Populate_AssetDetails(self):
-    #     self.prefix_le.setText(self._rigSetup.GetPrefix())
-    #     self._Update_MeshPathLabel()
-    
-    # def _Populate_RigNaming(self):
-    #     order = self._rigSetup.GetStartOrder()
-    #     newOrder = [self.rigNaming[i] for i in order]
-    #     self.namingOrder_lw.addItems(newOrder)
-    
     def Update_ExampleLabels(self):
         ex0 = self.tempNameMng.GetName('PREFIX', 'LIMB', 'JOINT', 'SIDE', 'TYPE')
         ex1 = self.tempNameMng.GetName('CAT', 'BLEG', 'KNEE', 'L', 'CTR')
@@ -185,15 +161,6 @@ class RigSetup_UI(QtWidgets.QDialog):
             self.save_btn.setEnabled(combo)
             if combo:
                 self.tempNameMng.SetPrefix(self.prefix_le.text())
-        # if (not self._rigSetup.IsPrefixValid()):
-        #     self.save_btn.setEnabled(False)
-        #     self.save_btn.setText('Save (prefix invalid)')
-        # elif (not self._rigSetup.IsMeshPathValid()):
-        #     self.save_btn.setEnabled(False)
-        #     self.save_btn.setText('Save (missing mesh path)')
-        # else:
-        #     self.save_btn.setEnabled(True)
-        #     self.save_btn.setText('Save')
 
     def IsPrefixValid(self):
         text = self.prefix_le.text()
@@ -205,14 +172,6 @@ class RigSetup_UI(QtWidgets.QDialog):
         msg = 'ASSET PREFIX |  '+ self.tempNameMng.errorMsg[5:]
         self.prefix_l.setText(msg)
         return valid
-        # if (self._rigSetup.IsPrefixValid()):
-        #     self.prefixErrorMsg_l.hide()
-        # else:
-        #     self.prefixErrorMsg_l.show()
-        #     self.prefixErrorMsg_l.setText(self._rigSetup.prefixErrorMsg)
-
-    # def _Update_MeshPathLabel(self):
-    #     self.meshPath_l.setText(self._rigSetup.GetMeshPath())
     
 #============ FUNCTIONALITY ============================
 
@@ -225,15 +184,6 @@ class RigSetup_UI(QtWidgets.QDialog):
 
         self.cancel_btn.clicked.connect(self.reject)
         self.save_btn.clicked.connect(self.Save)
-
-    # def closeEvent(self, event):
-    #     self._rigSetup.Cancel()
-    #     event.accept()
-    
-    # def _Save_Prefix(self):
-    #     self._rigSetup.SetPrefix(self.prefix_le.text())
-    #     self.IsPrefixValid()
-    #     self.Update_SaveBtn()
 
     def SetNamingOrder(self):
         temp = []
@@ -250,8 +200,6 @@ class RigSetup_UI(QtWidgets.QDialog):
                                                     self.fileMng.GetMeshPath(),
                                                     '*.ma')
         if (os.path.isfile(filePath)):
-            # self._rigSetup.SetMeshPath(filePath)
-            # self._Update_MeshPathLabel()
             self.meshFile = filePath
             self.meshPath_l.setText('MESH FILE | ' + filePath)
             self.Update_SaveBtn()
@@ -267,12 +215,10 @@ class RigSetup_UI(QtWidgets.QDialog):
             self.Update_SaveBtn()
 
     def ToggleShowPrefix(self):
-        # self._rigSetup.SetShowPrefix(self.showPrefix_cb.isChecked())
         self.tempNameMng.SetShowPrefix(self.showPrefix_cb.isChecked())
         self.Update_ExampleLabels()
 
     def Save(self):
-        # self._rigSetup.Save()
         if not self._isPopulating:
             self.nameMng.SetPrefix(self.tempNameMng.GetPrefix())
             self.nameMng.SetNamingOrder(self.tempNameMng.GetNamingOrder())
@@ -303,12 +249,5 @@ class ReorderListWidget(QtWidgets.QListWidget):
     def onOrderChanged(self):
         self.parent.SetNamingOrder()
 
-
-# if __name__ == '__main__':
-#     app = QtWidgets.QApplication(sys.argv)
-    
-#     ex = RigSetup_UI()
-#     ex.show()
-#     sys.exit(app.exec_())
 
 

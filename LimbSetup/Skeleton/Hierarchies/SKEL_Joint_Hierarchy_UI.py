@@ -3,9 +3,9 @@ import sys
 
 from Qt import QtWidgets, QtCore, QtGui
 
-class Joint_Hierarchy_UI(QtWidgets.QListWidget):
+class SKEL_Joint_Hierarchy_UI(QtWidgets.QListWidget):
     def __init__(self, jointHierarchy, parent=None):
-        super(Joint_Hierarchy_UI, self).__init__(parent)
+        super(SKEL_Joint_Hierarchy_UI, self).__init__(parent)
         self.parent = parent
         self.jntHier = jointHierarchy
         self._isPopulating = False

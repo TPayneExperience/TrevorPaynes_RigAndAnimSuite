@@ -32,11 +32,4 @@ class PayneFreeRigSuite():
                                             self.limbSetup.saveLoadSkel)
         self.rigSceneMng = rigsm.RIG_Scene_Manager(self.fileMng,
                                                     self.nameMng)
-        # self.rigMng = rig.RigAndAnim_Manager()
-        # self.saveLoadMng = slm.SaveLoad_Manager(
-        #                         self.jsonMng,
-        #                         self.rigMng.skel.saveLoadSkel,
-        #                         None,
-        #                         None, 
-        #                         None)
 

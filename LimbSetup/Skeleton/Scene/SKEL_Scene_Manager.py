@@ -42,7 +42,7 @@ class SKEL_Scene_Manager():
         for limbID in self.limbsWithJoints: # LIMB CONTROLS
             self.Setup_LimbControl(limbID)
         
-        self.UpdateDisplaySize()
+        # self.UpdateDisplaySize()
         # MISSING: LISTENERS
 
     def Teardown_Editable(self):
@@ -146,7 +146,7 @@ class SKEL_Scene_Manager():
             self.Setup_JointControls(limbID)
             self.Setup_LimbControl(limbID)
             self.Setup_Children_External_JointParents(limbID)
-            self.UpdateDisplaySize()
+            # self.UpdateDisplaySize()
 
     def Remove_Editable_Limb(self, limbID): # when limb removed or joint count 0
         if limbID in self.limbsWithJoints:
@@ -181,17 +181,17 @@ class SKEL_Scene_Manager():
 #======= DISPLAY SIZE : JOINT + CONTROL ===================================
 
     def SetDisplaySize(self, size):
-        self.lastDisplaySize = size
-        self.UpdateDisplaySize()
-
-    def UpdateDisplaySize(self):
-        size = self.lastDisplaySize
-        for joint in list(self.sceneLimbMng.sceneJoints.values()):
-            cmds.joint(joint, e=True, rad=size)
-        for ctr in list(self.sceneLimbMng.limbCtrs.values()):
-            cmds.circle(ctr, e=True, r=size*5)
-        for ctr in list(self.sceneLimbMng.jointCtrs.values()):
-            cmds.xform(ctr, s=[size, size, size])
+        if (size != self.sceneLimbMng.displaySize):
+            self.sceneLimbMng.displaySize = size
+            # print('\n\nScene Joints: ' + str(self.sceneLimbMng.sceneJoints))
+            # print('Limb Ctr: ' + str(self.sceneLimbMng.limbCtrs))
+            # print('Jnt Ctr: ' + str(self.sceneLimbMng.jointCtrs))
+            for joint in list(self.sceneLimbMng.sceneJoints.values()):
+                cmds.joint(joint, e=True, rad=size)
+            for ctr in list(self.sceneLimbMng.limbCtrs.values()):
+                cmds.circle(ctr, e=True, r=size*5)
+            for ctr in list(self.sceneLimbMng.jointCtrs.values()):
+                cmds.xform(ctr, s=[size, size, size])
 
 #======= SELECTION ===================================
 
@@ -246,10 +246,6 @@ class SKEL_Scene_Manager():
 
 # ======= MISC  ===================================
 
-    # def SetPrefix(self, prefix):
-    #     newName = '%s_ROOT' % prefix
-    #     self.rootGrp = cmds.rename(self.rootGrp, newName)
-
     def MoveToVertsCenter(self):
         sel = cmds.ls(sl=True)
         ctr = sel[0]
@@ -258,15 +254,10 @@ class SKEL_Scene_Manager():
         cmds.xform(ctr, t=pos, ws=True)
 
     def NewRig(self, rootGrp):
-        # self.Teardown_Editable()
-        # self.KillScriptJobs()
         cmds.select(d=True)
         self.lastDisplaySize = 1
         self.sceneLimbMng.NewRig()
 
-        # self.rootGrp = cmds.group(name='Temp', em=True)
-        # prefix = self.nameMng.GetPrefix()
-        # self.SetPrefix(prefix)
         self.rootJntGrp = cmds.group(name='Joint_GRP',em=True)
         self.rootCtrGrp = cmds.group(name='Control_GRP', em=True)
         cmds.parent(self.rootJntGrp, rootGrp)

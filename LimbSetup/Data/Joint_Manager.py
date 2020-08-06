@@ -124,22 +124,22 @@ class Joint_Manager():
         del(self._limbParentJoint[limbID])
         del(self._limbNextJointIndex[limbID])
 
-    def Add(self, limbID, mirrorID, count):
+    def Add(self, limbID, mirrorLimbID, count):
         currentCount = len(self._limbJoints[limbID])
         limit = min(99, currentCount + count)
         addCount = limit - currentCount
         startIndex = self._limbNextJointIndex[limbID]
         self._limbNextJointIndex[limbID] += addCount
-        if (mirrorID != -1):
-            self._limbNextJointIndex[mirrorID] += addCount
-        IDs = []
+        if (mirrorLimbID != -1):
+            self._limbNextJointIndex[mirrorLimbID] += addCount
+        jointIDs = []
         for i in range(addCount):
-            IDs.append(self._AddJoint(limbID, startIndex + i))
-        if (mirrorID != -1):
+            jointIDs.append(self._AddJoint(limbID, startIndex + i))
+        if (mirrorLimbID != -1):
             for i in range(addCount):
-                mirrorID = self._AddJoint(mirrorID, startIndex + i)
-                self._mirrorJoints[IDs[i]] = mirrorID
-                self._mirrorJoints[mirrorID] = IDs[i]
+                mirrorJointID = self._AddJoint(mirrorLimbID, startIndex + i)
+                self._mirrorJoints[jointIDs[i]] = mirrorJointID
+                self._mirrorJoints[mirrorJointID] = jointIDs[i]
     
     def _AddJoint(self, limbID, jointIndex):
         position = [0,0,0]

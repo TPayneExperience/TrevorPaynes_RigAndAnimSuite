@@ -2,20 +2,13 @@
 from Qt import QtWidgets, QtCore
 
 
-# import Templates.Default_Templates_UI as defTemp_UI
-# import Templates.Custom_Templates_UI as cusTemp_UI
-# import Templates.Save_CustomLimb_UI as saveLimb_UI
-# reload(defTemp_UI)
-# reload(cusTemp_UI)
-# reload(saveLimb_UI)
-
-import Hierarchies.Joint_Hierarchy_UI as jointHier_UI
-import Hierarchies.Limb_Hierarchy_UI as limbHier_UI
+import Hierarchies.SKEL_Joint_Hierarchy_UI as jointHier_UI
+import Hierarchies.SKEL_Limb_Hierarchy_UI as limbHier_UI
 reload(jointHier_UI)
 reload(limbHier_UI)
 
-import Properties.Joint_Properties_UI as jointProp_UI
-import Properties.Limb_Properties_UI as limbProp_UI
+import Properties.SKEL_Joint_Properties_UI as jointProp_UI
+import Properties.SKEL_Limb_Properties_UI as limbProp_UI
 reload(jointProp_UI)
 reload(limbProp_UI)
 
@@ -25,12 +18,9 @@ class Skeleton_UI(QtWidgets.QTabWidget):
         super(Skeleton_UI, self).__init__(parent)
         self.skel = skeleton
         self.skel.parent = self
-        # self.parent = parent
         self.mainWindow = mainWindow
 
         self._isPopulating = False
-        # self.templatePath = '' # '', 'custom', or 'default' templates
-
         self._Setup()
         self._Setup_Connections()
 
@@ -41,47 +31,27 @@ class Skeleton_UI(QtWidgets.QTabWidget):
         self.jntProp_gb.hide()
         self.skel.sceneMng.Teardown_Editable()
         self.skel.sceneMng.Setup_Editable()
-        # self.defaultTemplates_lw.Populate()
-        # self.customTemplates_lw.Populate()
         self._UpdateJointCountLabel()
     
 #=========== SETUP ====================================
 
     def _Setup(self):
         h_layout = QtWidgets.QHBoxLayout(self)
-        # h_layout.addLayout(self._Setup_Templates())
         h_layout.addLayout(self._Setup_LimbJointHierarchy())
         h_layout.addLayout(self._Setup_Properties())
-    
-    # def _Setup_Templates(self):
-    #     v_layout = QtWidgets.QVBoxLayout()
-
-    #     gb1 = QtWidgets.QGroupBox('Default Limb Templates')
-    #     vl = QtWidgets.QVBoxLayout(gb1)
-        # self.defaultTemplates_lw = defTemp_UI.Default_Templates_UI(self.skel.fileMng, self)
-    #     vl.addWidget(self.defaultTemplates_lw)
-    #     v_layout.addWidget(gb1)
-
-    #     gb2 = QtWidgets.QGroupBox('Custom Limb Templates')
-    #     vl = QtWidgets.QVBoxLayout(gb2)
-    #     self.customTemplates_lw = cusTemp_UI.Custom_Templates_UI(self.skel.fileMng, self)
-    #     vl.addWidget(self.customTemplates_lw)
-    #     v_layout.addWidget(gb2)
-
-    #     return v_layout
     
     def _Setup_LimbJointHierarchy(self):
         v_layout = QtWidgets.QVBoxLayout()
 
         gb1 = QtWidgets.QGroupBox('LIMB Hierarchy')
         vl = QtWidgets.QVBoxLayout(gb1)
-        self.limbHier_tw = limbHier_UI.Limb_Hierarchy_UI(self.skel.limbHier, self)
+        self.limbHier_tw = limbHier_UI.SKEL_Limb_Hierarchy_UI(self.skel.limbHier, self)
         vl.addWidget(self.limbHier_tw)
         v_layout.addWidget(gb1)
 
         gb2 = QtWidgets.QGroupBox('Limb JOINT Hierarchy')
         vl = QtWidgets.QVBoxLayout(gb2)
-        self.jntHier_lw = jointHier_UI.Joint_Hierarchy_UI(self.skel.jntHier, self)
+        self.jntHier_lw = jointHier_UI.SKEL_Joint_Hierarchy_UI(self.skel.jntHier, self)
         vl.addWidget(self.jntHier_lw)
         v_layout.addWidget(gb2)
 
@@ -93,9 +63,9 @@ class Skeleton_UI(QtWidgets.QTabWidget):
         gb = QtWidgets.QGroupBox('Properties')
         vl = QtWidgets.QVBoxLayout(gb)
 
-        self.limbProp_gb = limbProp_UI.Limb_Properties_UI(self.skel.limbProp, self)
+        self.limbProp_gb = limbProp_UI.SKEL_Limb_Properties_UI(self.skel.limbProp, self)
         vl.addWidget(self.limbProp_gb)
-        self.jntProp_gb = jointProp_UI.Joint_Properties_UI(self.skel.jntProp)
+        self.jntProp_gb = jointProp_UI.SKEL_Joint_Properties_UI(self.skel.jntProp)
         vl.addWidget(self.jntProp_gb)
         vl.addStretch()
         
@@ -133,34 +103,6 @@ class Skeleton_UI(QtWidgets.QTabWidget):
         self.jntHier_lw.itemClicked.connect(self._JointSelected)
         self.moveToVertCenter_btn.clicked.connect(self.skel.sceneMng.MoveToVertsCenter)
         self.displaySize_sb.valueChanged.connect(self._UpdateDisplaySize)
-
-        # DRAG DROP
-        # self.defaultTemplates_lw.itemPressed.connect(self.DragDefaultTemplate)
-        # self.customTemplates_lw.itemPressed.connect(self.DragCustomTemplate)
-        # self.jntHier_lw.itemPressed.connect(self.DragNull)
-        # self.limbHier_tw.itemPressed.connect(self.DragNull)
-
-    # def LoadTemplate(self, filePath):
-    #     self.skel.saveLoadSkel.saveLoadMng.Load_Skel_Limbs(filePath)
-    #     self.Populate()
-
-    # def DragDefaultTemplate(self):
-    #     self.templatePath = self.defaultTemplates_lw.currentItem().toolTip()
-
-    # def DragCustomTemplate(self):
-    #     self.templatePath = self.customTemplates_lw.currentItem().toolTip()
-    
-    # def DragNull(self):
-    #     self.templatePath = ''
-
-    # def SaveCustomLimb(self):
-    #     limbID = self.limbHier_tw.currentItem().ID
-    #     limbIDs = self.skel.limbMng.GetLimbCreationOrder(limbID)
-
-    #     saveUI = saveLimb_UI.Save_CustomLimb_UI(limbIDs, self)
-    #     saveUI.exec_()
-
-    #     self.customTemplates_lw.Populate()
 
 #=========== LIMBS ====================================
 
@@ -226,9 +168,9 @@ class Skeleton_UI(QtWidgets.QTabWidget):
 
     def RenameLimb(self, limbID):
         self.skel.sceneMng.sceneLimbMng.RenameLimb(limbID)
-        mirrorID = self.skel.limbMng.GetMirror(limbID)
-        if (mirrorID != -1):
-            self.skel.sceneMng.sceneLimbMng.RenameLimb(mirrorID)
+        # mirrorID = self.skel.limbMng.GetMirror(limbID)
+        # if (mirrorID != -1):
+        #     self.skel.sceneMng.sceneLimbMng.RenameLimb(mirrorID)
     
     def FlipLimbSides(self, limbID): # for L/R switching
         limbIDs = self.skel.limbMng.GetLimbCreationOrder(limbID) #children
@@ -250,10 +192,6 @@ class Skeleton_UI(QtWidgets.QTabWidget):
                 self.skel.sceneMng.sceneLimbMng.RenameLimb(ID)
 
         self.limbHier_tw.Populate()
-
-    # def Mirror(self, limbID): # called by limb hier UI
-    #     self.limbProp_gb.SetLimb(limbID)
-    #     self.limbProp_gb.Populate()
 
 
 #=========== MANIPULATE JOINTS ====================================
@@ -374,22 +312,12 @@ class Skeleton_UI(QtWidgets.QTabWidget):
         self.Populate()
     
     def UpdateNaming(self):
-        # populate limbhier, jnt hier, 
-        # scene mng
         self.skel.sceneMng.Teardown_Editable()
         self.skel.sceneMng.Setup_Editable()
-        # self.skel.sceneMng.SetPrefix(self.skel.nameMng.GetPrefix())
 
     def TeardownRig(self):
         self.skel.sceneMng.Teardown_Editable()
         self.skel.sceneMng.KillScriptJobs()
-
-# if __name__ == '__main__':
-#     app = QtWidgets.QApplication(sys.argv)
-#     ex = Skeleton_UI(None)
-
-#     ex.show()
-#     sys.exit(app.exec_())
 
 
 
