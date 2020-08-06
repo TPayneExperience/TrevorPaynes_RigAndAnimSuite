@@ -74,9 +74,12 @@ class SaveLoad_Skeleton():
         limbData = data['Limb Data']
 
     # LIMB ------------------------------
-        for k, v in limbData['Limb Name'].items():
-            oldToNewLimbIDs[k] = nextLimbID
-            self.limbMng._limbName[nextLimbID] = '%s_Copy%03d' % (v, nextLimbID)
+        for limbID, limbName in limbData['Limb Name'].items():
+            oldToNewLimbIDs[limbID] = nextLimbID
+            if (limbName in list(self.limbMng._limbName.values())):
+                self.limbMng._limbName[nextLimbID] = '%s_%d' % (limbName, nextLimbID)
+            else:
+                self.limbMng._limbName[nextLimbID] = limbName
             nextLimbID += 1
 
         for k, v in limbData['Limb Type'].items():

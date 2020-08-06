@@ -1,51 +1,34 @@
 {
     "Limb Data": {
         "Limb Mirror": {
-            "1": -1
+            "4": -1
         }, 
         "Limb Side": {
-            "1": "M"
+            "4": "M"
         }, 
         "Limb Type": {
-            "1": "Chain"
+            "4": "Chain"
         }, 
         "Limb Parent": {
-            "1": -1
+            "4": -1
         }, 
         "Limb Name": {
-            "1": "Spine"
+            "4": "Spine"
         }, 
         "Limb Mirror Roots": []
     }, 
     "Joint Data": {
         "Limb Joints": {
-            "1": [
-                1, 
-                2, 
-                3, 
-                4, 
-                5
+            "4": [
+                14, 
+                16, 
+                15, 
+                18, 
+                17
             ]
         }, 
         "Joints": {
-            "1": {
-                "upAxis": "Y", 
-                "name": "S01", 
-                "rotationOrder": "XYZ", 
-                "position": [
-                    0.0, 
-                    21.46572169820727, 
-                    -3.241116431858189e-13
-                ], 
-                "rotation": [
-                    0.0, 
-                    0.0, 
-                    90.0
-                ], 
-                "ID": 1, 
-                "aimAxis": "X"
-            }, 
-            "2": {
+            "16": {
                 "upAxis": "Y", 
                 "name": "S02", 
                 "rotationOrder": "XYZ", 
@@ -59,44 +42,10 @@
                     0.0, 
                     90.0
                 ], 
-                "ID": 2, 
+                "ID": 16, 
                 "aimAxis": "X"
             }, 
-            "3": {
-                "upAxis": "Y", 
-                "name": "S03", 
-                "rotationOrder": "XYZ", 
-                "position": [
-                    0.0, 
-                    31.46572169820727, 
-                    -4.751019745348401e-13
-                ], 
-                "rotation": [
-                    0.0, 
-                    0.0, 
-                    90.0
-                ], 
-                "ID": 3, 
-                "aimAxis": "X"
-            }, 
-            "4": {
-                "upAxis": "Y", 
-                "name": "S04", 
-                "rotationOrder": "XYZ", 
-                "position": [
-                    0.0, 
-                    36.46572169820727, 
-                    -5.505971402093508e-13
-                ], 
-                "rotation": [
-                    0.0, 
-                    0.0, 
-                    90.0
-                ], 
-                "ID": 4, 
-                "aimAxis": "X"
-            }, 
-            "5": {
+            "17": {
                 "upAxis": "Y", 
                 "name": "S05", 
                 "rotationOrder": "XYZ", 
@@ -110,22 +59,73 @@
                     0.0, 
                     90.0
                 ], 
-                "ID": 5, 
+                "ID": 17, 
+                "aimAxis": "X"
+            }, 
+            "18": {
+                "upAxis": "Y", 
+                "name": "S04", 
+                "rotationOrder": "XYZ", 
+                "position": [
+                    0.0, 
+                    36.46572169820727, 
+                    -5.505971402093508e-13
+                ], 
+                "rotation": [
+                    0.0, 
+                    0.0, 
+                    90.0
+                ], 
+                "ID": 18, 
+                "aimAxis": "X"
+            }, 
+            "14": {
+                "upAxis": "Y", 
+                "name": "S01", 
+                "rotationOrder": "XYZ", 
+                "position": [
+                    0.0, 
+                    21.46572169820727, 
+                    -3.241116431858189e-13
+                ], 
+                "rotation": [
+                    0.0, 
+                    0.0, 
+                    90.0
+                ], 
+                "ID": 14, 
+                "aimAxis": "X"
+            }, 
+            "15": {
+                "upAxis": "Y", 
+                "name": "S03", 
+                "rotationOrder": "XYZ", 
+                "position": [
+                    0.0, 
+                    31.46572169820727, 
+                    -4.751019745348401e-13
+                ], 
+                "rotation": [
+                    0.0, 
+                    0.0, 
+                    90.0
+                ], 
+                "ID": 15, 
                 "aimAxis": "X"
             }
         }, 
         "Mirror Joints": {
-            "1": -1, 
-            "2": -1, 
-            "3": -1, 
-            "4": -1, 
-            "5": -1
+            "16": -1, 
+            "17": -1, 
+            "18": -1, 
+            "14": -1, 
+            "15": -1
         }, 
         "Limb Next Joint Index": {
-            "1": 6
+            "4": 6
         }, 
         "Limb Parent Joint": {
-            "1": -1
+            "4": -1
         }
     }
 }
