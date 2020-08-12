@@ -1,85 +1,57 @@
 
 import os
 
-from Qt import QtWidgets, QtCore, QtGui
+from Common.Qt import QtWidgets, QtCore, QtGui
 
+import Common.LimbHier_TW as limbHierTW
+reload(limbHierTW)
 
-class SKEL_Limb_Hierarchy_UI(QtWidgets.QTreeWidget):
+class SKEL_Limb_Hierarchy_TW(limbHierTW.Limb_Hierarchy_TW):
     def __init__(self, limbHierarchy, parent=None):
-        super(SKEL_Limb_Hierarchy_UI, self).__init__(parent)
+        super(SKEL_Limb_Hierarchy_TW, self).__init__(limbHierarchy.limbMng, parent)
+
         self.parent = parent
         self.limbHier = limbHierarchy
-        self._items = {} # ID : Item
+
         self._isPopulating = False
-        self._lastItemEdited = -1
 
         self._Setup()
         self._Setup_Connections()
 
     def Populate(self, selectedID = -1):
-        selectemItem = None
-        items = self.selectedItems()
-        if (items):
-            selectedID = items[0].ID
         self._isPopulating = True
-        self.clear()
-        self._items.clear()
-
-        idOrder = self.limbHier.limbMng.GetAllLimbsCreationOrder()
-
-        # CREATE ITEMS, IN ORDER
-        for ID in idOrder:
-            name = self.limbHier.limbMng.GetName(ID)
-            side = self.limbHier.limbMng.GetSide(ID)
-            parentID = self.limbHier.limbMng.GetParentID(ID)
-            if (parentID != -1):
-                parentItem = self._items[parentID]
-                item = QtWidgets.QTreeWidgetItem(parentItem, [name])
-            else:
-                item = QtWidgets.QTreeWidgetItem(self, [name])
-            item.ID = ID
+        items = self.selectedItems()
+        if (items and selectedID == -1):
+            selectedID = items[0].ID
+        self.Populate_Abstract()
+        for limbID, item in self._items.items():
+            side = self.limbMng.GetSide(limbID)
             if (side == 'M'):
-                item.setIcon(0, self.m_icon)
                 item.setFlags(item.flags() | QtCore.Qt.ItemIsEditable)
             else:
-                if (side == 'L'):
-                    item.setIcon(0, self.l_icon)
-                elif (side == 'R'):
-                    item.setIcon(0, self.r_icon)
                 item.setFlags(  QtCore.Qt.ItemIsEditable |
                                 QtCore.Qt.ItemIsSelectable |
                                 QtCore.Qt.ItemIsEnabled |
                                 QtCore.Qt.ItemIsDropEnabled)
-            self._items[ID] = item
-            if (ID == selectedID):
-                selectemItem = item
-        self.expandAll()
+            if (limbID == selectedID):
+                self.setCurrentItem(item)
         self._isPopulating = False
-        if (selectemItem):
-            self.setCurrentItem(selectemItem)
+        if (selectedID != -1):
+            self.edit(self.currentIndex())
 
 #=========== SETUP ====================================
 
     def _Setup(self):
-        self.setAlternatingRowColors(True)
         self.setDragDropMode(self.InternalMove)
-        self.setHeaderHidden(True)
-        self.setIndentation(10)
         self.installEventFilter(self)
 
         self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
 
-        self._Setup_Icons()
-    
-    def _Setup_Icons(self):
-        path = os.path.dirname(__file__)
-        path = os.path.dirname(path)
-        path = os.path.dirname(path)
-        path = os.path.dirname(path)
-        self.l_icon = QtGui.QIcon(os.path.join(path, 'Images', 'Skel_L.png'))
-        self.r_icon =  QtGui.QIcon(os.path.join(path, 'Images', 'Skel_R.png'))
-        self.m_icon =  QtGui.QIcon(os.path.join(path, 'Images', 'Skel_M.png'))
+#=========== MENUS + LISTENER ====================================
 
+    def _Setup_Connections(self):
+        self.customContextMenuRequested[QtCore.QPoint].connect(self._RightClickMenu)
+        self.itemChanged.connect(self._Rename)
 
     def _RightClickMenu(self):
         menu = QtWidgets.QMenu(self)
@@ -99,16 +71,11 @@ class SKEL_Limb_Hierarchy_UI(QtWidgets.QTreeWidget):
         remove.setEnabled(bool(items))
         menu.exec_(QtGui.QCursor.pos())
 
-    
     def eventFilter(self, sender, event):
         if (event.type() == QtCore.QEvent.ChildRemoved):
             self._Reparent()
         return False
     
-    def _Setup_Connections(self):
-        self.customContextMenuRequested[QtCore.QPoint].connect(self._RightClickMenu)
-        self.itemChanged.connect(self._Rename)
-
 #=========== FUNCTIONALITY ====================================
 
     def Add(self):
@@ -153,7 +120,6 @@ class SKEL_Limb_Hierarchy_UI(QtWidgets.QTreeWidget):
                 item.setText(0, oldName)
                 self.parent.StatusMsg(self.limbHier.nameMng.errorMsg)
                 self._isPopulating = False
-
 
     def _Reparent(self):
         if not self._isPopulating:

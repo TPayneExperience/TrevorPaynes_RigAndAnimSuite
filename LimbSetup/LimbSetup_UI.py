@@ -1,5 +1,5 @@
 
-from Qt import QtWidgets, QtCore
+from Common.Qt import QtWidgets, QtCore
 
 
 import Skeleton.Skeleton_UI as skel_ui

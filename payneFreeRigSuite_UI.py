@@ -2,8 +2,8 @@
 import os
 import sys
 
-import Qt
-from Qt import QtWidgets, QtCore, QtGui
+# import Common.Qt
+from Common.Qt import QtWidgets, QtCore, QtGui
 
 
 import payneFreeRigSuite as pfrs

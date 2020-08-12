@@ -1,7 +1,7 @@
 
 import os
 
-from Qt import QtWidgets, QtCore, QtGui
+from Common.Qt import QtWidgets, QtCore, QtGui
 
 class LoadTemplate_UI(QtWidgets.QDialog):
     def __init__(self, templateFiles, parent=None):
@@ -41,8 +41,7 @@ class LoadTemplate_UI(QtWidgets.QDialog):
         self.limbs_lw = QtWidgets.QListWidget(self)
         self.limbs_lw.setAlternatingRowColors(True)
         self.limbs_lw.setSelectionMode(self.limbs_lw.ExtendedSelection)
-        # self.limbs_lw.setHeaderHidden(True)
-        # self.limbs_lw.setIndentation(10)
+        self.limbs_lw.setToolTip('Ctr + click = multi select!')
 
         vl.addWidget(self.limbs_lw)
         return gb

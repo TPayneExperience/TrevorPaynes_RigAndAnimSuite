@@ -1,7 +1,7 @@
 
 import sys
 
-from Qt import QtWidgets, QtCore, QtGui
+from Common.Qt import QtWidgets, QtCore, QtGui
 
 class SKEL_Joint_Properties_UI(QtWidgets.QWidget):
     def __init__(self, jointProperties, parent=None):

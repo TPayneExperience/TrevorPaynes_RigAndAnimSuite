@@ -1,7 +1,7 @@
 
 import os
 
-from Qt import QtWidgets, QtCore, QtGui
+from Common.Qt import QtWidgets, QtCore, QtGui
 
 class DuplicateLimbs_UI(QtWidgets.QDialog):
     def __init__(self, limbMng, parent=None):

@@ -1,9 +1,9 @@
 
-from Qt import QtWidgets, QtCore
+from Common.Qt import QtWidgets, QtCore
 
 
-import Hierarchies.SKEL_Joint_Hierarchy_UI as jointHier_UI
-import Hierarchies.SKEL_Limb_Hierarchy_UI as limbHier_UI
+import Hierarchies.SKEL_Joint_Hierarchy_LW as jointHier_UI
+import Hierarchies.SKEL_Limb_Hierarchy_TW as limbHier_UI
 reload(jointHier_UI)
 reload(limbHier_UI)
 
@@ -45,13 +45,13 @@ class Skeleton_UI(QtWidgets.QTabWidget):
 
         gb1 = QtWidgets.QGroupBox('LIMB Hierarchy')
         vl = QtWidgets.QVBoxLayout(gb1)
-        self.limbHier_tw = limbHier_UI.SKEL_Limb_Hierarchy_UI(self.skel.limbHier, self)
+        self.limbHier_tw = limbHier_UI.SKEL_Limb_Hierarchy_TW(self.skel.limbHier, self)
         vl.addWidget(self.limbHier_tw)
         v_layout.addWidget(gb1)
 
         gb2 = QtWidgets.QGroupBox('Limb JOINT Hierarchy')
         vl = QtWidgets.QVBoxLayout(gb2)
-        self.jntHier_lw = jointHier_UI.SKEL_Joint_Hierarchy_UI(self.skel.jntHier, self)
+        self.jntHier_lw = jointHier_UI.SKEL_Joint_Hierarchy_LW(self.skel.jntHier, self)
         vl.addWidget(self.jntHier_lw)
         v_layout.addWidget(gb2)
 
@@ -99,6 +99,7 @@ class Skeleton_UI(QtWidgets.QTabWidget):
 #=========== FUNCTIONALITY ====================================
 
     def _Setup_Connections(self):
+        # self.limbHier_tw.itemClicked.connect(self._LimbSelected)
         self.limbHier_tw.itemClicked.connect(self._LimbSelected)
         self.jntHier_lw.itemClicked.connect(self._JointSelected)
         self.moveToVertCenter_btn.clicked.connect(self.skel.sceneMng.MoveToVertsCenter)
@@ -191,7 +192,7 @@ class Skeleton_UI(QtWidgets.QTabWidget):
             if self.skel.jntMng.DoesLimbHaveJoints(ID):
                 self.skel.sceneMng.sceneLimbMng.RenameLimb(ID)
 
-        self.limbHier_tw.Populate()
+        self.limbHier_gb.Populate()
 
 
 #=========== MANIPULATE JOINTS ====================================

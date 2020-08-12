@@ -2,12 +2,10 @@
 import os
 import sys
 
-# import RigAndAnim_Manager as rig
-# reload(rig)
 
-import Utils.File_Manager as fm
+import Common.File_Manager as fm
 reload(fm)
-import Utils.Json_Manager as js
+import Common.Json_Manager as js
 reload(js)
 import RigSetup.Name_Manager as nm
 reload(nm)

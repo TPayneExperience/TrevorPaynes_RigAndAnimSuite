@@ -1,7 +1,7 @@
 import os
 import sys
 
-from Qt import QtWidgets, QtCore, QtGui
+from Common.Qt import QtWidgets, QtCore, QtGui
 
 import Name_Manager as nm
 reload(nm)

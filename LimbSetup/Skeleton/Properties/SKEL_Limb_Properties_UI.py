@@ -1,6 +1,6 @@
 import sys
 
-from Qt import QtWidgets, QtCore, QtGui
+from Common.Qt import QtWidgets, QtCore, QtGui
 
 class SKEL_Limb_Properties_UI(QtWidgets.QWidget):
     def __init__(self, Limb_Properties, parent=None):

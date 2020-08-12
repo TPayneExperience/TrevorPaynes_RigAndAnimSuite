@@ -26,7 +26,7 @@ import os
 import sys
 
 import Qt
-from Qt import QtWidgets, QtCore, QtGui
+from Common.Qt import QtWidgets, QtCore, QtGui
 import tp_launcher_model
 
 QT_VER = Qt.__binding__

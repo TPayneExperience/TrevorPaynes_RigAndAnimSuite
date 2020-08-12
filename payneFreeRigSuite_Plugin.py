@@ -6,12 +6,12 @@
 
 # from maya import cmds
 # try:
-#     cmds.unloadPlugin('tpRigAndAnimSuite_Plugin')
+#     cmds.unloadPlugin('payneFreeRigSuite_Plugin')
 # except:
 #     pass
-# cmds.loadPlugin('tpRigAndAnimSuite_Plugin')
+# cmds.loadPlugin('payneFreeRigSuite_Plugin')
 # reload(cmds)
-# cmds.tpRigAndAnimSuite_Plugin()
+# cmds.payneFreeRigSuite_Plugin()
 
 import sys
 
@@ -19,13 +19,13 @@ import maya.api.OpenMaya as om
 from maya import OpenMayaUI as omui 
 from shiboken2 import wrapInstance
 
-import Qt
-from Qt import QtWidgets, QtCore, QtGui
+import Common.Qt
+from Common.Qt import QtWidgets, QtCore, QtGui
 import payneFreeRigSuite_UI as pfrs_ui
 reload(pfrs_ui)
 
 
-QT_VER = Qt.__binding__
+QT_VER = Common.Qt.__binding__
 PY_VER = sys.version[:3]
 
 def maya_useNewAPI():

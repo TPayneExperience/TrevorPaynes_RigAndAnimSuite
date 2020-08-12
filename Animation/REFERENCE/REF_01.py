@@ -1,7 +1,7 @@
 
 import sys
 
-from Qt import QtWidgets, QtCore, QtGui
+from Common.Qt import QtWidgets, QtCore, QtGui
 
 class Joint_Hierarchy_UI(QtWidgets.QListWidget):
     def __init__(self, jointHierarchy, parent=None):

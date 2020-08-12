@@ -1,5 +1,5 @@
 
-from Qt import QtWidgets, QtCore
+from Common.Qt import QtWidgets, QtCore
 
 
 import Templates.Default_Templates_UI as defTemp_UI

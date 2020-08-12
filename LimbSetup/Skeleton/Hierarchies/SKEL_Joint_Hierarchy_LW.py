@@ -1,11 +1,11 @@
 
 import sys
 
-from Qt import QtWidgets, QtCore, QtGui
+from Common.Qt import QtWidgets, QtCore, QtGui
 
-class SKEL_Joint_Hierarchy_UI(QtWidgets.QListWidget):
+class SKEL_Joint_Hierarchy_LW(QtWidgets.QListWidget):
     def __init__(self, jointHierarchy, parent=None):
-        super(SKEL_Joint_Hierarchy_UI, self).__init__(parent)
+        super(SKEL_Joint_Hierarchy_LW, self).__init__(parent)
         self.parent = parent
         self.jntHier = jointHierarchy
         self._isPopulating = False
