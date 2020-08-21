@@ -28,27 +28,25 @@ class Limb_Hierarchy_TW(QtWidgets.QTreeWidget):
         self.clear()
         self._items.clear()
 
-        idOrder = self.limbMng.GetAllLimbsCreationOrder()
-
-        # CREATE ITEMS, IN ORDER
-        for limbID in idOrder:
-            name = self.limbMng.GetName(limbID)
-            side = self.limbMng.GetSide(limbID)
-            parentID = self.limbMng.GetParentID(limbID)
-            if (parentID != -1):
-                parentItem = self._items[parentID]
-                item = QtWidgets.QTreeWidgetItem(parentItem, [name])
-            else:
-                item = QtWidgets.QTreeWidgetItem(self, [name])
-            item.ID = limbID
-            if (side == 'M'):
-                item.setIcon(0, self.m_icon)
-            else:
-                if (side == 'L'):
+        # idOrder = self.limbMng.GetLimbCreationOrder()
+        for rootLimbID in self.limbMng.GetRootLimbs():
+            for limbID in self.limbMng.GetLimbCreationOrder(rootLimbID):
+                name = self.limbMng.GetPFRSName(limbID)
+                sideIndex = self.limbMng.GetSideIndex(limbID)
+                parentID = self.limbMng.GetParentLimbID(limbID)
+                if (parentID != -1):
+                    parentItem = self._items[parentID]
+                    item = QtWidgets.QTreeWidgetItem(parentItem, [name])
+                else:
+                    item = QtWidgets.QTreeWidgetItem(self, [name])
+                item.ID = limbID
+                if (sideIndex == 1):
                     item.setIcon(0, self.l_icon)
-                elif (side == 'R'):
+                elif (sideIndex == 2):
                     item.setIcon(0, self.r_icon)
-            self._items[limbID] = item
+                else:
+                    item.setIcon(0, self.m_icon)
+                self._items[limbID] = item
         self.expandAll()
 
 

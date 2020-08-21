@@ -45,14 +45,14 @@ class SKEL_Scene_Limb_Manager():
         jointIDs = self.jntMng.GetLimbJointIDs(limbID)
         tempSceneJoints = []
         for ID in jointIDs:
-            cmds.select(d=1)
-            jointData = self.jntMng.GetJoint(ID)
-            name = self.GetJointName(limbID, ID)
-            jnt = cmds.joint(   name=name, 
-                                position=jointData.position, 
-                                orientation=jointData.rotation, 
-                                rotationOrder=jointData.rotationOrder,
-                                rad=self.displaySize)
+            # cmds.select(d=1)
+            # jointData = self.jntMng.GetJoint(ID)
+            # name = self.GetJointName(limbID, ID)
+            # jnt = cmds.joint(   name=name, 
+            #                     position=jointData.position, 
+            #                     orientation=jointData.rotation, 
+            #                     rotationOrder=jointData.rotationOrder,
+            #                     rad=self.displaySize)
             cmds.parent(jnt, rootJntGrp)
             self.sceneJoints[ID] = jnt
             tempSceneJoints.append(jnt)
@@ -143,14 +143,14 @@ class SKEL_Scene_Limb_Manager():
 
 #======= ACCESSORS  ===================================
 
-    def GetJointName(self, limbID, jointID):
-        jointData = self.jntMng.GetJoint(jointID)
-        name = self.nameMng.GetName(self.nameMng.GetPrefix(),
-                                    self.limbMng.GetName(limbID),
-                                    jointData.name,
-                                    self.limbMng.GetSide(limbID),
-                                    'JNT')
-        return name
+    # def GetJointName(self, limbID, jointID):
+    #     jointData = self.jntMng.GetJoint(jointID)
+    #     name = self.nameMng.GetName(self.nameMng.GetPrefix(),
+    #                                 self.limbMng.GetName(limbID),
+    #                                 jointData.name,
+    #                                 self.limbMng.GetSide(limbID),
+    #                                 'JNT')
+    #     return name
 
     def GetJointCtrName(self, limbID, jointID):
         jointData = self.jntMng.GetJoint(jointID)
@@ -181,10 +181,10 @@ class SKEL_Scene_Limb_Manager():
             self.RenameJoint(limbID, jointID)
 
     def RenameJoint(self, limbID, jointID):
-        oldJntName = self.sceneJoints[jointID]
-        newJntName = self.GetJointName(limbID, jointID)
-        cmds.rename(oldJntName, newJntName)
-        self.sceneJoints[jointID] = newJntName
+        # oldJntName = self.sceneJoints[jointID]
+        # newJntName = self.GetJointName(limbID, jointID)
+        # cmds.rename(oldJntName, newJntName)
+        # self.sceneJoints[jointID] = newJntName
 
         oldCtrName = self.jointCtrs[jointID]
         newCtrName = self.GetJointCtrName(limbID, jointID)

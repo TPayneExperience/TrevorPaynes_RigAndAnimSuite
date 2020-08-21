@@ -8,11 +8,11 @@ class SKEL_Limb_Hierarchy():
     
 #========= FUNCTIONALITY ===========================================
 
-    def Add(self):
-        limbID = self.limbMng.Add()
-        self.jntMng.AddLimb(limbID)
-        self.jntMng.Add(limbID, -1, 1)
-        return limbID
+    # def Add(self):
+    #     limbID = self.limbMng.Add()
+    #     self.jntMng.AddLimb(limbID)
+    #     self.jntMng.Add(limbID, -1, 1)
+    #     return limbID
     
     def Remove(self, limbID):
         self.jntMng.RemoveLimb(limbID)

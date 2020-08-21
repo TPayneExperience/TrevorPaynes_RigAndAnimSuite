@@ -12,8 +12,8 @@ reload(pfrs)
 import LimbSetup.LimbSetup_UI as limbSetup_ui
 reload(limbSetup_ui)
 
-import RigSetup.RigSetup_UI as rs_ui
-reload(rs_ui)
+# import RigSetup.RigSetup_UI as rs_ui
+# reload(rs_ui)
 
 
 __author__ = 'Trevor Payne'
@@ -50,117 +50,118 @@ class PayneFreeRigSuite_UI(QtWidgets.QMainWindow):
 #=========== SETUP MENUBAR ====================================
 
     def _Setup_MenuBar(self):
-        self._Setup_MenuBar_FileMenu()
-        self._Setup_MenuBar_Limbs()
-        self._Setup_MenuBar_Settings()
-        self._Setup_MenuBar_Help()
+        pass
+        # self._Setup_MenuBar_FileMenu()
+        # self._Setup_MenuBar_Limbs()
+        # self._Setup_MenuBar_Settings()
+        # self._Setup_MenuBar_Help()
         
-    def _Setup_MenuBar_FileMenu(self):
-        # ACTIONS
-        save = QtWidgets.QAction(   'Save', 
-                                    self, 
-                                    triggered=self.pfrs.saveLoadRig.Save)
-        saveAs = QtWidgets.QAction( 'Save As...', 
-                                    self, 
-                                    triggered=self.SaveAs_Dialog)
-        newRig = QtWidgets.QAction( 'New Rig...', 
-                                    self, 
-                                    triggered=self.NewRig_Dialog)
-        loadRig = QtWidgets.QAction('Load Rig...', 
-                                    self, 
-                                    triggered=self.LoadRig_Dialog)
-        editRig = QtWidgets.QAction('Edit Rig...', 
-                                    self, 
-                                    triggered=self.EditRig_Dialog)
-        importFBX = QtWidgets.QAction('Import FBX...', self)
-        importFBX.setEnabled(False)
-        exportFBX = QtWidgets.QAction('Export FBX...', self)
-        exportFBX.setEnabled(False)
+    # def _Setup_MenuBar_FileMenu(self):
+    #     # ACTIONS
+    #     save = QtWidgets.QAction(   'Save', 
+    #                                 self, 
+    #                                 triggered=self.pfrs.saveLoadRig.Save)
+    #     saveAs = QtWidgets.QAction( 'Save As...', 
+    #                                 self, 
+    #                                 triggered=self.SaveAs_Dialog)
+    #     newRig = QtWidgets.QAction( 'New Rig...', 
+    #                                 self, 
+    #                                 triggered=self.NewRig_Dialog)
+    #     loadRig = QtWidgets.QAction('Load Rig...', 
+    #                                 self, 
+    #                                 triggered=self.LoadRig_Dialog)
+    #     editRig = QtWidgets.QAction('Edit Rig...', 
+    #                                 self, 
+    #                                 triggered=self.EditRig_Dialog)
+    #     importFBX = QtWidgets.QAction('Import FBX...', self)
+    #     importFBX.setEnabled(False)
+    #     exportFBX = QtWidgets.QAction('Export FBX...', self)
+    #     exportFBX.setEnabled(False)
 
-        # ADD TO FILEMENU
-        fileMenu = self.menuBar().addMenu('File')
-        fileMenu.addAction(save)
-        fileMenu.addAction(saveAs)
-        fileMenu.addSeparator()
+    #     # ADD TO FILEMENU
+    #     fileMenu = self.menuBar().addMenu('File')
+    #     fileMenu.addAction(save)
+    #     fileMenu.addAction(saveAs)
+    #     fileMenu.addSeparator()
 
-        fileMenu.addAction(newRig)
-        fileMenu.addAction(loadRig)
-        fileMenu.addAction(editRig)
-        fileMenu.addSeparator()
+    #     fileMenu.addAction(newRig)
+    #     fileMenu.addAction(loadRig)
+    #     fileMenu.addAction(editRig)
+    #     fileMenu.addSeparator()
 
-        fileMenu.addAction(importFBX)
-        fileMenu.addAction(exportFBX)
-        fileMenu.addSeparator()
+    #     fileMenu.addAction(importFBX)
+    #     fileMenu.addAction(exportFBX)
+    #     fileMenu.addSeparator()
 
-        quitAct = fileMenu.addAction('Quit')
-        quitAct.triggered.connect(self.close)
+    #     quitAct = fileMenu.addAction('Quit')
+    #     quitAct.triggered.connect(self.close)
     
-    def _Setup_MenuBar_Limbs(self):
-        limbsMenu = self.menuBar().addMenu('Limbs')
-        mirrorMenu = QtWidgets.QMenu('Mirror Limb')
+    # def _Setup_MenuBar_Limbs(self):
+    #     limbsMenu = self.menuBar().addMenu('Limbs')
+    #     mirrorMenu = QtWidgets.QMenu('Mirror Limb')
 
-        mirrorX = QtWidgets.QAction('X Axis', 
-                                    self, 
-                                    triggered=self.limbs_tw.Mirror_X)
-        mirrorY = QtWidgets.QAction('Y Axis', 
-                                    self, 
-                                    triggered=self.limbs_tw.Mirror_Y)
-        mirrorZ = QtWidgets.QAction('Z Axis', 
-                                    self, 
-                                    triggered=self.limbs_tw.Mirror_Z)
-        duplicate = QtWidgets.QAction('Duplicate', 
-                                    self, 
-                                    triggered=self.limbs_tw.Duplicate_Dialog)
+    #     mirrorX = QtWidgets.QAction('X Axis', 
+    #                                 self, 
+    #                                 triggered=self.limbs_tw.Mirror_X)
+    #     mirrorY = QtWidgets.QAction('Y Axis', 
+    #                                 self, 
+    #                                 triggered=self.limbs_tw.Mirror_Y)
+    #     mirrorZ = QtWidgets.QAction('Z Axis', 
+    #                                 self, 
+    #                                 triggered=self.limbs_tw.Mirror_Z)
+    #     duplicate = QtWidgets.QAction('Duplicate', 
+    #                                 self, 
+    #                                 triggered=self.limbs_tw.Duplicate_Dialog)
         
         
-        save = QtWidgets.QAction('Save Template', 
-                                    self, 
-                                    triggered=self.limbs_tw.Save_Dialog)
+    #     save = QtWidgets.QAction('Save Template', 
+    #                                 self, 
+    #                                 triggered=self.limbs_tw.Save_Dialog)
         
-        load = QtWidgets.QAction('Load Template', 
-                                    self, 
-                                    triggered=self.limbs_tw.Load_Dialog)
+    #     load = QtWidgets.QAction('Load Template', 
+    #                                 self, 
+    #                                 triggered=self.limbs_tw.Load_Dialog)
         
 
-        mirrorMenu.addAction(mirrorX)
-        mirrorMenu.addAction(mirrorY)
-        mirrorMenu.addAction(mirrorZ)
+    #     mirrorMenu.addAction(mirrorX)
+    #     mirrorMenu.addAction(mirrorY)
+    #     mirrorMenu.addAction(mirrorZ)
 
-        limbsMenu.addMenu(mirrorMenu)
+    #     limbsMenu.addMenu(mirrorMenu)
 
-        limbsMenu.addAction(duplicate)
-        limbsMenu.addSeparator()
+    #     limbsMenu.addAction(duplicate)
+    #     limbsMenu.addSeparator()
 
-        limbsMenu.addAction(load)
-        limbsMenu.addAction(save)
+    #     limbsMenu.addAction(load)
+    #     limbsMenu.addAction(save)
 
-    def _Setup_MenuBar_Settings(self):
-        # ACTIONS
-        animFolder = QtWidgets.QAction(   'Set Animation Library Folder...', 
-                                    self)
-        animFolder.setEnabled(False)
-        tool = QtWidgets.QAction(   'Tool Settings...', 
-                                    self)
-        tool.setEnabled(False)
+    # def _Setup_MenuBar_Settings(self):
+    #     # ACTIONS
+    #     animFolder = QtWidgets.QAction(   'Set Animation Library Folder...', 
+    #                                 self)
+    #     animFolder.setEnabled(False)
+    #     tool = QtWidgets.QAction(   'Tool Settings...', 
+    #                                 self)
+    #     tool.setEnabled(False)
 
-        # ADD TO FILEMENU
-        settingsMenu = self.menuBar().addMenu('Settings')
-        settingsMenu.addAction(animFolder)
-        settingsMenu.addAction(tool)
+    #     # ADD TO FILEMENU
+    #     settingsMenu = self.menuBar().addMenu('Settings')
+    #     settingsMenu.addAction(animFolder)
+    #     settingsMenu.addAction(tool)
 
-    def _Setup_MenuBar_Help(self):
-        # ACTIONS
-        doc = QtWidgets.QAction('Documentation...', 
-                                self)
-        doc.setEnabled(False)
-        tut = QtWidgets.QAction('Tutorials...', 
-                                self)
-        tut.setEnabled(False)
+    # def _Setup_MenuBar_Help(self):
+    #     # ACTIONS
+    #     doc = QtWidgets.QAction('Documentation...', 
+    #                             self)
+    #     doc.setEnabled(False)
+    #     tut = QtWidgets.QAction('Tutorials...', 
+    #                             self)
+    #     tut.setEnabled(False)
 
-        # ADD TO FILEMENU
-        helpMenu = self.menuBar().addMenu('Help')
-        helpMenu.addAction(doc)
-        helpMenu.addAction(tut)
+    #     # ADD TO FILEMENU
+    #     helpMenu = self.menuBar().addMenu('Help')
+    #     helpMenu.addAction(doc)
+    #     helpMenu.addAction(tut)
 
 #=========== SETUP MAIN WIDGET====================================
 
@@ -181,74 +182,79 @@ class PayneFreeRigSuite_UI(QtWidgets.QMainWindow):
 #=========== FUNCTIONALITY ====================================
 
     def closeEvent(self, e):
-        self.pfrs.limbSetup.skel.sceneMng.KillScriptJobs()
-        self.pfrs.limbSetup.skel.sceneMng.KillSelectionJob()
+        # self.pfrs.limbSetup.skel.sceneMng.KillScriptJobs()
+        # self.pfrs.limbSetup.skel.sceneMng.KillSelectionJob()
         super(PayneFreeRigSuite_UI, self).closeEvent(e)
     
     def StatusMsg(self, message):
         self.statusBar().showMessage(message)
 
     def NewRig_Dialog(self):
-        rigUI = rs_ui.RigSetup_UI(  self.pfrs.nameMng,
-                                    self.pfrs.fileMng,
-                                    self)
-        if (rigUI.exec_()):
-            self._NewRig()
+        pass
+        # rigUI = rs_ui.RigSetup_UI(  self.pfrs.nameMng,
+        #                             self.pfrs.fileMng,
+        #                             self)
+        # if (rigUI.exec_()):
+        #     self._NewRig()
 
     def _NewRig(self):
-        self.pfrs.rigSceneMng.NewRig()
-        self.limbs_tw.NewRig(self.pfrs.rigSceneMng.rootGrp)
-        self.pfrs.saveLoadRig.Save()
+        self.pfrs.NewRig()
+        # self.pfrs.rigSceneMng.NewRig()
+        # self.limbs_tw.NewRig(self.pfrs.rigSceneMng.rootGrp)
+        # self.pfrs.saveLoadRig.Save()
 
     def EditRig_Dialog(self):
-        tempPrefix = self.pfrs.nameMng.GetPrefix()
-        tempMeshPath = self.pfrs.fileMng.GetMeshPath()
-        tempOutputPath = self.pfrs.fileMng.GetOutputFile()
-        tempShowPrefix = self.pfrs.nameMng.GetShowPrefix()
-        tempOrder = self.pfrs.nameMng.GetNamingOrder()
+        pass
+        # tempPrefix = self.pfrs.nameMng.GetPrefix()
+        # tempMeshPath = self.pfrs.fileMng.GetMeshPath()
+        # tempOutputPath = self.pfrs.fileMng.GetOutputFile()
+        # tempShowPrefix = self.pfrs.nameMng.GetShowPrefix()
+        # tempOrder = self.pfrs.nameMng.GetNamingOrder()
 
-        rigUI = rs_ui.RigSetup_UI(  self.pfrs.nameMng,
-                                    self.pfrs.fileMng,
-                                    self)
-        rigUI.SetData(  self.pfrs.nameMng.GetPrefix(),
-                        self.pfrs.fileMng.GetMeshPath(),
-                        self.pfrs.fileMng.GetOutputFile(),
-                        self.pfrs.nameMng.GetShowPrefix(),
-                        self.pfrs.nameMng.GetNamingOrder())
+        # rigUI = rs_ui.RigSetup_UI(  self.pfrs.nameMng,
+        #                             self.pfrs.fileMng,
+        #                             self)
+        # rigUI.SetData(  self.pfrs.nameMng.GetPrefix(),
+        #                 self.pfrs.fileMng.GetMeshPath(),
+        #                 self.pfrs.fileMng.GetOutputFile(),
+        #                 self.pfrs.nameMng.GetShowPrefix(),
+        #                 self.pfrs.nameMng.GetNamingOrder())
 
-        if (rigUI.exec_()):
-            prefix = (tempPrefix != self.pfrs.nameMng.GetPrefix())
-            meshPath = (tempMeshPath != self.pfrs.fileMng.GetMeshPath())
-            outputPath = (tempOutputPath != self.pfrs.fileMng.GetOutputFile())
-            showPrefix = (tempShowPrefix != self.pfrs.nameMng.GetShowPrefix())
-            order = (tempOrder != self.pfrs.nameMng.GetNamingOrder())
-            if (prefix):
-                self.pfrs.rigSceneMng.UpdatePrefix()
-            if (prefix or showPrefix or order):
-                self.limbs_tw.UpdateNaming()
-            if meshPath:
-                self.pfrs.rigSceneMng.UpdateMeshes()
-            if outputPath:
-                self.pfrs.saveLoadRig.Save()
+        # if (rigUI.exec_()):
+        #     prefix = (tempPrefix != self.pfrs.nameMng.GetPrefix())
+        #     meshPath = (tempMeshPath != self.pfrs.fileMng.GetMeshPath())
+        #     outputPath = (tempOutputPath != self.pfrs.fileMng.GetOutputFile())
+        #     showPrefix = (tempShowPrefix != self.pfrs.nameMng.GetShowPrefix())
+        #     order = (tempOrder != self.pfrs.nameMng.GetNamingOrder())
+        #     if (prefix):
+        #         self.pfrs.rigSceneMng.UpdatePrefix()
+        #     if (prefix or showPrefix or order):
+        #         self.limbs_tw.UpdateNaming()
+        #     if meshPath:
+        #         self.pfrs.rigSceneMng.UpdateMeshes()
+        #     if outputPath:
+        #         self.pfrs.saveLoadRig.Save()
 
     def LoadRig_Dialog(self):
-        filePath, ignore = QtWidgets.QFileDialog.getOpenFileName(
-                                                self, 
-                                                'Load Rig File',
-                                                __file__,
-                                                '*.json')
-        if (os.path.isfile(filePath)):
-            self.pfrs.saveLoadRig.Load(filePath)
-            self.limbs_tw.Populate()
+        pass
+        # filePath, ignore = QtWidgets.QFileDialog.getOpenFileName(
+        #                                         self, 
+        #                                         'Load Rig File',
+        #                                         __file__,
+        #                                         '*.json')
+        # if (os.path.isfile(filePath)):
+        #     self.pfrs.saveLoadRig.Load(filePath)
+        #     self.limbs_tw.Populate()
     
     def SaveAs_Dialog(self):
-        filePath, ignore = QtWidgets.QFileDialog.getSaveFileName(self, 
-                                                        'Save Rig File',
-                                                        os.path.dirname(__file__),
-                                                        '*.json')
-        if (filePath):
-            self.pfrs.fileMng.SetOutputFile(filePath)
-            self.pfrs.saveLoadRig.Save()
+        pass
+        # filePath, ignore = QtWidgets.QFileDialog.getSaveFileName(self, 
+        #                                                 'Save Rig File',
+        #                                                 os.path.dirname(__file__),
+        #                                                 '*.json')
+        # if (filePath):
+        #     self.pfrs.fileMng.SetOutputFile(filePath)
+        #     self.pfrs.saveLoadRig.Save()
 
 
     

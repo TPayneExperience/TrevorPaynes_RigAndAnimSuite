@@ -1,104 +1,152 @@
 
+from maya import cmds
+reload(cmds)
+
 
 class Limb_Manager():
-    def __init__(self):
-        self._limbSidesOptions = ['M', 'L', 'R']
+    def __init__(self, nameMng):
+
+        self.nameMng = nameMng
+
+        self._limbSides = ['M', 'L', 'R', 'None']
         self._limbTypes = ['Chain', 'Branch', 'Linear_Chain', 'Linear_Branch']
+        self._limbBhvs = ['FK', 'FK / IK', 'IK Pole Vector', 'IK Spline', 'Constraint']
 
-        self.NewRig()
+        # self.NewRig()
 
-    def NewRig(self):
+    def NewRig(self, limbSetupGrp):
         self._nextLimbID = 1
-        self._limbName = {} # ID : Name
-        self._limbType = {} # ID : string,  ['Chain', 'Branch', 'Linear_Chain']
-        self._limbSide = {} # ID : side, ['M', 'L', 'R']
-        self._limbParent = {} # limbID : parentID 
-        self._limbMirror = {} # limbID_01 : limbID_02 (was mirrorLimbID)
-        self._limbMirrorRoots = []
+        self._limbs = {} # limbID : sceneName
+        
+        cmds.select(d=1)
+        name = '%s_Limbs_Grp' % self.nameMng.GetPrefix()
+        self._limbGrp = cmds.group(name=name, em=1)
+        cmds.parent(self._limbGrp, limbSetupGrp)
+
+        # self._limbName = {} # ID : Name
+        # self._limbParent = {} # limbID : parentID 
+        # self._limbType = {} # ID : string,  ['Chain', 'Branch', 'Linear_Chain']
+        # self._limbSide = {} # ID : side, ['M', 'L', 'R']
+        # self._limbMirror = {} # limbID_01 : limbID_02 (was mirrorLimbID)
+        # self._limbMirrorRoots = []
 
 #============= ACCESSORS + MUTATORS ============================
 
-    def GetLimbIDs(self):
-        return list(self._limbName.keys())
-
     # NAMES
-    def GetName(self, ID):
-        return self._limbName[ID]
+    def GetSceneName(self, limbID):
+        return self._limbs[limbID]
 
-    def SetLimbName(self, limbID, newName):
-        self._limbName[limbID] = newName
-        mirrorID = self._limbMirror[limbID]
-        if (mirrorID != -1):
-            self._limbName[mirrorID] = newName
+    def GetPFRSName(self, limbID):
+        return cmds.getAttr(self._limbs[limbID] + '.pfrsName')
     
-    # MIRROR
-    def GetMirror(self, ID):
-        return self._limbMirror[ID]
-    
-    def SetLimbMirrorRoot(self, ID):
-        mirrorID = self.GetMirror(ID)
-        self._limbMirrorRoots.append(ID)
-        self._limbMirrorRoots.append(mirrorID)
-    
-    def GetLimbMirrorRoots(self):
-        return self._limbMirrorRoots
+    def SetPFRSName(self, limbID, newPFRSName):
+        oldSceneName = self._limbs[limbID]
+        side = self.GetSide(limbID)
+        cmds.setAttr(oldSceneName + '.pfrsName', newPFRSName, type='string')
+        newSceneName = self._GenerateSceneName(newPFRSName, side)
+        cmds.rename(oldSceneName, newSceneName)
+        self._limbs[limbID] = newSceneName
 
-    # TYPES
-    def GetType(self, ID):
-        return self._limbType[ID]
-    
-    def SetType(self, ID, limbType):
-        self._limbType[ID] = limbType
-        mirrorID = self._limbMirror[ID]
-        if (mirrorID != -1):
-            self._limbType[mirrorID] = limbType
+    # TYPE: chain, branch...
+    def GetTypeIndex(self, limbID):
+        return cmds.getAttr(self._limbs[limbID] + '.type')
 
-    def GetTypes(self):
-        return self._limbTypes
-    
+    def SetTypeIndex(self, limbID, typeIndex):
+        return cmds.setAttr(self._limbs[limbID] + '.type', typeIndex)
+
     # SIDES
-    def GetSide(self, ID):
-        return self._limbSide[ID]
+    def GetSideIndex(self, limbID):
+        return cmds.getAttr(self._limbs[limbID] + '.side')
     
-    def SetSide(self, limbID, side):
-        self._limbSide[limbID] = side
+    def SetSideIndex(self, limbID, sideIndex):
+        cmds.setAttr(self._limbs[limbID] + '.side', sideIndex)
+    
+    def GetSide(self, limbID):
+        return self._limbSides[cmds.getAttr(self._limbs[limbID] + '.side')]
 
-    def GetSides(self):
-        return self._limbSidesOptions
+    # PARENT LIMB ID
+    def GetParentLimbID(self, limbID):
+        return cmds.getAttr(self._limbs[limbID] + '.parentLimbID')
     
+    def SetParentLimbID(self, limbID, parentLimbID):
+        cmds.setAttr(self._limbs[limbID] + '.parentLimbID', parentLimbID)
+
+    # PARENT JOINT ID
+    def GetParentJointID(self, limbID):
+        return cmds.getAttr(self._limbs[limbID] + '.parentJointID')
+    
+    def SetParentJointID(self, limbID, parentJointID):
+        cmds.setAttr(self._limbs[limbID] + '.parentJointID', parentJointID)
+
+    # FUTURE STUFFSS--------------------
+    # PARENT BHV GRP ID
+    def GetParentBhvGrpID(self, limbID):
+        return cmds.getAttr(self._limbs[limbID] + '.parentBhvGrpID')
+    
+    def SetParentBhvGrpID(self, limbID, parentBhvGrpID):
+        cmds.setAttr(self._limbs[limbID] + '.parentBhvGrpID', parentBhvGrpID)
+
+    # BEHAVIOR
+    def GetBhvIndex(self, limbID):
+        return cmds.getAttr(self._limbs[limbID] + '.behavior')
+
+    def SetBhvIndex(self, limbID, bhvIndex):
+        return cmds.setAttr(self._limbs[limbID] + '.behavior', bhvIndex)
+
+
+# #============= FUNCTIONALITY ============================
+
+    def _GenerateSceneName(self, pfrsName, side):
+        return '%s_%s_%s_Limb' % (self.nameMng.GetPrefix(), pfrsName, side)
+    
+    def Add(self):
+        limbID = self._nextLimbID
+        self._nextLimbID += 1
+        pfrsName = 'Limb_%03d' % limbID
+        sceneName = self._GenerateSceneName(pfrsName, self._limbSides[0])
+        limbTypes = ':'.join(self._limbTypes)
+        limbBhvs = ':'.join(self._limbBhvs)
+        limbSides = ':'.join(self._limbSides)
+        
+        cmds.select(d=1)
+        self._limbs[limbID] = sceneName
+        cmds.group(name=sceneName, em=1)
+        cmds.addAttr(sceneName, ln='limbID', at='short', dv=limbID)
+        cmds.addAttr(sceneName, ln='pfrsName', dt='string')
+        cmds.setAttr(sceneName +'.pfrsName', pfrsName, type='string')
+        cmds.addAttr(sceneName, ln='type', at='enum', en=limbTypes)
+        cmds.addAttr(sceneName, ln='behavior', at='enum', en=limbBhvs)
+        cmds.addAttr(sceneName, ln='side', at='enum', en=limbSides)
+        cmds.addAttr(sceneName, ln='parentLimbID', at='short', dv=-1)
+        cmds.addAttr(sceneName, ln='parentJointID', at='short', dv=-1)
+        cmds.addAttr(sceneName, ln='parentBhvGrpID', at='short', dv=-1)
+        # cmds.addAttr(sceneName, ln='mirrorID', at='short', dv=-1)
+        cmds.parent(sceneName, self._limbGrp)
+
+        return limbID
+
+    def Remove(self, limbID): # Should be called after joints deleted
+        sceneName = self._limbs[limbID]
+        cmds.select(d=1)
+        cmds.delete(sceneName)
+        del(self._limbs[limbID])
+    
+    # Missing mirror + Duplicate
+
 #============= PARENTS / TREE MANIPULATION ============================
-
-    def GetParentID(self, limbID):
-        return self._limbParent[limbID]
-    
-    def GetAllParents(self, limbID):
-        parents = []
-        parentID = self.GetParentID(limbID)
-        while(parentID != -1):
-            parents.append(parentID)
-            parentID = self.GetParentID(parentID)
-        return parents
 
     def GetRootLimbs(self):
         rootLimbIDs = []
-        for childID, parentID in self.GetLimbParentDict().items():
-            if (parentID == -1):
-                rootLimbIDs.append(childID)
+        for limbID in list(self._limbs.keys()):
+            if (self.GetParentLimbID(limbID) == -1):
+                rootLimbIDs.append(limbID)
         return rootLimbIDs
 
-    def GetImmediateChildren(self, limbID):
-        childIDs = []
-        for childID, parentID in self.GetLimbParentDict().items():
-            if (parentID == limbID):
-                childIDs.append(childID)
-        return childIDs
-
-    def GetLimbParentDict(self):
-        return dict(self._limbParent)
-    
     def GetLimbCreationOrder(self, rootLimbID):
         '''Returns a list of children from bottommost to root'''
-        limbParents = self.GetLimbParentDict()
+        limbParents = {}
+        for limbID in list(self._limbs.keys()):
+            limbParents[limbID] = cmds.getAttr(self._limbs[limbID] + '.parentLimbID')
         limbIDs = [rootLimbID]
         complete = False
         while(limbParents and not complete):
@@ -110,75 +158,170 @@ class Limb_Manager():
                     del(limbParents[childID])
                     break
         return limbIDs
+
+#============= ACCESSORS + MUTATORS ============================
+
+    # def GetLimbIDs(self):
+    #     return list(self._limbName.keys())
+
+    # # NAMES
+    # def GetName(self, ID):
+    #     return self._limbName[ID]
+
+    # def SetLimbName(self, limbID, newName):
+    #     self._limbName[limbID] = newName
+    #     mirrorID = self._limbMirror[limbID]
+    #     if (mirrorID != -1):
+    #         self._limbName[mirrorID] = newName
     
-    def GetAllLimbsCreationOrder(self):
-        limbIDs = []
-        for childID, parentID in self._limbParent.items():
-            if (parentID == -1):
-                limbIDs += self.GetLimbCreationOrder(childID)
-        return limbIDs
+    # # MIRROR
+    # def GetMirror(self, ID):
+    #     return self._limbMirror[ID]
+    
+    # def SetLimbMirrorRoot(self, ID):
+    #     mirrorID = self.GetMirror(ID)
+    #     self._limbMirrorRoots.append(ID)
+    #     self._limbMirrorRoots.append(mirrorID)
+    
+    # def GetLimbMirrorRoots(self):
+    #     return self._limbMirrorRoots
 
-    def SetParent(self, childID, parentID):
-        if(self._IsValidParent(childID, parentID)):
-            self._limbParent[childID] = parentID
+    # # TYPES
+    # def GetType(self, ID):
+    #     return self._limbType[ID]
+    
+    # def SetType(self, ID, limbType):
+    #     self._limbType[ID] = limbType
+    #     mirrorID = self._limbMirror[ID]
+    #     if (mirrorID != -1):
+    #         self._limbType[mirrorID] = limbType
 
-    def _IsValidParent(self, childID, parentID):
-        while(parentID != -1):
-            if (childID == parentID):
-                return False
-            parentID = self._limbParent[parentID]
-        return True
+    # def GetTypes(self):
+    #     return self._limbTypes
+    
+    # # SIDES
+    # def GetSide(self, ID):
+    #     return self._limbSide[ID]
+    
+    # def SetSide(self, limbID, side):
+    #     self._limbSide[limbID] = side
+
+    # def GetSides(self):
+    #     return self._limbSidesOptions
+    
+#============= PARENTS / TREE MANIPULATION ============================
+
+    # def GetParentID(self, limbID):
+    #     return self._limbParent[limbID]
+    
+    # def GetAllParents(self, limbID):
+    #     parents = []
+    #     parentID = self.GetParentID(limbID)
+    #     while(parentID != -1):
+    #         parents.append(parentID)
+    #         parentID = self.GetParentID(parentID)
+    #     return parents
+
+    # def GetRootLimbs(self):
+    #     rootLimbIDs = []
+    #     for childID, parentID in self.GetLimbParentDict().items():
+    #         if (parentID == -1):
+    #             rootLimbIDs.append(childID)
+    #     return rootLimbIDs
+
+    # def GetImmediateChildren(self, limbID):
+    #     childIDs = []
+    #     for childID, parentID in self.GetLimbParentDict().items():
+    #         if (parentID == limbID):
+    #             childIDs.append(childID)
+    #     return childIDs
+
+    # def GetLimbParentDict(self):
+    #     return dict(self._limbParent)
+    
+    # def GetLimbCreationOrder(self, rootLimbID):
+    #     '''Returns a list of children from bottommost to root'''
+    #     limbParents = self.GetLimbParentDict()
+    #     limbIDs = [rootLimbID]
+    #     complete = False
+    #     while(limbParents and not complete):
+    #         complete = True
+    #         for childID, parentID in limbParents.items():
+    #             if (parentID in limbIDs):
+    #                 complete = False
+    #                 limbIDs.append(childID)
+    #                 del(limbParents[childID])
+    #                 break
+    #     return limbIDs
+    
+    # def GetAllLimbsCreationOrder(self):
+    #     limbIDs = []
+    #     for childID, parentID in self._limbParent.items():
+    #         if (parentID == -1):
+    #             limbIDs += self.GetLimbCreationOrder(childID)
+    #     return limbIDs
+
+    # def SetParent(self, childID, parentID):
+    #     if(self._IsValidParent(childID, parentID)):
+    #         self._limbParent[childID] = parentID
+
+    # def _IsValidParent(self, childID, parentID):
+    #     while(parentID != -1):
+    #         if (childID == parentID):
+    #             return False
+    #         parentID = self._limbParent[parentID]
+    #     return True
 
 #============= ADD + REMOVE LIMBS ============================
 
-    def Add(self):
-        ID = self._nextLimbID
+    # def Add(self):
+    #     ID = self._nextLimbID
         
-        self._limbName[ID] = 'Limb_%03d' % (ID)
-        self._limbType[ID] = self._limbTypes[0]
-        self._limbSide[ID] = self._limbSidesOptions[0]
-        self._limbParent[ID] = -1
-        self._limbMirror[ID] = -1
+    #     self._limbName[ID] = 'Limb_%03d' % (ID)
+    #     self._limbType[ID] = self._limbTypes[0]
+    #     self._limbSide[ID] = self._limbSidesOptions[0]
+    #     self._limbParent[ID] = -1
+    #     self._limbMirror[ID] = -1
 
-        self._nextLimbID += 1
-        return ID
+    #     self._nextLimbID += 1
+    #     return ID
 
-    def _Remove(self, ID):
-        mirrorID = self.GetMirror(ID)
-        if mirrorID != -1:
-            self._limbSide[mirrorID] = self._limbSidesOptions[0]
-            self._limbMirror[mirrorID] = -1
-            if mirrorID in self.GetLimbMirrorRoots():
-                self._limbMirrorRoots.remove(ID)
-                self._limbMirrorRoots.remove(mirrorID)
-        del(self._limbName[ID])
-        del(self._limbType[ID])
-        del(self._limbSide[ID])
-        del(self._limbParent[ID])
-        del(self._limbMirror[ID])
+    # def _Remove(self, ID):
+    #     mirrorID = self.GetMirror(ID)
+    #     if mirrorID != -1:
+    #         self._limbSide[mirrorID] = self._limbSidesOptions[0]
+    #         self._limbMirror[mirrorID] = -1
+    #         if mirrorID in self.GetLimbMirrorRoots():
+    #             self._limbMirrorRoots.remove(ID)
+    #             self._limbMirrorRoots.remove(mirrorID)
+    #     del(self._limbName[ID])
+    #     del(self._limbType[ID])
+    #     del(self._limbSide[ID])
+    #     del(self._limbParent[ID])
+    #     del(self._limbMirror[ID])
 
-    def Remove(self, ID): # Remove Children first, then parent
-        childIDs = []
-        for child, parent in self._limbParent.items():
-            if parent == ID:
-                childIDs.append(child)
-        for childID in childIDs:
-            self.Remove(childID)
-        self._Remove(ID)
+    # def Remove(self, ID): # Remove Children first, then parent
+    #     childIDs = []
+    #     for child, parent in self._limbParent.items():
+    #         if parent == ID:
+    #             childIDs.append(child)
+    #     for childID in childIDs:
+    #         self.Remove(childID)
+    #     self._Remove(ID)
 
-    def Mirror(self, ID_01):
-        ID_02 = self.Duplicate(ID_01)
-        self._limbSide[ID_01] = self._limbSidesOptions[1]
-        self._limbSide[ID_02] = self._limbSidesOptions[2]
-        self._limbMirror[ID_01] = ID_02
-        self._limbMirror[ID_02] = ID_01
-        self._limbName[ID_02] = self._limbName[ID_01] 
-        return ID_02
+    # def Mirror(self, ID_01):
+    #     ID_02 = self.Duplicate(ID_01)
+    #     self._limbSide[ID_01] = self._limbSidesOptions[1]
+    #     self._limbSide[ID_02] = self._limbSidesOptions[2]
+    #     self._limbMirror[ID_01] = ID_02
+    #     self._limbMirror[ID_02] = ID_01
+    #     self._limbName[ID_02] = self._limbName[ID_01] 
+    #     return ID_02
 
-    def Duplicate(self, ID_01):
-        ID_02 = self.Add()
-        self._limbType[ID_02] = self._limbType[ID_01]
-        self._limbName[ID_02] = self._limbName[ID_01] + '_2'
-        self.SetParent(ID_02, self._limbParent[ID_01])
-        return ID_02
+    # def Duplicate(self, ID_01):
+    #     ID_02 = self.Add()
+    #     self._limbType[ID_02] = self._limbType[ID_01]
+    #     self._limbName[ID_02] = self._limbName[ID_01] + '_2'
+    #     self.SetParent(ID_02, self._limbParent[ID_01])
+    #     return ID_02
 

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>582</width>
-    <height>605</height>
+    <width>467</width>
+    <height>698</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -34,7 +34,7 @@
         <item>
          <widget class="QTabWidget" name="tabWidget">
           <property name="currentIndex">
-           <number>0</number>
+           <number>1</number>
           </property>
           <widget class="QWidget" name="tab">
            <attribute name="title">
@@ -52,7 +52,7 @@
                  <bool>true</bool>
                 </property>
                 <property name="currentIndex">
-                 <number>1</number>
+                 <number>2</number>
                 </property>
                 <widget class="QWidget" name="tab_11">
                  <attribute name="title">
@@ -60,7 +60,7 @@
                  </attribute>
                  <layout class="QHBoxLayout" name="horizontalLayout_4">
                   <item>
-                   <layout class="QHBoxLayout" name="horizontalLayout_14">
+                   <layout class="QHBoxLayout" name="horizontalLayout_14" stretch="1,1,1">
                     <item>
                      <layout class="QVBoxLayout" name="verticalLayout_8">
                       <item>
@@ -664,7 +664,7 @@
                  </attribute>
                  <layout class="QHBoxLayout" name="horizontalLayout_84">
                   <item>
-                   <layout class="QHBoxLayout" name="horizontalLayout_85">
+                   <layout class="QHBoxLayout" name="horizontalLayout_85" stretch="1,1,1">
                     <item>
                      <layout class="QVBoxLayout" name="verticalLayout_78">
                       <item>
@@ -762,12 +762,17 @@
                              </item>
                              <item>
                               <property name="text">
-                               <string>IK Pole Vector - Mid</string>
+                               <string>IK Pole Vector - Control - Mid</string>
                               </property>
                              </item>
                              <item>
                               <property name="text">
-                               <string>IK Pole Vector - End</string>
+                               <string>IK Pole Vector - Handle - End</string>
+                              </property>
+                             </item>
+                             <item>
+                              <property name="text">
+                               <string>IK Pole Vector - Control - End</string>
                               </property>
                              </item>
                              <item>
@@ -795,17 +800,22 @@
                              </item>
                              <item>
                               <property name="text">
-                               <string>IK Handle - 01</string>
+                               <string>IK Chain - Handle 01</string>
                               </property>
                              </item>
                              <item>
                               <property name="text">
-                               <string>IK Handle - 02</string>
+                               <string>IK Chain - Control 01</string>
                               </property>
                              </item>
                              <item>
                               <property name="text">
-                               <string>IK Handle - 03</string>
+                               <string>IK Chain - Handle 02</string>
+                              </property>
+                             </item>
+                             <item>
+                              <property name="text">
+                               <string>IK Chain - Handle 03</string>
                               </property>
                              </item>
                              <item>
@@ -855,6 +865,161 @@
                         <layout class="QHBoxLayout" name="horizontalLayout_87">
                          <item>
                           <layout class="QVBoxLayout" name="verticalLayout_92">
+                           <item>
+                            <widget class="QGroupBox" name="groupBox_9">
+                             <property name="title">
+                              <string>All Limb</string>
+                             </property>
+                             <layout class="QHBoxLayout" name="horizontalLayout_18">
+                              <item>
+                               <layout class="QVBoxLayout" name="verticalLayout_10">
+                                <item>
+                                 <layout class="QHBoxLayout" name="horizontalLayout_122">
+                                  <item>
+                                   <widget class="QLabel" name="label_66">
+                                    <property name="text">
+                                     <string>Behavior</string>
+                                    </property>
+                                   </widget>
+                                  </item>
+                                  <item>
+                                   <widget class="QComboBox" name="comboBox_31">
+                                    <property name="currentIndex">
+                                     <number>0</number>
+                                    </property>
+                                    <item>
+                                     <property name="text">
+                                      <string>FK</string>
+                                     </property>
+                                    </item>
+                                    <item>
+                                     <property name="text">
+                                      <string>FK / IK</string>
+                                     </property>
+                                    </item>
+                                    <item>
+                                     <property name="text">
+                                      <string>IK Pole Vector</string>
+                                     </property>
+                                    </item>
+                                    <item>
+                                     <property name="text">
+                                      <string>IK Spline</string>
+                                     </property>
+                                    </item>
+                                    <item>
+                                     <property name="text">
+                                      <string>Constraint</string>
+                                     </property>
+                                    </item>
+                                   </widget>
+                                  </item>
+                                 </layout>
+                                </item>
+                                <item>
+                                 <layout class="QHBoxLayout" name="horizontalLayout_19">
+                                  <item>
+                                   <widget class="QLabel" name="label_7">
+                                    <property name="text">
+                                     <string>Bhv Parent</string>
+                                    </property>
+                                   </widget>
+                                  </item>
+                                  <item>
+                                   <widget class="QComboBox" name="comboBox_4">
+                                    <property name="currentIndex">
+                                     <number>0</number>
+                                    </property>
+                                    <item>
+                                     <property name="text">
+                                      <string>World</string>
+                                     </property>
+                                    </item>
+                                    <item>
+                                     <property name="text">
+                                      <string>Limb Defined</string>
+                                     </property>
+                                    </item>
+                                    <item>
+                                     <property name="text">
+                                      <string>Root</string>
+                                     </property>
+                                    </item>
+                                   </widget>
+                                  </item>
+                                 </layout>
+                                </item>
+                                <item>
+                                 <layout class="QHBoxLayout" name="horizontalLayout_21">
+                                  <item>
+                                   <widget class="QLabel" name="label_17">
+                                    <property name="text">
+                                     <string>Bhv Parent Limb</string>
+                                    </property>
+                                   </widget>
+                                  </item>
+                                  <item>
+                                   <widget class="QComboBox" name="comboBox_6">
+                                    <property name="currentIndex">
+                                     <number>0</number>
+                                    </property>
+                                    <item>
+                                     <property name="text">
+                                      <string>Limb Defined</string>
+                                     </property>
+                                    </item>
+                                    <item>
+                                     <property name="text">
+                                      <string>Root</string>
+                                     </property>
+                                    </item>
+                                    <item>
+                                     <property name="text">
+                                      <string>World</string>
+                                     </property>
+                                    </item>
+                                   </widget>
+                                  </item>
+                                 </layout>
+                                </item>
+                                <item>
+                                 <layout class="QHBoxLayout" name="horizontalLayout_20">
+                                  <item>
+                                   <widget class="QLabel" name="label_8">
+                                    <property name="text">
+                                     <string>Bhv Parent Grp</string>
+                                    </property>
+                                   </widget>
+                                  </item>
+                                  <item>
+                                   <widget class="QComboBox" name="comboBox_5">
+                                    <property name="currentIndex">
+                                     <number>0</number>
+                                    </property>
+                                    <item>
+                                     <property name="text">
+                                      <string>Limb Defined</string>
+                                     </property>
+                                    </item>
+                                    <item>
+                                     <property name="text">
+                                      <string>Root</string>
+                                     </property>
+                                    </item>
+                                    <item>
+                                     <property name="text">
+                                      <string>World</string>
+                                     </property>
+                                    </item>
+                                   </widget>
+                                  </item>
+                                 </layout>
+                                </item>
+                               </layout>
+                              </item>
+                             </layout>
+                            </widget>
+                           </item>
                            <item>
                             <widget class="QGroupBox" name="groupBox_21">
                              <property name="title">
@@ -1058,7 +1223,7 @@
                            <item>
                             <widget class="QGroupBox" name="groupBox_13">
                              <property name="title">
-                              <string>IK RP, Look At: Control Offset</string>
+                              <string>IK RP, Look At, Group: Control Offset</string>
                              </property>
                              <layout class="QVBoxLayout" name="verticalLayout_21">
                               <item>
@@ -1081,49 +1246,99 @@
                            <item>
                             <widget class="QGroupBox" name="groupBox">
                              <property name="title">
-                              <string>IK, Controller: Parent FK Controller</string>
+                              <string>IK Handle, Group: Parent FK Controller</string>
                              </property>
                              <property name="checkable">
                               <bool>true</bool>
                              </property>
                              <layout class="QVBoxLayout" name="verticalLayout_3">
                               <item>
-                               <layout class="QVBoxLayout" name="verticalLayout_4">
+                               <layout class="QVBoxLayout" name="verticalLayout_11">
                                 <item>
-                                 <widget class="QLineEdit" name="lineEdit">
-                                  <property name="placeholderText">
-                                   <string>Search...</string>
-                                  </property>
-                                 </widget>
+                                 <layout class="QHBoxLayout" name="horizontalLayout_22">
+                                  <item>
+                                   <widget class="QLabel" name="label_22">
+                                    <property name="text">
+                                     <string>Bhv Parent Limb</string>
+                                    </property>
+                                   </widget>
+                                  </item>
+                                  <item>
+                                   <widget class="QComboBox" name="comboBox_7">
+                                    <property name="currentIndex">
+                                     <number>0</number>
+                                    </property>
+                                    <item>
+                                     <property name="text">
+                                      <string>InverseFoot_L</string>
+                                     </property>
+                                    </item>
+                                    <item>
+                                     <property name="text">
+                                      <string>Spine</string>
+                                     </property>
+                                    </item>
+                                    <item>
+                                     <property name="text">
+                                      <string>Clav_L</string>
+                                     </property>
+                                    </item>
+                                    <item>
+                                     <property name="text">
+                                      <string>Arm_L</string>
+                                     </property>
+                                    </item>
+                                    <item>
+                                     <property name="text">
+                                      <string>IndexFinger</string>
+                                     </property>
+                                    </item>
+                                    <item>
+                                     <property name="text">
+                                      <string>Leg_L</string>
+                                     </property>
+                                    </item>
+                                    <item>
+                                     <property name="text">
+                                      <string>Foot_L</string>
+                                     </property>
+                                    </item>
+                                   </widget>
+                                  </item>
+                                 </layout>
                                 </item>
                                 <item>
-                                 <widget class="QListWidget" name="listWidget">
+                                 <layout class="QHBoxLayout" name="horizontalLayout_38">
                                   <item>
-                                   <property name="text">
-                                    <string>Arm_Shoulder_L</string>
-                                   </property>
+                                   <widget class="QLabel" name="label_23">
+                                    <property name="text">
+                                     <string>Bhv Parent Grp</string>
+                                    </property>
+                                   </widget>
                                   </item>
                                   <item>
-                                   <property name="text">
-                                    <string>Arm_Elbow_L</string>
-                                   </property>
+                                   <widget class="QComboBox" name="comboBox_8">
+                                    <property name="currentIndex">
+                                     <number>0</number>
+                                    </property>
+                                    <item>
+                                     <property name="text">
+                                      <string>Ankle</string>
+                                     </property>
+                                    </item>
+                                    <item>
+                                     <property name="text">
+                                      <string>Toe</string>
+                                     </property>
+                                    </item>
+                                    <item>
+                                     <property name="text">
+                                      <string>End</string>
+                                     </property>
+                                    </item>
+                                   </widget>
                                   </item>
-                                  <item>
-                                   <property name="text">
-                                    <string>Arm_Wrist_L</string>
-                                   </property>
-                                  </item>
-                                  <item>
-                                   <property name="text">
-                                    <string>Clav_Clav_L</string>
-                                   </property>
-                                  </item>
-                                  <item>
-                                   <property name="text">
-                                    <string>Leg_</string>
-                                   </property>
-                                  </item>
-                                 </widget>
+                                 </layout>
                                 </item>
                                </layout>
                               </item>
@@ -1160,7 +1375,7 @@
                  </attribute>
                  <layout class="QHBoxLayout" name="horizontalLayout_95">
                   <item>
-                   <layout class="QHBoxLayout" name="horizontalLayout_96">
+                   <layout class="QHBoxLayout" name="horizontalLayout_96" stretch="1,1,1">
                     <item>
                      <layout class="QVBoxLayout" name="verticalLayout_98">
                       <item>
@@ -1530,7 +1745,7 @@
                      </attribute>
                      <layout class="QVBoxLayout" name="verticalLayout_23">
                       <item>
-                       <layout class="QHBoxLayout" name="horizontalLayout_8">
+                       <layout class="QHBoxLayout" name="horizontalLayout_8" stretch="1,1,1">
                         <item>
                          <layout class="QVBoxLayout" name="verticalLayout_107">
                           <item>
@@ -1675,7 +1890,7 @@
                           <item>
                            <widget class="QGroupBox" name="groupBox_59">
                             <property name="title">
-                             <string>Weight Softness</string>
+                             <string>Limb Mask / Joint Weight</string>
                             </property>
                             <layout class="QVBoxLayout" name="verticalLayout_113">
                              <item>
@@ -1685,17 +1900,7 @@
                                  <item>
                                   <widget class="QLabel" name="label_49">
                                    <property name="text">
-                                    <string>Mask</string>
-                                   </property>
-                                  </widget>
-                                 </item>
-                                 <item>
-                                  <widget class="QSlider" name="horizontalSlider_13">
-                                   <property name="value">
-                                    <number>50</number>
-                                   </property>
-                                   <property name="orientation">
-                                    <enum>Qt::Horizontal</enum>
+                                    <string>Soften Amount</string>
                                    </property>
                                   </widget>
                                  </item>
@@ -1703,7 +1908,7 @@
                                   <widget class="QDoubleSpinBox" name="doubleSpinBox_5">
                                    <property name="maximumSize">
                                     <size>
-                                     <width>50</width>
+                                     <width>16777215</width>
                                      <height>16777215</height>
                                     </size>
                                    </property>
@@ -1714,122 +1919,16 @@
                                <item>
                                 <layout class="QHBoxLayout" name="horizontalLayout_127">
                                  <item>
-                                  <widget class="QLabel" name="label_65">
+                                  <widget class="QPushButton" name="pushButton_5">
                                    <property name="text">
-                                    <string>Clavical</string>
+                                    <string>Reset</string>
                                    </property>
                                   </widget>
                                  </item>
                                  <item>
-                                  <widget class="QSlider" name="horizontalSlider_24">
-                                   <property name="value">
-                                    <number>50</number>
-                                   </property>
-                                   <property name="orientation">
-                                    <enum>Qt::Horizontal</enum>
-                                   </property>
-                                  </widget>
-                                 </item>
-                                 <item>
-                                  <widget class="QDoubleSpinBox" name="doubleSpinBox_9">
-                                   <property name="maximumSize">
-                                    <size>
-                                     <width>50</width>
-                                     <height>16777215</height>
-                                    </size>
-                                   </property>
-                                  </widget>
-                                 </item>
-                                </layout>
-                               </item>
-                               <item>
-                                <layout class="QHBoxLayout" name="horizontalLayout_123">
-                                 <item>
-                                  <widget class="QLabel" name="label_64">
+                                  <widget class="QPushButton" name="pushButton_3">
                                    <property name="text">
-                                    <string>Shoulder</string>
-                                   </property>
-                                  </widget>
-                                 </item>
-                                 <item>
-                                  <widget class="QSlider" name="horizontalSlider_23">
-                                   <property name="value">
-                                    <number>50</number>
-                                   </property>
-                                   <property name="orientation">
-                                    <enum>Qt::Horizontal</enum>
-                                   </property>
-                                  </widget>
-                                 </item>
-                                 <item>
-                                  <widget class="QDoubleSpinBox" name="doubleSpinBox_8">
-                                   <property name="maximumSize">
-                                    <size>
-                                     <width>50</width>
-                                     <height>16777215</height>
-                                    </size>
-                                   </property>
-                                  </widget>
-                                 </item>
-                                </layout>
-                               </item>
-                               <item>
-                                <layout class="QHBoxLayout" name="horizontalLayout_116">
-                                 <item>
-                                  <widget class="QLabel" name="label_63">
-                                   <property name="text">
-                                    <string>Elbow</string>
-                                   </property>
-                                  </widget>
-                                 </item>
-                                 <item>
-                                  <widget class="QSlider" name="horizontalSlider_22">
-                                   <property name="value">
-                                    <number>50</number>
-                                   </property>
-                                   <property name="orientation">
-                                    <enum>Qt::Horizontal</enum>
-                                   </property>
-                                  </widget>
-                                 </item>
-                                 <item>
-                                  <widget class="QDoubleSpinBox" name="doubleSpinBox_7">
-                                   <property name="maximumSize">
-                                    <size>
-                                     <width>50</width>
-                                     <height>16777215</height>
-                                    </size>
-                                   </property>
-                                  </widget>
-                                 </item>
-                                </layout>
-                               </item>
-                               <item>
-                                <layout class="QHBoxLayout" name="horizontalLayout_115">
-                                 <item>
-                                  <widget class="QLabel" name="label_55">
-                                   <property name="text">
-                                    <string>Wrist</string>
-                                   </property>
-                                  </widget>
-                                 </item>
-                                 <item>
-                                  <widget class="QSlider" name="horizontalSlider_21">
-                                   <property name="value">
-                                    <number>50</number>
-                                   </property>
-                                   <property name="orientation">
-                                    <enum>Qt::Horizontal</enum>
-                                   </property>
-                                  </widget>
-                                 </item>
-                                 <item>
-                                  <widget class="QDoubleSpinBox" name="doubleSpinBox_6">
-                                   <property name="maximumSize">
-                                    <size>
-                                     <width>50</width>
-                                     <height>16777215</height>
-                                    </size>
+                                    <string>Flood</string>
                                    </property>
                                   </widget>
                                  </item>
@@ -3081,7 +3180,7 @@
                   <item>
                    <widget class="QTabWidget" name="tabWidget_6">
                     <property name="currentIndex">
-                     <number>1</number>
+                     <number>0</number>
                     </property>
                     <widget class="QWidget" name="tab_9">
                      <attribute name="title">
@@ -3771,1153 +3870,6 @@
             </item>
            </layout>
           </widget>
-          <widget class="QWidget" name="tab_3">
-           <attribute name="title">
-            <string>Animation</string>
-           </attribute>
-           <layout class="QVBoxLayout" name="verticalLayout_130">
-            <item>
-             <widget class="QTabWidget" name="tabWidget_2">
-              <property name="enabled">
-               <bool>true</bool>
-              </property>
-              <property name="currentIndex">
-               <number>3</number>
-              </property>
-              <widget class="QWidget" name="tab_17">
-               <attribute name="title">
-                <string>Attach Points</string>
-               </attribute>
-               <layout class="QVBoxLayout" name="verticalLayout_26">
-                <item>
-                 <widget class="QGroupBox" name="groupBox_3">
-                  <property name="title">
-                   <string>Attach Points</string>
-                  </property>
-                  <layout class="QVBoxLayout" name="verticalLayout_12">
-                   <item>
-                    <layout class="QVBoxLayout" name="verticalLayout_13">
-                     <item>
-                      <widget class="QListWidget" name="listWidget_2">
-                       <item>
-                        <property name="text">
-                         <string>L_FrontPec</string>
-                        </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>L_ShoulderTop</string>
-                        </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>L_ShoulderBlade</string>
-                        </property>
-                       </item>
-                      </widget>
-                     </item>
-                     <item>
-                      <widget class="QLabel" name="label_12">
-                       <property name="text">
-                        <string>RMB: Add / remove Attach points (based on verts selected)</string>
-                       </property>
-                      </widget>
-                     </item>
-                    </layout>
-                   </item>
-                  </layout>
-                 </widget>
-                </item>
-               </layout>
-              </widget>
-              <widget class="QWidget" name="tab_4">
-               <attribute name="title">
-                <string>Poses</string>
-               </attribute>
-               <layout class="QHBoxLayout" name="horizontalLayout_5">
-                <item>
-                 <layout class="QHBoxLayout" name="horizontalLayout_121">
-                  <item>
-                   <layout class="QVBoxLayout" name="verticalLayout_134">
-                    <item>
-                     <widget class="QGroupBox" name="groupBox_70">
-                      <property name="title">
-                       <string>Limb Heirarchy</string>
-                      </property>
-                      <layout class="QHBoxLayout" name="horizontalLayout_126">
-                       <item>
-                        <layout class="QVBoxLayout" name="verticalLayout_135">
-                         <item>
-                          <widget class="QTreeWidget" name="treeWidget_4">
-                           <property name="autoScrollMargin">
-                            <number>16</number>
-                           </property>
-                           <property name="alternatingRowColors">
-                            <bool>true</bool>
-                           </property>
-                           <property name="selectionMode">
-                            <enum>QAbstractItemView::MultiSelection</enum>
-                           </property>
-                           <property name="autoExpandDelay">
-                            <number>-1</number>
-                           </property>
-                           <property name="indentation">
-                            <number>10</number>
-                           </property>
-                           <property name="headerHidden">
-                            <bool>true</bool>
-                           </property>
-                           <column>
-                            <property name="text">
-                             <string notr="true">1</string>
-                            </property>
-                           </column>
-                           <item>
-                            <property name="text">
-                             <string>Root</string>
-                            </property>
-                            <item>
-                             <property name="text">
-                              <string>Spine</string>
-                             </property>
-                             <item>
-                              <property name="text">
-                               <string>Arm (M)</string>
-                              </property>
-                              <item>
-                               <property name="text">
-                                <string>Hand</string>
-                               </property>
-                              </item>
-                             </item>
-                             <item>
-                              <property name="text">
-                               <string>Head</string>
-                              </property>
-                             </item>
-                             <item>
-                              <property name="text">
-                               <string>Leg (M)</string>
-                              </property>
-                             </item>
-                             <item>
-                              <property name="text">
-                               <string>Tail</string>
-                              </property>
-                             </item>
-                            </item>
-                           </item>
-                          </widget>
-                         </item>
-                        </layout>
-                       </item>
-                      </layout>
-                     </widget>
-                    </item>
-                    <item>
-                     <widget class="QGroupBox" name="groupBox_68">
-                      <property name="title">
-                       <string>Poses Library</string>
-                      </property>
-                      <layout class="QHBoxLayout" name="horizontalLayout_122">
-                       <item>
-                        <layout class="QVBoxLayout" name="verticalLayout_132">
-                         <item>
-                          <widget class="QListWidget" name="listWidget_18">
-                           <property name="alternatingRowColors">
-                            <bool>true</bool>
-                           </property>
-                           <item>
-                            <property name="text">
-                             <string>[Reset]</string>
-                            </property>
-                           </item>
-                           <item>
-                            <property name="text">
-                             <string>Hand_Fist</string>
-                            </property>
-                           </item>
-                           <item>
-                            <property name="text">
-                             <string>Hand_Extend Fingers</string>
-                            </property>
-                           </item>
-                           <item>
-                            <property name="text">
-                             <string>Hand_Spread Fingers</string>
-                            </property>
-                           </item>
-                           <item>
-                            <property name="text">
-                             <string>Hand_DeSpread Fingers</string>
-                            </property>
-                           </item>
-                           <item>
-                            <property name="text">
-                             <string>Eyes_Open (Ctr Driven)</string>
-                            </property>
-                           </item>
-                           <item>
-                            <property name="text">
-                             <string>Eyes_Closed (Ctr Driven)</string>
-                            </property>
-                           </item>
-                           <item>
-                            <property name="text">
-                             <string>[-----Notes-----]</string>
-                            </property>
-                           </item>
-                           <item>
-                            <property name="text">
-                             <string>RMB &gt; Add / Delete Pose</string>
-                            </property>
-                           </item>
-                           <item>
-                            <property name="text">
-                             <string>Update This List based on limb selection</string>
-                            </property>
-                           </item>
-                           <item>
-                            <property name="text">
-                             <string>Update Status line with MMB drag values</string>
-                            </property>
-                           </item>
-                          </widget>
-                         </item>
-                        </layout>
-                       </item>
-                      </layout>
-                     </widget>
-                    </item>
-                   </layout>
-                  </item>
-                  <item>
-                   <widget class="Line" name="line">
-                    <property name="orientation">
-                     <enum>Qt::Vertical</enum>
-                    </property>
-                   </widget>
-                  </item>
-                  <item>
-                   <layout class="QVBoxLayout" name="verticalLayout_131">
-                    <item>
-                     <widget class="QGroupBox" name="groupBox_4">
-                      <property name="title">
-                       <string>Operation</string>
-                      </property>
-                      <layout class="QHBoxLayout" name="horizontalLayout_10">
-                       <item>
-                        <layout class="QHBoxLayout" name="horizontalLayout_11">
-                         <item>
-                          <widget class="QRadioButton" name="radioButton_2">
-                           <property name="text">
-                            <string>Replace</string>
-                           </property>
-                           <property name="checked">
-                            <bool>true</bool>
-                           </property>
-                          </widget>
-                         </item>
-                         <item>
-                          <widget class="QRadioButton" name="radioButton">
-                           <property name="text">
-                            <string>Add</string>
-                           </property>
-                          </widget>
-                         </item>
-                        </layout>
-                       </item>
-                      </layout>
-                     </widget>
-                    </item>
-                    <item>
-                     <widget class="QGroupBox" name="groupBox_6">
-                      <property name="title">
-                       <string>Limb Weights</string>
-                      </property>
-                      <layout class="QHBoxLayout" name="horizontalLayout_6">
-                       <item>
-                        <widget class="QScrollArea" name="scrollArea">
-                         <property name="widgetResizable">
-                          <bool>true</bool>
-                         </property>
-                         <widget class="QWidget" name="scrollAreaWidgetContents">
-                          <property name="geometry">
-                           <rect>
-                            <x>0</x>
-                            <y>0</y>
-                            <width>198</width>
-                            <height>164</height>
-                           </rect>
-                          </property>
-                          <layout class="QVBoxLayout" name="verticalLayout_14">
-                           <item>
-                            <layout class="QVBoxLayout" name="verticalLayout_20">
-                             <item>
-                              <layout class="QHBoxLayout" name="horizontalLayout_12">
-                               <item>
-                                <widget class="QLabel" name="label_3">
-                                 <property name="sizePolicy">
-                                  <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-                                   <horstretch>0</horstretch>
-                                   <verstretch>0</verstretch>
-                                  </sizepolicy>
-                                 </property>
-                                 <property name="text">
-                                  <string>L_Thumb</string>
-                                 </property>
-                                </widget>
-                               </item>
-                               <item>
-                                <widget class="QSlider" name="horizontalSlider">
-                                 <property name="singleStep">
-                                  <number>0</number>
-                                 </property>
-                                 <property name="pageStep">
-                                  <number>20</number>
-                                 </property>
-                                 <property name="value">
-                                  <number>0</number>
-                                 </property>
-                                 <property name="orientation">
-                                  <enum>Qt::Horizontal</enum>
-                                 </property>
-                                </widget>
-                               </item>
-                              </layout>
-                             </item>
-                             <item>
-                              <layout class="QHBoxLayout" name="horizontalLayout_13">
-                               <item>
-                                <widget class="QLabel" name="label_4">
-                                 <property name="sizePolicy">
-                                  <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-                                   <horstretch>0</horstretch>
-                                   <verstretch>0</verstretch>
-                                  </sizepolicy>
-                                 </property>
-                                 <property name="text">
-                                  <string>L_Index</string>
-                                 </property>
-                                </widget>
-                               </item>
-                               <item>
-                                <widget class="QSlider" name="horizontalSlider_3">
-                                 <property name="pageStep">
-                                  <number>20</number>
-                                 </property>
-                                 <property name="value">
-                                  <number>0</number>
-                                 </property>
-                                 <property name="orientation">
-                                  <enum>Qt::Horizontal</enum>
-                                 </property>
-                                </widget>
-                               </item>
-                              </layout>
-                             </item>
-                             <item>
-                              <layout class="QHBoxLayout" name="horizontalLayout_16">
-                               <item>
-                                <widget class="QLabel" name="label_5">
-                                 <property name="sizePolicy">
-                                  <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-                                   <horstretch>0</horstretch>
-                                   <verstretch>0</verstretch>
-                                  </sizepolicy>
-                                 </property>
-                                 <property name="text">
-                                  <string>L_Middle</string>
-                                 </property>
-                                </widget>
-                               </item>
-                               <item>
-                                <widget class="QSlider" name="horizontalSlider_2">
-                                 <property name="singleStep">
-                                  <number>0</number>
-                                 </property>
-                                 <property name="pageStep">
-                                  <number>20</number>
-                                 </property>
-                                 <property name="value">
-                                  <number>0</number>
-                                 </property>
-                                 <property name="orientation">
-                                  <enum>Qt::Horizontal</enum>
-                                 </property>
-                                </widget>
-                               </item>
-                              </layout>
-                             </item>
-                             <item>
-                              <layout class="QHBoxLayout" name="horizontalLayout_29">
-                               <item>
-                                <widget class="QLabel" name="label_13">
-                                 <property name="sizePolicy">
-                                  <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-                                   <horstretch>0</horstretch>
-                                   <verstretch>0</verstretch>
-                                  </sizepolicy>
-                                 </property>
-                                 <property name="text">
-                                  <string>L_Ring</string>
-                                 </property>
-                                </widget>
-                               </item>
-                               <item>
-                                <widget class="QSlider" name="horizontalSlider_11">
-                                 <property name="singleStep">
-                                  <number>0</number>
-                                 </property>
-                                 <property name="pageStep">
-                                  <number>20</number>
-                                 </property>
-                                 <property name="value">
-                                  <number>0</number>
-                                 </property>
-                                 <property name="orientation">
-                                  <enum>Qt::Horizontal</enum>
-                                 </property>
-                                </widget>
-                               </item>
-                              </layout>
-                             </item>
-                             <item>
-                              <layout class="QHBoxLayout" name="horizontalLayout_30">
-                               <item>
-                                <widget class="QLabel" name="label_14">
-                                 <property name="sizePolicy">
-                                  <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-                                   <horstretch>0</horstretch>
-                                   <verstretch>0</verstretch>
-                                  </sizepolicy>
-                                 </property>
-                                 <property name="text">
-                                  <string>L_Pinky</string>
-                                 </property>
-                                </widget>
-                               </item>
-                               <item>
-                                <widget class="QSlider" name="horizontalSlider_12">
-                                 <property name="singleStep">
-                                  <number>0</number>
-                                 </property>
-                                 <property name="pageStep">
-                                  <number>20</number>
-                                 </property>
-                                 <property name="value">
-                                  <number>0</number>
-                                 </property>
-                                 <property name="sliderPosition">
-                                  <number>0</number>
-                                 </property>
-                                 <property name="orientation">
-                                  <enum>Qt::Horizontal</enum>
-                                 </property>
-                                </widget>
-                               </item>
-                              </layout>
-                             </item>
-                            </layout>
-                           </item>
-                          </layout>
-                         </widget>
-                        </widget>
-                       </item>
-                      </layout>
-                     </widget>
-                    </item>
-                    <item>
-                     <widget class="QLabel" name="label_15">
-                      <property name="text">
-                       <string>NOTE: ^'Scroll Area' container above^</string>
-                      </property>
-                     </widget>
-                    </item>
-                    <item>
-                     <widget class="QLabel" name="label_18">
-                      <property name="text">
-                       <string>RMB: Convert IK / FK</string>
-                      </property>
-                     </widget>
-                    </item>
-                    <item>
-                     <widget class="QLabel" name="label_19">
-                      <property name="text">
-                       <string>RMB: Flip with mirror limb</string>
-                      </property>
-                     </widget>
-                    </item>
-                    <item>
-                     <widget class="QLabel" name="label_20">
-                      <property name="text">
-                       <string>RMB: Copy to mirror limb</string>
-                      </property>
-                     </widget>
-                    </item>
-                    <item>
-                     <spacer name="verticalSpacer_2">
-                      <property name="orientation">
-                       <enum>Qt::Vertical</enum>
-                      </property>
-                      <property name="sizeHint" stdset="0">
-                       <size>
-                        <width>20</width>
-                        <height>40</height>
-                       </size>
-                      </property>
-                     </spacer>
-                    </item>
-                   </layout>
-                  </item>
-                 </layout>
-                </item>
-               </layout>
-              </widget>
-              <widget class="QWidget" name="tab_7">
-               <attribute name="title">
-                <string>Animations</string>
-               </attribute>
-               <layout class="QVBoxLayout" name="verticalLayout_18">
-                <item>
-                 <layout class="QHBoxLayout" name="horizontalLayout_129">
-                  <item>
-                   <layout class="QVBoxLayout" name="verticalLayout_144">
-                    <item>
-                     <widget class="QGroupBox" name="groupBox_74">
-                      <property name="title">
-                       <string>Limb Heirarchy</string>
-                      </property>
-                      <layout class="QHBoxLayout" name="horizontalLayout_130">
-                       <item>
-                        <layout class="QVBoxLayout" name="verticalLayout_145">
-                         <item>
-                          <widget class="QTreeWidget" name="treeWidget_7">
-                           <property name="autoScrollMargin">
-                            <number>16</number>
-                           </property>
-                           <property name="alternatingRowColors">
-                            <bool>true</bool>
-                           </property>
-                           <property name="selectionMode">
-                            <enum>QAbstractItemView::MultiSelection</enum>
-                           </property>
-                           <property name="autoExpandDelay">
-                            <number>-1</number>
-                           </property>
-                           <property name="indentation">
-                            <number>10</number>
-                           </property>
-                           <property name="headerHidden">
-                            <bool>true</bool>
-                           </property>
-                           <column>
-                            <property name="text">
-                             <string notr="true">1</string>
-                            </property>
-                           </column>
-                           <item>
-                            <property name="text">
-                             <string>Root</string>
-                            </property>
-                            <item>
-                             <property name="text">
-                              <string>Spine</string>
-                             </property>
-                             <item>
-                              <property name="text">
-                               <string>Arm (M)</string>
-                              </property>
-                              <item>
-                               <property name="text">
-                                <string>Hand</string>
-                               </property>
-                              </item>
-                             </item>
-                             <item>
-                              <property name="text">
-                               <string>Head</string>
-                              </property>
-                             </item>
-                             <item>
-                              <property name="text">
-                               <string>Leg (M)</string>
-                              </property>
-                             </item>
-                             <item>
-                              <property name="text">
-                               <string>Tail</string>
-                              </property>
-                             </item>
-                            </item>
-                           </item>
-                          </widget>
-                         </item>
-                        </layout>
-                       </item>
-                      </layout>
-                     </widget>
-                    </item>
-                    <item>
-                     <widget class="QGroupBox" name="groupBox_75">
-                      <property name="title">
-                       <string>Animation Library</string>
-                      </property>
-                      <layout class="QHBoxLayout" name="horizontalLayout_131">
-                       <item>
-                        <layout class="QVBoxLayout" name="verticalLayout_146">
-                         <item>
-                          <widget class="QListWidget" name="listWidget_20">
-                           <property name="alternatingRowColors">
-                            <bool>true</bool>
-                           </property>
-                           <item>
-                            <property name="text">
-                             <string>[Reset]</string>
-                            </property>
-                           </item>
-                           <item>
-                            <property name="text">
-                             <string>Hand_Fist</string>
-                            </property>
-                           </item>
-                           <item>
-                            <property name="text">
-                             <string>Hand_Extend Fingers</string>
-                            </property>
-                           </item>
-                           <item>
-                            <property name="text">
-                             <string>Hand_Spread Fingers</string>
-                            </property>
-                           </item>
-                           <item>
-                            <property name="text">
-                             <string>Hand_DeSpread Fingers</string>
-                            </property>
-                           </item>
-                           <item>
-                            <property name="text">
-                             <string>[-----Notes-----]</string>
-                            </property>
-                           </item>
-                           <item>
-                            <property name="text">
-                             <string>MMB Drag = changes values, like channel box</string>
-                            </property>
-                           </item>
-                           <item>
-                            <property name="text">
-                             <string>MMB Drag + Multi-select = Change all values</string>
-                            </property>
-                           </item>
-                           <item>
-                            <property name="text">
-                             <string>RMB &gt; Add / Delete Pose</string>
-                            </property>
-                           </item>
-                           <item>
-                            <property name="text">
-                             <string>Update This List based on limb selection</string>
-                            </property>
-                           </item>
-                           <item>
-                            <property name="text">
-                             <string>Update Status line with MMB drag values</string>
-                            </property>
-                           </item>
-                          </widget>
-                         </item>
-                        </layout>
-                       </item>
-                      </layout>
-                     </widget>
-                    </item>
-                   </layout>
-                  </item>
-                  <item>
-                   <widget class="Line" name="line_5">
-                    <property name="orientation">
-                     <enum>Qt::Vertical</enum>
-                    </property>
-                   </widget>
-                  </item>
-                  <item>
-                   <layout class="QVBoxLayout" name="verticalLayout_147">
-                    <item>
-                     <widget class="QGroupBox" name="groupBox_10">
-                      <property name="title">
-                       <string>Operation</string>
-                      </property>
-                      <layout class="QHBoxLayout" name="horizontalLayout_23">
-                       <item>
-                        <layout class="QHBoxLayout" name="horizontalLayout_24">
-                         <item>
-                          <widget class="QRadioButton" name="radioButton_5">
-                           <property name="text">
-                            <string>Replace</string>
-                           </property>
-                           <property name="checked">
-                            <bool>true</bool>
-                           </property>
-                          </widget>
-                         </item>
-                         <item>
-                          <widget class="QRadioButton" name="radioButton_6">
-                           <property name="text">
-                            <string>Add</string>
-                           </property>
-                          </widget>
-                         </item>
-                        </layout>
-                       </item>
-                      </layout>
-                     </widget>
-                    </item>
-                    <item>
-                     <widget class="QGroupBox" name="groupBox_11">
-                      <property name="title">
-                       <string>Keyed Controllers</string>
-                      </property>
-                      <layout class="QHBoxLayout" name="horizontalLayout_25">
-                       <item>
-                        <layout class="QVBoxLayout" name="verticalLayout_17">
-                         <item>
-                          <layout class="QHBoxLayout" name="horizontalLayout_26">
-                           <item>
-                            <widget class="QLabel" name="label_9">
-                             <property name="sizePolicy">
-                              <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-                               <horstretch>0</horstretch>
-                               <verstretch>0</verstretch>
-                              </sizepolicy>
-                             </property>
-                             <property name="text">
-                              <string>Overall Limb</string>
-                             </property>
-                            </widget>
-                           </item>
-                           <item>
-                            <widget class="QSlider" name="horizontalSlider_7">
-                             <property name="value">
-                              <number>50</number>
-                             </property>
-                             <property name="orientation">
-                              <enum>Qt::Horizontal</enum>
-                             </property>
-                            </widget>
-                           </item>
-                          </layout>
-                         </item>
-                         <item>
-                          <layout class="QHBoxLayout" name="horizontalLayout_27">
-                           <item>
-                            <widget class="QLabel" name="label_10">
-                             <property name="sizePolicy">
-                              <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-                               <horstretch>0</horstretch>
-                               <verstretch>0</verstretch>
-                              </sizepolicy>
-                             </property>
-                             <property name="text">
-                              <string>IK Wrist</string>
-                             </property>
-                            </widget>
-                           </item>
-                           <item>
-                            <widget class="QSlider" name="horizontalSlider_9">
-                             <property name="value">
-                              <number>50</number>
-                             </property>
-                             <property name="orientation">
-                              <enum>Qt::Horizontal</enum>
-                             </property>
-                            </widget>
-                           </item>
-                          </layout>
-                         </item>
-                         <item>
-                          <layout class="QHBoxLayout" name="horizontalLayout_28">
-                           <item>
-                            <widget class="QLabel" name="label_11">
-                             <property name="sizePolicy">
-                              <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-                               <horstretch>0</horstretch>
-                               <verstretch>0</verstretch>
-                              </sizepolicy>
-                             </property>
-                             <property name="text">
-                              <string>IK Pole Vector</string>
-                             </property>
-                            </widget>
-                           </item>
-                           <item>
-                            <widget class="QSlider" name="horizontalSlider_10">
-                             <property name="value">
-                              <number>50</number>
-                             </property>
-                             <property name="orientation">
-                              <enum>Qt::Horizontal</enum>
-                             </property>
-                            </widget>
-                           </item>
-                          </layout>
-                         </item>
-                        </layout>
-                       </item>
-                      </layout>
-                     </widget>
-                    </item>
-                    <item>
-                     <widget class="QPushButton" name="pushButton_7">
-                      <property name="text">
-                       <string>Keyframe</string>
-                      </property>
-                     </widget>
-                    </item>
-                    <item>
-                     <spacer name="verticalSpacer_4">
-                      <property name="orientation">
-                       <enum>Qt::Vertical</enum>
-                      </property>
-                      <property name="sizeHint" stdset="0">
-                       <size>
-                        <width>20</width>
-                        <height>40</height>
-                       </size>
-                      </property>
-                     </spacer>
-                    </item>
-                   </layout>
-                  </item>
-                 </layout>
-                </item>
-               </layout>
-              </widget>
-              <widget class="QWidget" name="tab_8">
-               <attribute name="title">
-                <string>Blend Shapes</string>
-               </attribute>
-               <layout class="QVBoxLayout" name="verticalLayout_16">
-                <item>
-                 <layout class="QHBoxLayout" name="horizontalLayout_124">
-                  <item>
-                   <layout class="QVBoxLayout" name="verticalLayout_136">
-                    <item>
-                     <widget class="QGroupBox" name="groupBox_71">
-                      <property name="title">
-                       <string>Limb Heirarchy</string>
-                      </property>
-                      <layout class="QHBoxLayout" name="horizontalLayout_128">
-                       <item>
-                        <layout class="QVBoxLayout" name="verticalLayout_137">
-                         <item>
-                          <widget class="QTreeWidget" name="treeWidget_6">
-                           <property name="autoScrollMargin">
-                            <number>16</number>
-                           </property>
-                           <property name="alternatingRowColors">
-                            <bool>true</bool>
-                           </property>
-                           <property name="selectionMode">
-                            <enum>QAbstractItemView::MultiSelection</enum>
-                           </property>
-                           <property name="autoExpandDelay">
-                            <number>-1</number>
-                           </property>
-                           <property name="indentation">
-                            <number>10</number>
-                           </property>
-                           <property name="headerHidden">
-                            <bool>true</bool>
-                           </property>
-                           <column>
-                            <property name="text">
-                             <string notr="true">1</string>
-                            </property>
-                           </column>
-                           <item>
-                            <property name="text">
-                             <string>Root</string>
-                            </property>
-                            <item>
-                             <property name="text">
-                              <string>Spine</string>
-                             </property>
-                             <item>
-                              <property name="text">
-                               <string>Arm (M)</string>
-                              </property>
-                              <item>
-                               <property name="text">
-                                <string>Hand</string>
-                               </property>
-                              </item>
-                             </item>
-                             <item>
-                              <property name="text">
-                               <string>Head</string>
-                              </property>
-                             </item>
-                             <item>
-                              <property name="text">
-                               <string>Leg (M)</string>
-                              </property>
-                             </item>
-                             <item>
-                              <property name="text">
-                               <string>Tail</string>
-                              </property>
-                             </item>
-                            </item>
-                           </item>
-                          </widget>
-                         </item>
-                        </layout>
-                       </item>
-                      </layout>
-                     </widget>
-                    </item>
-                    <item>
-                     <widget class="QGroupBox" name="groupBox_69">
-                      <property name="title">
-                       <string>Poses Library</string>
-                      </property>
-                      <layout class="QHBoxLayout" name="horizontalLayout_125">
-                       <item>
-                        <layout class="QVBoxLayout" name="verticalLayout_133">
-                         <item>
-                          <widget class="QListWidget" name="listWidget_19">
-                           <property name="alternatingRowColors">
-                            <bool>true</bool>
-                           </property>
-                           <item>
-                            <property name="text">
-                             <string>[Reset]</string>
-                            </property>
-                           </item>
-                           <item>
-                            <property name="text">
-                             <string>Hand_Fist</string>
-                            </property>
-                           </item>
-                           <item>
-                            <property name="text">
-                             <string>Hand_Extend Fingers</string>
-                            </property>
-                           </item>
-                           <item>
-                            <property name="text">
-                             <string>Hand_Spread Fingers</string>
-                            </property>
-                           </item>
-                           <item>
-                            <property name="text">
-                             <string>Hand_DeSpread Fingers</string>
-                            </property>
-                           </item>
-                           <item>
-                            <property name="text">
-                             <string>[-----Notes-----]</string>
-                            </property>
-                           </item>
-                           <item>
-                            <property name="text">
-                             <string>MMB Drag = changes values, like channel box</string>
-                            </property>
-                           </item>
-                           <item>
-                            <property name="text">
-                             <string>MMB Drag + Multi-select = Change all values</string>
-                            </property>
-                           </item>
-                           <item>
-                            <property name="text">
-                             <string>RMB &gt; Add / Delete Pose</string>
-                            </property>
-                           </item>
-                           <item>
-                            <property name="text">
-                             <string>Update This List based on limb selection</string>
-                            </property>
-                           </item>
-                           <item>
-                            <property name="text">
-                             <string>Update Status line with MMB drag values</string>
-                            </property>
-                           </item>
-                          </widget>
-                         </item>
-                        </layout>
-                       </item>
-                      </layout>
-                     </widget>
-                    </item>
-                   </layout>
-                  </item>
-                  <item>
-                   <widget class="Line" name="line_4">
-                    <property name="orientation">
-                     <enum>Qt::Vertical</enum>
-                    </property>
-                   </widget>
-                  </item>
-                  <item>
-                   <layout class="QVBoxLayout" name="verticalLayout_143">
-                    <item>
-                     <widget class="QGroupBox" name="groupBox_7">
-                      <property name="title">
-                       <string>Operation</string>
-                      </property>
-                      <layout class="QHBoxLayout" name="horizontalLayout_17">
-                       <item>
-                        <layout class="QHBoxLayout" name="horizontalLayout_18">
-                         <item>
-                          <widget class="QRadioButton" name="radioButton_3">
-                           <property name="text">
-                            <string>Replace</string>
-                           </property>
-                           <property name="checked">
-                            <bool>true</bool>
-                           </property>
-                          </widget>
-                         </item>
-                         <item>
-                          <widget class="QRadioButton" name="radioButton_4">
-                           <property name="text">
-                            <string>Add</string>
-                           </property>
-                          </widget>
-                         </item>
-                        </layout>
-                       </item>
-                      </layout>
-                     </widget>
-                    </item>
-                    <item>
-                     <widget class="QGroupBox" name="groupBox_9">
-                      <property name="title">
-                       <string>Keyed Controllers</string>
-                      </property>
-                      <layout class="QHBoxLayout" name="horizontalLayout_19">
-                       <item>
-                        <layout class="QVBoxLayout" name="verticalLayout_15">
-                         <item>
-                          <layout class="QHBoxLayout" name="horizontalLayout_20">
-                           <item>
-                            <widget class="QLabel" name="label_6">
-                             <property name="sizePolicy">
-                              <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-                               <horstretch>0</horstretch>
-                               <verstretch>0</verstretch>
-                              </sizepolicy>
-                             </property>
-                             <property name="text">
-                              <string>Overall Limb</string>
-                             </property>
-                            </widget>
-                           </item>
-                           <item>
-                            <widget class="QSlider" name="horizontalSlider_4">
-                             <property name="value">
-                              <number>50</number>
-                             </property>
-                             <property name="orientation">
-                              <enum>Qt::Horizontal</enum>
-                             </property>
-                            </widget>
-                           </item>
-                          </layout>
-                         </item>
-                         <item>
-                          <layout class="QHBoxLayout" name="horizontalLayout_21">
-                           <item>
-                            <widget class="QLabel" name="label_7">
-                             <property name="sizePolicy">
-                              <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-                               <horstretch>0</horstretch>
-                               <verstretch>0</verstretch>
-                              </sizepolicy>
-                             </property>
-                             <property name="text">
-                              <string>IK Wrist</string>
-                             </property>
-                            </widget>
-                           </item>
-                           <item>
-                            <widget class="QSlider" name="horizontalSlider_5">
-                             <property name="value">
-                              <number>50</number>
-                             </property>
-                             <property name="orientation">
-                              <enum>Qt::Horizontal</enum>
-                             </property>
-                            </widget>
-                           </item>
-                          </layout>
-                         </item>
-                         <item>
-                          <layout class="QHBoxLayout" name="horizontalLayout_22">
-                           <item>
-                            <widget class="QLabel" name="label_8">
-                             <property name="sizePolicy">
-                              <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-                               <horstretch>0</horstretch>
-                               <verstretch>0</verstretch>
-                              </sizepolicy>
-                             </property>
-                             <property name="text">
-                              <string>IK Pole Vector</string>
-                             </property>
-                            </widget>
-                           </item>
-                           <item>
-                            <widget class="QSlider" name="horizontalSlider_6">
-                             <property name="value">
-                              <number>50</number>
-                             </property>
-                             <property name="orientation">
-                              <enum>Qt::Horizontal</enum>
-                             </property>
-                            </widget>
-                           </item>
-                          </layout>
-                         </item>
-                        </layout>
-                       </item>
-                      </layout>
-                     </widget>
-                    </item>
-                    <item>
-                     <widget class="QPushButton" name="pushButton_6">
-                      <property name="text">
-                       <string>Keyframe</string>
-                      </property>
-                     </widget>
-                    </item>
-                    <item>
-                     <spacer name="verticalSpacer_3">
-                      <property name="orientation">
-                       <enum>Qt::Vertical</enum>
-                      </property>
-                      <property name="sizeHint" stdset="0">
-                       <size>
-                        <width>20</width>
-                        <height>40</height>
-                       </size>
-                      </property>
-                     </spacer>
-                    </item>
-                   </layout>
-                  </item>
-                 </layout>
-                </item>
-               </layout>
-              </widget>
-             </widget>
-            </item>
-           </layout>
-          </widget>
          </widget>
         </item>
         <item>
@@ -4944,7 +3896,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>582</width>
+     <width>467</width>
      <height>21</height>
     </rect>
    </property>
