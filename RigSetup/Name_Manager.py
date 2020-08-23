@@ -3,41 +3,23 @@ import re
 
 class Name_Manager():
     def __init__(self):
-        self._order = [0,1,2,3,4]
-        self._prefix = 'PREFIX'
-        self._showPrefix = True 
         self.errorMsg = ''
-    
-#======= ACCESSORS + MUTATORS ========================================
 
-    def GetNamingOrder(self):
-        return self._order[:]
+    def NewRig(self, rigRoot, limbMng, jntMng):
+        self.rigRoot = rigRoot
+        self.limbMng = limbMng
+        self.jntMng = jntMng
 
-    def SetNamingOrder(self, namingOrder):
-        self._order = namingOrder
-
-    def GetPrefix(self):
-        return self._prefix
-
-    def SetPrefix(self, newPrefix):
-        self._prefix = newPrefix
-
-    def GetShowPrefix(self):
-        return self._showPrefix
-
-    def SetShowPrefix(self, isShown):
-        self._showPrefix = isShown
-
-    def GetName(self, prefix, limb, joint, side, objType):
-        orderCopy = self._order[:]
-        if not self._showPrefix:
-            orderCopy.remove(0)
-        temp = {0:prefix,
-                1:limb,
-                2:joint,
-                3:side,
-                4:objType}
-        partNames = [temp[i] for i in orderCopy]
+    def GetName(self, limbID, jointID, objType):
+        temp = {self.rigRoot.prefixIndex.get() : self.rigRoot.prefix.get(),
+                self.rigRoot.limbIndex.get() : self.limbMng.GetLimb(limbID).pfrsName.get(),
+                self.rigRoot.jointIndex.get() : self.jntMng.GetJoint(jointID).pfrsName.get(),
+                self.rigRoot.sideIndex.get() : self.limbMng.GetLimbSide(limbID),
+                self.rigRoot.typeIndex.get() : objType}
+        order = sorted(list(temp.keys()))
+        if not self.rigRoot.showPrefix.get():
+            order.remove(0)
+        partNames = [temp[i] for i in order]
         return '_'.join(partNames)
 
 
@@ -69,6 +51,45 @@ class Name_Manager():
             self.errorMsg = 'NAME ERROR: May only contain A-Z, a-z, 0-9, _'
             return False
 
+#======= DEPRICATED ========================================
+
+
+    # def GetName(self, prefix, limb, joint, side, objType):
+    #     orderCopy = self._order[:]
+    #     if not self._showPrefix:
+    #         orderCopy.remove(0)
+    #     temp = {0:prefix,
+    #             1:limb,
+    #             2:joint,
+    #             3:side,
+    #             4:objType}
+    #     partNames = [temp[i] for i in orderCopy]
+    #     return '_'.join(partNames)
+    # def __init__(self):
+    #     self._order = [0,1,2,3,4]
+    #     self._prefix = 'PREFIX'
+    #     self._showPrefix = True 
+    #     self.errorMsg = ''
+    
+#======= ACCESSORS + MUTATORS ========================================
+
+    # def GetNamingOrder(self):
+    #     return self._order[:]
+
+    # def SetNamingOrder(self, namingOrder):
+    #     self._order = namingOrder
+
+    # def GetPrefix(self):
+    #     return self._prefix
+
+    # def SetPrefix(self, newPrefix):
+    #     self._prefix = newPrefix
+
+    # def GetShowPrefix(self):
+    #     return self._showPrefix
+
+    # def SetShowPrefix(self, isShown):
+    #     self._showPrefix = isShown
 
 
 

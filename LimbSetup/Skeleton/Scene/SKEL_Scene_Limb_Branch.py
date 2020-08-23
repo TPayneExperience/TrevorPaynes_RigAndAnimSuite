@@ -1,5 +1,6 @@
 
-from maya import cmds
+# from maya import pm
+import pymel.core as pm
 
 class SKEL_Scene_Limb_Branch():
     def __init__(self, sceneManager):
@@ -9,39 +10,40 @@ class SKEL_Scene_Limb_Branch():
 #========== JOINTS ========================
 
     # INTERNAL PARENTS
-    def Setup_Internal_JointParents(self, limbID, sceneJoints):
+    def Setup_Internal_JointParents(self, limbID):
         pass
 
-    def Teardown_Internal_JointParents(self, oldJntIDs, sceneJoints, jntGrp):
+    def Teardown_Internal_JointParents(self, limbID):
         pass
 
     # EXTERNAL PARENTS
-    def Setup_External_JointParents(self, limbID, sceneJoints):
+    def Setup_External_JointParents(self, limbID):
         jointIDs = self.sceneMng.jntMng.GetLimbJointIDs(limbID)
-        parentJointID = self.sceneMng.jntMng.GetParentJointId(limbID)
-        for jointID in jointIDs:
-            cmds.parent(sceneJoints[jointID], sceneJoints[parentJointID])
+        parentJoint = self.sceneMng.GetParentJoint(limbID)
+        for joint in [self.sceneMng.jntMng.GetJoint(ID) for ID in jointIDs]:
+            pm.parent(joint, parentJoint)
  
-    def Teardown_External_JointParents(self, oldJntIDs, sceneJoints, jntGrp):
-        for jointID in oldJntIDs:
-            cmds.parent(sceneJoints[jointID], jntGrp)
+    def Teardown_External_JointParents(self, limbID):
+        jointIDs = self.sceneMng.jntMng.GetLimbJointIDs(limbID)
+        for joint in [self.sceneMng.jntMng.GetJoint(ID) for ID in jointIDs]:
+            pm.parent(joint, self.sceneMng.jntMng.jntGrp)
 
     # EDITABLE CONTROLS
-    def Setup_JointControls(self, limbID, sceneJoints, jntCtrDict):
+    def Setup_JointControls(self, limbID):
         ctrs = []
         jointIDs = self.sceneMng.jntMng.GetLimbJointIDs(limbID)
-        for jointID in jointIDs:
-            jointData = self.sceneMng.jntMng.GetJoint(jointID)
-            name = self.sceneMng.GetJointCtrName(limbID, jointID)
-            ctr = cmds.spaceLocator(name=name)[0]
-            cmds.xform(ctr, t=jointData.position, ro=jointData.rotation)
-            cmds.parentConstraint(ctr, sceneJoints[jointID])
-            jntCtrDict[jointID] = ctr
+        for joint in [self.sceneMng.jntMng.GetJoint(ID) for ID in jointIDs]:
+            name = self.sceneMng.GetJointCtrName(limbID, joint.ID.get())
+            ctr = pm.spaceLocator(name=name)
+            pm.xform(ctr, t=joint.t.get(), ro=joint.rotate.get())
+            pm.parentConstraint(ctr, joint)
+            self.sceneMng.jointCtrs[joint.ID.get()] = ctr
             ctrs.append(ctr)
         return ctrs
 
-    def Teardown_JointControls(self, oldJntIDs, jntCtrDict):
-        ctrs = [jntCtrDict[ID] for ID in oldJntIDs]
-        cmds.delete(ctrs)
-        for ID in oldJntIDs:
-            del(jntCtrDict[ID])
+    def Teardown_JointControls(self, limbID):
+        jointIDs = self.sceneMng.jntMng.GetLimbJointIDs(limbID)
+        ctrs = [self.sceneMng.jointCtrs[ID] for ID in jointIDs]
+        pm.delete(ctrs)
+        for ID in jointIDs:
+            del(self.sceneMng.jointCtrs[ID])

@@ -1,7 +1,5 @@
 
-from maya import cmds
-reload(cmds)
-
+import pymel.core as pm
 
 class Joint_Manager():
     def __init__(self, nameMng, limbMng):
@@ -9,24 +7,30 @@ class Joint_Manager():
         self.nameMng = nameMng
         self.limbMng = limbMng
 
-        self._axes = ['X', '-X', 'Y', '-Y', 'Z', '-Z']
-        self.axisPairs = {  'X': ['X', '-X'],
-                            '-X': ['X', '-X'],
-                            'Y': ['Y', '-Y'],
-                            '-Y': ['Y', '-Y'],
-                            'Z': ['Z', '-Z'],
-                            '-Z': ['Z', '-Z']}
-        self._rotAxes = ['XYZ', 'YZX','ZXY', 'XZY', 'YXZ', 'ZYX']
+        # self._axes = ['X', '-X', 'Y', '-Y', 'Z', '-Z']
+        # self.axisPairs = {  'X': ['X', '-X'],
+        #                     '-X': ['X', '-X'],
+        #                     'Y': ['Y', '-Y'],
+        #                     '-Y': ['Y', '-Y'],
+        #                     'Z': ['Z', '-Z'],
+        #                     '-Z': ['Z', '-Z']}
+        # self._rotAxes = ['XYZ', 'YZX','ZXY', 'XZY', 'YXZ', 'ZYX']
 
 
-    def NewRig(self, limbSetupGrp):
+    def NewRig(self, rigRoot):
+        self.rigRoot = rigRoot
+
         self._nextJointID = 1
-        self._joints = {} # jointID: sceneJointName
+        self._joints = {} # jointID: jointNode
         self._limbJoints = {} # limbID: jointIdList
-        cmds.select(d=1)
-        name = '%s_Skeleton_Grp' % self.nameMng.GetPrefix()
-        self._jntGrp = cmds.group(name=name, em=1)
-        cmds.parent(self._jntGrp, limbSetupGrp)
+
+        pm.select(d=1)
+        self.jntGrp = pm.group(name='Skeleton', em=1)
+        pm.parent(self.jntGrp, rigRoot)
+        self.skelLayer = pm.createDisplayLayer(n='Skel Joints', e=True)
+        self.skelLayer.displayType.set(2)
+
+        pm.addAttr(rigRoot, ln='joints', dt='string')
         # self._limbNextJointIndex = {} # limbID: nextJointIndex
         # self._limbParentJoint = {} # limbID: parentJointID
         # self._mirrorJoints = {} # jointID_01 : jointID_02
@@ -34,103 +38,66 @@ class Joint_Manager():
 
 #============= ACCESSORS + MUTATORS ============================
 
-    # NAMES
-    def GetSceneName(self, jointID):
+    def GetJoint(self, jointID):
         return self._joints[jointID]
-
-    def GetPFRSName(self, jointID):
-        return cmds.getAttr(self._joints[jointID] + '.pfrsName')
-    
-    def SetPFRSName(self, jointID, newPFRSName):
-        cmds.setAttr(self._joints[jointID] + '.pfrsName', newPFRSName, type='string')
-        self.SetSceneName(jointID, newPFRSName)
-    
-    def SetSceneName(self, jointID, newPFRSName):
-        oldSceneName = self._joints[jointID]
-        limbID = cmds.getAttr(oldSceneName + '.limbID')
-        newSceneName = self._GenerateSceneName(limbID, newPFRSName)
-        cmds.rename(oldSceneName, newSceneName)
-        self._joints[jointID] = newSceneName
-
-    # GET AXES FOR COMBOBOXES
-    def GetAxes(self):
-        return self._axes
-    
-    def GetRotAxes(self):
-        return self._rotAxes
-
-    # ROTATION ORDER
-    def GetRotationOrder(self, jointIDs):
-        firstOrder = cmds.getAttr(self._joints[jointIDs[0]] + '.rotateOrder')
-        for jointID in jointIDs[1:]:
-            nextOrder = cmds.getAttr(self._joints[jointID] + '.rotateOrder')
-            if (firstOrder != nextOrder):
-                return -1
-        return firstOrder
-
-    def SetRotationOrder(self, jointIDs, rotateOrder):
-        for jointID in jointIDs:
-            cmds.setAttr(self._joints[jointID] + '.rotateOrder', rotateOrder)
-    
-    # INDEX: for limb joint Order
-    def GetIndex(self, jointID):
-        return cmds.getAttr(self._joints[jointID] + '.index')
-
-    def SetIndex(self, jointID, index):
-        return cmds.setAttr(self._joints[jointID] + '.index', index)
 
     # LIMB JOINTS
     def GetLimbJointIDs(self, limbID):
-        return self._limbJoints[limbID]
+        '''Order joints by internal joint index'''
+        orderedJntIDs = []
+        temp = {}
+        for jointID in self._limbJoints[limbID]:
+            temp[self._joints[jointID].index.get()] = jointID
+        for index in sorted(list(temp.keys())):
+            orderedJntIDs.append(temp[index])
+        return orderedJntIDs
 
-    def SetLimbJointIDs(self, limbID, jointIDs):
-        self._limbJoints[limbID] = jointIDs
-        for index in range(len(jointIDs)):
-            jointID = jointIDs[index]
-            self.SetIndex(jointID, index)
-
+    # MISC
     def GetJointCount(self): # for Skel tool label
-        return len(self._joints.keys())
+        return len(self._joints)
 
 
 # #============= FUNCTIONALITY ============================
 
-    def _GenerateSceneName(self, limbID, jointName):
-        return self.nameMng.GetName(self.nameMng.GetPrefix(),
-                                    self.limbMng.GetPFRSName(limbID),
-                                    jointName,
-                                    self.limbMng.GetSide(limbID),
-                                    'JNT')
-    
     # JOINTS
-    def Add(self, limbID, count, displaySize):
+    def Add(self, limbID, count):
         start = len(self._limbJoints[limbID])
         for index in range(start, start + count):
+            jointID = self._nextJointID
+            self._nextJointID += 1
+
             pfrsName = 'Joint_%03d' % (index)
             position = [0,0,0]
-            parent = self._jntGrp
-            jointID = self._nextJointID
+            parentGrp = self.jntGrp
             limbJointIDs = self._limbJoints[limbID]
             if (limbJointIDs):
-                parent = self._joints[limbJointIDs[-1]]
-                position = cmds.xform(parent, q=1, t=1, ws=1)
+                parentGrp = self._joints[limbJointIDs[-1]]
+                position = pm.xform(parentGrp, q=1, t=1, ws=1)
                 position[1] -= 5
             
-            sceneName = self._GenerateSceneName(limbID, pfrsName)
+            pm.select(d=1)
+            jnt = pm.joint()
+            pm.addAttr(jnt, ln='jointID', at='short', dv=jointID)
+            pm.addAttr(jnt, ln='limbID', at='short', dv=limbID)
+            pm.addAttr(jnt, ln='index', at='short', dv=index)
+            pm.addAttr(jnt, ln='aimAxis', at='float3')
+            pm.addAttr(jnt, ln='x', at='float', parent='aimAxis')
+            pm.addAttr(jnt, ln='y', at='float', parent='aimAxis')
+            pm.addAttr(jnt, ln='z', at='float', parent='aimAxis')
+            pm.addAttr(jnt, ln='upAxis', at='float3')
+            pm.addAttr(jnt, ln='x', at='float', parent='upAxis')
+            pm.addAttr(jnt, ln='y', at='float', parent='upAxis')
+            pm.addAttr(jnt, ln='z', at='float', parent='upAxis')
+            pm.addAttr(jnt, ln='pfrsName', dt='string')
+            pm.addAttr(jnt, ln='rigRoot', dt='string')
+            pm.connectAttr(self.rigRoot.limbs, jnt.rigRoot)
+            jnt.pfrsName.set(pfrsName)
 
-            cmds.select(d=1)
-            self._joints[jointID] = sceneName
-            cmds.joint(name=sceneName, p=position, rad=displaySize)
-            cmds.addAttr(sceneName, ln='jointID', at='short', dv=jointID)
-            cmds.addAttr(sceneName, ln='limbID', at='short', dv=limbID)
-            cmds.addAttr(sceneName, ln='index', at='short', dv=index)
-            cmds.addAttr(sceneName, ln='pfrsName', dt='string')
-            cmds.setAttr(sceneName +'.pfrsName', pfrsName, type='string')
-
-            cmds.parent(sceneName, parent)
-
+            pm.parent(jnt, parentGrp)
+            self._joints[jointID] = jnt
             self._limbJoints[limbID].append(jointID)
-            self._nextJointID += 1
+            self.UpdateJointName(limbID, jointID)
+            pm.editDisplayLayerMembers(self.skelLayer, jnt)
 
     def Remove(self, limbID, jointIDs):
         for jointID in jointIDs:
@@ -140,25 +107,165 @@ class Joint_Manager():
     # LIMBS
     def AddLimb(self, limbID):
         self._limbJoints[limbID] = []
+        self.Add(limbID, 1)
+        jointID = self.GetLimbJointIDs(limbID)[0]
+        self._joints[jointID].index.set(9900)
+        self._joints[jointID].pfrsName.set('Terminator')
+        self.UpdateJointName(limbID, jointID)
     
     def RemoveLimb(self, limbID):
         jointIDs = self.GetLimbJointIDs(limbID)
         self.Remove(limbID, jointIDs)
         del(self._limbJoints[limbID])
 
-    # RENAME HIERARCHY
-    def LimbNameChanged(self, limbID):
-        for jointID in self._limbJoints[limbID]:
-            pfrsName = self.GetPFRSName(jointID)
-            self.SetSceneName(jointID, pfrsName)
+    # RENAME
+    def UpdateAllJointNames(self):
+        for limbID in list(self._limbJoints.keys()):
+            self.UpdateLimbJointNames(limbID)
 
-    def PrefixChanged(self):
-        newGrpName = '%s_Skeleton_Grp' % self.nameMng.GetPrefix()
-        cmds.rename(self._jntGrp, newGrpName)
-        self._jntGrp = newGrpName
-        for jointID in list(self._joints.keys()):
-            pfrsName = self.GetPFRSName(jointID)
-            self.SetSceneName(jointID, pfrsName)
+    def UpdateLimbJointNames(self, limbID):
+        for jointID in self._limbJoints[limbID]:
+            self.UpdateJointName(limbID, jointID)
+
+    def UpdateJointName(self, limbID, jointID):
+        jnt = self._joints[jointID]
+        jnt.rename(self.nameMng.GetName(limbID, jointID, 'JNT'))
+    
+
+
+# #============= DEPRICATED ============================
+
+    # def SetLimbJointIDs(self, limbID, jointIDs):
+    #     self._limbJoints[limbID] = jointIDs
+    #     for index in range(len(jointIDs)):
+    #         jointID = jointIDs[index]
+    #         self.SetIndex(jointID, index)
+
+#     # NAMES
+#     def GetSceneName(self, jointID):
+#         return self._joints[jointID]
+
+#     def GetPFRSName(self, jointID):
+#         return cmds.getAttr(self._joints[jointID] + '.pfrsName')
+    
+#     def SetPFRSName(self, jointID, newPFRSName):
+#         cmds.setAttr(self._joints[jointID] + '.pfrsName', newPFRSName, type='string')
+#         self.SetSceneName(jointID, newPFRSName)
+    
+#     def SetSceneName(self, jointID, newPFRSName):
+#         oldSceneName = self._joints[jointID]
+#         limbID = cmds.getAttr(oldSceneName + '.limbID')
+#         newSceneName = self._GenerateSceneName(limbID, newPFRSName)
+#         cmds.rename(oldSceneName, newSceneName)
+#         self._joints[jointID] = newSceneName
+
+#     # GET AXES FOR COMBOBOXES
+#     def GetAxes(self):
+#         return self._axes
+    
+#     def GetRotAxes(self):
+#         return self._rotAxes
+
+#     # ROTATION ORDER
+#     def GetRotationOrder(self, jointIDs):
+#         firstOrder = cmds.getAttr(self._joints[jointIDs[0]] + '.rotateOrder')
+#         for jointID in jointIDs[1:]:
+#             nextOrder = cmds.getAttr(self._joints[jointID] + '.rotateOrder')
+#             if (firstOrder != nextOrder):
+#                 return -1
+#         return firstOrder
+
+#     def SetRotationOrder(self, jointIDs, rotateOrder):
+#         for jointID in jointIDs:
+#             cmds.setAttr(self._joints[jointID] + '.rotateOrder', rotateOrder)
+    
+#     # INDEX: for limb joint Order
+#     def GetIndex(self, jointID):
+#         return cmds.getAttr(self._joints[jointID] + '.index')
+
+#     def SetIndex(self, jointID, index):
+#         return cmds.setAttr(self._joints[jointID] + '.index', index)
+
+#     # LIMB JOINTS
+#     def GetLimbJointIDs(self, limbID):
+#         return self._limbJoints[limbID]
+
+#     def SetLimbJointIDs(self, limbID, jointIDs):
+#         self._limbJoints[limbID] = jointIDs
+#         for index in range(len(jointIDs)):
+#             jointID = jointIDs[index]
+#             self.SetIndex(jointID, index)
+
+#     def GetJointCount(self): # for Skel tool label
+#         return len(self._joints.keys())
+
+
+# # #============= FUNCTIONALITY ============================
+
+#     def _GenerateSceneName(self, limbID, jointName):
+#         return self.nameMng.GetName(self.nameMng.GetPrefix(),
+#                                     self.limbMng.GetPFRSName(limbID),
+#                                     jointName,
+#                                     self.limbMng.GetSide(limbID),
+#                                     'JNT')
+    
+#     # JOINTS
+#     def Add(self, limbID, count, displaySize):
+#         start = len(self._limbJoints[limbID])
+#         for index in range(start, start + count):
+#             pfrsName = 'Joint_%03d' % (index)
+#             position = [0,0,0]
+#             parent = self.jntGrp
+#             jointID = self._nextJointID
+#             limbJointIDs = self._limbJoints[limbID]
+#             if (limbJointIDs):
+#                 parent = self._joints[limbJointIDs[-1]]
+#                 position = cmds.xform(parent, q=1, t=1, ws=1)
+#                 position[1] -= 5
+            
+#             sceneName = self._GenerateSceneName(limbID, pfrsName)
+
+#             cmds.select(d=1)
+#             self._joints[jointID] = sceneName
+#             cmds.joint(name=sceneName, p=position, rad=displaySize)
+#             cmds.addAttr(sceneName, ln='jointID', at='short', dv=jointID)
+#             cmds.addAttr(sceneName, ln='limbID', at='short', dv=limbID)
+#             cmds.addAttr(sceneName, ln='index', at='short', dv=index)
+#             cmds.addAttr(sceneName, ln='pfrsName', dt='string')
+#             cmds.setAttr(sceneName +'.pfrsName', pfrsName, type='string')
+
+#             cmds.parent(sceneName, parent)
+
+#             self._limbJoints[limbID].append(jointID)
+#             self._nextJointID += 1
+
+#     def Remove(self, limbID, jointIDs):
+#         for jointID in jointIDs:
+#             self._limbJoints[limbID].remove(jointID)
+#             del(self._joints[jointID])
+
+#     # LIMBS
+#     def AddLimb(self, limbID):
+#         self._limbJoints[limbID] = []
+    
+#     def RemoveLimb(self, limbID):
+#         jointIDs = self.GetLimbJointIDs(limbID)
+#         self.Remove(limbID, jointIDs)
+#         del(self._limbJoints[limbID])
+
+#     # RENAME HIERARCHY
+#     def LimbNameChanged(self, limbID):
+#         for jointID in self._limbJoints[limbID]:
+#             pfrsName = self.GetPFRSName(jointID)
+#             self.SetSceneName(jointID, pfrsName)
+
+#     def PrefixChanged(self):
+#         newGrpName = '%s_Skeleton_Grp' % self.nameMng.GetPrefix()
+#         cmds.rename(self.jntGrp, newGrpName)
+#         self.jntGrp = newGrpName
+#         for jointID in list(self._joints.keys()):
+#             pfrsName = self.GetPFRSName(jointID)
+#             self.SetSceneName(jointID, pfrsName)
 
     # MISSING, DUPLICATE + MIRROR
 

@@ -1,4 +1,33 @@
 
+
+    # Hold prefix data
+    # hold naming order
+    # create group
+    # create outputs for connecting to:
+    #       limbs, joints, controllers
+    # track last rig root selection
+    # listen for every selection
+    #   if does not match last rigRoot
+    #       update all data/ui
+    # 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# #============= DEPRICATED ============================
+
 # import os
 
 # from maya import cmds
