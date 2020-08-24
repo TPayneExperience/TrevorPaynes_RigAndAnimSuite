@@ -2,10 +2,10 @@
 import pymel.core as pm
 
 
+import Hierarchies.SKEL_Limb_Hierarchy_UI as limbHier_UI
+reload(limbHier_UI)
 # import Hierarchies.SKEL_Joint_Hierarchy_LW as jointHier_UI
-# import Hierarchies.SKEL_Limb_Hierarchy_TW as limbHier_UI
 # reload(jointHier_UI)
-# reload(limbHier_UI)
 
 # import Properties.SKEL_Joint_Properties_UI as jointProp_UI
 # import Properties.SKEL_Limb_Properties_UI as limbProp_UI
@@ -16,11 +16,20 @@ import pymel.core as pm
 class Skeleton_UI():
     def __init__(self, skeleton):
         self.skel = skeleton
+        self.jntMng = skeleton.jntMng
+        self.limbMng = skeleton.limbMng
 
         self._isPopulating = False
         self._Setup()
         # self._Setup_Connections()
 
+    def NewRig(self, rigRoot):
+        self.limbHier_ui.NewRig()
+        # self.skel.jntMng.NewRig()
+        # self.skel.limbMng.NewRig()
+        # self.skel.sceneMng.NewRig(rootGrp)
+        # self.Populate()
+    
     # def Populate(self): # CALLED BY MAIN WINDOW
     #     self.limbHier_tw.Populate()
     #     self.jntHier_lw.clear()
@@ -35,11 +44,8 @@ class Skeleton_UI():
     def _Setup(self):
         with pm.verticalLayout():
             with pm.frameLayout('Limb Hierarchy', bv=1):
-                self.limbHier_tv = pm.treeView(ai=(('asdf',''), ('ffff','')))
-                with pm.popupMenu():
-                    pm.menuItem('Add')
-                    pm.menuItem(divider=1)
-                    pm.menuItem('Remove')
+                self.limbHier_ui = limbHier_UI.SKEL_Limb_Hierarchy_UI(  self.skel.limbHier,
+                                                                        self)
             with pm.frameLayout('Joint Hierarchy', bv=1):
                 self.jntHier_tv = pm.treeView()
                 with pm.popupMenu():
@@ -75,12 +81,56 @@ class Skeleton_UI():
                                     max=20.0,
                                     v=1.0)
                     pm.text('Total Joints:')
-                            
-                    
-        # h_layout = QtWidgets.QHBoxLayout(self)
-        # h_layout.addLayout(self._Setup_LimbJointHierarchy())
-        # h_layout.addLayout(self._Setup_Properties())
+           
+
+#=========== FUNCTIONALITY ====================================
+                 
+    def AddLimb(self, limbID):
+        self.limbHier_ui.Populate(limbID)
+        # self.skel.sceneMng.Add_Editable_Limb(limbID)
+        # self._LimbSelected()
+        # self._UpdateJointCountLabel()
+        # msg = 'Added limb "%s"' % self.skel.limbMng.GetPFRSName(limbID)
+        # self.StatusMsg(msg)
+
+
+    def RemoveLimb(self, rootLimbID):
+        limbIDs = self.limbMng.GetLimbCreationOrder(rootLimbID)
+        for limbID in limbIDs[::-1]:
+            # self.jntMng.RemoveLimb(limbID)
+            self.limbMng.Remove(limbID)
+        self.limbHier_ui.Populate()
+#         self.jntHier_lw.Depopulate()
+#         # self.limbProp_gb.hide()
+#         # self.jntProp_gb.hide()
+#         # self.skel.sceneMng.Remove_Editable_Limb(rootLimbID)
+#         self._UpdateJointCountLabel()
+
+
+    def SetLimbName(self, limbID):
+        pass
+        # self.skel.jntMng.LimbNameChanged(limbID)
+        # self.skel.sceneMng.sceneLimbMng.SetLimbName(limbID)
+        # mirrorID = self.skel.limbMng.GetMirror(limbID)
+        # if (mirrorID != -1):
+        #     self.skel.sceneMng.sceneLimbMng.SetLimbName(mirrorID)
     
+    def ReparentLimb(self, limbID, oldParentID): # limb hier changed
+        pass
+        # self.skel.sceneMng.Reparent_Editable_Limb(limbID, oldParentID)
+        # items = self.limbHier_tw.selectedItems()
+        # if (items):
+        #     limbID = items[0].ID
+            # self.limbProp_gb.SetLimb(limbID)
+            # self.limbProp_gb.Populate()
+
+        # limbName = self.skel.limbMng.GetPFRSName(limbID)
+        # newParentName = 'World'
+        # newParentID = self.skel.limbMng.GetParentLimbID(limbID)
+        # if (newParentID != -1):
+        #     newParentName = self.skel.limbMng.GetPFRSName(newParentID)
+
+
 #     def _Setup_LimbJointHierarchy(self):
 #         v_layout = QtWidgets.QVBoxLayout()
 
@@ -160,47 +210,6 @@ class Skeleton_UI():
 #         # else:
 #         #     self.skel.sceneMng.DeselectAll()
     
-#     def AddLimb(self, limbID):
-#         self.limbHier_tw.Populate(limbID)
-#         # self.skel.sceneMng.Add_Editable_Limb(limbID)
-#         self._LimbSelected()
-#         self._UpdateJointCountLabel()
-#         msg = 'Added limb "%s"' % self.skel.limbMng.GetPFRSName(limbID)
-#         self.StatusMsg(msg)
-
-#     def RemoveLimb(self, rootLimbID):
-#         limbIDs = self.skel.limbMng.GetLimbCreationOrder(rootLimbID)
-#         limbNames = [self.skel.limbMng.GetName(ID) for ID in limbIDs]
-#         for limbID in limbIDs[::-1]:
-#             # mirrorID = self.skel.limbMng.GetMirror(limbID)
-#             self.limbHier_tw.limbHier.Remove(limbID)
-#             # self.RemoveLimb(limbID)
-#             # if (mirrorID != -1):
-#             #     self.SetLimbName(mirrorID)
-#         self.StatusMsg('Removed limbs ' + str(limbNames))
-#         self.limbHier_tw.Populate()
-#         self.jntHier_lw.Depopulate()
-#         # self.limbProp_gb.hide()
-#         # self.jntProp_gb.hide()
-#         # self.skel.sceneMng.Remove_Editable_Limb(rootLimbID)
-#         self._UpdateJointCountLabel()
-
-#     def ReparentLimb(self, limbID, oldParentID): # limb hier changed
-#         # self.skel.sceneMng.Reparent_Editable_Limb(limbID, oldParentID)
-#         # items = self.limbHier_tw.selectedItems()
-#         # if (items):
-#         #     limbID = items[0].ID
-#             # self.limbProp_gb.SetLimb(limbID)
-#             # self.limbProp_gb.Populate()
-
-#         limbName = self.skel.limbMng.GetPFRSName(limbID)
-#         newParentName = 'World'
-#         newParentID = self.skel.limbMng.GetParentLimbID(limbID)
-#         if (newParentID != -1):
-#             newParentName = self.skel.limbMng.GetPFRSName(newParentID)
-#         msg = 'Reparenting "%s" to "%s"' % (limbName, newParentName)
-#         self.StatusMsg(msg)
-
 #     def RebuildLimb(self, limbID): # limb type changed
 #         pass
 #         # self.skel.sceneMng.Rebuild_Editable_Limb(limbID)
@@ -211,13 +220,6 @@ class Skeleton_UI():
 #         # self.skel.sceneMng.Setup_External_JointParents(limbID)
 #         # self.skel.sceneMng.SelectLimbControl(limbID)
 
-#     def SetLimbName(self, limbID):
-#         self.skel.jntMng.LimbNameChanged(limbID)
-#         # self.skel.sceneMng.sceneLimbMng.SetLimbName(limbID)
-#         # mirrorID = self.skel.limbMng.GetMirror(limbID)
-#         # if (mirrorID != -1):
-#         #     self.skel.sceneMng.sceneLimbMng.SetLimbName(mirrorID)
-    
 #     def FlipLimbSides(self, limbID): # for L/R switching
 #         limbIDs = self.skel.limbMng.GetLimbCreationOrder(limbID) #children
 #         mirrorID = self.skel.limbMng.GetMirror(limbID)
@@ -360,12 +362,6 @@ class Skeleton_UI():
 
 #     def StatusMsg(self, message):
 #         self.mainWindow.StatusMsg(message)
-    
-#     def NewRig(self, rootGrp):
-#         self.skel.jntMng.NewRig()
-#         self.skel.limbMng.NewRig()
-#         # self.skel.sceneMng.NewRig(rootGrp)
-#         self.Populate()
     
 #     def UpdateNaming(self):
 #         pass

@@ -52,7 +52,7 @@
                  <bool>true</bool>
                 </property>
                 <property name="currentIndex">
-                 <number>2</number>
+                 <number>1</number>
                 </property>
                 <widget class="QWidget" name="tab_11">
                  <attribute name="title">
@@ -1727,7 +1727,7 @@
                  <bool>true</bool>
                 </property>
                 <property name="currentIndex">
-                 <number>1</number>
+                 <number>0</number>
                 </property>
                 <widget class="QWidget" name="tab_14">
                  <attribute name="title">
@@ -1895,6 +1895,34 @@
                             <layout class="QVBoxLayout" name="verticalLayout_113">
                              <item>
                               <layout class="QVBoxLayout" name="verticalLayout_114">
+                               <item>
+                                <layout class="QHBoxLayout" name="horizontalLayout_123">
+                                 <item>
+                                  <widget class="QLabel" name="label_67">
+                                   <property name="text">
+                                    <string>Algorithm</string>
+                                   </property>
+                                  </widget>
+                                 </item>
+                                 <item>
+                                  <widget class="QComboBox" name="comboBox_32">
+                                   <property name="currentIndex">
+                                    <number>0</number>
+                                   </property>
+                                   <item>
+                                    <property name="text">
+                                     <string>End Jnt to Closes Vert</string>
+                                    </property>
+                                   </item>
+                                   <item>
+                                    <property name="text">
+                                     <string>Limb Radius</string>
+                                    </property>
+                                   </item>
+                                  </widget>
+                                 </item>
+                                </layout>
+                               </item>
                                <item>
                                 <layout class="QHBoxLayout" name="horizontalLayout_104">
                                  <item>
@@ -3180,7 +3208,7 @@
                   <item>
                    <widget class="QTabWidget" name="tabWidget_6">
                     <property name="currentIndex">
-                     <number>0</number>
+                     <number>1</number>
                     </property>
                     <widget class="QWidget" name="tab_9">
                      <attribute name="title">

@@ -16,7 +16,8 @@ reload(limbSetup_ui)
 
 __author__ = 'Trevor Payne'
 __version__ = '0.1'
-
+LICENSE = 'INDIE'
+SUITE = 'Rig'
 
 class PayneFreeRigSuite_UI():
     def __init__(self):
@@ -30,12 +31,20 @@ class PayneFreeRigSuite_UI():
         self.pfrs.limbSetup.fileMng.SetOutputFile(os.path.join(folder, 'temp.json'))
         self.pfrs.limbSetup.fileMng.SetMeshPath(os.path.join(folder, 'temp.ma'))
         
-        # self._NewRig()
+        self.NewRig()
+
+    def NewRig(self):
+        self.pfrs.NewRig('somePrefix', [0,1,2,3,4], True)
+        self.limbSetup_ui.NewRig(self.pfrs.rigRoot)
+        # self.pfrs.rigSceneMng.NewRig()
+        # self.limbs_tw.NewRig(self.pfrs.rigSceneMng.rootGrp)
+        # self.pfrs.saveLoadRig.Save()
 
 #=========== SETUP ====================================
 
     def _Setup(self):
-        with pm.window(mb=True,mbv=True, w=500, h=500) as self.win:
+        name = '%s - Payne Free %s Suite - v%s' % (LICENSE, SUITE, __version__)
+        with pm.window(mb=True,mbv=True, t=name, w=500, h=500) as self.win:
             with pm.tabLayout() as self.rigTabs:
                 with pm.horizontalLayout() as self.lsLayout:
                     self.limbSetup_ui = limbSetup_ui.LimbSetup_UI(self.pfrs.limbSetup)
@@ -218,13 +227,7 @@ class PayneFreeRigSuite_UI():
     #     #                             self.pfrs.fileMng,
     #     #                             self)
     #     # if (rigUI.exec_()):
-    #     #     self._NewRig()
-
-    # def _NewRig(self):
-    #     self.pfrs.NewRig()
-    #     # self.pfrs.rigSceneMng.NewRig()
-    #     # self.limbs_tw.NewRig(self.pfrs.rigSceneMng.rootGrp)
-    #     # self.pfrs.saveLoadRig.Save()
+    #     #     self.NewRig()
 
     def EditRig_Dialog(self):
         pass
@@ -319,7 +322,7 @@ class PayneFreeRigSuite_UI():
 #         self.pfrs.limbSetup.fileMng.SetOutputFile(os.path.join(folder, 'temp.json'))
 #         self.pfrs.limbSetup.fileMng.SetMeshPath(os.path.join(folder, 'temp.ma'))
         
-#         self._NewRig()
+#         self.NewRig()
 
 # #=========== SETUP ====================================
 
@@ -480,9 +483,9 @@ class PayneFreeRigSuite_UI():
 #         #                             self.pfrs.fileMng,
 #         #                             self)
 #         # if (rigUI.exec_()):
-#         #     self._NewRig()
+#         #     self.NewRig()
 
-#     def _NewRig(self):
+#     def NewRig(self):
 #         self.pfrs.NewRig()
 #         # self.pfrs.rigSceneMng.NewRig()
 #         # self.limbs_tw.NewRig(self.pfrs.rigSceneMng.rootGrp)

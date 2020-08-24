@@ -24,7 +24,6 @@ class Limb_Manager():
 
         self.limbSides = ['M', 'L', 'R', 'None']
         
-        # self.NewRig()
 
     def NewRig(self, rigRoot):
         self.rigRoot = rigRoot
@@ -32,6 +31,11 @@ class Limb_Manager():
         self._nextLimbID = 1
         self._limbs = {} # limbID : limbNode
         pm.addAttr(rigRoot, ln='limbs', dt='string')
+
+        # TESTING:
+        self.Add()
+        self.Add()
+        self.Add()
         
 #============= ACCESSORS + MUTATORS ============================
 
@@ -57,7 +61,7 @@ class Limb_Manager():
         pm.setAttr(limb+'.pfrsName', pfrsName)
         pm.addAttr(limb, ln='typeIndex', at='enum', enumName=limbTypes, dv=1)
         pm.addAttr(limb, ln='sideIndex', at='enum', enumName=limbSides, dv=1)
-        pm.addAttr(limb, ln='parentLimbID', at='long')
+        pm.addAttr(limb, ln='parentLimbID', at='long', dv=-1)
         pm.addAttr(limb, ln='parentJntIndex', at='enum', enumName='Empty')
         pm.addAttr(limb, ln='parentCtrID', at='long')
         pm.addAttr(limb, ln='bhvIndex', at='enum', enumName=bhvTypes)
@@ -65,6 +69,7 @@ class Limb_Manager():
         pm.connectAttr(self.rigRoot.limbs, limb.rigRoot)
 
         self._limbs[limbID] = limb
+        return limb
 
     def Remove(self, limbID): # Should be called after joints deleted
         pm.select(d=1)

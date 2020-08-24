@@ -48,7 +48,7 @@ class PayneFreeRigSuite():
         pm.addAttr(self.rigRoot, ln='prefix', dt='string')
         self.rigRoot.prefix.set(prefix)
 
-        self.nameMng.NewRig(self.rigRoot, self.limbSetup.limbMng, self.limbSetup.jntMng)
+        # self.nameMng.NewRig(self.rigRoot, self.limbSetup.limbMng, self.limbSetup.jntMng)
         self.meshGrp = pm.group(name='Meshes', em=True)
         pm.parent(self.meshGrp, self.rigRoot)
 
@@ -56,28 +56,28 @@ class PayneFreeRigSuite():
         self.meshLayer = pm.createDisplayLayer(n='Rig Mesh', e=True)
         pm.setAttr(self.meshLayer + '.displayType', 2)
         pm.select(d=True)
-        self._Import_Meshes()
-        self.limbSetup.NewRig(self.rigRoot)
+        # self._Import_Meshes()
         self.UpdatePrefix()
+        self.limbSetup.NewRig(self.rigRoot)
 
-    def _Import_Meshes(self):
-        meshPath = self.fileMng.GetMeshPath()
-        if(os.path.isfile(meshPath)):
-            pm.file(meshPath, i=True, f=True)
-            meshShapes = pm.ls(type='mesh')
-            meshes = pm.listRelatives(meshShapes, p=1)
-            pm.parent(meshes, self.meshGrp)
-            pm.editDisplayLayerMembers(self.meshLayer, meshes)
+    # def _Import_Meshes(self):
+    #     meshPath = self.fileMng.GetMeshPath()
+    #     if(os.path.isfile(meshPath)):
+    #         pm.file(meshPath, i=True, f=True)
+    #         meshShapes = pm.ls(type='mesh')
+    #         meshes = pm.listRelatives(meshShapes, p=1)
+    #         pm.parent(meshes, self.meshGrp)
+    #         pm.editDisplayLayerMembers(self.meshLayer, meshes)
     
     def UpdatePrefix(self):
         self.rigRoot.rename('%s_ROOT' % self.rigRoot.prefix.get())
 
-    def UpdateMeshes(self):
-        pm.select(d=1)
-        pm.delete(self.meshGrp)
-        self.meshGrp = pm.group(name='Mesh_GRP', em=True)
-        pm.parent(self.meshGrp, self.rigRoot)
-        self._Import_Meshes()
+    # def UpdateMeshes(self):
+    #     pm.select(d=1)
+    #     pm.delete(self.meshGrp)
+    #     self.meshGrp = pm.group(name='Mesh_GRP', em=True)
+    #     pm.parent(self.meshGrp, self.rigRoot)
+    #     self._Import_Meshes()
 
 # #============= DEPRICATED ============================
 

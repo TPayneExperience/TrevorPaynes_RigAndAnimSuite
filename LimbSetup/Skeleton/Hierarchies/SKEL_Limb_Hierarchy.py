@@ -14,9 +14,9 @@ class SKEL_Limb_Hierarchy():
     #     self.jntMng.Add(limbID, -1, 1)
     #     return limbID
     
-    def Remove(self, limbID):
-        self.jntMng.RemoveLimb(limbID)
-        self.limbMng.Remove(limbID)
+    # def Remove(self, limbID):
+    #     self.jntMng.RemoveLimb(limbID)
+    #     self.limbMng.Remove(limbID)
 
 
 

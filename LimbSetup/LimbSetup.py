@@ -28,10 +28,10 @@ class LimbSetup:
         #                                                     self.jntMng)
     
     def NewRig(self, rootGrp):
-        cmds.select(d=1)
-        name = '%s_LimbSetup_GRP' % self.nameMng.GetPrefix()
-        self.limbSetupGrp = cmds.group(name=name, em=1)
-        cmds.parent(self.limbSetupGrp, rootGrp)
-        self.limbMng.NewRig(self.limbSetupGrp)
-        self.jntMng.NewRig(self.limbSetupGrp)
+        self.limbMng.NewRig(rootGrp)
+        # cmds.select(d=1)
+        # name = '%s_LimbSetup_GRP' % self.nameMng.GetPrefix()
+        # self.limbSetupGrp = cmds.group(name=name, em=1)
+        # cmds.parent(self.limbSetupGrp, rootGrp)
+        # self.jntMng.NewRig(self.limbSetupGrp)
 

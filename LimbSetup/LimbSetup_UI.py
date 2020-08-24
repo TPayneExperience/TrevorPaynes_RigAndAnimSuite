@@ -26,6 +26,9 @@ class LimbSetup_UI():
     # def Populate(self):
     #     self.skel_ui.Populate()
 
+    def NewRig(self, rigRoot):
+        self.skel_ui.NewRig(rigRoot)
+
 #=========== SETUP ====================================
 
     def _Setup(self):
@@ -150,9 +153,6 @@ class LimbSetup_UI():
 
 
 # #=========== MISC ====================================
-
-#     def NewRig(self, rootGrp):
-#         self.skel_ui.NewRig(rootGrp)
 
 #     def UpdateNaming(self):
 #         self.skel_ui.UpdateNaming()
