@@ -13,7 +13,7 @@ class Limb_Hierarchy_UI(object):
         self._Setup_Abstract()
 
     def _Setup_Abstract(self):
-        self.widget = pm.treeView(ams=0)
+        self.widget = pm.treeView(allowMultiSelection=0)
         # self.setAlternatingRowColors(True)
         # self.setHeaderHidden(True)
         # self.setIndentation(10)

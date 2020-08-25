@@ -32,10 +32,10 @@ class Limb_Manager():
         self._limbs = {} # limbID : limbNode
         pm.addAttr(rigRoot, ln='limbs', dt='string')
 
-        # TESTING:
-        self.Add()
-        self.Add()
-        self.Add()
+        # # TESTING:
+        # self.Add()
+        # self.Add()
+        # self.Add()
         
 #============= ACCESSORS + MUTATORS ============================
 
@@ -43,7 +43,7 @@ class Limb_Manager():
         return self._limbs[limbID]
     
     def GetLimbSide(self, limbID): # Name Manager Only
-        return self.limbSides[self._limbs[limbID]]
+        return self.limbSides[self._limbs[limbID].sideIndex.get()]
 
     def Add(self):
         # MISSING: CONNECT TO ROOT RIG NODE
@@ -61,6 +61,7 @@ class Limb_Manager():
         pm.setAttr(limb+'.pfrsName', pfrsName)
         pm.addAttr(limb, ln='typeIndex', at='enum', enumName=limbTypes, dv=1)
         pm.addAttr(limb, ln='sideIndex', at='enum', enumName=limbSides, dv=1)
+        pm.addAttr(limb, ln='mirrorLimbID', at='long', dv=-1)
         pm.addAttr(limb, ln='parentLimbID', at='long', dv=-1)
         pm.addAttr(limb, ln='parentJntIndex', at='enum', enumName='Empty')
         pm.addAttr(limb, ln='parentCtrID', at='long')
@@ -89,7 +90,7 @@ class Limb_Manager():
         '''Returns an ordered list of limb IDs from root to bottom most child'''
         limbParents = {}
         for limbID, limb in self._limbs.items():
-            limbParents[limbID] = limb.getAttr('parentLimbID')
+            limbParents[limbID] = limb.parentLimbID.get()
         limbIDs = [rootLimbID]
         complete = False
         while(limbParents and not complete):
@@ -102,6 +103,10 @@ class Limb_Manager():
                     break
         return limbIDs
 
+
+
+#============= DEPRICATED ============================
+#============= DEPRICATED ============================
 #============= DEPRICATED ============================
 
     # def NewRig(self, limbSetupGrp):

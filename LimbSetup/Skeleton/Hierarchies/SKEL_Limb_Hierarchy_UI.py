@@ -9,59 +9,48 @@ class SKEL_Limb_Hierarchy_UI(limbHierUI.Limb_Hierarchy_UI):
     def __init__(self, limbHierarchy, skelUI):
         super(SKEL_Limb_Hierarchy_UI, self).__init__(limbHierarchy.limbMng)
 
-        self.limbHier = limbHierarchy
+        self.limbMng = limbHierarchy.limbMng
+        self.jntMng = limbHierarchy.jntMng
+        self.nameMng = limbHierarchy.nameMng
         self.parent = skelUI
 
         self._isPopulating = False
 
         self._Setup()
-        # self._Setup_Connections()
-        # self.Populate_Abstract()
 
     def NewRig(self):
         self.Populate_Abstract()
 
     def Populate(self, selectedID = -1):
         self.Populate_Abstract()
-    #     self._isPopulating = True
-    #     items = self.selectedItems()
-    #     if (items and selectedID == -1):
-    #         selectedID = items[0].ID
-    #     for limbID, item in self._items.items():
-    #         index = self.limbMng.GetSideIndex(limbID)
-    #         if (index == 0 or index == 3):
-    #             item.setFlags(item.flags() | QtCore.Qt.ItemIsEditable)
-    #         else:
-    #             item.setFlags(  QtCore.Qt.ItemIsEditable |
-    #                             QtCore.Qt.ItemIsSelectable |
-    #                             QtCore.Qt.ItemIsEnabled |
-    #                             QtCore.Qt.ItemIsDropEnabled)
-    #         if (limbID == selectedID):
-    #             self.setCurrentItem(item)
-    #     self._isPopulating = False
-    #     if (selectedID != -1):
-    #         self.edit(self.currentIndex())
+        if (selectedID != -1):
+            limb = self.limbMng.GetLimb(selectedID)
+            pm.treeView(self.widget, e=1, selectItem=(limb.pfrsName.get(), 1))
 
 #=========== SETUP ====================================
 
     def _Setup(self):
         pm.treeView(self.widget, e=1, itemRenamedCommand=self.SetName)
         pm.treeView(self.widget, e=1, dragAndDropCommand=self.Reparent)
+        pm.treeView(self.widget, e=1, selectCommand=self.SelectLimb)
         with pm.popupMenu():
             pm.menuItem('Add', c=pm.Callback(self.Add))
             pm.menuItem(divider=1)
             pm.menuItem('Remove', c=pm.Callback(self.Remove))
-        # self.setDragDropMode(self.InternalMove)
-        # self.installEventFilter(self)
-
-        # self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
 
 #=========== FUNCTIONALITY ====================================
 
+    def SelectLimb(self, limbNames, limbIndexes):
+        if (limbNames):
+            limbID = self._limbs[limbNames[0]]
+            self.parent.LimbSelected(limbID)
+            return True
+        return False
+
     def Add(self):
-        limb = self.limbHier.limbMng.Add()
-        # self.limbHier.jntMng.AddLimb(limb.ID.get())
-        # self.limbHier.jntMng.Add(limb.ID.get(), 1, 1)
+        limb = self.limbMng.Add()
+        self.jntMng.AddLimb(limb.ID.get())
+        self.jntMng.Add(limb.ID.get(), 1)
         self.parent.AddLimb(limb.ID.get())
 
     def Remove(self):
@@ -76,15 +65,14 @@ class SKEL_Limb_Hierarchy_UI(limbHierUI.Limb_Hierarchy_UI):
                                         cancelButton='No', 
                                         dismissString='No' )
             if (result == 'Yes'):
-                limb = self._limbs[limbName]
-                self.parent.RemoveLimb(limb.ID.get())
+                self.parent.RemoveLimb(self._limbs[limbName])
 
     def SetName(self, oldName, newName):
         if (oldName in self._limbs):
             valid = False
-            if self.limbHier.nameMng.IsValidCharacterLength(newName):
-                if self.limbHier.nameMng.DoesNotStartWithNumber(newName):
-                    if self.limbHier.nameMng.AreAllValidCharacters(newName):
+            if self.nameMng.IsValidCharacterLength(newName):
+                if self.nameMng.DoesNotStartWithNumber(newName):
+                    if self.nameMng.AreAllValidCharacters(newName):
                         if (newName not in self._limbs):
                             self._limbs[newName] = self._limbs[oldName]
                             del(self._limbs[oldName])

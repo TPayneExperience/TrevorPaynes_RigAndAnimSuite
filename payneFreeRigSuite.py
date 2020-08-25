@@ -58,6 +58,9 @@ class PayneFreeRigSuite():
         pm.select(d=True)
         # self._Import_Meshes()
         self.UpdatePrefix()
+        self.nameMng.NewRig(self.rigRoot, 
+                            self.limbSetup.limbMng, 
+                            self.limbSetup.jntMng)
         self.limbSetup.NewRig(self.rigRoot)
 
     # def _Import_Meshes(self):

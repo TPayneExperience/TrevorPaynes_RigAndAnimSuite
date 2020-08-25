@@ -47,7 +47,7 @@ class Joint_Manager():
         orderedJntIDs = []
         temp = {}
         for jointID in self._limbJoints[limbID]:
-            temp[self._joints[jointID].index.get()] = jointID
+            temp[self._joints[jointID].limbIndex.get()] = jointID
         for index in sorted(list(temp.keys())):
             orderedJntIDs.append(temp[index])
         return orderedJntIDs
@@ -77,17 +77,17 @@ class Joint_Manager():
             
             pm.select(d=1)
             jnt = pm.joint()
-            pm.addAttr(jnt, ln='jointID', at='short', dv=jointID)
+            pm.addAttr(jnt, ln='ID', at='short', dv=jointID)
             pm.addAttr(jnt, ln='limbID', at='short', dv=limbID)
-            pm.addAttr(jnt, ln='index', at='short', dv=index)
+            pm.addAttr(jnt, ln='limbIndex', at='short', dv=index)
             pm.addAttr(jnt, ln='aimAxis', at='float3')
-            pm.addAttr(jnt, ln='x', at='float', parent='aimAxis')
-            pm.addAttr(jnt, ln='y', at='float', parent='aimAxis')
-            pm.addAttr(jnt, ln='z', at='float', parent='aimAxis')
+            pm.addAttr(jnt, ln='aimX', at='float', parent='aimAxis')
+            pm.addAttr(jnt, ln='aimY', at='float', parent='aimAxis')
+            pm.addAttr(jnt, ln='aimZ', at='float', parent='aimAxis')
             pm.addAttr(jnt, ln='upAxis', at='float3')
-            pm.addAttr(jnt, ln='x', at='float', parent='upAxis')
-            pm.addAttr(jnt, ln='y', at='float', parent='upAxis')
-            pm.addAttr(jnt, ln='z', at='float', parent='upAxis')
+            pm.addAttr(jnt, ln='upX', at='float', parent='upAxis')
+            pm.addAttr(jnt, ln='upY', at='float', parent='upAxis')
+            pm.addAttr(jnt, ln='upZ', at='float', parent='upAxis')
             pm.addAttr(jnt, ln='pfrsName', dt='string')
             pm.addAttr(jnt, ln='rigRoot', dt='string')
             pm.connectAttr(self.rigRoot.limbs, jnt.rigRoot)
@@ -101,15 +101,19 @@ class Joint_Manager():
 
     def Remove(self, limbID, jointIDs):
         for jointID in jointIDs:
+            joint = self._joints[jointID]
             self._limbJoints[limbID].remove(jointID)
             del(self._joints[jointID])
+            pm.select(d=1)
+            pm.delete(joint)
+
 
     # LIMBS
     def AddLimb(self, limbID):
         self._limbJoints[limbID] = []
         self.Add(limbID, 1)
         jointID = self.GetLimbJointIDs(limbID)[0]
-        self._joints[jointID].index.set(9900)
+        self._joints[jointID].limbIndex.set(9900)
         self._joints[jointID].pfrsName.set('Terminator')
         self.UpdateJointName(limbID, jointID)
     
@@ -133,6 +137,8 @@ class Joint_Manager():
     
 
 
+# #============= DEPRICATED ============================
+# #============= DEPRICATED ============================
 # #============= DEPRICATED ============================
 
     # def SetLimbJointIDs(self, limbID, jointIDs):
