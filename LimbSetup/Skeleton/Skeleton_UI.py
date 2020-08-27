@@ -7,10 +7,10 @@ reload(limbHier_UI)
 import Hierarchies.SKEL_Joint_Hierarchy_UI as jointHier_UI
 reload(jointHier_UI)
 
+import Properties.SKEL_Limb_Properties_UI as limbProp_UI
+reload(limbProp_UI)
 # import Properties.SKEL_Joint_Properties_UI as jointProp_UI
-# import Properties.SKEL_Limb_Properties_UI as limbProp_UI
 # reload(jointProp_UI)
-# reload(limbProp_UI)
 
 
 class Skeleton_UI():
@@ -18,6 +18,7 @@ class Skeleton_UI():
         self.skel = skeleton
         self.jntMng = skeleton.jntMng
         self.limbMng = skeleton.limbMng
+        # self.sceneMng = skeleton.sceneMng
 
         self._isPopulating = False
         self._Setup()
@@ -50,15 +51,10 @@ class Skeleton_UI():
                 self.jntHier_ui = jointHier_UI.SKEL_Joint_Hierarchy_UI(self.skel.jntHier,
                                                                         self)
         with pm.verticalLayout():
-            with pm.frameLayout('Limb Options', bv=1):
-                with pm.columnLayout(adj=1):
-                    with pm.optionMenuGrp( l='Parent Joint', adj=2, cw=(1,70)):
-                        pm.menuItem('aaa')
-                        pm.menuItem('sss')
-                    pm.optionMenuGrp( l='Type', adj=2, cw=(1,70))
-                    pm.optionMenuGrp( l='Side', adj=2, cw=(1,70))
-                    pm.intFieldGrp(l='Joint Count', nf=1, v1=1, adj=2, cw=(1,70))
-            with pm.frameLayout('Joint Options', bv=1):
+            with pm.frameLayout('Limb Properties', bv=1, en=0) as self.limbProp:
+                self.limbProp_ui = limbProp_UI.SKEL_Limb_Properties_UI(self.skel.limbProp,
+                                                                        self)
+            with pm.frameLayout('Joint Properties', bv=1, en=0) as self.jntProp:
                 with pm.columnLayout(adj=1):
                     with pm.optionMenuGrp( l='Aim Axis', adj=2, cw=(1,70)):
                         pm.menuItem('aaa')
@@ -68,7 +64,7 @@ class Skeleton_UI():
                     pm.optionMenuGrp( l='Label', adj=2, cw=(1,70))
             with pm.frameLayout('Tools', bv=1):
                 with pm.columnLayout(adj=1):
-                    pm.button('Move To Verts Center')
+                    pm.button(l='Move To Verts Center')
                     pm.floatSliderGrp(l='Joint Size', 
                                     dc=pm.jointDisplayScale, 
                                     cw=((1,70), 
@@ -77,7 +73,7 @@ class Skeleton_UI():
                                     min=0.01,
                                     max=20.0,
                                     v=1.0)
-                    pm.text('Total Joints:')
+                    self.jntCnt = pm.text('Total Joints: 0')
            
 
 #=========== FUNCTIONALITY ====================================
@@ -85,10 +81,8 @@ class Skeleton_UI():
     def AddLimb(self, limbID):
         self.limbHier_ui.Populate(limbID)
         self.LimbSelected(limbID)
+        self._UpdateJointCountLabel()
         # self.skel.sceneMng.Add_Editable_Limb(limbID)
-        # self._UpdateJointCountLabel()
-        # msg = 'Added limb "%s"' % self.skel.limbMng.GetPFRSName(limbID)
-        # self.StatusMsg(msg)
 
 
     def RemoveLimb(self, rootLimbID):
@@ -98,10 +92,10 @@ class Skeleton_UI():
             self.limbMng.Remove(limbID)
         self.limbHier_ui.Populate()
         self.jntHier_ui.Populate()
+        self._UpdateJointCountLabel()
 #         # self.limbProp_gb.hide()
 #         # self.jntProp_gb.hide()
 #         # self.skel.sceneMng.Remove_Editable_Limb(rootLimbID)
-#         self._UpdateJointCountLabel()
 
 
     def SetLimbName(self, limbID):
@@ -130,14 +124,16 @@ class Skeleton_UI():
 
     def LimbSelected(self, limbID):
         self.jntHier_ui.SetLimbID(limbID)
-        # self.limbProp_gb.SetLimb(limbID)
-        # self.limbProp_gb.show()
-        # self.jntProp_gb.hide()
+        self.limbProp_ui.SetLimb(limbID)
+        pm.frameLayout(self.limbProp, e=1, en=1)
+        # self.limbProp_ui.Show()
+        # self.jntProp_gb.Hide()
         # jointCount = len(self.skel.jntMng.GetLimbJointIDs(limbID))
         # if (jointCount > 0):
         #     self.skel.sceneMng.SelectLimbControl(limbID)
         # else:
         #     self.skel.sceneMng.DeselectAll()
+    
     
 # #=========== ADD + REMOVE JOINTS ====================================
 
@@ -146,6 +142,7 @@ class Skeleton_UI():
         self.skel.jntMng.Add(limbID, count)
         self._AddJoints(hadJoints, limbID, count)
         # self._UpdateJointWidgets(limbID)
+        self._UpdateJointCountLabel()
 
     def _AddJoints(self, hadJoints, limbID, count):
         if hadJoints:
@@ -164,6 +161,7 @@ class Skeleton_UI():
         #     self._RemoveJoints(mirrorLimbID, mirrorJointIDs)
         self._RemoveJoints(limbID, removeJointIDs)
         # self._UpdateJointWidgets(limbID)
+        self._UpdateJointCountLabel()
     
     def _RemoveJoints(self, limbID, removeJointIDs):
         self.jntMng.Remove(limbID, removeJointIDs)
@@ -183,62 +181,56 @@ class Skeleton_UI():
         #     mirrorJointID = self.skel.jntMng.GetMirrorJoint(jointID)
         #     self.skel.sceneMng.sceneLimbMng.RenameJoint(mirrorLimbID, mirrorJointID)
     
+    def SetJointCount(self, limbID, newJointCount):
+        jointIDs = self.jntMng.GetLimbJointIDs(limbID)
+        oldJointCount = len(jointIDs)
+        if (newJointCount < oldJointCount):
+            self.RemoveJoints(limbID, jointIDs[newJointCount:oldJointCount])
+        elif (newJointCount > oldJointCount):
+            amount = newJointCount - oldJointCount
+            self.AddJoints(limbID, amount)
 
-#     def _Setup_LimbJointHierarchy(self):
-#         v_layout = QtWidgets.QVBoxLayout()
+    def _UpdateJointCountLabel(self):
+        count = self.jntMng.GetJointCount()
+        pm.text(self.jntCnt, e=1, l='Total Joints: %d' %count)
 
-#         gb1 = QtWidgets.QGroupBox('LIMB Hierarchy')
-#         vl = QtWidgets.QVBoxLayout(gb1)
-#         self.limbHier_tw = limbHier_UI.SKEL_Limb_Hierarchy_TW(self.skel.limbHier, self)
-#         vl.addWidget(self.limbHier_tw)
-#         v_layout.addWidget(gb1)
+#=========== LIMBS ====================================
 
-#         gb2 = QtWidgets.QGroupBox('Limb JOINT Hierarchy')
-#         vl = QtWidgets.QVBoxLayout(gb2)
-#         self.jntHier_lw = jointHier_UI.SKEL_Joint_Hierarchy_LW(self.skel.jntHier, self)
-#         vl.addWidget(self.jntHier_lw)
-#         v_layout.addWidget(gb2)
+    def RebuildLimb(self, limbID): # limb type changed
+        pass
+        # self.sceneMng.Remove_Editable_Limb(limbID)
+        # self.sceneMng.Add_Editable_Limb(limbID)
 
-#         return v_layout
-    
-#     # def _Setup_Properties(self):
-#     #     v_layout = QtWidgets.QVBoxLayout()
+    def LimbParentJointChanged(self, limbID):
+        pass
+        # self.sceneMng.Teardown_External_JointParents(limbID)
+        # self.sceneMng.Setup_External_JointParents(limbID)
+        # self.sceneMng.SelectLimbControl(limbID)
 
-#     #     gb = QtWidgets.QGroupBox('Properties')
-#     #     vl = QtWidgets.QVBoxLayout(gb)
+    # def FlipLimbSides(self, limbID): # for L/R switching
+    #     limbIDs = self.skel.limbMng.GetLimbCreationOrder(limbID) #children
+    #     mirrorID = self.skel.limbMng.GetMirror(limbID)
+    #     mirrorIDs = self.skel.limbMng.GetLimbCreationOrder(mirrorID)
+    #     side_01 = self.skel.limbMng.GetSide(limbID)
+    #     side_02 = self.skel.limbMng.GetSide(mirrorID)
+    #     for ID in limbIDs:
+    #         self.skel.limbMng.SetSide(ID, 'temp')
+    #         if self.skel.jntMng.DoesLimbHaveJoints(ID):
+    #             pass
+    #             # self.skel.sceneMng.sceneLimbMng.SetLimbName(ID)
+    #     for ID in mirrorIDs:
+    #         self.skel.limbMng.SetSide(ID, side_01)
+    #         if self.skel.jntMng.DoesLimbHaveJoints(ID):
+    #             pass
+    #             # self.skel.sceneMng.sceneLimbMng.SetLimbName(ID)
+    #     for ID in limbIDs:
+    #         self.skel.limbMng.SetSide(ID, side_02)
+    #         if self.skel.jntMng.DoesLimbHaveJoints(ID):
+    #             pass
+    #             # self.skel.sceneMng.sceneLimbMng.SetLimbName(ID)
 
-#     #     self.limbProp_gb = limbProp_UI.SKEL_Limb_Properties_UI(self.skel.limbProp, self)
-#     #     vl.addWidget(self.limbProp_gb)
-#     #     self.jntProp_gb = jointProp_UI.SKEL_Joint_Properties_UI(self.skel.jntProp)
-#     #     vl.addWidget(self.jntProp_gb)
-#     #     vl.addStretch()
-        
-#     #     v_layout.addWidget(gb)
-#     #     v_layout.addWidget(self._Setup_Properties_Tools())
+    #     self.limbHier_gb.Populate()
 
-#     #     return v_layout
-    
-#     # def _Setup_Properties_Tools(self):
-#     #     gb = QtWidgets.QGroupBox('Tools')
-#     #     vl = QtWidgets.QVBoxLayout(gb)
-
-#     #     self.moveToVertCenter_btn = QtWidgets.QPushButton('Move To Selected Center')
-#     #     msg = 'Select control in Scene, then select verts/edges/faces..., then press this'
-#     #     self.moveToVertCenter_btn.setToolTip(msg)
-#     #     vl.addWidget(self.moveToVertCenter_btn)
-
-#     #     hl = QtWidgets.QHBoxLayout()
-#     #     hl.addWidget(QtWidgets.QLabel('Display Size'))
-#     #     self.displaySize_sb = QtWidgets.QDoubleSpinBox()
-#     #     self.displaySize_sb.setValue(1)
-#     #     hl.addWidget(self.displaySize_sb)
-#     #     vl.addLayout(hl)
-
-#     #     self.jointCount_l = QtWidgets.QLabel('Total Joints: 128')
-#     #     self.jointCount_l.setAlignment(QtCore.Qt.AlignHCenter)
-#     #     vl.addWidget(self.jointCount_l)
-
-#     #     return gb
 
 # #=========== FUNCTIONALITY ====================================
 
@@ -248,43 +240,6 @@ class Skeleton_UI():
 #         self.jntHier_lw.itemClicked.connect(self._JointSelected)
 #         # self.moveToVertCenter_btn.clicked.connect(self.skel.sceneMng.MoveToVertsCenter)
 #         # self.displaySize_sb.valueChanged.connect(self._UpdateDisplaySize)
-
-# #=========== LIMBS ====================================
-
-#     def RebuildLimb(self, limbID): # limb type changed
-#         pass
-#         # self.skel.sceneMng.Rebuild_Editable_Limb(limbID)
-
-#     def LimbParentJointChanged(self, limbID):
-#         pass
-#         # self.skel.sceneMng.Teardown_External_JointParents(limbID)
-#         # self.skel.sceneMng.Setup_External_JointParents(limbID)
-#         # self.skel.sceneMng.SelectLimbControl(limbID)
-
-#     def FlipLimbSides(self, limbID): # for L/R switching
-#         limbIDs = self.skel.limbMng.GetLimbCreationOrder(limbID) #children
-#         mirrorID = self.skel.limbMng.GetMirror(limbID)
-#         mirrorIDs = self.skel.limbMng.GetLimbCreationOrder(mirrorID)
-#         side_01 = self.skel.limbMng.GetSide(limbID)
-#         side_02 = self.skel.limbMng.GetSide(mirrorID)
-#         for ID in limbIDs:
-#             self.skel.limbMng.SetSide(ID, 'temp')
-#             if self.skel.jntMng.DoesLimbHaveJoints(ID):
-#                 pass
-#                 # self.skel.sceneMng.sceneLimbMng.SetLimbName(ID)
-#         for ID in mirrorIDs:
-#             self.skel.limbMng.SetSide(ID, side_01)
-#             if self.skel.jntMng.DoesLimbHaveJoints(ID):
-#                 pass
-#                 # self.skel.sceneMng.sceneLimbMng.SetLimbName(ID)
-#         for ID in limbIDs:
-#             self.skel.limbMng.SetSide(ID, side_02)
-#             if self.skel.jntMng.DoesLimbHaveJoints(ID):
-#                 pass
-#                 # self.skel.sceneMng.sceneLimbMng.SetLimbName(ID)
-
-#         self.limbHier_gb.Populate()
-
 
 # #=========== MANIPULATE JOINTS ====================================
 
@@ -309,14 +264,6 @@ class Skeleton_UI():
 #         #     self.skel.sceneMng.Rebuild_Editable_Limb(mirrorID)
 #         self._UpdateJointCountLabel()
 
-#     def SetJointCount(self, limbID, newJointCount):
-#         jointIDs = self.skel.jntMng.GetLimbJointIDs(limbID)
-#         oldJointCount = len(jointIDs)
-#         if (newJointCount < oldJointCount):
-#             self.RemoveJoints(limbID, jointIDs[newJointCount:oldJointCount])
-#         elif (newJointCount > oldJointCount):
-#             amount = newJointCount - oldJointCount
-#             self.AddJoints(limbID, amount)
 
 #     def _UpdateJointWidgets(self, limbID):
 #         # self.jntHier_lw.Populate()
@@ -333,11 +280,6 @@ class Skeleton_UI():
     
 # #=========== MISC ====================================
 
-#     def _UpdateJointCountLabel(self):
-#         pass
-#         # count = self.skel.jntMng.GetJointCount()
-#         # self.jointCount_l.setText('Total Joints: ' + str(count))
-
 #     def StatusMsg(self, message):
 #         self.mainWindow.StatusMsg(message)
     
@@ -352,6 +294,8 @@ class Skeleton_UI():
 #         # self.skel.sceneMng.KillScriptJobs()
 
 
+#=========== DEPRICATED ====================================
+#=========== DEPRICATED ====================================
 #=========== DEPRICATED ====================================
 
 

@@ -22,7 +22,7 @@ class Limb_Manager():
                             'Linear Chain', 
                             'Linear Branch']
 
-        self.limbSides = ['M', 'L', 'R', 'None']
+        self.limbSides = ['Center', 'Left', 'Right','None']
         
 
     def NewRig(self, rigRoot):
@@ -59,11 +59,11 @@ class Limb_Manager():
         pm.addAttr(limb, ln='ID', at='long', dv=limbID)
         pm.addAttr(limb, ln='pfrsName', dt='string')
         pm.setAttr(limb+'.pfrsName', pfrsName)
-        pm.addAttr(limb, ln='typeIndex', at='enum', enumName=limbTypes, dv=1)
-        pm.addAttr(limb, ln='sideIndex', at='enum', enumName=limbSides, dv=1)
+        pm.addAttr(limb, ln='typeIndex', at='enum', enumName=limbTypes, dv=0)
+        pm.addAttr(limb, ln='sideIndex', at='enum', enumName=limbSides, dv=0)
         pm.addAttr(limb, ln='mirrorLimbID', at='long', dv=-1)
         pm.addAttr(limb, ln='parentLimbID', at='long', dv=-1)
-        pm.addAttr(limb, ln='parentJntIndex', at='enum', enumName='Empty')
+        pm.addAttr(limb, ln='parentJntIndex', at='enum', enumName='')
         pm.addAttr(limb, ln='parentCtrID', at='long')
         pm.addAttr(limb, ln='bhvIndex', at='enum', enumName=bhvTypes)
         pm.addAttr(limb, ln='rigRoot', dt='string')

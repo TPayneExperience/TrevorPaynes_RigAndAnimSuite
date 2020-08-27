@@ -42,16 +42,16 @@ class SKEL_Limb_Hierarchy_UI(limbHierUI.Limb_Hierarchy_UI):
 
     def SelectLimb(self, limbNames, limbIndexes):
         if (limbNames):
-            limbID = self._limbs[limbNames[0]]
+            limbID = self._limbs[limbNames]
             self.parent.LimbSelected(limbID)
             return True
         return False
 
     def Add(self):
-        limb = self.limbMng.Add()
-        self.jntMng.AddLimb(limb.ID.get())
-        self.jntMng.Add(limb.ID.get(), 1)
-        self.parent.AddLimb(limb.ID.get())
+        limbID = self.limbMng.Add().ID.get()
+        self.jntMng.AddLimb(limbID)
+        self.jntMng.Add(limbID, 1)
+        self.parent.AddLimb(limbID)
 
     def Remove(self):
         limbNames = pm.treeView(self.widget, q=1, selectItem=1)
@@ -122,11 +122,15 @@ class SKEL_Limb_Hierarchy_UI(limbHierUI.Limb_Hierarchy_UI):
             return self.Populate()
         limb = self.limbMng.GetLimb(self._limbs[limbNames[0]])
         oldParentID = limb.parentLimbID.get()
-        newParentID = -1
         if (newParent in self._limbs):
             newParentID = self._limbs[newParent]
+            jointIDs = self.jntMng.GetLimbJointIDs(limb.ID.get())
+            jointNames = [self.jntMng.GetJoint(ID).pfrsName.get() for ID in jointIDs]
+            pm.setAttr(limb.parentJntIndex, 0, enumName=':'.join(jointNames))
+        else:
+            newParentID = -1
+            pm.setAttr(limb.parentJntIndex, -1, enumName='')
         limb.parentLimbID.set(newParentID)
-        limb.parentJntIndex.set(0)
         self.parent.ReparentLimb(limb.ID.get(), oldParentID)
         
         # if not self._isPopulating:

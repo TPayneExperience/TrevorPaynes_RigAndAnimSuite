@@ -61,7 +61,7 @@ class Joint_Manager():
 
     # JOINTS
     def Add(self, limbID, count):
-        start = len(self._limbJoints[limbID])
+        start = max(len(self._limbJoints[limbID])-1, 0)
         for index in range(start, start + count):
             jointID = self._nextJointID
             self._nextJointID += 1
@@ -90,7 +90,7 @@ class Joint_Manager():
             pm.addAttr(jnt, ln='upZ', at='float', parent='upAxis')
             pm.addAttr(jnt, ln='pfrsName', dt='string')
             pm.addAttr(jnt, ln='rigRoot', dt='string')
-            pm.connectAttr(self.rigRoot.limbs, jnt.rigRoot)
+            pm.connectAttr(self.rigRoot.joints, jnt.rigRoot)
             jnt.pfrsName.set(pfrsName)
 
             pm.parent(jnt, parentGrp)

@@ -22,7 +22,7 @@ class SKEL_Joint_Hierarchy_UI():
         self.widget = pm.treeView(allowReparenting=0)
         pm.treeView(self.widget, e=1, selectCommand=self.SelectJoints)
         pm.treeView(self.widget, e=1, itemRenamedCommand=self.SetName)
-        # pm.treeView(self.widget, e=1, dragAndDropCommand=self.Reparent)
+        pm.treeView(self.widget, e=1, dragAndDropCommand=self.Reorder)
         with pm.popupMenu():
             pm.menuItem('Add', c=pm.Callback(self.Add))
             pm.menuItem(divider=1)
@@ -64,9 +64,14 @@ class SKEL_Joint_Hierarchy_UI():
         pm.treeView(self.widget, e=1, removeAll=1)
         if (self.limbID != -1):
             jointIDs = self.jntMng.GetLimbJointIDs(self.limbID)
+            joints = {}
             for jointID in jointIDs:
                 joint = self.jntMng.GetJoint(jointID)
+                joints[joint.limbIndex.get()] = joint
+            for index in sorted(list(joints.keys())):
+                joint = joints[index]
                 name = joint.pfrsName.get()
+                jointID = joint.ID.get()
                 self._joints[name] = jointID
                 pm.treeView(self.widget, e=1, addItem=(name, ''))
     
@@ -86,30 +91,13 @@ class SKEL_Joint_Hierarchy_UI():
             if not valid:
                 self.Populate()
 
-    def Reorder(self):
-        pass
-        # jointIDs = [self.item(i).ID for i in range(self.count())]
-        # limbID = self.jntHier.limbID
-        # limbName = self.jntHier.limbMng.GetPFRSName(limbID)
-        # # mirrorID = self.jntHier.limbMng.GetMirror(limbID)
-        # self.jntHier.jntMng.SetLimbJointIDs(limbID, jointIDs)
-        # # self.jntHier.jntMng.SetLimbJointIDs(limbID, mirrorID, jointIDs)
-        # self.parent.ReorderJoints()
-        # self.parent.StatusMsg('Reording joints of limb "%s"' % limbName)
-    
-# #=========== FUNCTIONALITY ====================================
-
-#     def _TabPressed(self):
-#         item = self.currentItem()
-#         if (item):
-#             row = self.currentRow()
-#             if (item.ID == self._lastItemEdited):
-#                 row = (row + 1) % self.count()
-#             index = (self.model().index(row))
-#             self.edit(index)
-#             self._lastItemEdited = item.ID
-        
-
+    def Reorder(self, limbNames, oldParents, oldIndex, newParent, newIndex, i1, i2):
+        for jointName, jointID in self._joints.items():
+            if (jointName != 'Terminator'):
+                joint = self.jntMng.GetJoint(jointID)
+                index = pm.treeView(self.widget, q=1, itemIndex=jointName)
+                joint.limbIndex.set(index)
+                
 
 
 
