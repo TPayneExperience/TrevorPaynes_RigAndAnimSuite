@@ -7,22 +7,19 @@ class Limb_Manager():
         self.nameMng = nameMng
 
         self.bhvTypes = [   'FK Chain',
-
                             'FK Branch',
                             'FK IK Chain',
                             'FK IK Branch',
                             'IK',
                             'LookAt',
-
                             'Constraint']
 
         self.limbTypes = [  'Chain', 
-
                             'Branch', 
                             'Linear Chain', 
                             'Linear Branch']
 
-        self.limbSides = ['Center', 'Left', 'Right','None']
+        self.limbSides = ['M', 'L', 'R','None']
         
 
     def NewRig(self, rigRoot):
@@ -63,7 +60,7 @@ class Limb_Manager():
         pm.addAttr(limb, ln='sideIndex', at='enum', enumName=limbSides, dv=0)
         pm.addAttr(limb, ln='mirrorLimbID', at='long', dv=-1)
         pm.addAttr(limb, ln='parentLimbID', at='long', dv=-1)
-        pm.addAttr(limb, ln='parentJntIndex', at='enum', enumName='')
+        pm.addAttr(limb, ln='parentJntIndex', at='enum', enumName='None')
         pm.addAttr(limb, ln='parentCtrID', at='long')
         pm.addAttr(limb, ln='bhvIndex', at='enum', enumName=bhvTypes)
         pm.addAttr(limb, ln='rigRoot', dt='string')
@@ -102,6 +99,14 @@ class Limb_Manager():
                     del(limbParents[childID])
                     break
         return limbIDs
+
+    def GetImmediateChildren(self, limbID):
+        childIDs = []
+        for limb in list(self._limbs.values()):
+            if (limb.parentLimbID.get() == limbID):
+                childIDs.append(limb.ID.get())
+        return childIDs
+
 
 
 

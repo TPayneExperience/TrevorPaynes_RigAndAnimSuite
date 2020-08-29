@@ -4,7 +4,7 @@ import pymel.core as pm
 class SKEL_Scene_Limb_LinearBranch():
     def __init__(self, sceneManager):
         self.sceneMng = sceneManager
-        self.type = self.sceneMng.limbMng.GetTypes()[3] # 'Linear Branch'
+        self.type = self.sceneMng.limbMng.limbTypes[3] # 'Linear Branch'
         self.lockAttrs = [  'tx', 'ty', 'tz',
                             'rx', 'ry', 'rz',
                             'sx', 'sy', 'sz',

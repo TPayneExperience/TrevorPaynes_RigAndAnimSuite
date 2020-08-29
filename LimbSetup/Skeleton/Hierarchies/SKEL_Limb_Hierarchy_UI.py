@@ -40,12 +40,12 @@ class SKEL_Limb_Hierarchy_UI(limbHierUI.Limb_Hierarchy_UI):
 
 #=========== FUNCTIONALITY ====================================
 
-    def SelectLimb(self, limbNames, limbIndexes):
-        if (limbNames):
-            limbID = self._limbs[limbNames]
-            self.parent.LimbSelected(limbID)
-            return True
-        return False
+    def SelectLimb(self, limbName, state):
+        limbID = 0
+        if state:
+            limbID = self._limbs[limbName]
+        self.parent.LimbSelected(limbID)
+        return True
 
     def Add(self):
         limbID = self.limbMng.Add().ID.get()
@@ -126,10 +126,10 @@ class SKEL_Limb_Hierarchy_UI(limbHierUI.Limb_Hierarchy_UI):
             newParentID = self._limbs[newParent]
             jointIDs = self.jntMng.GetLimbJointIDs(limb.ID.get())
             jointNames = [self.jntMng.GetJoint(ID).pfrsName.get() for ID in jointIDs]
-            pm.setAttr(limb.parentJntIndex, 0, enumName=':'.join(jointNames))
+            pm.addAttr(limb.parentJntIndex, e=1, enumName=':'.join(jointNames))
         else:
             newParentID = -1
-            pm.setAttr(limb.parentJntIndex, -1, enumName='')
+            pm.addAttr(limb.parentJntIndex, e=1, enumName='')
         limb.parentLimbID.set(newParentID)
         self.parent.ReparentLimb(limb.ID.get(), oldParentID)
         

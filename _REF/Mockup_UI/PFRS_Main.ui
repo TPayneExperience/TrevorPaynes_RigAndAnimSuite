@@ -384,7 +384,7 @@
                                  <number>6</number>
                                 </property>
                                 <item>
-                                 <layout class="QHBoxLayout" name="horizontalLayout_79">
+                                 <layout class="QHBoxLayout" name="horizontalLayout_79" stretch="1,1">
                                   <item>
                                    <widget class="QLabel" name="label_37">
                                     <property name="text">
@@ -393,46 +393,52 @@
                                    </widget>
                                   </item>
                                   <item>
-                                   <widget class="QComboBox" name="comboBox_19">
-                                    <property name="currentIndex">
-                                     <number>1</number>
-                                    </property>
+                                   <layout class="QHBoxLayout" name="horizontalLayout_5">
                                     <item>
-                                     <property name="text">
-                                      <string>X</string>
-                                     </property>
+                                     <widget class="QLineEdit" name="lineEdit_2">
+                                      <property name="maximumSize">
+                                       <size>
+                                        <width>20</width>
+                                        <height>16777215</height>
+                                       </size>
+                                      </property>
+                                      <property name="text">
+                                       <string>1</string>
+                                      </property>
+                                     </widget>
                                     </item>
                                     <item>
-                                     <property name="text">
-                                      <string>-X</string>
-                                     </property>
+                                     <widget class="QLineEdit" name="lineEdit_3">
+                                      <property name="maximumSize">
+                                       <size>
+                                        <width>20</width>
+                                        <height>16777215</height>
+                                       </size>
+                                      </property>
+                                      <property name="text">
+                                       <string>1</string>
+                                      </property>
+                                     </widget>
                                     </item>
                                     <item>
-                                     <property name="text">
-                                      <string>Y</string>
-                                     </property>
+                                     <widget class="QLineEdit" name="lineEdit">
+                                      <property name="maximumSize">
+                                       <size>
+                                        <width>20</width>
+                                        <height>16777215</height>
+                                       </size>
+                                      </property>
+                                      <property name="text">
+                                       <string>1</string>
+                                      </property>
+                                     </widget>
                                     </item>
-                                    <item>
-                                     <property name="text">
-                                      <string>-Y</string>
-                                     </property>
-                                    </item>
-                                    <item>
-                                     <property name="text">
-                                      <string>Z</string>
-                                     </property>
-                                    </item>
-                                    <item>
-                                     <property name="text">
-                                      <string>-Z</string>
-                                     </property>
-                                    </item>
-                                   </widget>
+                                   </layout>
                                   </item>
                                  </layout>
                                 </item>
                                 <item>
-                                 <layout class="QHBoxLayout" name="horizontalLayout_80">
+                                 <layout class="QHBoxLayout" name="horizontalLayout_80" stretch="1,1">
                                   <item>
                                    <widget class="QLabel" name="label_38">
                                     <property name="text">
@@ -441,41 +447,47 @@
                                    </widget>
                                   </item>
                                   <item>
-                                   <widget class="QComboBox" name="comboBox_20">
-                                    <property name="currentIndex">
-                                     <number>3</number>
-                                    </property>
+                                   <layout class="QHBoxLayout" name="horizontalLayout_6">
                                     <item>
-                                     <property name="text">
-                                      <string>X</string>
-                                     </property>
+                                     <widget class="QLineEdit" name="lineEdit_4">
+                                      <property name="maximumSize">
+                                       <size>
+                                        <width>20</width>
+                                        <height>16777215</height>
+                                       </size>
+                                      </property>
+                                      <property name="text">
+                                       <string>1</string>
+                                      </property>
+                                     </widget>
                                     </item>
                                     <item>
-                                     <property name="text">
-                                      <string>-X</string>
-                                     </property>
+                                     <widget class="QLineEdit" name="lineEdit_5">
+                                      <property name="maximumSize">
+                                       <size>
+                                        <width>20</width>
+                                        <height>16777215</height>
+                                       </size>
+                                      </property>
+                                      <property name="text">
+                                       <string>1</string>
+                                      </property>
+                                     </widget>
                                     </item>
                                     <item>
-                                     <property name="text">
-                                      <string>Y</string>
-                                     </property>
+                                     <widget class="QLineEdit" name="lineEdit_6">
+                                      <property name="maximumSize">
+                                       <size>
+                                        <width>20</width>
+                                        <height>16777215</height>
+                                       </size>
+                                      </property>
+                                      <property name="text">
+                                       <string>1</string>
+                                      </property>
+                                     </widget>
                                     </item>
-                                    <item>
-                                     <property name="text">
-                                      <string>-Y</string>
-                                     </property>
-                                    </item>
-                                    <item>
-                                     <property name="text">
-                                      <string>Z</string>
-                                     </property>
-                                    </item>
-                                    <item>
-                                     <property name="text">
-                                      <string>-Z</string>
-                                     </property>
-                                    </item>
-                                   </widget>
+                                   </layout>
                                   </item>
                                  </layout>
                                 </item>

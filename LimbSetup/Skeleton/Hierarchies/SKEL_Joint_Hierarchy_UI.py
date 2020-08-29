@@ -11,6 +11,7 @@ class SKEL_Joint_Hierarchy_UI():
         self.jntMng = self.jntHier.jntMng
         self.nameMng = jointHierarchy.nameMng
         self.limbID = -1
+        self.selectedJntIDs = []
         self._joints = {} # jointName : jointID
         # self._lastItemEdited = -1 # jointID
 
@@ -30,17 +31,22 @@ class SKEL_Joint_Hierarchy_UI():
     
 # #=========== FUNCTIONALITY ====================================
 
-    def SelectJoints(self, jointNames, jointIndexes):
-        if 'Terminator' in jointNames:
-            return False
-        return True
-
     def SetLimbID(self, limbID):
         self.limbID = limbID
         if (limbID == -1):
             pm.treeView(self.widget, e=1, removeAll=1)
         else:
             self.Populate()
+
+    def SelectJoints(self, jointName, state):
+        if 'Terminator' == jointName:
+            return False
+        if state:
+            self.selectedJntIDs.append(self._joints[jointName])
+        else:
+            self.selectedJntIDs.remove(self._joints[jointName])
+        self.parent.JointSelected(self.selectedJntIDs)
+        return True
 
     def Add(self):
         self.parent.AddJoints(self.limbID, 1)

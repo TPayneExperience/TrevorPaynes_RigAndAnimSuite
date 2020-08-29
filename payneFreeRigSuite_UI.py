@@ -66,13 +66,12 @@ class PayneFreeRigSuite_UI():
         with self.win:
             with pm.menu('File'):
                 pm.menuItem(l='New Rig...')
-                pm.menuItem(l='Load Rig...')
                 pm.menuItem(l='Edit Rig...')
                 pm.menuItem(divider=1)
-                pm.menuItem(l='Import FBX...')
-                pm.menuItem(l='Export FBX...')
+                pm.menuItem(l='Import FBX...', en=0)
+                pm.menuItem(l='Export FBX...', en=0)
                 pm.menuItem(divider=1)
-                pm.menuItem(l='Quit')
+                pm.menuItem(l='Quit', command=(''))
                 
             with pm.menu('Limbs'):
                 with pm.subMenuItem(l='Mirror'):
@@ -83,89 +82,6 @@ class PayneFreeRigSuite_UI():
                 pm.menuItem(divider=1)
                 pm.menuItem(l='Load Template...')
                 pm.menuItem(l='Save Template...')
-        # self._Setup_MenuBar_FileMenu()
-        # self._Setup_MenuBar_Limbs()
-        # self._Setup_MenuBar_Settings()
-        # self._Setup_MenuBar_Help()
-        
-    # def _Setup_MenuBar_FileMenu(self):
-    #     # ACTIONS
-    #     save = QtWidgets.QAction(   'Save', 
-    #                                 self, 
-    #                                 triggered=self.pfrs.saveLoadRig.Save)
-    #     saveAs = QtWidgets.QAction( 'Save As...', 
-    #                                 self, 
-    #                                 triggered=self.SaveAs_Dialog)
-    #     newRig = QtWidgets.QAction( 'New Rig...', 
-    #                                 self, 
-    #                                 triggered=self.NewRig_Dialog)
-    #     loadRig = QtWidgets.QAction('Load Rig...', 
-    #                                 self, 
-    #                                 triggered=self.LoadRig_Dialog)
-    #     editRig = QtWidgets.QAction('Edit Rig...', 
-    #                                 self, 
-    #                                 triggered=self.EditRig_Dialog)
-    #     importFBX = QtWidgets.QAction('Import FBX...', self)
-    #     importFBX.setEnabled(False)
-    #     exportFBX = QtWidgets.QAction('Export FBX...', self)
-    #     exportFBX.setEnabled(False)
-
-    #     # ADD TO FILEMENU
-    #     fileMenu = self.menuBar().addMenu('File')
-    #     fileMenu.addAction(save)
-    #     fileMenu.addAction(saveAs)
-    #     fileMenu.addSeparator()
-
-    #     fileMenu.addAction(newRig)
-    #     fileMenu.addAction(loadRig)
-    #     fileMenu.addAction(editRig)
-    #     fileMenu.addSeparator()
-
-    #     fileMenu.addAction(importFBX)
-    #     fileMenu.addAction(exportFBX)
-    #     fileMenu.addSeparator()
-
-    #     quitAct = fileMenu.addAction('Quit')
-    #     quitAct.triggered.connect(self.close)
-    
-    # def _Setup_MenuBar_Limbs(self):
-    #     limbsMenu = self.menuBar().addMenu('Limbs')
-    #     mirrorMenu = QtWidgets.QMenu('Mirror Limb')
-
-    #     mirrorX = QtWidgets.QAction('X Axis', 
-    #                                 self, 
-    #                                 triggered=self.limbs_tw.Mirror_X)
-    #     mirrorY = QtWidgets.QAction('Y Axis', 
-    #                                 self, 
-    #                                 triggered=self.limbs_tw.Mirror_Y)
-    #     mirrorZ = QtWidgets.QAction('Z Axis', 
-    #                                 self, 
-    #                                 triggered=self.limbs_tw.Mirror_Z)
-    #     duplicate = QtWidgets.QAction('Duplicate', 
-    #                                 self, 
-    #                                 triggered=self.limbs_tw.Duplicate_Dialog)
-        
-        
-    #     save = QtWidgets.QAction('Save Template', 
-    #                                 self, 
-    #                                 triggered=self.limbs_tw.Save_Dialog)
-        
-    #     load = QtWidgets.QAction('Load Template', 
-    #                                 self, 
-    #                                 triggered=self.limbs_tw.Load_Dialog)
-        
-
-    #     mirrorMenu.addAction(mirrorX)
-    #     mirrorMenu.addAction(mirrorY)
-    #     mirrorMenu.addAction(mirrorZ)
-
-    #     limbsMenu.addMenu(mirrorMenu)
-
-    #     limbsMenu.addAction(duplicate)
-    #     limbsMenu.addSeparator()
-
-    #     limbsMenu.addAction(load)
-    #     limbsMenu.addAction(save)
 
     # def _Setup_MenuBar_Settings(self):
     #     # ACTIONS
@@ -213,10 +129,10 @@ class PayneFreeRigSuite_UI():
     
 #=========== FUNCTIONALITY ====================================
 
-    # def closeEvent(self, e):
-    #     # self.pfrs.limbSetup.skel.sceneMng.KillScriptJobs()
-    #     # self.pfrs.limbSetup.skel.sceneMng.KillSelectionJob()
-    #     super(PayneFreeRigSuite_UI, self).closeEvent(e)
+    def closeEvent(self):
+        # self.pfrs.limbSetup.skel.sceneMng.KillScriptJobs()
+        # self.pfrs.limbSetup.skel.sceneMng.KillSelectionJob()
+        pm.deleteUI(self.win, window=True)
     
     # def StatusMsg(self, message):
     #     self.statusBar().showMessage(message)
@@ -286,6 +202,8 @@ class PayneFreeRigSuite_UI():
     
 
 
+#=========== DEPRICATED ====================================
+#=========== DEPRICATED ====================================
 #=========== DEPRICATED ====================================
 
 # import os

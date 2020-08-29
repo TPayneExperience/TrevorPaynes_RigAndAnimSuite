@@ -1,5 +1,4 @@
 
-#from maya import cmds
 import pymel.core as pm
 
 import SKEL_Scene_Limb_Manager as slm
@@ -24,7 +23,7 @@ class SKEL_Scene_Manager():
         pm.select(d=1)
         self.sceneLimbMng.NewRig()
 
-        self.rootCtrGrp = pm.group(name='SKEL_TempCtr_GRP', em=True)
+        self.rootCtrGrp = pm.group(name='TEMP', em=True)
         pm.parent(self.rootCtrGrp, rigRoot)
         pm.select(d=True)
         self.selectionScriptJob = pm.scriptJob(e=['SelectionChanged', self.SelectionChanged])
@@ -91,7 +90,7 @@ class SKEL_Scene_Manager():
 
     # JOINT EXTERNAL PARENTS
     def Setup_External_JointParents(self, limbID):
-        parentID = self.limbMng.GetParentID(limbID)
+        parentID = self.limbMng.GetLimb(limbID).parentLimbID.get()
         self.limbParents[limbID] = parentID
         if parentID in self.limbsWithJoints:
             self.sceneLimbMng.Setup_External_JointParents(limbID)
@@ -137,10 +136,6 @@ class SKEL_Scene_Manager():
             self.Teardown_External_JointParents(limbID)
             self.Teardown_Internal_JointParents(limbID)
             self.Teardown_LimbWithJoints(limbID)
-
-    # def Rebuild_Editable_Limb(self, limbID):
-    #     self.Remove_Editable_Limb(limbID)
-    #     self.Add_Editable_Limb(limbID)
 
     def Reparent_Editable_Limb(self, limbID, oldParentID):
         if self.jntMng.DoesLimbHaveJoints(limbID):

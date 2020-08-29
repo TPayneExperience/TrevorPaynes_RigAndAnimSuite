@@ -48,6 +48,8 @@ class SKEL_Limb_Properties_UI:
 
     def Populate(self):
         limb = self.limbMng.GetLimb(self.limbID)
+        jointCount = len(self.jntMng.GetLimbJointIDs(self.limbID))
+        pm.intFieldGrp(self.jntCnt, e=1, v1=jointCount)
         if (self.type_cb):
             pm.deleteUI(self.type_cb, control=1)
             pm.deleteUI(self.pJnt_cb, control=1)
@@ -106,7 +108,7 @@ class SKEL_Limb_Properties_UI:
             # self.pJnt_cb = pm.attrEnumOptionMenuGrp( l='Parent Joint', adj=2, cw=(1,70))
             # self.side_cb = pm.attrEnumOptionMenuGrp( l='Side', adj=2, cw=(1,70))
             self.jntCnt = pm.intFieldGrp(l='Joint Count', nf=1, v1=1, adj=2, cw=(1,70),
-            cc=self.SetJointCount)
+                                            cc=self.SetJointCount)
 
     def SetParentJoint(self):
         self.parent.LimbParentJointChanged(self.limbID)

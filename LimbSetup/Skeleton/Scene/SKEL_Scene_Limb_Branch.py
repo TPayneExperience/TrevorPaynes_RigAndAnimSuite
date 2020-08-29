@@ -5,7 +5,7 @@ import pymel.core as pm
 class SKEL_Scene_Limb_Branch():
     def __init__(self, sceneManager):
         self.sceneMng = sceneManager
-        self.type = self.sceneMng.limbMng.GetTypes()[1] # 'Branch'
+        self.type = self.sceneMng.limbMng.limbTypes[1] # 'Branch'
 
 #========== JOINTS ========================
 

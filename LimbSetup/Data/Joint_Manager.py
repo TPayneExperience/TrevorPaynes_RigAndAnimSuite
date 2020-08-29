@@ -7,16 +7,6 @@ class Joint_Manager():
         self.nameMng = nameMng
         self.limbMng = limbMng
 
-        # self._axes = ['X', '-X', 'Y', '-Y', 'Z', '-Z']
-        # self.axisPairs = {  'X': ['X', '-X'],
-        #                     '-X': ['X', '-X'],
-        #                     'Y': ['Y', '-Y'],
-        #                     '-Y': ['Y', '-Y'],
-        #                     'Z': ['Z', '-Z'],
-        #                     '-Z': ['Z', '-Z']}
-        # self._rotAxes = ['XYZ', 'YZX','ZXY', 'XZY', 'YXZ', 'ZYX']
-
-
     def NewRig(self, rigRoot):
         self.rigRoot = rigRoot
 
@@ -31,9 +21,6 @@ class Joint_Manager():
         self.skelLayer.displayType.set(2)
 
         pm.addAttr(rigRoot, ln='joints', dt='string')
-        # self._limbNextJointIndex = {} # limbID: nextJointIndex
-        # self._limbParentJoint = {} # limbID: parentJointID
-        # self._mirrorJoints = {} # jointID_01 : jointID_02
 
 
 #============= ACCESSORS + MUTATORS ============================
@@ -68,11 +55,9 @@ class Joint_Manager():
 
             pfrsName = 'Joint_%03d' % (index)
             position = [0,0,0]
-            parentGrp = self.jntGrp
-            limbJointIDs = self._limbJoints[limbID]
-            if (limbJointIDs):
-                parentGrp = self._joints[limbJointIDs[-1]]
-                position = pm.xform(parentGrp, q=1, t=1, ws=1)
+            joints = self._limbJoints[limbID]
+            if (joints):
+                position = pm.xform(self._joints[joints[-1]], q=1, t=1, ws=1)
                 position[1] -= 5
             
             pm.select(d=1)
@@ -82,18 +67,18 @@ class Joint_Manager():
             pm.addAttr(jnt, ln='limbIndex', at='short', dv=index)
             pm.addAttr(jnt, ln='aimAxis', at='float3')
             pm.addAttr(jnt, ln='aimX', at='float', parent='aimAxis')
-            pm.addAttr(jnt, ln='aimY', at='float', parent='aimAxis')
+            pm.addAttr(jnt, ln='aimY', at='float', parent='aimAxis', dv=1)
             pm.addAttr(jnt, ln='aimZ', at='float', parent='aimAxis')
             pm.addAttr(jnt, ln='upAxis', at='float3')
             pm.addAttr(jnt, ln='upX', at='float', parent='upAxis')
             pm.addAttr(jnt, ln='upY', at='float', parent='upAxis')
-            pm.addAttr(jnt, ln='upZ', at='float', parent='upAxis')
+            pm.addAttr(jnt, ln='upZ', at='float', parent='upAxis', dv=1)
             pm.addAttr(jnt, ln='pfrsName', dt='string')
             pm.addAttr(jnt, ln='rigRoot', dt='string')
             pm.connectAttr(self.rigRoot.joints, jnt.rigRoot)
             jnt.pfrsName.set(pfrsName)
 
-            pm.parent(jnt, parentGrp)
+            pm.parent(jnt, self.jntGrp)
             self._joints[jointID] = jnt
             self._limbJoints[limbID].append(jointID)
             self.UpdateJointName(limbID, jointID)
