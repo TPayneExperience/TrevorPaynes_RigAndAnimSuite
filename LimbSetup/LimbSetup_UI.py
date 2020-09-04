@@ -53,6 +53,12 @@ class LimbSetup_UI():
         # self.limbs_tw.setTabEnabled(index, False)
         # vl.addWidget(self.limbs_tw)
     
+
+#=========== MISC ====================================
+
+    def UpdateNaming(self):
+        self.skel_ui.RebuildAll()
+
     
 # #=========== MIRROR ====================================
 
@@ -152,12 +158,10 @@ class LimbSetup_UI():
 #         self.skel_ui.Populate()
 
 
-# #=========== MISC ====================================
-
-#     def UpdateNaming(self):
-#         self.skel_ui.UpdateNaming()
 
 
+#=========== DEPRICATED ====================================
+#=========== DEPRICATED ====================================
 #=========== DEPRICATED ====================================
 
 

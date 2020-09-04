@@ -19,8 +19,6 @@ class SKEL_Scene_Limb_Manager():
         self.jntMng = jointManager
         self.nameMng = nameManager
 
-        self.displaySize = 1
-
         self.limbBuildTypes = [ cl.SKEL_Scene_Limb_Chain(self),
                                 bl.SKEL_Scene_Limb_Branch(self),
                                 lcl.SKEL_Scene_Limb_LinearChain(self),
@@ -33,16 +31,23 @@ class SKEL_Scene_Limb_Manager():
         self.sceneJoints = {} # ID : sceneJoint 
         self.jointCtrs = {} # jointID : jointCtr
         self.limbCtrs = {} # limbID : limbCtr
+        self.limbCsts = {} # limbID : [constraints list]
         self.limbTypeIndex = {} # limbID : int
             # For after the limb type has changed, and teardown needed
 
 
 #======= SETUP + TEARDOWNS ===================================
 
-    # JOINT INTERNAL PARENTS
-    def Setup_Internal_JointParents(self, limbID):
+    def Setup_LimbsWithJoints(self, limbID):
         limbTypeIndex = self.limbMng.GetLimb(limbID).typeIndex.get()
         self.limbTypeIndex[limbID] = limbTypeIndex
+
+    def Teardown_LimbsWithJoints(self, limbID):
+        del(self.limbTypeIndex[limbID])
+
+    # JOINT INTERNAL PARENTS
+    def Setup_Internal_JointParents(self, limbID):
+        limbTypeIndex = self.limbTypeIndex[limbID]
         limbBuilder = self.limbBuildTypes[limbTypeIndex]
         limbBuilder.Setup_Internal_JointParents(limbID)
     
@@ -50,7 +55,6 @@ class SKEL_Scene_Limb_Manager():
         limbTypeIndex = self.limbTypeIndex[limbID]
         limbBuilder = self.limbBuildTypes[limbTypeIndex]
         limbBuilder.Teardown_Internal_JointParents(limbID)
-        del(self.limbTypeIndex[limbID])
 
     # JOINT EXTERNAL PARENTS
     def Setup_External_JointParents(self, limbID):
@@ -67,18 +71,16 @@ class SKEL_Scene_Limb_Manager():
     def Setup_JointControls(self, limbID):
         limbTypeIndex = self.limbTypeIndex[limbID]
         limbBuilder = self.limbBuildTypes[limbTypeIndex]
-        ctrs = limbBuilder.Setup_JointControls(limbID)
-        for ctr in ctrs:
+        for ctr in limbBuilder.Setup_JointControls(limbID):
             pm.addAttr(ctr, longName = 'limbID', at='short')
             pm.setAttr(ctr + '.limbID', limbID)
             for attr in ['sx', 'sy', 'sz']:
                 pm.setAttr(ctr + '.' + attr, k=0)
             pm.setAttr(ctr + '.v', l=1, k=0)
-            pm.xform(ctr, s=[self.displaySize, 
-                            self.displaySize, 
-                            self.displaySize])
         
     def Teardown_JointControls(self, limbID):
+        pm.delete(self.limbCsts[limbID])
+        del(self.limbCsts[limbID])
         limbTypeIndex = self.limbTypeIndex[limbID]
         limbBuilder = self.limbBuildTypes[limbTypeIndex]
         limbBuilder.Teardown_JointControls(limbID)
@@ -127,14 +129,18 @@ class SKEL_Scene_Limb_Manager():
 
 #======= NAMING  ===================================
 
-    def RenameLimb(self, limbID):
+    def SetLimbName(self, limbID):
         self.limbCtrs[limbID].rename(self.GetLimbCtrName(limbID))
         for jointID in self.jntMng.GetLimbJointIDs(limbID):
-            self.RenameJoint(limbID, jointID)
+            self.SetJointName(limbID, jointID)
 
-    def RenameJoint(self, limbID, jointID):
+    def SetJointName(self, limbID, jointID):
         self.jointCtrs[jointID].rename(self.GetJointCtrName(limbID, jointID))
 
+
+
+#======= DEPRICATED  ===================================
+#======= DEPRICATED  ===================================
 #======= DEPRICATED  ===================================
 
 # class SKEL_Scene_Limb_Manager():

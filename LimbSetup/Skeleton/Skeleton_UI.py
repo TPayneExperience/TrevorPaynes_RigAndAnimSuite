@@ -75,31 +75,29 @@ class Skeleton_UI():
                  
     def AddLimb(self, limbID):
         self.limbHier_ui.Populate(limbID)
-        self.LimbSelected(limbID)
         self._UpdateJointCountLabel()
-        self.skel.sceneMng.Add_Editable_Limb(limbID)
-
+        self.sceneMng.Add_Editable_Limb(limbID)
+        self.LimbSelected(limbID)
 
     def RemoveLimb(self, rootLimbID):
         limbIDs = self.limbMng.GetLimbCreationOrder(rootLimbID)
         for limbID in limbIDs[::-1]:
+            self.sceneMng.Remove_Editable_Limb(limbID)
             self.jntMng.RemoveLimb(limbID)
             self.limbMng.Remove(limbID)
         self.limbHier_ui.Populate()
-        self.jntHier_ui.Populate()
+        self.jntHier_ui.Depopulate()
+        pm.frameLayout(self.limbProp, e=1, en=0)
+        pm.frameLayout(self.jntProp, e=1, en=0)
         self._UpdateJointCountLabel()
-        self.skel.sceneMng.Remove_Editable_Limb(rootLimbID)
-
 
     def SetLimbName(self, limbID):
-        pass
+        self.jntMng.UpdateLimbJointNames(limbID)
+        self.sceneMng.sceneLimbMng.SetLimbName(limbID)
         # self.skel.jntMng.LimbNameChanged(limbID)
-        # self.skel.sceneMng.sceneLimbMng.SetLimbName(limbID)
-        # mirrorID = self.skel.limbMng.GetMirror(limbID)
-        # if (mirrorID != -1):
-        #     self.skel.sceneMng.sceneLimbMng.SetLimbName(mirrorID)
-    
+        
     def ReparentLimb(self, limbID, oldParentID): # limb hier changed
+        self.sceneMng.Reparent_Editable_Limb(limbID, oldParentID)
         self.limbProp_ui.Populate()
 
         # limb = self.limbMng.GetLimb(limbID)
@@ -107,7 +105,6 @@ class Skeleton_UI():
         # jointNames = [self.jntMng.GetJoint(ID).pfrsName.get() for ID in jointIDs]
         # print(pm.Attribute(limb.parentJntIndex).getEnums())
         # pm.Attribute(limb.parentJntIndex).setEnums(':'.join(jointNames))
-        # self.skel.sceneMng.Reparent_Editable_Limb(limbID, oldParentID)
         # items = self.limbHier_tw.selectedItems()
         # if (items):
         #     limbID = items[0].ID
@@ -125,75 +122,92 @@ class Skeleton_UI():
         if limbID:
             self.jntHier_ui.SetLimbID(limbID)
             self.limbProp_ui.SetLimb(limbID)
+            if (self.jntMng.GetLimbJointIDs(limbID)):
+                self.sceneMng.SelectLimbControl(limbID)
+            else:
+                self.sceneMng.DeselectAll()
+        else:
+            self.sceneMng.DeselectAll()
         pm.frameLayout(self.jntProp, e=1, en=0)
         pm.frameLayout(self.limbProp, e=1, en=bool(limbID))
-        # self.limbProp_ui.Show()
-        # self.jntProp_gb.Hide()
-        # jointCount = len(self.skel.jntMng.GetLimbJointIDs(limbID))
-        # if (jointCount > 0):
-        #     self.skel.sceneMng.SelectLimbControl(limbID)
-        # else:
-        #     self.skel.sceneMng.DeselectAll()
     
+    def UpdateParentJntIndex(self, limbID):
+        limb = self.limbMng.GetLimb(limbID)
+        parentLimbID = limb.parentLimbID.get()
+        if (parentLimbID == -1):
+            pm.addAttr(limb.parentJntIndex, e=1, enumName='None')
+        else:
+            jointIDs = self.jntMng.GetLimbJointIDs(parentLimbID)
+            jointNames = [self.jntMng.GetJoint(ID).pfrsName.get() for ID in jointIDs]
+            pm.addAttr(limb.parentJntIndex, e=1, enumName=':'.join(jointNames))
     
 # #=========== ADD + REMOVE JOINTS ====================================
 
     def AddJoints(self, limbID, count):
-        hadJoints = bool(self.skel.jntMng.GetLimbJointIDs(limbID))
-        self.skel.jntMng.Add(limbID, count)
-        self._AddJoints(hadJoints, limbID, count)
+        if self.jntMng.GetLimbJointIDs(limbID):
+            self.sceneMng.Remove_Editable_Limb(limbID)
+        self.jntMng.Add(limbID, count)
+        for childLimbID in self.limbMng.GetImmediateChildren(limbID):
+            self.UpdateParentJntIndex(childLimbID)
+        self.sceneMng.Add_Editable_Limb(limbID)
+        self.jntHier_ui.Populate()
         self._UpdateJointCountLabel()
-
-    def _AddJoints(self, hadJoints, limbID, count):
-        if hadJoints:
-            pass
-            # self.skel.sceneMng.Rebuild_Editable_Limb(limbID)
-        else:
-            jointID = self.skel.jntMng.GetLimbJointIDs(limbID)[0]
-            for childLimbID in self.skel.limbMng.GetImmediateChildren(limbID):
-                self.skel.jntMng.SetParentJointId(childLimbID, jointID)
-            # self.skel.sceneMng.Add_Editable_Limb(limbID)
 
     def RemoveJoints(self, limbID, removeJointIDs):
-        # mirrorLimbID = self.skel.limbMng.GetLimb(limbID).mirrorLimbID.get()
-        # if (mirrorLimbID != -1):
-        #     mirrorJointIDs = [self.skel.jntMng.GetMirrorJoint(ID) for ID in removeJointIDs]
-        #     self._RemoveJoints(mirrorLimbID, mirrorJointIDs)
-        self._RemoveJoints(limbID, removeJointIDs)
-        # self._UpdateJointWidgets(limbID)
-        self._UpdateJointCountLabel()
-    
-    def _RemoveJoints(self, limbID, removeJointIDs):
+        self.sceneMng.Remove_Editable_Limb(limbID)
         self.jntMng.Remove(limbID, removeJointIDs)
         if (self.jntMng.GetLimbJointIDs(limbID)):
-            pass    
-            # self.skel.sceneMng.Rebuild_Editable_Limb(limbID)
-        else:
-            for childLimbID in self.skel.limbMng.GetImmediateChildren(limbID):
-                self.jntMng.SetParentJointId(childLimbID, -1)
-            # self.skel.sceneMng.Remove_Editable_Limb(limbID)
+            self.sceneMng.Add_Editable_Limb(limbID)
+        for childLimbID in self.limbMng.GetImmediateChildren(limbID):
+            self.UpdateParentJntIndex(childLimbID)
+        self._UpdateJointCountLabel()
+    
+    # def AddJoints(self, limbID, count):
+    #     hadJoints = bool(self.jntMng.GetLimbJointIDs(limbID))
+    #     self.jntMng.Add(limbID, count)
+    #     self._AddJoints(hadJoints, limbID, count)
+    #     self._UpdateJointCountLabel()
+
+    # def _AddJoints(self, hadJoints, limbID, count):
+        # if hadJoints:
+        #     self.RebuildLimb(limbID)
+        # else:
+        #     jointID = self.jntMng.GetLimbJointIDs(limbID)[0]
+        #     for childLimbID in self.limbMng.GetImmediateChildren(limbID):
+        #         self.jntMng.SetParentJointId(childLimbID, jointID)
+        #     self.skel.sceneMng.Add_Editable_Limb(limbID)
+
+    # def RemoveJoints(self, limbID, removeJointIDs):
+    #     self._RemoveJoints(limbID, removeJointIDs)
+    #     self._UpdateJointCountLabel()
+    
+    # def _RemoveJoints(self, limbID, removeJointIDs):
+    #     self.jntMng.Remove(limbID, removeJointIDs)
+    #     if (self.jntMng.GetLimbJointIDs(limbID)):
+    #         self.RebuildLimb(limbID)
+    #     else:
+    #         for childLimbID in self.limbMng.GetImmediateChildren(limbID):
+    #             self.jntMng.SetParentJointId(childLimbID, -1)
+    #         self.sceneMng.Remove_Editable_Limb(limbID)
 
     def SetJointName(self, limbID, jointID):
         self.jntMng.UpdateJointName(limbID, jointID)
-        # self.skel.sceneMng.sceneLimbMng.RenameJoint(limbID, jointID)
-        # mirrorLimbID = self.skel.limbMng.GetMirror(limbID)
-        # if (mirrorLimbID != -1):
-        #     mirrorJointID = self.skel.jntMng.GetMirrorJoint(jointID)
-        #     self.skel.sceneMng.sceneLimbMng.RenameJoint(mirrorLimbID, mirrorJointID)
+        self.sceneMng.sceneLimbMng.SetJointName(limbID, jointID)
     
-    def SetJointCount(self, limbID, newJointCount):
-        jointIDs = self.jntMng.GetLimbJointIDs(limbID)
-        oldJointCount = len(jointIDs)
-        if (newJointCount < oldJointCount):
-            self.RemoveJoints(limbID, jointIDs[newJointCount:oldJointCount])
-        elif (newJointCount > oldJointCount):
-            amount = newJointCount - oldJointCount
-            self.AddJoints(limbID, amount)
+    # def SetJointCount(self, limbID, newJointCount):
+    #     jointIDs = self.jntMng.GetLimbJointIDs(limbID)
+    #     oldJointCount = len(jointIDs)
+    #     if (newJointCount < oldJointCount):
+    #         self.RemoveJoints(limbID, jointIDs[newJointCount:oldJointCount])
+    #     elif (newJointCount > oldJointCount):
+    #         amount = newJointCount - oldJointCount
+    #         self.AddJoints(limbID, amount)
 
     def JointSelected(self, jointIDs):
         self.jntProp_ui.SetJoints(jointIDs)
         pm.frameLayout(self.limbProp, e=1, en=0)
         pm.frameLayout(self.jntProp, e=1, en=bool(jointIDs))
+        self.skel.sceneMng.SelectJointControls(jointIDs)
         # jointIDs = [item.ID for item in self.jntHier_lw.selectedItems()]
         # joints = self.skel.jntMng.GetJoints(jointIDs)
         # self.jntProp_gb.SetJoints(joints)
@@ -202,7 +216,6 @@ class Skeleton_UI():
         # limbType = self.skel.limbMng.GetType(limbID)
         # if 'Chain' in limbType:
         #     self.jntProp_gb.show()
-        # self.skel.sceneMng.SelectJointControls(jointIDs)
 
     def _UpdateJointCountLabel(self):
         count = self.jntMng.GetJointCount()
@@ -210,16 +223,19 @@ class Skeleton_UI():
 
 #=========== LIMBS ====================================
 
+    def RebuildAll(self):
+        self.skel.sceneMng.Teardown_Editable()
+        self.skel.sceneMng.Setup_Editable()
+
     def RebuildLimb(self, limbID): # limb type changed
-        pass
-        # self.sceneMng.Remove_Editable_Limb(limbID)
-        # self.sceneMng.Add_Editable_Limb(limbID)
+        self.sceneMng.Remove_Editable_Limb(limbID)
+        self.sceneMng.Add_Editable_Limb(limbID)
 
     def LimbParentJointChanged(self, limbID):
-        pass
-        # self.sceneMng.Teardown_External_JointParents(limbID)
-        # self.sceneMng.Setup_External_JointParents(limbID)
-        # self.sceneMng.SelectLimbControl(limbID)
+        self.sceneMng.Teardown_External_JointParents(limbID)
+        self.sceneMng.Setup_External_JointParents(limbID)
+        self.sceneMng.SelectLimbControl(limbID)
+
 
     # def FlipLimbSides(self, limbID): # for L/R switching
     #     limbIDs = self.skel.limbMng.GetLimbCreationOrder(limbID) #children
@@ -285,10 +301,6 @@ class Skeleton_UI():
 #     def StatusMsg(self, message):
 #         self.mainWindow.StatusMsg(message)
     
-#     def UpdateNaming(self):
-#         pass
-#         # self.skel.sceneMng.Teardown_Editable()
-#         # self.skel.sceneMng.Setup_Editable()
 
 #     def TeardownRig(self):
 #         pass

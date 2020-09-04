@@ -10,8 +10,8 @@ reload(pfrs)
 import LimbSetup.LimbSetup_UI as limbSetup_ui
 reload(limbSetup_ui)
 
-# import RigSetup.RigSetup_UI as rs_ui
-# reload(rs_ui)
+import RigSetup.RigSetup_UI as rs_ui
+reload(rs_ui)
 
 
 __author__ = 'Trevor Payne'
@@ -23,19 +23,24 @@ class PayneFreeRigSuite_UI():
     def __init__(self):
         self.pfrs = pfrs.PayneFreeRigSuite()
 
+        self.rigSetupUI = rs_ui.RigSetup_UI(self.pfrs.rigSetup,
+                                            self)
         self._Setup()
-        self.Populate()
+        # self.Populate()
 
-    def Populate(self):
-        folder = os.path.join(os.path.dirname(__file__), 'TEST_OUTPUT')
-        self.pfrs.limbSetup.fileMng.SetOutputFile(os.path.join(folder, 'temp.json'))
-        self.pfrs.limbSetup.fileMng.SetMeshPath(os.path.join(folder, 'temp.ma'))
+    # def Populate(self):
+    #     pass
+        # folder = os.path.join(os.path.dirname(__file__), 'TEST_OUTPUT')
+        # self.pfrs.limbSetup.fileMng.SetOutputFile(os.path.join(folder, 'temp.json'))
+        # self.pfrs.limbSetup.fileMng.SetMeshPath(os.path.join(folder, 'temp.ma'))
         
-        self.NewRig()
 
-    def NewRig(self):
-        self.pfrs.NewRig('somePrefix', [0,1,2,3,4], True)
-        self.limbSetup_ui.NewRig(self.pfrs.rigRoot)
+        # self.NewRig()
+
+    # def NewRig(self):
+        # self.pfrs.NewRig('somePrefix', [0,1,2,3,4], True)
+        # self.pfrs.rigSetup.NewRig('somePrefix', [0,1,2,3,4], True)
+        # self.limbSetup_ui.NewRig(self.pfrs.rigSetup.rigRoot)
         # self.pfrs.rigSceneMng.NewRig()
         # self.limbs_tw.NewRig(self.pfrs.rigSceneMng.rootGrp)
         # self.pfrs.saveLoadRig.Save()
@@ -45,18 +50,16 @@ class PayneFreeRigSuite_UI():
     def _Setup(self):
         name = '%s - Payne Free %s Suite - v%s' % (LICENSE, SUITE, __version__)
         with pm.window(mb=True,mbv=True, t=name, w=500, h=500) as self.win:
-            with pm.tabLayout() as self.rigTabs:
+            with pm.tabLayout(enable=0) as self.rigTabs:
                 with pm.horizontalLayout() as self.lsLayout:
                     self.limbSetup_ui = limbSetup_ui.LimbSetup_UI(self.pfrs.limbSetup)
                 with pm.horizontalLayout() as self.mdLayout:
                     with pm.tabLayout() as self.mdTab:
                         with pm.horizontalLayout():
                             pm.button('test', label='Three')
-        pm.tabLayout(  self.rigTabs, 
-                    edit=1, 
+        pm.tabLayout(self.rigTabs, edit=1, 
                     tabLabel=(  (self.lsLayout,'Limb Setup'), 
                                 (self.mdLayout,'Mesh Deformation')))
-        # self._Setup_MainTabWidget()
         self._Setup_MenuBar()
         pm.showWindow()
     
@@ -65,8 +68,8 @@ class PayneFreeRigSuite_UI():
     def _Setup_MenuBar(self):
         with self.win:
             with pm.menu('File'):
-                pm.menuItem(l='New Rig...')
-                pm.menuItem(l='Edit Rig...')
+                pm.menuItem(l='New Rig...', c=self.NewRig_Dialog)
+                pm.menuItem(l='Edit Rig...', c=self.EditRig_Dialog)
                 pm.menuItem(divider=1)
                 pm.menuItem(l='Import FBX...', en=0)
                 pm.menuItem(l='Export FBX...', en=0)
@@ -83,70 +86,28 @@ class PayneFreeRigSuite_UI():
                 pm.menuItem(l='Load Template...')
                 pm.menuItem(l='Save Template...')
 
-    # def _Setup_MenuBar_Settings(self):
-    #     # ACTIONS
-    #     animFolder = QtWidgets.QAction(   'Set Animation Library Folder...', 
-    #                                 self)
-    #     animFolder.setEnabled(False)
-    #     tool = QtWidgets.QAction(   'Tool Settings...', 
-    #                                 self)
-    #     tool.setEnabled(False)
-
-    #     # ADD TO FILEMENU
-    #     settingsMenu = self.menuBar().addMenu('Settings')
-    #     settingsMenu.addAction(animFolder)
-    #     settingsMenu.addAction(tool)
-
-    # def _Setup_MenuBar_Help(self):
-    #     # ACTIONS
-    #     doc = QtWidgets.QAction('Documentation...', 
-    #                             self)
-    #     doc.setEnabled(False)
-    #     tut = QtWidgets.QAction('Tutorials...', 
-    #                             self)
-    #     tut.setEnabled(False)
-
-    #     # ADD TO FILEMENU
-    #     helpMenu = self.menuBar().addMenu('Help')
-    #     helpMenu.addAction(doc)
-    #     helpMenu.addAction(tut)
-
-#=========== SETUP MAIN WIDGET====================================
-
-    # def _Setup_MainTabWidget(self):
-    #     main_w = QtWidgets.QWidget(self)
-    #     vl = QtWidgets.QVBoxLayout(main_w)
-    #     self.main_tw = QtWidgets.QTabWidget()
-    #     self.limbs_tw = limbSetup_ui.LimbSetup_UI(self.pfrs.limbSetup, self, self.main_tw)
-    #     self.main_tw.addTab(self.limbs_tw, 'Limb Setup')
-    #     index = self.main_tw.addTab(QtWidgets.QTabWidget(), 'Mesh Deformation')
-    #     self.main_tw.setTabEnabled(index, False)
-    #     index = self.main_tw.addTab(QtWidgets.QTabWidget(), 'Animation')
-    #     self.main_tw.setTabEnabled(index, False)
-    #     vl.addWidget(self.main_tw)
-    #     self.setCentralWidget(main_w)
-        
     
 #=========== FUNCTIONALITY ====================================
+
+    def UpdateNaming(self):
+        self.pfrs.rigSetup.UpdatePrefix()
+        self.limbSetup_ui.UpdateNaming()
 
     def closeEvent(self):
         # self.pfrs.limbSetup.skel.sceneMng.KillScriptJobs()
         # self.pfrs.limbSetup.skel.sceneMng.KillSelectionJob()
         pm.deleteUI(self.win, window=True)
     
-    # def StatusMsg(self, message):
-    #     self.statusBar().showMessage(message)
+    def NewRig_Dialog(self, ignore):
+        self.rigSetupUI.NewRig_Dialog()
+        # rigUI = rs_ui.RigSetup_UI(  self.pfrs.nameMng,
+        #                             self.pfrs.fileMng,
+        #                             self)
+        # if (rigUI.exec_()):
+        #     self.NewRig()
 
-    # def NewRig_Dialog(self):
-    #     pass
-    #     # rigUI = rs_ui.RigSetup_UI(  self.pfrs.nameMng,
-    #     #                             self.pfrs.fileMng,
-    #     #                             self)
-    #     # if (rigUI.exec_()):
-    #     #     self.NewRig()
-
-    def EditRig_Dialog(self):
-        pass
+    def EditRig_Dialog(self, ignore):
+        self.rigSetupUI.EditRig_Dialog()
         # tempPrefix = self.pfrs.nameMng.GetPrefix()
         # tempMeshPath = self.pfrs.fileMng.GetMeshPath()
         # tempOutputPath = self.pfrs.fileMng.GetOutputFile()

@@ -120,17 +120,19 @@ class SKEL_Limb_Hierarchy_UI(limbHierUI.Limb_Hierarchy_UI):
     def Reparent(self, limbNames, oldParents, oldIndex, newParent, newIndex, i1, i2):
         if (limbNames[0] == newParent):
             return self.Populate()
-        limb = self.limbMng.GetLimb(self._limbs[limbNames[0]])
+        limbID = self._limbs[limbNames[0]]
+        limb = self.limbMng.GetLimb(limbID)
         oldParentID = limb.parentLimbID.get()
         if (newParent in self._limbs):
             newParentID = self._limbs[newParent]
-            jointIDs = self.jntMng.GetLimbJointIDs(limb.ID.get())
-            jointNames = [self.jntMng.GetJoint(ID).pfrsName.get() for ID in jointIDs]
-            pm.addAttr(limb.parentJntIndex, e=1, enumName=':'.join(jointNames))
+            # jointIDs = self.jntMng.GetLimbJointIDs(limb.ID.get())
+            # jointNames = [self.jntMng.GetJoint(ID).pfrsName.get() for ID in jointIDs]
+            # pm.addAttr(limb.parentJntIndex, e=1, enumName=':'.join(jointNames))
         else:
             newParentID = -1
-            pm.addAttr(limb.parentJntIndex, e=1, enumName='')
+            # pm.addAttr(limb.parentJntIndex, e=1, enumName='None')
         limb.parentLimbID.set(newParentID)
+        self.parent.UpdateParentJntIndex(limbID)
         self.parent.ReparentLimb(limb.ID.get(), oldParentID)
         
         # if not self._isPopulating:

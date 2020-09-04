@@ -23,7 +23,7 @@ class SKEL_Scene_Limb_LinearChain():
     def Teardown_Internal_JointParents(self, limbID):
         jointIDs = self.sceneMng.jntMng.GetLimbJointIDs(limbID)
         for i in range(0, len(jointIDs)-1):
-            joint = jointIDs[i+1]
+            joint = self.sceneMng.jntMng.GetJoint(jointIDs[i+1])
             pm.parent(joint, self.sceneMng.jntMng.jntGrp)
 
     # EXTERNAL PARENTS
@@ -40,6 +40,7 @@ class SKEL_Scene_Limb_LinearChain():
 
     # EDITABLE CONTROLS
     def Setup_JointControls(self, limbID):
+        self.sceneMng.limbCsts[limbID] = []
         ctrs = []
         jointIDs = self.sceneMng.jntMng.GetLimbJointIDs(limbID)
 
@@ -47,9 +48,10 @@ class SKEL_Scene_Limb_LinearChain():
         for jointID in jointIDs:
             joint = self.sceneMng.jntMng.GetJoint(jointID)
             name = self.sceneMng.GetJointCtrName(limbID, jointID)
-            ctr = pm.spaceLocator(name=name)[0]
+            ctr = pm.spaceLocator(name=name)
             pm.xform(ctr, t=joint.t.get(), ro=joint.rotate.get())
-            pm.parentConstraint(ctr, joint)
+            cst = pm.parentConstraint(ctr, joint)
+            self.sceneMng.limbCsts[limbID].append(cst)
             self.sceneMng.jointCtrs[jointID] = ctr
             ctrs.append(ctr)
         jointCount = len(jointIDs)
@@ -58,9 +60,10 @@ class SKEL_Scene_Limb_LinearChain():
         for i in range(1, jointCount-1):
             ctr = ctrs[i]
             lerp = float(i) / max(1, (jointCount-1))
-            pm.parentConstraint(ctrs[0], ctrs[-1], ctr)
+            c2 = pm.parentConstraint(ctrs[0], ctrs[-1], ctr)
             pm.parentConstraint(ctrs[0], ctr, e=1, w=(1-lerp))
             pm.parentConstraint(ctrs[-1], ctr, e=1, w=lerp)
+            self.sceneMng.limbCsts[limbID].append(c2)
             # LOCK + HIDE ATTRS + CTR
             pm.setAttr(ctr + '.v', 0)
             for attr in self.lockAttrs:

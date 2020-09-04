@@ -75,11 +75,13 @@ class SKEL_Scene_Manager():
         hasJnts = self.jntMng.GetLimbJointIDs(limbID)
         if hasJnts:
             self.limbsWithJoints.append(limbID)
+            self.sceneLimbMng.Setup_LimbsWithJoints(limbID)
         return hasJnts
 
     def Teardown_LimbWithJoints(self, limbID):
         if limbID in self.limbsWithJoints:
             self.limbsWithJoints.remove(limbID)
+            self.sceneLimbMng.Teardown_LimbsWithJoints(limbID)
 
     # JOINT INTERNAL PARENTS
     def Setup_Internal_JointParents(self, limbID):
@@ -121,28 +123,27 @@ class SKEL_Scene_Manager():
     def Add_Editable_Limb(self, limbID):
         '''REQUIRES JOINTS ON LIMB'''
         if (self.Setup_LimbWithJoints(limbID)):
-            self.Setup_Internal_JointParents(limbID)
-            self.Setup_External_JointParents(limbID)
             self.Setup_JointControls(limbID)
             self.Setup_LimbControl(limbID)
+            self.Setup_Internal_JointParents(limbID)
+            self.Setup_External_JointParents(limbID)
             self.Setup_Children_External_JointParents(limbID)
-            # self.UpdateDisplaySize()
 
     def Remove_Editable_Limb(self, limbID): # when limb removed or joint count 0
         if limbID in self.limbsWithJoints:
             self.Teardown_Children_External_JointParents(limbID)
+            self.Teardown_Internal_JointParents(limbID)
+            self.Teardown_External_JointParents(limbID)
             self.Teardown_LimbControl(limbID)
             self.Teardown_JointControls(limbID)
-            self.Teardown_External_JointParents(limbID)
-            self.Teardown_Internal_JointParents(limbID)
             self.Teardown_LimbWithJoints(limbID)
 
     def Reparent_Editable_Limb(self, limbID, oldParentID):
-        if self.jntMng.DoesLimbHaveJoints(limbID):
+        if self.jntMng.GetLimbJointIDs(limbID):
             if (oldParentID in self.limbsWithJoints):
                 self.Teardown_External_JointParents(limbID)
-            newParentID = self.limbMng.GetParentID(limbID)
-            if (newParentID in self.limbsWithJoints):
+            limb = self.limbMng.GetLimb(limbID)
+            if (limb.parentLimbID.get() in self.limbsWithJoints):
                 self.Setup_External_JointParents(limbID)
 
     def Setup_Children_External_JointParents(self, limbID):
@@ -153,18 +154,6 @@ class SKEL_Scene_Manager():
         for childID in self.limbMng.GetImmediateChildren(limbID):
             self.Teardown_External_JointParents(childID)
 
-
-#======= DISPLAY SIZE : JOINT + CONTROL ===================================
-
-    # def SetDisplaySize(self, size):
-    #     if (size != self.sceneLimbMng.displaySize):
-    #         self.sceneLimbMng.displaySize = size
-    #         # for joint in list(self.sceneLimbMng.sceneJoints.values()):
-    #         #     pm.joint(joint, e=True, rad=size)
-    #         for ctr in list(self.sceneLimbMng.limbCtrs.values()):
-    #             pm.circle(ctr, e=True, r=size*5)
-    #         for ctr in list(self.sceneLimbMng.jointCtrs.values()):
-    #             pm.xform(ctr, s=[size, size, size])
 
 #======= SELECTION ===================================
 

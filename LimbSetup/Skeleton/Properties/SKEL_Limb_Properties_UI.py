@@ -112,14 +112,12 @@ class SKEL_Limb_Properties_UI:
 
     def SetParentJoint(self):
         self.parent.LimbParentJointChanged(self.limbID)
-        print(11)
 
     def SetSide(self):
-        print(22)
+        pass
 
     def SetType(self):
         self.parent.RebuildLimb(self.limbID)
-        print(33)
 
     def SetJointCount(self, newJointCount):
         jointIDs = self.jntMng.GetLimbJointIDs(self.limbID)

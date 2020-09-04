@@ -61,28 +61,29 @@ class Joint_Manager():
                 position[1] -= 5
             
             pm.select(d=1)
-            jnt = pm.joint()
-            pm.addAttr(jnt, ln='ID', at='short', dv=jointID)
-            pm.addAttr(jnt, ln='limbID', at='short', dv=limbID)
-            pm.addAttr(jnt, ln='limbIndex', at='short', dv=index)
-            pm.addAttr(jnt, ln='aimAxis', at='float3')
-            pm.addAttr(jnt, ln='aimX', at='float', parent='aimAxis')
-            pm.addAttr(jnt, ln='aimY', at='float', parent='aimAxis', dv=1)
-            pm.addAttr(jnt, ln='aimZ', at='float', parent='aimAxis')
-            pm.addAttr(jnt, ln='upAxis', at='float3')
-            pm.addAttr(jnt, ln='upX', at='float', parent='upAxis')
-            pm.addAttr(jnt, ln='upY', at='float', parent='upAxis')
-            pm.addAttr(jnt, ln='upZ', at='float', parent='upAxis', dv=1)
-            pm.addAttr(jnt, ln='pfrsName', dt='string')
-            pm.addAttr(jnt, ln='rigRoot', dt='string')
-            pm.connectAttr(self.rigRoot.joints, jnt.rigRoot)
-            jnt.pfrsName.set(pfrsName)
+            joint = pm.joint()
+            pm.addAttr(joint, ln='ID', at='short', dv=jointID)
+            pm.addAttr(joint, ln='limbID', at='short', dv=limbID)
+            pm.addAttr(joint, ln='limbIndex', at='short', dv=index)
+            pm.addAttr(joint, ln='aimAxis', at='float3')
+            pm.addAttr(joint, ln='aimX', at='float', parent='aimAxis')
+            pm.addAttr(joint, ln='aimY', at='float', parent='aimAxis', dv=1)
+            pm.addAttr(joint, ln='aimZ', at='float', parent='aimAxis')
+            pm.addAttr(joint, ln='upAxis', at='float3')
+            pm.addAttr(joint, ln='upX', at='float', parent='upAxis')
+            pm.addAttr(joint, ln='upY', at='float', parent='upAxis')
+            pm.addAttr(joint, ln='upZ', at='float', parent='upAxis', dv=1)
+            pm.addAttr(joint, ln='pfrsName', dt='string')
+            pm.addAttr(joint, ln='rigRoot', dt='string')
+            pm.connectAttr(self.rigRoot.joints, joint.rigRoot)
+            joint.pfrsName.set(pfrsName)
 
-            pm.parent(jnt, self.jntGrp)
-            self._joints[jointID] = jnt
+            pm.xform(joint, t=position)
+            pm.parent(joint, self.jntGrp)
+            self._joints[jointID] = joint
             self._limbJoints[limbID].append(jointID)
             self.UpdateJointName(limbID, jointID)
-            pm.editDisplayLayerMembers(self.skelLayer, jnt)
+            pm.editDisplayLayerMembers(self.skelLayer, joint)
 
     def Remove(self, limbID, jointIDs):
         for jointID in jointIDs:
@@ -117,8 +118,8 @@ class Joint_Manager():
             self.UpdateJointName(limbID, jointID)
 
     def UpdateJointName(self, limbID, jointID):
-        jnt = self._joints[jointID]
-        jnt.rename(self.nameMng.GetName(limbID, jointID, 'JNT'))
+        joint = self._joints[jointID]
+        joint.rename(self.nameMng.GetName(limbID, jointID, 'JNT'))
     
 
 

@@ -22,7 +22,7 @@ class SKEL_Joint_Hierarchy_UI():
     def _Setup(self):
         self.widget = pm.treeView(allowReparenting=0)
         pm.treeView(self.widget, e=1, selectCommand=self.SelectJoints)
-        pm.treeView(self.widget, e=1, itemRenamedCommand=self.SetName)
+        pm.treeView(self.widget, e=1, itemRenamedCommand=self.Rename)
         pm.treeView(self.widget, e=1, dragAndDropCommand=self.Reorder)
         with pm.popupMenu():
             pm.menuItem('Add', c=pm.Callback(self.Add))
@@ -67,21 +67,20 @@ class SKEL_Joint_Hierarchy_UI():
             self.Populate()
 
     def Populate(self):
-        pm.treeView(self.widget, e=1, removeAll=1)
+        self.Depopulate()
         if (self.limbID != -1):
-            jointIDs = self.jntMng.GetLimbJointIDs(self.limbID)
-            joints = {}
-            for jointID in jointIDs:
+            for jointID in self.jntMng.GetLimbJointIDs(self.limbID):
                 joint = self.jntMng.GetJoint(jointID)
-                joints[joint.limbIndex.get()] = joint
-            for index in sorted(list(joints.keys())):
-                joint = joints[index]
                 name = joint.pfrsName.get()
-                jointID = joint.ID.get()
                 self._joints[name] = jointID
                 pm.treeView(self.widget, e=1, addItem=(name, ''))
     
-    def SetName(self, oldName, newName):
+    def Depopulate(self):
+        pm.treeView(self.widget, e=1, removeAll=1)
+        self._joints.clear()
+        self.selectedJntIDs = []
+
+    def Rename(self, oldName, newName):
         if (oldName in self._joints):
             valid = False
             if self.nameMng.IsValidCharacterLength(newName):
@@ -103,6 +102,7 @@ class SKEL_Joint_Hierarchy_UI():
                 joint = self.jntMng.GetJoint(jointID)
                 index = pm.treeView(self.widget, q=1, itemIndex=jointName)
                 joint.limbIndex.set(index)
+        self.parent.RebuildLimb(self.limbID)
                 
 
 

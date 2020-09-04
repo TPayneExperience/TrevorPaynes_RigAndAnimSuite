@@ -48,7 +48,6 @@ class SKEL_Joint_Properties_UI:
         # self._Setup_Connections()
     
     def SetJoints(self, jointIDs):
-        print jointIDs
         self.joints = [self.jntMng.GetJoint(ID) for ID in jointIDs]
         if self.joints:
             first = self.joints[0]
@@ -96,14 +95,12 @@ class SKEL_Joint_Properties_UI:
 # #========== FUNCTIONALITY ===============================
 
     def _AimAxis_Changed(self, xVal, yVal, zVal):
-        print (xVal, yVal, zVal)
         for joint in self.joints:
             joint.aimX.set(xVal)
             joint.aimY.set(yVal)
             joint.aimZ.set(zVal)
 
     def _UpAxis_Changed(self, xVal, yVal, zVal):
-        print (xVal, yVal, zVal)
         for joint in self.joints:
             joint.upX.set(xVal)
             joint.upY.set(yVal)

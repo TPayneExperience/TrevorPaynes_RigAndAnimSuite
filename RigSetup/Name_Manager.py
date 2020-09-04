@@ -21,8 +21,8 @@ class Name_Manager():
             order.remove(0)
         partNames = [temp[i] for i in order]
         return '_'.join(partNames)
-
-
+    
+    
 #======= VALIDATION ========================================
 
     def IsValidCharacterLength(self, name):
@@ -51,6 +51,9 @@ class Name_Manager():
             self.errorMsg = 'NAME ERROR: May only contain A-Z, a-z, 0-9, _'
             return False
 
+
+#======= DEPRICATED ========================================
+#======= DEPRICATED ========================================
 #======= DEPRICATED ========================================
 
 

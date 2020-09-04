@@ -1,5 +1,4 @@
 
-# from maya import pm
 import pymel.core as pm
 
 class SKEL_Scene_Limb_Branch():
@@ -30,13 +29,15 @@ class SKEL_Scene_Limb_Branch():
 
     # EDITABLE CONTROLS
     def Setup_JointControls(self, limbID):
+        self.sceneMng.limbCsts[limbID] = []
         ctrs = []
         jointIDs = self.sceneMng.jntMng.GetLimbJointIDs(limbID)
         for joint in [self.sceneMng.jntMng.GetJoint(ID) for ID in jointIDs]:
             name = self.sceneMng.GetJointCtrName(limbID, joint.ID.get())
             ctr = pm.spaceLocator(name=name)
             pm.xform(ctr, t=joint.t.get(), ro=joint.rotate.get())
-            pm.parentConstraint(ctr, joint)
+            cst = pm.parentConstraint(ctr, joint)
+            self.sceneMng.limbCsts[limbID].append(cst)
             self.sceneMng.jointCtrs[joint.ID.get()] = ctr
             ctrs.append(ctr)
         return ctrs

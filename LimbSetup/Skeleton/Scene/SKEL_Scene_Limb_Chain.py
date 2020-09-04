@@ -19,7 +19,7 @@ class SKEL_Scene_Limb_Chain():
     def Teardown_Internal_JointParents(self, limbID):
         jointIDs = self.sceneMng.jntMng.GetLimbJointIDs(limbID)
         for i in range(0, len(jointIDs)-1):
-            joint = jointIDs[i+1]
+            joint = self.sceneMng.jntMng.GetJoint(jointIDs[i+1])
             pm.parent(joint, self.sceneMng.jntMng.jntGrp)
 
     # EXTERNAL PARENTS
@@ -36,6 +36,7 @@ class SKEL_Scene_Limb_Chain():
 
     # EDITABLE CONTROLS
     def Setup_JointControls(self, limbID):
+        self.sceneMng.limbCsts[limbID] = []
         ctrs = []
         jointIDs = self.sceneMng.jntMng.GetLimbJointIDs(limbID)
         jointID = jointIDs[0]
@@ -44,15 +45,19 @@ class SKEL_Scene_Limb_Chain():
             joint = self.sceneMng.jntMng.GetJoint(jointIDs[i-1])
             ID_02 = jointIDs[i]
             ctr = self._Setup_JointControl(limbID, ID_02)
-            pm.aimConstraint(ctr, joint)
+            cst = pm.aimConstraint(ctr, joint)
+            self.sceneMng.limbCsts[limbID].append(cst)
             ctrs.append(ctr)
         return ctrs
 
     def _Setup_JointControl(self, limbID, jointID):
         joint = self.sceneMng.jntMng.GetJoint(jointID)
         name = self.sceneMng.GetJointCtrName(limbID, jointID)
-        ctr = pm.spaceLocator(name=name, p=joint.translate.get())
-        pm.pointConstraint(ctr, joint)
+        pos = pm.xform(joint, q=1, t=1, ws=1)
+        ctr = pm.spaceLocator(name=name)
+        pm.xform(ctr, t=pos, ws=1)
+        cst = pm.pointConstraint(ctr, joint)
+        self.sceneMng.limbCsts[limbID].append(cst)
         self.sceneMng.jointCtrs[jointID] = ctr
         return ctr
 
