@@ -36,46 +36,6 @@ class PayneFreeRigSuite():
         # self.rigSceneMng = rigsm.RIG_Scene_Manager(self.fileMng,
         #                                             self.nameMng)
 
-    # def NewRig(self, prefix, nameOrder, showPrefix):
-    #     # self.rigRoot = pm.group(name='temp', em=True)
-
-    #     # # NAMING
-    #     # pm.addAttr(self.rigRoot, ln='prefixIndex', at='short', dv=nameOrder[0])
-    #     # pm.addAttr(self.rigRoot, ln='limbIndex', at='short', dv=nameOrder[1])
-    #     # pm.addAttr(self.rigRoot, ln='jointIndex', at='short', dv=nameOrder[2])
-    #     # pm.addAttr(self.rigRoot, ln='sideIndex', at='short', dv=nameOrder[3])
-    #     # pm.addAttr(self.rigRoot, ln='typeIndex', at='short', dv=nameOrder[4])
-    #     # pm.addAttr(self.rigRoot, ln='showPrefix', at='bool', dv=showPrefix)
-    #     # pm.addAttr(self.rigRoot, ln='prefix', dt='string')
-    #     # self.rigRoot.prefix.set(prefix)
-
-    #     # self.nameMng.NewRig(self.rigRoot, self.limbSetup.limbMng, self.limbSetup.jntMng)
-    #     self.meshGrp = pm.group(name='Meshes', em=True)
-    #     pm.parent(self.meshGrp, self.rigRoot)
-
-    #     # MESH LAYER
-    #     self.meshLayer = pm.createDisplayLayer(n='Rig Mesh', e=True)
-    #     pm.setAttr(self.meshLayer + '.displayType', 2)
-    #     pm.select(d=True)
-    #     # self._Import_Meshes()
-    #     self.UpdatePrefix()
-    #     self.nameMng.NewRig(self.rigRoot, 
-    #                         self.limbSetup.limbMng, 
-    #                         self.limbSetup.jntMng)
-    #     self.limbSetup.NewRig(self.rigRoot)
-
-    # # def _Import_Meshes(self):
-    # #     meshPath = self.fileMng.GetMeshPath()
-    # #     if(os.path.isfile(meshPath)):
-    # #         pm.file(meshPath, i=True, f=True)
-    # #         meshShapes = pm.ls(type='mesh')
-    # #         meshes = pm.listRelatives(meshShapes, p=1)
-    # #         pm.parent(meshes, self.meshGrp)
-    # #         pm.editDisplayLayerMembers(self.meshLayer, meshes)
-    
-    # def UpdatePrefix(self):
-    #     self.rigRoot.rename('%s_ROOT' % self.rigRoot.prefix.get())
-
     # def UpdateMeshes(self):
     #     pm.select(d=1)
     #     pm.delete(self.meshGrp)

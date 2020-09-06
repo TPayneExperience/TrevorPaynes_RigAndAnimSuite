@@ -18,8 +18,8 @@ class SKEL_Limb_Hierarchy_UI(limbHierUI.Limb_Hierarchy_UI):
 
         self._Setup()
 
-    def NewRig(self):
-        self.Populate_Abstract()
+    # def NewRig(self):
+    #     self.Populate_Abstract()
 
     def Populate(self, selectedID = -1):
         self.Populate_Abstract()
@@ -30,9 +30,9 @@ class SKEL_Limb_Hierarchy_UI(limbHierUI.Limb_Hierarchy_UI):
 #=========== SETUP ====================================
 
     def _Setup(self):
-        pm.treeView(self.widget, e=1, itemRenamedCommand=self.SetName)
-        pm.treeView(self.widget, e=1, dragAndDropCommand=self.Reparent)
-        pm.treeView(self.widget, e=1, selectCommand=self.SelectLimb)
+        pm.treeView(self.widget, e=1,   itemRenamedCommand=self.SetName,
+                                        dragAndDropCommand=self.Reparent,
+                                        selectCommand=self.SelectLimb)
         with pm.popupMenu():
             pm.menuItem('Add', c=pm.Callback(self.Add))
             pm.menuItem(divider=1)

@@ -118,7 +118,7 @@
        <item>
         <widget class="QPushButton" name="pushButton">
          <property name="text">
-          <string>Save (file dialog)</string>
+          <string>Save</string>
          </property>
         </widget>
        </item>

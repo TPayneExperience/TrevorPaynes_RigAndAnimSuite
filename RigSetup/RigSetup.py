@@ -12,6 +12,7 @@ class RigSetup:
         self.fileMng = fileManager
         self.limbSetup = limbSetup
 
+        self.rigRoot = None
         self.curMeshGrp = None
         self.oldMeshGrp = None
     
@@ -31,8 +32,6 @@ class RigSetup:
         pm.setAttr(self.rigRoot +'.prefix', prefix)
         pm.addAttr(self.rigRoot, ln='meshPath', dt='string')
         pm.setAttr(self.rigRoot +'.meshPath', meshPath)
-
-        # self.nameMng.NewRig(self.rigRoot, self.limbSetup.limbMng, self.limbSetup.jntMng)
 
         # MESH LAYER
         self.meshLayer = pm.createDisplayLayer(n='Rig Mesh', e=True)

@@ -21,18 +21,12 @@ class Limb_Manager():
 
         self.limbSides = ['M', 'L', 'R','None']
         
-
     def NewRig(self, rigRoot):
         self.rigRoot = rigRoot
-
         self._nextLimbID = 1
         self._limbs = {} # limbID : limbNode
         pm.addAttr(rigRoot, ln='limbs', dt='string')
 
-        # # TESTING:
-        # self.Add()
-        # self.Add()
-        # self.Add()
         
 #============= ACCESSORS + MUTATORS ============================
 

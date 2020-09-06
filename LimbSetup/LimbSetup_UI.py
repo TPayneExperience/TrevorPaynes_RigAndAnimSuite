@@ -9,10 +9,10 @@ reload(skel_ui)
 # import Popups.DuplicateLimbs_UI as dup_ui
 # reload(dup_ui)
 
-# import Popups.SaveTemplate_UI as save_ui
-# reload(save_ui)
-# import Popups.LoadTemplate_UI as load_ui
-# reload(load_ui)
+import Popups.SaveTemplate_UI as save_ui
+reload(save_ui)
+import Popups.LoadTemplate_UI as load_ui
+reload(load_ui)
 
 
 class LimbSetup_UI():
@@ -20,6 +20,9 @@ class LimbSetup_UI():
         self.limbSetup = limbSetup
 
         self.mirror_axis = '' # 'X', 'Y', 'Z'
+        self.saveDialog = save_ui.SaveTemplate_UI(  self.limbSetup.limbMng, 
+                                                    self.limbSetup.nameMng)
+        self.loadDialog = load_ui.LoadTemplate_UI()
 
         self._Setup()
     
@@ -36,22 +39,14 @@ class LimbSetup_UI():
             with pm.horizontalLayout() as self.skelTab:
                 self.skel_ui = skel_ui.Skeleton_UI(self.limbSetup.skel)
             with pm.horizontalLayout() as self.bhvTab:
-                pm.button('test', label='One')
+                pm.button(label='One')
             with pm.horizontalLayout() as self.appTab:
-                pm.button('test', label='Two')
+                pm.button(label='Two')
         pm.tabLayout(  self.tab, 
                     edit=1, 
                     tabLabel=(  (self.skelTab,'Skeleton'), 
                                 (self.bhvTab,'Behaviors'), 
                                 (self.appTab,'Appearance')))
-        # vl = QtWidgets.QVBoxLayout(self)
-        # self.limbs_tw = QtWidgets.QTabWidget()
-        # self.limbs_tw.addTab(self.skel_ui, 'Skeleton')
-        # index = self.limbs_tw.addTab(QtWidgets.QTabWidget(self.limbs_tw), 'Behaviors')
-        # self.limbs_tw.setTabEnabled(index, False)
-        # index = self.limbs_tw.addTab(QtWidgets.QTabWidget(self.limbs_tw), 'Appearance')
-        # self.limbs_tw.setTabEnabled(index, False)
-        # vl.addWidget(self.limbs_tw)
     
 
 #=========== MISC ====================================
@@ -59,7 +54,25 @@ class LimbSetup_UI():
     def UpdateNaming(self):
         self.skel_ui.RebuildAll()
 
+#=========== SAVE ====================================
+
+    def Save_Dialog(self, ignore):
+        limbIDs, templateName = self.saveDialog.SaveTemplate_Dialog()
+        if limbIDs:
+            data = self.limbSetup.saveLoadSkel.GetData(limbIDs)
+            filePath = self.limbSetup.fileMng.GetTemplatePath(templateName)
+            self.limbSetup.jsonMng.Save(filePath, data)
+
     
+    def Load_Dialog(self, ignore):
+        templateFiles = self.limbSetup.fileMng.GetTemplateFiles()
+        filePaths = self.loadDialog.LoadTemplate_Dialog(templateFiles)
+        for filePath in filePaths:
+            data = self.limbSetup.jsonMng.Load(filePath)
+            self.limbSetup.saveLoadSkel.LoadData(data)
+        self.skel_ui.Populate()
+
+
 # #=========== MIRROR ====================================
 
 #     def Mirror_X(self):
@@ -128,34 +141,6 @@ class LimbSetup_UI():
 #                 # MISSING LOGIC TO ADD TO SCENE BASED ON TAB
 #                 # Missing Behavior + appearace logic too
     
-
-# #=========== SAVE ====================================
-
-#     def Save_Dialog(self):
-#         saveUI = save_ui.SaveTemplate_UI(   self.limbSetup.limbMng, 
-#                                             self.limbSetup.nameMng,
-#                                             self)
-#         saveUI.exec_()
-
-#     def _Save_Template(self, limbIDs, templateName):
-#         data = self.limbSetup.saveLoadSkel.GetData(limbIDs)
-#         filePath = self.limbSetup.fileMng.GetTemplatePath(templateName)
-#         self.limbSetup.jsonMng.Save(filePath, data)
-
-
-# #=========== LOAD ====================================
-
-#     def Load_Dialog(self):
-#         templateFiles = self.limbSetup.fileMng.GetTemplateFiles()
-#         loadUI = load_ui.LoadTemplate_UI(templateFiles, self)
-#         loadUI.exec_()
-
-
-#     def _Load_Template(self, filePaths):
-#         for filePath in filePaths:
-#             data = self.limbSetup.jsonMng.Load(filePath)
-#             self.limbSetup.saveLoadSkel.LoadData(data)
-#         self.skel_ui.Populate()
 
 
 

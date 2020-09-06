@@ -26,6 +26,7 @@ class PayneFreeRigSuite_UI():
         self.rigSetupUI = rs_ui.RigSetup_UI(self.pfrs.rigSetup,
                                             self)
         self._Setup()
+        self.Debug()
         # self.Populate()
 
     # def Populate(self):
@@ -45,10 +46,19 @@ class PayneFreeRigSuite_UI():
         # self.limbs_tw.NewRig(self.pfrs.rigSceneMng.rootGrp)
         # self.pfrs.saveLoadRig.Save()
 
+    def Debug(self):
+        path = r'D:\Assets\Programming\Python\Maya\ModularAutoRigger\TEST_OUTPUT\temp_sphere.ma'
+        self.pfrs.rigSetup.NewRig('tempPrefix', 
+                                    range(5), 
+                                    True, 
+                                    path)
+        self.UpdateEnableUI()
+
 #=========== SETUP ====================================
 
     def _Setup(self):
         name = '%s - Payne Free %s Suite - v%s' % (LICENSE, SUITE, __version__)
+        name += ' - by Trevor Payne'
         with pm.window(mb=True,mbv=True, t=name, w=500, h=500) as self.win:
             with pm.tabLayout(enable=0) as self.rigTabs:
                 with pm.horizontalLayout() as self.lsLayout:
@@ -77,14 +87,14 @@ class PayneFreeRigSuite_UI():
                 pm.menuItem(l='Quit', command=(''))
                 
             with pm.menu('Limbs'):
-                with pm.subMenuItem(l='Mirror'):
+                with pm.subMenuItem(l='Mirror', en=0):
                     pm.menuItem(l='X')
                     pm.menuItem(l='Y')
                     pm.menuItem(l='Z')
-                pm.menuItem(l='Duplicate')
+                pm.menuItem(l='Duplicate', en=0)
                 pm.menuItem(divider=1)
-                pm.menuItem(l='Load Template...')
-                pm.menuItem(l='Save Template...')
+                pm.menuItem(l='Load Template...', c=self.limbSetup_ui.Load_Dialog)
+                pm.menuItem(l='Save Template...', c=self.limbSetup_ui.Save_Dialog)
 
     
 #=========== FUNCTIONALITY ====================================
@@ -98,13 +108,13 @@ class PayneFreeRigSuite_UI():
         # self.pfrs.limbSetup.skel.sceneMng.KillSelectionJob()
         pm.deleteUI(self.win, window=True)
     
+
+    def UpdateEnableUI(self):
+        pm.tabLayout(self.rigTabs, e=1, en=bool(self.pfrs.rigSetup.rigRoot))
+
     def NewRig_Dialog(self, ignore):
         self.rigSetupUI.NewRig_Dialog()
-        # rigUI = rs_ui.RigSetup_UI(  self.pfrs.nameMng,
-        #                             self.pfrs.fileMng,
-        #                             self)
-        # if (rigUI.exec_()):
-        #     self.NewRig()
+        self.UpdateEnableUI()
 
     def EditRig_Dialog(self, ignore):
         self.rigSetupUI.EditRig_Dialog()

@@ -1,0 +1,49 @@
+{
+    "joints": {
+        "1": {
+            "upAxis": [
+                0.0, 
+                0.0, 
+                1.0
+            ], 
+            "rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "rotationOrder": 0, 
+            "limbIndex": 0, 
+            "side": 0, 
+            "limbID": 1, 
+            "translate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "type": 0, 
+            "ID": 1, 
+            "pfrsName": "Joint_000", 
+            "aimAxis": [
+                0.0, 
+                1.0, 
+                0.0
+            ]
+        }
+    }, 
+    "limbs": [
+        {
+            "sideIndex": 0, 
+            "mirrorLimbID": -1, 
+            "parentJntIndex": 0, 
+            "bhvIndex": 0, 
+            "jointIDs": [
+                1
+            ], 
+            "ID": 1, 
+            "typeIndex": 0, 
+            "parentCtrID": 0, 
+            "pfrsName": "Limb_001", 
+            "parentLimbID": -1
+        }
+    ]
+}

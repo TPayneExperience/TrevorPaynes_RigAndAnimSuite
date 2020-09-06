@@ -25,8 +25,9 @@ class Skeleton():
         self.sceneMng = sm.SKEL_Scene_Manager(limbMng, jntMng, nameMng, self)
 
 
-
-
+    def NewRig(self, rigRoot):
+        self.jntMng.NewRig(rigRoot)
+        self.sceneMng.NewRig(rigRoot)
 
 
 

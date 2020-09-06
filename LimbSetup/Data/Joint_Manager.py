@@ -48,7 +48,8 @@ class Joint_Manager():
 
     # JOINTS
     def Add(self, limbID, count):
-        start = max(len(self._limbJoints[limbID])-1, 0)
+        start = len(self._limbJoints[limbID])
+        jointsCreated = []
         for index in range(start, start + count):
             jointID = self._nextJointID
             self._nextJointID += 1
@@ -84,6 +85,8 @@ class Joint_Manager():
             self._limbJoints[limbID].append(jointID)
             self.UpdateJointName(limbID, jointID)
             pm.editDisplayLayerMembers(self.skelLayer, joint)
+            jointsCreated.append(joint)
+        return jointsCreated
 
     def Remove(self, limbID, jointIDs):
         for jointID in jointIDs:
@@ -97,11 +100,11 @@ class Joint_Manager():
     # LIMBS
     def AddLimb(self, limbID):
         self._limbJoints[limbID] = []
-        self.Add(limbID, 1)
-        jointID = self.GetLimbJointIDs(limbID)[0]
-        self._joints[jointID].limbIndex.set(9900)
-        self._joints[jointID].pfrsName.set('Terminator')
-        self.UpdateJointName(limbID, jointID)
+        # self.Add(limbID, 1)
+        # jointID = self.GetLimbJointIDs(limbID)[0]
+        # self._joints[jointID].limbIndex.set(9900)
+        # self._joints[jointID].pfrsName.set('END')
+        # self.UpdateJointName(limbID, jointID)
     
     def RemoveLimb(self, limbID):
         jointIDs = self.GetLimbJointIDs(limbID)

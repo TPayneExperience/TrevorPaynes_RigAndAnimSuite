@@ -1,0 +1,195 @@
+{
+    "joints": {
+        "1": {
+            "upAxis": [
+                0.0, 
+                0.0, 
+                1.0
+            ], 
+            "rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "rotationOrder": 0, 
+            "limbIndex": 0, 
+            "side": 0, 
+            "limbID": 1, 
+            "translate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "type": 0, 
+            "ID": 1, 
+            "pfrsName": "Joint_000", 
+            "aimAxis": [
+                0.0, 
+                1.0, 
+                0.0
+            ]
+        }, 
+        "2": {
+            "upAxis": [
+                0.0, 
+                0.0, 
+                1.0
+            ], 
+            "rotate": [
+                0.0, 
+                0.0, 
+                -90.0
+            ], 
+            "rotationOrder": 0, 
+            "limbIndex": 0, 
+            "side": 0, 
+            "limbID": 2, 
+            "translate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "type": 0, 
+            "ID": 2, 
+            "pfrsName": "Shoulder", 
+            "aimAxis": [
+                0.0, 
+                1.0, 
+                0.0
+            ]
+        }, 
+        "3": {
+            "upAxis": [
+                0.0, 
+                0.0, 
+                1.0
+            ], 
+            "rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "rotationOrder": 0, 
+            "limbIndex": 0, 
+            "side": 0, 
+            "limbID": 3, 
+            "translate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "type": 0, 
+            "ID": 3, 
+            "pfrsName": "Joint_000", 
+            "aimAxis": [
+                0.0, 
+                1.0, 
+                0.0
+            ]
+        }, 
+        "4": {
+            "upAxis": [
+                0.0, 
+                0.0, 
+                1.0
+            ], 
+            "rotate": [
+                0.0, 
+                0.0, 
+                -90.0
+            ], 
+            "rotationOrder": 0, 
+            "limbIndex": 1, 
+            "side": 0, 
+            "limbID": 2, 
+            "translate": [
+                5.0, 
+                0.0, 
+                0.0
+            ], 
+            "type": 0, 
+            "ID": 4, 
+            "pfrsName": "Elbow", 
+            "aimAxis": [
+                0.0, 
+                1.0, 
+                0.0
+            ]
+        }, 
+        "5": {
+            "upAxis": [
+                0.0, 
+                0.0, 
+                1.0
+            ], 
+            "rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "rotationOrder": 0, 
+            "limbIndex": 2, 
+            "side": 0, 
+            "limbID": 2, 
+            "translate": [
+                5.0, 
+                0.0, 
+                0.0
+            ], 
+            "type": 0, 
+            "ID": 5, 
+            "pfrsName": "END", 
+            "aimAxis": [
+                0.0, 
+                1.0, 
+                0.0
+            ]
+        }
+    }, 
+    "limbs": [
+        {
+            "sideIndex": 0, 
+            "mirrorLimbID": -1, 
+            "parentJntIndex": 0, 
+            "bhvIndex": 0, 
+            "jointIDs": [
+                1
+            ], 
+            "ID": 1, 
+            "typeIndex": 0, 
+            "parentCtrID": 0, 
+            "pfrsName": "Clav", 
+            "parentLimbID": -1
+        }, 
+        {
+            "sideIndex": 0, 
+            "mirrorLimbID": -1, 
+            "parentJntIndex": 0, 
+            "bhvIndex": 0, 
+            "jointIDs": [
+                2, 
+                4, 
+                5
+            ], 
+            "ID": 2, 
+            "typeIndex": 0, 
+            "parentCtrID": 0, 
+            "pfrsName": "Arm", 
+            "parentLimbID": 1
+        }, 
+        {
+            "sideIndex": 0, 
+            "mirrorLimbID": -1, 
+            "parentJntIndex": 0, 
+            "bhvIndex": 0, 
+            "jointIDs": [
+                3
+            ], 
+            "ID": 3, 
+            "typeIndex": 0, 
+            "parentCtrID": 0, 
+            "pfrsName": "Wrist", 
+            "parentLimbID": 2
+        }
+    ]
+}
