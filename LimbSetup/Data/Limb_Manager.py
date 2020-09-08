@@ -68,6 +68,32 @@ class Limb_Manager():
         pm.delete(self._limbs[limbID])
         del(self._limbs[limbID])
 
+    def DuplicateLimb(self, sourceLimbID):
+        targetID = self._nextLimbID
+        self._nextLimbID += 1
+        source = self.GetLimb(sourceLimbID)
+        target = pm.duplicate(source)[0]
+        target.ID.set(targetID)
+        sourceName = source.pfrsName.get()
+        for i in range(2,9999):
+            name = '%s_%d' % (sourceName, i)
+            if self.IsNameUnique(name):
+                break
+        target.pfrsName.set(name)
+        self._limbs[targetID] = target
+        return target.ID.get()
+
+    def SetMirrorLimb(self, sourceID, targetID):
+        source = self.GetLimb(sourceID)
+        target = self.GetLimb(targetID)
+        source.mirrorLimbID.set(targetID)
+        target.mirrorLimbID.set(sourceID)
+        target.pfrsName.set(source.pfrsName.get())
+        source.sideIndex.set(1)
+        target.sideIndex.set(2)
+        return targetID
+
+
 #============= PARENTS / TREE MANIPULATION ============================
 
     def GetRootLimbIDs(self):
@@ -78,7 +104,7 @@ class Limb_Manager():
         return rootLimbIDs
 
     def GetLimbCreationOrder(self, rootLimbID):
-        '''Returns an ordered list of limb IDs from root to bottom most child'''
+        '''Returns an ordered list of limb IDs FROM ROOT TO bottom most CHILD'''
         limbParents = {}
         for limbID, limb in self._limbs.items():
             limbParents[limbID] = limb.parentLimbID.get()
@@ -100,6 +126,12 @@ class Limb_Manager():
             if (limb.parentLimbID.get() == limbID):
                 childIDs.append(limb.ID.get())
         return childIDs
+
+    def IsNameUnique(self, name):
+        limbNames = []
+        for limb in list(self._limbs.values()):
+            limbNames.append(limb.pfrsName.get())
+        return (name not in limbNames)
 
 
 

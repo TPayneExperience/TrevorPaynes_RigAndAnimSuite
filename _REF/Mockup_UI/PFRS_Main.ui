@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>467</width>
+    <width>532</width>
     <height>698</height>
    </rect>
   </property>
@@ -52,7 +52,7 @@
                  <bool>true</bool>
                 </property>
                 <property name="currentIndex">
-                 <number>0</number>
+                 <number>1</number>
                 </property>
                 <widget class="QWidget" name="tab_11">
                  <attribute name="title">
@@ -779,12 +779,12 @@
                              </item>
                              <item>
                               <property name="text">
-                               <string>IK Pole Vector - Handle - End</string>
+                               <string>IK Pole Vector - Control - End</string>
                               </property>
                              </item>
                              <item>
                               <property name="text">
-                               <string>IK Pole Vector - Control - End</string>
+                               <string>IK Pole Vector - Handle - End</string>
                               </property>
                              </item>
                              <item>
@@ -812,12 +812,12 @@
                              </item>
                              <item>
                               <property name="text">
-                               <string>IK Chain - Handle 01</string>
+                               <string>IK Chain - Control 01</string>
                               </property>
                              </item>
                              <item>
                               <property name="text">
-                               <string>IK Chain - Control 01</string>
+                               <string>IK Chain - Handle 01</string>
                               </property>
                              </item>
                              <item>
@@ -3936,7 +3936,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>467</width>
+     <width>532</width>
      <height>21</height>
     </rect>
    </property>

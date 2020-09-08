@@ -15,12 +15,12 @@ class SKEL_Joint_Hierarchy_UI():
 
     def Populate(self):
         self.Depopulate()
-        if (self.limbID != -1):
-            for jointID in self.jntMng.GetLimbJointIDs(self.limbID):
-                joint = self.jntMng.GetJoint(jointID)
-                name = joint.pfrsName.get()
-                pm.treeView(self.widget, e=1, addItem=(jointID, ''))
-                pm.treeView(self.widget, e=1, displayLabel=(jointID, name))
+        # if (self.limbID != -1):
+        for jointID in self.jntMng.GetLimbJointIDs(self.limbID):
+            joint = self.jntMng.GetJoint(jointID)
+            name = joint.pfrsName.get()
+            pm.treeView(self.widget, e=1, addItem=(jointID, ''))
+            pm.treeView(self.widget, e=1, displayLabel=(jointID, name))
     
 # #=========== SETUP ====================================
 
@@ -38,10 +38,11 @@ class SKEL_Joint_Hierarchy_UI():
 
     def SetLimbID(self, limbID):
         self.limbID = limbID
-        if (limbID == -1):
-            pm.treeView(self.widget, e=1, removeAll=1)
-        else:
-            self.Populate()
+        self.Populate()
+        # if (limbID == -1):
+        #     pm.treeView(self.widget, e=1, removeAll=1)
+        # else:
+        #     self.Populate()
 
     def SelectionChanged(self):
         jointIDsStr = pm.treeView(self.widget, q=1, selectItem=1)

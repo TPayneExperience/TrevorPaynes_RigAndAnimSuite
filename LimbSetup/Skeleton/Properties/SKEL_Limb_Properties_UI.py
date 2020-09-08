@@ -38,12 +38,6 @@ class SKEL_Limb_Properties_UI:
         for job in self.scriptJobs:
             pm.scriptJob(kill=job, force=True)
 
-    def Show(self):
-        pass
-
-    def Hide(self):
-        pass
-
 # #=========== POPULATE ==============================================
 
     def Populate(self):

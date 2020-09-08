@@ -10,21 +10,21 @@ class LoadTemplate_UI:
             return self.selectedFiles
         return None
 
-#=========== SETUP ====================================
-
     def _Setup(self):
         form = pm.setParent(q=1)
         temp_fl = pm.frameLayout(l='Select Template(s) to LOAD', 
                                     bv=1, mh=5, mw=5, p=form)
         self.limbs_tv = pm.treeView(adr=0, arp=0, ann='CTR or Shift + LMB to multi-select',
                                     elc=lambda x,y: '', 
-                                    scc=self.LimbSelected)
+                                    scc=self._LimbSelected)
         for name, path in self.templateFiles.items():
             pm.treeView(self.limbs_tv, e=1, addItem=(path, ''))
             pm.treeView(self.limbs_tv, e=1, displayLabel=(path, name))
         
-        self.close_btn = pm.button(l='Close', parent=form, c=self.Close)
-        self.load_btn = pm.button(l='Load', parent=form, c=self.Load, en=0)
+        self.close_btn = pm.button(l='Close', parent=form, 
+                                    c=lambda x: pm.layoutDialog(dis='close'))
+        self.load_btn = pm.button(l='Load', parent=form, en=0, 
+                                    c=lambda x: pm.layoutDialog(dis='load'))
         pm.formLayout(form, edit=True, width=430, height=320,
                         attachForm=[(temp_fl, 'top', 5), 
                                     (temp_fl, 'left', 5), 
@@ -37,18 +37,9 @@ class LoadTemplate_UI:
                         attachPosition=[(self.close_btn, 'right', 5, 50), 
                                         (self.load_btn, 'left', 5, 50)])
 
-#=========== FUNCTIONALITY ====================================
-
-    def LimbSelected(self):
+    def _LimbSelected(self):
         self.selectedFiles = pm.treeView(self.limbs_tv, q=1, si=1)
         pm.button(self.load_btn, e=1, enable=bool(self.selectedFiles))
-
-    def Close(self, ignore):
-        pm.layoutDialog(dis='close')
-    
-    def Load(self, ignore):
-        pm.layoutDialog(dis='load')
-
 
 
 #=========== DEPRICATED ====================================

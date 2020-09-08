@@ -37,13 +37,15 @@ class SaveTemplate_UI:
                 limb = self.limbMng.GetLimb(limbID)
                 name = limb.pfrsName.get()
                 parentID = limb.parentLimbID.get()
-                if (parentID == -1):
-                    parentID = ''
+                # if (parentID == -1):
+                #     parentID = ''
                 pm.treeView(self.limbs_tv, e=1, addItem=(limbID, str(parentID)))
                 pm.treeView(self.limbs_tv, e=1, displayLabel=(limbID, name))
         
-        self.close_btn = pm.button(l='Close', parent=form, c=self.Close)
-        self.save_btn = pm.button(l='Save', parent=form, c=self.Save)
+        self.close_btn = pm.button(l='Close', parent=form, 
+                                c=lambda x: pm.layoutDialog(dis='close'))
+        self.save_btn = pm.button(l='Save', parent=form, 
+                                c=lambda x: pm.layoutDialog(dis='save'))
         pm.formLayout(form, edit=True, width=430, height=320,
                         attachForm=[(self.name_grp, 'top', 5), 
                                     (self.name_grp, 'left', 5), 
@@ -88,12 +90,6 @@ class SaveTemplate_UI:
             self.selectedLimbs.remove(limbName)
         self.Update_SaveBtn()
         return True
-
-    def Close(self, ignore):
-        pm.layoutDialog(dis='close')
-    
-    def Save(self, ignore):
-        pm.layoutDialog(dis='save')
 
     def NameChanged(self, text):
         self.templateName = text

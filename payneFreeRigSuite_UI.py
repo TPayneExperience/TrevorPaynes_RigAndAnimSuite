@@ -87,14 +87,21 @@ class PayneFreeRigSuite_UI():
                 pm.menuItem(l='Quit', command=(''))
                 
             with pm.menu('Limbs'):
-                with pm.subMenuItem(l='Mirror', en=0):
-                    pm.menuItem(l='X')
-                    pm.menuItem(l='Y')
-                    pm.menuItem(l='Z')
-                pm.menuItem(l='Duplicate', en=0)
+                with pm.subMenuItem(l='Mirror'):
+                    pm.menuItem(l='X', 
+                        c=lambda x: self.limbSetup_ui.Mirror_Dialog('X'))
+                    pm.menuItem(l='Y', 
+                        c=lambda x: self.limbSetup_ui.Mirror_Dialog('Y'))
+                    pm.menuItem(l='Z', 
+                        c=lambda x: self.limbSetup_ui.Mirror_Dialog('Z'))
+                pm.menuItem(l='Duplicate', c=self.limbSetup_ui.Duplicate_Dialog)
                 pm.menuItem(divider=1)
                 pm.menuItem(l='Load Template...', c=self.limbSetup_ui.Load_Dialog)
                 pm.menuItem(l='Save Template...', c=self.limbSetup_ui.Save_Dialog)
+
+            with pm.menu('Options'):
+                pm.menuItem(l='Share...', en=0)
+                pm.menuItem(l='Report Bug...', en=0)
 
     
 #=========== FUNCTIONALITY ====================================

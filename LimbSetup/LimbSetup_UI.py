@@ -4,10 +4,10 @@ import pymel.core as pm
 import Skeleton.Skeleton_UI as skel_ui
 reload(skel_ui)
 
-# import Popups.MirrorLimbs_UI as mir_ui
-# reload(mir_ui)
-# import Popups.DuplicateLimbs_UI as dup_ui
-# reload(dup_ui)
+import Popups.MirrorLimbs_UI as mir_ui
+reload(mir_ui)
+import Popups.DuplicateLimbs_UI as dup_ui
+reload(dup_ui)
 
 import Popups.SaveTemplate_UI as save_ui
 reload(save_ui)
@@ -18,11 +18,18 @@ reload(load_ui)
 class LimbSetup_UI():
     def __init__(self, limbSetup):
         self.limbSetup = limbSetup
+        self.limbMng = limbSetup.limbMng
+        self.jntMng = limbSetup.jntMng
+        self.nameMng = limbSetup.nameMng
+        self.fileMng = limbSetup.fileMng
+        self.jsonMng = limbSetup.jsonMng
+        self.saveLoadSkel = limbSetup.saveLoadSkel
 
-        self.mirror_axis = '' # 'X', 'Y', 'Z'
-        self.saveDialog = save_ui.SaveTemplate_UI(  self.limbSetup.limbMng, 
-                                                    self.limbSetup.nameMng)
+        self.saveDialog = save_ui.SaveTemplate_UI(  self.limbMng, 
+                                                    self.nameMng)
         self.loadDialog = load_ui.LoadTemplate_UI()
+        self.dupDialog = dup_ui.DuplicateLimbs_UI(self.limbMng)
+        self.mirDialog = mir_ui.MirrorLimbs_UI(self.limbMng)
 
         self._Setup()
     
@@ -48,98 +55,62 @@ class LimbSetup_UI():
                                 (self.bhvTab,'Behaviors'), 
                                 (self.appTab,'Appearance')))
     
-
-#=========== MISC ====================================
-
-    def UpdateNaming(self):
-        self.skel_ui.RebuildAll()
-
-#=========== SAVE ====================================
+#=========== DIALOGS ====================================
 
     def Save_Dialog(self, ignore):
         limbIDs, templateName = self.saveDialog.SaveTemplate_Dialog()
         if limbIDs:
-            data = self.limbSetup.saveLoadSkel.GetData(limbIDs)
-            filePath = self.limbSetup.fileMng.GetTemplatePath(templateName)
-            self.limbSetup.jsonMng.Save(filePath, data)
+            data = self.saveLoadSkel.GetData(limbIDs)
+            filePath = self.fileMng.GetTemplatePath(templateName)
+            self.jsonMng.Save(filePath, data)
 
     
     def Load_Dialog(self, ignore):
-        templateFiles = self.limbSetup.fileMng.GetTemplateFiles()
+        templateFiles = self.fileMng.GetTemplateFiles()
         filePaths = self.loadDialog.LoadTemplate_Dialog(templateFiles)
-        for filePath in filePaths:
-            data = self.limbSetup.jsonMng.Load(filePath)
-            self.limbSetup.saveLoadSkel.LoadData(data)
-        self.skel_ui.Populate()
+        if filePaths:
+            for filePath in filePaths:
+                data = self.jsonMng.Load(filePath)
+                self.saveLoadSkel.LoadData(data)
+            self.skel_ui.Populate()
 
+    def Duplicate_Dialog(self, ignore):
+        sourceParentIDs = self.dupDialog.Duplicate_Dialog()
+        if sourceParentIDs:
+            sourceToTargetIDs = self._Duplicate_Limbs(sourceParentIDs)
+            for sourceID, targetID in sourceToTargetIDs.items():
+                self.jntMng.DuplicateLimb(sourceID, targetID)
+            self.skel_ui.Populate()
 
-# #=========== MIRROR ====================================
+    def _Duplicate_Limbs(self, sourceParentIDs):
+            sourceToTargetIDs = {}
+            for sourceID in sourceParentIDs:
+                targetID = self.limbMng.DuplicateLimb(sourceID)
+                sourceToTargetIDs[sourceID] = targetID
 
-#     def Mirror_X(self):
-#         self.mirror_axis = 'X'
-#         self._Mirror_Dialog()
+            for sParentID in sourceParentIDs:
+                for sChildID in self.limbMng.GetLimbCreationOrder(sParentID)[1:]:
+                    tChildID = self.limbMng.DuplicateLimb(sChildID)
+                    sChild = self.limbMng.GetLimb(sChildID)
+                    tChild = self.limbMng.GetLimb(tChildID)
+                    tParentID = sourceToTargetIDs[sChild.parentLimbID.get()]
+                    tChild.parentLimbID.set(tParentID)
+                    sourceToTargetIDs[sChildID] = tChildID
+            return sourceToTargetIDs
 
-#     def Mirror_Y(self):
-#         self.mirror_axis = 'Y'
-#         self._Mirror_Dialog()
+    def Mirror_Dialog(self, axis):
+        sourceParentIDs = self.mirDialog.Mirror_Dialog()
+        if sourceParentIDs:
+            sourceToTargetIDs = self._Duplicate_Limbs(sourceParentIDs)
+            for sourceID, targetID in sourceToTargetIDs.items():
+                self.limbMng.SetMirrorLimb(sourceID, targetID)
+                self.jntMng.DuplicateLimb(sourceID, targetID)
+                self.jntMng.SetMirrorLimb(sourceID, targetID, axis)
+            self.skel_ui.Populate()
 
-#     def Mirror_Z(self):
-#         self.mirror_axis = 'Z'
-#         self._Mirror_Dialog()
+    def UpdateNaming(self):
+        self.skel_ui.RebuildAll()
 
-#     def _Mirror_Dialog(self):
-#         mirUI = mir_ui.MirrorLimbs_UI(self.limbSetup.limbMng, self)
-#         mirUI.exec_()
-    
-#     def _Mirror_Limbs(self, limbIDs):
-#         '''Only call by dialog'''
-#         for limbID in limbIDs:
-#             sourceLimbIDs = self.limbSetup.limbMng.GetLimbCreationOrder(limbID)
-#             sourceToTargetLimbIDs = {}
-#             for i in range(len(sourceLimbIDs)):
-#                 sourceLimbID = sourceLimbIDs[i]
-#                 targetLimbID = self.limbSetup.limbMng.Mirror(sourceLimbID)
-#                 self.limbSetup.jntMng.Mirror(sourceLimbID, targetLimbID, self.mirror_axis)
-#                 sourceToTargetLimbIDs[sourceLimbID] = targetLimbID
-#                 sourceParentID = self.limbSetup.limbMng.GetParentID(sourceLimbID)
-#                 if sourceParentID in sourceToTargetLimbIDs:
-#                     self.limbSetup.limbMng.SetParent(targetLimbID, sourceToTargetLimbIDs[sourceParentID])
-#                     self.limbSetup.jntMng.SetParentLimb(targetLimbID, sourceToTargetLimbIDs[sourceParentID])
-#                 else:
-#                     self.limbSetup.limbMng.SetParent(targetLimbID, sourceParentID)
-#                     self.limbSetup.jntMng.SetParentLimb(targetLimbID, sourceParentID)
-#                 self.skel_ui.AddLimb(targetLimbID)
-#                 self.skel_ui.RenameLimb(sourceLimbID)
-#             self.limbSetup.limbMng.SetLimbMirrorRoot(limbID)
-#             self.skel_ui.limbProp_gb.SetLimb(limbID)
-#             self.skel_ui.limbProp_gb.Populate()
-    
-# #=========== DUPLICATE ====================================
-
-#     def Duplicate_Dialog(self):
-#         dupUI = dup_ui.DuplicateLimbs_UI(self.limbSetup.limbMng, self)
-#         dupUI.exec_()
-    
-#     def _Duplicate_Limbs(self, limbIDs):
-#         '''Only call by dialog'''
-#         for limbID in limbIDs:
-#             sourceLimbIDs = self.limbSetup.limbMng.GetLimbCreationOrder(limbID)
-#             sourceToTargetLimbIDs = {}
-#             for i in range(len(sourceLimbIDs)):
-#                 sourceLimbID = sourceLimbIDs[i]
-#                 targetLimbID = self.limbSetup.limbMng.Duplicate(sourceLimbID)
-#                 self.limbSetup.jntMng.Duplicate(sourceLimbID, targetLimbID)
-#                 sourceToTargetLimbIDs[sourceLimbID] = targetLimbID
-#                 sourceParentID = self.limbSetup.limbMng.GetParentID(sourceLimbID)
-#                 if sourceParentID in sourceToTargetLimbIDs:
-#                     self.limbSetup.limbMng.SetParent(targetLimbID, sourceToTargetLimbIDs[sourceParentID])
-#                     self.limbSetup.jntMng.SetParentLimb(targetLimbID, sourceToTargetLimbIDs[sourceParentID])
-#                 else:
-#                     self.limbSetup.limbMng.SetParent(targetLimbID, sourceParentID)
-#                     self.limbSetup.jntMng.SetParentLimb(targetLimbID, sourceParentID)
-#                 self.skel_ui.AddLimb(targetLimbID)
-#                 # MISSING LOGIC TO ADD TO SCENE BASED ON TAB
-#                 # Missing Behavior + appearace logic too
     
 
 
