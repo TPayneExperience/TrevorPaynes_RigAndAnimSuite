@@ -47,7 +47,7 @@ class Joint_Manager():
         return len(self._joints)
 
 
-# #============= FUNCTIONALITY ============================
+#============= FUNCTIONALITY ============================
 
     # LIMBS
     def AddLimb(self, limbID):
@@ -102,11 +102,10 @@ class Joint_Manager():
 
     def Remove(self, limbID, jointIDs):
         for jointID in jointIDs:
-            joint = self._joints[jointID]
-            self._limbJoints[limbID].remove(jointID)
-            del(self._joints[jointID])
             pm.select(d=1)
-            pm.delete(joint)
+            pm.delete(self._joints[jointID])
+            del(self._joints[jointID])
+            self._limbJoints[limbID].remove(jointID)
 
     # RENAME
     def UpdateAllJointNames(self):

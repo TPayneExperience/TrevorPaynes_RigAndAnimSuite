@@ -20,20 +20,11 @@ class Skeleton_UI():
         self.limbMng = skeleton.limbMng
         self.sceneMng = skeleton.sceneMng
 
-        self._isPopulating = False
         self._Setup()
-        # self._Setup_Connections()
 
     def NewRig(self, rigRoot):
         pass
 
-    # def NewRig(self, rigRoot):
-    #     self.skel.jntMng.NewRig(rigRoot)
-    #     self.skel.sceneMng.NewRig(rigRoot)
-        #self.limbHier_ui.NewRig()
-        # self.skel.limbMng.NewRig()
-        # self.Populate()
-    
     def Populate(self): # CALLED BY MAIN WINDOW
         self.limbHier_ui.Populate()
         self.jntHier_ui.Depopulate()

@@ -6,13 +6,13 @@ class Limb_Manager():
 
         self.nameMng = nameMng
 
-        self.bhvTypes = [   'FK Chain',
-                            'FK Branch',
-                            'FK IK Chain',
-                            'FK IK Branch',
-                            'IK',
-                            'LookAt',
-                            'Constraint']
+        # self.bhvTypes = [   'FK Chain',
+        #                     'FK Branch',
+        #                     'FK IK Chain',
+        #                     'FK IK Branch',
+        #                     'IK',
+        #                     'LookAt',
+        #                     'Constraint']
 
         self.limbTypes = [  'Chain', 
                             'Branch', 
@@ -37,13 +37,11 @@ class Limb_Manager():
         return self.limbSides[self._limbs[limbID].sideIndex.get()]
 
     def Add(self):
-        # MISSING: CONNECT TO ROOT RIG NODE
         limbID = self._nextLimbID
         self._nextLimbID += 1
         
         pfrsName = 'Limb_%03d' % limbID
         limbTypes = ':'.join(self.limbTypes)
-        bhvTypes = ':'.join(self.bhvTypes)
         limbSides = ':'.join(self.limbSides)
 
         limb = pm.createNode('network', name='Limb')
@@ -56,7 +54,7 @@ class Limb_Manager():
         pm.addAttr(limb, ln='parentLimbID', at='long', dv=-1)
         pm.addAttr(limb, ln='parentJntIndex', at='enum', enumName='None')
         pm.addAttr(limb, ln='parentCtrID', at='long')
-        pm.addAttr(limb, ln='bhvIndex', at='enum', enumName=bhvTypes)
+        pm.addAttr(limb, ln='bhvIndex', at='enum', enumName='None') # Set in bhv tab
         pm.addAttr(limb, ln='rigRoot', dt='string')
         pm.connectAttr(self.rigRoot.limbs, limb.rigRoot)
 

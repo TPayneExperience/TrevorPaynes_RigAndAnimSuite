@@ -3,6 +3,8 @@ import pymel.core as pm
 
 import Skeleton.Skeleton_UI as skel_ui
 reload(skel_ui)
+import Behavior.Behavior_UI as bhv_ui
+reload(bhv_ui)
 
 import Popups.MirrorLimbs_UI as mir_ui
 reload(mir_ui)
@@ -46,7 +48,7 @@ class LimbSetup_UI():
             with pm.horizontalLayout() as self.skelTab:
                 self.skel_ui = skel_ui.Skeleton_UI(self.limbSetup.skel)
             with pm.horizontalLayout() as self.bhvTab:
-                pm.button(label='One')
+                self.bhv_ui = bhv_ui.Behavior_UI()
             with pm.horizontalLayout() as self.appTab:
                 pm.button(label='Two')
         pm.tabLayout(  self.tab, 
