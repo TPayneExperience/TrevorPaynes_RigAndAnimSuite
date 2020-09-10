@@ -15,13 +15,15 @@ class SKEL_Joint_Hierarchy_UI():
 
     def Populate(self):
         self.Depopulate()
-        # if (self.limbID != -1):
         for jointID in self.jntMng.GetLimbJointIDs(self.limbID):
             joint = self.jntMng.GetJoint(jointID)
             name = joint.pfrsName.get()
             pm.treeView(self.widget, e=1, addItem=(jointID, ''))
             pm.treeView(self.widget, e=1, displayLabel=(jointID, name))
     
+    def Depopulate(self):
+        pm.treeView(self.widget, e=1, removeAll=1)
+
 # #=========== SETUP ====================================
 
     def _Setup(self):
@@ -39,10 +41,6 @@ class SKEL_Joint_Hierarchy_UI():
     def SetLimbID(self, limbID):
         self.limbID = limbID
         self.Populate()
-        # if (limbID == -1):
-        #     pm.treeView(self.widget, e=1, removeAll=1)
-        # else:
-        #     self.Populate()
 
     def SelectionChanged(self):
         jointIDsStr = pm.treeView(self.widget, q=1, selectItem=1)
@@ -65,9 +63,6 @@ class SKEL_Joint_Hierarchy_UI():
         if (result == 'Yes'):
             self.parent.RemoveJoints(self.limbID, jointIDs)
             self.Populate()
-
-    def Depopulate(self):
-        pm.treeView(self.widget, e=1, removeAll=1)
 
     def Rename(self, jointIDStr, newName):
         if self.nameMng.IsValidCharacterLength(newName):

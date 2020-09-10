@@ -11,9 +11,9 @@ class SKEL_Limb_Properties_UI:
 
         self.limbID = -1
         self.scriptJobs = []
-        self.type_cb = None
-        self.pJnt_cb = None
-        self.side_cb = None
+        self.type_om = None
+        self.pJnt_om = None
+        self.side_om = None
 #         self.limbProps = Limb_Properties
 #         self._parentJoints = []
         self._Setup()
@@ -24,7 +24,6 @@ class SKEL_Limb_Properties_UI:
         self.limbID = limbID
         self.Populate()
         self._AddListeners(limbID)
-
 
     def _AddListeners(self, limbID):
         limb = self.limbMng.GetLimb(limbID)
@@ -44,63 +43,24 @@ class SKEL_Limb_Properties_UI:
         limb = self.limbMng.GetLimb(self.limbID)
         jointCount = len(self.jntMng.GetLimbJointIDs(self.limbID))
         pm.intFieldGrp(self.jntCnt, e=1, v1=jointCount)
-        if (self.type_cb):
-            pm.deleteUI(self.type_cb, control=1)
-            pm.deleteUI(self.pJnt_cb, control=1)
-            pm.deleteUI(self.side_cb, control=1)
-        self.type_cb = pm.attrEnumOptionMenuGrp(l='Type', adj=2, cw=(1,70),
+        if (self.type_om):
+            pm.deleteUI(self.type_om, control=1)
+            pm.deleteUI(self.pJnt_om, control=1)
+            pm.deleteUI(self.side_om, control=1)
+        self.type_om = pm.attrEnumOptionMenuGrp(l='Type', adj=2, cw=(1,70),
                                                 at=limb.typeIndex, p=self.layout)
-        self.pJnt_cb = pm.attrEnumOptionMenuGrp(l='Parent Joint', adj=2, cw=(1,70), 
+        self.pJnt_om = pm.attrEnumOptionMenuGrp(l='Parent Joint', adj=2, cw=(1,70), 
                                                 at=limb.parentJntIndex, p=self.layout)
-        self.side_cb = pm.attrEnumOptionMenuGrp(l='Side', adj=2, cw=(1,70), 
+        self.side_om = pm.attrEnumOptionMenuGrp(l='Side', adj=2, cw=(1,70), 
                                                 at=limb.sideIndex, p=self.layout)
-
-        # # PARENT JOINTS
-        # self._isPopulating = True
-        # self.parentJoint_cb.clear()
-        # limbID = self.limbProps.limbID
-        # parentLimbID = self.limbProps.limbMng.GetParentID(limbID)
-        # self.parentJoint_cb.setCurrentIndex(-1)
-        # if (parentLimbID != -1):
-        #     self.parentJointIDs = self.limbProps.jntMng.GetLimbJointIDs(parentLimbID)
-        #     jointNames = [joint.name for joint in self.limbProps.jntMng.GetJoints(self.parentJointIDs)]
-        #     self.parentJoint_cb.addItems(jointNames)
-        #     parentJointID = self.limbProps.jntMng.GetParentJointId(limbID)
-        #     if parentJointID != -1 and parentJointID in self.parentJointIDs:
-        #         index = self.parentJointIDs.index(parentJointID)
-        #         self.parentJoint_cb.setCurrentIndex(index)
-    
-        # # TYPE
-        # types = self.limbProps.limbMng.GetTypes()
-        # index = types.index(self.limbProps.limbMng.GetType(limbID))
-        # self.type_cb.setCurrentIndex(index)
-
-        # # SIDE
-        # side = self.limbProps.limbMng.GetSide(limbID)
-        # sides = self.limbProps.limbMng.GetSides()[1:]
-        # mirrorRoots = self.limbProps.limbMng.GetLimbMirrorRoots()
-        # if side in sides and limbID in mirrorRoots:
-        #     index = sides.index(side)
-        #     self.side_l.show()
-        #     self.side_cb.show()
-        #     self.side_cb.setCurrentIndex(index)
-        # else:
-        #     self.side_l.hide()
-        #     self.side_cb.hide()
-
-        # # JOINT COUNT
-        # jointIDs = self.limbProps.jntMng.GetLimbJointIDs(self.limbProps.limbID)
-        # self.jointCount_sb.setValue(len(jointIDs))
-        # self._isPopulating = False
-    
 
 #=========== SETUP UI ==============================================
 
     def _Setup(self):
         with pm.columnLayout(adj=1) as self.layout:
-            # self.type_cb = pm.attrEnumOptionMenuGrp(l='Type', adj=2, cw=(1,70))
-            # self.pJnt_cb = pm.attrEnumOptionMenuGrp( l='Parent Joint', adj=2, cw=(1,70))
-            # self.side_cb = pm.attrEnumOptionMenuGrp( l='Side', adj=2, cw=(1,70))
+            # self.type_om = pm.attrEnumOptionMenuGrp(l='Type', adj=2, cw=(1,70))
+            # self.pJnt_om = pm.attrEnumOptionMenuGrp( l='Parent Joint', adj=2, cw=(1,70))
+            # self.side_om = pm.attrEnumOptionMenuGrp( l='Side', adj=2, cw=(1,70))
             self.jntCnt = pm.intFieldGrp(l='Joint Count', nf=1, v1=1, adj=2, cw=(1,70),
                                             cc=self.SetJointCount)
 

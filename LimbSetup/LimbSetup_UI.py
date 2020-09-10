@@ -48,7 +48,7 @@ class LimbSetup_UI():
             with pm.horizontalLayout() as self.skelTab:
                 self.skel_ui = skel_ui.Skeleton_UI(self.limbSetup.skel)
             with pm.horizontalLayout() as self.bhvTab:
-                self.bhv_ui = bhv_ui.Behavior_UI()
+                self.bhv_ui = bhv_ui.Behavior_UI(self.limbSetup.bhv)
             with pm.horizontalLayout() as self.appTab:
                 pm.button(label='Two')
         pm.tabLayout(  self.tab, 

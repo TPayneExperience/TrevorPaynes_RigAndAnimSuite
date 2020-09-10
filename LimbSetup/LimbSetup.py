@@ -11,6 +11,8 @@ reload(saveLoadSkel)
 
 import Skeleton.Skeleton as skel
 reload(skel)
+import Behavior.Behavior as bhv
+reload(bhv)
 
 
 class LimbSetup:
@@ -21,9 +23,9 @@ class LimbSetup:
         self.limbMng = lm.Limb_Manager(nameMng)
         self.jntMng = jm.Joint_Manager(nameMng, self.limbMng)
         self.skel = skel.Skeleton(  nameMng, 
-                                    # fileMng, 
                                     self.jntMng, 
                                     self.limbMng)
+        self.bhv = bhv.Behavior(nameMng, fileMng, self.jntMng, self.limbMng)
         self.saveLoadSkel = saveLoadSkel.SaveLoad_Skeleton( self.limbMng, 
                                                             self.jntMng)
     

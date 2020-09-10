@@ -6,20 +6,12 @@ class Limb_Manager():
 
         self.nameMng = nameMng
 
-        # self.bhvTypes = [   'FK Chain',
-        #                     'FK Branch',
-        #                     'FK IK Chain',
-        #                     'FK IK Branch',
-        #                     'IK',
-        #                     'LookAt',
-        #                     'Constraint']
-
         self.limbTypes = [  'Chain', 
                             'Branch', 
                             'Linear Chain', 
                             'Linear Branch']
 
-        self.limbSides = ['M', 'L', 'R','None']
+        self.limbSides = ['M', 'L', 'R', 'None']
         
     def NewRig(self, rigRoot):
         self.rigRoot = rigRoot
@@ -54,7 +46,7 @@ class Limb_Manager():
         pm.addAttr(limb, ln='parentLimbID', at='long', dv=-1)
         pm.addAttr(limb, ln='parentJntIndex', at='enum', enumName='None')
         pm.addAttr(limb, ln='parentCtrID', at='long')
-        pm.addAttr(limb, ln='bhvIndex', at='enum', enumName='None') # Set in bhv tab
+        pm.addAttr(limb, ln='bhvIndex', at='long')
         pm.addAttr(limb, ln='rigRoot', dt='string')
         pm.connectAttr(self.rigRoot.limbs, limb.rigRoot)
 

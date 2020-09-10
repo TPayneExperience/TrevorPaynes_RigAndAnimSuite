@@ -8,12 +8,9 @@ class SKEL_Limb_Hierarchy_UI(limbHierUI.Limb_Hierarchy_UI):
     def __init__(self, limbHierarchy, skelUI):
         super(SKEL_Limb_Hierarchy_UI, self).__init__(limbHierarchy.limbMng)
 
-        # self.limbMng = limbHierarchy.limbMng
         self.jntMng = limbHierarchy.jntMng
         self.nameMng = limbHierarchy.nameMng
         self.parent = skelUI
-
-        self._isPopulating = False
 
         self._Setup()
 

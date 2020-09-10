@@ -12,7 +12,7 @@ class BHV_Group_Manager:
                             'IK Pole Vector',
                             'IK Chain',
                             'IK Spline']
-        self.bhvSuffixes = ['FK',
+        self.grpSuffixes = ['FK',
                             'CST',
                             'LKAT',
                             'IKPV',
@@ -22,9 +22,9 @@ class BHV_Group_Manager:
     def NewRig(self, rigRoot):
         self.rigRoot = rigRoot
 
-        self._nextBhvID = 1
-        self._bhvs = {} # bhvID : bhvData
-        self._limbBhvs = {} # limbID : [bhvIDs]
+        self._nextGrpID = 1
+        self._groups = {} # grpID : grpData
+        self._limbGrps = {} # limbID : [grpIDs]
 
         pm.select(d=1)
         self.bhvGrp = pm.group(name='Behaviors', em=1)
@@ -34,69 +34,65 @@ class BHV_Group_Manager:
 
 #============= ACCESSORS + MUTATORS ============================
 
-    def GetBhvGrp(self, bhvID):
-        return self._bhvs[bhvID]
+    def GetGroup(self, groupID):
+        return self._groups[groupID]
 
-    def GetLimbBhvIDs(self, limbID):
-        return self._limbBhvs[limbID]
+    def GetLimbGrpIDs(self, limbID):
+        return self._limbGrps[limbID]
 
 #============= FUNCTIONALITY ============================
 
     # LIMBS
     def AddLimb(self, limbID):
-        self._limbBhvs[limbID] = []
-        limb = self.limbMng.GetLimb(limbID)
-        if (limb.typeIndex.get() % 2): # BRANCH
-            bhvTypes = ':'.join(self.bhvTypes[:3])
-        else: # CHAIN
-            bhvTypes = ':'.join(self.bhvTypes)
-        pm.addAttr(limb.bhvIndex, e=1, enumName=':'.join(bhvTypes))
+        self._limbGrps[limbID] = []
     
     def RemoveLimb(self, limbID):
-        bhvIDs = self.GetLimbBhvIDs(limbID)
-        self.Remove(limbID, bhvIDs)
-        del(self._limbBhvs[limbID])
+        groupIDs = self.GetLimbGrpIDs(limbID)
+        self.Remove(limbID, groupIDs)
+        del(self._limbGrps[limbID])
 
     def Add(self, limbID):
-        bhvID = self._nextBhvID
-        self._nextBhvID += 1
+        groupID = self._nextGrpID
+        self._nextGrpID += 1
 
         cstTypes = ':'.join(self.cstTypes)
 
-        bhv = pm.group(em=1, w=1)
-        pm.addAttr(bhv, ln='ID', at='long', dv=bhvID)
-        pm.addAttr(bhv, ln='limbID', at='short', dv=limbID)
-        pm.addAttr(bhv, ln='bhvType', dt='string')
+        group = pm.group(em=1, w=1)
+        pm.addAttr(group, ln='ID', at='long', dv=groupID)
+        pm.addAttr(group, ln='limbID', at='short', dv=limbID)
+        pm.addAttr(group, ln='bhvType', dt='string')
 
         # FK, IK Chain, Constraint
-        pm.addAttr(bhv, ln='jointID', at='short', dv=-1) 
+        pm.addAttr(group, ln='jointID', at='short', dv=-1) 
 
         # Limb Switch
-        pm.addAttr(bhv, ln='parentJntID', at='short', dv=-1) 
+        pm.addAttr(group, ln='parentJntID', at='short', dv=-1) 
 
         # IK Chain, IK Pole Vector - End
-        pm.addAttr(bhv, ln='parentBhvGrpID', at='short', dv=-1) 
+        pm.addAttr(group, ln='parentBhvGrpID', at='short', dv=-1) 
 
         # Look At, IK Pole Vector - Mid
-        pm.addAttr(bhv, ln='distance', at='short') 
+        pm.addAttr(group, ln='distance', at='short') 
         
         # Constraint
-        pm.addAttr(bhv, ln='targetJntID', at='short', dv=-1)
-        pm.addAttr(bhv, ln='weight', at='short', dv=0.5)
-        pm.addAttr(bhv, ln='cstType', at='enum', enumName=cstTypes, dv=0)
+        pm.addAttr(group, ln='targetJntID', at='short', dv=-1)
+        pm.addAttr(group, ln='weight', at='short', dv=0.5)
+        pm.addAttr(group, ln='cstType', at='enum', enumName=cstTypes, dv=0)
 
-        pm.addAttr(bhv, ln='rigRoot', dt='string')
-        pm.connectAttr(self.rigRoot.joints, bhv.rigRoot)
+        pm.addAttr(group, ln='rigRoot', dt='string')
+        pm.connectAttr(self.rigRoot.joints, group.rigRoot)
 
-        self._bhvs[bhvID] = bhv
-        self._limbBhvs[limbID].append(bhvID)
-        return bhv
+        pm.parent(group, self.bhvGrp)
 
-    def Remove(self, limbID, bhvID):
+        self._groups[groupID] = group
+        self._limbGrps[limbID].append(groupID)
+        return group
+
+    def Remove(self, limbID, groupID):
         pm.select(d=1)
-        pm.delete(self._bhvs[bhvID])
-        del(self._bhvs[bhvID])
-        self._limbBhvs[limbID].remove(bhvID)
+        pm.delete(self._groups[groupID])
+        del(self._groups[groupID])
+        self._limbGrps[limbID].remove(groupID)
 
 
 
@@ -113,7 +109,7 @@ class BHV_Group_Manager:
 #     def __init__(self, jntMng):
 #         self.jntMng = jntMng
 
-#         self.grpTypes = ['Limb Switch',
+#         self.bhvTypes = ['Limb Switch',
 
 #                         'FK',
 #                         'Constraint',
@@ -129,24 +125,24 @@ class BHV_Group_Manager:
 #                             'Rotation',
 #                             'Scale']
 
-#         self.distanceGrps = [   self.grpTypes[3], # Look At
-#                                 self.grpTypes[6]] # IK Pole Vector - Mid
+#         self.distanceGrps = [   self.bhvTypes[3], # Look At
+#                                 self.bhvTypes[6]] # IK Pole Vector - Mid
 
-#         self.parentToFkGrps = [ self.grpTypes[3], # Look At
-#                                 self.grpTypes[4], # IK Chain
-#                                 self.grpTypes[5], # IK Spline
-#                                 self.grpTypes[6], # IK Pole Vector - Mid
-#                                 self.grpTypes[7]] # IK Pole Vector - End
+#         self.parentToFkGrps = [ self.bhvTypes[3], # Look At
+#                                 self.bhvTypes[4], # IK Chain
+#                                 self.bhvTypes[5], # IK Spline
+#                                 self.bhvTypes[6], # IK Pole Vector - Mid
+#                                 self.bhvTypes[7]] # IK Pole Vector - End
 
-#         self.ctrGrps = [self.grpTypes[0], # Limb Switch
-#                         self.grpTypes[1], # FK
-#                         self.grpTypes[3], # Look At
-#                         self.grpTypes[5], # IK Spline
-#                         self.grpTypes[6]] # IK Pole Vector - Mid
+#         self.ctrGrps = [self.bhvTypes[0], # Limb Switch
+#                         self.bhvTypes[1], # FK
+#                         self.bhvTypes[3], # Look At
+#                         self.bhvTypes[5], # IK Spline
+#                         self.bhvTypes[6]] # IK Pole Vector - Mid
 
-#         self.jntGrps = [self.grpTypes[1], # FK
-#                         self.grpTypes[2], # Constraint
-#                         self.grpTypes[4]] # IK Chain
+#         self.jntGrps = [self.bhvTypes[1], # FK
+#                         self.bhvTypes[2], # Constraint
+#                         self.bhvTypes[4]] # IK Chain
                         
 
 #         self.NewRig()
@@ -174,7 +170,7 @@ class BHV_Group_Manager:
 
 #     # PARENT JOINT
 #     def HasParentJointID(self, bhvGrpID):
-#         return self._bhvGrps[bhvGrpID].type == self.grpTypes[0]
+#         return self._bhvGrps[bhvGrpID].type == self.bhvTypes[0]
 
 #     def GetParentJointID(self, bhvGrpID):
 #         return self._bhvGrps[bhvGrpID].parentJntID
@@ -205,7 +201,7 @@ class BHV_Group_Manager:
 # #============= CONSTRAINT ============================
 
 #     def IsConstraint(self, bhvGrpID):
-#         return self._bhvGrps[bhvGrpID].type == self.grpTypes[2]
+#         return self._bhvGrps[bhvGrpID].type == self.bhvTypes[2]
 
 #     def GetConstraintTypes(self):
 #         return self.cstTypes
@@ -253,20 +249,20 @@ class BHV_Group_Manager:
 # #============= ADD TYPE ============================
 
 #     def Add_LimbSwitch(self, parentJntID):
-#         bhvGrpType = self.grpTypes[0]
+#         bhvGrpType = self.bhvTypes[0]
 #         bhvGrp = self._Add(bhvGrpType, bhvGrpType)
 #         bhvGrp.parentJntID = parentJntID
 #         return bhvGrp.ID
     
 #     def Add_FK(self, jointID):
-#         bhvGrpType = self.grpTypes[1]
+#         bhvGrpType = self.bhvTypes[1]
 #         jointName = self.jntMng.GetName(jointID)
 #         bhvGrpName = '%s - %s' % (bhvGrpType, jointName)
 #         bhvGrp = self._Add(bhvGrpType, bhvGrpName)
 #         return bhvGrp.ID
 
 #     def Add_Constraint(self, jointID, targetJntID, cstType):
-#         bhvGrpType = self.grpTypes[2]
+#         bhvGrpType = self.bhvTypes[2]
 #         jointName = self.jntMng.GetName(jointID)
 #         bhvGrpName = '%s - %s' % (bhvGrpType, jointName)
 #         bhvGrp = self._Add(bhvGrpType, bhvGrpName)
@@ -275,30 +271,30 @@ class BHV_Group_Manager:
 #         return bhvGrp.ID
 
 #     def Add_LookAt(self):
-#         bhvGrpType = self.grpTypes[3]
+#         bhvGrpType = self.bhvTypes[3]
 #         bhvGrp = self._Add(bhvGrpType, bhvGrpType)
 #         return bhvGrp.ID
 
 #     def Add_IKChain(self, jointID):
-#         bhvGrpType = self.grpTypes[4]
+#         bhvGrpType = self.bhvTypes[4]
 #         jointName = self.jntMng.GetName(jointID)
 #         bhvGrpName = '%s - %s' % (bhvGrpType, jointName)
 #         bhvGrp = self._Add(bhvGrpType, bhvGrpName)
 #         return bhvGrp.ID
 
 #     def Add_IKSpline(self, index):
-#         bhvGrpType = self.grpTypes[5]
+#         bhvGrpType = self.bhvTypes[5]
 #         bhvGrpName = '%s - %02d' % (bhvGrpType, index)
 #         bhvGrp = self._Add(bhvGrpType, bhvGrpName)
 #         return bhvGrp.ID
 
 #     def Add_IKPoleVectorMid(self):
-#         bhvGrpType = self.grpTypes[6]
+#         bhvGrpType = self.bhvTypes[6]
 #         bhvGrp = self._Add(bhvGrpType, bhvGrpType)
 #         return bhvGrp.ID
 
 #     def Add_IKPoleVectorEnd(self):
-#         bhvGrpType = self.grpTypes[7]
+#         bhvGrpType = self.bhvTypes[7]
 #         bhvGrp = self._Add(bhvGrpType, bhvGrpType)
 #         return bhvGrp.ID
 
@@ -333,16 +329,16 @@ class BHV_Group_Manager:
 #         self.NewRig()
 
 #     def NewRig(self):
-#         self._nextBhvID = 1
+#         self._nextGrpID = 1
 #         self._bhvs = {} # bhvID : bhvData
-#         self._limbBhvs = {} # limbID : {bhvType : bhvID}
+#         self._limbGrps = {} # limbID : {bhvType : bhvID}
 #         self._limbSwitchGrps = {} # limbID : limbSwitchGrp
 
 
 # #============= ACCESSORS + MUTATORS ============================
 
 #     def GetLimbBhvIDs(self, limbID):
-#         return self._limbBhvs[limbID]
+#         return self._limbGrps[limbID]
 
 #     def GetBhvType(self, bhvID):
 #         return self._bhvs[bhvID].bhvType
@@ -357,22 +353,22 @@ class BHV_Group_Manager:
 # #=============  ============================
 
 #     def _AddBhv(self, limbID, bhvType, suffix, bhvGrps):
-#         bhvID = self._nextBhvID
+#         bhvID = self._nextGrpID
 #         self._bhvs[bhvID] = bhvData.BHV_Data(bhvID, bhvType, suffix, bhvGrps)
-#         self._limbBhvs[limbID][bhvType] = bhvID
-#         self._nextBhvID += 1
+#         self._limbGrps[limbID][bhvType] = bhvID
+#         self._nextGrpID += 1
 
 #     def _RemoveBhv(self, limbID, bhvID):
 #         bhv = self._bhvs[bhvID]
 #         del(self._bhvs[bhvID])
-#         del(self._limbBhvs[limbID][bhv.bhvType])
+#         del(self._limbGrps[limbID][bhv.bhvType])
 
 #     def Add_FK(self, limbID):
 #         jntIDs = self.jntMng.GetLimbJointIDs(limbID)
 #         bhvGrps = []
 #         for jntID in jntIDs:
 #             pass
-#         self._limbBhvs[limbID]
+#         self._limbGrps[limbID]
 
 #     def Remove_FK(self, limbID):
 #         pass

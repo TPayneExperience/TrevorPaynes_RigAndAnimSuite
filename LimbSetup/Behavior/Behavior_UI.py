@@ -2,19 +2,20 @@
 
 import pymel.core as pm
 
-# import Hierarchies.BHV_Limb_Hierarchy_UI as limbHier_UI
-# reload(limbHier_UI)
-# import Hierarchies.BHV_Behavior_Hierarchy_UI as ctrHier_UI
-# reload(ctrHier_UI)
+import Hierarchies.BHV_Limb_Hierarchy_UI as limbHier_UI
+reload(limbHier_UI)
+import Hierarchies.BHV_Group_Hierarchy_UI as groupHier_UI
+reload(groupHier_UI)
 
-# import Properties.BHV_Limb_Properties_UI as limbProp_UI
-# reload(limbProp_UI)
+import Properties.BHV_Limb_Properties_UI as limbProp_UI
+reload(limbProp_UI)
 # import Properties.BHV_Behavior_Properties_UI as bhvProp_UI
 # reload(bhvProp_UI)
 
 
 class Behavior_UI:
-    def __init__(self):
+    def __init__(self, bhv):
+        self.bhv = bhv
         self._Setup()
         # self.bhv = behavior
 
@@ -26,70 +27,20 @@ class Behavior_UI:
     def _Setup(self):
         with pm.verticalLayout():
             with pm.frameLayout('Limb Hierarchy', bv=1):
-                pm.button(l='a')
-                # self.limbHier_ui = limbHier_UI.SKEL_Limb_Hierarchy_UI(  self.skel.limbHier,
-                #                                                         self)
-            with pm.frameLayout('Joint Hierarchy', bv=1):
-                pm.button(l='b')
-                # self.jntHier_ui = jointHier_UI.SKEL_Joint_Hierarchy_UI(self.skel.jntHier,
-                #                                                         self)
+                self.limbHier_ui = limbHier_UI.BHV_Limb_Hierarchy_UI(self.bhv.limbMng)
+            with pm.frameLayout('Behavior Groups', bv=1):
+                self.grpHier_ui = groupHier_UI.BHV_Group_Hierarchy_UI(self.bhv.grpMng,
+                                                                        self)
         with pm.verticalLayout():
             with pm.frameLayout('Limb Properties', bv=1, en=0) as self.limbProp:
-                pm.button(l='c')
-                # self.limbProp_ui = limbProp_UI.SKEL_Limb_Properties_UI(self.skel.limbProp,
-                #                                                         self)
-            with pm.frameLayout('Joint Properties', bv=1, en=0) as self.jntProp:
+                self.limbProp_ui = limbProp_UI.BHV_Limb_Properties_UI(  self.bhv.limbMng,
+                                                                        self.bhv.grpMng,
+                                                                        self)
+            with pm.frameLayout('Group Properties', bv=1, en=0) as self.jntProp:
                 pm.button(l='d')
                 # self.jntProp_ui = jointProp_UI.SKEL_Joint_Properties_UI(self.skel.jntProp,
-                #                                                         self)
-    # def _Setup(self):
-    #     hl = QtWidgets.QHBoxLayout(self)
-    #     hl.addLayout(self._Setup_LimbBehaviorHierarchy())
-    #     hl.addLayout(self._Setup_Properties())
+                #           
 
-    # def _Setup_LimbBehaviorHierarchy(self):
-    #     v_layout = QtWidgets.QVBoxLayout()
-
-    #     gb1 = QtWidgets.QGroupBox('Limb Hierarchy')
-    #     vl = QtWidgets.QVBoxLayout(gb1)
-    #     # self.limbHier_tw = limbHier_UI.BHV_Limb_Hierarchy_UI(self.skel.limbHier, self)
-    #     self.limbHier_tw = limbHier_UI.BHV_Limb_Hierarchy_UI(self)
-    #     vl.addWidget(self.limbHier_tw)
-    #     v_layout.addWidget(gb1)
-
-    #     gb2 = QtWidgets.QGroupBox('Adjustable Behavior Settings')
-    #     vl = QtWidgets.QVBoxLayout(gb2)
-    #     # self.bhvHier_lw = ctrHier_UI.BHV_Behavior_Hierarchy_UI(self.skel.jntHier, self)
-    #     self.bhvHier_lw = ctrHier_UI.BHV_Behavior_Hierarchy_UI(self)
-    #     vl.addWidget(self.bhvHier_lw)
-    #     v_layout.addWidget(gb2)
-
-    #     return v_layout
-    
-    # def _Setup_Properties(self):
-    #     vl = QtWidgets.QVBoxLayout()
-    #     self.bhvProp_w = bhvProp_UI.BHV_Behavior_Properties_UI(self)
-    #     self.limbProp_w = limbProp_UI.BHV_Limb_Properties_UI(self)
-
-    #     vl.addWidget(self.bhvProp_w)
-    #     vl.addWidget(self.limbProp_w)
-    #     # gb = QtWidgets.QGroupBox('Properties')
-    #     # vl = QtWidgets.QVBoxLayout(gb)
-
-    #     # self.limbProp_gb = limbProp_UI.BHV_Limb_Properties_UI(self.skel.limbProp, self)
-    #     # vl.addWidget(self.limbProp_gb)
-    #     # self.bhvProp_gb = bhvProp_UI.BHV_Behavior_Properties_UI(self.skel.jntProp)
-    #     # self.bhvProp_gb = bhvProp_UI.BHV_Behavior_Properties_UI()
-    #     # vl.addStretch()
-        
-    #     # v_layout.addWidget(gb)
-    #     # v_layout.addWidget(self._Setup_Properties_Tools())
-
-    #     return vl
-    
-    # # def SetStatusMsg(self, msg):
-    # #     print (msg)
-    
 
 
 #============= DEPRICATED ============================
