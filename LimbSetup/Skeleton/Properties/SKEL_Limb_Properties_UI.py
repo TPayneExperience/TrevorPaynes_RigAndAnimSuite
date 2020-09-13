@@ -14,8 +14,6 @@ class SKEL_Limb_Properties_UI:
         self.type_om = None
         self.pJnt_om = None
         self.side_om = None
-#         self.limbProps = Limb_Properties
-#         self._parentJoints = []
         self._Setup()
     
     def SetLimb(self, limbID):
@@ -58,9 +56,6 @@ class SKEL_Limb_Properties_UI:
 
     def _Setup(self):
         with pm.columnLayout(adj=1) as self.layout:
-            # self.type_om = pm.attrEnumOptionMenuGrp(l='Type', adj=2, cw=(1,70))
-            # self.pJnt_om = pm.attrEnumOptionMenuGrp( l='Parent Joint', adj=2, cw=(1,70))
-            # self.side_om = pm.attrEnumOptionMenuGrp( l='Side', adj=2, cw=(1,70))
             self.jntCnt = pm.intFieldGrp(l='Joint Count', nf=1, v1=1, adj=2, cw=(1,70),
                                             cc=self.SetJointCount)
 

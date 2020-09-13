@@ -9,8 +9,8 @@ reload(groupHier_UI)
 
 import Properties.BHV_Limb_Properties_UI as limbProp_UI
 reload(limbProp_UI)
-# import Properties.BHV_Behavior_Properties_UI as bhvProp_UI
-# reload(bhvProp_UI)
+import Properties.BHV_Group_Properties_UI as bhvProp_UI
+reload(bhvProp_UI)
 
 
 class Behavior_UI:
@@ -32,14 +32,14 @@ class Behavior_UI:
                 self.grpHier_ui = groupHier_UI.BHV_Group_Hierarchy_UI(self.bhv.grpMng,
                                                                         self)
         with pm.verticalLayout():
-            with pm.frameLayout('Limb Properties', bv=1, en=0) as self.limbProp:
-                self.limbProp_ui = limbProp_UI.BHV_Limb_Properties_UI(  self.bhv.limbMng,
-                                                                        self.bhv.grpMng,
-                                                                        self)
+            self.limbProp_ui = limbProp_UI.BHV_Limb_Properties_UI(  self.bhv.limbMng,
+                                                                    self.bhv.jntMng,
+                                                                    self.bhv.grpMng,
+                                                                    self)
             with pm.frameLayout('Group Properties', bv=1, en=0) as self.jntProp:
-                pm.button(l='d')
-                # self.jntProp_ui = jointProp_UI.SKEL_Joint_Properties_UI(self.skel.jntProp,
-                #           
+                self.jntProp_ui = bhvProp_UI.BHV_Group_Properties_UI(self.bhv.grpMng,
+                    self)
+                          
 
 
 

@@ -1,6 +1,4 @@
 
-import sys
-
 import pymel.core as pm
 
 class SKEL_Joint_Properties_UI:
@@ -45,7 +43,6 @@ class SKEL_Joint_Properties_UI:
         self.joints = []
         
         self._Setup()
-        # self._Setup_Connections()
     
     def SetJoints(self, jointIDs):
         self.joints = [self.jntMng.GetJoint(ID) for ID in jointIDs]

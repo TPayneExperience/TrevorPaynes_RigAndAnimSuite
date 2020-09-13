@@ -6,6 +6,7 @@ class BHV_Group_Manager:
         self.limbMng = limbMng
         
         self.cstTypes = ['Parent', 'Point', 'Orient', 'Scale']
+        self.bhvParents = ['Limb Defined', 'World']
         self.bhvTypes = [   'FK',
                             'Constraint',
                             'Look At',
@@ -45,6 +46,19 @@ class BHV_Group_Manager:
     # LIMBS
     def AddLimb(self, limbID):
         self._limbGrps[limbID] = []
+        limb = self.limbMng.GetLimb(limbID)
+
+        bhvTypes = ':'.join(self.bhvTypes)
+        bhvParents = ':'.join(self.bhvParents)
+        bhvCstTypes = ':'.join(self.cstTypes)
+
+        pm.addAttr(limb, ln='bhvTypeIndex', at='enum', en=bhvTypes)
+        pm.addAttr(limb, ln='bhvParentTypeIndex', at='enum', en=bhvParents)
+        pm.addAttr(limb, ln='bhvParentLimbID', at='long')
+        pm.addAttr(limb, ln='bhvParentGrpID', at='long')
+        pm.addAttr(limb, ln='bhvCstTypeIndex', at='enum', en=bhvCstTypes)
+        pm.addAttr(limb, ln='bhvCstTargetLimbID', at='long')
+        pm.addAttr(limb, ln='bhvCstTargetJntIndex', at='long')
     
     def RemoveLimb(self, limbID):
         groupIDs = self.GetLimbGrpIDs(limbID)
@@ -59,8 +73,9 @@ class BHV_Group_Manager:
 
         group = pm.group(em=1, w=1)
         pm.addAttr(group, ln='ID', at='long', dv=groupID)
+        pm.addAttr(group, ln='pfrsName', dt='string')
         pm.addAttr(group, ln='limbID', at='short', dv=limbID)
-        pm.addAttr(group, ln='bhvType', dt='string')
+        pm.addAttr(group, ln='grpType', dt='string')
 
         # FK, IK Chain, Constraint
         pm.addAttr(group, ln='jointID', at='short', dv=-1) 
