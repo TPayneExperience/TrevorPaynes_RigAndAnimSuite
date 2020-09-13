@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>522</width>
-    <height>705</height>
+    <width>520</width>
+    <height>669</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -34,7 +34,7 @@
         <item>
          <widget class="QTabWidget" name="tabWidget">
           <property name="currentIndex">
-           <number>1</number>
+           <number>0</number>
           </property>
           <widget class="QWidget" name="tab">
            <attribute name="title">
@@ -52,7 +52,7 @@
                  <bool>true</bool>
                 </property>
                 <property name="currentIndex">
-                 <number>0</number>
+                 <number>1</number>
                 </property>
                 <widget class="QWidget" name="tab_11">
                  <attribute name="title">
@@ -555,6 +555,9 @@
                         <layout class="QHBoxLayout" name="horizontalLayout_87">
                          <item>
                           <layout class="QVBoxLayout" name="verticalLayout_92">
+                           <property name="spacing">
+                            <number>0</number>
+                           </property>
                            <item>
                             <widget class="QGroupBox" name="groupBox_9">
                              <property name="title">
@@ -1392,7 +1395,7 @@
                  <bool>true</bool>
                 </property>
                 <property name="currentIndex">
-                 <number>3</number>
+                 <number>1</number>
                 </property>
                 <widget class="QWidget" name="tab_19">
                  <attribute name="title">
@@ -4421,7 +4424,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>522</width>
+     <width>520</width>
      <height>21</height>
     </rect>
    </property>

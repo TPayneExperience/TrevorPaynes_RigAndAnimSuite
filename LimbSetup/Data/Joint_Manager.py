@@ -12,10 +12,9 @@ class Joint_Manager():
 
     def NewRig(self, rigRoot):
         self.rigRoot = rigRoot
-
-        self._nextJointID = 1
         self._joints = {} # jointID: jointNode
-        self._limbJoints = {-1:[]} # limbID: jointIdList
+        pm.addAttr(rigRoot, ln='nextJointID', at='short', dv=1)
+        pm.addAttr(rigRoot, ln='joints', dt='string')
 
         pm.select(d=1)
         self.jntGrp = pm.group(name='Skeleton', em=1)
@@ -23,128 +22,260 @@ class Joint_Manager():
         self.skelLayer = pm.createDisplayLayer(n='Skel Joints', e=True)
         self.skelLayer.displayType.set(2)
 
-        pm.addAttr(rigRoot, ln='joints', dt='string')
-
+    def SetRig(self, rigRoot):
+        self.rigRoot = rigRoot
+        self._joints = {} # jointID: jointNode
+        for joint in pm.listConnections(self.rigRoot.joints):
+            self._joints[joint.ID.get()] = joint
+        # Missing: Get Skeleton group, get skeleton layer
 
 #============= ACCESSORS + MUTATORS ============================
 
     def GetJoint(self, jointID):
         return self._joints[jointID]
 
-    # LIMB JOINTS
-    def GetLimbJointIDs(self, limbID):
+    def GetLimbJoint(self, limbID):
         '''Order joints by internal joint index'''
+        limb = self.limbMng.GetLimb(limbID)
         orderedJntIDs = []
         temp = {}
-        for jointID in self._limbJoints[limbID]:
-            temp[self._joints[jointID].limbIndex.get()] = jointID
+        for joint in pm.listConnections(limb.joints):
+            temp[joint.limbIndex.get()] = joint
         for index in sorted(list(temp.keys())):
             orderedJntIDs.append(temp[index])
         return orderedJntIDs
 
-    # MISC
     def GetJointCount(self): # for Skel tool label
         return len(self._joints)
 
-
 #============= FUNCTIONALITY ============================
 
-    # LIMBS
-    def AddLimb(self, limbID):
-        self._limbJoints[limbID] = []
-    
-    def RemoveLimb(self, limbID):
-        jointIDs = self.GetLimbJointIDs(limbID)
-        self.Remove(limbID, jointIDs)
-        del(self._limbJoints[limbID])
+    def _ReindexJoints(self, limb):
+        temp = {} # longName : joint
+        for joint in pm.listConnections(limb.joints):
+            temp[joint.longName()] = joint
+        i = 0
+        for key in sorted(list(temp.keys())):
+            temp[key].limbIndex.set(i)
+            i += 1
 
-    # JOINTS
-    def Add(self, limbID, count):
-        start = len(self._limbJoints[limbID])
-        jointsCreated = []
-        for index in range(start, start + count):
-            jointID = self._nextJointID
-            self._nextJointID += 1
-
-            pfrsName = 'Joint_%03d' % (index)
-            position = [0,0,0]
-            joints = self._limbJoints[limbID]
-            if (joints):
-                position = pm.xform(self._joints[joints[-1]], q=1, t=1, ws=1)
-                position[1] -= 5
-            
-            pm.select(d=1)
-            joint = pm.joint()
-            pm.addAttr(joint, ln='ID', at='short', dv=jointID)
-            pm.addAttr(joint, ln='limbID', at='short', dv=limbID)
-            pm.addAttr(joint, ln='limbIndex', at='short', dv=index)
-            pm.addAttr(joint, ln='aimAxis', at='float3')
-            pm.addAttr(joint, ln='aimX', at='float', parent='aimAxis')
-            pm.addAttr(joint, ln='aimY', at='float', parent='aimAxis', dv=1)
-            pm.addAttr(joint, ln='aimZ', at='float', parent='aimAxis')
-            pm.addAttr(joint, ln='upAxis', at='float3')
-            pm.addAttr(joint, ln='upX', at='float', parent='upAxis')
-            pm.addAttr(joint, ln='upY', at='float', parent='upAxis')
-            pm.addAttr(joint, ln='upZ', at='float', parent='upAxis', dv=1)
+    def Add(self, limbID, joint):
+        jointID = self.rigRoot.nextJointID.get()
+        self.rigRoot.nextJointID.set(jointID + 1)
+        
+        if (not pm.hasAttr(joint, 'pfrsName')):
+            pm.addAttr(joint, ln='ID', at='short')
+            pm.addAttr(joint, ln='limbID', at='short')
+            pm.addAttr(joint, ln='limbIndex', at='short')
             pm.addAttr(joint, ln='pfrsName', dt='string')
             pm.addAttr(joint, ln='rigRoot', dt='string')
-            pm.connectAttr(self.rigRoot.joints, joint.rigRoot)
-            joint.pfrsName.set(pfrsName)
+            joint.pfrsName.set('Joint_%03d' % (jointID))
+        joint.ID.set(jointID)
 
-            pm.xform(joint, t=position)
-            pm.parent(joint, self.jntGrp)
-            self._joints[jointID] = joint
-            self._limbJoints[limbID].append(jointID)
-            self.UpdateJointName(limbID, jointID)
-            pm.editDisplayLayerMembers(self.skelLayer, joint)
-            jointsCreated.append(joint)
-        return jointsCreated
+        limb = self.limbMng.GetLimb(limbID)
+        pm.connectAttr(limb.ID, joint.limbID)
+        pm.connectAttr(self.rigRoot.joints, joint.rigRoot)
 
-    def Remove(self, limbID, jointIDs):
-        for jointID in jointIDs:
-            pm.select(d=1)
-            pm.delete(self._joints[jointID])
-            del(self._joints[jointID])
-            self._limbJoints[limbID].remove(jointID)
+        self._joints[jointID] = joint
+        self.UpdateJointName(jointID)
+        pm.editDisplayLayerMembers(self.skelLayer, joint)
+        self._ReindexJoints(limb)
 
-    # RENAME
-    def UpdateAllJointNames(self):
-        for limbID in list(self._limbJoints.keys()):
-            self.UpdateLimbJointNames(limbID)
+    def Remove(self, limbID, jointID):
+        joint = self.GetJoint(jointID)
+        pm.disconnectAttr(joint.rigRoot)
+        pm.disconnectAttr(joint.limbID)
+        del(self._joints[jointID])
 
-    def UpdateLimbJointNames(self, limbID):
-        for jointID in self._limbJoints[limbID]:
-            self.UpdateJointName(limbID, jointID)
+    def UpdateAllJointNames(self): # if prefix changed
+        for jointID in list(self._joints.keys()):
+            self.UpdateJointName(jointID)
 
-    def UpdateJointName(self, limbID, jointID):
-        joint = self._joints[jointID]
-        joint.rename(self.nameMng.GetName(limbID, jointID, 'JNT'))
+    def UpdateJointName(self, jointID):
+        joint = self.GetJoint(jointID)
+        joint.rename(self.nameMng.GetName(jointID, 'JNT'))
     
-    def DuplicateLimb(self, sourceLimbID, targetLimbID):
-        self._limbJoints[targetLimbID] = []
-        sourceJoints = [self.GetJoint(ID) for ID in self.GetLimbJointIDs(sourceLimbID)]
-        targetJoints = pm.duplicate(sourceJoints)
-        for targetJoint in targetJoints:
-            targetJoint.ID.set(self._nextJointID)
-            targetJoint.limbID.set(targetLimbID)
-            self._limbJoints[targetLimbID].append(self._nextJointID)
-            self._joints[self._nextJointID] = targetJoint
-            self._nextJointID += 1
-        self.UpdateLimbJointNames(targetLimbID)
+    # def DuplicateLimb(self, sourceLimbID, targetLimbID):
+    #     self._limbJoints[targetLimbID] = []
+    #     sourceJoints = [self.GetJoint(ID) for ID in self.GetLimbJointIDs(sourceLimbID)]
+    #     targetJoints = pm.duplicate(sourceJoints)
+    #     for targetJoint in targetJoints:
+    #         targetJoint.ID.set(self._nextJointID)
+    #         targetJoint.limbID.set(targetLimbID)
+    #         self._limbJoints[targetLimbID].append(self._nextJointID)
+    #         self._joints[self._nextJointID] = targetJoint
+    #         self._nextJointID += 1
+    #     self.UpdateLimbJointNames(targetLimbID)
 
-    def SetMirrorLimb(self, sourceLimbID, targetLimbID, axis):
-        # NEEDS TO BE CALLED AFTER SCENE SKEL TEARDOWN!!!
-        self.DuplicateLimb(sourceLimbID, targetLimbID)
-        jointIDs = self.GetLimbJointIDs(targetLimbID)
-        joints = [self.GetJoint(ID) for ID in jointIDs]
-        temp = pm.group(w=1, a=1, em=1)
-        pm.parent(joints, temp)
-        pm.xform(temp, s=self.mirrorXform[axis])
-        pm.parent(joints, self.jntGrp)
-        pm.delete(temp)
-        for joint in joints:
-            aim = [i*-1 for i in list(joint.aimAxis.get())]
-            joint.aimAxis.set(aim)
+    # def SetMirrorLimb(self, sourceLimbID, targetLimbID, axis):
+    #     # NEEDS TO BE CALLED AFTER SCENE SKEL TEARDOWN!!!
+    #     self.DuplicateLimb(sourceLimbID, targetLimbID)
+    #     jointIDs = self.GetLimbJointIDs(targetLimbID)
+    #     joints = [self.GetJoint(ID) for ID in jointIDs]
+    #     temp = pm.group(w=1, a=1, em=1)
+    #     pm.parent(joints, temp)
+    #     pm.xform(temp, s=self.mirrorXform[axis])
+    #     pm.parent(joints, self.jntGrp)
+    #     pm.delete(temp)
+    #     for joint in joints:
+    #         aim = [i*-1 for i in list(joint.aimAxis.get())]
+    #         joint.aimAxis.set(aim)
+
+
+
+# #============= DEPRICATED ============================
+# #============= DEPRICATED ============================
+# #============= DEPRICATED ============================
+
+
+
+
+# import pymel.core as pm
+
+# class Joint_Manager():
+#     def __init__(self, nameMng, limbMng):
+
+#         self.nameMng = nameMng
+#         self.limbMng = limbMng
+#         self.mirrorXform = {'X': [-1,1,1],
+#                             'Y': [1,-1,1],
+#                             'Z': [1,1,-1]}
+
+#     def NewRig(self, rigRoot):
+#         self.rigRoot = rigRoot
+
+#         self._nextJointID = 1
+#         self._joints = {} # jointID: jointNode
+#         self._limbJoints = {-1:[]} # limbID: jointIdList
+
+#         pm.select(d=1)
+#         self.jntGrp = pm.group(name='Skeleton', em=1)
+#         pm.parent(self.jntGrp, rigRoot)
+#         self.skelLayer = pm.createDisplayLayer(n='Skel Joints', e=True)
+#         self.skelLayer.displayType.set(2)
+
+#         pm.addAttr(rigRoot, ln='joints', dt='string')
+
+
+# #============= ACCESSORS + MUTATORS ============================
+
+#     def GetJoint(self, jointID):
+#         return self._joints[jointID]
+
+#     # LIMB JOINTS
+#     def GetLimbJointIDs(self, limbID):
+#         '''Order joints by internal joint index'''
+#         orderedJntIDs = []
+#         temp = {}
+#         for jointID in self._limbJoints[limbID]:
+#             temp[self._joints[jointID].limbIndex.get()] = jointID
+#         for index in sorted(list(temp.keys())):
+#             orderedJntIDs.append(temp[index])
+#         return orderedJntIDs
+
+#     # MISC
+#     def GetJointCount(self): # for Skel tool label
+#         return len(self._joints)
+
+
+# #============= FUNCTIONALITY ============================
+
+#     # LIMBS
+#     def AddLimb(self, limbID):
+#         self._limbJoints[limbID] = []
+    
+#     def RemoveLimb(self, limbID):
+#         jointIDs = self.GetLimbJointIDs(limbID)
+#         self.Remove(limbID, jointIDs)
+#         del(self._limbJoints[limbID])
+
+#     # JOINTS
+#     def Add(self, limbID, count):
+#         start = len(self._limbJoints[limbID])
+#         jointsCreated = []
+#         for index in range(start, start + count):
+#             jointID = self._nextJointID
+#             self._nextJointID += 1
+
+#             pfrsName = 'Joint_%03d' % (index)
+#             position = [0,0,0]
+#             joints = self._limbJoints[limbID]
+#             if (joints):
+#                 position = pm.xform(self._joints[joints[-1]], q=1, t=1, ws=1)
+#                 position[1] -= 5
+            
+#             pm.select(d=1)
+#             joint = pm.joint()
+#             pm.addAttr(joint, ln='ID', at='short', dv=jointID)
+#             pm.addAttr(joint, ln='limbID', at='short', dv=limbID)
+#             pm.addAttr(joint, ln='limbIndex', at='short', dv=index)
+#             pm.addAttr(joint, ln='aimAxis', at='float3')
+#             pm.addAttr(joint, ln='aimX', at='float', parent='aimAxis')
+#             pm.addAttr(joint, ln='aimY', at='float', parent='aimAxis', dv=1)
+#             pm.addAttr(joint, ln='aimZ', at='float', parent='aimAxis')
+#             pm.addAttr(joint, ln='upAxis', at='float3')
+#             pm.addAttr(joint, ln='upX', at='float', parent='upAxis')
+#             pm.addAttr(joint, ln='upY', at='float', parent='upAxis')
+#             pm.addAttr(joint, ln='upZ', at='float', parent='upAxis', dv=1)
+#             pm.addAttr(joint, ln='pfrsName', dt='string')
+#             pm.addAttr(joint, ln='rigRoot', dt='string')
+#             pm.connectAttr(self.rigRoot.joints, joint.rigRoot)
+#             joint.pfrsName.set(pfrsName)
+
+#             pm.xform(joint, t=position)
+#             pm.parent(joint, self.jntGrp)
+#             self._joints[jointID] = joint
+#             self._limbJoints[limbID].append(jointID)
+#             self.UpdateJointName(limbID, jointID)
+#             pm.editDisplayLayerMembers(self.skelLayer, joint)
+#             jointsCreated.append(joint)
+#         return jointsCreated
+
+#     def Remove(self, limbID, jointIDs):
+#         for jointID in jointIDs:
+#             pm.select(d=1)
+#             pm.delete(self._joints[jointID])
+#             del(self._joints[jointID])
+#             self._limbJoints[limbID].remove(jointID)
+
+#     # RENAME
+#     def UpdateAllJointNames(self):
+#         for limbID in list(self._limbJoints.keys()):
+#             self.UpdateLimbJointNames(limbID)
+
+#     def UpdateLimbJointNames(self, limbID):
+#         for jointID in self._limbJoints[limbID]:
+#             self.UpdateJointName(limbID, jointID)
+
+#     def UpdateJointName(self, limbID, jointID):
+#         joint = self._joints[jointID]
+#         joint.rename(self.nameMng.GetName(limbID, jointID, 'JNT'))
+    
+#     def DuplicateLimb(self, sourceLimbID, targetLimbID):
+#         self._limbJoints[targetLimbID] = []
+#         sourceJoints = [self.GetJoint(ID) for ID in self.GetLimbJointIDs(sourceLimbID)]
+#         targetJoints = pm.duplicate(sourceJoints)
+#         for targetJoint in targetJoints:
+#             targetJoint.ID.set(self._nextJointID)
+#             targetJoint.limbID.set(targetLimbID)
+#             self._limbJoints[targetLimbID].append(self._nextJointID)
+#             self._joints[self._nextJointID] = targetJoint
+#             self._nextJointID += 1
+#         self.UpdateLimbJointNames(targetLimbID)
+
+#     def SetMirrorLimb(self, sourceLimbID, targetLimbID, axis):
+#         # NEEDS TO BE CALLED AFTER SCENE SKEL TEARDOWN!!!
+#         self.DuplicateLimb(sourceLimbID, targetLimbID)
+#         jointIDs = self.GetLimbJointIDs(targetLimbID)
+#         joints = [self.GetJoint(ID) for ID in jointIDs]
+#         temp = pm.group(w=1, a=1, em=1)
+#         pm.parent(joints, temp)
+#         pm.xform(temp, s=self.mirrorXform[axis])
+#         pm.parent(joints, self.jntGrp)
+#         pm.delete(temp)
+#         for joint in joints:
+#             aim = [i*-1 for i in list(joint.aimAxis.get())]
+#             joint.aimAxis.set(aim)
 
 
     # def Mirror(self, sourceLimbID, targetLimbID, axis):

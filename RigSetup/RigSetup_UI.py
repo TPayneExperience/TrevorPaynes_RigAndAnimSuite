@@ -4,15 +4,13 @@ import pymel.core as pm
 
 
 class RigSetup_UI:
-    def __init__(self, rigSetup, parent=None):
+    def __init__(self, nameMng, fileMng, parent=None):
         
-        self.rigSetup = rigSetup
-        self.nameMng = rigSetup.nameMng
-        self.fileMng = rigSetup.fileMng
+        self.nameMng = nameMng
+        self.fileMng = fileMng
         self.parent = parent
         
         self.prefix = ''
-        self.meshPath = ''
         self.showPrefix = True
         self.nameOrder = [0,1,2,3,4]
 
@@ -27,47 +25,36 @@ class RigSetup_UI:
     
     def NewRig_Dialog(self):
         self.startPrefix = 'tempPrefix'
-        self.startMeshPath = r'D:\Assets\Programming\Python\Maya\ModularAutoRigger\TEST_OUTPUT\temp_sphere.ma'
         self.startShowPrefix = True
         self.startNameOrder = [0,1,2,3,4]
         self._CopyInitValues()
         result = pm.layoutDialog(ui=self._Setup, title='Rig Setup')
         if result == 'save':
-            self.rigSetup.NewRig(   self.prefix, 
+            self.parent.NewRig(   self.prefix, 
                                     self.nameOrder, 
-                                    self.showPrefix, 
-                                    self.meshPath)
+                                    self.showPrefix)
 
-    def EditRig_Dialog(self):
-        self.startPrefix = self.rigSetup.rigRoot.prefix.get()
-        self.startMeshPath = self.rigSetup.rigRoot.meshPath.get()
-        self.startShowPrefix = self.rigSetup.rigRoot.showPrefix.get()
-        self.startNameOrder = [ self.rigSetup.rigRoot.prefixIndex.get(),
-                                self.rigSetup.rigRoot.limbIndex.get(),
-                                self.rigSetup.rigRoot.jointIndex.get(),
-                                self.rigSetup.rigRoot.sideIndex.get(),
-                                self.rigSetup.rigRoot.typeIndex.get()]
+    def EditRig_Dialog(self, prefix, showPrefix, order, rigRoot):
+        self.startPrefix = prefix
+        self.startShowPrefix = showPrefix
+        self.startNameOrder = order
         self._CopyInitValues()
         result = pm.layoutDialog(ui=self._Setup, title='Rig Setup')
         isPrefixSame = (self.startPrefix != self.prefix)
         isShowPrefixSame = (self.startShowPrefix != self.showPrefix)
-        isMeshPathSame = (self.startMeshPath != self.meshPath)
         isNameOrderSame = (self.startNameOrder != self.nameOrder)
         namesUpdated = any((isPrefixSame, isShowPrefixSame, isNameOrderSame))
         if result == 'save':
             if (isPrefixSame):
-                self.rigSetup.rigRoot.prefix.set(self.prefix)
+                rigRoot.prefix.set(self.prefix)
             if (isShowPrefixSame):
-                self.rigSetup.rigRoot.showPrefix.set(self.showPrefix)
-            if (isMeshPathSame):
-                self.rigSetup.rigRoot.meshPath.set(self.meshPath)
-                self.rigSetup.Import_Meshes()
+                rigRoot.showPrefix.set(self.showPrefix)
             if (isNameOrderSame):
-                self.rigSetup.rigRoot.prefixIndex.set(self.nameOrder[0])
-                self.rigSetup.rigRoot.limbIndex.set(self.nameOrder[1])
-                self.rigSetup.rigRoot.jointIndex.set(self.nameOrder[2])
-                self.rigSetup.rigRoot.sideIndex.set(self.nameOrder[3])
-                self.rigSetup.rigRoot.typeIndex.set(self.nameOrder[4])
+                rigRoot.prefixIndex.set(self.nameOrder[0])
+                rigRoot.limbIndex.set(self.nameOrder[1])
+                rigRoot.jointIndex.set(self.nameOrder[2])
+                rigRoot.sideIndex.set(self.nameOrder[3])
+                rigRoot.typeIndex.set(self.nameOrder[4])
             if namesUpdated:
                 self.parent.UpdateNaming()
     
@@ -83,10 +70,6 @@ class RigSetup_UI:
                                             tcc=self.PrefixChanged, 
                                             text=self.startPrefix,
                                             cw=(2,80), cal=(1,'left'))
-        self.path_grp = pm.pathButtonGrp(   l='MESH FILE', adj=2, 
-                                            cal=(1,'left'), cw=(1,60),
-                                            text=self.startMeshPath,
-                                            tcc=self.MeshPathChanged)
 
         # EXAMPLE NAMING
         ex_fl = pm.frameLayout(l='Example Results', bv=1, mh=5, mw=5, p=form)
@@ -128,13 +111,11 @@ class RigSetup_UI:
                                         (self.save_btn, 'left', 5, 50)])
         self.Update_ExampleLabels(0,0,0,0,0,0,0)
         self.PrefixChanged(self.startPrefix)
-        self.MeshPathChanged(self.startMeshPath)
 
 #============ POPULATE + UPDATE ============================
 
     def _CopyInitValues(self):
         self.prefix = self.startPrefix 
-        self.meshPath = self.startMeshPath
         self.showPrefix = self.startShowPrefix
         self.nameOrder = self.startNameOrder[:]
 
@@ -176,11 +157,6 @@ class RigSetup_UI:
         pm.textFieldGrp(self.prefix_grp, e=1, l=msg)
         self.Update_SaveBtn()
     
-    def MeshPathChanged(self, text):
-        self.meshPath = text
-        self.meshPathValid = os.path.isfile(text)
-        self.Update_SaveBtn()
-
     def Update_SaveBtn(self):
         combo = self.prefixValid and self.meshPathValid
         pm.button(self.save_btn, e=1, enable=combo)
