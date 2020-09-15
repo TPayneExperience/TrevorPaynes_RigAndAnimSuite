@@ -59,7 +59,7 @@ class Joint_Manager():
             temp[key].limbIndex.set(i)
             i += 1
 
-    def Add(self, limbID, joint):
+    def Add(self, limb, joint):
         jointID = self.rigRoot.nextJointID.get()
         self.rigRoot.nextJointID.set(jointID + 1)
         
@@ -72,7 +72,6 @@ class Joint_Manager():
             joint.pfrsName.set('Joint_%03d' % (jointID))
         joint.ID.set(jointID)
 
-        limb = self.limbMng.GetLimb(limbID)
         pm.connectAttr(limb.ID, joint.limbID)
         pm.connectAttr(self.rigRoot.joints, joint.rigRoot)
 
@@ -81,7 +80,7 @@ class Joint_Manager():
         pm.editDisplayLayerMembers(self.skelLayer, joint)
         self._ReindexJoints(limb)
 
-    def Remove(self, limbID, jointID):
+    def Remove(self, jointID):
         joint = self.GetJoint(jointID)
         pm.disconnectAttr(joint.rigRoot)
         pm.disconnectAttr(joint.limbID)

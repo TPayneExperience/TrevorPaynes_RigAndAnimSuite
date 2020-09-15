@@ -4,44 +4,111 @@ import pymel.core as pm
 import Common.LimbHier_UI as limbHierUI
 reload(limbHierUI)
 
-class SKEL_Limb_Hierarchy_UI(limbHierUI.Limb_Hierarchy_UI):
-    def __init__(self, limbHierarchy, skelUI):
-        super(SKEL_Limb_Hierarchy_UI, self).__init__(limbHierarchy.limbMng)
+class SKEL_Limb_Hierarchy_UI:
+    def __init__(self, limbMng, jntMng, nameMng, skelUI):
 
-        self.jntMng = limbHierarchy.jntMng
-        self.nameMng = limbHierarchy.nameMng
+        self.limbMng = limbMng
+        self.jntMng = jntMng
+        self.nameMng = nameMng
         self.parent = skelUI
 
         self._Setup()
 
     def Populate(self, selectedID = -1):
-        self.Populate_Abstract()
+        pm.treeView(self.widget, e=1, removeAll=1)
+        temp = {} # pfrsName : [limbs]
+        for rootLimbID in self.limbMng.GetRootLimbIDs():
+            for limbID in self.limbMng.GetLimbCreationOrder(rootLimbID):
+                limb = self.limbMng.GetLimb(limbID)
+                limbName = limb.pfrsName.get()
+                if limbName not in temp:
+                    temp[limbName] = []
+                temp[limbName].append(limbID)
+        for limbName in sorted(list(temp.keys())):
+            for limbID in temp[limbName]:
+                pm.treeView(self.widget, e=1, ai=(limbID, ''))
+                pm.treeView(self.widget, e=1, displayLabel=(limbID, limbName))
         if (selectedID != -1):
             pm.treeView(self.widget, e=1, selectItem=(selectedID, 1))
 
 #=========== SETUP ====================================
 
     def _Setup(self):
+        tt = 'Double click to RENAME.'
+        tt += '\nTo set a limb as a MIRROR,'
+        tt += '\nname both limbs with the same name'
+        self.widget = pm.treeView(ams=0, adr=0, arp=0, ann=tt)
         pm.treeView(self.widget, e=1,   editLabelCommand=self.Rename,
-                                        dragAndDropCommand=self.Reparent,
                                         scc=self.SelectionChanged)
         with pm.popupMenu():
-            pm.menuItem('Add', c=pm.Callback(self.Add))
+            pm.menuItem(l='Add Limb', c=self.Add)
             pm.menuItem(divider=1)
-            pm.menuItem('Remove', c=pm.Callback(self.Remove))
+            self.remove_btn = pm.menuItem(l='Remove Limb', c=self.Remove)
 
 #=========== FUNCTIONALITY ====================================
 
     def SelectionChanged(self):
         limbIDStrs = pm.treeView(self.widget, q=1, selectItem=1)
+        pm.menuItem(self.remove_btn, en=bool(limbIDStrs))
         if limbIDStrs:
             self.parent.LimbSelected(int(limbIDStrs[0]))
 
     def Add(self):
-        limbID = self.limbMng.Add().ID.get()
-        self.jntMng.AddLimb(limbID)
-        self.jntMng.Add(limbID, 1)
-        self.parent.AddLimb(limbID)
+        selJoints = pm.ls(sl=1, type='joint')
+        if (len(selJoints) < 2):
+            limb = self.limbMng.Add()
+            if selJoints:
+                self.jntMng.Add(limb, selJoints[0])
+                limb.typeIndex.set(1)
+        else:
+            # BRANCH LIMB, CHECK IF THEY SHARE SAME PARENT
+            parent = pm.listRelatives(selJoints[0], p=1)
+            isBranch = True
+            for joint in selJoints[1:]:
+                nextParent = pm.listRelatives(joint, p=1)
+                if (parent != nextParent):
+                    isBranch = False
+            if isBranch:
+                limb = self.limbMng.Add()
+                limb.typeIndex.set(3) # Branch
+                for joint in selJoints:
+                    self.jntMng.Add(limb, joint)
+                return
+            
+            # CHAIN LIMB, GET SHORTEST AND LONGEST NAMES, IF RELATED, CHAIN
+            temp = {} # longName : node
+            for joint in selJoints:
+                temp[joint.longName()] = joint
+            rootParent = temp[min(list(temp.keys()))]
+            child = temp[max(list(temp.keys()))]
+            allChildren = pm.listRelatives(rootParent, allDescendents=1)
+            if child in allChildren:
+                joints = [child]
+                parent = child
+                for i in range(999):
+                    if (parent == rootParent):
+                        break
+                    parent = pm.listRelatives(parent, p=1)
+                    joints.append(parent)
+                limb = self.limbMng.Add()
+                limb.typeIndex.set(2) # Branch
+                for joint in joints:
+                    self.jntMng.Add(limb, joint)
+                self.parent.AddLimb(limb)
+                return
+            else:
+                msg = 'Limb Joint Options:\n'
+                msg += '\n- 0 or 1 joint selected'
+                msg += '\n- 2+ joints that are all the immediate children '
+                msg += 'of the same parent [BRANCH]'
+                msg += '\n- 2+ joints that are parented to one another [CHAIN]'
+                pm.confirmDialog(   t='Limb Creation Error', icn='warning', 
+                                    m=msg, button=['Cool Beans'])
+
+        # limbID = self.limbMng.Add().ID.get()
+        # self.jntMng.AddLimb(limbID)
+        # self.jntMng.Add(limbID, 1)
+        # self.parent.AddLimb(limbID)
 
     def Remove(self):
         limbIDStrs = pm.treeView(self.widget, q=1, selectItem=1)
@@ -66,39 +133,119 @@ class SKEL_Limb_Hierarchy_UI(limbHierUI.Limb_Hierarchy_UI):
                         pm.treeView(self.widget, e=1, displayLabel=(limbIDStr, newName))
         return ''
 
-    def Reparent(self, limbIDStrs, oldParents, oldIndex, newParent, newIndex, i1, i2):
-        if (limbIDStrs[0] == newParent):
-            return self.Populate()
-        limb = self.limbMng.GetLimb(int(limbIDStrs[0]))
-        oldParentID = limb.parentLimbID.get()
-        if not newParent:
-            newParent = '-1'
-        limb.parentLimbID.set(int(newParent))
-        self.parent.UpdateParentJntIndex(int(limbIDStrs[0]))
-        self.parent.ReparentLimb(limb.ID.get(), oldParentID)
-        # if (newParent in self._limbs):
-        #     newParentID = self._limbs[newParent]
-            # jointIDs = self.jntMng.GetLimbJointIDs(limb.ID.get())
-            # jointNames = [self.jntMng.GetJoint(ID).pfrsName.get() for ID in jointIDs]
-            # pm.addAttr(limb.parentJntIndex, e=1, enumName=':'.join(jointNames))
-        # else:
-        #     newParentID = -1
-            # pm.addAttr(limb.parentJntIndex, e=1, enumName='None')
+
+
+
+
+
+#=========== DEPRICATED ====================================
+#=========== DEPRICATED ====================================
+#=========== DEPRICATED ====================================
+#=========== DEPRICATED ====================================
+#=========== DEPRICATED ====================================
+
+
+
+# import pymel.core as pm
+
+# import Common.LimbHier_UI as limbHierUI
+# reload(limbHierUI)
+
+# class SKEL_Limb_Hierarchy_UI(limbHierUI.Limb_Hierarchy_UI):
+#     def __init__(self, limbHierarchy, skelUI):
+#         super(SKEL_Limb_Hierarchy_UI, self).__init__(limbHierarchy.limbMng)
+
+#         self.jntMng = limbHierarchy.jntMng
+#         self.nameMng = limbHierarchy.nameMng
+#         self.parent = skelUI
+
+#         self._Setup()
+
+#     def Populate(self, selectedID = -1):
+#         self.Populate_Abstract()
+#         if (selectedID != -1):
+#             pm.treeView(self.widget, e=1, selectItem=(selectedID, 1))
+
+# #=========== SETUP ====================================
+
+#     def _Setup(self):
+#         pm.treeView(self.widget, e=1,   editLabelCommand=self.Rename,
+#                                         dragAndDropCommand=self.Reparent,
+#                                         scc=self.SelectionChanged)
+#         with pm.popupMenu():
+#             pm.menuItem('Add', c=pm.Callback(self.Add))
+#             pm.menuItem(divider=1)
+#             pm.menuItem('Remove', c=pm.Callback(self.Remove))
+
+# #=========== FUNCTIONALITY ====================================
+
+#     def SelectionChanged(self):
+#         limbIDStrs = pm.treeView(self.widget, q=1, selectItem=1)
+#         if limbIDStrs:
+#             self.parent.LimbSelected(int(limbIDStrs[0]))
+
+#     def Add(self):
+#         limbID = self.limbMng.Add().ID.get()
+#         self.jntMng.AddLimb(limbID)
+#         self.jntMng.Add(limbID, 1)
+#         self.parent.AddLimb(limbID)
+
+#     def Remove(self):
+#         limbIDStrs = pm.treeView(self.widget, q=1, selectItem=1)
+#         if limbIDStrs:
+#             if (pm.confirmDialog(   title='Remove Limb', 
+#                                     icon='warning', 
+#                                     message='Remove limb?', 
+#                                     button=['Yes','No'], 
+#                                     defaultButton='Yes', 
+#                                     cancelButton='No', 
+#                                     dismissString='No') == 'Yes'):
+#                 self.parent.RemoveLimb(int(limbIDStrs[0]))
+
+#     def Rename(self, limbIDStr, newName):
+#         if self.nameMng.IsValidCharacterLength(newName):
+#             if self.nameMng.DoesNotStartWithNumber(newName):
+#                 if self.nameMng.AreAllValidCharacters(newName):
+#                     if self.limbMng.IsNameUnique(newName):
+#                         limb = self.limbMng.GetLimb(int(limbIDStr))
+#                         limb.pfrsName.set(newName)
+#                         self.parent.SetLimbName(int(limbIDStr))
+#                         pm.treeView(self.widget, e=1, displayLabel=(limbIDStr, newName))
+#         return ''
+
+#     def Reparent(self, limbIDStrs, oldParents, oldIndex, newParent, newIndex, i1, i2):
+#         if (limbIDStrs[0] == newParent):
+#             return self.Populate()
+#         limb = self.limbMng.GetLimb(int(limbIDStrs[0]))
+#         oldParentID = limb.parentLimbID.get()
+#         if not newParent:
+#             newParent = '-1'
+#         limb.parentLimbID.set(int(newParent))
+#         self.parent.UpdateParentJntIndex(int(limbIDStrs[0]))
+#         self.parent.ReparentLimb(limb.ID.get(), oldParentID)
+#         # if (newParent in self._limbs):
+#         #     newParentID = self._limbs[newParent]
+#             # jointIDs = self.jntMng.GetLimbJointIDs(limb.ID.get())
+#             # jointNames = [self.jntMng.GetJoint(ID).pfrsName.get() for ID in jointIDs]
+#             # pm.addAttr(limb.parentJntIndex, e=1, enumName=':'.join(jointNames))
+#         # else:
+#         #     newParentID = -1
+#             # pm.addAttr(limb.parentJntIndex, e=1, enumName='None')
         
-        # if not self._isPopulating:
-        #     for item in self._items.values():
-        #         limbID = item.ID
-        #         oldParentID = self.limbHier.limbMng.GetParentLimbID(limbID)
-        #         newParentID = -1
-        #         if (item.parent()):
-        #             newParentID = item.parent().ID
-        #         if (oldParentID != newParentID):
-        #             self.limbHier.limbMng.SetParentLimbID(limbID, newParentID)
-        #             self.limbHier.limbMng.SetParentJointID(limbID, -1)
-        #             # self.limbHier.jntMng.SetParentLimb(limbID, newParentID)
-        #             self.expandAll()
-        #             self.parent.ReparentLimb(limbID, oldParentID)
-        #             break
+#         # if not self._isPopulating:
+#         #     for item in self._items.values():
+#         #         limbID = item.ID
+#         #         oldParentID = self.limbHier.limbMng.GetParentLimbID(limbID)
+#         #         newParentID = -1
+#         #         if (item.parent()):
+#         #             newParentID = item.parent().ID
+#         #         if (oldParentID != newParentID):
+#         #             self.limbHier.limbMng.SetParentLimbID(limbID, newParentID)
+#         #             self.limbHier.limbMng.SetParentJointID(limbID, -1)
+#         #             # self.limbHier.jntMng.SetParentLimb(limbID, newParentID)
+#         #             self.expandAll()
+#         #             self.parent.ReparentLimb(limbID, oldParentID)
+#         #             break
         
 
 

@@ -6,7 +6,9 @@ class Limb_Manager():
 
         self.nameMng = nameMng
 
-        self.limbTypes = [  'Chain', 
+        self.limbTypes = [  'Empty',
+                            'OneJoint',
+                            'Chain', 
                             'Branch']
         self.limbSides = ['M', 'L', 'R', 'None']
         
@@ -103,6 +105,13 @@ class Limb_Manager():
         else:
             parent = self.GetLimb(parentID)
             pm.connectAttr(parent.ID, child.parentLimbID)
+
+    def UpdateLimbType(self, limb):
+        joints = pm.listConnections(limb.joints)
+        if (len(joints) == 0):
+            limb.typeIndex.set(0)
+        elif (len(joints) == 1):
+            limb.typeIndex.set(1)
 
     # def DuplicateLimb(self, sourceLimbID):
     #     targetID = self.rigRoot.nextLimbID.get()

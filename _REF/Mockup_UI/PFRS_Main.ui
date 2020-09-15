@@ -54,9 +54,137 @@
                 <property name="currentIndex">
                  <number>1</number>
                 </property>
-                <widget class="QWidget" name="tab_11">
+                <widget class="QWidget" name="tab_16">
                  <attribute name="title">
                   <string>Skeleton</string>
+                 </attribute>
+                 <layout class="QHBoxLayout" name="horizontalLayout_19">
+                  <item>
+                   <widget class="QTreeWidget" name="treeWidget_2">
+                    <property name="indentation">
+                     <number>12</number>
+                    </property>
+                    <attribute name="headerVisible">
+                     <bool>false</bool>
+                    </attribute>
+                    <column>
+                     <property name="text">
+                      <string notr="true">1</string>
+                     </property>
+                    </column>
+                    <item>
+                     <property name="text">
+                      <string>Root</string>
+                     </property>
+                     <item>
+                      <property name="text">
+                       <string>Spine01</string>
+                      </property>
+                      <item>
+                       <property name="text">
+                        <string>Spine02</string>
+                       </property>
+                       <item>
+                        <property name="text">
+                         <string>Spine03</string>
+                        </property>
+                        <item>
+                         <property name="text">
+                          <string>Neck</string>
+                         </property>
+                         <item>
+                          <property name="text">
+                           <string>Head</string>
+                          </property>
+                         </item>
+                        </item>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>Clav</string>
+                        </property>
+                        <item>
+                         <property name="text">
+                          <string>Shoulder</string>
+                         </property>
+                         <item>
+                          <property name="text">
+                           <string>Elbow</string>
+                          </property>
+                          <item>
+                           <property name="text">
+                            <string>Wrist</string>
+                           </property>
+                          </item>
+                         </item>
+                        </item>
+                       </item>
+                      </item>
+                     </item>
+                    </item>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="Line" name="line_4">
+                    <property name="orientation">
+                     <enum>Qt::Vertical</enum>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QGroupBox" name="groupBox_16">
+                    <property name="title">
+                     <string>Tools</string>
+                    </property>
+                    <layout class="QVBoxLayout" name="verticalLayout_23">
+                     <item>
+                      <widget class="QPushButton" name="pushButton_9">
+                       <property name="text">
+                        <string>Joint Tool</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <spacer name="verticalSpacer_3">
+                       <property name="orientation">
+                        <enum>Qt::Vertical</enum>
+                       </property>
+                       <property name="sizeHint" stdset="0">
+                        <size>
+                         <width>20</width>
+                         <height>40</height>
+                        </size>
+                       </property>
+                      </spacer>
+                     </item>
+                     <item>
+                      <widget class="QLabel" name="label_7">
+                       <property name="text">
+                        <string>[Names will AUTOMAGICALLY be fixed later]</string>
+                       </property>
+                       <property name="wordWrap">
+                        <bool>true</bool>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QLabel" name="label_6">
+                       <property name="text">
+                        <string>Joint Count: 128</string>
+                       </property>
+                       <property name="alignment">
+                        <set>Qt::AlignCenter</set>
+                       </property>
+                      </widget>
+                     </item>
+                    </layout>
+                   </widget>
+                  </item>
+                 </layout>
+                </widget>
+                <widget class="QWidget" name="tab_11">
+                 <attribute name="title">
+                  <string>Limb Setup</string>
                  </attribute>
                  <layout class="QHBoxLayout" name="horizontalLayout_4">
                   <item>
@@ -1372,6 +1500,11 @@
                    </layout>
                   </item>
                  </layout>
+                </widget>
+                <widget class="QWidget" name="tab_20">
+                 <attribute name="title">
+                  <string>Test</string>
+                 </attribute>
                 </widget>
                </widget>
               </item>

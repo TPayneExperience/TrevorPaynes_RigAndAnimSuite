@@ -1,9 +1,7 @@
 
-import sys
-
 import pymel.core as pm
 
-class SKEL_Joint_Hierarchy_UI():
+class SKEL_Joint_Hierarchy_UI:
     def __init__(self, jointHierarchy, parent=None):
         self.parent = parent
         self.jntHier = jointHierarchy
@@ -38,9 +36,13 @@ class SKEL_Joint_Hierarchy_UI():
     
 # #=========== FUNCTIONALITY ====================================
 
-    def SetLimbID(self, limbID):
-        self.limbID = limbID
+    def SetLimb(self, limb):
+        self.limb = limb
         self.Populate()
+
+    # def SetLimbID(self, limbID):
+    #     self.limbID = limbID
+    #     self.Populate()
 
     def SelectionChanged(self):
         jointIDsStr = pm.treeView(self.widget, q=1, selectItem=1)
@@ -83,6 +85,101 @@ class SKEL_Joint_Hierarchy_UI():
             index = pm.treeView(self.widget, q=1, itemIndex=str(jointID))
             self.jntMng.GetJoint(jointID).limbIndex.set(index)
         self.parent.RebuildLimb(self.limbID)
+        
+
+
+#=========== DEPRICATED ====================================
+#=========== DEPRICATED ====================================
+#=========== DEPRICATED ====================================
+#=========== DEPRICATED ====================================
+#=========== DEPRICATED ====================================
+        
+
+
+# import sys
+
+# import pymel.core as pm
+
+# class SKEL_Joint_Hierarchy_UI:
+#     def __init__(self, jointHierarchy, parent=None):
+#         self.parent = parent
+#         self.jntHier = jointHierarchy
+#         self.jntMng = self.jntHier.jntMng
+#         self.nameMng = jointHierarchy.nameMng
+#         self.limbID = -1
+
+#         self._Setup()
+
+#     def Populate(self):
+#         self.Depopulate()
+#         for jointID in self.jntMng.GetLimbJointIDs(self.limbID):
+#             joint = self.jntMng.GetJoint(jointID)
+#             name = joint.pfrsName.get()
+#             pm.treeView(self.widget, e=1, addItem=(jointID, ''))
+#             pm.treeView(self.widget, e=1, displayLabel=(jointID, name))
+    
+#     def Depopulate(self):
+#         pm.treeView(self.widget, e=1, removeAll=1)
+
+# # #=========== SETUP ====================================
+
+#     def _Setup(self):
+#         self.widget = pm.treeView(allowReparenting=0)
+#         pm.treeView(self.widget, e=1, scc=self.SelectionChanged)
+#         pm.treeView(self.widget, e=1, editLabelCommand=self.Rename)
+#         pm.treeView(self.widget, e=1, dragAndDropCommand=self.Reorder)
+#         with pm.popupMenu():
+#             pm.menuItem('Add', c=pm.Callback(self.Add))
+#             pm.menuItem(divider=1)
+#             pm.menuItem('Remove', c=pm.Callback(self.Remove))
+    
+# # #=========== FUNCTIONALITY ====================================
+
+#     def SetLimbID(self, limbID):
+#         self.limbID = limbID
+#         self.Populate()
+
+#     def SelectionChanged(self):
+#         jointIDsStr = pm.treeView(self.widget, q=1, selectItem=1)
+#         if jointIDsStr:
+#             self.parent.JointSelected([int(ID) for ID in jointIDsStr])
+
+#     def Add(self):
+#         self.parent.AddJoints(self.limbID, 1)
+#         self.Populate()
+    
+#     def Remove(self):
+#         jointIDs = [int(ID) for ID in pm.treeView(self.widget, q=1, selectItem=1)]
+#         result = pm.confirmDialog(  title='Remove Joints', 
+#                                     icon='warning', 
+#                                     message='Remove %d joints?' % len(jointIDs), 
+#                                     button=['Yes','No'], 
+#                                     defaultButton='Yes', 
+#                                     cancelButton='No', 
+#                                     dismissString='No' )
+#         if (result == 'Yes'):
+#             self.parent.RemoveJoints(self.limbID, jointIDs)
+#             self.Populate()
+
+#     def Rename(self, jointIDStr, newName):
+#         if self.nameMng.IsValidCharacterLength(newName):
+#             if self.nameMng.DoesNotStartWithNumber(newName):
+#                 if self.nameMng.AreAllValidCharacters(newName):
+#                     jointNames = []
+#                     for jointID in self.jntMng.GetLimbJointIDs(self.limbID):
+#                         jointNames.append(self.jntMng.GetJoint(jointID).pfrsName.get())
+#                     if (newName not in jointNames):
+#                         joint = self.jntMng.GetJoint(int(jointIDStr))
+#                         joint.pfrsName.set(newName)
+#                         self.parent.SetJointName(self.limbID, joint.ID.get())
+#                         pm.treeView(self.widget, e=1, displayLabel=(jointIDStr, newName))
+#         return ''
+
+#     def Reorder(self, jointIDs, oldParents, oldIndex, newParent, newIndex, i1, i2):
+#         for jointID in self.jntMng.GetLimbJointIDs(self.limbID):
+#             index = pm.treeView(self.widget, q=1, itemIndex=str(jointID))
+#             self.jntMng.GetJoint(jointID).limbIndex.set(index)
+#         self.parent.RebuildLimb(self.limbID)
                 
 
 
