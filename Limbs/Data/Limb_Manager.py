@@ -32,6 +32,9 @@ class Limb_Manager():
     def GetLimbSide(self, limbID): # Name Manager Only
         return self.limbSides[self._limbs[limbID].sideIndex.get()]
 
+    def GetLimbMirror(self, limb):
+        return pm.listConnections(limb.mirrorLimb)
+
     def SetLimbParent(self, childID, parentID = -1):
         limb = self.GetLimb(childID)
         if (parentID == -1):
@@ -61,16 +64,17 @@ class Limb_Manager():
         pm.addAttr(limb, ln='parentLimbID', at='long', dv=-1)
         # pm.addAttr(limb, ln='parentJntIndex', at='enum', enumName='None')
         # pm.addAttr(limb, ln='parentCtrID', at='long')
+        pm.addAttr(limb, ln='joints', at='short')
         pm.addAttr(limb, ln='rigRoot', dt='string')
         pm.connectAttr(self.rigRoot.limbs, limb.rigRoot)
 
         self._limbs[limbID] = limb
         return limb
 
-    def Remove(self, limbID): # Should be called after joints deleted
+    def Remove(self, limb): # Should be called after joints deleted
+        del(self._limbs[limb.ID.get()])
         pm.select(d=1)
-        pm.delete(self._limbs[limbID])
-        del(self._limbs[limbID])
+        pm.delete(limb)
 
     def Rename(self, sourceLimbID, newName): # list should repopulate after call
         names = [limb.pfrsName.get() for limb in self._limbs.values()]
@@ -112,6 +116,16 @@ class Limb_Manager():
             limb.typeIndex.set(0)
         elif (len(joints) == 1):
             limb.typeIndex.set(1)
+
+    def FlipSides(self, limbID):
+        limb1 = self.GetLimb(limbID)
+        limb2 = pm.listConnections(limb1.mirrorLimb)
+        if limb2:
+            limb2 = limb2[0]
+            side1 = limb1.sideIndex.get()
+            side2 = limb2.sideIndex.get()
+            limb1.sideIndex.set(side2)
+            limb2.sideIndex.set(side1)
 
     # def DuplicateLimb(self, sourceLimbID):
     #     targetID = self.rigRoot.nextLimbID.get()

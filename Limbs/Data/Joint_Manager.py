@@ -34,16 +34,16 @@ class Joint_Manager():
     def GetJoint(self, jointID):
         return self._joints[jointID]
 
-    def GetLimbJoint(self, limbID):
+    def GetLimbJoints(self, limbID):
         '''Order joints by internal joint index'''
         limb = self.limbMng.GetLimb(limbID)
-        orderedJntIDs = []
+        orderedJoints = []
         temp = {}
         for joint in pm.listConnections(limb.joints):
             temp[joint.limbIndex.get()] = joint
         for index in sorted(list(temp.keys())):
-            orderedJntIDs.append(temp[index])
-        return orderedJntIDs
+            orderedJoints.append(temp[index])
+        return orderedJoints
 
     def GetJointCount(self): # for Skel tool label
         return len(self._joints)
@@ -65,14 +65,14 @@ class Joint_Manager():
         
         if (not pm.hasAttr(joint, 'pfrsName')):
             pm.addAttr(joint, ln='ID', at='short')
-            pm.addAttr(joint, ln='limbID', at='short')
+            pm.addAttr(joint, ln='parentLimb', at='short')
             pm.addAttr(joint, ln='limbIndex', at='short')
             pm.addAttr(joint, ln='pfrsName', dt='string')
             pm.addAttr(joint, ln='rigRoot', dt='string')
             joint.pfrsName.set('Joint_%03d' % (jointID))
         joint.ID.set(jointID)
 
-        pm.connectAttr(limb.ID, joint.limbID)
+        pm.connectAttr(limb.joints, joint.parentLimb)
         pm.connectAttr(self.rigRoot.joints, joint.rigRoot)
 
         self._joints[jointID] = joint
@@ -80,11 +80,11 @@ class Joint_Manager():
         pm.editDisplayLayerMembers(self.skelLayer, joint)
         self._ReindexJoints(limb)
 
-    def Remove(self, jointID):
-        joint = self.GetJoint(jointID)
+    def Remove(self, joint):
         pm.disconnectAttr(joint.rigRoot)
-        pm.disconnectAttr(joint.limbID)
-        del(self._joints[jointID])
+        pm.disconnectAttr(joint.parentLimb)
+        joint.rename('Joint_%03d' % joint.ID.get())
+        del(self._joints[joint.ID.get()])
 
     def UpdateAllJointNames(self): # if prefix changed
         for jointID in list(self._joints.keys()):
@@ -94,6 +94,36 @@ class Joint_Manager():
         joint = self.GetJoint(jointID)
         joint.rename(self.nameMng.GetName(jointID, 'JNT'))
     
+#============= UTILS ============================
+
+    def AreJointsSiblings(self, joints):
+        isBranch = True
+        parent1 = pm.listRelatives(joints[0], parent=1)
+        for joint in joints[1:]:
+            parent2 = pm.listRelatives(joint, parent=1)
+            if (parent1 != parent2):
+                isBranch = False
+        return isBranch
+    
+    def AreJointsChained(self, joints):
+        bestChain = self.GetJointChain(joints)
+        return all([j in bestChain for j in joints])
+    
+    def GetJointChain(self, joints):
+        temp = {} # longName : node
+        for joint in joints:
+            temp[joint.longName()] = joint
+        rootParent = temp[min(list(temp.keys()))]
+        child = temp[max(list(temp.keys()))]
+        joints = [child]
+        parent = child
+        for i in range(999):
+            if (parent == rootParent or not parent):
+                break
+            parent = pm.listRelatives(parent, p=1)
+            joints.append(parent)
+        return joints
+
     # def DuplicateLimb(self, sourceLimbID, targetLimbID):
     #     self._limbJoints[targetLimbID] = []
     #     sourceJoints = [self.GetJoint(ID) for ID in self.GetLimbJointIDs(sourceLimbID)]
@@ -122,6 +152,8 @@ class Joint_Manager():
 
 
 
+# #============= DEPRICATED ============================
+# #============= DEPRICATED ============================
 # #============= DEPRICATED ============================
 # #============= DEPRICATED ============================
 # #============= DEPRICATED ============================

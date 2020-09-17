@@ -52,11 +52,11 @@
                  <bool>true</bool>
                 </property>
                 <property name="currentIndex">
-                 <number>1</number>
+                 <number>0</number>
                 </property>
                 <widget class="QWidget" name="tab_16">
                  <attribute name="title">
-                  <string>Skeleton</string>
+                  <string>Joint Setup</string>
                  </attribute>
                  <layout class="QHBoxLayout" name="horizontalLayout_19">
                   <item>
@@ -141,6 +141,13 @@
                       <widget class="QPushButton" name="pushButton_9">
                        <property name="text">
                         <string>Joint Tool</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QPushButton" name="pushButton_10">
+                       <property name="text">
+                        <string>Insert Dup Joint (terminator)</string>
                        </property>
                       </widget>
                      </item>
@@ -1500,11 +1507,6 @@
                    </layout>
                   </item>
                  </layout>
-                </widget>
-                <widget class="QWidget" name="tab_20">
-                 <attribute name="title">
-                  <string>Test</string>
-                 </attribute>
                 </widget>
                </widget>
               </item>
@@ -3759,6 +3761,11 @@
             </item>
            </layout>
           </widget>
+          <widget class="QWidget" name="tab_20">
+           <attribute name="title">
+            <string>TEST</string>
+           </attribute>
+          </widget>
           <widget class="QWidget" name="tab_3">
            <attribute name="title">
             <string>Animation (Anim Only)</string>
@@ -3966,7 +3973,7 @@
                            <rect>
                             <x>0</x>
                             <y>0</y>
-                            <width>82</width>
+                            <width>98</width>
                             <height>164</height>
                            </rect>
                           </property>

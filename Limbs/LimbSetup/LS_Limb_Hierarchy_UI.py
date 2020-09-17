@@ -1,10 +1,8 @@
 
 import pymel.core as pm
 
-import Common.LimbHier_UI as limbHierUI
-reload(limbHierUI)
 
-class SKEL_Limb_Hierarchy_UI:
+class LS_Limb_Hierarchy_UI:
     def __init__(self, limbMng, jntMng, nameMng, skelUI):
 
         self.limbMng = limbMng
@@ -14,8 +12,7 @@ class SKEL_Limb_Hierarchy_UI:
 
         self._Setup()
 
-    def Populate(self, selectedID = -1):
-        pm.treeView(self.widget, e=1, removeAll=1)
+    def Populate(self):
         temp = {} # pfrsName : [limbs]
         for rootLimbID in self.limbMng.GetRootLimbIDs():
             for limbID in self.limbMng.GetLimbCreationOrder(rootLimbID):
@@ -28,20 +25,21 @@ class SKEL_Limb_Hierarchy_UI:
             for limbID in temp[limbName]:
                 pm.treeView(self.widget, e=1, ai=(limbID, ''))
                 pm.treeView(self.widget, e=1, displayLabel=(limbID, limbName))
-        if (selectedID != -1):
-            pm.treeView(self.widget, e=1, selectItem=(selectedID, 1))
+        # if (selectedID != -1):
+        #     pm.treeView(self.widget, e=1, selectItem=(selectedID, 1))
 
 #=========== SETUP ====================================
 
     def _Setup(self):
         tt = 'Double click to RENAME.'
         tt += '\nTo set a limb as a MIRROR,'
-        tt += '\nname both limbs with the same name'
+        tt += '\nname BOTH LIMBS with the SAME NAME'
         self.widget = pm.treeView(ams=0, adr=0, arp=0, ann=tt)
         pm.treeView(self.widget, e=1,   editLabelCommand=self.Rename,
                                         scc=self.SelectionChanged)
         with pm.popupMenu():
             pm.menuItem(l='Add Limb', c=self.Add)
+            pm.menuItem(l='Flip Sides', c=self.FlipSides)
             pm.menuItem(divider=1)
             self.remove_btn = pm.menuItem(l='Remove Limb', c=self.Remove)
 
@@ -54,61 +52,32 @@ class SKEL_Limb_Hierarchy_UI:
             self.parent.LimbSelected(int(limbIDStrs[0]))
 
     def Add(self):
-        selJoints = pm.ls(sl=1, type='joint')
+        selJoints = self.parent.GetSelectedSceneJoints()
+        limb = None
         if (len(selJoints) < 2):
             limb = self.limbMng.Add()
             if selJoints:
                 self.jntMng.Add(limb, selJoints[0])
                 limb.typeIndex.set(1)
-        else:
-            # BRANCH LIMB, CHECK IF THEY SHARE SAME PARENT
-            parent = pm.listRelatives(selJoints[0], p=1)
-            isBranch = True
-            for joint in selJoints[1:]:
-                nextParent = pm.listRelatives(joint, p=1)
-                if (parent != nextParent):
-                    isBranch = False
-            if isBranch:
-                limb = self.limbMng.Add()
-                limb.typeIndex.set(3) # Branch
-                for joint in selJoints:
-                    self.jntMng.Add(limb, joint)
-                return
-            
-            # CHAIN LIMB, GET SHORTEST AND LONGEST NAMES, IF RELATED, CHAIN
-            temp = {} # longName : node
-            for joint in selJoints:
-                temp[joint.longName()] = joint
-            rootParent = temp[min(list(temp.keys()))]
-            child = temp[max(list(temp.keys()))]
-            allChildren = pm.listRelatives(rootParent, allDescendents=1)
-            if child in allChildren:
-                joints = [child]
-                parent = child
-                for i in range(999):
-                    if (parent == rootParent):
-                        break
-                    parent = pm.listRelatives(parent, p=1)
-                    joints.append(parent)
-                limb = self.limbMng.Add()
-                limb.typeIndex.set(2) # Branch
-                for joint in joints:
-                    self.jntMng.Add(limb, joint)
-                self.parent.AddLimb(limb)
-                return
-            else:
-                msg = 'Limb Joint Options:\n'
-                msg += '\n- 0 or 1 joint selected'
-                msg += '\n- 2+ joints that are all the immediate children '
-                msg += 'of the same parent [BRANCH]'
-                msg += '\n- 2+ joints that are parented to one another [CHAIN]'
-                pm.confirmDialog(   t='Limb Creation Error', icn='warning', 
-                                    m=msg, button=['Cool Beans'])
+        # CHAIN LIMB
+        if not limb and self.jntMng.AreJointsChained(selJoints):
+            limb = self.limbMng.Add()
+            limb.typeIndex.set(2) # Chain
+            for joint in self.jntMng.GetJointChain(selJoints):
+                self.jntMng.Add(limb, joint)
 
-        # limbID = self.limbMng.Add().ID.get()
-        # self.jntMng.AddLimb(limbID)
-        # self.jntMng.Add(limbID, 1)
-        # self.parent.AddLimb(limbID)
+        # BRANCH LIMB
+        if not limb and self.jntMng.AreJointsSiblings(selJoints):
+            limb = self.limbMng.Add()
+            limb.typeIndex.set(3) # Branch
+            for joint in selJoints:
+                self.jntMng.Add(limb, joint)
+        
+        # RAISE WARNING
+        if limb:
+            self.parent.Populate()
+        else:
+            self.parent.SceneJointsIncorrectDialog()
 
     def Remove(self):
         limbIDStrs = pm.treeView(self.widget, q=1, selectItem=1)
@@ -120,21 +89,25 @@ class SKEL_Limb_Hierarchy_UI:
                                     defaultButton='Yes', 
                                     cancelButton='No', 
                                     dismissString='No') == 'Yes'):
-                self.parent.RemoveLimb(int(limbIDStrs[0]))
+                limb = self.limbMng.GetLimb(limbIDStrs[0])
+                for joint in self.jntMng.GetLimbJoints(limb):
+                    self.jntMng.Remove(joint)
+                self.limbMng.Remove(limb)
+                self.parent.Populate()
 
     def Rename(self, limbIDStr, newName):
         if self.nameMng.IsValidCharacterLength(newName):
             if self.nameMng.DoesNotStartWithNumber(newName):
                 if self.nameMng.AreAllValidCharacters(newName):
-                    if self.limbMng.IsNameUnique(newName):
-                        limb = self.limbMng.GetLimb(int(limbIDStr))
-                        limb.pfrsName.set(newName)
-                        self.parent.SetLimbName(int(limbIDStr))
-                        pm.treeView(self.widget, e=1, displayLabel=(limbIDStr, newName))
+                    self.limbMng.Rename(int(limbIDStr), newName)
+                    self.parent.SetLimbName(int(limbIDStr))
+                    # parent should call populate on this
         return ''
 
-
-
+    def FlipSides(self):
+        limbIDStrs = pm.treeView(self.widget, q=1, selectItem=1)
+        if limbIDStrs:
+            self.limbMng.FlipSides(limbIDStrs[0])
 
 
 
