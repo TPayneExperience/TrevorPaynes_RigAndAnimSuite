@@ -36,6 +36,11 @@ class Joint_Manager():
     def GetJoint(self, jointID):
         return self._joints[jointID]
 
+    def HasLimb(self, joint):
+        if not joint.hasAttr('parentLimb'):
+            return False
+        return bool(pm.listConnections(joint.parentLimb))
+
     def GetLimb(self, joint):
         return pm.listConnections(joint.parentLimb)[0]
 

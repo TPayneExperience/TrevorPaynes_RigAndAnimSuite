@@ -44,7 +44,7 @@ class LS_Limb_Hierarchy_UI:
         pm.treeView(self.widget, e=1,   editLabelCommand=self.Rename,
                                         scc=self.SelectionChanged)
         with pm.popupMenu():
-            pm.menuItem(l='Add Limb', c=self.Add)
+            pm.menuItem(l='Add Limb', c=self.parent.AddLimb)
             pm.menuItem(l='Flip Sides', c=self.FlipSides)
             pm.menuItem(divider=1)
             pm.menuItem(l='Remove Limb', c=self.Remove)
@@ -55,34 +55,6 @@ class LS_Limb_Hierarchy_UI:
         limbIDStrs = pm.treeView(self.widget, q=1, selectItem=1)
         if limbIDStrs:
             self.parent.LimbSelected(int(limbIDStrs[0]))
-
-    def Add(self, ignore):
-        selJoints = self.parent.GetSelectedSceneJoints()
-        limb = None
-        if (len(selJoints) < 2):
-            limb = self.limbMng.Add()
-            if selJoints:
-                self.jntMng.Add(limb, selJoints[0])
-                limb.typeIndex.set(1)
-        # CHAIN LIMB
-        if not limb and self.jntMng.AreJointsChained(selJoints):
-            limb = self.limbMng.Add()
-            limb.typeIndex.set(2) # Chain
-            for joint in self.jntMng.GetJointChain(selJoints):
-                self.jntMng.Add(limb, joint)
-
-        # BRANCH LIMB
-        if not limb and self.jntMng.AreJointsSiblings(selJoints):
-            limb = self.limbMng.Add()
-            limb.typeIndex.set(3) # Branch
-            for joint in selJoints:
-                self.jntMng.Add(limb, joint)
-        
-        # RAISE WARNING
-        if limb:
-            self.parent.AddLimb()
-        else:
-            self.parent.SceneJointsIncorrectDialog()
 
     def Remove(self, ignore):
         limbIDStrs = pm.treeView(self.widget, q=1, selectItem=1)

@@ -7,7 +7,7 @@ class LS_Joint_Hierarchy_UI:
         self.jntMng = jntMng
         self.nameMng = nameMng
         self.parent = parent
-        self.limb = None
+        self.limbID = None
 
         self._Setup()
 
@@ -22,46 +22,68 @@ class LS_Joint_Hierarchy_UI:
     def Depopulate(self):
         pm.treeView(self.widget, e=1, removeAll=1)
 
-# #=========== SETUP ====================================
+#=========== SETUP ====================================
 
     def _Setup(self):
-        self.widget = pm.treeView(allowReparenting=0)
+        self.widget = pm.treeView(arp=0, scc=self.SelectionChanged)
         pm.treeView(self.widget, e=1, editLabelCommand=self.Rename)
         with pm.popupMenu():
             pm.menuItem('Add', c=pm.Callback(self.Add))
             pm.menuItem(divider=1)
             pm.menuItem('Remove', c=pm.Callback(self.Remove))
     
-# #=========== FUNCTIONALITY ====================================
+#=========== FUNCTIONALITY ====================================
+
+    def SelectionChanged(self):
+        jointIDStrs = pm.treeView(self.widget, q=1, selectItem=1)
+        if jointIDStrs:
+            jointID = int(jointIDStrs[0])
+            joint = self.jntMng.GetJoint(jointID)
+            pm.select(joint)
 
     def SetLimb(self, limbID):
         self.limbID = limbID
         self.Populate()
 
     def Add(self):
+        newJoints = self.parent.GetSelectedSceneJoints()
+        if not newJoints:
+            return
         limb = self.limbMng.GetLimb(self.limbID)
-        joints = self.parent.GetSelectedSceneJoints()
-        joints += self.jntMng.GetLimbJoints(self.limbID)
-        # EMPTY
-        if len(joints) == 0:
-            pass
+        oldJoints = self.jntMng.GetLimbJoints(self.limbID)
+        joints = newJoints + oldJoints
+
         # ONE JOINT
-        elif len(joints) == 1:
+        if (len(joints) == 1):
             limb.typeIndex.set(1)
-            self.jntMng.Add(limb, joints[0])
+            self.jntMng.Add(limb, newJoints[0])
             self.parent.PopulateJoints()
+
         # CHAIN
         elif self.jntMng.AreJointsChained(joints):
             limb.typeIndex.set(2)
-            for joint in self.jntMng.GetJointChain(joints):
-                self.jntMng.Add(limb, joint)
+            jointChain = self.jntMng.GetJointChain(joints)
+            # Check if all joints are free from limbs
+            for joint in jointChain:
+                if self.jntMng.HasLimb(joint):
+                    if (self.jntMng.GetLimb(joint) != limb):
+                        pm.confirmDialog(t='Joint Selection Mismatch', 
+                                icn='warning', 
+                                m='Limbs may not contain joints from other limbs', 
+                                button=['Cool Beans'])
+                        return
+            for joint in jointChain:
+                if not self.jntMng.HasLimb(joint):
+                    self.jntMng.Add(limb, joint)
             self.parent.PopulateJoints()
+
         # BRANCH
         elif self.jntMng.AreJointsSiblings(joints):
             limb.typeIndex.set(3)
-            for joint in joints:
+            for joint in newJoints:
                 self.jntMng.Add(limb, joint)
             self.parent.PopulateJoints()
+
         # ERROR
         else:
             self.parent.SceneJointsIncorrectDialog()
@@ -100,12 +122,13 @@ class LS_Joint_Hierarchy_UI:
             if self.nameMng.DoesNotStartWithNumber(newName):
                 if self.nameMng.AreAllValidCharacters(newName):
                     jointNames = []
-                    for joint in self.jntMng.GetLimbJoints(self.limb):
+                    for joint in self.jntMng.GetLimbJoints(self.limbID):
                         jointNames.append(joint.pfrsName.get())
                     if (newName not in jointNames):
-                        joint = self.jntMng.GetJoint(int(jointIDStr))
+                        jointID = int(jointIDStr)
+                        joint = self.jntMng.GetJoint(jointID)
                         joint.pfrsName.set(newName)
-                        pm.treeView(self.widget, e=1, displayLabel=(jointIDStr, newName))
+                        self.jntMng.UpdateJointName(jointID)
                         self.parent.PopulateJoints()
         return ''
 

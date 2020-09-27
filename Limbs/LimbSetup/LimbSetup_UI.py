@@ -30,7 +30,8 @@ class LimbSetup_UI:
     def _Setup(self):
         with pm.verticalLayout():
             with pm.frameLayout('Scene Joints', bv=1):
-                self.sceneHier_ui = sceneHier_UI.LS_Scene_Hierarchy_UI(self.jntMng)
+                self.sceneHier_ui = sceneHier_UI.LS_Scene_Hierarchy_UI(self.jntMng,
+                                                                        self)
         with pm.verticalLayout():
             with pm.frameLayout('Limbs', bv=1):
                 self.limbHier_ui = limbHier_UI.LS_Limb_Hierarchy_UI(    self.limbMng,
@@ -45,10 +46,36 @@ class LimbSetup_UI:
            
 #=========== LIMB FUNCTIONALITY ====================================
     
-    def AddLimb(self):
-        self.Populate()
-        self.UpdateJointCount()
+    def AddLimb(self, ignore): # called by limb heir > RMB > Add
+        joints = self.GetSelectedSceneJoints()
+        if self.AddLimbByJoints(joints):
+            self.Populate()
+            self.UpdateJointCount()
+        else:
+            self.SceneJointsIncorrectDialog()
     
+    def AddLimbByJoints(self, joints): # called by Scene hier > RMB > Autobuild
+        limb = None
+        if (len(joints) < 2):
+            limb = self.limbMng.Add()
+            if joints:
+                self.jntMng.Add(limb, joints[0])
+                limb.typeIndex.set(1)
+        # CHAIN LIMB
+        if not limb and self.jntMng.AreJointsChained(joints):
+            limb = self.limbMng.Add()
+            limb.typeIndex.set(2) # Chain
+            for joint in self.jntMng.GetJointChain(joints):
+                self.jntMng.Add(limb, joint)
+
+        # BRANCH LIMB
+        if not limb and self.jntMng.AreJointsSiblings(joints):
+            limb = self.limbMng.Add()
+            limb.typeIndex.set(3) # Branch
+            for joint in joints:
+                self.jntMng.Add(limb, joint)
+        return bool(limb)
+
     def RemoveLimb(self):
         self.Populate()
         self.UpdateJointCount()
@@ -60,6 +87,8 @@ class LimbSetup_UI:
         self.Populate()
 
     def LimbSelected(self, limbID):
+        joints = self.jntMng.GetLimbJoints(limbID)
+        pm.select(joints)
         self.jntHier_ui.SetLimb(limbID)
 
     def GetSelectedSceneJoints(self):
@@ -73,6 +102,8 @@ class LimbSetup_UI:
         msg += '\n- 2+ joints that are all the immediate children '
         msg += 'of the same parent [BRANCH]'
         msg += '\n- 2+ joints that are parented to one another [CHAIN]'
+        msg += '\n--------------------------'
+        msg += '\n- Limbs cannot contain joints from OTHER limbs'
         pm.confirmDialog(   t='Joint Selection Mismatch', icn='warning', 
                             m=msg, button=['Cool Beans'])
 
