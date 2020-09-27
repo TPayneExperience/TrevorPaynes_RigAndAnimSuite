@@ -47,6 +47,8 @@ class Limbs_UI():
         self._Setup()
     
     def NewRig(self, rigRoot):
+        pm.addAttr(rigRoot, ln='lastLimbsTabIndex', at='short')
+        self.rigRoot = rigRoot
         self.jntMng.NewRig(rigRoot)
         self.limbMng.NewRig(rigRoot)
 
@@ -72,20 +74,39 @@ class Limbs_UI():
                                 (self.bhvTab, 'Behaviors'), 
                                 (self.appTab, 'Appearance')))
     
+#=========== TAB SWITCHING ====================================
+
+    def SetupLimbsTab(self):
+        '''When starting up tool or switching back to the limb tab'''
+        pass
+        # SETUP BHVS
+        # SETUP APPS
+        
+    def TeardownLimbsTab(self):
+        '''When exiting the limb tab'''
+        pass
+        # TEARDOWN BHVS
+        # TEARDOWN APPS
+        
+    def TabChanged(self):
+        lastIndex = self.rigRoot.lastLimbsTabIndex.get()
+        if (lastIndex == 3): # behaviors
+            pass # MISSING TEARDOWN
+        if (lastIndex == 4): # appearances
+            pass # MISSING TEARDOWN
+        nextIndex = pm.tabLayout(self.tab, q=1, selectTabIndex=1)
+        if (nextIndex == 2): # limbs
+            self.limbSetup_ui.Populate()
+        if (nextIndex == 3): # behaviors
+            pass # MISSING SETUP
+        if (nextIndex == 4): # appearances
+            pass # MISSING SETUP
+        self.rigRoot.lastLimbsTabIndex.set(nextIndex)
+
 #=========== FUNCTIONALITY ====================================
 
-    def TabChanged(self):
-        tabIndex = pm.tabLayout(self.tab, q=1, selectTabIndex=1)
-        # TEARDOWN EDITABLE
-        # TEARDOWN FINALS
-        # SETUP FINALS
-        # SETUP EDITABLE
-        print tabIndex
-        # if (tab == self.jntSetupTab.shortName()):
-        #     pass
-        # elif (tab == self.limbSetupTab.shortName()):
-        #     pass
-        self.lastTabIndex = tabIndex
+
+
 
 #=========== DIALOGS ====================================
 

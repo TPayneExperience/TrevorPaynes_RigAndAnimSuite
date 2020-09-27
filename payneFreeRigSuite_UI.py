@@ -93,6 +93,8 @@ class PayneFreeRigSuite_UI():
         self.NewRig('tempPrefix', 
                     range(5), 
                     True)
+        path = r'D:/Assets/Programming/Python/Maya/ModularAutoRigger/TEST_OUTPUT/temp_joints.ma'
+        pm.importFile(path)
         self.UpdateEnableUI()
 
 #=========== SETUP ====================================
@@ -111,7 +113,7 @@ class PayneFreeRigSuite_UI():
                         with pm.horizontalLayout():
                             pm.button('test', label='Three')
         pm.tabLayout(self.rigTabs, edit=1, 
-                    tabLabel=(  (self.lsLayout,'Limb Setup'), 
+                    tabLabel=(  (self.lsLayout,'Limbs'), 
                                 (self.mdLayout,'Mesh Deformation')))
         self._Setup_MenuBar()
         pm.showWindow()

@@ -25,14 +25,19 @@ class Joint_Manager():
     def SetRig(self, rigRoot):
         self.rigRoot = rigRoot
         self._joints = {} # jointID: jointNode
-        for joint in pm.listConnections(self.rigRoot.joints):
-            self._joints[joint.ID.get()] = joint
+        for rootLimbID in self.limbMng.GetRootLimbIDs():
+            for limbID in self.limbMng.GetLimbCreationOrder(rootLimbID):
+                for joint in self.GetLimbJoints(limbID):
+                    self._joints[joint.ID.get()] = joint
         # Missing: Get Skeleton group, get skeleton layer
 
 #============= ACCESSORS + MUTATORS ============================
 
     def GetJoint(self, jointID):
         return self._joints[jointID]
+
+    def GetLimb(self, joint):
+        return pm.listConnections(joint.parentLimb)[0]
 
     def GetLimbJoints(self, limbID):
         '''Order joints by internal joint index'''
@@ -68,12 +73,10 @@ class Joint_Manager():
             pm.addAttr(joint, ln='parentLimb', at='short')
             pm.addAttr(joint, ln='limbIndex', at='short')
             pm.addAttr(joint, ln='pfrsName', dt='string')
-            pm.addAttr(joint, ln='rigRoot', dt='string')
             joint.pfrsName.set('Joint_%03d' % (jointID))
         joint.ID.set(jointID)
 
         pm.connectAttr(limb.joints, joint.parentLimb)
-        pm.connectAttr(self.rigRoot.joints, joint.rigRoot)
 
         self._joints[jointID] = joint
         self.UpdateJointName(jointID)
@@ -81,7 +84,6 @@ class Joint_Manager():
         self._ReindexJoints(limb)
 
     def Remove(self, joint):
-        pm.disconnectAttr(joint.rigRoot)
         pm.disconnectAttr(joint.parentLimb)
         joint.rename('Joint_%03d' % joint.ID.get())
         del(self._joints[joint.ID.get()])
@@ -89,6 +91,10 @@ class Joint_Manager():
     def UpdateAllJointNames(self): # if prefix changed
         for jointID in list(self._joints.keys()):
             self.UpdateJointName(jointID)
+
+    def UpdateLimbJointNames(self, limb):
+        for joint in self.GetLimbJoints(limb.ID.get()):
+            self.UpdateJointName(joint.ID.get())
 
     def UpdateJointName(self, jointID):
         joint = self.GetJoint(jointID)
@@ -115,14 +121,17 @@ class Joint_Manager():
             temp[joint.longName()] = joint
         rootParent = temp[min(list(temp.keys()))]
         child = temp[max(list(temp.keys()))]
-        joints = [child]
+        jointChain = [child]
         parent = child
         for i in range(999):
-            if (parent == rootParent or not parent):
-                break
             parent = pm.listRelatives(parent, p=1)
-            joints.append(parent)
-        return joints
+            if not parent:
+                break
+            parent = parent[0]
+            jointChain.append(parent)
+            if parent == rootParent:
+                break
+        return jointChain
 
     # def DuplicateLimb(self, sourceLimbID, targetLimbID):
     #     self._limbJoints[targetLimbID] = []

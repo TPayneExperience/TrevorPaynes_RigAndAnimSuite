@@ -14,7 +14,7 @@ class Name_Manager():
 
     def GetName(self, jointID, objType):
         joint = self.jntMng.GetJoint(jointID)
-        limb = pm.listConnections(joint.limbID)[0]
+        limb = self.jntMng.GetLimb(joint)
         side = self.limbMng.GetLimbSide(limb.ID.get())
         temp = {self.rigRoot.limbIndex.get() : limb.pfrsName.get(),
                 self.rigRoot.jointIndex.get() : joint.pfrsName.get(),

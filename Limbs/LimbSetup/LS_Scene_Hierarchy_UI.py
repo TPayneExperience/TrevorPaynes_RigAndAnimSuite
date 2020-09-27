@@ -15,16 +15,17 @@ class LS_Scene_Hierarchy_UI:
         for joint in pm.ls(type='joint'):
             self.allJoints[joint.longName()] = joint
         for longName in sorted(list(self.allJoints.keys())):
+            joint = self.allJoints[longName]
             parent = pm.listRelatives(joint, parent=1)
             if parent and (parent[0].longName() in self.allJoints):
                 pm.treeView(self.widget, e=1, ai=(longName, parent[0].longName()))
             else:
                 pm.treeView(self.widget, e=1, ai=(longName, ''))
-            pm.treeView(self.widget, e=1, enl=(longName, joint in limbJoints))
+            pm.treeView(self.widget, e=1, enl=(longName, joint not in limbJoints))
             pm.treeView(self.widget, e=1, dl=(longName, joint.shortName()))
 
     def _Setup(self):
-        self.widget = pm.treeView(ams=0, adr=0, arp=0)
+        self.widget = pm.treeView(adr=0, arp=0)
         with pm.popupMenu():
             pm.menuItem(l='Auto Build Limbs', c=self.AutoBuildLimbs)
 

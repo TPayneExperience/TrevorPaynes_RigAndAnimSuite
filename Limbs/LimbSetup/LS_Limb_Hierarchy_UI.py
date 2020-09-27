@@ -13,6 +13,7 @@ class LS_Limb_Hierarchy_UI:
         self._Setup()
 
     def Populate(self):
+        pm.treeView(self.widget, e=1, removeAll=1)
         temp = {} # pfrsName : [limbs]
         for rootLimbID in self.limbMng.GetRootLimbIDs():
             for limbID in self.limbMng.GetLimbCreationOrder(rootLimbID):
@@ -25,6 +26,11 @@ class LS_Limb_Hierarchy_UI:
             for limbID in temp[limbName]:
                 pm.treeView(self.widget, e=1, ai=(limbID, ''))
                 pm.treeView(self.widget, e=1, displayLabel=(limbID, limbName))
+                side = self.limbMng.GetLimbSide(limbID)
+                if (side == 'L' or side == 'R'):
+                    pm.treeView(self.widget, e=1, buttonTextIcon=(limbID, 1, side))
+                else:
+                    pm.treeView(self.widget, e=1, buttonVisible=(limbID, 1, 0))
         # if (selectedID != -1):
         #     pm.treeView(self.widget, e=1, selectItem=(selectedID, 1))
 
@@ -34,24 +40,23 @@ class LS_Limb_Hierarchy_UI:
         tt = 'Double click to RENAME.'
         tt += '\nTo set a limb as a MIRROR,'
         tt += '\nname BOTH LIMBS with the SAME NAME'
-        self.widget = pm.treeView(ams=0, adr=0, arp=0, ann=tt)
+        self.widget = pm.treeView(ams=0, adr=0, arp=0, ann=tt, nb=1, fb=1)
         pm.treeView(self.widget, e=1,   editLabelCommand=self.Rename,
                                         scc=self.SelectionChanged)
         with pm.popupMenu():
             pm.menuItem(l='Add Limb', c=self.Add)
             pm.menuItem(l='Flip Sides', c=self.FlipSides)
             pm.menuItem(divider=1)
-            self.remove_btn = pm.menuItem(l='Remove Limb', c=self.Remove)
+            pm.menuItem(l='Remove Limb', c=self.Remove)
 
 #=========== FUNCTIONALITY ====================================
 
     def SelectionChanged(self):
         limbIDStrs = pm.treeView(self.widget, q=1, selectItem=1)
-        pm.menuItem(self.remove_btn, en=bool(limbIDStrs))
         if limbIDStrs:
             self.parent.LimbSelected(int(limbIDStrs[0]))
 
-    def Add(self):
+    def Add(self, ignore):
         selJoints = self.parent.GetSelectedSceneJoints()
         limb = None
         if (len(selJoints) < 2):
@@ -75,11 +80,11 @@ class LS_Limb_Hierarchy_UI:
         
         # RAISE WARNING
         if limb:
-            self.parent.Populate()
+            self.parent.AddLimb()
         else:
             self.parent.SceneJointsIncorrectDialog()
 
-    def Remove(self):
+    def Remove(self, ignore):
         limbIDStrs = pm.treeView(self.widget, q=1, selectItem=1)
         if limbIDStrs:
             if (pm.confirmDialog(   title='Remove Limb', 
@@ -89,25 +94,47 @@ class LS_Limb_Hierarchy_UI:
                                     defaultButton='Yes', 
                                     cancelButton='No', 
                                     dismissString='No') == 'Yes'):
-                limb = self.limbMng.GetLimb(limbIDStrs[0])
-                for joint in self.jntMng.GetLimbJoints(limb):
+                limbID = int(limbIDStrs[0])
+                for joint in self.jntMng.GetLimbJoints(limbID):
                     self.jntMng.Remove(joint)
+                limb = self.limbMng.GetLimb(limbID)
+                mirror = self.limbMng.GetLimbMirror(limb)
                 self.limbMng.Remove(limb)
-                self.parent.Populate()
+                if mirror:
+                    self.jntMng.UpdateLimbJointNames(mirror[0])
+                self.parent.RemoveLimb()
 
     def Rename(self, limbIDStr, newName):
         if self.nameMng.IsValidCharacterLength(newName):
             if self.nameMng.DoesNotStartWithNumber(newName):
                 if self.nameMng.AreAllValidCharacters(newName):
-                    self.limbMng.Rename(int(limbIDStr), newName)
-                    self.parent.SetLimbName(int(limbIDStr))
-                    # parent should call populate on this
+                    limbID = int(limbIDStr)
+                    limb = self.limbMng.GetLimb(limbID)
+                    oldMirror = self.limbMng.GetLimbMirror(limb)
+                    self.limbMng.Rename(limbID, newName)
+                    newMirror = self.limbMng.GetLimbMirror(limb)
+
+                    if oldMirror:
+                        self.jntMng.UpdateLimbJointNames(oldMirror[0])
+                    if newMirror:
+                        self.jntMng.UpdateLimbJointNames(newMirror[0])
+                    self.jntMng.UpdateLimbJointNames(limb)
+                    
+                    self.parent.RenameLimbs([limb] + oldMirror + newMirror)
         return ''
 
-    def FlipSides(self):
+    def FlipSides(self, ignore):
         limbIDStrs = pm.treeView(self.widget, q=1, selectItem=1)
         if limbIDStrs:
-            self.limbMng.FlipSides(limbIDStrs[0])
+            limbID = int(limbIDStrs[0])
+            sourceLimb = self.limbMng.GetLimb(limbID)
+            mirrorLimbs = self.limbMng.GetLimbMirror(sourceLimb)
+            if mirrorLimbs:
+                mirrorLimb = mirrorLimbs[0]
+                self.limbMng.FlipSides(limbID)
+                self.jntMng.UpdateLimbJointNames(sourceLimb)
+                self.jntMng.UpdateLimbJointNames(mirrorLimb)
+                self.parent.FlipSides()
 
 
 

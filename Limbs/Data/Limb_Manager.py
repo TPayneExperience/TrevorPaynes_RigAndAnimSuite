@@ -10,7 +10,7 @@ class Limb_Manager():
                             'OneJoint',
                             'Chain', 
                             'Branch']
-        self.limbSides = ['M', 'L', 'R', 'None']
+        self.limbSides = ['M', 'L', 'R', '-']
         
     def NewRig(self, rigRoot):
         self.rigRoot = rigRoot
@@ -29,7 +29,7 @@ class Limb_Manager():
     def GetLimb(self, limbID):
         return self._limbs[limbID]
     
-    def GetLimbSide(self, limbID): # Name Manager Only
+    def GetLimbSide(self, limbID): # Name Manager + button labels
         return self.limbSides[self._limbs[limbID].sideIndex.get()]
 
     def GetLimbMirror(self, limb):
@@ -72,13 +72,14 @@ class Limb_Manager():
         return limb
 
     def Remove(self, limb): # Should be called after joints deleted
+        self._BreakMirror(limb)
         del(self._limbs[limb.ID.get()])
         pm.select(d=1)
         pm.delete(limb)
 
     def Rename(self, sourceLimbID, newName): # list should repopulate after call
         names = [limb.pfrsName.get() for limb in self._limbs.values()]
-        if (names.count(newName) >= 2):
+        if (names.count(newName) >= 2): # Only 2 can have same name
             return 
 
         # PAIR WITH MIRROR
@@ -87,6 +88,8 @@ class Limb_Manager():
             for mirrorLimb in list(self._limbs.values()):
                 if (mirrorLimb.pfrsName.get() == newName):
                     break
+            if (sourceLimb == mirrorLimb): # prevent pairing with self
+                return
             pm.connectAttr(sourceLimb.mirrorLimb, mirrorLimb.mirrorLimb)
             mirrorLimb.sideIndex.set(1)
             sourceLimb.sideIndex.set(2)
@@ -94,13 +97,16 @@ class Limb_Manager():
         # BREAK MIRROR
         else:
             sourceLimb = self.GetLimb(sourceLimbID)
-            mirrorLimbs = pm.listConnections(sourceLimb.mirrorLimb)
-            if mirrorLimbs:
-                mirrorLimbs[0].sideIndex.set(0)
-                sourceLimb.sideIndex.set(0)
-                pm.disconnectAttr(sourceLimb.mirrorLimb)
+            self._BreakMirror(sourceLimb)
         sourceLimb.pfrsName.set(newName)
     
+    def _BreakMirror(self, sourceLimb):
+        mirrorLimbs = self.GetLimbMirror(sourceLimb)
+        if mirrorLimbs:
+            mirrorLimbs[0].sideIndex.set(0)
+            sourceLimb.sideIndex.set(0)
+            pm.disconnectAttr(sourceLimb.mirrorLimb)
+
     def Reparent(self, childID, parentID=-1):
         child = self.GetLimb(childID)
         if (parentID == -1):

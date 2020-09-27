@@ -37,19 +37,36 @@ class LimbSetup_UI:
                                                                         self.jntMng,
                                                                         self.nameMng,
                                                                         self)
-            with pm.frameLayout('Limb Joints', bv=1):
-                self.jntHier_ui = jointHier_UI.LS_Joint_Hierarchy_UI(   self.jntMng,
+            with pm.frameLayout(l='XXX', bv=1) as self.limbJnts_fl:
+                self.jntHier_ui = jointHier_UI.LS_Joint_Hierarchy_UI(   self.limbMng,
+                                                                        self.jntMng,
                                                                         self.nameMng,
                                                                         self)
            
-#=========== FUNCTIONALITY ====================================
+#=========== LIMB FUNCTIONALITY ====================================
     
-    def SelectLimb(self, limb):
-        self.jntHier_ui.SetLimb(limb)
+    def AddLimb(self):
+        self.Populate()
+        self.UpdateJointCount()
+    
+    def RemoveLimb(self):
+        self.Populate()
+        self.UpdateJointCount()
+
+    def RenameLimbs(self, limbs):
+        self.Populate()
+
+    def FlipSides(self):
+        self.Populate()
+
+    def LimbSelected(self, limbID):
+        self.jntHier_ui.SetLimb(limbID)
 
     def GetSelectedSceneJoints(self):
         return self.sceneHier_ui.GetSelectedJoints()
 
+#=========== MISC FUNCTIONALITY ====================================
+    
     def SceneJointsIncorrectDialog(self):
         msg = 'Limbs may only have the following joint arrangements:\n'
         msg += '\n- 0 or 1 joint selected'
@@ -58,6 +75,10 @@ class LimbSetup_UI:
         msg += '\n- 2+ joints that are parented to one another [CHAIN]'
         pm.confirmDialog(   t='Joint Selection Mismatch', icn='warning', 
                             m=msg, button=['Cool Beans'])
+
+    def UpdateJointCount(self):
+        txt = 'Limb Joints (Limb Joint Total: %d)' % self.jntMng.GetJointCount()
+        pm.frameLayout(self.limbJnts_fl, e=1, l=txt)
 
 
 
