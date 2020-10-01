@@ -52,7 +52,7 @@
                  <bool>true</bool>
                 </property>
                 <property name="currentIndex">
-                 <number>1</number>
+                 <number>2</number>
                 </property>
                 <widget class="QWidget" name="tab_16">
                  <attribute name="title">
@@ -545,7 +545,7 @@
                            <item>
                             <widget class="QLabel" name="label_28">
                              <property name="text">
-                              <string>RMB: Show/Hide Prefix, for cross rig Parenting [or color code?]</string>
+                              <string>RMB: Show/Hide Prefix, for cross rig Parenting [or color code?], Also Reset to default hier, Set As Default for easy reverting, Reset to Default</string>
                              </property>
                              <property name="wordWrap">
                               <bool>true</bool>
@@ -4577,13 +4577,15 @@
     <property name="title">
      <string>Help</string>
     </property>
+    <addaction name="actionShare"/>
     <addaction name="actionDocumentation"/>
     <addaction name="actionTutorials"/>
    </widget>
    <widget class="QMenu" name="menuOptions">
     <property name="title">
-     <string>Settings</string>
+     <string>Options</string>
     </property>
+    <addaction name="actionSet_to_Animation_Rigging_Mode"/>
     <addaction name="actionAnimation_Library_Folder"/>
     <addaction name="separator"/>
     <addaction name="actionSettings"/>
@@ -4740,6 +4742,16 @@
   <action name="actionEdit_Rig">
    <property name="text">
     <string>Edit Rig...</string>
+   </property>
+  </action>
+  <action name="actionSet_to_Animation_Rigging_Mode">
+   <property name="text">
+    <string>Set to Animation/Rigging Mode</string>
+   </property>
+  </action>
+  <action name="actionShare">
+   <property name="text">
+    <string>Share!...</string>
    </property>
   </action>
  </widget>

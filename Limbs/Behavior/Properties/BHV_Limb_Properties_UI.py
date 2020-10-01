@@ -17,7 +17,7 @@ class BHV_Limb_Properties_UI:
         pm.frameLayout(self.limbLayout, en=1)
 
         # BEHAVIOR DATA
-        pm.optionMenu(self.bhvType_om, e=1, sl=(self.limb.bhvTypeIndex.get()+1))
+        pm.optionMenu(self.bhvType_om, e=1, sl=(self.limb.bhvType.get()+1))
         pm.optionMenu(self.bhvParentType_om, e=1, sl=self.limb.bhvParentTypeIndex.get()+1)
         limbNames = pm.optionMenu(self.bhvParentLimb_om, q=1, ill=1)
         bhvParentLimbID = self.limb.bhvParentLimbID.get()
@@ -76,7 +76,7 @@ class BHV_Limb_Properties_UI:
     def SetBhvType(self, bhvTypeStr):
         print (bhvTypeStr)
         pm.frameLayout(self.cstLayout, e=1, vis=(bhvTypeStr == 'Constraint'))
-        self.limb.bhvTypeIndex.set(self.grpMng.bhvTypes.index(bhvTypeStr))
+        self.limb.bhvType.set(self.grpMng.bhvTypes.index(bhvTypeStr))
         # self.parent.SetLimbBhv(self.limb) 
 
     def SetBhvParent(self, parentTypeStr):

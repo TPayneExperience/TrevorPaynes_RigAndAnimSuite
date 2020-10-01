@@ -78,6 +78,7 @@ class LS_Scene_Hierarchy_UI:
         for newLimbJoints in newLimbJointSets:
             self.parent.AddLimbByJoints(newLimbJoints)
         self.parent.Populate()
+        self.parent.UpdateSceneFrame()
 
     def GetJointChain(self, startJoint):
         joints = [startJoint]

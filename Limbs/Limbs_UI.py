@@ -26,7 +26,7 @@ import Popups.LoadTemplate_UI as load_ui
 reload(load_ui)
 
 
-class Limbs_UI():
+class Limbs_UI:
     def __init__(self, nameMng, fileMng, jsonMng):
         self.nameMng = nameMng
         self.fileMng = fileMng
