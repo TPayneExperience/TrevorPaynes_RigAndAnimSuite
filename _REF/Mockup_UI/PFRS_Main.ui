@@ -1498,6 +1498,11 @@
                   </item>
                  </layout>
                 </widget>
+                <widget class="QWidget" name="tab_21">
+                 <attribute name="title">
+                  <string>Test</string>
+                 </attribute>
+                </widget>
                </widget>
               </item>
              </layout>
@@ -1520,7 +1525,7 @@
                  <bool>true</bool>
                 </property>
                 <property name="currentIndex">
-                 <number>4</number>
+                 <number>6</number>
                 </property>
                 <widget class="QWidget" name="tab_19">
                  <attribute name="title">
@@ -3745,16 +3750,16 @@
                   </item>
                  </layout>
                 </widget>
+                <widget class="QWidget" name="tab_20">
+                 <attribute name="title">
+                  <string>Test</string>
+                 </attribute>
+                </widget>
                </widget>
               </item>
              </layout>
             </item>
            </layout>
-          </widget>
-          <widget class="QWidget" name="tab_20">
-           <attribute name="title">
-            <string>TEST</string>
-           </attribute>
           </widget>
           <widget class="QWidget" name="tab_3">
            <attribute name="title">

@@ -19,6 +19,7 @@ class Limb_Manager():
         pm.addAttr(rigRoot, ln='limbs', dt='string')
 
     def SetRig(self, rigRoot):
+        # MISSING: for multiple rigs in scene, remap limb IDs, only for anim though
         self.rigRoot = rigRoot
         self._limbs = {} # limbID : limbNode
         for limb in pm.listConnections(self.rigRoot.limbs):
@@ -35,18 +36,13 @@ class Limb_Manager():
     def GetLimbMirror(self, limb):
         return pm.listConnections(limb.mirrorLimb)
 
-    def SetLimbParent(self, childID, parentID = -1):
-        limb = self.GetLimb(childID)
-        if (parentID == -1):
-            pm.disconnectAttr(limb.parentLimbID)
-            limb.parentLimbID.set(-1)
-        else:
-            parent = self.GetLimb(parentID)
-            pm.connectAttr(parent.ID, limb.parentLimbID)
-
 #============= FUNCTIONS ============================
 
     def Add(self):
+        '''
+        ID's are used for the TreeView UI items ONLY,
+        most all data tracked through storage and connections.
+        '''
         limbID = self.rigRoot.nextLimbID.get()
         self.rigRoot.nextLimbID.set(limbID + 1)
         
@@ -57,11 +53,15 @@ class Limb_Manager():
         limb = pm.createNode('network', name='Limb')
         pm.addAttr(limb, ln='ID', at='long', dv=limbID)
         pm.addAttr(limb, ln='pfrsName', dt='string')
-        pm.setAttr(limb+'.pfrsName', pfrsName)
+        limb.pfrsName.set(pfrsName)
+        # pm.setAttr(limb+'.pfrsName', pfrsName)
         pm.addAttr(limb, ln='limbType', at='enum', enumName=limbTypes)
         pm.addAttr(limb, ln='sideIndex', at='enum', enumName=limbSides)
         pm.addAttr(limb, ln='mirrorLimb', at='long')
-        pm.addAttr(limb, ln='parentLimbID', at='long', dv=-1)
+        pm.addAttr(limb, ln='parentLimb', dt='string')
+        pm.addAttr(limb, ln='childrenLimbs', dt='string')
+        pm.addAttr(limb, ln='defaultParentLimb', dt='string')
+        pm.addAttr(limb, ln='defaultChildrenLimbs', dt='string')
         # pm.addAttr(limb, ln='parentJntIndex', at='enum', enumName='None')
         # pm.addAttr(limb, ln='parentCtrID', at='long')
         pm.addAttr(limb, ln='joints', dt='string')
@@ -76,6 +76,13 @@ class Limb_Manager():
         del(self._limbs[limb.ID.get()])
         pm.select(d=1)
         pm.delete(limb)
+
+    def Reparent(self, childID, parentID):
+        child = self.GetLimb(childID)
+        pm.disconnectAttr(child.parentLimb)
+        if (parentID != -1):
+            parent = self.GetLimb(parentID)
+            pm.connectAttr(parent.childrenLimbs, child.parentLimb)
 
     def Rename(self, sourceLimbID, newName): # list should repopulate after call
         names = [limb.pfrsName.get() for limb in self._limbs.values()]
@@ -107,15 +114,6 @@ class Limb_Manager():
             sourceLimb.sideIndex.set(0)
             pm.disconnectAttr(sourceLimb.mirrorLimb)
 
-    def Reparent(self, childID, parentID=-1):
-        child = self.GetLimb(childID)
-        if (parentID == -1):
-            pm.disconnectAttr(child.parentLimbID)
-            child.parentLimbID.set(-1)
-        else:
-            parent = self.GetLimb(parentID)
-            pm.connectAttr(parent.ID, child.parentLimbID)
-
     def UpdateLimbType(self, limb):
         joints = pm.listConnections(limb.joints)
         if (len(joints) == 0):
@@ -132,6 +130,59 @@ class Limb_Manager():
             side2 = limb2.sideIndex.get()
             limb1.sideIndex.set(side2)
             limb2.sideIndex.set(side1)
+
+
+#============= PARENTS / TREE MANIPULATION ============================
+
+    def RebuildLimbDict(self):
+        self._limbs = {}
+        for limb in pm.ls(type='network'):
+            if pm.hasAttr('pfrsName'):
+                limbID = limb.ID.get()
+                if limbID in self._limbs:
+                    nextID = self.rigRoot.nextLimbID.get()
+                    maxID = max(list(self._limbs.keys())) + 1
+                    limbID = max(nextID, maxID)
+                    self.rigRoot.nextLimbID.set(limbID + 1)
+                    limb.ID.set(limbID)
+                self._limbs[limbID] = limb
+
+    def GetAllLimbs(self):
+        return list(self._limbs.values())
+
+    def GetDefaultLimbHier(self, jntMng):
+        # UNTESTED
+        limbParents = {} # childLimb : parentLimb
+        for childLimb in list(self._limbs.values()):
+            joints = jntMng.GetLimbJoints(childLimb)
+            if joints:
+                childJoint = joints[0]
+                parentJoint = pm.listRelatives(childJoint, parent=1)
+                if parentJoint:
+                    parentLimb = jntMng.GetLimb(parentJoint)
+                    limbParents[childLimb] = parentLimb
+        return limbParents
+
+    def GetRootLimbs(self):
+        rootLimbs = []
+        for limb in list(self._limbs.values()):
+            if not pm.listConnections(limb.parentLimb):
+                rootLimbs.append(limb)
+        return rootLimbs
+
+    def GetLimbCreationOrder(self, rootLimbID):
+        '''Returns an ordered list of limb IDs FROM ROOT TO bottom most CHILD'''
+        rootLimb = self.GetLimb(rootLimbID)
+        orderedLimbs = [rootLimb]
+        parents = [rootLimb]
+        while(parents):
+            children = []
+            for parent in parents:
+                children += pm.listConnections(parent.childrenLimbs)
+            parents = children[:]
+            orderedLimbs += children[:]
+        return orderedLimbs
+    
 
     # def DuplicateLimb(self, sourceLimbID):
     #     targetID = self.rigRoot.nextLimbID.get()
@@ -157,43 +208,3 @@ class Limb_Manager():
     #     source.sideIndex.set(1)
     #     target.sideIndex.set(2)
     #     return targetID
-
-
-#============= PARENTS / TREE MANIPULATION ============================
-
-    def GetRootLimbIDs(self):
-        rootLimbIDs = []
-        for limbID, limb in self._limbs.items():
-            if (limb.getAttr('parentLimbID') == -1):
-                rootLimbIDs.append(limbID)
-        return rootLimbIDs
-
-    def GetLimbCreationOrder(self, rootLimbID):
-        '''Returns an ordered list of limb IDs FROM ROOT TO bottom most CHILD'''
-        limbParents = {}
-        for limbID, limb in self._limbs.items():
-            limbParents[limbID] = limb.parentLimbID.get()
-        limbIDs = [rootLimbID]
-        complete = False
-        while(limbParents and not complete):
-            complete = True
-            for childID, parentID in limbParents.items():
-                if (parentID in limbIDs):
-                    complete = False
-                    limbIDs.append(childID)
-                    del(limbParents[childID])
-                    break
-        return limbIDs
-    
-    def GetDefaultLimbHier(self, jntMng):
-        # UNTESTED
-        limbParents = {} # childLimb : parentLimb
-        for childLimb in list(self._limbs.values()):
-            joints = jntMng.GetLimbJoints(childLimb)
-            if joints:
-                childJoint = joints[0]
-                parentJoint = pm.listRelatives(childJoint, parent=1)
-                if parentJoint:
-                    parentLimb = jntMng.GetLimb(parentJoint)
-                    limbParents[childLimb] = parentLimb
-        return limbParents

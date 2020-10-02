@@ -63,8 +63,12 @@ class PayneFreeRigSuite_UI():
         pm.addAttr(self.rigRoot, ln='sideIndex', at='short', dv=nameOrder[3])
         pm.addAttr(self.rigRoot, ln='typeIndex', at='short', dv=nameOrder[4])
         pm.addAttr(self.rigRoot, ln='showPrefix', at='bool', dv=showPrefix)
+        pm.addAttr(self.rigRoot, ln='mainTab', at='enum', en='Limbs:MeshDef:Anim')
+        pm.addAttr(self.rigRoot, ln='limbsTab', at='enum', en='Jnt:Limbs:Bhv:App:Test')
+        pm.addAttr(self.rigRoot, ln='meshDefTab', at='enum', en='Mesh:QW:Paint')
         pm.addAttr(self.rigRoot, ln='prefix', dt='string')
-        pm.setAttr(self.rigRoot +'.prefix', prefix)
+        self.rigRoot.prefix.set(prefix)
+        # pm.setAttr(self.rigRoot +'.prefix', prefix)
 
         # MESH LAYER
         self.meshLayer = pm.createDisplayLayer(n='Rig Mesh', e=True)

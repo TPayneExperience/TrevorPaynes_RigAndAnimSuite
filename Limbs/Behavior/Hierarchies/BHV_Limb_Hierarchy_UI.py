@@ -1,164 +1,94 @@
 
 import pymel.core as pm
 
-import Common.LimbHier_UI as limbHierUI
-reload(limbHierUI)
-
-class BHV_Limb_Hierarchy_UI(limbHierUI.Limb_Hierarchy_UI):
-    def __init__(self, limbMng):
-        super(BHV_Limb_Hierarchy_UI, self).__init__(limbMng)
+class BHV_Limb_Hierarchy_UI:
+    def __init__(self, limbMng, jntMng, parent):
+        self.limbMng = limbMng
+        self.jntMng = jntMng
+        self.parent = parent
 
         self._Setup()
 
     def Populate(self):
-        self.Populate_Abstract()
+        pm.treeView(self.widget, e=1, removeAll=1)
+        self.limbMng.RebuildLimbDict()
+        for rootLimb in self.limbMng.GetRootLimbs():
+            prefix = pm.listConnections(rootLimb.rigRoot)[0].prefix.get()
+            for limb in self.limbMng.GetLimbCreationOrder(rootLimb):
+                limbID = limb.ID.get()
+                limbName = '%s_%s' % (prefix, limb.pfrsName.get())
+                parentID = limb.parentLimbID.get()
+                pm.treeView(self.widget, e=1, ai=(limbID, parentID))
+                pm.treeView(self.widget, e=1, dl=(limbID, limbName))
+                side = self.limbMng.GetLimbSide(limbID)
+                if (side == 'L' or side == 'R'):
+                    pm.treeView(self.widget, e=1, bti=(limbID, 1, side))
+                else:
+                    pm.treeView(self.widget, e=1, bvf=(limbID, 1, 0))
 
     def _Setup(self):
+        self.widget = pm.treeView(ams=0, ann='MMB + Drag + Drop to reparent')
         pm.treeView(self.widget, e=1, scc=self.SelectionChanged)
+        with pm.popupMenu():
+            pm.menuItem(l='Load Skeleton Hierarchy', c=self.LoadSkelHier)
+            pm.menuItem(l='Load Default Hierarchy', c=self.LoadDefaultHier)
+            pm.menuItem(divider=1)
+            pm.menuItem(l='Save as Default Hierarchy', c=self.SaveAsDefaultHier)
 
     def SelectionChanged(self):
-        print 'bhv limb selected...'
-        # limbIDStrs = pm.treeView(self.widget, q=1, selectItem=1)
-        # if limbIDStrs:
-        #     self.parent.LimbSelected(int(limbIDStrs[0]))
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#============= DEPRICATED ============================
-#============= DEPRICATED ============================
-#============= DEPRICATED ============================
-
-
-
-
-
-
-
-
-
-# import os
-
-# from Common.Qt import QtWidgets, QtCore, QtGui
-
-
-# class BHV_Limb_Hierarchy_UI(QtWidgets.QTreeWidget):
-#     # def __init__(self, limbHierarchy, parent=None):
-#     def __init__(self, parent=None):
-#         super(BHV_Limb_Hierarchy_UI, self).__init__(parent)
-
-#         self.parent = parent
-
-#         self._items = {} # ID : Item
-#         # self.limbHier = limbHierarchy
-#         # self._isPopulating = False
-#         # self._lastItemEdited = -1
-
-#         self._Setup()
-#         self._Setup_Connections()
-
-#     def Populate(self):
-#         self.clear()
-#         self._items.clear()
-
-#         # CREATE ITEMS, IN ORDER
-#         for limbID in self.limbHier.limbMng.GetAllLimbsCreationOrder():
-#             name = self.limbHier.limbMng.GetName(limbID)
-#             side = self.limbHier.limbMng.GetSide(limbID)
-#             parentID = self.limbHier.limbMng.GetParentID(limbID)
-#             if (parentID != -1):
-#                 parentItem = self._items[parentID]
-#                 item = QtWidgets.QTreeWidgetItem(parentItem, [name])
-#             else:
-#                 item = QtWidgets.QTreeWidgetItem(self, [name])
-#             item.ID = limbID
-#             if (side == 'M'):
-#                 item.setIcon(0, self.m_icon)
-#                 item.setFlags(item.flags() | QtCore.Qt.ItemIsEditable)
-#             else:
-#                 if (side == 'L'):
-#                     item.setIcon(0, self.l_icon)
-#                 elif (side == 'R'):
-#                     item.setIcon(0, self.r_icon)
-#                 item.setFlags(  QtCore.Qt.ItemIsEditable |
-#                                 QtCore.Qt.ItemIsSelectable |
-#                                 QtCore.Qt.ItemIsEnabled |
-#                                 QtCore.Qt.ItemIsDropEnabled)
-#             self._items[limbID] = item
-#         self.expandAll()
-
-# #=========== SETUP ====================================
-
-#     def _Setup(self):
-#         self.setAlternatingRowColors(True)
-#         self.setDragDropMode(self.InternalMove)
-#         self.setHeaderHidden(True)
-#         self.setIndentation(10)
-
-#         self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
-
-#         self._Setup_Icons()
+        limbIDStrs = pm.treeView(self.widget, q=1, selectItem=1)
+        if limbIDStrs:
+            self.parent.LimbSelected(int(limbIDStrs[0]))
     
-#     def _Setup_Icons(self):
-#         path = os.path.dirname(__file__)
-#         path = os.path.dirname(path)
-#         path = os.path.dirname(path)
-#         path = os.path.dirname(path)
-#         self.l_icon = QtGui.QIcon(os.path.join(path, 'Images', 'Skel_L.png'))
-#         self.r_icon =  QtGui.QIcon(os.path.join(path, 'Images', 'Skel_R.png'))
-#         self.m_icon =  QtGui.QIcon(os.path.join(path, 'Images', 'Skel_M.png'))
-
-
-#     def _RightClickMenu(self):
-#         menu = QtWidgets.QMenu(self)
-#         addFK = QtWidgets.QAction('Add FK', 
-#                                 self, 
-#                                 triggered=self.Debug)
-#         removeFK = QtWidgets.QAction( 'Remove FK', 
-#                                     self, 
-#                                     triggered=self.Debug)
-#         addIKPoleVector = QtWidgets.QAction('Add IK Pole Vector [Requires 3+ chain joints]', 
-#                                 self, 
-#                                 triggered=self.Debug)
-#         removeIKPoleVector = QtWidgets.QAction( 'Remove IK Pole Vector', 
-#                                     self, 
-#                                     triggered=self.Debug)
-#         menu.addAction(addFK)
-#         menu.addAction(addIKPoleVector)
-
-#         menu.addSeparator()
-#         menu.addAction(removeFK)
-#         menu.addAction(removeIKPoleVector)
-        
-#         menu.exec_(QtGui.QCursor.pos())
+    def Reparent(self, limbIDsStr, i1, i2, newParentIDStr, i3, i4, i5):
+        limbID = int(limbIDsStr[0])
+        self.limbMng.Reparent(limbID, int(newParentIDStr))
+        # self.parent.ReparentLimb(limbID) # unsure what it will do
+    
+    def LoadSkelHier(self, ignore):
+        limbParents = self.limbMng.GetDefaultLimbHier(self.jntMng)
+        for child, parent in limbParents.items():
+            self.limbMng.Reparent(child.ID.get(), parent.ID.get())
+            # self.parent.ReparentLimb(child.ID.get())
+        self.Populate()
+    
+    def LoadDefaultHier(self, ignore):
+        for limb in self.limbMng.GetAllLimbs():
+            pm.disconnectAttr(limb.parentLimb)
+            parents = pm.listConnections(limb.defaultParentLimb)
+            if parents:
+                pm.connectAttr(parents[0].childrenLimbs, limb.parentLimb)
+        self.Populate()
+    
+    def SaveAsDefaultHier(self, ignore):
+        for limb in self.limbMng.GetAllLimbs():
+            pm.disconnectAttr(limb.defaultParentLimb)
+            parents = pm.listConnections(limb.parentLimb)
+            if parents:
+                pm.connectAttr(parents[0].defaultChildrenLimbs, 
+                                limb.defaultParentLimb)
 
     
-#     def _Setup_Connections(self):
-#         self.customContextMenuRequested[QtCore.QPoint].connect(self._RightClickMenu)
+    
 
-# #=========== FUNCTIONALITY ====================================
 
-#     def Debug(self):
-#         print ('Working, you sexy beast you!')
-        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

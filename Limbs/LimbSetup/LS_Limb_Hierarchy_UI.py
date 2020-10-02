@@ -15,22 +15,21 @@ class LS_Limb_Hierarchy_UI:
     def Populate(self):
         pm.treeView(self.widget, e=1, removeAll=1)
         temp = {} # pfrsName : [limbs]
-        for rootLimbID in self.limbMng.GetRootLimbIDs():
-            for limbID in self.limbMng.GetLimbCreationOrder(rootLimbID):
-                limb = self.limbMng.GetLimb(limbID)
-                limbName = limb.pfrsName.get()
-                if limbName not in temp:
-                    temp[limbName] = []
-                temp[limbName].append(limbID)
+        for limb in self.limbMng.GetAllLimbs():
+            limbID = limb.ID.get()
+            limbName = limb.pfrsName.get()
+            if limbName not in temp:
+                temp[limbName] = []
+            temp[limbName].append(limbID)
         for limbName in sorted(list(temp.keys())):
             for limbID in temp[limbName]:
                 pm.treeView(self.widget, e=1, ai=(limbID, ''))
-                pm.treeView(self.widget, e=1, displayLabel=(limbID, limbName))
+                pm.treeView(self.widget, e=1, dl=(limbID, limbName))
                 side = self.limbMng.GetLimbSide(limbID)
                 if (side == 'L' or side == 'R'):
-                    pm.treeView(self.widget, e=1, buttonTextIcon=(limbID, 1, side))
+                    pm.treeView(self.widget, e=1, bti=(limbID, 1, side))
                 else:
-                    pm.treeView(self.widget, e=1, buttonVisible=(limbID, 1, 0))
+                    pm.treeView(self.widget, e=1, bvf=(limbID, 1, 0))
         # if (selectedID != -1):
         #     pm.treeView(self.widget, e=1, selectItem=(selectedID, 1))
 
