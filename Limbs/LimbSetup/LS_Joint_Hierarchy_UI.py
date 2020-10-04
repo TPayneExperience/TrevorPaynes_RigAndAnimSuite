@@ -7,13 +7,13 @@ class LS_Joint_Hierarchy_UI:
         self.jntMng = jntMng
         self.nameMng = nameMng
         self.parent = parent
-        self.limbID = None
+        self.limb = None
 
         self._Setup()
 
     def Populate(self):
         self.Depopulate()
-        for joint in self.jntMng.GetLimbJoints(self.limbID):
+        for joint in self.jntMng.GetLimbJoints(self.limb):
             jointID = joint.ID.get()
             name = joint.pfrsName.get()
             pm.treeView(self.widget, e=1, addItem=(jointID, ''))
@@ -42,31 +42,30 @@ class LS_Joint_Hierarchy_UI:
             pm.select(joint)
 
     def SetLimb(self, limbID):
-        self.limbID = limbID
+        self.limb = self.limbMng.GetLimb(limbID)
         self.Populate()
 
     def Add(self):
         newJoints = self.parent.GetSelectedSceneJoints()
         if not newJoints:
             return
-        limb = self.limbMng.GetLimb(self.limbID)
-        oldJoints = self.jntMng.GetLimbJoints(self.limbID)
+        oldJoints = self.jntMng.GetLimbJoints(self.limb)
         joints = newJoints + oldJoints
 
         # ONE JOINT
         if (len(joints) == 1):
-            limb.limbType.set(1)
-            self.jntMng.Add(limb, newJoints[0])
+            self.limb.limbType.set(1)
+            self.jntMng.Add(self.limb, newJoints[0])
             self.parent.PopulateJoints()
 
         # CHAIN
         elif self.jntMng.AreJointsChained(joints):
-            limb.limbType.set(2)
+            self.limb.limbType.set(2)
             jointChain = self.jntMng.GetJointChain(joints)
             # Check if all joints are free from limbs
             for joint in jointChain:
                 if self.jntMng.HasLimb(joint):
-                    if (self.jntMng.GetLimb(joint) != limb):
+                    if (self.jntMng.GetLimb(joint) != self.limb):
                         pm.confirmDialog(t='Joint Selection Mismatch', 
                                 icn='warning', 
                                 m='Limbs may not contain joints from other limbs', 
@@ -74,14 +73,14 @@ class LS_Joint_Hierarchy_UI:
                         return
             for joint in jointChain:
                 if not self.jntMng.HasLimb(joint):
-                    self.jntMng.Add(limb, joint)
+                    self.jntMng.Add(self.limb, joint)
             self.parent.PopulateJoints()
 
         # BRANCH
         elif self.jntMng.AreJointsSiblings(joints):
-            limb.limbType.set(3)
+            self.limb.limbType.set(3)
             for joint in newJoints:
-                self.jntMng.Add(limb, joint)
+                self.jntMng.Add(self.limb, joint)
             self.parent.PopulateJoints()
 
         # ERROR
@@ -99,22 +98,21 @@ class LS_Joint_Hierarchy_UI:
                                     dismissString='No' )
         if (result == 'Yes'):
             joints = [self.jntMng.GetJoint(ID) for ID in jointIDs]
-            limb = self.limbMng.GetLimb(self.limbID)
             for joint in joints:
                 self.jntMng.Remove(joint)
-            joints = self.jntMng.GetLimbJoints(self.limbID)
+            joints = self.jntMng.GetLimbJoints(self.limb)
             # EMPTY
             if len(joints) == 0:
-                limb.limbType.set(0)
+                self.limb.limbType.set(0)
             # ONE JOINT
             elif len(joints) == 1:
-                limb.limbType.set(1)
+                self.limb.limbType.set(1)
             # CHAIN
             elif self.jntMng.AreJointsChained(joints):
                 chainJoints = self.jntMng.GetJointChain(joints)
                 if (len(chainJoints) > len(joints)):
                     for joint in chainJoints:
-                        self.jntMng.Add(limb, joint)
+                        self.jntMng.Add(self.limb, joint)
             self.parent.PopulateJoints()
 
     def Rename(self, jointIDStr, newName):
@@ -122,7 +120,7 @@ class LS_Joint_Hierarchy_UI:
             if self.nameMng.DoesNotStartWithNumber(newName):
                 if self.nameMng.AreAllValidCharacters(newName):
                     jointNames = []
-                    for joint in self.jntMng.GetLimbJoints(self.limbID):
+                    for joint in self.jntMng.GetLimbJoints(self.limb):
                         jointNames.append(joint.pfrsName.get())
                     if (newName not in jointNames):
                         jointID = int(jointIDStr)

@@ -20,12 +20,13 @@ class LS_Limb_Hierarchy_UI:
             limbName = limb.pfrsName.get()
             if limbName not in temp:
                 temp[limbName] = []
-            temp[limbName].append(limbID)
+            temp[limbName].append(limb)
         for limbName in sorted(list(temp.keys())):
-            for limbID in temp[limbName]:
+            for limb in temp[limbName]:
+                limbID = limb.ID.get()
                 pm.treeView(self.widget, e=1, ai=(limbID, ''))
                 pm.treeView(self.widget, e=1, dl=(limbID, limbName))
-                side = self.limbMng.GetLimbSide(limbID)
+                side = self.limbMng.GetLimbSide(limb)
                 if (side == 'L' or side == 'R'):
                     pm.treeView(self.widget, e=1, bti=(limbID, 1, side))
                 else:

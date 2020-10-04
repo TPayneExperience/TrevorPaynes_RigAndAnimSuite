@@ -2,10 +2,10 @@
 import pymel.core as pm
 
 class Joint_Manager():
-    def __init__(self, nameMng, limbMng):
+    def __init__(self, nameMng):
 
         self.nameMng = nameMng
-        self.limbMng = limbMng
+        # self.limbMng = limbMng
         self.mirrorXform = {'X': [-1,1,1],
                             'Y': [1,-1,1],
                             'Z': [1,1,-1]}
@@ -22,13 +22,13 @@ class Joint_Manager():
         self.skelLayer = pm.createDisplayLayer(n='Skel Joints', e=True)
         self.skelLayer.displayType.set(2)
 
-    def SetRig(self, rigRoot):
-        self.rigRoot = rigRoot
-        self._joints = {} # jointID: jointNode
-        for rootLimbID in self.limbMng.GetRootLimbIDs():
-            for limbID in self.limbMng.GetLimbCreationOrder(rootLimbID):
-                for joint in self.GetLimbJoints(limbID):
-                    self._joints[joint.ID.get()] = joint
+    # def SetRig(self, rigRoot):
+    #     self.rigRoot = rigRoot
+    #     self._joints = {} # jointID: jointNode
+    #     for rootLimbID in self.limbMng.GetRootLimbIDs():
+    #         for limbID in self.limbMng.GetLimbCreationOrder(rootLimbID):
+    #             for joint in self.GetLimbJoints(limbID):
+    #                 self._joints[joint.ID.get()] = joint
         # Missing: Get Skeleton group, get skeleton layer
 
 #============= ACCESSORS + MUTATORS ============================
@@ -44,9 +44,8 @@ class Joint_Manager():
     def GetLimb(self, joint):
         return pm.listConnections(joint.parentLimb)[0]
 
-    def GetLimbJoints(self, limbID):
+    def GetLimbJoints(self, limb):
         '''Order joints by internal joint index'''
-        limb = self.limbMng.GetLimb(limbID)
         orderedJoints = []
         temp = {}
         for joint in pm.listConnections(limb.joints):
@@ -99,7 +98,7 @@ class Joint_Manager():
             self.UpdateJointName(jointID)
 
     def UpdateLimbJointNames(self, limb):
-        for joint in self.GetLimbJoints(limb.ID.get()):
+        for joint in self.GetLimbJoints(limb):
             self.UpdateJointName(joint.ID.get())
 
     def UpdateJointName(self, jointID):

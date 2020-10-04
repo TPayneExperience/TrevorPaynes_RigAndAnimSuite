@@ -57,12 +57,6 @@ class BHV_Limb_Manager:
 
             pm.addAttr(limb, ln='bhvType', at='enum', en=bhvTypes)
 
-            # Limb interconnections
-            pm.addAttr(limb, ln='bhvParentLimb', dt='string')
-            pm.addAttr(limb, ln='bhvParentGrp', at='enum', en='None')
-            pm.addAttr(limb, ln='bhvChildrenLimbs', dt='string')
-            
-            # Limb Groups
             pm.addAttr(limb, ln='bhvFKGrps', dt='string')
             pm.addAttr(limb, ln='bhvIKGrps', dt='string')
             pm.addAttr(limb, ln='bhvFKIKSwitchGrp', dt='string')
@@ -109,7 +103,7 @@ class BHV_Limb_Manager:
 
     def Set_FK(self, limb):
         pm.disconnectAttr(limb.bhvFKGrps)
-        for joint in self.jntMng.GetLimbJoints(limb.ID.get()):
+        for joint in self.jntMng.GetLimbJoints(limb):
             groups = pm.listConnections(joint.bhvFKGrp)
             if groups:
                 group = groups[0]
@@ -120,7 +114,7 @@ class BHV_Limb_Manager:
 
     def Set_IK(self, limb):
         pm.delete(pm.listConnections(limb.bhvIKGrps))
-        joints = self.jntMng.GetLimbJoints(limb.ID.get())
+        joints = self.jntMng.GetLimbJoints(limb)
         self.grpMng.Add_IKHandle(limb, joints[0], joints[-1])
 
     def Set_FKIK(self, limb):
@@ -130,7 +124,7 @@ class BHV_Limb_Manager:
 
     def Set_Cst(self, limb):
         pm.disconnectAttr(limb.bhvCstGrps)
-        for joint in self.jntMng.GetLimbJoints(limb.ID.get()):
+        for joint in self.jntMng.GetLimbJoints(limb):
             groups = pm.listConnections(joint.bhvCstGrp)
             if groups:
                 group = groups[0]
@@ -141,7 +135,7 @@ class BHV_Limb_Manager:
 
     def Set_LookAt(self, limb):
         pm.disconnectAttr(limb.bhvLookAtGrp)
-        for joint in self.jntMng.GetLimbJoints(limb.ID.get()):
+        for joint in self.jntMng.GetLimbJoints(limb):
             groups = pm.listConnections(joint.bhvLookAtGrp)
             if groups:
                 group = groups[0]
@@ -152,7 +146,7 @@ class BHV_Limb_Manager:
 
     def Set_IKChain(self, limb):
         pm.delete(pm.listConnections(limb.bhvIKGrps))
-        joints = self.jntMng.GetLimbJoints(limb.ID.get())
+        joints = self.jntMng.GetLimbJoints(limb)
         for i in range(len(joints)-1):
             start = joints[i]
             end = joints[i+1]

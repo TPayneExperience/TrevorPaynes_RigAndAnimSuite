@@ -30,11 +30,20 @@ class Limb_Manager():
     def GetLimb(self, limbID):
         return self._limbs[limbID]
     
-    def GetLimbSide(self, limbID): # Name Manager + button labels
-        return self.limbSides[self._limbs[limbID].sideIndex.get()]
+    def GetLimbSide(self, limb): # Name Manager + button labels
+        return self.limbSides[limb.sideIndex.get()]
+    
+    def GetLimbParent(self, limb):
+        parent = pm.listConnections(limb.parentLimb)
+        if parent:
+            return parent[0]
+        return None
 
     def GetLimbMirror(self, limb):
         return pm.listConnections(limb.mirrorLimb)
+
+    def GetAllLimbs(self): # used for bhv limb selection comboboxes
+        return list(self._limbs.values())
 
 #============= FUNCTIONS ============================
 
@@ -54,11 +63,11 @@ class Limb_Manager():
         pm.addAttr(limb, ln='ID', at='long', dv=limbID)
         pm.addAttr(limb, ln='pfrsName', dt='string')
         limb.pfrsName.set(pfrsName)
-        # pm.setAttr(limb+'.pfrsName', pfrsName)
         pm.addAttr(limb, ln='limbType', at='enum', enumName=limbTypes)
         pm.addAttr(limb, ln='sideIndex', at='enum', enumName=limbSides)
         pm.addAttr(limb, ln='mirrorLimb', at='long')
         pm.addAttr(limb, ln='parentLimb', dt='string')
+        pm.addAttr(limb, ln='parentGrp', at='enum', en='None')
         pm.addAttr(limb, ln='childrenLimbs', dt='string')
         pm.addAttr(limb, ln='defaultParentLimb', dt='string')
         pm.addAttr(limb, ln='defaultChildrenLimbs', dt='string')
@@ -137,7 +146,7 @@ class Limb_Manager():
     def RebuildLimbDict(self):
         self._limbs = {}
         for limb in pm.ls(type='network'):
-            if pm.hasAttr('pfrsName'):
+            if pm.hasAttr(limb, 'pfrsName'):
                 limbID = limb.ID.get()
                 if limbID in self._limbs:
                     nextID = self.rigRoot.nextLimbID.get()
@@ -146,9 +155,6 @@ class Limb_Manager():
                     self.rigRoot.nextLimbID.set(limbID + 1)
                     limb.ID.set(limbID)
                 self._limbs[limbID] = limb
-
-    def GetAllLimbs(self):
-        return list(self._limbs.values())
 
     def GetDefaultLimbHier(self, jntMng):
         # UNTESTED
@@ -170,9 +176,8 @@ class Limb_Manager():
                 rootLimbs.append(limb)
         return rootLimbs
 
-    def GetLimbCreationOrder(self, rootLimbID):
+    def GetLimbCreationOrder(self, rootLimb):
         '''Returns an ordered list of limb IDs FROM ROOT TO bottom most CHILD'''
-        rootLimb = self.GetLimb(rootLimbID)
         orderedLimbs = [rootLimb]
         parents = [rootLimb]
         while(parents):

@@ -16,15 +16,20 @@ class BHV_Limb_Hierarchy_UI:
             prefix = pm.listConnections(rootLimb.rigRoot)[0].prefix.get()
             for limb in self.limbMng.GetLimbCreationOrder(rootLimb):
                 limbID = limb.ID.get()
-                limbName = '%s_%s' % (prefix, limb.pfrsName.get())
-                parentID = limb.parentLimbID.get()
+                name = '%s_%s' % (prefix, limb.pfrsName.get())
+                parent = self.limbMng.GetLimbParent(limb)
+                parentID = ''
+                if parent:
+                    parentID = parent.ID.get()
                 pm.treeView(self.widget, e=1, ai=(limbID, parentID))
-                pm.treeView(self.widget, e=1, dl=(limbID, limbName))
-                side = self.limbMng.GetLimbSide(limbID)
+                pm.treeView(self.widget, e=1, dl=(limbID, name))
+                side = self.limbMng.GetLimbSide(limb)
                 if (side == 'L' or side == 'R'):
                     pm.treeView(self.widget, e=1, bti=(limbID, 1, side))
                 else:
                     pm.treeView(self.widget, e=1, bvf=(limbID, 1, 0))
+
+#=========== SETUP ====================================
 
     def _Setup(self):
         self.widget = pm.treeView(ams=0, ann='MMB + Drag + Drop to reparent')
@@ -34,6 +39,8 @@ class BHV_Limb_Hierarchy_UI:
             pm.menuItem(l='Load Default Hierarchy', c=self.LoadDefaultHier)
             pm.menuItem(divider=1)
             pm.menuItem(l='Save as Default Hierarchy', c=self.SaveAsDefaultHier)
+
+#=========== FUNCTIONS ====================================
 
     def SelectionChanged(self):
         limbIDStrs = pm.treeView(self.widget, q=1, selectItem=1)
@@ -45,6 +52,8 @@ class BHV_Limb_Hierarchy_UI:
         self.limbMng.Reparent(limbID, int(newParentIDStr))
         # self.parent.ReparentLimb(limbID) # unsure what it will do
     
+#=========== RMB ====================================
+
     def LoadSkelHier(self, ignore):
         limbParents = self.limbMng.GetDefaultLimbHier(self.jntMng)
         for child, parent in limbParents.items():

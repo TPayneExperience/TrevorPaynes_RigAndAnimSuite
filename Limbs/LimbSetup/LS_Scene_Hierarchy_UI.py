@@ -66,17 +66,17 @@ class LS_Scene_Hierarchy_UI:
             for child in list(children - parents):
                 if child not in jointParents:
                     continue
-                print 'child is ' + str(child)
                 joints = self.GetJointChain(child)
                 if len(joints) == 1:
                     joints = self.GetJointBranch(child)
                 newLimbJointSets.append(joints)
-                print 'Limb Created for:'
                 for joint in joints:
-                    print '\t' + str(joint)
                     del(jointParents[joint])
         for newLimbJoints in newLimbJointSets:
-            self.parent.AddLimbByJoints(newLimbJoints)
+            print newLimbJoints
+            limb = self.parent.AddLimbByJoints(newLimbJoints)
+            if limb:
+                self.parent.parent.AddLimb(limb)
         self.parent.Populate()
         self.parent.UpdateSceneFrame()
 

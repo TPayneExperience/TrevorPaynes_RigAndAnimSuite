@@ -9,10 +9,11 @@ import LS_Joint_Hierarchy_UI as jointHier_UI
 reload(jointHier_UI)
 
 class LimbSetup_UI:
-    def __init__(self, limbMng, jntMng, nameMng):
+    def __init__(self, limbMng, jntMng, nameMng, parent):
         self.limbMng = limbMng
         self.jntMng = jntMng
         self.nameMng = nameMng
+        self.parent = parent
 
         self._Setup()
 
@@ -48,9 +49,11 @@ class LimbSetup_UI:
     
     def AddLimb(self, ignore): # called by limb heir > RMB > Add
         joints = self.GetSelectedSceneJoints()
-        if self.AddLimbByJoints(joints):
+        limb = self.AddLimbByJoints(joints)
+        if limb:
             self.Populate()
             self.UpdateSceneFrame()
+            self.parent.AddLimb(limb)
         else:
             self.SceneJointsIncorrectDialog()
     
@@ -74,7 +77,7 @@ class LimbSetup_UI:
             limb.limbType.set(3) # Branch
             for joint in joints:
                 self.jntMng.Add(limb, joint)
-        return bool(limb)
+        return limb
 
     def RemoveLimb(self):
         self.Populate()
@@ -87,7 +90,8 @@ class LimbSetup_UI:
         self.Populate()
 
     def LimbSelected(self, limbID):
-        joints = self.jntMng.GetLimbJoints(limbID)
+        limb = self.limbMng.GetLimb(limbID)
+        joints = self.jntMng.GetLimbJoints(limb)
         pm.select(joints)
         self.jntHier_ui.SetLimb(limbID)
         self.UpdateJointFrame(limbID)

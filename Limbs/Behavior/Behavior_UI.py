@@ -11,8 +11,8 @@ reload(groupHier_UI)
 
 import Properties.BHV_Limb_Properties_UI as limbProp_UI
 reload(limbProp_UI)
-import Properties.BHV_Group_Properties_UI as bhvProp_UI
-reload(bhvProp_UI)
+# import Properties.BHV_Group_Properties_UI as bhvProp_UI
+# reload(bhvProp_UI)
 
 
 class Behavior_UI:
@@ -28,26 +28,52 @@ class Behavior_UI:
     def NewRig(self, rigRoot):
         pass
 
+    def Setup_Editable(self):
+        self.limbHier_ui.Populate()
+        print 'setup editable bhvs'
+    
+    def Teardown_Editable(self):
+        print 'teardown editable bhvs'
+
 #=========== SETUP ====================================
 
     def _Setup(self):
         with pm.verticalLayout():
             with pm.frameLayout('Limb Hierarchy', bv=1):
-                self.limbHier_ui = limbHier_UI.BHV_Limb_Hierarchy_UI(self.limbMng)
+                self.limbHier_ui = limbHier_UI.BHV_Limb_Hierarchy_UI(
+                                                        self.limbMng,
+                                                        self.jntMng,
+                                                        self)
             with pm.frameLayout('Behavior Groups', bv=1):
-                self.grpHier_ui = groupHier_UI.BHV_Group_Hierarchy_UI(self.grpMng,
+                self.grpHier_ui = groupHier_UI.BHV_Group_Hierarchy_UI(  self.limbMng,
+                                                                        self.grpMng,
                                                                         self)
         with pm.verticalLayout():
             self.limbProp_ui = limbProp_UI.BHV_Limb_Properties_UI(  self.limbMng,
                                                                     self.jntMng,
+                                                                    self.bhvMng,
                                                                     self.grpMng,
                                                                     self)
-            with pm.frameLayout('Group Properties', bv=1, en=0) as self.jntProp:
-                self.jntProp_ui = bhvProp_UI.BHV_Group_Properties_UI(self.grpMng,
-                                                                    self)
+            # with pm.frameLayout('Group Properties', bv=1, en=0) as self.jntProp:
+            #     self.jntProp_ui = bhvProp_UI.BHV_Group_Properties_UI(self.grpMng,
+            #                                                         self)
     
 #=========== LIMBS ====================================
 
     def ReparentLimb(self, limbID):
+        '''Set child's parent group enum'''
+        limb = self.limbMng.GetLimb(limbID)
+        parents = pm.listConnections(limb.parentLimb)
+        if parents:
+            groups = self.grpMng.GetLimbGrps(parents[0])
+            names = [group.pfrsName.get() for group in groups]
+            pm.addAttr(limb.parentGrp, e=1, en=':'.join(names))
+        else:
+            pm.addAttr(limb.parentGrp, e=1, en='None')
+    
+    def LimbSelected(self, limbID):
+        self.grpHier_ui.SetLimb(limbID)
+
+    def SetBhvType(self):
         pass
 
