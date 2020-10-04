@@ -13,7 +13,7 @@ class LS_Joint_Hierarchy_UI:
 
     def Populate(self):
         self.Depopulate()
-        for joint in self.jntMng.GetLimbJoints(self.limb):
+        for joint in self.jntMng.GetLimbTempJoints(self.limb):
             jointID = joint.ID.get()
             name = joint.pfrsName.get()
             pm.treeView(self.widget, e=1, addItem=(jointID, ''))
@@ -35,11 +35,9 @@ class LS_Joint_Hierarchy_UI:
 #=========== FUNCTIONALITY ====================================
 
     def SelectionChanged(self):
-        jointIDStrs = pm.treeView(self.widget, q=1, selectItem=1)
-        if jointIDStrs:
-            jointID = int(jointIDStrs[0])
-            joint = self.jntMng.GetJoint(jointID)
-            pm.select(joint)
+        jntStr = pm.treeView(self.widget, q=1, selectItem=1)
+        if jntStr:
+            pm.select(self.jntMng.GetJoint(int(jntStr[0])))
 
     def SetLimb(self, limbID):
         self.limb = self.limbMng.GetLimb(limbID)
@@ -49,18 +47,18 @@ class LS_Joint_Hierarchy_UI:
         newJoints = self.parent.GetSelectedSceneJoints()
         if not newJoints:
             return
-        oldJoints = self.jntMng.GetLimbJoints(self.limb)
-        joints = newJoints + oldJoints
+        joints = self.jntMng.GetLimbJoints(self.limb)
+        joints += newJoints
 
         # ONE JOINT
         if (len(joints) == 1):
-            self.limb.limbType.set(1)
-            self.jntMng.Add(self.limb, newJoints[0])
+            # self.limb.limbType.set(1)
+            self.jntMng.AddTemp(self.limb, joints[0])
             self.parent.PopulateJoints()
 
         # CHAIN
         elif self.jntMng.AreJointsChained(joints):
-            self.limb.limbType.set(2)
+            # self.limb.limbType.set(2)
             jointChain = self.jntMng.GetJointChain(joints)
             # Check if all joints are free from limbs
             for joint in jointChain:
@@ -73,14 +71,14 @@ class LS_Joint_Hierarchy_UI:
                         return
             for joint in jointChain:
                 if not self.jntMng.HasLimb(joint):
-                    self.jntMng.Add(self.limb, joint)
+                    self.jntMng.AddTemp(self.limb, joint)
             self.parent.PopulateJoints()
 
         # BRANCH
         elif self.jntMng.AreJointsSiblings(joints):
-            self.limb.limbType.set(3)
+            # self.limb.limbType.set(3)
             for joint in newJoints:
-                self.jntMng.Add(self.limb, joint)
+                self.jntMng.AddTemp(self.limb, joint)
             self.parent.PopulateJoints()
 
         # ERROR
@@ -99,20 +97,21 @@ class LS_Joint_Hierarchy_UI:
         if (result == 'Yes'):
             joints = [self.jntMng.GetJoint(ID) for ID in jointIDs]
             for joint in joints:
-                self.jntMng.Remove(joint)
-            joints = self.jntMng.GetLimbJoints(self.limb)
-            # EMPTY
-            if len(joints) == 0:
-                self.limb.limbType.set(0)
+                self.jntMng.RemoveTemp(joint)
+            # joints = self.jntMng.GetLimbJoints(self.limb)
+            joints = self.jntMng.GetLimbTempJoints(self.limb)
+            # # EMPTY
+            # if len(joints) == 0:
+            #     self.limb.limbType.set(0)
             # ONE JOINT
-            elif len(joints) == 1:
-                self.limb.limbType.set(1)
+            # elif len(joints) == 1:
+            #     self.limb.limbType.set(1)
             # CHAIN
-            elif self.jntMng.AreJointsChained(joints):
+            if self.jntMng.AreJointsChained(joints):
                 chainJoints = self.jntMng.GetJointChain(joints)
                 if (len(chainJoints) > len(joints)):
                     for joint in chainJoints:
-                        self.jntMng.Add(self.limb, joint)
+                        self.jntMng.AddTemp(self.limb, joint)
             self.parent.PopulateJoints()
 
     def Rename(self, jointIDStr, newName):

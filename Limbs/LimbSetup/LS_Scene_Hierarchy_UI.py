@@ -73,7 +73,6 @@ class LS_Scene_Hierarchy_UI:
                 for joint in joints:
                     del(jointParents[joint])
         for newLimbJoints in newLimbJointSets:
-            print newLimbJoints
             limb = self.parent.AddLimbByJoints(newLimbJoints)
             if limb:
                 self.parent.parent.AddLimb(limb)

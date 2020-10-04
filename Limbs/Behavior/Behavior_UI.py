@@ -28,13 +28,6 @@ class Behavior_UI:
     def NewRig(self, rigRoot):
         pass
 
-    def Setup_Editable(self):
-        self.limbHier_ui.Populate()
-        print 'setup editable bhvs'
-    
-    def Teardown_Editable(self):
-        print 'teardown editable bhvs'
-
 #=========== SETUP ====================================
 
     def _Setup(self):
@@ -58,6 +51,15 @@ class Behavior_UI:
             #     self.jntProp_ui = bhvProp_UI.BHV_Group_Properties_UI(self.grpMng,
             #                                                         self)
     
+#=========== SETUP + TEARDOWN ====================================
+
+    def Setup_Editable(self):
+        self.limbHier_ui.Populate()
+        print 'setup editable bhvs'
+    
+    def Teardown_Editable(self):
+        print 'teardown editable bhvs'
+
 #=========== LIMBS ====================================
 
     def ReparentLimb(self, limbID):

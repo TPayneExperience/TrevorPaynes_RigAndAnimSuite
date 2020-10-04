@@ -74,6 +74,7 @@ class Limb_Manager():
         # pm.addAttr(limb, ln='parentJntIndex', at='enum', enumName='None')
         # pm.addAttr(limb, ln='parentCtrID', at='long')
         pm.addAttr(limb, ln='joints', dt='string')
+        pm.addAttr(limb, ln='tempJoints', dt='string') # limb setup
         pm.addAttr(limb, ln='rigRoot', dt='string')
         pm.connectAttr(self.rigRoot.limbs, limb.rigRoot)
 

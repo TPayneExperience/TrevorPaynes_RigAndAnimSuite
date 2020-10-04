@@ -30,8 +30,8 @@ class PayneFreeRigSuite_UI():
                                             self.fileMng,
                                             self)
         self._Setup()
-        self.limbMng = self.limbSetup_ui.limbMng
-        self.jntMng = self.limbSetup_ui.jntMng
+        self.limbMng = self.limbs_ui.limbMng
+        self.jntMng = self.limbs_ui.jntMng
         self.Debug()
         # self.Populate()
 
@@ -79,9 +79,9 @@ class PayneFreeRigSuite_UI():
         self.nameMng.NewRig(self.rigRoot, 
                             self.limbMng, 
                             self.jntMng)
-        self.limbSetup_ui.NewRig(self.rigRoot)
+        self.limbs_ui.NewRig(self.rigRoot)
         # self.pfrs.rigSetup.NewRig('somePrefix', [0,1,2,3,4], True)
-        # self.limbSetup_ui.NewRig(self.pfrs.rigSetup.rigRoot)
+        # self.limbs_ui.NewRig(self.pfrs.rigSetup.rigRoot)
         # self.pfrs.rigSceneMng.NewRig()
         # self.limbs_tw.NewRig(self.pfrs.rigSceneMng.rootGrp)
         # self.pfrs.saveLoadRig.Save()
@@ -108,9 +108,10 @@ class PayneFreeRigSuite_UI():
         with pm.window(mb=True,mbv=True, t=name, w=500, h=500) as self.win:
             with pm.tabLayout(enable=0) as self.rigTabs:
                 with pm.horizontalLayout() as self.lsLayout:
-                    self.limbSetup_ui = limbs_ui.Limbs_UI(  self.nameMng,
+                    self.limbs_ui = limbs_ui.Limbs_UI(  self.nameMng,
                                                             self.fileMng,
-                                                            self.jsonMng)
+                                                            self.jsonMng,
+                                                            self)
                 with pm.horizontalLayout() as self.mdLayout:
                     with pm.tabLayout() as self.mdTab:
                         with pm.horizontalLayout():
@@ -138,26 +139,38 @@ class PayneFreeRigSuite_UI():
                 pm.menuItem(l='disabled')
                 # with pm.subMenuItem(l='Mirror'):
                     # pm.menuItem(l='X', 
-                    #     c=lambda x: self.limbSetup_ui.Mirror_Dialog('X'))
+                    #     c=lambda x: self.limbs_ui.Mirror_Dialog('X'))
                     # pm.menuItem(l='Y', 
-                    #     c=lambda x: self.limbSetup_ui.Mirror_Dialog('Y'))
+                    #     c=lambda x: self.limbs_ui.Mirror_Dialog('Y'))
                     # pm.menuItem(l='Z', 
-                    #     c=lambda x: self.limbSetup_ui.Mirror_Dialog('Z'))
-                # pm.menuItem(l='Duplicate', c=self.limbSetup_ui.Duplicate_Dialog)
+                    #     c=lambda x: self.limbs_ui.Mirror_Dialog('Z'))
+                # pm.menuItem(l='Duplicate', c=self.limbs_ui.Duplicate_Dialog)
                 # pm.menuItem(divider=1)
-                # pm.menuItem(l='Load Template...', c=self.limbSetup_ui.Load_Dialog)
-                # pm.menuItem(l='Save Template...', c=self.limbSetup_ui.Save_Dialog)
+                # pm.menuItem(l='Load Template...', c=self.limbs_ui.Load_Dialog)
+                # pm.menuItem(l='Save Template...', c=self.limbs_ui.Save_Dialog)
 
             with pm.menu('Options'):
                 pm.menuItem(l='Share...', en=0)
                 pm.menuItem(l='Report Bug...', en=0)
 
     
+#=========== LIMBS ====================================
+
+    def AddLimb(self, limb):
+        pass
+
+    def RemoveLimb(self, limb):
+        pass
+
+    def UpdateLimb(self, limb):
+        pass
+
+    
 #=========== FUNCTIONALITY ====================================
 
     # def UpdateNaming(self):
     #     self.pfrs.UpdatePrefix()
-    #     self.limbSetup_ui.UpdateNaming()
+    #     self.limbs_ui.UpdateNaming()
 
     def closeEvent(self):
         # self.pfrs.limbSetup.skel.sceneMng.KillScriptJobs()

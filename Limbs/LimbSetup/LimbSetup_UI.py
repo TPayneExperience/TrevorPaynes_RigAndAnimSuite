@@ -21,10 +21,12 @@ class LimbSetup_UI:
         self.sceneHier_ui.Populate()
         self.limbHier_ui.Populate()
         self.jntHier_ui.Depopulate()
+        self.UpdateSceneFrame()
     
     def PopulateJoints(self):
         self.sceneHier_ui.Populate()
         self.jntHier_ui.Populate()
+        self.UpdateSceneFrame()
     
 #=========== SETUP ====================================
 
@@ -45,43 +47,68 @@ class LimbSetup_UI:
                                                                         self.nameMng,
                                                                         self)
            
+#=========== TAB FUNCTIONALITY ====================================
+    
+    def Setup_Editable(self):
+        self.limbMng.RebuildLimbDict()
+        for limb in self.limbMng.GetAllLimbs():
+            for joint in self.jntMng.GetLimbJoints(limb):
+                pm.disconnectAttr(joint.tempLimb)
+                pm.connectAttr(limb.tempJoints, joint.tempLimb)
+        self.Populate()
+
+    def Teardown_Editable(self):
+        for limb in self.limbMng.GetAllLimbs():
+            joints = self.jntMng.GetLimbTempJoints(limb)
+            for joint in joints:
+                self.jntMng.AddPerm(limb, joint)
+            if not joints:
+                limb.limbType.set(0)
+            elif (len(joints) == 1):
+                limb.limbType.set(1)
+            elif self.jntMng.AreJointsChained(joints):
+                limb.limbType.set(2)
+            elif self.jntMng.AreJointsSiblings(joints):
+                limb.limbType.set(3)
+            self.parent.UpdateLimb(limb)
+
 #=========== LIMB FUNCTIONALITY ====================================
     
     def AddLimb(self, ignore): # called by limb heir > RMB > Add
         joints = self.GetSelectedSceneJoints()
-        limb = self.AddLimbByJoints(joints)
-        if limb:
+        if not (len(joints) < 2) and \
+            not self.jntMng.AreJointsChained(joints) and \
+            not self.jntMng.AreJointsSiblings(joints):
+            self.SceneJointsIncorrectDialog()
+        else:
+            limb = self.limbMng.Add()
+            self.jntHier_ui.SetLimb(limb.ID.get())
+            self.jntHier_ui.Add()
             self.Populate()
             self.UpdateSceneFrame()
             self.parent.AddLimb(limb)
-        else:
-            self.SceneJointsIncorrectDialog()
     
     def AddLimbByJoints(self, joints): # called by Scene hier > RMB > Autobuild
         limb = None
         if (len(joints) < 2):
             limb = self.limbMng.Add()
             if joints:
-                self.jntMng.Add(limb, joints[0])
-                limb.limbType.set(1)
+                self.jntMng.AddTemp(limb, joints[0])
         # CHAIN LIMB
         if not limb and self.jntMng.AreJointsChained(joints):
             limb = self.limbMng.Add()
-            limb.limbType.set(2) # Chain
             for joint in self.jntMng.GetJointChain(joints):
-                self.jntMng.Add(limb, joint)
+                self.jntMng.AddTemp(limb, joint)
 
         # BRANCH LIMB
         if not limb and self.jntMng.AreJointsSiblings(joints):
             limb = self.limbMng.Add()
-            limb.limbType.set(3) # Branch
             for joint in joints:
-                self.jntMng.Add(limb, joint)
+                self.jntMng.AddTemp(limb, joint)
         return limb
 
-    def RemoveLimb(self):
-        self.Populate()
-        self.UpdateSceneFrame()
+    def RemoveLimb(self, limb):
+        self.parent.RemoveLimb(limb)
 
     def RenameLimbs(self, limbs):
         self.Populate()
@@ -91,7 +118,7 @@ class LimbSetup_UI:
 
     def LimbSelected(self, limbID):
         limb = self.limbMng.GetLimb(limbID)
-        joints = self.jntMng.GetLimbJoints(limb)
+        joints = self.jntMng.GetLimbTempJoints(limb)
         pm.select(joints)
         self.jntHier_ui.SetLimb(limbID)
         self.UpdateJointFrame(limbID)

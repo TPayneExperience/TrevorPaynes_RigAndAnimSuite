@@ -32,14 +32,18 @@ reload(load_ui)
 
 
 class Limbs_UI:
-    def __init__(self, nameMng, fileMng, jsonMng):
+    def __init__(self, nameMng, fileMng, jsonMng, parent):
         self.nameMng = nameMng
         self.fileMng = fileMng
         self.jsonMng = jsonMng
+        self.parent = parent
+
         self.limbMng = lm.Limb_Manager(nameMng)
         self.jntMng = jm.Joint_Manager(nameMng)
-        self.bhvMng = bhv.BHV_Limb_Manager(self.limbMng, self.jntMng)
         self.grpMng = grp.BHV_Group_Manager()
+        self.bhvMng = bhv.BHV_Limb_Manager( self.limbMng, 
+                                            self.jntMng, 
+                                            self.grpMng)
         self.saveLoadSkel = saveLoadSkel.SaveLoad_Skeleton( self.limbMng, 
                                                     self.jntMng)
 
@@ -56,8 +60,9 @@ class Limbs_UI:
     def NewRig(self, rigRoot):
         pm.addAttr(rigRoot, ln='lastLimbsTabIndex', at='short')
         self.rigRoot = rigRoot
-        self.jntMng.NewRig(rigRoot)
         self.limbMng.NewRig(rigRoot)
+        self.jntMng.NewRig(rigRoot)
+        self.grpMng.NewRig(rigRoot)
 
 #=========== SETUP ====================================
 
@@ -86,45 +91,51 @@ class Limbs_UI:
     
 #=========== TAB SWITCHING ====================================
 
-    def SetupLimbsTab(self):
-        '''When starting up tool or switching back to the limb tab'''
-        pass
-        # SETUP BHVS
-        # SETUP APPS
+    def Setup_Editable(self):
+        index = self.rigRoot.limbsTab.get()
+        if (index == 2):
+            self.limbSetup_ui.Setup_Editable()
+        if (index == 3):
+            self.bhv_ui.Setup_Editable()
+        if (index == 4):
+            pass 
         
-    def TeardownLimbsTab(self):
-        '''When exiting the limb tab'''
-        pass
-        # TEARDOWN BHVS
-        # TEARDOWN APPS
+    def Teardown_Editable(self):
+        index = self.rigRoot.limbsTab.get()
+        if (index == 2): 
+            self.limbSetup_ui.Teardown_Editable()
+        if (index == 3):
+            self.bhv_ui.Teardown_Editable()
+        if (index == 4):
+            pass 
         
     def TabChanged(self):
-        lastIndex = self.rigRoot.limbsTab.get()
-        if (lastIndex == 3): # behaviors
-            self.bhv_ui.Teardown_Editable()
-        if (lastIndex == 4): # appearances
-            pass # MISSING TEARDOWN
+        self.Teardown_Editable()
         nextIndex = pm.tabLayout(self.tab, q=1, selectTabIndex=1)
-        if (nextIndex == 2): # limbs
-            self.limbSetup_ui.Populate()
-        if (nextIndex == 3): # behaviors
-            self.bhv_ui.Setup_Editable()
-        if (nextIndex == 4): # appearances
-            pass # MISSING SETUP
         self.rigRoot.limbsTab.set(nextIndex)
+        self.Setup_Editable()
 
 #=========== FUNCTIONALITY ====================================
 
     def AddLimb(self, limb):
-        print 'adding limb ' + str(limb)
         self.bhvMng.AddLimb(limb)
         for joint in self.jntMng.GetLimbJoints(limb):
             self.grpMng.AddJoint(joint)
+        self.parent.AddLimb(limb)
 
     def RemoveLimb(self, limb):
-        pass
+        self.parent.RemoveLimb(limb)
+    
+    # def AddJoint(self, joint):
+    #     self.parent.AddJoint(joint)
+    
+    # def RemoveJoint(self, joint):
+    #     self.parent.RemoveJoint(joint)
 
-
+    def UpdateLimb(self, limb):
+        bhvs = self.bhvMng.GetBhvOptions(limb)
+        self.bhvMng.SetBhv(limb, bhvs[0])
+        self.parent.UpdateLimb(limb)
 
 #=========== DIALOGS ====================================
 

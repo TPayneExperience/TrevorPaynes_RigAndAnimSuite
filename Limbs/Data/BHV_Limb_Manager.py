@@ -1,14 +1,11 @@
 
 import pymel.core as pm
 
-import BHV_Group_Manager as grpMng
-reload(grpMng)
-
 class BHV_Limb_Manager:
-    def __init__ (self, limbMng, jntMng):
+    def __init__ (self, limbMng, jntMng, grpMng):
         self.limbMng = limbMng
         self.jntMng = jntMng
-        self.grpMng = grpMng.BHV_Group_Manager()
+        self.grpMng = grpMng
 
         self.bhvTypes = [   'FK - Chain',
 
@@ -47,9 +44,6 @@ class BHV_Limb_Manager:
             return [self.bhvTypes[3], 
                     self.bhvTypes[6]]
 
-    def SetBhvOption(self, limb, bhv):
-        limb.bhvType.set(self.bhvTypes.index(bhv))
-
     def AddLimb(self, limb):
         if not limb.hasAttr('bhvType'):
             bhvTypes = ':'.join(self.bhvTypes)
@@ -83,7 +77,7 @@ class BHV_Limb_Manager:
 #============= BHV TYPES ============================
 # CURRENTLY, THIS ONLY ACCOUNTS FOR EDITABLE SETUP, NOT FINAL
 
-    def Set_BhvType(self, limb, bhvType):
+    def SetBhv(self, limb, bhvType):
         index = self.bhvTypes.index(bhvType)
         limb.bhvType.set(index)
         if index == 0 or index == 6: # FK Chain / Branch
@@ -96,9 +90,7 @@ class BHV_Limb_Manager:
             self.Set_Cst(limb)
         elif index == 4:
             self.Set_LookAt(limb)
-        elif index == 5:
-            self.Set_IKChain(limb)
-        elif index == 7:
+        elif index == 5 or index == 7:
             self.Set_IKChain(limb)
 
     def Set_FK(self, limb):

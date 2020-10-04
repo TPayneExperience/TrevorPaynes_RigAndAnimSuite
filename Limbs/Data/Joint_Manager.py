@@ -36,13 +36,16 @@ class Joint_Manager():
     def GetJoint(self, jointID):
         return self._joints[jointID]
 
+    def GetAllJoints(self):
+        return list(self._joints.values())
+
     def HasLimb(self, joint):
-        if not joint.hasAttr('parentLimb'):
+        if not joint.hasAttr('limb'):
             return False
-        return bool(pm.listConnections(joint.parentLimb))
+        return bool(pm.listConnections(joint.limb))
 
     def GetLimb(self, joint):
-        return pm.listConnections(joint.parentLimb)[0]
+        return pm.listConnections(joint.limb)[0]
 
     def GetLimbJoints(self, limb):
         '''Order joints by internal joint index'''
@@ -53,6 +56,9 @@ class Joint_Manager():
         for index in sorted(list(temp.keys())):
             orderedJoints.append(temp[index])
         return orderedJoints
+
+    def GetLimbTempJoints(self, limb):
+        return pm.listConnections(limb.tempJoints)
 
     def GetJointCount(self): # for Skel tool label
         return len(self._joints)
@@ -68,42 +74,56 @@ class Joint_Manager():
             temp[key].limbIndex.set(i)
             i += 1
 
-    def Add(self, limb, joint):
+    def AddTemp(self, limb, joint): # for Limb Setup
+        self._Add(limb, joint)
+        pm.connectAttr(limb.tempJoints, joint.tempLimb)
+    
+    def AddPerm(self, limb, joint):
+        pm.disconnectAttr(joint.limb)
+        pm.connectAttr(limb.joints, joint.limb)
+        self.UpdateJointName(joint)
+    
+    def _Add(self, limb, joint):
         jointID = self.rigRoot.nextJointID.get()
         self.rigRoot.nextJointID.set(jointID + 1)
         
-        if (not pm.hasAttr(joint, 'pfrsName')):
+        if (not joint.hasAttr('pfrsName')):
             pm.addAttr(joint, ln='ID', at='short')
-            pm.addAttr(joint, ln='parentLimb', dt='string')
+            pm.addAttr(joint, ln='limb', dt='string')
+            pm.addAttr(joint, ln='tempLimb', dt='string') # limb setup
             pm.addAttr(joint, ln='limbIndex', at='short')
             pm.addAttr(joint, ln='pfrsName', dt='string')
-            pm.addAttr(joint, ln='bhvGrps', dt='string')
+            
+            pm.addAttr(joint, ln='bhvFKGrp', dt='string')
+            pm.addAttr(joint, ln='bhvIKGrp', dt='string')
+            pm.addAttr(joint, ln='bhvLookAtGrp', dt='string')
+            pm.addAttr(joint, ln='bhvCstGrp', dt='string')
             joint.pfrsName.set('Joint_%03d' % (jointID))
         joint.ID.set(jointID)
 
-        pm.connectAttr(limb.joints, joint.parentLimb)
-
         self._joints[jointID] = joint
-        self.UpdateJointName(jointID)
         pm.editDisplayLayerMembers(self.skelLayer, joint)
         self._ReindexJoints(limb)
 
-    def Remove(self, joint):
-        pm.disconnectAttr(joint.parentLimb)
+    def RemoveTemp(self, joint):
+        pm.disconnectAttr(joint.tempLimb)
+        del(self._joints[joint.ID.get()])
+
+    def RemovePerm(self, joint):
+        pm.disconnectAttr(joint.limb)
         joint.rename('Joint_%03d' % joint.ID.get())
         del(self._joints[joint.ID.get()])
 
     def UpdateAllJointNames(self): # if prefix changed
-        for jointID in list(self._joints.keys()):
-            self.UpdateJointName(jointID)
+        for joint in self.GetAllJoints():
+            self.UpdateJointName(joint)
 
     def UpdateLimbJointNames(self, limb):
         for joint in self.GetLimbJoints(limb):
             self.UpdateJointName(joint.ID.get())
 
-    def UpdateJointName(self, jointID):
-        joint = self.GetJoint(jointID)
-        joint.rename(self.nameMng.GetName(jointID, 'JNT'))
+    def UpdateJointName(self, joint):
+        joint.rename(self.nameMng.GetName(joint, 'JNT'))
     
 #============= UTILS ============================
 

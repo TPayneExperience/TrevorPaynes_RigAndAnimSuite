@@ -21,13 +21,13 @@ class BHV_Group_Manager:
     def NewRig(self, rigRoot):
         self.rigRoot = rigRoot
 
-        self._nextGrpID = 1
         self._groups = {} # grpID : grpData
 
         pm.select(d=1)
         self.bhvGrp = pm.group(name='BehaviorGroups', em=1)
         pm.parent(self.bhvGrp, rigRoot)
         pm.addAttr(rigRoot, ln='behaviors', dt='string')
+        pm.addAttr(rigRoot, ln='nextGrpID', at='long')
 
 
 #============= ACCESSORS  ============================
@@ -64,27 +64,11 @@ class BHV_Group_Manager:
         if index == 7: # EMPTY
             return pm.listConnections(limb.bhvEmptyGrp)
 
-#============= JOINTS ============================
-
-    def AddJoint(self, joint):
-        pm.addAttr(joint, ln='bhvFKGrp', dt='string')
-        pm.addAttr(joint, ln='bhvIKGrp', dt='string')
-        pm.addAttr(joint, ln='bhvLookAtGrp', dt='string')
-        pm.addAttr(joint, ln='bhvCstGrp', dt='string')
-
-    def RemoveJoint(self, joint):
-        groups = pm.listConnections(joint.bhvFKGrp)
-        groups += pm.listConnections(joint.bhvIKGrp)
-        groups += pm.listConnections(joint.bhvLookAtGrp)
-        groups += pm.listConnections(joint.bhvCstGrp)
-        if groups:
-            pm.delete(groups)
-
 #============= FUNCTIONALITY ============================
 
     def _AddGroup(self):
-        groupID = self._nextGrpID
-        self._nextGrpID += 1
+        groupID = self.rigRoot.nextGrpID.get()
+        self.rigRoot.nextGrpID.set(groupID + 1)
 
         groupTypes = ':'.join(self.grpTypes)
 
@@ -100,7 +84,7 @@ class BHV_Group_Manager:
 
     def Add_FK(self, limb, joint):
         group = self._AddGroup()
-        group.bhvGrpType.set(0)
+        group.groupType.set(0)
         name = '%s - %s' % (self.grpTypes[0], joint.pfrsName)
         group.pfrsName.set(name)
         pm.connectAttr(joint.bhvFKGrp, group.joint)
@@ -109,7 +93,7 @@ class BHV_Group_Manager:
     def Add_IKHandle(self, limb, startJoint, endJoint):
         '''Positions the center for the poll vector control'''
         group = self._AddGroup()
-        group.bhvGrpType.set(1)
+        group.groupType.set(1)
         name = '%s - %s' % (self.grpTypes[1], endJoint.pfrsName)
         group.pfrsName.set(name)
         pm.addAttr(group, ln='joint2', dt='string')
@@ -121,7 +105,7 @@ class BHV_Group_Manager:
 
     def Add_FKIKSwitch(self, limb):
         group = self._AddGroup()
-        group.bhvGrpType.set(2)
+        group.groupType.set(2)
         group.pfrsName.set(self.grpTypes[2])
         pm.addAttr(group, ln='parentGrp', at='enum', en='None')
         pm.connectAttr(limb.bhvFKIKSwitchGrp, group.limb)
@@ -130,7 +114,7 @@ class BHV_Group_Manager:
     def Add_Constraint(self, limb, joint):
         '''Positions the center for control'''
         group = self._AddGroup()
-        group.bhvGrpType.set(3)
+        group.groupType.set(3)
         name = '%s - %s' % (self.grpTypes[3], joint.pfrsName)
         group.pfrsName.set(name)
         pm.connectAttr(limb.bhvCstGrps, group.limb)
@@ -140,14 +124,14 @@ class BHV_Group_Manager:
     def Add_LookAt(self, limb, joint):
         '''Positions the center for control'''
         group = self._AddGroup()
-        group.bhvGrpType.set(4)
+        group.groupType.set(4)
         group.pfrsName.set(self.grpTypes[4])
         pm.connectAttr(limb.bhvLookAtGrp, group.limb)
         pm.connectAttr(joint.bhvLookAtGrp, group.joint)
 
     def Add_Empty(self, limb):
         group = self._AddGroup()
-        group.bhvGrpType.set(5)
+        group.groupType.set(5)
         group.pfrsName.set(self.grpTypes[5])
         pm.connectAttr(limb.bhvEmptyGrp, group.limb)
 
