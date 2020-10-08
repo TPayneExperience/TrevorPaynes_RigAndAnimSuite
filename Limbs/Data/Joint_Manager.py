@@ -76,12 +76,14 @@ class Joint_Manager():
 
     def AddTemp(self, limb, joint): # for Limb Setup
         self._Add(limb, joint)
+        pm.disconnectAttr(joint.tempLimb)
         pm.connectAttr(limb.tempJoints, joint.tempLimb)
     
     def AddPerm(self, limb, joint):
         pm.disconnectAttr(joint.limb)
         pm.connectAttr(limb.joints, joint.limb)
         self.UpdateJointName(joint)
+        self._ReindexJoints(limb)
     
     def _Add(self, limb, joint):
         jointID = self.rigRoot.nextJointID.get()
@@ -120,7 +122,7 @@ class Joint_Manager():
 
     def UpdateLimbJointNames(self, limb):
         for joint in self.GetLimbJoints(limb):
-            self.UpdateJointName(joint.ID.get())
+            self.UpdateJointName(joint)
 
     def UpdateJointName(self, joint):
         joint.rename(self.nameMng.GetName(joint, 'JNT'))

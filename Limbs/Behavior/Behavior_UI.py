@@ -11,8 +11,8 @@ reload(groupHier_UI)
 
 import Properties.BHV_Limb_Properties_UI as limbProp_UI
 reload(limbProp_UI)
-# import Properties.BHV_Group_Properties_UI as bhvProp_UI
-# reload(bhvProp_UI)
+import Properties.BHV_Group_Properties_UI as bhvProp_UI
+reload(bhvProp_UI)
 
 
 class Behavior_UI:
@@ -47,35 +47,51 @@ class Behavior_UI:
                                                                     self.bhvMng,
                                                                     self.grpMng,
                                                                     self)
-            # with pm.frameLayout('Group Properties', bv=1, en=0) as self.jntProp:
-            #     self.jntProp_ui = bhvProp_UI.BHV_Group_Properties_UI(self.grpMng,
-            #                                                         self)
+            self.grpProp_ui = bhvProp_UI.BHV_Group_Properties_UI(   self.limbMng,
+                                                                    self.jntMng,
+                                                                    self.grpMng,
+                                                                    self)
     
 #=========== SETUP + TEARDOWN ====================================
 
     def Setup_Editable(self):
         self.limbHier_ui.Populate()
-        print 'setup editable bhvs'
+        self.limbProp_ui.Populate()
+        self.grpProp_ui.Populate()
     
     def Teardown_Editable(self):
         print 'teardown editable bhvs'
 
 #=========== LIMBS ====================================
 
-    def ReparentLimb(self, limbID):
+    def UpdateLimbUI(self):
+        self.limbProp_ui.UpdateGroupParentUI()
+
+    def UpdateLimbParentGroups(self, limbID):
         '''Set child's parent group enum'''
         limb = self.limbMng.GetLimb(limbID)
         parents = pm.listConnections(limb.parentLimb)
         if parents:
-            groups = self.grpMng.GetLimbGrps(parents[0])
+            groups = self.grpMng.GetLimbGroups(parents[0])
             names = [group.pfrsName.get() for group in groups]
             pm.addAttr(limb.parentGrp, e=1, en=':'.join(names))
         else:
             pm.addAttr(limb.parentGrp, e=1, en='None')
     
     def LimbSelected(self, limbID):
+        limb = self.limbMng.GetLimb(limbID)
+        joints = self.jntMng.GetLimbTempJoints(limb)
+        pm.select(joints)
+        self.limbProp_ui.SetLimb(limbID)
         self.grpHier_ui.SetLimb(limbID)
+        self.grpProp_ui.SetLimb()
 
-    def SetBhvType(self):
-        pass
+    def GroupSelected(self, groupID):
+        group = self.grpMng.GetGroup(groupID)
+        pm.select(group)
+        self.limbProp_ui.SetGroup()
+        self.grpProp_ui.SetGroup(group)
+
+    def SetBhvType(self, limb):
+        self.grpHier_ui.Populate()
 

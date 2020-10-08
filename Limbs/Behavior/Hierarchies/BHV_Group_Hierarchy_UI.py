@@ -13,7 +13,7 @@ class BHV_Group_Hierarchy_UI:
 
     def Populate(self):
         self.Depopulate()
-        for group in self.grpMng.GetLimbGrps(self.limb):
+        for group in self.grpMng.GetLimbGroups(self.limb):
             groupID = group.ID.get()
             name = group.pfrsName.get()
             pm.treeView(self.widget, e=1, ai=(groupID, ''))

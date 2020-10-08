@@ -21,7 +21,7 @@ class SaveLoad_Skeleton():
             limbData['ID'] = limbID
             limbData['pfrsName'] = limb.pfrsName.get()
             limbData['typeIndex'] = limb.typeIndex.get()
-            limbData['sideIndex'] = limb.sideIndex.get()
+            limbData['side'] = limb.side.get()
             limbData['parentJntIndex'] = limb.parentJntIndex.get()
             limbData['parentCtrID'] = limb.parentCtrID.get()
             limbData['bhvIndex'] = limb.bhvIndex.get()
@@ -72,7 +72,7 @@ class SaveLoad_Skeleton():
             
             limb.pfrsName.set(limbData['pfrsName'])
             limb.typeIndex.set(limbData['typeIndex'])
-            limb.sideIndex.set(limbData['sideIndex'])
+            limb.side.set(limbData['side'])
             limb.mirrorLimbID.set(oldToNewLimbIDs[limbData['mirrorLimbID']])
             limb.parentLimbID.set(oldToNewLimbIDs[limbData['parentLimbID']])
             limb.parentJntIndex.set(limbData['parentJntIndex'])

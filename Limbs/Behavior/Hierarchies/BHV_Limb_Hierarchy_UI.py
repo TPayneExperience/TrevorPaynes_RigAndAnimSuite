@@ -28,12 +28,14 @@ class BHV_Limb_Hierarchy_UI:
                     pm.treeView(self.widget, e=1, bti=(limbID, 1, side))
                 else:
                     pm.treeView(self.widget, e=1, bvf=(limbID, 1, 0))
+                self.parent.UpdateLimbParentGroups(limbID)
 
 #=========== SETUP ====================================
 
     def _Setup(self):
-        self.widget = pm.treeView(ams=0, ann='MMB + Drag + Drop to reparent')
+        self.widget = pm.treeView(ams=0, nb=1, ann='MMB + Drag + Drop to reparent')
         pm.treeView(self.widget, e=1, scc=self.SelectionChanged)
+        pm.treeView(self.widget, e=1, dad=self.Reparent)
         with pm.popupMenu():
             pm.menuItem(l='Load Skeleton Hierarchy', c=self.LoadSkelHier)
             pm.menuItem(l='Load Default Hierarchy', c=self.LoadDefaultHier)
@@ -49,8 +51,9 @@ class BHV_Limb_Hierarchy_UI:
     
     def Reparent(self, limbIDsStr, i1, i2, newParentIDStr, i3, i4, i5):
         limbID = int(limbIDsStr[0])
-        self.limbMng.Reparent(limbID, int(newParentIDStr))
-        # self.parent.ReparentLimb(limbID) # unsure what it will do
+        parentID = int(newParentIDStr)
+        self.limbMng.Reparent(limbID, parentID)
+        self.parent.ReparentLimb(limbID)
     
 #=========== RMB ====================================
 
@@ -58,7 +61,8 @@ class BHV_Limb_Hierarchy_UI:
         limbParents = self.limbMng.GetDefaultLimbHier(self.jntMng)
         for child, parent in limbParents.items():
             self.limbMng.Reparent(child.ID.get(), parent.ID.get())
-            # self.parent.ReparentLimb(child.ID.get())
+            self.parent.UpdateLimbParentGroups(child.ID.get())
+        self.parent.UpdateLimbUI()
         self.Populate()
     
     def LoadDefaultHier(self, ignore):

@@ -31,7 +31,7 @@ class Limb_Manager():
         return self._limbs[limbID]
     
     def GetLimbSide(self, limb): # Name Manager + button labels
-        return self.limbSides[limb.sideIndex.get()]
+        return self.limbSides[limb.side.get()]
     
     def GetLimbParent(self, limb):
         parent = pm.listConnections(limb.parentLimb)
@@ -41,6 +41,10 @@ class Limb_Manager():
 
     def GetLimbMirror(self, limb):
         return pm.listConnections(limb.mirrorLimb)
+
+    def GetLimbPrefix(self, limb):
+        rigRoot = pm.listConnections(limb.rigRoot)[0]
+        return rigRoot.prefix.get()
 
     def GetAllLimbs(self): # used for bhv limb selection comboboxes
         return list(self._limbs.values())
@@ -64,7 +68,7 @@ class Limb_Manager():
         pm.addAttr(limb, ln='pfrsName', dt='string')
         limb.pfrsName.set(pfrsName)
         pm.addAttr(limb, ln='limbType', at='enum', enumName=limbTypes)
-        pm.addAttr(limb, ln='sideIndex', at='enum', enumName=limbSides)
+        pm.addAttr(limb, ln='side', at='enum', enumName=limbSides)
         pm.addAttr(limb, ln='mirrorLimb', at='long')
         pm.addAttr(limb, ln='parentLimb', dt='string')
         pm.addAttr(limb, ln='parentGrp', at='enum', en='None')
@@ -108,8 +112,8 @@ class Limb_Manager():
             if (sourceLimb == mirrorLimb): # prevent pairing with self
                 return
             pm.connectAttr(sourceLimb.mirrorLimb, mirrorLimb.mirrorLimb)
-            mirrorLimb.sideIndex.set(1)
-            sourceLimb.sideIndex.set(2)
+            mirrorLimb.side.set(1)
+            sourceLimb.side.set(2)
 
         # BREAK MIRROR
         else:
@@ -120,8 +124,8 @@ class Limb_Manager():
     def _BreakMirror(self, sourceLimb):
         mirrorLimbs = self.GetLimbMirror(sourceLimb)
         if mirrorLimbs:
-            mirrorLimbs[0].sideIndex.set(0)
-            sourceLimb.sideIndex.set(0)
+            mirrorLimbs[0].side.set(0)
+            sourceLimb.side.set(0)
             pm.disconnectAttr(sourceLimb.mirrorLimb)
 
     def UpdateLimbType(self, limb):
@@ -136,10 +140,10 @@ class Limb_Manager():
         limb2 = pm.listConnections(limb1.mirrorLimb)
         if limb2:
             limb2 = limb2[0]
-            side1 = limb1.sideIndex.get()
-            side2 = limb2.sideIndex.get()
-            limb1.sideIndex.set(side2)
-            limb2.sideIndex.set(side1)
+            side1 = limb1.side.get()
+            side2 = limb2.side.get()
+            limb1.side.set(side2)
+            limb2.side.set(side1)
 
 
 #============= PARENTS / TREE MANIPULATION ============================
@@ -166,7 +170,7 @@ class Limb_Manager():
                 childJoint = joints[0]
                 parentJoint = pm.listRelatives(childJoint, parent=1)
                 if parentJoint:
-                    parentLimb = jntMng.GetLimb(parentJoint)
+                    parentLimb = jntMng.GetLimb(parentJoint[0])
                     limbParents[childLimb] = parentLimb
         return limbParents
 
@@ -211,6 +215,6 @@ class Limb_Manager():
     #     source.mirrorLimbID.set(targetID)
     #     target.mirrorLimbID.set(sourceID)
     #     target.pfrsName.set(source.pfrsName.get())
-    #     source.sideIndex.set(1)
-    #     target.sideIndex.set(2)
+    #     source.side.set(1)
+    #     target.side.set(2)
     #     return targetID

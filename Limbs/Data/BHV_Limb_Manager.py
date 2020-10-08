@@ -16,7 +16,8 @@ class BHV_Limb_Manager:
                             'IK Chain',
 
                             'FK - Branch',
-                            'Empty']
+                            'Empty',
+                            'FK - Reverse Chain'] # NOT YET CONNECTED
 
         self.cstTypes = ['Parent', 'Point', 'Orient', 'Scale']
 
@@ -38,11 +39,12 @@ class BHV_Limb_Manager:
                     self.bhvTypes[2], 
                     self.bhvTypes[3], 
                     self.bhvTypes[5], 
-                    self.bhvTypes[6]]
+                    self.bhvTypes[6], 
+                    self.bhvTypes[8]]
 
         if limbType == 3: # Branch
-            return [self.bhvTypes[3], 
-                    self.bhvTypes[6]]
+            return [self.bhvTypes[6],
+                    self.bhvTypes[3]]
 
     def AddLimb(self, limb):
         if not limb.hasAttr('bhvType'):
@@ -59,8 +61,10 @@ class BHV_Limb_Manager:
             pm.addAttr(limb, ln='bhvEmptyGrp', dt='string')
 
             pm.addAttr(limb, ln='bhvCstType', at='enum', en=bhvCstTypes)
-            pm.addAttr(limb, ln='bhvCstTargetLimbID', at='long')
-            pm.addAttr(limb, ln='bhvCstTargetJntIndex', at='enum', en='None')
+            pm.addAttr(limb, ln='bhvCstTargetLimb', dt='string') # for connecting to target
+            pm.addAttr(limb, ln='bhvCstSourceLimb', dt='string') # Ignore, only for connections
+            pm.addAttr(limb, ln='bhvCstTargetJnt', at='enum', en='None')
+            pm.addAttr(limb, ln='bhvIKSourceLimb', dt='string') # IK handles parent connection
     
     def RemoveLimb(self, limb):
         pm.disconnectAttr(limb.bhvFKGrps)
@@ -80,7 +84,7 @@ class BHV_Limb_Manager:
     def SetBhv(self, limb, bhvType):
         index = self.bhvTypes.index(bhvType)
         limb.bhvType.set(index)
-        if index == 0 or index == 6: # FK Chain / Branch
+        if index == 0 or index == 6 or index == 8: # FK Chain / Branch
             self.Set_FK(limb)
         elif index == 1:
             self.Set_IK(limb)
@@ -90,12 +94,15 @@ class BHV_Limb_Manager:
             self.Set_Cst(limb)
         elif index == 4:
             self.Set_LookAt(limb)
-        elif index == 5 or index == 7:
+        elif index == 5:
             self.Set_IKChain(limb)
+        elif index == 7:
+            self.Set_Empty(limb)
 
     def Set_FK(self, limb):
         pm.disconnectAttr(limb.bhvFKGrps)
-        for joint in self.jntMng.GetLimbJoints(limb):
+        joints = self.jntMng.GetLimbJoints(limb)
+        for joint in joints:
             groups = pm.listConnections(joint.bhvFKGrp)
             if groups:
                 group = groups[0]

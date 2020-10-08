@@ -27,7 +27,7 @@ class MirrorLimbs_UI:
                 limb = self.limbMng.GetLimb(limbID)
                 name = limb.pfrsName.get()
                 parentID = limb.parentLimbID.get()
-                side = limb.sideIndex.get()
+                side = limb.side.get()
                 canMirror = (side == 0 or side == 3)
                 pm.treeView(self.limbs_tv, e=1, addItem=(limbID, str(parentID)))
                 pm.treeView(self.limbs_tv, e=1, displayLabel=(limbID, name), 
