@@ -19,6 +19,8 @@ import LimbSetup.LimbSetup_UI as ls_ui
 reload(ls_ui)
 import Behavior.Behavior_UI as bhv_ui
 reload(bhv_ui)
+import Appearance.Appearance_UI as app_ui
+reload(app_ui)
 
 import Popups.MirrorLimbs_UI as mir_ui
 reload(mir_ui)
@@ -44,6 +46,7 @@ class Limbs_UI:
         self.bhvMng = bhv.BHV_Limb_Manager( self.limbMng, 
                                             self.jntMng, 
                                             self.grpMng)
+        self.ctrMng = None
         self.saveLoadSkel = saveLoadSkel.SaveLoad_Skeleton( self.limbMng, 
                                                     self.jntMng)
 
@@ -81,7 +84,11 @@ class Limbs_UI:
                                                     self.bhvMng,
                                                     self.grpMng)
             with pm.horizontalLayout() as self.appTab:
-                pm.button(label='Two')
+                self.app_ui = app_ui.Appearance_UI( self.limbMng,
+                                                    self.grpMng,
+                                                    self.ctrMng,
+                                                    self.nameMng,
+                                                    self)
         pm.tabLayout(  self.tab, 
                     edit=1, 
                     tabLabel=(  (self.jntSetupTab,'Joint Setup'), 
@@ -98,7 +105,7 @@ class Limbs_UI:
         if (index == 3):
             self.bhv_ui.Setup_Editable()
         if (index == 4):
-            pass 
+            self.app_ui.Setup_Editable() 
         
     def Teardown_Editable(self):
         index = self.rigRoot.limbsTab.get()
@@ -107,7 +114,7 @@ class Limbs_UI:
         if (index == 3):
             self.bhv_ui.Teardown_Editable()
         if (index == 4):
-            pass 
+            self.app_ui.Teardown_Editable() 
         
     def TabChanged(self):
         self.Teardown_Editable()
@@ -119,8 +126,8 @@ class Limbs_UI:
 
     def AddLimb(self, limb):
         self.bhvMng.AddLimb(limb)
-        for joint in self.jntMng.GetLimbJoints(limb):
-            self.grpMng.AddJoint(joint)
+        # for joint in self.jntMng.GetLimbJoints(limb):
+        #     self.grpMng.AddJoint(joint)
         self.parent.AddLimb(limb)
 
     def RemoveLimb(self, limb):

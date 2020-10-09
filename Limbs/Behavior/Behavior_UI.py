@@ -4,14 +4,14 @@ import pymel.core as pm
 
 
 
-import Hierarchies.BHV_Limb_Hierarchy_UI as limbHier_UI
+import BHV_Limb_Hierarchy_UI as limbHier_UI
 reload(limbHier_UI)
-import Hierarchies.BHV_Group_Hierarchy_UI as groupHier_UI
+import BHV_Group_Hierarchy_UI as groupHier_UI
 reload(groupHier_UI)
 
-import Properties.BHV_Limb_Properties_UI as limbProp_UI
+import BHV_Limb_Properties_UI as limbProp_UI
 reload(limbProp_UI)
-import Properties.BHV_Group_Properties_UI as bhvProp_UI
+import BHV_Group_Properties_UI as bhvProp_UI
 reload(bhvProp_UI)
 
 
