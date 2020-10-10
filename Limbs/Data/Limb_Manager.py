@@ -1,7 +1,7 @@
 
 import pymel.core as pm
 
-class Limb_Manager():
+class Limb_Manager:
     def __init__(self, nameMng):
 
         self.nameMng = nameMng

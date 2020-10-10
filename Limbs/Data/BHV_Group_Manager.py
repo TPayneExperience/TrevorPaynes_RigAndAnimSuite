@@ -4,6 +4,7 @@ import pymel.core as pm
 class BHV_Group_Manager:
     def __init__(self):
         self.grpTypes = [   'FK',
+
                             'IK Handle',
                             'FK / IK Switch',
                             'Constraint',
@@ -92,6 +93,7 @@ class BHV_Group_Manager:
         pm.addAttr(group, ln='ID', at='long', dv=groupID)
         pm.addAttr(group, ln='joint', dt='string')
         pm.addAttr(group, ln='pfrsName', dt='string')
+        pm.addAttr(group, ln='control', dt='string')
         pm.addAttr(group, ln='limb', dt='string')
         pm.addAttr(group, ln='groupType', at='enum', en=groupTypes)
         for attr in ['.sx', '.sy', '.sz', '.v']:

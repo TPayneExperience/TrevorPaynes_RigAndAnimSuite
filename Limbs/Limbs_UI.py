@@ -9,6 +9,8 @@ import Data.BHV_Limb_Manager as bhv
 reload(bhv)
 import Data.BHV_Group_Manager as grp
 reload(grp)
+import Data.APP_Control_Manager as ctr
+reload(ctr)
 
 import Data.SaveLoad_Skeleton as saveLoadSkel
 reload(saveLoadSkel)
@@ -46,7 +48,7 @@ class Limbs_UI:
         self.bhvMng = bhv.BHV_Limb_Manager( self.limbMng, 
                                             self.jntMng, 
                                             self.grpMng)
-        self.ctrMng = None
+        self.ctrMng = ctr.APP_Control_Manager(self.nameMng)
         self.saveLoadSkel = saveLoadSkel.SaveLoad_Skeleton( self.limbMng, 
                                                     self.jntMng)
 
@@ -66,6 +68,7 @@ class Limbs_UI:
         self.limbMng.NewRig(rigRoot)
         self.jntMng.NewRig(rigRoot)
         self.grpMng.NewRig(rigRoot)
+        self.ctrMng.NewRig(rigRoot)
 
 #=========== SETUP ====================================
 
