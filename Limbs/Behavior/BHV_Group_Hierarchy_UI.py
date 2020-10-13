@@ -15,7 +15,10 @@ class BHV_Group_Hierarchy_UI:
         self.Depopulate()
         for group in self.grpMng.GetLimbGroups(self.limb):
             groupID = group.ID.get()
-            name = group.pfrsName.get()
+            if pm.listConnections(group.joint):
+                name = self.grpMng.GetJointGroupName(group)
+            else:
+                name = self.grpMng.GetLimbGroupName(group)
             pm.treeView(self.widget, e=1, ai=(groupID, ''))
             pm.treeView(self.widget, e=1, dl=(groupID, name))
     

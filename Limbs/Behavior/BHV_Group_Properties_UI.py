@@ -95,7 +95,13 @@ class BHV_Group_Properties_UI:
         pm.disconnectAttr(self.group.IKTargetLimb)
         pm.connectAttr(limb.bhvIKSourceLimb, self.group.IKTargetLimb)
         groups = self.grpMng.GetLimbGroups(limb)
-        groupNames = [g.pfrsName.get() for g in groups if 'FK -' in g.pfrsName.get()]
+        groupNames = []
+        for group in groups:
+            if (group.groupType.get() == 0):
+                if (pm.listConnections(group.joint)):
+                    groupNames.append(self.grpMng.GetJointGroupName(group))
+                else:
+                    groupNames.append(self.grpMng.GetLimbGroupName(group))
         if groupNames:
             pm.addAttr(self.group.IKTargetGroup, e=1, en=':'.join(groupNames))
         else:

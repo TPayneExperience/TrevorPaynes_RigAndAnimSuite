@@ -2,12 +2,13 @@
 import pymel.core as pm
 
 class BHV_Limb_Manager:
-    def __init__ (self, limbMng, jntMng, grpMng):
+    def __init__ (self, limbMng, jntMng, grpMng, ctrMng):
         self.limbMng = limbMng
         self.jntMng = jntMng
         self.grpMng = grpMng
+        self.ctrMng = ctrMng
 
-        self.bhvTypes = [   'FK - Chain',
+        self.bhvTypes = [   'FK - Chain', # DON'T CHANGE ORDER!
 
                             'IK',
                             'FK / IK',
@@ -17,11 +18,11 @@ class BHV_Limb_Manager:
 
                             'FK - Branch',
                             'Empty',
-                            'FK - Reverse Chain'] # NOT YET CONNECTED
+                            'FK - Reverse Chain']
 
         self.cstTypes = ['Parent', 'Point', 'Orient', 'Scale']
 
-#============= LIMBS  ============================
+#============= ACCESSORS  ============================
 
     def GetBhvOptions(self, limb):
         limbType = limb.limbType.get()
@@ -45,6 +46,8 @@ class BHV_Limb_Manager:
         if limbType == 3: # Branch
             return [self.bhvTypes[6],
                     self.bhvTypes[3]]
+
+#============= ADD / REMOVE LIMB  ============================
 
     def AddLimb(self, limb):
         if not limb.hasAttr('bhvType'):
@@ -109,7 +112,8 @@ class BHV_Limb_Manager:
                 pm.disconnectAttr(group.limb)
                 pm.connectAttr(limb.bhvFKGrps, group.limb)
             else:
-                self.grpMng.Add_FK(limb, joint)
+                group = self.grpMng.Add_FK(limb, joint)
+                self.ctrMng.Add(group)
 
     def Set_IK(self, limb):
         pm.delete(pm.listConnections(limb.bhvIKGrps))
@@ -117,7 +121,8 @@ class BHV_Limb_Manager:
         self.grpMng.Add_IKHandle(limb, joints[0], joints[-1])
 
     def Set_FKIK(self, limb):
-        self.grpMng.Add_FKIKSwitch(limb)
+        group = self.grpMng.Add_FKIKSwitch(limb)
+        self.ctrMng.Add(group)
         self.Set_FK(limb)
         self.Set_IK(limb)
 
@@ -141,7 +146,8 @@ class BHV_Limb_Manager:
                 pm.disconnectAttr(group.limb)
                 pm.connectAttr(limb.bhvLookAtGrp, group.limb)
             else:
-                self.grpMng.Add_LookAt(limb, joint)
+                group = self.grpMng.Add_LookAt(limb, joint)
+                self.ctrMng.Add(group)
 
     def Set_IKChain(self, limb):
         pm.delete(pm.listConnections(limb.bhvIKGrps))
@@ -153,5 +159,6 @@ class BHV_Limb_Manager:
 
     def Set_Empty(self, limb):
         pm.delete(pm.listConnections(limb.bhvEmptyGrp))
-        self.grpMng.Add_Empty(limb)
+        group = self.grpMng.Add_Empty(limb)
+        self.ctrMng.Add(group)
 

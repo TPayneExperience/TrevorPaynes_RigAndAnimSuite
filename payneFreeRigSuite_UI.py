@@ -76,9 +76,7 @@ class PayneFreeRigSuite_UI():
         self.meshGrp = pm.group(name='Mesh_GRP', em=True)
         pm.parent(self.meshGrp, self.rigRoot)
         self.UpdatePrefix()
-        self.nameMng.NewRig(self.rigRoot, 
-                            self.limbMng, 
-                            self.jntMng)
+        self.nameMng.NewRig(self.rigRoot)
         self.limbs_ui.NewRig(self.rigRoot)
         # self.pfrs.rigSetup.NewRig('somePrefix', [0,1,2,3,4], True)
         # self.limbs_ui.NewRig(self.pfrs.rigSetup.rigRoot)
@@ -150,8 +148,8 @@ class PayneFreeRigSuite_UI():
                 # pm.menuItem(l='Save Template...', c=self.limbs_ui.Save_Dialog)
 
             with pm.menu('Options'):
+                pm.menuItem(l='Submit Feedback...', en=0)
                 pm.menuItem(l='Share...', en=0)
-                pm.menuItem(l='Report Bug...', en=0)
 
     
 #=========== LIMBS ====================================

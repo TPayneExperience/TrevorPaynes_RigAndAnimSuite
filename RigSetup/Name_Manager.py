@@ -7,23 +7,18 @@ class Name_Manager():
     def __init__(self):
         self.errorMsg = ''
 
-    def NewRig(self, rigRoot, limbMng, jntMng):
+    def NewRig(self, rigRoot):
         self.rigRoot = rigRoot
-        self.limbMng = limbMng
-        self.jntMng = jntMng
 
-    def GetName(self, joint, objType):
-        limb = self.jntMng.GetLimb(joint)
-        side = self.limbMng.GetLimbSide(limb)
-        temp = {self.rigRoot.limbIndex.get() : limb.pfrsName.get(),
-                self.rigRoot.jointIndex.get() : joint.pfrsName.get(),
+    def GetName(self, limbName, secondName, side, objType):
+        temp = {self.rigRoot.limbIndex.get() : limbName,
+                self.rigRoot.jointIndex.get() : secondName,
                 self.rigRoot.sideIndex.get() : side,
                 self.rigRoot.typeIndex.get() : objType}
         if self.rigRoot.showPrefix.get():
             temp[self.rigRoot.prefixIndex.get()] = self.rigRoot.prefix.get()
         partNames = [temp[i] for i in sorted(list(temp.keys()))]
         return '_'.join(partNames)
-    
     
 #======= VALIDATION ========================================
 

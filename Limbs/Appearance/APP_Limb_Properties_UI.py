@@ -2,124 +2,102 @@
 import pymel.core as pm
 
 class APP_Limb_Properties_UI:
-    # def __init__(self, limbMng, jntMng, bhvMng, grpMng, parent):
-    def __init__(self, limbMng, grpMng, parent):
+    def __init__(self, limbMng, grpMng, ctrMng, parent):
         self.limbMng = limbMng
         self.grpMng = grpMng
+        self.ctrMng = ctrMng
         self.parent = parent
-#         self.jntMng = jntMng
-#         self.bhvMng = bhvMng
 
-#         self.limb = None
-#         self.cstTargetJnt_at = None
-#         self.cstType_at = None
-#         self.limbs = {} # limbName : limb
-#         self.limbOrder = [] # limbs
+        self.limbs = {} # name : limb
+        self.limbOrder = []
 
         self._Setup()
     
-#     def SetLimb(self, limbID):
-#         self.limb = self.limbMng.GetLimb(limbID)
-#         pm.frameLayout(self.limbLayout, e=1, en=1)
+    def SetLimb(self, limbID):
+        self.limb = self.limbMng.GetLimb(limbID)
 
-#         # Add only bhv options relevant to that limb
-#         pm.optionMenu(self.bhvType_om, e=1, dai=1)
-#         bhvTypes = self.bhvMng.GetBhvOptions(self.limb)
-#         for bhvType in bhvTypes:
-#             pm.menuItem(l=bhvType, p=self.bhvType_om)
+        pm.deleteUI(self.targetType)
+        pm.deleteUI(self.ctrType)
 
-#         # Convert bhv type enum on limb to select the proper index
-#         bhvTypeStr = self.bhvMng.bhvTypes[self.limb.bhvType.get()]
-#         index = bhvTypes.index(bhvTypeStr) + 1
-#         pm.optionMenu(self.bhvType_om, e=1, sl=index)
+        self.targetType = pm.attrEnumOptionMenu(l='FK or IK',
+                                                at=self.limb.appTargetFKIKType,
+                                                p=self.appLimbProp_cl)
+        self.ctrType = pm.attrEnumOptionMenu(   l='Control Type',
+                                                at=self.limb.appControlType,
+                                                p=self.appLimbProp_cl,
+                                                cc=self.SetControlType)
+        pm.attrControlGrp(self.lockPos, e=1, a=self.limb.appLockHidePos)
+        pm.attrControlGrp(self.lockRot, e=1, a=self.limb.appLockHideRot)
+        pm.attrControlGrp(self.lockScale, e=1, a=self.limb.appLockHideScale)
+        self.GetTargetFKIK()
 
-#         self.UpdateGroupParentUI()
-#         self.UpdateCstUI()
-
-#     def UpdateGroupParentUI(self):
-#         pm.deleteUI(self.grpParent_at)
-#         self.grpParent_at = pm.attrEnumOptionMenu(  self.grpParent_at, 
-#                                                     l='Bhv Grp Parent', 
-#                                                     p=self.bhvLimbProp_cl,
-#                                                     at=self.limb.parentGrp)
-
-#     def UpdateCstUI(self):
-#         if self.cstTargetJnt_at:
-#             pm.deleteUI(self.cstTargetJnt_at)
-#             self.cstTargetJnt_at = None
-#         if self.cstType_at:
-#             pm.deleteUI(self.cstType_at)
-#             self.cstType_at = None
-#         isCstType = (self.limb.bhvType.get() == 3)
-#         pm.frameLayout(self.cstLayout, e=1, en=isCstType)
-#         if isCstType:
-#             self.cstTargetJnt_at = pm.attrEnumOptionMenu( l='Target Joint',
-#                                         at=self.limb.bhvCstTargetJnt,
-#                                         p=self.bhvCstProp_cl)
-#             self.cstType_at = pm.attrEnumOptionMenu(l='Constraint Type',
-#                                         at=self.limb.bhvCstType,
-#                                         p=self.bhvCstProp_cl)
-#             cstLimbs = pm.listConnections(self.limb.bhvCstTargetLimb)
-#             if cstLimbs:
-#                 cstLimb = cstLimbs[0]
-#                 index = self.limbOrder.index(cstLimb)
-#                 pm.optionMenu(self.cstTargetLimb_om, e=1, sl=index)
-        
-#     def SetGroup(self):
-#         pm.frameLayout(self.limbLayout, e=1, en=0)
-#         pm.frameLayout(self.cstLayout, e=1, en=0)
-
-#     def Populate(self):
-#         '''Called when Bhvs tab clicked, 
-#         populates Constraint Target Limbs option menu
-#         '''
-#         pm.optionMenu(self.cstTargetLimb_om, e=1, dai=1)
-#         self.limbs = {}
-#         self.limbOrder = []
-#         for rootLimb in self.limbMng.GetRootLimbs():
-#             prefix = self.limbMng.GetLimbPrefix(rootLimb)
-#             for limb in self.limbMng.GetLimbCreationOrder(rootLimb):
-#                 side = self.limbMng.GetLimbSide(limb)
-#                 name = '%s_%s_%s' % (prefix, limb.pfrsName.get(), side)
-#                 pm.menuItem(l=name, p=self.cstTargetLimb_om)
-#                 self.limbs[name] = limb
-#                 self.limbOrder.append(limb)
+    def Populate(self):
+        '''Called when Bhvs tab clicked, 
+        populates Constraint Target Limbs option menu
+        '''
+        pm.optionMenu(self.fkikTargetLimb_om, e=1, dai=1)
+        self.limbs = {} # name : limb
+        self.limbOrder = []
+        pm.menuItem(l='None', p=self.fkikTargetLimb_om)
+        for rootLimb in self.limbMng.GetRootLimbs():
+            if (rootLimb.bhvType.get() == 2): # FK / IK
+                prefix = self.limbMng.GetLimbPrefix(rootLimb)
+                for limb in self.limbMng.GetLimbCreationOrder(rootLimb):
+                    side = self.limbMng.GetLimbSide(limb)
+                    name = '%s_%s_%s' % (prefix, limb.pfrsName.get(), side)
+                    pm.menuItem(l=name, p=self.fkikTargetLimb_om)
+                    self.limbs[name] = limb
+                    self.limbOrder.append(name)
 
 
 #=========== SETUP UI ==============================================
 
     def _Setup(self):
-        '''Create frame layouts here because we have limb + cst frames'''
-        # with pm.frameLayout('Limb BEHAVIOR Properties', bv=1, en=0) as self.limbLayout:
         with pm.columnLayout(adj=1) as self.appLimbProp_cl:
-            self.bhvType_om = pm.optionMenu(l='Target FK / IK Limb')
-            # self.grpParent_at = pm.attrEnumOptionMenu(  l='Bhv Grp Parent', 
-            #                                             at='perspShape.filmFit')
+            self.lockPos = pm.attrControlGrp(l='Lock + Hide Translate',
+                                            a='perspShape.shakeEnabled')
+            self.lockRot = pm.attrControlGrp(l='Lock + Hide Rotate',
+                                            a='perspShape.shakeEnabled')
+            self.lockScale = pm.attrControlGrp(l='Lock + Hide Scale',
+                                            a='perspShape.shakeEnabled')
+            self.fkikTargetLimb_om = pm.optionMenu( l='Target FK / IK Limb',
+                                                    cc=self.SetTargetFKIK)
+            self.targetType = pm.attrEnumOptionMenu(at='perspShape.filmFit')
+            self.ctrType = pm.attrEnumOptionMenu(at='perspShape.filmFit')
 
 
-# #=========== FUNCTIONALITY ==============================================
+#=========== FUNCTIONALITY ==============================================
 
-#     def SetBhvType(self):
-#         bhvType = pm.optionMenu(self.bhvType_om, q=1, v=1)
-#         isVis = (bhvType == 'Constraint')
-#         pm.frameLayout(self.cstLayout, e=1, en=isVis)
-#         self.bhvMng.SetBhv(self.limb, bhvType)
-#         self.parent.SetBhvType(self.limb) 
-#         self.UpdateCstUI()
-
-#     def SetTargetCstLimb(self, limbName):
-#         limb = self.limbs[limbName]
-#         self.ConnectTargetCstLimb(limb)
+    def SetTargetFKIK(self, limbName):
+        isEnabled = (limbName != 'None')
+        pm.attrEnumOptionMenu(self.targetType, e=1, en=isEnabled)
+        pm.disconnectAttr(self.limb.appTargetFKIKLimb)
+        if (limbName != 'None'):
+            limb = self.limbs[limbName]
+            pm.connectAttr(limb.appSourceFKIKLimb, self.limb.appTargetFKIKLimb)
     
-#     def ConnectTargetCstLimb(self, limb):
-#         pm.disconnectAttr(self.limb.bhvCstTargetLimb)
-#         pm.connectAttr(limb.bhvCstSourceLimb, self.limb.bhvCstTargetLimb)
-#         joints = self.jntMng.GetLimbJoints(limb)
-#         jointNames = [j.pfrsName.get() for j in joints]
-#         pm.addAttr(self.limb.bhvCstTargetJnt, e=1, en=':'.join(jointNames))
-#         self.UpdateCstUI()
+    def GetTargetFKIK(self):
+        limbs = pm.listConnections(self.limb.appTargetFKIKLimb)
+        if limbs:
+            limb = limbs[0]
+            prefix = self.limbMng.GetLimbPrefix(limb)
+            side = self.limbMng.GetLimbSide(limb)
+            name = '%s_%s_%s' % (prefix, limb.pfrsName.get(), side)
+            index = self.limbOrder.index(name)
+            pm.optionMenu(self.fkikTargetLimb_om, e=1, sl=index)
+            pm.attrEnumOptionMenu(self.targetType, e=1, en=1)
+        else:
+            pm.optionMenu(self.fkikTargetLimb_om, e=1, sl=1)
+            pm.attrEnumOptionMenu(self.targetType, e=1, en=0)
 
-
+    def SetControlType(self, ctrType):
+        print ctrType
+        for group in self.grpMng.GetLimbGroups(self.limb):
+            if group.groupType.get() in [0, 2, 4, 5]: # Skip IK / Constraint
+                controls = self.ctrMng.GetGroupControl(group)
+                if controls:
+                    control = controls[0]
+                    self.ctrMng.SetType(control, ctrType)
 
 
 

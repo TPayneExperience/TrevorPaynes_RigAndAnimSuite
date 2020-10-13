@@ -2,10 +2,10 @@
 import pymel.core as pm
 
 class Joint_Manager():
-    def __init__(self, nameMng):
+    def __init__(self, limbMng, nameMng):
 
+        self.limbMng = limbMng
         self.nameMng = nameMng
-        # self.limbMng = limbMng
         self.mirrorXform = {'X': [-1,1,1],
                             'Y': [1,-1,1],
                             'Z': [1,1,-1]}
@@ -125,7 +125,12 @@ class Joint_Manager():
             self.UpdateJointName(joint)
 
     def UpdateJointName(self, joint):
-        joint.rename(self.nameMng.GetName(joint, 'JNT'))
+        limb = self.GetLimb(joint)
+        name = self.nameMng.GetName(limb.pfrsName.get(),
+                                    joint.pfrsName.get(),
+                                    self.limbMng.GetLimbSide(limb), 
+                                    'JNT')
+        joint.rename(name)
     
 #============= UTILS ============================
 

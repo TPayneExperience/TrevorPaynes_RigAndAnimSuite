@@ -42,13 +42,17 @@ class Limbs_UI:
         self.jsonMng = jsonMng
         self.parent = parent
 
+        # NEED A BETTER PLACE FOR THIS
+        
         self.limbMng = lm.Limb_Manager(nameMng)
-        self.jntMng = jm.Joint_Manager(nameMng)
-        self.grpMng = grp.BHV_Group_Manager()
+        self.jntMng = jm.Joint_Manager(self.limbMng, nameMng)
+        self.grpMng = grp.BHV_Group_Manager(self.limbMng, nameMng)
+        self.ctrMng = ctr.APP_Control_Manager(self.grpMng,
+                                                self.nameMng)
         self.bhvMng = bhv.BHV_Limb_Manager( self.limbMng, 
                                             self.jntMng, 
-                                            self.grpMng)
-        self.ctrMng = ctr.APP_Control_Manager(self.nameMng)
+                                            self.grpMng,
+                                            self.ctrMng)
         self.saveLoadSkel = saveLoadSkel.SaveLoad_Skeleton( self.limbMng, 
                                                     self.jntMng)
 

@@ -12,6 +12,6 @@ class JointSetup_UI:
             with pm.frameLayout('Tools', bv=1):
                 with pm.rowLayout(adj=1, rat=(1,'top', 5)):
                     with pm.columnLayout(adj=1, cat=('both', 5), rs=5):
-                        pm.button(l='Joints Tool', c=pm.Callback(pm.mel.eval, 'JointTool()'))
+                        pm.button(l='Joint Tool', c=pm.Callback(pm.mel.eval, 'JointTool()'))
 
 

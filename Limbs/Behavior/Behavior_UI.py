@@ -73,7 +73,12 @@ class Behavior_UI:
         parents = pm.listConnections(limb.parentLimb)
         if parents:
             groups = self.grpMng.GetLimbGroups(parents[0])
-            names = [group.pfrsName.get() for group in groups]
+            names = []
+            for group in groups:
+                if (pm.listConnections(group.joint)):
+                    names.append(self.grpMng.GetJointGroupName(group))
+                else:
+                    names.append(self.grpMng.GetLimbGroupName(group))
             pm.addAttr(limb.parentGrp, e=1, en=':'.join(names))
         else:
             pm.addAttr(limb.parentGrp, e=1, en='None')

@@ -1,9 +1,10 @@
 
-
 import pymel.core as pm
 
+
 class APP_Control_Manager:
-    def __init__(self, nameMng):
+    def __init__(self, grpMng, nameMng):
+        self.grpMng = grpMng
         self.nameMng = nameMng
 
         self._ctrs = {} # ctrID : ctr
@@ -16,21 +17,37 @@ class APP_Control_Manager:
         self.ctrTemplatesParent = pm.group(name='Internal', em=1)
         pm.addAttr(rigRoot, ln='nextCtrID', at='long')
         path = r'D:\Assets\Programming\Python\Maya\ModularAutoRigger\Limbs\Templates\Controls\Controls.ma'
-        nodes = pm.importFile(path, returnNewNodes=1)
-        tempCtrs = [n for n in nodes if pm.objectType(n) == 'transform']
+        ctrSourceNodes = pm.importFile(path, returnNewNodes=1)
+        tempCtrs = [n for n in ctrSourceNodes if pm.objectType(n) == 'transform']
         pm.parent(tempCtrs, self.ctrTemplatesParent)
-        self._ctrTemplates = [c.shortName() for c in self._ctrTemplates]
+        for ctr in tempCtrs:
+            self._ctrTemplates[ctr.shortName()] = ctr
     
 #============= ACCESSORS  ============================
 
     def GetControl(self, ctrID):
         return self._ctrs[ctrID]
 
-    def GetTypes(self):
-        return list(self._ctrTemplates.keys())
-    
     def GetGroupControl(self, group):
         return pm.listConnections(group.control)
+
+    # def GetLimbControls(self, limb):
+    #     ctrs = []
+    #     for group in self.grpMng.GetLimbGroups(limb):
+    #         ctrs += pm.listConnections(group.control)
+    #     return ctrs
+
+    def _SortGroups(self, groups):
+        indexGroups = {} # jointIndex : group
+        orderedGroups = []
+        for group in groups:
+            joints = pm.listConnections(group.joint)
+            if not joints:
+                return []
+            indexGroups[joints[0].limbIndex.get()] = group
+        for index in sorted(list(indexGroups.keys())):
+            orderedGroups.append(indexGroups[index])
+        return orderedGroups
 
 #============= FUNCTIONALITY ============================
 
@@ -38,19 +55,13 @@ class APP_Control_Manager:
         ctrID = self.rigRoot.nextCtrID.get()
         self.rigRoot.nextCtrID.set(ctrID + 1)
 
-        if (group.groupType.get() == 0): # FK
-            ctr = self._Add('Circle_Wire', ctrID)
-        elif (group.groupType.get() == 1): # IK
+        if group.groupType.get() in [0, 4, 5]: # FK, LookAt, Empty
             ctr = self._Add('Circle_Wire', ctrID)
         elif (group.groupType.get() == 2): # FK / IK Switch
-            ctr = self._Add('Cylinder_Poly', ctrID)
-        elif (group.groupType.get() == 3): # Constraint
-            pass
-        elif (group.groupType.get() == 4): # Look At
-            ctr = self._Add('Circle_Wire', ctrID)
-        elif (group.groupType.get() == 5): # Empty
-            ctr = self._Add('Circle_Wire', ctrID)
-
+            ctr = self._Add('FKIK_Wire', ctrID)
+        else:
+            return None
+        pm.connectAttr(group.control, ctr.group)
         self._CopyXForm(group, ctr)
         pm.parent(ctr, group)
         self._ctrs[ctrID] = ctr
@@ -67,20 +78,14 @@ class APP_Control_Manager:
         pm.disconnectAttr(control.group)
         pm.connectAttr(group.control , newCtr.group)
         self._ctrs[newCtr.ID.get()] = newCtr
+        pm.delete(control)
 
 #============= PRIVATE ============================
 
     def _Add(self, ctrType, ctrID):
-        ctr = pm.duplicate(self._ctrTemplates[ctrType])
-        ctrTypes = self.GetTypes()
-        index = ctrTypes.index(ctrType)
+        ctr = pm.duplicate(self._ctrTemplates[ctrType])[0]
         pm.addAttr(ctr, ln='ID', at='long', dv=ctrID)
         pm.addAttr(ctr, ln='group', dt='string')
-        pm.addAttr(ctr, ln='lockHideTranslate', at='bool')
-        pm.addAttr(ctr, ln='lockHideRotate', at='bool')
-        pm.addAttr(ctr, ln='lockHideScale', at='bool')
-        pm.addAttr(ctr, ln='controlType', at='enum', 
-                        en=':'.join(ctrTypes), dv=index)
         return ctr
 
     def _CopyXForm(self, source, target):
