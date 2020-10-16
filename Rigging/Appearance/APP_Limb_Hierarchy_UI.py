@@ -15,19 +15,16 @@ class APP_Limb_Hierarchy_UI:
         for rootLimb in self.limbMng.GetRootLimbs():
             prefix = pm.listConnections(rootLimb.rigRoot)[0].prefix.get()
             for limb in self.limbMng.GetLimbCreationOrder(rootLimb):
-                limbID = limb.ID.get()
-                name = '%s_%s' % (prefix, limb.pfrsName.get())
-                parent = self.limbMng.GetLimbParent(limb)
-                parentID = ''
-                if parent:
-                    parentID = parent.ID.get()
-                pm.treeView(self.widget, e=1, ai=(limbID, parentID))
-                pm.treeView(self.widget, e=1, dl=(limbID, name))
-                side = self.limbMng.GetLimbSide(limb)
-                if (side == 'L' or side == 'R'):
-                    pm.treeView(self.widget, e=1, bti=(limbID, 1, side))
-                else:
-                    pm.treeView(self.widget, e=1, bvf=(limbID, 1, 0))
+                if limb.bhvType.get() in [0, 2, 4, 6, 8]: # only limbs w/ctrs
+                    limbID = limb.ID.get()
+                    name = '%s_%s' % (prefix, limb.pfrsName.get())
+                    pm.treeView(self.widget, e=1, ai=(limbID, ''))
+                    pm.treeView(self.widget, e=1, dl=(limbID, name))
+                    side = self.limbMng.GetLimbSide(limb)
+                    if (side == 'L' or side == 'R'):
+                        pm.treeView(self.widget, e=1, bti=(limbID, 1, side))
+                    else:
+                        pm.treeView(self.widget, e=1, bvf=(limbID, 1, 0))
 
 #=========== SETUP ====================================
 

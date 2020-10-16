@@ -57,16 +57,23 @@ class LS_Limb_Hierarchy_UI:
                                         scc=self.SelectionChanged)
         with pm.popupMenu():
             pm.menuItem(l='Add Limb', c=self.parent.AddLimb)
-            pm.menuItem(l='Flip Sides', c=self.FlipSides)
+            self.flipSides_mi = pm.menuItem(l='Flip Sides', en=0, c=self.FlipSides)
             pm.menuItem(divider=1)
-            pm.menuItem(l='Remove Limb', c=self.Remove)
+            self.remove_mi = pm.menuItem(l='Remove Limb', en=0, c=self.Remove)
 
 #=========== FUNCTIONALITY ====================================
 
     def SelectionChanged(self):
+        pm.menuItem(self.flipSides_mi, e=1, en=0)
+        pm.menuItem(self.remove_mi, e=1, en=0)
         limbIDStrs = pm.treeView(self.widget, q=1, selectItem=1)
         if limbIDStrs:
-            self.parent.LimbSelected(int(limbIDStrs[0]))
+            pm.menuItem(self.remove_mi, e=1, en=1)
+            limbID = int(limbIDStrs[0])
+            limb = self.limbMng.GetLimb(limbID)
+            if self.limbMng.GetLimbMirror(limb):
+                pm.menuItem(self.flipSides_mi, e=1, en=1)
+            self.parent.LimbSelected(limbID)
 
     def Remove(self, ignore):
         limbIDStrs = pm.treeView(self.widget, q=1, selectItem=1)

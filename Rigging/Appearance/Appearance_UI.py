@@ -52,10 +52,12 @@ class Appearance_UI:
     def Setup_Editable(self):
         self.limbHier_ui.Populate()
         self.limbProp_ui.Populate()
+        self.ctrHier_ui.Depopulate()
         pm.frameLayout(self.prop_l, e=1, en=0)
+        self.ctrMng.SetLayerState(True, False)
     
     def Teardown_Editable(self):
-        print 'teardown editable apps'
+        self.ctrMng.SetLayerState(True, True)
 
 #=========== LIMBS ====================================
 

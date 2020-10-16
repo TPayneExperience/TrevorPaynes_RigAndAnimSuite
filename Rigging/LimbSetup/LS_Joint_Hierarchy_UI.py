@@ -30,13 +30,15 @@ class LS_Joint_Hierarchy_UI:
         with pm.popupMenu():
             pm.menuItem('Add', c=pm.Callback(self.Add))
             pm.menuItem(divider=1)
-            pm.menuItem('Remove', c=pm.Callback(self.Remove))
+            self.remove_mi = pm.menuItem('Remove', en=0, c=pm.Callback(self.Remove))
     
 #=========== FUNCTIONALITY ====================================
 
     def SelectionChanged(self):
+        pm.menuItem(self.remove_mi, e=1, en=0)
         jntStr = pm.treeView(self.widget, q=1, selectItem=1)
         if jntStr:
+            pm.menuItem(self.remove_mi, e=1, en=1)
             pm.select(self.jntMng.GetJoint(int(jntStr[0])))
 
     def SetLimb(self, limbID):
@@ -119,13 +121,12 @@ class LS_Joint_Hierarchy_UI:
             if self.nameMng.DoesNotStartWithNumber(newName):
                 if self.nameMng.AreAllValidCharacters(newName):
                     jointNames = []
-                    for joint in self.jntMng.GetLimbJoints(self.limb):
+                    for joint in self.jntMng.GetLimbTempJoints(self.limb):
                         jointNames.append(joint.pfrsName.get())
                     if (newName not in jointNames):
                         jointID = int(jointIDStr)
                         joint = self.jntMng.GetJoint(jointID)
                         joint.pfrsName.set(newName)
-                        self.jntMng.UpdateJointName(jointID)
                         self.parent.PopulateJoints()
         return ''
 

@@ -1,8 +1,8 @@
 
 import pymel.core as pm
 
-import Limbs.Limbs_UI as limbs_ui
-reload(limbs_ui)
+import Rigging.Rigging_UI as rig_ui
+reload(rig_ui)
 import RigSetup.RigSetup_UI as rs_ui
 reload(rs_ui)
 
@@ -30,8 +30,8 @@ class PayneFreeRigSuite_UI():
                                             self.fileMng,
                                             self)
         self._Setup()
-        self.limbMng = self.limbs_ui.limbMng
-        self.jntMng = self.limbs_ui.jntMng
+        self.limbMng = self.rig_ui.limbMng
+        self.jntMng = self.rig_ui.jntMng
         self.Debug()
         # self.Populate()
 
@@ -62,7 +62,7 @@ class PayneFreeRigSuite_UI():
         pm.addAttr(self.rigRoot, ln='sideIndex', at='short', dv=nameOrder[3])
         pm.addAttr(self.rigRoot, ln='typeIndex', at='short', dv=nameOrder[4])
         pm.addAttr(self.rigRoot, ln='showPrefix', at='bool', dv=showPrefix)
-        pm.addAttr(self.rigRoot, ln='mainTab', at='enum', en='Limbs:MeshDef:Anim')
+        pm.addAttr(self.rigRoot, ln='mainTab', at='enum', en='Rig:Skin:Anim')
         pm.addAttr(self.rigRoot, ln='limbsTab', at='enum', en='Jnt:Limbs:Bhv:App:Test')
         pm.addAttr(self.rigRoot, ln='meshDefTab', at='enum', en='Mesh:QW:Paint')
         pm.addAttr(self.rigRoot, ln='prefix', dt='string')
@@ -77,9 +77,9 @@ class PayneFreeRigSuite_UI():
         pm.parent(self.meshGrp, self.rigRoot)
         self.UpdatePrefix()
         self.nameMng.NewRig(self.rigRoot)
-        self.limbs_ui.NewRig(self.rigRoot)
+        self.rig_ui.NewRig(self.rigRoot)
         # self.pfrs.rigSetup.NewRig('somePrefix', [0,1,2,3,4], True)
-        # self.limbs_ui.NewRig(self.pfrs.rigSetup.rigRoot)
+        # self.rig_ui.NewRig(self.pfrs.rigSetup.rigRoot)
         # self.pfrs.rigSceneMng.NewRig()
         # self.limbs_tw.NewRig(self.pfrs.rigSceneMng.rootGrp)
         # self.pfrs.saveLoadRig.Save()
@@ -105,18 +105,23 @@ class PayneFreeRigSuite_UI():
         name += ' - by Trevor Payne'
         with pm.window(mb=True,mbv=True, t=name, w=500, h=500) as self.win:
             with pm.tabLayout(enable=0) as self.rigTabs:
-                with pm.horizontalLayout() as self.lsLayout:
-                    self.limbs_ui = limbs_ui.Limbs_UI(  self.nameMng,
+                with pm.horizontalLayout() as self.rigging_l:
+                    self.rig_ui = rig_ui.Rigging_UI(  self.nameMng,
                                                             self.fileMng,
                                                             self.jsonMng,
                                                             self)
-                with pm.horizontalLayout() as self.mdLayout:
+                with pm.horizontalLayout() as self.skinning_l:
+                    with pm.tabLayout() as self.mdTab:
+                        with pm.horizontalLayout():
+                            pm.button('test', label='Three')
+                with pm.horizontalLayout() as self.animation_l:
                     with pm.tabLayout() as self.mdTab:
                         with pm.horizontalLayout():
                             pm.button('test', label='Three')
         pm.tabLayout(self.rigTabs, edit=1, 
-                    tabLabel=(  (self.lsLayout,'Limbs'), 
-                                (self.mdLayout,'Mesh Deformation')))
+                    tabLabel=(  (self.rigging_l,'Rigging'), 
+                                (self.skinning_l,'Skinning'), 
+                                (self.animation_l,'Animation')))
         self._Setup_MenuBar()
         pm.showWindow()
     

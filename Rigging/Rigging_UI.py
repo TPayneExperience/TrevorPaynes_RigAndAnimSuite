@@ -23,6 +23,8 @@ import Behavior.Behavior_UI as bhv_ui
 reload(bhv_ui)
 import Appearance.Appearance_UI as app_ui
 reload(app_ui)
+import Test.Test_UI as test_ui
+reload(test_ui)
 
 import Popups.MirrorLimbs_UI as mir_ui
 reload(mir_ui)
@@ -35,7 +37,7 @@ import Popups.LoadTemplate_UI as load_ui
 reload(load_ui)
 
 
-class Limbs_UI:
+class Rigging_UI:
     def __init__(self, nameMng, fileMng, jsonMng, parent):
         self.nameMng = nameMng
         self.fileMng = fileMng
@@ -89,44 +91,55 @@ class Limbs_UI:
                 self.bhv_ui = bhv_ui.Behavior_UI(   self.limbMng,
                                                     self.jntMng,
                                                     self.bhvMng,
-                                                    self.grpMng)
+                                                    self.grpMng,
+                                                    self.ctrMng)
             with pm.horizontalLayout() as self.appTab:
                 self.app_ui = app_ui.Appearance_UI( self.limbMng,
                                                     self.grpMng,
                                                     self.ctrMng,
                                                     self.nameMng,
                                                     self)
+            with pm.horizontalLayout() as self.testTab:
+                self.test_ui = test_ui.Test_UI( self.limbMng,
+                                                self.jntMng,
+                                                self.grpMng,
+                                                self.ctrMng)
         pm.tabLayout(  self.tab, 
                     edit=1, 
                     tabLabel=(  (self.jntSetupTab,'Joint Setup'), 
                                 (self.limbSetupTab, 'Limb Setup'), 
                                 (self.bhvTab, 'Behaviors'), 
-                                (self.appTab, 'Appearance')))
+                                (self.appTab, 'Appearance'), 
+                                (self.testTab, 'Test')))
     
 #=========== TAB SWITCHING ====================================
 
     def Setup_Editable(self):
         index = self.rigRoot.limbsTab.get()
-        if (index == 2):
+        if (index == 1):
             self.limbSetup_ui.Setup_Editable()
-        if (index == 3):
+        if (index == 2):
             self.bhv_ui.Setup_Editable()
-        if (index == 4):
+        if (index == 3):
             self.app_ui.Setup_Editable() 
+        if (index == 4):
+            self.test_ui.Setup_Editable() 
         
     def Teardown_Editable(self):
         index = self.rigRoot.limbsTab.get()
-        if (index == 2): 
+        if (index == 1): 
             self.limbSetup_ui.Teardown_Editable()
-        if (index == 3):
+        if (index == 2):
             self.bhv_ui.Teardown_Editable()
-        if (index == 4):
+        if (index == 3):
             self.app_ui.Teardown_Editable() 
+        if (index == 4):
+            self.test_ui.Teardown_Editable() 
         
     def TabChanged(self):
         self.Teardown_Editable()
         nextIndex = pm.tabLayout(self.tab, q=1, selectTabIndex=1)
-        self.rigRoot.limbsTab.set(nextIndex)
+        self.rigRoot.limbsTab.set(nextIndex-1)
         self.Setup_Editable()
 
 #=========== FUNCTIONALITY ====================================

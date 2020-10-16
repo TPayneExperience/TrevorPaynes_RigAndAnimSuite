@@ -35,35 +35,6 @@ class BHV_Limb_Properties_UI:
         self.UpdateGroupParentUI()
         self.UpdateCstUI()
 
-    def UpdateGroupParentUI(self):
-        pm.deleteUI(self.grpParent_at)
-        self.grpParent_at = pm.attrEnumOptionMenu(  self.grpParent_at, 
-                                                    l='Bhv Grp Parent', 
-                                                    p=self.bhvLimbProp_cl,
-                                                    at=self.limb.parentGrp)
-
-    def UpdateCstUI(self):
-        if self.cstTargetJnt_at:
-            pm.deleteUI(self.cstTargetJnt_at)
-            self.cstTargetJnt_at = None
-        if self.cstType_at:
-            pm.deleteUI(self.cstType_at)
-            self.cstType_at = None
-        isCstType = (self.limb.bhvType.get() == 3)
-        pm.frameLayout(self.cstLayout, e=1, en=isCstType)
-        if isCstType:
-            self.cstTargetJnt_at = pm.attrEnumOptionMenu( l='Target Joint',
-                                        at=self.limb.bhvCstTargetJnt,
-                                        p=self.bhvCstProp_cl)
-            self.cstType_at = pm.attrEnumOptionMenu(l='Constraint Type',
-                                        at=self.limb.bhvCstType,
-                                        p=self.bhvCstProp_cl)
-            cstLimbs = pm.listConnections(self.limb.bhvCstTargetLimb)
-            if cstLimbs:
-                cstLimb = cstLimbs[0]
-                index = self.limbOrder.index(cstLimb)
-                pm.optionMenu(self.cstTargetLimb_om, e=1, sl=index)
-        
     def SetGroup(self):
         pm.frameLayout(self.limbLayout, e=1, en=0)
         pm.frameLayout(self.cstLayout, e=1, en=0)
@@ -124,6 +95,38 @@ class BHV_Limb_Properties_UI:
         self.UpdateCstUI()
 
 
+#=========== UI UPDATES ==============================================
+
+    def UpdateGroupParentUI(self):
+        if self.limb:
+            pm.deleteUI(self.grpParent_at)
+            self.grpParent_at = pm.attrEnumOptionMenu(  self.grpParent_at, 
+                                                        l='Bhv Grp Parent', 
+                                                        p=self.bhvLimbProp_cl,
+                                                        at=self.limb.parentGrp)
+
+    def UpdateCstUI(self):
+        if self.cstTargetJnt_at:
+            pm.deleteUI(self.cstTargetJnt_at)
+            self.cstTargetJnt_at = None
+        if self.cstType_at:
+            pm.deleteUI(self.cstType_at)
+            self.cstType_at = None
+        isCstType = (self.limb.bhvType.get() == 3)
+        pm.frameLayout(self.cstLayout, e=1, en=isCstType)
+        if isCstType:
+            self.cstTargetJnt_at = pm.attrEnumOptionMenu( l='Target Joint',
+                                        at=self.limb.bhvCstTargetJnt,
+                                        p=self.bhvCstProp_cl)
+            self.cstType_at = pm.attrEnumOptionMenu(l='Constraint Type',
+                                        at=self.limb.bhvCstType,
+                                        p=self.bhvCstProp_cl)
+            cstLimbs = pm.listConnections(self.limb.bhvCstTargetLimb)
+            if cstLimbs:
+                cstLimb = cstLimbs[0]
+                index = self.limbOrder.index(cstLimb)
+                pm.optionMenu(self.cstTargetLimb_om, e=1, sl=index)
+        
 
 
 

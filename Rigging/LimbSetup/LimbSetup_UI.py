@@ -22,6 +22,7 @@ class LimbSetup_UI:
         self.limbHier_ui.Populate()
         self.jntHier_ui.Depopulate()
         self.UpdateSceneFrame()
+        self.UpdateJointFrame()
     
     def PopulateJoints(self):
         self.sceneHier_ui.Populate()
@@ -32,7 +33,7 @@ class LimbSetup_UI:
 
     def _Setup(self):
         with pm.verticalLayout():
-            with pm.frameLayout(l='XXX', bv=1) as self.sceneHier_fl:
+            with pm.frameLayout(l='---', bv=1) as self.sceneHier_fl:
                 self.sceneHier_ui = sceneHier_UI.LS_Scene_Hierarchy_UI(self.jntMng,
                                                                         self)
         with pm.verticalLayout():
@@ -41,7 +42,7 @@ class LimbSetup_UI:
                                                                         self.jntMng,
                                                                         self.nameMng,
                                                                         self)
-            with pm.frameLayout(l='XXX', bv=1) as self.jntHier_fl:
+            with pm.frameLayout(l='---', bv=1) as self.jntHier_fl:
                 self.jntHier_ui = jointHier_UI.LS_Joint_Hierarchy_UI(   self.limbMng,
                                                                         self.jntMng,
                                                                         self.nameMng,
@@ -108,6 +109,7 @@ class LimbSetup_UI:
         return limb
 
     def RemoveLimb(self, limb):
+        self.UpdateJointFrame()
         self.parent.RemoveLimb(limb)
 
     def RenameLimbs(self, limbs):
@@ -145,14 +147,15 @@ class LimbSetup_UI:
         txt = 'Scene Joints (%d of %d used)' % (limbJntCount, sceneCount)
         pm.frameLayout(self.sceneHier_fl, e=1, l=txt)
 
-    def UpdateJointFrame(self, limbID):
-        txt = ''
-        if (limbID != -1):
+    def UpdateJointFrame(self, limbID = -1):
+        txt = '---'
+        isValid = (limbID != -1)
+        if isValid:
             limb = self.limbMng.GetLimb(limbID)
             name = limb.pfrsName.get()
             limbType = self.limbMng.limbTypes[limb.limbType.get()]
             txt = "%s's Joints (Type: %s)" % (name, limbType)
-        pm.frameLayout(self.jntHier_fl, e=1, l=txt)
+        pm.frameLayout(self.jntHier_fl, e=1, en=isValid, l=txt)
 
 
 

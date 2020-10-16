@@ -1,7 +1,5 @@
 
-
 import pymel.core as pm
-
 
 
 import BHV_Limb_Hierarchy_UI as limbHier_UI
@@ -16,12 +14,13 @@ reload(bhvProp_UI)
 
 
 class Behavior_UI:
-    def __init__(self, limbMng, jntMng, bhvMng, grpMng):
+    def __init__(self, limbMng, jntMng, bhvMng, grpMng, ctrMng):
 
         self.limbMng = limbMng
         self.jntMng = jntMng
         self.bhvMng = bhvMng
         self.grpMng = grpMng
+        self.ctrMng = ctrMng
 
         self._Setup()
 
@@ -58,9 +57,10 @@ class Behavior_UI:
         self.limbHier_ui.Populate()
         self.limbProp_ui.Populate()
         self.grpProp_ui.Populate()
+        self.ctrMng.SetLayerState(True, True)
     
     def Teardown_Editable(self):
-        print 'teardown editable bhvs'
+        self.ctrMng.SetLayerState(True, True)
 
 #=========== LIMBS ====================================
 

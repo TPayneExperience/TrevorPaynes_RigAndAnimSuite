@@ -15,7 +15,6 @@ class APP_Limb_Properties_UI:
     
     def SetLimb(self, limbID):
         self.limb = self.limbMng.GetLimb(limbID)
-
         pm.deleteUI(self.targetType)
         pm.deleteUI(self.ctrType)
 
@@ -29,6 +28,9 @@ class APP_Limb_Properties_UI:
         pm.attrControlGrp(self.lockPos, e=1, a=self.limb.appLockHidePos)
         pm.attrControlGrp(self.lockRot, e=1, a=self.limb.appLockHideRot)
         pm.attrControlGrp(self.lockScale, e=1, a=self.limb.appLockHideScale)
+        
+        isFK = (self.limb.bhvType.get() in [0, 6, 8])
+        pm.optionMenu(self.fkikTargetLimb_om, e=1, en=isFK)
         self.GetTargetFKIK()
 
     def Populate(self):

@@ -67,6 +67,9 @@ class BHV_Group_Manager:
         if index == 7: # EMPTY
             return pm.listConnections(limb.bhvEmptyGrp)
 
+    def GetAllGroups(self):
+        return list(self._groups.values())
+
     def _SortGroups(self, groups):
         indexGroups = {} # jointIndex : group
         orderedGroups = []
@@ -96,7 +99,6 @@ class BHV_Group_Manager:
         for attr in ['.sx', '.sy', '.sz', '.v']:
             pm.setAttr(group + attr, l=1, k=0, cb=0)
         self._groups[groupID] = group
-        pm.parent(group, self.bhvGrp)
         return group
 
     def Add_FK(self, limb, joint):
@@ -130,6 +132,7 @@ class BHV_Group_Manager:
         pm.connectAttr(limb.bhvFKIKSwitchGrp, group.limb)
         self._LockGroup(group)
         self._UpdateGroupName(limb, group, self.GetLimbGroupName(group))
+        pm.parent(group, self.bhvGrp)
         return group
 
     def Add_Constraint(self, limb, joint):
@@ -159,6 +162,7 @@ class BHV_Group_Manager:
         group.groupType.set(5)
         pm.connectAttr(limb.bhvEmptyGrp, group.limb)
         self._UpdateGroupName(limb, group, self.GetLimbGroupName(group))
+        pm.parent(group, self.bhvGrp)
         return group
 
 #============= PRIVATE ============================
@@ -172,6 +176,7 @@ class BHV_Group_Manager:
         pm.xform(group, t=pos, ws=1)
         rot = pm.xform(joint, q=1, ro=1, ws=1)
         pm.xform(group, ro=rot, ws=1)
+        pm.parent(group, joint)
 
     def _UpdateGroupName(self, limb, group, pfrsName):
         name = self.nameMng.GetName(limb.pfrsName.get(),

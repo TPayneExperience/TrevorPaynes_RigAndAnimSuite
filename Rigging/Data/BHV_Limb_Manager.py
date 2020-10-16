@@ -19,6 +19,7 @@ class BHV_Limb_Manager:
                             'FK - Branch',
                             'Empty',
                             'FK - Reverse Chain']
+                            # MISSING: Relative FK
 
         self.cstTypes = ['Parent', 'Point', 'Orient', 'Scale']
 
@@ -125,6 +126,8 @@ class BHV_Limb_Manager:
         self.ctrMng.Add(group)
         self.Set_FK(limb)
         self.Set_IK(limb)
+        names = [j.pfrsName.get() for j in self.jntMng.GetLimbJoints(limb)]
+        pm.addAttr(group.parentGrp, e=1, en=':'.join(names))
 
     def Set_Cst(self, limb):
         pm.disconnectAttr(limb.bhvCstGrps)

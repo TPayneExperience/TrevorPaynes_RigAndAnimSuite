@@ -58,7 +58,14 @@ class Joint_Manager():
         return orderedJoints
 
     def GetLimbTempJoints(self, limb):
-        return pm.listConnections(limb.tempJoints)
+        # return pm.listConnections(limb.tempJoints)'
+        orderedJoints = []
+        temp = {}
+        for joint in pm.listConnections(limb.tempJoints):
+            temp[joint.limbIndex.get()] = joint
+        for index in sorted(list(temp.keys())):
+            orderedJoints.append(temp[index])
+        return orderedJoints
 
     def GetJointCount(self): # for Skel tool label
         return len(self._joints)
@@ -67,7 +74,7 @@ class Joint_Manager():
 
     def _ReindexJoints(self, limb):
         temp = {} # longName : joint
-        for joint in pm.listConnections(limb.joints):
+        for joint in pm.listConnections(limb.tempJoints):
             temp[joint.longName()] = joint
         i = 0
         for key in sorted(list(temp.keys())):
@@ -75,17 +82,18 @@ class Joint_Manager():
             i += 1
 
     def AddTemp(self, limb, joint): # for Limb Setup
-        self._Add(limb, joint)
+        self._Add(joint)
         pm.disconnectAttr(joint.tempLimb)
         pm.connectAttr(limb.tempJoints, joint.tempLimb)
+        self._ReindexJoints(limb)
     
     def AddPerm(self, limb, joint):
         pm.disconnectAttr(joint.limb)
         pm.connectAttr(limb.joints, joint.limb)
         self.UpdateJointName(joint)
-        self._ReindexJoints(limb)
+        # self._ReindexJoints(limb)
     
-    def _Add(self, limb, joint):
+    def _Add(self, joint):
         jointID = self.rigRoot.nextJointID.get()
         self.rigRoot.nextJointID.set(jointID + 1)
         
@@ -105,7 +113,6 @@ class Joint_Manager():
 
         self._joints[jointID] = joint
         pm.editDisplayLayerMembers(self.skelLayer, joint)
-        self._ReindexJoints(limb)
 
     def RemoveTemp(self, joint):
         pm.disconnectAttr(joint.tempLimb)
