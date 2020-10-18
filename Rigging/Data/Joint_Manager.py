@@ -58,10 +58,10 @@ class Joint_Manager():
         return orderedJoints
 
     def GetLimbTempJoints(self, limb):
-        # return pm.listConnections(limb.tempJoints)'
         orderedJoints = []
         temp = {}
-        for joint in pm.listConnections(limb.tempJoints):
+        joints = pm.listConnections(limb.tempJoints)
+        for joint in joints:
             temp[joint.limbIndex.get()] = joint
         for index in sorted(list(temp.keys())):
             orderedJoints.append(temp[index])

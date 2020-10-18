@@ -9,17 +9,12 @@ class BHV_Group_Properties_UI:
         self.grpMng = grpMng
         self.parent = parent
 
-        self.float_ct = None
+        self.distance_cg = None
         self.weight_at = None
         self.parentSub_at = None
+        self.pfrsAxis_om = None
         self.limbs = {} # limbName : limb
         self.limbOrder = [] # limbs
-        self.axes = {   'X':    [1,0,0],
-                        '-X':   [-1,0,0],
-                        'Y':    [0,1,0],
-                        '-Y':   [0,-1,0],
-                        'Z':    [0,0,1],
-                        '-Z':   [0,0,-1]}
 
         self._Setup()
     
@@ -52,25 +47,21 @@ class BHV_Group_Properties_UI:
 #========== SETUP ===============================
 
     def _Setup(self):
-        '''Create frame layouts here because we have limb + cst frames'''
         with pm.frameLayout('Group Properties', bv=1, en=0) as self.groupLayout:
             with pm.columnLayout(adj=1) as self.bhvGrpProp_cl:
-                self.float_ct = pm.attrControlGrp( l='Distance / Weight', a='persp.translateX')
+                self.distance_cg = pm.attrControlGrp( l='Distance', a='persp.translateX')
+                self.weight_sg = pm.attrFieldSliderGrp( l='Constraint Weight', 
+                                                        min=0.0,
+                                                        max=1.0,
+                                                        at='persp.translateX')
                 self.ikTargetLimb_om = pm.optionMenu(   l='IK Target Limb', 
                                                         cc=self.SetIKTargetLimb)
-                self.lookAtAxis_om = pm.optionMenu(   l='Look At Axis', 
-                                                        cc=self.SelectedLookAtAxis)
-                for axis in list(self.axes.keys()):
-                    pm.menuItem(l=axis)
+
                                                         
 #========== FUNCTIONALITY ===============================
 
-    def SelectedLookAtAxis(self, axis):
-        print axis
-    
-    def ChangedLookAtDistance(self, amount):
-        print amount
-
+    def UpdateGroupPosition(self, ignore):
+        self.grpMng.UpdateLockedGroupPosition(self.group)
 
     def SetIKTargetLimb(self, limbName):
         limb = self.limbs[limbName]
@@ -95,7 +86,8 @@ class BHV_Group_Properties_UI:
     def UpdateUI(self):
         group = self.group
         groupType = group.groupType.get()
-        pm.attrControlGrp(self.float_ct, e=1, en=0)
+        pm.attrControlGrp(self.distance_cg, e=1, en=0)
+        pm.attrFieldSliderGrp(self.weight_sg, e=1, en=0)
         # DELETE OLD ATTRS
         if self.weight_at:
             pm.deleteUI(self.weight_at)
@@ -103,31 +95,27 @@ class BHV_Group_Properties_UI:
         if self.parentSub_at:
             pm.deleteUI(self.parentSub_at)
             self.parentSub_at = None
+        if self.pfrsAxis_om:
+            pm.deleteUI(self.pfrsAxis_om)
+            self.pfrsAxis_om = None
 
-        # IK Handle parent
-        if groupType == 1:
-            pm.optionMenu(self.ikTargetLimb_om, e=1, en=1)
-            pm.attrControlGrp(self.float_ct, e=1, en=1, a=group.distance)
-            tt = 'IK groups must be parented to an FK group.'
-            self.parentSub_at = pm.attrEnumOptionMenu(  l='IK Target FK Group',
-                                                        at=group.IKTargetGroup, 
-                                                        p=self.bhvGrpProp_cl,
-                                                        ann=tt)
+        # IK Pole Vector + Look At parent
+        if groupType in [1,4]:
+            pm.attrControlGrp(self.distance_cg, e=1, en=1, a=group.distance,
+                                                    cc=pm.Callback(self.UpdateGroupPosition, 1))
+            self.pfrsAxis_om = pm.attrEnumOptionMenu(l='Axis Direction',
+                                                at=self.group.pfrsAxis,
+                                                p=self.bhvGrpProp_cl,
+                                                cc=self.UpdateGroupPosition)
         # FK IK switch
         if groupType == 2:
             self.parentSub_at = pm.attrEnumOptionMenu(  l='Parent Joint',
                                                         at=group.parentGrp, 
                                                         p=self.bhvGrpProp_cl)
+
         # Cst Weight attr
         if groupType == 3:
-            pm.attrControlGrp(self.float_ct, e=1, en=1, a=group.weight)
-        # Look At
-        if groupType == 4:
-            joints = pm.listConnections(group.joint) 
-            joints += pm.listConnections(group.joint2)
-            if len(self.jntMng.GetJointChain(joints)) > 2:
-                pm.attrControlGrp(self.float_ct, e=1, en=1,  a=group.distance)
-   
+            pm.attrFieldSliderGrp(self.weight_sg, e=1, en=1, at=group.weight)
 
 
 

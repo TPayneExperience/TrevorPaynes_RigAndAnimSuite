@@ -133,12 +133,9 @@ class PayneFreeRigSuite_UI():
                 pm.menuItem(l='New Rig...', c=self.NewRig_Dialog)
                 pm.menuItem(l='Edit Rig...', c=self.EditRig_Dialog)
                 pm.menuItem(divider=1)
-                pm.menuItem(l='Import FBX...', en=0)
-                pm.menuItem(l='Export FBX...', en=0)
-                pm.menuItem(divider=1)
                 pm.menuItem(l='Quit', command=(''))
                 
-            with pm.menu('Limbs'):
+            with pm.menu('Rigging'):
                 pm.menuItem(l='disabled')
                 # with pm.subMenuItem(l='Mirror'):
                     # pm.menuItem(l='X', 
@@ -152,7 +149,12 @@ class PayneFreeRigSuite_UI():
                 # pm.menuItem(l='Load Template...', c=self.limbs_ui.Load_Dialog)
                 # pm.menuItem(l='Save Template...', c=self.limbs_ui.Save_Dialog)
 
-            with pm.menu('Options'):
+            with pm.menu('Skinning'):
+                pm.menuItem(l='disabled')
+
+            with pm.menu('Help'):
+                pm.menuItem(l='Tutorials...', en=0)
+                pm.menuItem(divider=1)
                 pm.menuItem(l='Submit Feedback...', en=0)
                 pm.menuItem(l='Share...', en=0)
 

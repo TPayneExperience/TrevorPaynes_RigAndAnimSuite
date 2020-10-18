@@ -16,7 +16,8 @@ class Limb_Manager:
                             'Sphere_Poly',
                             'Cube_Poly',
                             'Cylinder_Poly',
-                            'FKIK_Wire'] # Duplication of data, but whatever
+                            'FKIK_Wire',
+                            'Diamond_Wire'] # Duplication of data, but whatever
         
     def NewRig(self, rigRoot):
         self.rigRoot = rigRoot
@@ -70,7 +71,7 @@ class Limb_Manager:
         limbSides = ':'.join(self.limbSides)
         ctrTypes = ':'.join(self.ctrTypes)
 
-        limb = pm.createNode('network', name='Limb')
+        limb = pm.createNode('network', name=pfrsName)
         pm.addAttr(limb, ln='ID', at='long', dv=limbID)
         pm.addAttr(limb, ln='pfrsName', dt='string')
         limb.pfrsName.set(pfrsName)

@@ -10,11 +10,11 @@ class BHV_Limb_Manager:
 
         self.bhvTypes = [   'FK - Chain', # DON'T CHANGE ORDER!
 
-                            'IK',
-                            'FK / IK',
+                            'IK - Pole Vector',
+                            'FK + IK',
                             'Constraint',
                             'Look At',
-                            'IK Chain',
+                            'IK - Chain',
 
                             'FK - Branch',
                             'Empty',
@@ -28,7 +28,7 @@ class BHV_Limb_Manager:
     def GetBhvOptions(self, limb):
         limbType = limb.limbType.get()
         if limbType == 0: # Empty
-            return self.bhvTypes[7]
+            return [self.bhvTypes[7]]
 
         if limbType == 1: # One Joint
             return [self.bhvTypes[0], 
@@ -36,13 +36,21 @@ class BHV_Limb_Manager:
                     self.bhvTypes[4]]
 
         if limbType == 2: # Chain
-            return [self.bhvTypes[0], 
-                    self.bhvTypes[1], 
-                    self.bhvTypes[2], 
-                    self.bhvTypes[3], 
-                    self.bhvTypes[5], 
-                    self.bhvTypes[6], 
-                    self.bhvTypes[8]]
+            if (len(self.jntMng.GetLimbJoints(limb)) > 2):
+                return [self.bhvTypes[0], 
+                        self.bhvTypes[1], 
+                        self.bhvTypes[2], 
+                        self.bhvTypes[3], 
+                        self.bhvTypes[5], 
+                        self.bhvTypes[6], 
+                        self.bhvTypes[8]]
+            else: # Remove IK Pole Vect Option
+                return [self.bhvTypes[0], 
+                        self.bhvTypes[1], 
+                        self.bhvTypes[3], 
+                        self.bhvTypes[5], 
+                        self.bhvTypes[6], 
+                        self.bhvTypes[8]]
 
         if limbType == 3: # Branch
             return [self.bhvTypes[6],
@@ -58,7 +66,8 @@ class BHV_Limb_Manager:
             pm.addAttr(limb, ln='bhvType', at='enum', en=bhvTypes)
 
             pm.addAttr(limb, ln='bhvFKGrps', dt='string')
-            pm.addAttr(limb, ln='bhvIKGrps', dt='string')
+            pm.addAttr(limb, ln='bhvIKPoleVectorGrps', dt='string')
+            pm.addAttr(limb, ln='bhvIKChainGrps', dt='string')
             pm.addAttr(limb, ln='bhvFKIKSwitchGrp', dt='string')
             pm.addAttr(limb, ln='bhvCstGrps', dt='string')
             pm.addAttr(limb, ln='bhvLookAtGrp', dt='string')
@@ -75,7 +84,8 @@ class BHV_Limb_Manager:
         pm.disconnectAttr(limb.bhvCstGrps)
         pm.disconnectAttr(limb.bhvLookAtGrp)
         groups = []
-        groups += pm.listConnections(limb.bhvIKGrps)
+        groups += pm.listConnections(limb.bhvIKPoleVectorGrps)
+        groups += pm.listConnections(limb.bhvIKChainGrps)
         groups += pm.listConnections(limb.bhvFKIKSwitchGrp)
         groups += pm.listConnections(limb.bhvEmptyGrp)
         if groups:
@@ -88,10 +98,10 @@ class BHV_Limb_Manager:
     def SetBhv(self, limb, bhvType):
         index = self.bhvTypes.index(bhvType)
         limb.bhvType.set(index)
-        if index == 0 or index == 6 or index == 8: # FK Chain / Branch
+        if index in [0, 6, 8]: # FK Chain / Branch
             self.Set_FK(limb)
         elif index == 1:
-            self.Set_IK(limb)
+            self.Set_IKPoleVector(limb)
         elif index == 2:
             self.Set_FKIK(limb)
         elif index == 3:
@@ -116,16 +126,17 @@ class BHV_Limb_Manager:
                 group = self.grpMng.Add_FK(limb, joint)
                 self.ctrMng.Add(group)
 
-    def Set_IK(self, limb):
-        pm.delete(pm.listConnections(limb.bhvIKGrps))
+    def Set_IKPoleVector(self, limb):
+        pm.delete(pm.listConnections(limb.bhvIKPoleVectorGrps))
         joints = self.jntMng.GetLimbJoints(limb)
-        self.grpMng.Add_IKHandle(limb, joints[0], joints[-1])
+        group = self.grpMng.Add_IKPoleVector(limb, joints[0], joints[-1])
+        self.ctrMng.Add(group)
 
     def Set_FKIK(self, limb):
         group = self.grpMng.Add_FKIKSwitch(limb)
         self.ctrMng.Add(group)
         self.Set_FK(limb)
-        self.Set_IK(limb)
+        self.Set_IKPoleVector(limb)
         names = [j.pfrsName.get() for j in self.jntMng.GetLimbJoints(limb)]
         pm.addAttr(group.parentGrp, e=1, en=':'.join(names))
 
@@ -153,15 +164,15 @@ class BHV_Limb_Manager:
                 self.ctrMng.Add(group)
 
     def Set_IKChain(self, limb):
-        pm.delete(pm.listConnections(limb.bhvIKGrps))
+        pm.delete(pm.listConnections(limb.bhvIKChainGrps))
         joints = self.jntMng.GetLimbJoints(limb)
         for i in range(len(joints)-1):
             start = joints[i]
             end = joints[i+1]
-            self.grpMng.Add_IKHandle(limb, start, end)
+            self.grpMng.Add_IKChain(limb, start, end)
 
     def Set_Empty(self, limb):
-        pm.delete(pm.listConnections(limb.bhvEmptyGrp))
-        group = self.grpMng.Add_Empty(limb)
-        self.ctrMng.Add(group)
+        if not pm.listConnections(limb.bhvEmptyGrp):
+            group = self.grpMng.Add_Empty(limb)
+            self.ctrMng.Add(group)
 

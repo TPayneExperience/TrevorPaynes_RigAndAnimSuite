@@ -25,23 +25,35 @@ class Test_UI:
         self.ctrMng.SetLayerState(True, False)
 
     def Teardown_Editable(self):
-        print 'bbb'
+        self.Reset_Controls()
+        self.Remove_Constraints()
+        self.Reparent_Groups()
 
-#=========== FUNCTIONALITY ====================================
+#=========== SETUP FUNCTIONALITY ====================================
     
     def Setup_Groups(self):
         for group in self.grpMng.GetAllGroups():
+            for attr in ['.tx', '.ty', '.tz', '.rx', '.ry', '.rz']:
+                pm.setAttr(group+attr, l=0)
             pm.parent(group, self.grpMng.bhvGrp)
 
     def Setup_Controls(self):
         for control in self.ctrMng.GetAllControls():
             pm.makeIdentity(control, a=1, t=1, r=1, s=1)
+            group = pm.listConnections(control.group)[0]
+            pos = pm.xform(group, q=1, t=1)
+            pm.move(pos[0], pos[1], pos[2], 
+                        control.scalePivot, 
+                        control.rotatePivot, 
+                        a=1)
 
     def Setup_Internal(self):
         for limb in self.limbMng.GetAllLimbs():
             bhvType = limb.bhvType.get()
             if (bhvType == 0): # fk chain
                 self.Setup_Internal_FKChain(limb)
+            elif (bhvType == 4): # Look At
+                self.Setup_Internal_LookAt(limb)
             elif (bhvType == 6): # fk Branch
                 self.Setup_Internal_FKBranch(limb)
             elif (bhvType == 8): # fk reverse chain
@@ -54,9 +66,32 @@ class Test_UI:
                 self.Setup_External_FKChain(limb)
             elif (bhvType == 6): # fk Branch
                 self.Setup_External_FKBranch(limb)
+            elif bhvType in [4, 7]: # LookAt, Empty
+                self.Setup_External_SingleControl(limb)
             elif (bhvType == 8): # fk reverse chain
                 self.Setup_External_FKReverseChain(limb)
 
+#=========== TEARDOWN FUNCTIONALITY ====================================
+    
+    def Reset_Controls(self):
+        for control in self.ctrMng.GetAllControls():
+            pm.xform(control, t=[0,0,0], ro=[0,0,0], s=[1,1,1])
+    
+    def Remove_Constraints(self):
+        pm.delete(pm.ls(type='ikHandle'))
+        pm.delete(pm.ls(type='parentConstraint'))
+        pm.delete(pm.ls(type='pointConstraint'))
+        pm.delete(pm.ls(type='orientConstraint'))
+        pm.delete(pm.ls(type='scaleConstraint'))
+    
+    def Reparent_Groups(self):
+        for group in self.grpMng.GetAllGroups():
+            grpType = group.groupType.get()
+            if grpType in [1,4]:
+                joint = pm.listConnections(group.joint)[0]
+                pm.parent(group, joint)
+            else:
+                pm.parent(group, self.grpMng.bhvGrp)
 
 #=========== FK ====================================
     
@@ -119,7 +154,21 @@ class Test_UI:
             ctr = self.ctrMng.GetGroupControl(group)
             pm.parentConstraint(ctr, joint, mo=1)
 
-#=========== FK ====================================
+#=========== MISC ====================================
     
+    def Setup_External_SingleControl(self, limb):
+        parent = self.limbMng.GetLimbParent(limb)
+        if parent:
+            childGroup = self.grpMng.GetLimbGroups(limb)[0]
+            index = limb.parentGrp.get()-1
+            parentGroup = self.grpMng.GetLimbGroups(parent)[index]
+            parentCtrs = self.ctrMng.GetGroupControl(parentGroup)
+            if parentCtrs:
+                pm.parent(childGroup, parentCtrs[0])
 
+    def Setup_Internal_LookAt(self, limb):
+        joint = self.jntMng.GetLimbJoints(limb)[0]
+        group = self.grpMng.GetLimbGroups(limb)[0]
+        control = self.ctrMng.GetGroupControl(group)
+        pm.aimConstraint(control, joint, mo=1)
 

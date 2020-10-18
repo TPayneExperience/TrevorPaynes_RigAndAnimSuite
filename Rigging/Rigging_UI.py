@@ -48,8 +48,10 @@ class Rigging_UI:
         
         self.limbMng = lm.Limb_Manager(nameMng)
         self.jntMng = jm.Joint_Manager(self.limbMng, nameMng)
-        self.grpMng = grp.BHV_Group_Manager(self.limbMng, nameMng)
-        self.ctrMng = ctr.APP_Control_Manager(self.grpMng,
+        self.grpMng = grp.BHV_Group_Manager(self.limbMng,
+                                            self.jntMng,
+                                            self.nameMng)
+        self.ctrMng = ctr.APP_Control_Manager(  self.grpMng,
                                                 self.nameMng)
         self.bhvMng = bhv.BHV_Limb_Manager( self.limbMng, 
                                             self.jntMng, 

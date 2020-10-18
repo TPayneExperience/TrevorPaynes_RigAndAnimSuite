@@ -46,9 +46,11 @@ class APP_Control_Manager:
     def Add(self, group):
         ctrID = self.rigRoot.nextCtrID.get()
         self.rigRoot.nextCtrID.set(ctrID + 1)
-
-        if group.groupType.get() in [0, 4, 5]: # FK, LookAt, Empty
+        grpType = group.groupType.get()
+        if grpType in [0, 4, 5]: # FK, LookAt, Empty
             ctr = self._Add('Circle_Wire', ctrID)
+        elif grpType == 1: # IK PV
+            ctr = self._Add('Diamond_Wire', ctrID)
         elif (group.groupType.get() == 2): # FK / IK Switch
             ctr = self._Add('FKIK_Wire', ctrID)
         else:

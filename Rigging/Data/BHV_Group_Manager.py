@@ -2,17 +2,26 @@
 import pymel.core as pm
 
 class BHV_Group_Manager:
-    def __init__(self, limbMng, nameMng):
+    def __init__(self, limbMng, jntMng, nameMng):
         self.limbMng = limbMng
+        self.jntMng = jntMng
         self.nameMng = nameMng
 
         self.grpTypes = [   'FK',
 
-                            'IK',
+                            'IKPoleVector',
                             'FKIKSwitch',
                             'Constraint',
                             'LookAt',
-                            'Empty']
+                            'Empty',
+                            
+                            'IKChain']
+        self.axes = [   [1,0,0],
+                        [-1,0,0],
+                        [0,1,0],
+                        [0,-1,0],
+                        [0,0,1],
+                        [0,0,-1]]
 
         self._groups = {} # grpID : grpData
 
@@ -47,12 +56,12 @@ class BHV_Group_Manager:
             return self._SortGroups(pm.listConnections(limb.bhvFKGrps))
 
         if index == 1: # IK
-            return self._SortGroups(pm.listConnections(limb.bhvIKGrps))
+            return self._SortGroups(pm.listConnections(limb.bhvIKPoleVectorGrps))
 
         if index == 2: # FK IK
             groups = pm.listConnections(limb.bhvFKIKSwitchGrp)
             groups += self._SortGroups(pm.listConnections(limb.bhvFKGrps))
-            groups += self._SortGroups(pm.listConnections(limb.bhvIKGrps))
+            groups += self._SortGroups(pm.listConnections(limb.bhvIKPoleVectorGrps))
             return groups
 
         if index == 3: # Constraint
@@ -62,7 +71,7 @@ class BHV_Group_Manager:
             return pm.listConnections(limb.bhvLookAtGrp)
 
         if index == 5: # IK Chain
-            return self._SortGroups(pm.listConnections(limb.bhvIKGrps))
+            return self._SortGroups(pm.listConnections(limb.bhvIKChainGrps))
             
         if index == 7: # EMPTY
             return pm.listConnections(limb.bhvEmptyGrp)
@@ -83,6 +92,16 @@ class BHV_Group_Manager:
         return orderedGroups
 
 #============= FUNCTIONALITY ============================
+
+    def UpdateLockedGroupPosition(self, group):
+        pos = self.axes[group.pfrsAxis.get()][:]
+        dist = group.distance.get()
+        pos = [p*dist for p in pos]
+        for attr in ['.tx', '.ty', '.tz']:
+            pm.setAttr(group+attr, l=0, k=0, cb=0)
+        pm.xform(group, t=pos)
+        for attr in ['.tx', '.ty', '.tz']:
+            pm.setAttr(group+attr, l=1, k=0, cb=0)
 
     def _AddGroup(self):
         groupID = self.rigRoot.nextGrpID.get()
@@ -110,17 +129,37 @@ class BHV_Group_Manager:
         self._UpdateGroupName(limb, group, self.GetJointGroupName(group))
         return group
 
-    def Add_IKHandle(self, limb, startJoint, endJoint):
+    def Add_IKPoleVector(self, limb, startJoint, endJoint):
         '''Positions the center for the poll vector control'''
         group = self._AddGroup()
         group.groupType.set(1)
         pm.addAttr(group, ln='joint2', dt='string')
         pm.addAttr(group, ln='IKTargetLimb', dt='string') # connect
         pm.addAttr(group, ln='IKTargetGroup', at='enum', en='None')
-        pm.addAttr(group, ln='distance', at='float', min=0)
+        pm.addAttr(group, ln='distance', at='float', min=0, dv=1)
+        pm.addAttr(group, ln='pfrsAxis', at='enum', en='X:-X:Y:-Y:Z:-Z')
+        pm.addAttr(group, ln='IKPoleVectorJoint', dt='string') # connect
+        joint = self.jntMng.GetLimbJoints(limb)[1]
+        pm.connectAttr(joint.bhvIKGrp, group.IKPoleVectorJoint)
         pm.connectAttr(startJoint.bhvIKGrp, group.joint)
         pm.connectAttr(endJoint.bhvIKGrp, group.joint2)
-        pm.connectAttr(limb.bhvIKGrps, group.limb)
+        pm.connectAttr(limb.bhvIKPoleVectorGrps, group.limb)
+        self._PosRotGroupToJoint(group, joint)
+        self._LockGroup(group)
+        self.UpdateLockedGroupPosition(group)
+        self._UpdateGroupName(limb, group, self.GetJointGroupName(group))
+        return group
+
+    def Add_IKChain(self, limb, startJoint, endJoint):
+        '''Positions the center for the poll vector control'''
+        group = self._AddGroup()
+        group.groupType.set(6)
+        pm.addAttr(group, ln='joint2', dt='string')
+        pm.addAttr(group, ln='IKTargetLimb', dt='string') # connect
+        pm.addAttr(group, ln='IKTargetGroup', at='enum', en='None')
+        pm.connectAttr(startJoint.bhvIKGrp, group.joint)
+        pm.connectAttr(endJoint.bhvIKGrp, group.joint2)
+        pm.connectAttr(limb.bhvIKChainGrps, group.limb)
         self._LockGroup(group)
         self._UpdateGroupName(limb, group, self.GetJointGroupName(group))
         return group
@@ -151,8 +190,10 @@ class BHV_Group_Manager:
         group = self._AddGroup()
         group.groupType.set(4)
         pm.addAttr(group, ln='distance', at='float', min=0)
+        pm.addAttr(group, ln='pfrsAxis', at='enum', en='X:-X:Y:-Y:Z:-Z')
         pm.connectAttr(limb.bhvLookAtGrp, group.limb)
         pm.connectAttr(joint.bhvLookAtGrp, group.joint)
+        self._PosRotGroupToJoint(group, joint)
         self._LockGroup(group)
         self._UpdateGroupName(limb, group, self.GetJointGroupName(group))
         return group
