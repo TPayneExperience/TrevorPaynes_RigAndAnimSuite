@@ -31,7 +31,7 @@ class BHV_Limb_Manager:
             return [self.bhvTypes[7]]
 
         if limbType == 1: # One Joint
-            return [self.bhvTypes[0], 
+            return [self.bhvTypes[6], 
                     self.bhvTypes[3], 
                     self.bhvTypes[4]]
 
@@ -44,9 +44,8 @@ class BHV_Limb_Manager:
                         self.bhvTypes[5], 
                         self.bhvTypes[6], 
                         self.bhvTypes[8]]
-            else: # Remove IK Pole Vect Option
+            else: # Remove FKIK, IK Pole Vect Options
                 return [self.bhvTypes[0], 
-                        self.bhvTypes[1], 
                         self.bhvTypes[3], 
                         self.bhvTypes[5], 
                         self.bhvTypes[6], 
@@ -78,6 +77,7 @@ class BHV_Limb_Manager:
             pm.addAttr(limb, ln='bhvCstSourceLimb', dt='string') # Ignore, only for connections
             pm.addAttr(limb, ln='bhvCstTargetJnt', at='enum', en='None')
             pm.addAttr(limb, ln='bhvIKSourceLimb', dt='string') # IK handles parent connection
+            pm.addAttr(limb, ln='bhvIKTargetLimb', dt='string') # IK handles parent connection
     
     def RemoveLimb(self, limb):
         pm.disconnectAttr(limb.bhvFKGrps)
@@ -149,7 +149,7 @@ class BHV_Limb_Manager:
                 pm.disconnectAttr(group.limb)
                 pm.connectAttr(limb.bhvCstGrps, group.limb)
             else:
-                self.grpMng.Add_Constraint(limb, joint)
+                group = self.grpMng.Add_Constraint(limb, joint)
 
     def Set_LookAt(self, limb):
         pm.disconnectAttr(limb.bhvLookAtGrp)
@@ -175,4 +175,15 @@ class BHV_Limb_Manager:
         if not pm.listConnections(limb.bhvEmptyGrp):
             group = self.grpMng.Add_Empty(limb)
             self.ctrMng.Add(group)
+
+#============= MISC ============================
+
+    def SetTargetCstLimb(self, sourceLimb, targetLimb):
+        pm.disconnectAttr(sourceLimb.bhvCstTargetLimb)
+        pm.connectAttr(targetLimb.bhvCstSourceLimb, sourceLimb.bhvCstTargetLimb)
+        joints = self.jntMng.GetLimbJoints(targetLimb)
+        jointNames = [j.pfrsName.get() for j in joints]
+        pm.addAttr(sourceLimb.bhvCstTargetJnt, e=1, en=':'.join(jointNames))
+
+
 

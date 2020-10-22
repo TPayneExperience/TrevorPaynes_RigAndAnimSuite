@@ -94,7 +94,7 @@ class PayneFreeRigSuite_UI():
         self.NewRig('tempPrefix', 
                     range(5), 
                     True)
-        path = r'D:/Assets/Programming/Python/Maya/ModularAutoRigger/TEST_OUTPUT/temp_joints.ma'
+        path = r'D:/Assets/Programming/Python/Maya/ModularAutoRigger/TEST_OUTPUT/temp_joints2.ma'
         pm.importFile(path)
         self.UpdateEnableUI()
 

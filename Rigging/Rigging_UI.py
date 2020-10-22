@@ -148,19 +148,11 @@ class Rigging_UI:
 
     def AddLimb(self, limb):
         self.bhvMng.AddLimb(limb)
-        # for joint in self.jntMng.GetLimbJoints(limb):
-        #     self.grpMng.AddJoint(joint)
         self.parent.AddLimb(limb)
 
     def RemoveLimb(self, limb):
         self.parent.RemoveLimb(limb)
     
-    # def AddJoint(self, joint):
-    #     self.parent.AddJoint(joint)
-    
-    # def RemoveJoint(self, joint):
-    #     self.parent.RemoveJoint(joint)
-
     def UpdateLimb(self, limb):
         bhvs = self.bhvMng.GetBhvOptions(limb)
         self.bhvMng.SetBhv(limb, bhvs[0])

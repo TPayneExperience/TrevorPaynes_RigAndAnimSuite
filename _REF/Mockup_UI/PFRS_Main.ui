@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>520</width>
+    <width>523</width>
     <height>669</height>
    </rect>
   </property>
@@ -34,11 +34,11 @@
         <item>
          <widget class="QTabWidget" name="tabWidget">
           <property name="currentIndex">
-           <number>0</number>
+           <number>3</number>
           </property>
           <widget class="QWidget" name="tab">
            <attribute name="title">
-            <string>Limbs</string>
+            <string>Rigging</string>
            </attribute>
            <layout class="QVBoxLayout" name="verticalLayout_6">
             <item>
@@ -1499,7 +1499,7 @@
           </widget>
           <widget class="QWidget" name="tab_2">
            <attribute name="title">
-            <string>Mesh Deformation (Rig Only)</string>
+            <string>Skinning (Rig Mode Only)</string>
            </attribute>
            <layout class="QVBoxLayout" name="verticalLayout_105">
             <item>
@@ -1513,7 +1513,7 @@
                  <bool>true</bool>
                 </property>
                 <property name="currentIndex">
-                 <number>3</number>
+                 <number>2</number>
                 </property>
                 <widget class="QWidget" name="tab_19">
                  <attribute name="title">
@@ -2331,7 +2331,7 @@
           </widget>
           <widget class="QWidget" name="tab_22">
            <attribute name="title">
-            <string>Extras (AAA)</string>
+            <string>Extras (PRO)</string>
            </attribute>
            <layout class="QHBoxLayout" name="horizontalLayout_47">
             <item>
@@ -2345,11 +2345,11 @@
                  <bool>true</bool>
                 </property>
                 <property name="currentIndex">
-                 <number>0</number>
+                 <number>1</number>
                 </property>
                 <widget class="QWidget" name="tab_26">
                  <attribute name="title">
-                  <string>Ctr Poses (AAA)</string>
+                  <string>Ctr Poses</string>
                  </attribute>
                  <layout class="QHBoxLayout" name="horizontalLayout_43">
                   <item>
@@ -2590,7 +2590,7 @@
                 </widget>
                 <widget class="QWidget" name="tab_27">
                  <attribute name="title">
-                  <string>Muscles (AAA)</string>
+                  <string>Muscles</string>
                  </attribute>
                  <layout class="QHBoxLayout" name="horizontalLayout_155">
                   <item>
@@ -3775,54 +3775,8 @@
                <bool>true</bool>
               </property>
               <property name="currentIndex">
-               <number>3</number>
+               <number>0</number>
               </property>
-              <widget class="QWidget" name="tab_17">
-               <attribute name="title">
-                <string>Attach Points (AAA)</string>
-               </attribute>
-               <layout class="QVBoxLayout" name="verticalLayout_26">
-                <item>
-                 <widget class="QGroupBox" name="groupBox_3">
-                  <property name="title">
-                   <string>Attach Points</string>
-                  </property>
-                  <layout class="QVBoxLayout" name="verticalLayout_12">
-                   <item>
-                    <layout class="QVBoxLayout" name="verticalLayout_13">
-                     <item>
-                      <widget class="QListWidget" name="listWidget_2">
-                       <item>
-                        <property name="text">
-                         <string>L_FrontPec</string>
-                        </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>L_ShoulderTop</string>
-                        </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>L_ShoulderBlade</string>
-                        </property>
-                       </item>
-                      </widget>
-                     </item>
-                     <item>
-                      <widget class="QLabel" name="label_12">
-                       <property name="text">
-                        <string>RMB: Add / remove Attach points (based on verts selected)</string>
-                       </property>
-                      </widget>
-                     </item>
-                    </layout>
-                   </item>
-                  </layout>
-                 </widget>
-                </item>
-               </layout>
-              </widget>
               <widget class="QWidget" name="tab_4">
                <attribute name="title">
                 <string>Poses</string>
@@ -3958,7 +3912,7 @@
                     <item>
                      <widget class="QGroupBox" name="groupBox_6">
                       <property name="title">
-                       <string>Limb Weights</string>
+                       <string>Limb Poses</string>
                       </property>
                       <layout class="QHBoxLayout" name="horizontalLayout_13">
                        <item>
@@ -3971,7 +3925,7 @@
                            <rect>
                             <x>0</x>
                             <y>0</y>
-                            <width>82</width>
+                            <width>191</width>
                             <height>164</height>
                            </rect>
                           </property>
@@ -3989,7 +3943,7 @@
                                   </sizepolicy>
                                  </property>
                                  <property name="text">
-                                  <string>L_Thumb</string>
+                                  <string>Fingers_Fist</string>
                                  </property>
                                 </widget>
                                </item>
@@ -4022,7 +3976,7 @@
                                   </sizepolicy>
                                  </property>
                                  <property name="text">
-                                  <string>L_Index</string>
+                                  <string>Fingers_Extend</string>
                                  </property>
                                 </widget>
                                </item>
@@ -4052,7 +4006,7 @@
                                   </sizepolicy>
                                  </property>
                                  <property name="text">
-                                  <string>L_Middle</string>
+                                  <string>Fingers_Closed</string>
                                  </property>
                                 </widget>
                                </item>
@@ -4085,7 +4039,7 @@
                                   </sizepolicy>
                                  </property>
                                  <property name="text">
-                                  <string>L_Ring</string>
+                                  <string>Fingers_Spread</string>
                                  </property>
                                 </widget>
                                </item>
@@ -4107,42 +4061,6 @@
                                </item>
                               </layout>
                              </item>
-                             <item>
-                              <layout class="QHBoxLayout" name="horizontalLayout_30">
-                               <item>
-                                <widget class="QLabel" name="label_14">
-                                 <property name="sizePolicy">
-                                  <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-                                   <horstretch>0</horstretch>
-                                   <verstretch>0</verstretch>
-                                  </sizepolicy>
-                                 </property>
-                                 <property name="text">
-                                  <string>L_Pinky</string>
-                                 </property>
-                                </widget>
-                               </item>
-                               <item>
-                                <widget class="QSlider" name="horizontalSlider_12">
-                                 <property name="singleStep">
-                                  <number>0</number>
-                                 </property>
-                                 <property name="pageStep">
-                                  <number>20</number>
-                                 </property>
-                                 <property name="value">
-                                  <number>0</number>
-                                 </property>
-                                 <property name="sliderPosition">
-                                  <number>0</number>
-                                 </property>
-                                 <property name="orientation">
-                                  <enum>Qt::Horizontal</enum>
-                                 </property>
-                                </widget>
-                               </item>
-                              </layout>
-                             </item>
                             </layout>
                            </item>
                           </layout>
@@ -4150,13 +4068,6 @@
                         </widget>
                        </item>
                       </layout>
-                     </widget>
-                    </item>
-                    <item>
-                     <widget class="QPushButton" name="pushButton">
-                      <property name="text">
-                       <string>Add Keyframe</string>
-                      </property>
                      </widget>
                     </item>
                     <item>
@@ -4184,6 +4095,13 @@
                      <widget class="QLabel" name="label_20">
                       <property name="text">
                        <string>RMB: Copy to mirror limb</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QLabel" name="label_14">
+                      <property name="text">
+                       <string>RMB: Save Pose</string>
                       </property>
                      </widget>
                     </item>
@@ -4526,9 +4444,55 @@
                 </item>
                </layout>
               </widget>
+              <widget class="QWidget" name="tab_17">
+               <attribute name="title">
+                <string>Attach Points (PRO)</string>
+               </attribute>
+               <layout class="QVBoxLayout" name="verticalLayout_26">
+                <item>
+                 <widget class="QGroupBox" name="groupBox_3">
+                  <property name="title">
+                   <string>Attach Points</string>
+                  </property>
+                  <layout class="QVBoxLayout" name="verticalLayout_12">
+                   <item>
+                    <layout class="QVBoxLayout" name="verticalLayout_13">
+                     <item>
+                      <widget class="QListWidget" name="listWidget_2">
+                       <item>
+                        <property name="text">
+                         <string>L_FrontPec</string>
+                        </property>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>L_ShoulderTop</string>
+                        </property>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>L_ShoulderBlade</string>
+                        </property>
+                       </item>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QLabel" name="label_12">
+                       <property name="text">
+                        <string>RMB: Add / remove Attach points (based on verts selected)</string>
+                       </property>
+                      </widget>
+                     </item>
+                    </layout>
+                   </item>
+                  </layout>
+                 </widget>
+                </item>
+               </layout>
+              </widget>
               <widget class="QWidget" name="tab_8">
                <attribute name="title">
-                <string>Blend Shapes (AAA)</string>
+                <string>Blend Shapes (PRO)</string>
                </attribute>
                <layout class="QVBoxLayout" name="verticalLayout_16"/>
               </widget>
@@ -4562,7 +4526,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>520</width>
+     <width>523</width>
      <height>21</height>
     </rect>
    </property>

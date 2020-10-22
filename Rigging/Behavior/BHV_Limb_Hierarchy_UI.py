@@ -53,7 +53,7 @@ class BHV_Limb_Hierarchy_UI:
         limbID = int(limbIDsStr[0])
         parentID = int(newParentIDStr)
         self.limbMng.Reparent(limbID, parentID)
-        self.parent.ReparentLimb(limbID)
+        self.parent.UpdateLimbParentGroups(limbID)
     
 #=========== RMB ====================================
 

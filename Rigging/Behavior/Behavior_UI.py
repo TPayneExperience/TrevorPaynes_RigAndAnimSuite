@@ -36,7 +36,7 @@ class Behavior_UI:
                                                         self.limbMng,
                                                         self.jntMng,
                                                         self)
-            with pm.frameLayout('Behavior Groups', bv=1):
+            with pm.frameLayout('Behavior Groups / Control Pivots', bv=1):
                 self.grpHier_ui = groupHier_UI.BHV_Group_Hierarchy_UI(  self.limbMng,
                                                                         self.grpMng,
                                                                         self)
@@ -55,7 +55,6 @@ class Behavior_UI:
 
     def Setup_Editable(self):
         self.limbHier_ui.Populate()
-        self.limbProp_ui.Populate()
         self.grpProp_ui.Populate()
         self.ctrMng.SetLayerState(True, True)
     

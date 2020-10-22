@@ -15,6 +15,7 @@ class APP_Control_Manager:
         self._ctrs = {} # ctrID : ctr
         self.ctrGrp = pm.group(name='ControlGroups', em=1)
         self.ctrTemplatesParent = pm.group(name='Internal', em=1)
+        self.ctrTemplatesParent.v.set(0)
         pm.addAttr(rigRoot, ln='nextCtrID', at='long')
         path = r'D:\Assets\Programming\Python\Maya\ModularAutoRigger\Rigging\Templates\Controls\Controls.ma'
         ctrSourceNodes = pm.importFile(path, returnNewNodes=1)
@@ -34,7 +35,6 @@ class APP_Control_Manager:
         return pm.listConnections(group.control)
 
     def SetLayerState(self, isVisible, isReference):
-        # will need visible for skinning tabs
         self.ctrLayer.displayType.set(isReference) # 2 = reference, 0 = default
         self.ctrLayer.visibility.set(isVisible) # 0 = off, 1 = on
 
@@ -71,6 +71,7 @@ class APP_Control_Manager:
         group = pm.listConnections(control.group)[0]
         pm.disconnectAttr(control.group)
         pm.connectAttr(group.control , newCtr.group)
+        pm.parent(newCtr, group)
         self._ctrs[newCtr.ID.get()] = newCtr
         pm.delete(control)
 

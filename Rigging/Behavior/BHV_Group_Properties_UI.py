@@ -24,24 +24,24 @@ class BHV_Group_Properties_UI:
     def SetGroup(self, group):
         self.group = group
         pm.frameLayout(self.groupLayout, e=1, en=1)
-        pm.optionMenu(self.ikTargetLimb_om, e=1, en=0)
+        # pm.optionMenu(self.ikTargetLimb_om, e=1, en=0)
         self.UpdateUI()
 
-    def Populate(self):
-        '''Called when Bhvs tab clicked, 
-        populates IK Target Limbs option menu
-        '''
-        pm.optionMenu(self.ikTargetLimb_om, e=1, dai=1)
-        self.limbs = {}
-        self.limbOrder = []
-        for rootLimb in self.limbMng.GetRootLimbs():
-            prefix = self.limbMng.GetLimbPrefix(rootLimb)
-            for limb in self.limbMng.GetLimbCreationOrder(rootLimb):
-                side = self.limbMng.GetLimbSide(limb)
-                name =  '%s_%s_%s' % (prefix, limb.pfrsName.get(), side)
-                pm.menuItem(l=name, p=self.ikTargetLimb_om)
-                self.limbs[name] = limb
-                self.limbOrder.append(limb)
+    # def Populate(self):
+    #     '''Called when Bhvs tab clicked, 
+    #     populates IK Target Limbs option menu
+    #     '''
+    #     pm.optionMenu(self.ikTargetLimb_om, e=1, dai=1)
+    #     self.limbs = {}
+    #     self.limbOrder = []
+    #     for rootLimb in self.limbMng.GetRootLimbs():
+    #         prefix = self.limbMng.GetLimbPrefix(rootLimb)
+    #         for limb in self.limbMng.GetLimbCreationOrder(rootLimb):
+    #             side = self.limbMng.GetLimbSide(limb)
+    #             name =  '%s_%s_%s' % (prefix, limb.pfrsName.get(), side)
+    #             pm.menuItem(l=name, p=self.ikTargetLimb_om)
+    #             self.limbs[name] = limb
+    #             self.limbOrder.append(limb)
 
 
 #========== SETUP ===============================
@@ -54,8 +54,8 @@ class BHV_Group_Properties_UI:
                                                         min=0.0,
                                                         max=1.0,
                                                         at='persp.translateX')
-                self.ikTargetLimb_om = pm.optionMenu(   l='IK Target Limb', 
-                                                        cc=self.SetIKTargetLimb)
+                # self.ikTargetLimb_om = pm.optionMenu(   l='IK Target Limb', 
+                #                                         cc=self.SetIKTargetLimb)
 
                                                         
 #========== FUNCTIONALITY ===============================
@@ -63,23 +63,23 @@ class BHV_Group_Properties_UI:
     def UpdateGroupPosition(self, ignore):
         self.grpMng.UpdateLockedGroupPosition(self.group)
 
-    def SetIKTargetLimb(self, limbName):
-        limb = self.limbs[limbName]
-        pm.disconnectAttr(self.group.IKTargetLimb)
-        pm.connectAttr(limb.bhvIKSourceLimb, self.group.IKTargetLimb)
-        groups = self.grpMng.GetLimbGroups(limb)
-        groupNames = []
-        for group in groups:
-            if (group.groupType.get() == 0):
-                if (pm.listConnections(group.joint)):
-                    groupNames.append(self.grpMng.GetJointGroupName(group))
-                else:
-                    groupNames.append(self.grpMng.GetLimbGroupName(group))
-        if groupNames:
-            pm.addAttr(self.group.IKTargetGroup, e=1, en=':'.join(groupNames))
-        else:
-            pm.addAttr(self.group.IKTargetGroup, e=1, en='None')
-        self.UpdateUI()
+    # def SetIKTargetLimb(self, limbName):
+    #     limb = self.limbs[limbName]
+    #     pm.disconnectAttr(self.group.IKTargetLimb)
+    #     pm.connectAttr(limb.bhvIKSourceLimb, self.group.IKTargetLimb)
+    #     groups = self.grpMng.GetLimbGroups(limb)
+    #     groupNames = []
+    #     for group in groups:
+    #         if (group.groupType.get() == 0):
+    #             if (pm.listConnections(group.joint)):
+    #                 groupNames.append(self.grpMng.GetJointGroupName(group))
+    #             else:
+    #                 groupNames.append(self.grpMng.GetLimbGroupName(group))
+    #     if groupNames:
+    #         pm.addAttr(self.group.IKTargetGroup, e=1, en=':'.join(groupNames))
+    #     else:
+    #         pm.addAttr(self.group.IKTargetGroup, e=1, en='None')
+    #     self.UpdateUI()
                                                    
 #========== UPDATE UI ===============================
 

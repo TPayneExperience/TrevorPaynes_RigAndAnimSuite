@@ -31,7 +31,7 @@ class LS_Scene_Hierarchy_UI:
             pm.treeView(self.widget, e=1, dl=(longName, joint.shortName()))
 
     def _Setup(self):
-        self.widget = pm.treeView(adr=0, arp=0, sc=self.Selection)
+        self.widget = pm.treeView(adr=0, arp=0, sc=self.Selection, scc=self.SelectionChanged)
         with pm.popupMenu():
             pm.menuItem(l='Auto Build Limbs', c=self.AutoBuildLimbs)
 
@@ -43,6 +43,10 @@ class LS_Scene_Hierarchy_UI:
     
     def Selection(self, name, state):
         return name in self.selectableJoints
+    
+    def SelectionChanged(self):
+        pm.select(self.GetSelectedJoints())
+
 
 #============= AUTO BUILDER ============================
 

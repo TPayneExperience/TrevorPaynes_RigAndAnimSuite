@@ -39,22 +39,6 @@ class BHV_Limb_Properties_UI:
         pm.frameLayout(self.limbLayout, e=1, en=0)
         pm.frameLayout(self.cstLayout, e=1, en=0)
 
-    def Populate(self):
-        '''Called when Bhvs tab clicked, 
-        populates Constraint Target Limbs option menu
-        '''
-        pm.optionMenu(self.cstTargetLimb_om, e=1, dai=1)
-        self.limbs = {}
-        self.limbOrder = []
-        for rootLimb in self.limbMng.GetRootLimbs():
-            prefix = self.limbMng.GetLimbPrefix(rootLimb)
-            for limb in self.limbMng.GetLimbCreationOrder(rootLimb):
-                side = self.limbMng.GetLimbSide(limb)
-                name = '%s_%s_%s' % (prefix, limb.pfrsName.get(), side)
-                pm.menuItem(l=name, p=self.cstTargetLimb_om)
-                self.limbs[name] = limb
-                self.limbOrder.append(limb)
-
 
 #=========== SETUP UI ==============================================
 
@@ -66,6 +50,8 @@ class BHV_Limb_Properties_UI:
                                                 cc=pm.Callback(self.SetBhvType))
                 self.grpParent_at = pm.attrEnumOptionMenu(  l='Bhv Grp Parent', 
                                                             at='perspShape.filmFit')
+                self.ikTargetLimb_om = pm.optionMenu(   l='IK Target Limb', 
+                                                        cc=self.SetIKTargetLimb)
 
         with pm.frameLayout('Limb CONSTRAINT Properties', bv=1) as self.cstLayout:
             with pm.columnLayout(adj=1) as self.bhvCstProp_cl:
@@ -76,26 +62,81 @@ class BHV_Limb_Properties_UI:
 
     def SetBhvType(self):
         bhvType = pm.optionMenu(self.bhvType_om, q=1, v=1)
-        isVis = (bhvType == 'Constraint')
-        pm.frameLayout(self.cstLayout, e=1, en=isVis)
+        isCst = (bhvType == 'Constraint')
+        pm.frameLayout(self.cstLayout, e=1, en=isCst)
         self.bhvMng.SetBhv(self.limb, bhvType)
-        self.parent.SetBhvType(self.limb) 
+        if isCst:
+            targetLimb = None
+            for possibleLimb in self.limbOrder:
+                if (possibleLimb != self.limb):
+                    targetLimb = possibleLimb
+                    break
+            else:
+                msg = 'No Valid Target for Constraint Limb "%s"' % self.limb
+                pm.confirmDialog(t='Constraint Error', m=msg, icon='warning', b='Ok')
+                return
+            self.bhvMng.SetTargetCstLimb(self.limb, targetLimb)
         self.UpdateCstUI()
+        self.PopulateCstTargetLimbs()
+        self.parent.SetBhvType(self.limb) 
 
     def SetTargetCstLimb(self, limbName):
-        limb = self.limbs[limbName]
-        self.ConnectTargetCstLimb(limb)
-    
-    def ConnectTargetCstLimb(self, limb):
-        pm.disconnectAttr(self.limb.bhvCstTargetLimb)
-        pm.connectAttr(limb.bhvCstSourceLimb, self.limb.bhvCstTargetLimb)
-        joints = self.jntMng.GetLimbJoints(limb)
-        jointNames = [j.pfrsName.get() for j in joints]
-        pm.addAttr(self.limb.bhvCstTargetJnt, e=1, en=':'.join(jointNames))
+        targetlimb = self.limbs[limbName]
+        self.bhvMng.SetTargetCstLimb(self.limb, targetlimb)
         self.UpdateCstUI()
 
+    def SetIKTargetLimb(self, limbName):
+        limb = self.limbs[limbName]
+        pm.disconnectAttr(self.group.IKTargetLimb)
+        pm.connectAttr(limb.bhvIKSourceLimb, self.group.IKTargetLimb)
+        groups = self.grpMng.GetLimbGroups(limb)
+        groupNames = []
+        for group in groups:
+            if (group.groupType.get() == 0):
+                if (pm.listConnections(group.joint)):
+                    groupNames.append(self.grpMng.GetJointGroupName(group))
+                else:
+                    groupNames.append(self.grpMng.GetLimbGroupName(group))
+        if groupNames:
+            pm.addAttr(self.group.IKTargetGroup, e=1, en=':'.join(groupNames))
+        else:
+            pm.addAttr(self.group.IKTargetGroup, e=1, en='None')
+        self.UpdateUI()
 
 #=========== UI UPDATES ==============================================
+
+    def PopulateCstTargetLimbs(self):
+        '''Called when Bhvs tab clicked, 
+        populates Constraint Target Limbs option menu
+        '''
+        pm.optionMenu(self.cstTargetLimb_om, e=1, dai=1)
+        self.limbs = {}
+        self.limbOrder = []
+        for rootLimb in self.limbMng.GetRootLimbs():
+            prefix = self.limbMng.GetLimbPrefix(rootLimb)
+            for limb in self.limbMng.GetLimbCreationOrder(rootLimb):
+                if (limb.bhvType.get() not in [3, 7]):
+                    side = self.limbMng.GetLimbSide(limb)
+                    name = '%s_%s_%s' % (prefix, limb.pfrsName.get(), side)
+                    pm.menuItem(l=name, p=self.cstTargetLimb_om)
+                    self.limbs[name] = limb
+                    self.limbOrder.append(limb)
+
+    def PopulateIKTargetLimbs(self):
+        '''Called when Bhvs tab clicked, 
+        populates IK Target Limbs option menu
+        '''
+        pm.optionMenu(self.ikTargetLimb_om, e=1, dai=1)
+        self.limbs = {}
+        self.limbOrder = []
+        for rootLimb in self.limbMng.GetRootLimbs():
+            prefix = self.limbMng.GetLimbPrefix(rootLimb)
+            for limb in self.limbMng.GetLimbCreationOrder(rootLimb):
+                side = self.limbMng.GetLimbSide(limb)
+                name =  '%s_%s_%s' % (prefix, limb.pfrsName.get(), side)
+                pm.menuItem(l=name, p=self.ikTargetLimb_om)
+                self.limbs[name] = limb
+                self.limbOrder.append(limb)
 
     def UpdateGroupParentUI(self):
         if self.limb:
@@ -124,7 +165,7 @@ class BHV_Limb_Properties_UI:
             cstLimbs = pm.listConnections(self.limb.bhvCstTargetLimb)
             if cstLimbs:
                 cstLimb = cstLimbs[0]
-                index = self.limbOrder.index(cstLimb)
+                index = self.limbOrder.index(cstLimb) + 1
                 pm.optionMenu(self.cstTargetLimb_om, e=1, sl=index)
         
 

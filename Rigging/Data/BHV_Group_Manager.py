@@ -52,7 +52,7 @@ class BHV_Group_Manager:
 
     def GetLimbGroups(self, limb):
         index = limb.bhvType.get()
-        if index in [0,6,8]: # FK - Chain, Branch, Reverse
+        if index in [0,6]: # FK - Chain, Branch
             return self._SortGroups(pm.listConnections(limb.bhvFKGrps))
 
         if index == 1: # IK
@@ -76,20 +76,11 @@ class BHV_Group_Manager:
         if index == 7: # EMPTY
             return pm.listConnections(limb.bhvEmptyGrp)
 
+        if index == 8: # FK - Reverse Chain
+            return self._SortGroups(pm.listConnections(limb.bhvFKGrps))[::-1]
+
     def GetAllGroups(self):
         return list(self._groups.values())
-
-    def _SortGroups(self, groups):
-        indexGroups = {} # jointIndex : group
-        orderedGroups = []
-        for group in groups:
-            joints = pm.listConnections(group.joint)
-            if not joints:
-                return []
-            indexGroups[joints[0].limbIndex.get()] = group
-        for index in sorted(list(indexGroups.keys())):
-            orderedGroups.append(indexGroups[index])
-        return orderedGroups
 
 #============= FUNCTIONALITY ============================
 
@@ -134,7 +125,6 @@ class BHV_Group_Manager:
         group = self._AddGroup()
         group.groupType.set(1)
         pm.addAttr(group, ln='joint2', dt='string')
-        pm.addAttr(group, ln='IKTargetLimb', dt='string') # connect
         pm.addAttr(group, ln='IKTargetGroup', at='enum', en='None')
         pm.addAttr(group, ln='distance', at='float', min=0, dv=1)
         pm.addAttr(group, ln='pfrsAxis', at='enum', en='X:-X:Y:-Y:Z:-Z')
@@ -181,6 +171,7 @@ class BHV_Group_Manager:
         pm.addAttr(group, ln='weight', at='float', min=0, max=1)
         pm.connectAttr(limb.bhvCstGrps, group.limb)
         pm.connectAttr(joint.bhvCstGrp, group.joint)
+        self._PosRotGroupToJoint(group, joint)
         self._LockGroup(group)
         self._UpdateGroupName(limb, group, self.GetJointGroupName(group))
         return group
@@ -208,15 +199,27 @@ class BHV_Group_Manager:
 
 #============= PRIVATE ============================
 
+    def _SortGroups(self, groups):
+        indexGroups = {} # jointIndex : group
+        orderedGroups = []
+        for group in groups:
+            joints = pm.listConnections(group.joint)
+            if not joints:
+                return []
+            indexGroups[joints[0].limbIndex.get()] = group
+        for index in sorted(list(indexGroups.keys())):
+            orderedGroups.append(indexGroups[index])
+        return orderedGroups
+
     def _LockGroup(self, group):
         for attr in ['.tx', '.ty', '.tz', '.rx', '.ry', '.rz']:
             pm.setAttr(group+attr, l=1, k=0, cb=0)
 
     def _PosRotGroupToJoint(self, group, joint):
         pos = pm.xform(joint, q=1, t=1, ws=1)
-        pm.xform(group, t=pos, ws=1)
         rot = pm.xform(joint, q=1, ro=1, ws=1)
-        pm.xform(group, ro=rot, ws=1)
+        scale = pm.xform(joint, q=1, s=1, ws=1)
+        pm.xform(group, t=pos, ro=rot, s=scale, ws=1)
         pm.parent(group, joint)
 
     def _UpdateGroupName(self, limb, group, pfrsName):
