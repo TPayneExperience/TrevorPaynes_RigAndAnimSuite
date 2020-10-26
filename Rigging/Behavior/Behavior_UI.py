@@ -54,8 +54,8 @@ class Behavior_UI:
 #=========== SETUP + TEARDOWN ====================================
 
     def Setup_Editable(self):
+        self.limbProp_ui.Populate()
         self.limbHier_ui.Populate()
-        self.grpProp_ui.Populate()
         self.ctrMng.SetLayerState(True, True)
     
     def Teardown_Editable(self):
@@ -78,9 +78,9 @@ class Behavior_UI:
                     names.append(self.grpMng.GetJointGroupName(group))
                 else:
                     names.append(self.grpMng.GetLimbGroupName(group))
-            pm.addAttr(limb.parentGrp, e=1, en=':'.join(names))
+            pm.addAttr(limb.parentGroup, e=1, en=':'.join(names))
         else:
-            pm.addAttr(limb.parentGrp, e=1, en='None')
+            pm.addAttr(limb.parentGroup, e=1, en='None')
     
     def LimbSelected(self, limbID):
         limb = self.limbMng.GetLimb(limbID)

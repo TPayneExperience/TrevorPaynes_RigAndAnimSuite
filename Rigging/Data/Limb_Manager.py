@@ -79,7 +79,7 @@ class Limb_Manager:
         pm.addAttr(limb, ln='side', at='enum', enumName=limbSides)
         pm.addAttr(limb, ln='mirrorLimb', at='long')
         pm.addAttr(limb, ln='parentLimb', dt='string')
-        pm.addAttr(limb, ln='parentGrp', at='enum', en='None')
+        pm.addAttr(limb, ln='parentGroup', at='enum', en='None')
         pm.addAttr(limb, ln='childrenLimbs', dt='string')
         pm.addAttr(limb, ln='defaultParentLimb', dt='string')
         pm.addAttr(limb, ln='defaultChildrenLimbs', dt='string')

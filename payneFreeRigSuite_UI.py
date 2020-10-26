@@ -94,9 +94,11 @@ class PayneFreeRigSuite_UI():
         self.NewRig('tempPrefix', 
                     range(5), 
                     True)
+        # Testing Joints
         path = r'D:/Assets/Programming/Python/Maya/ModularAutoRigger/TEST_OUTPUT/temp_joints2.ma'
         pm.importFile(path)
         self.UpdateEnableUI()
+        pm.tabLayout(self.rig_ui.tab, e=1, sti=2) # Select Limb setup tab
 
 #=========== SETUP ====================================
 
@@ -136,18 +138,16 @@ class PayneFreeRigSuite_UI():
                 pm.menuItem(l='Quit', command=(''))
                 
             with pm.menu('Rigging'):
-                pm.menuItem(l='disabled')
-                # with pm.subMenuItem(l='Mirror'):
-                    # pm.menuItem(l='X', 
-                    #     c=lambda x: self.limbs_ui.Mirror_Dialog('X'))
-                    # pm.menuItem(l='Y', 
-                    #     c=lambda x: self.limbs_ui.Mirror_Dialog('Y'))
-                    # pm.menuItem(l='Z', 
-                    #     c=lambda x: self.limbs_ui.Mirror_Dialog('Z'))
-                # pm.menuItem(l='Duplicate', c=self.limbs_ui.Duplicate_Dialog)
-                # pm.menuItem(divider=1)
-                # pm.menuItem(l='Load Template...', c=self.limbs_ui.Load_Dialog)
-                # pm.menuItem(l='Save Template...', c=self.limbs_ui.Save_Dialog)
+                with pm.subMenuItem(l='Mirror'):
+                    pm.menuItem(l='X')#c=lambda x: self.limbs_ui.Mirror_Dialog('X'))
+                    pm.menuItem(l='Y')
+                    pm.menuItem(l='Z')
+                pm.menuItem(l='Duplicate') # , c=self.limbs_ui.Duplicate_Dialog)
+                pm.menuItem(divider=1)
+                pm.menuItem(l='Load Template...')
+                pm.menuItem(l='Save Template...')
+                pm.menuItem(divider=1)
+                pm.menuItem(l='Clean Up Unused Controls') # Deletes Unused Ctrs + grps
 
             with pm.menu('Skinning'):
                 pm.menuItem(l='disabled')

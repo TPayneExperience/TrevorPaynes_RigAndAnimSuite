@@ -7,7 +7,7 @@ class BHV_Group_Manager:
         self.jntMng = jntMng
         self.nameMng = nameMng
 
-        self.grpTypes = [   'FK',
+        self.grpTypes = [   'FK', # DO NOT CHANGE ORDER
 
                             'IKPoleVector',
                             'FKIKSwitch',
@@ -53,46 +53,44 @@ class BHV_Group_Manager:
     def GetLimbGroups(self, limb):
         index = limb.bhvType.get()
         if index in [0,6]: # FK - Chain, Branch
-            return self._SortGroups(pm.listConnections(limb.bhvFKGrps))
+            groups = pm.listConnections(limb.bhvFKGrps)
+            return self._SortGroups(groups)
 
         if index == 1: # IK
-            return self._SortGroups(pm.listConnections(limb.bhvIKPoleVectorGrps))
+            return pm.listConnections(limb.bhvIKPoleVectorGrp)
 
         if index == 2: # FK IK
             groups = pm.listConnections(limb.bhvFKIKSwitchGrp)
             groups += self._SortGroups(pm.listConnections(limb.bhvFKGrps))
-            groups += self._SortGroups(pm.listConnections(limb.bhvIKPoleVectorGrps))
+            groups += pm.listConnections(limb.bhvIKPoleVectorGrp)
             return groups
 
         if index == 3: # Constraint
-            return self._SortGroups(pm.listConnections(limb.bhvCstGrps))
+            groups = pm.listConnections(limb.bhvCstGrps)
+            return self._SortGroups(groups)
 
         if index == 4: # Look At
             return pm.listConnections(limb.bhvLookAtGrp)
 
         if index == 5: # IK Chain
-            return self._SortGroups(pm.listConnections(limb.bhvIKChainGrps))
+            groups = pm.listConnections(limb.bhvIKChainGrps)
+            return self._SortGroups(groups)
             
         if index == 7: # EMPTY
             return pm.listConnections(limb.bhvEmptyGrp)
 
         if index == 8: # FK - Reverse Chain
-            return self._SortGroups(pm.listConnections(limb.bhvFKGrps))[::-1]
+            groups = pm.listConnections(limb.bhvFKGrps)
+            return self._SortGroups(groups)[::-1]
 
     def GetAllGroups(self):
         return list(self._groups.values())
 
-#============= FUNCTIONALITY ============================
+#============= ADD + REMOVE ============================
 
-    def UpdateLockedGroupPosition(self, group):
-        pos = self.axes[group.pfrsAxis.get()][:]
-        dist = group.distance.get()
-        pos = [p*dist for p in pos]
-        for attr in ['.tx', '.ty', '.tz']:
-            pm.setAttr(group+attr, l=0, k=0, cb=0)
-        pm.xform(group, t=pos)
-        for attr in ['.tx', '.ty', '.tz']:
-            pm.setAttr(group+attr, l=1, k=0, cb=0)
+    def Remove(self, group):
+        del(self._groups[group.ID.get()])
+        pm.delete(group)
 
     def _AddGroup(self):
         groupID = self.rigRoot.nextGrpID.get()
@@ -106,7 +104,7 @@ class BHV_Group_Manager:
         pm.addAttr(group, ln='control', dt='string')
         pm.addAttr(group, ln='limb', dt='string')
         pm.addAttr(group, ln='groupType', at='enum', en=groupTypes)
-        for attr in ['.sx', '.sy', '.sz', '.v']:
+        for attr in ['.sx', '.sy', '.sz']:
             pm.setAttr(group + attr, l=1, k=0, cb=0)
         self._groups[groupID] = group
         return group
@@ -116,48 +114,40 @@ class BHV_Group_Manager:
         group.groupType.set(0)
         pm.connectAttr(joint.bhvFKGrp, group.joint)
         pm.connectAttr(limb.bhvFKGrps, group.limb)
-        self._PosRotGroupToJoint(group, joint)
+        self.PosRotGroupToJoint(group, joint)
         self._UpdateGroupName(limb, group, self.GetJointGroupName(group))
         return group
 
-    def Add_IKPoleVector(self, limb, startJoint, endJoint):
+    def Add_IKPoleVector(self, limb):
         '''Positions the center for the poll vector control'''
         group = self._AddGroup()
         group.groupType.set(1)
-        pm.addAttr(group, ln='joint2', dt='string')
         pm.addAttr(group, ln='IKTargetGroup', at='enum', en='None')
         pm.addAttr(group, ln='distance', at='float', min=0, dv=1)
         pm.addAttr(group, ln='pfrsAxis', at='enum', en='X:-X:Y:-Y:Z:-Z')
-        pm.addAttr(group, ln='IKPoleVectorJoint', dt='string') # connect
-        joint = self.jntMng.GetLimbJoints(limb)[1]
-        pm.connectAttr(joint.bhvIKGrp, group.IKPoleVectorJoint)
-        pm.connectAttr(startJoint.bhvIKGrp, group.joint)
-        pm.connectAttr(endJoint.bhvIKGrp, group.joint2)
-        pm.connectAttr(limb.bhvIKPoleVectorGrps, group.limb)
-        self._PosRotGroupToJoint(group, joint)
+        pm.addAttr(group, ln='IKPoleVectorJoint', dt='string')
+        pm.connectAttr(limb.bhvIKPoleVectorGrp, group.limb)
         self._LockGroup(group)
         self.UpdateLockedGroupPosition(group)
-        self._UpdateGroupName(limb, group, self.GetJointGroupName(group))
+        self._UpdateGroupName(limb, group, self.GetLimbGroupName(group))
         return group
 
-    def Add_IKChain(self, limb, startJoint, endJoint):
-        '''Positions the center for the poll vector control'''
+    def Add_IKChain(self, limb, joint):
+        '''End Joints of each IK Handle, will grab parent joint'''
         group = self._AddGroup()
         group.groupType.set(6)
-        pm.addAttr(group, ln='joint2', dt='string')
-        pm.addAttr(group, ln='IKTargetLimb', dt='string') # connect
         pm.addAttr(group, ln='IKTargetGroup', at='enum', en='None')
-        pm.connectAttr(startJoint.bhvIKGrp, group.joint)
-        pm.connectAttr(endJoint.bhvIKGrp, group.joint2)
+        pm.connectAttr(joint.bhvIKGrp, group.joint)
         pm.connectAttr(limb.bhvIKChainGrps, group.limb)
         self._LockGroup(group)
+        self.UpdateLockedGroupPosition(group)
         self._UpdateGroupName(limb, group, self.GetJointGroupName(group))
         return group
 
     def Add_FKIKSwitch(self, limb):
         group = self._AddGroup()
         group.groupType.set(2)
-        pm.addAttr(group, ln='parentGrp', at='enum', en='None')
+        pm.addAttr(group, ln='parentGroup', at='enum', en='None')
         pm.connectAttr(limb.bhvFKIKSwitchGrp, group.limb)
         self._LockGroup(group)
         self._UpdateGroupName(limb, group, self.GetLimbGroupName(group))
@@ -171,7 +161,7 @@ class BHV_Group_Manager:
         pm.addAttr(group, ln='weight', at='float', min=0, max=1)
         pm.connectAttr(limb.bhvCstGrps, group.limb)
         pm.connectAttr(joint.bhvCstGrp, group.joint)
-        self._PosRotGroupToJoint(group, joint)
+        self.PosRotGroupToJoint(group, joint)
         self._LockGroup(group)
         self._UpdateGroupName(limb, group, self.GetJointGroupName(group))
         return group
@@ -184,7 +174,7 @@ class BHV_Group_Manager:
         pm.addAttr(group, ln='pfrsAxis', at='enum', en='X:-X:Y:-Y:Z:-Z')
         pm.connectAttr(limb.bhvLookAtGrp, group.limb)
         pm.connectAttr(joint.bhvLookAtGrp, group.joint)
-        self._PosRotGroupToJoint(group, joint)
+        self.PosRotGroupToJoint(group, joint)
         self._LockGroup(group)
         self._UpdateGroupName(limb, group, self.GetJointGroupName(group))
         return group
@@ -196,6 +186,25 @@ class BHV_Group_Manager:
         self._UpdateGroupName(limb, group, self.GetLimbGroupName(group))
         pm.parent(group, self.bhvGrp)
         return group
+
+#============= POSITION ============================
+
+    def UpdateLockedGroupPosition(self, group):
+        pos = self.axes[group.pfrsAxis.get()][:]
+        dist = group.distance.get()
+        pos = [p*dist for p in pos]
+        for attr in ['.tx', '.ty', '.tz']:
+            pm.setAttr(group+attr, l=0, k=0, cb=0)
+        pm.xform(group, t=pos)
+        for attr in ['.tx', '.ty', '.tz']:
+            pm.setAttr(group+attr, l=1, k=0, cb=0)
+
+    def PosRotGroupToJoint(self, group, joint):
+        pos = pm.xform(joint, q=1, t=1, ws=1)
+        rot = pm.xform(joint, q=1, ro=1, ws=1)
+        scale = pm.xform(joint, q=1, s=1, ws=1)
+        pm.xform(group, t=pos, ro=rot, s=scale, ws=1)
+        pm.parent(group, joint)
 
 #============= PRIVATE ============================
 
@@ -214,13 +223,6 @@ class BHV_Group_Manager:
     def _LockGroup(self, group):
         for attr in ['.tx', '.ty', '.tz', '.rx', '.ry', '.rz']:
             pm.setAttr(group+attr, l=1, k=0, cb=0)
-
-    def _PosRotGroupToJoint(self, group, joint):
-        pos = pm.xform(joint, q=1, t=1, ws=1)
-        rot = pm.xform(joint, q=1, ro=1, ws=1)
-        scale = pm.xform(joint, q=1, s=1, ws=1)
-        pm.xform(group, t=pos, ro=rot, s=scale, ws=1)
-        pm.parent(group, joint)
 
     def _UpdateGroupName(self, limb, group, pfrsName):
         name = self.nameMng.GetName(limb.pfrsName.get(),

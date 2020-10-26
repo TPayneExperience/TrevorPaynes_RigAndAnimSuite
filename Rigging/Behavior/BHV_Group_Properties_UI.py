@@ -27,22 +27,6 @@ class BHV_Group_Properties_UI:
         # pm.optionMenu(self.ikTargetLimb_om, e=1, en=0)
         self.UpdateUI()
 
-    # def Populate(self):
-    #     '''Called when Bhvs tab clicked, 
-    #     populates IK Target Limbs option menu
-    #     '''
-    #     pm.optionMenu(self.ikTargetLimb_om, e=1, dai=1)
-    #     self.limbs = {}
-    #     self.limbOrder = []
-    #     for rootLimb in self.limbMng.GetRootLimbs():
-    #         prefix = self.limbMng.GetLimbPrefix(rootLimb)
-    #         for limb in self.limbMng.GetLimbCreationOrder(rootLimb):
-    #             side = self.limbMng.GetLimbSide(limb)
-    #             name =  '%s_%s_%s' % (prefix, limb.pfrsName.get(), side)
-    #             pm.menuItem(l=name, p=self.ikTargetLimb_om)
-    #             self.limbs[name] = limb
-    #             self.limbOrder.append(limb)
-
 
 #========== SETUP ===============================
 
@@ -107,10 +91,16 @@ class BHV_Group_Properties_UI:
                                                 at=self.group.pfrsAxis,
                                                 p=self.bhvGrpProp_cl,
                                                 cc=self.UpdateGroupPosition)
+        # IK PV + Chain Parenting
+        if groupType in [1, 6]:
+            self.parentSub_at = pm.attrEnumOptionMenu(  l='Parent Group',
+                                                        at=group.IKTargetGroup, 
+                                                        p=self.bhvGrpProp_cl)
+
         # FK IK switch
         if groupType == 2:
             self.parentSub_at = pm.attrEnumOptionMenu(  l='Parent Joint',
-                                                        at=group.parentGrp, 
+                                                        at=group.parentGroup, 
                                                         p=self.bhvGrpProp_cl)
 
         # Cst Weight attr

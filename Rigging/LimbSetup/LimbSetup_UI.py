@@ -75,7 +75,7 @@ class LimbSetup_UI:
 
 #=========== LIMB FUNCTIONALITY ====================================
     
-    def AddLimb(self, ignore): # called by limb heir > RMB > Add
+    def AddLimb(self, ignore): # Limb Hier UI > RMB > Add
         joints = self.GetSelectedSceneJoints()
         if not (len(joints) < 2) and \
             not self.jntMng.AreJointsChained(joints) and \
@@ -89,7 +89,7 @@ class LimbSetup_UI:
             self.UpdateSceneFrame()
             self.parent.AddLimb(limb)
     
-    def AddLimbByJoints(self, joints): # called by Scene hier > RMB > Autobuild
+    def AddLimbByJoints(self, joints): # Scene hier UI > RMB > Autobuild
         limb = None
         if (len(joints) < 2):
             limb = self.limbMng.Add()
