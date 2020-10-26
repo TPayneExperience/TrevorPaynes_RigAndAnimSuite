@@ -127,8 +127,11 @@ class BHV_Group_Manager:
         pm.addAttr(group, ln='pfrsAxis', at='enum', en='X:-X:Y:-Y:Z:-Z')
         pm.addAttr(group, ln='IKPoleVectorJoint', dt='string')
         pm.connectAttr(limb.bhvIKPoleVectorGrp, group.limb)
+        joints = self.jntMng.GetLimbJoints(limb)
+        joint = joints[len(joints)/2]
+        self.PosRotGroupToJoint(group, joint)
         self._LockGroup(group)
-        self.UpdateLockedGroupPosition(group)
+        self.UpdateIKGroupPosition(group)
         self._UpdateGroupName(limb, group, self.GetLimbGroupName(group))
         return group
 
@@ -140,7 +143,7 @@ class BHV_Group_Manager:
         pm.connectAttr(joint.bhvIKGrp, group.joint)
         pm.connectAttr(limb.bhvIKChainGrps, group.limb)
         self._LockGroup(group)
-        self.UpdateLockedGroupPosition(group)
+        self.UpdateIKGroupPosition(group)
         self._UpdateGroupName(limb, group, self.GetJointGroupName(group))
         return group
 
@@ -189,7 +192,7 @@ class BHV_Group_Manager:
 
 #============= POSITION ============================
 
-    def UpdateLockedGroupPosition(self, group):
+    def UpdateIKGroupPosition(self, group):
         pos = self.axes[group.pfrsAxis.get()][:]
         dist = group.distance.get()
         pos = [p*dist for p in pos]

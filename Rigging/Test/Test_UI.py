@@ -108,6 +108,11 @@ class Test_UI:
             if grpType in [4, 6]:
                 joint = pm.listConnections(group.joint)[0]
                 pm.parent(group, joint)
+            elif grpType == 1:
+                limb = pm.listConnections(group.limb)[0]
+                joints = self.jntMng.GetLimbJoints(limb)
+                joint = joints[len(joints)/2]
+                pm.parent(group, joint)
             else:
                 pm.parent(group, self.grpMng.bhvGrp)
 
@@ -235,9 +240,13 @@ class Test_UI:
         joints = self.jntMng.GetLimbJoints(limb)
         startJoint = joints[0]
         endJoint = joints[-1]
-        pm.ikHandle(sj=startJoint, ee=endJoint)
+        handle = pm.ikHandle(sj=startJoint, ee=endJoint)[0]
+        group = pm.listConnections(limb.bhvIKPoleVectorGrp)[0]
+        control = pm.listConnections(group.control)[0]
+        pm.poleVectorConstraint(control, handle)
 
     def Setup_External_IKPoleVector(self, limb):
+        # PARENT IK HANDLE TO TARGET CONTROL 
         targetLimb = pm.listConnections(limb.bhvIKTargetLimb)
         if not targetLimb:
             msg = 'IK Pole Vector Limb "%s" missing TARGET limb' % limb
@@ -257,6 +266,11 @@ class Test_UI:
         handle.v.set(0)
         pm.parent(handle, targetControl)
 
+        # PARENT POLE VECTOR CONTROL to target Control group
+        # - this way if hand is parented to table/world
+        #   the pv is also!
+        pm.parent(group, targetGroup)
+
 #=========== FK IK ====================================
     
     def Setup_Internal_FKIK(self, limb):
@@ -272,6 +286,7 @@ class Test_UI:
         if not fkikControl.hasAttr('fkikSwitch'):
             pm.addAttr(fkikControl, ln='fkikSwitch', at='float', min=0, max=1)
             pm.addAttr(fkikControl, ln='fkikInvert', dt='string')
+            pm.setAttr(fkikControl.fkikSwitch, l=0, k=1, cb=1)
 
         invertFKIKNode = pm.createNode('plusMinusAverage')
         invertFKIKNode.input1D[0].set(1)
@@ -309,11 +324,15 @@ class Test_UI:
             pm.parent(childGroup, parentCtr)
 
         # Create IK handle
-        pm.ikHandle(sj=ikJoints[0], ee=ikJoints[-1])
+        handle = pm.ikHandle(sj=ikJoints[0], ee=ikJoints[-1])[0]
+        group = pm.listConnections(limb.bhvIKPoleVectorGrp)[0]
+        control = pm.listConnections(group.control)[0]
+        pm.poleVectorConstraint(control, handle)
 
     
     def Setup_External_FKIK(self, limb):
         joints = self.jntMng.GetLimbJoints(limb)
+
         # PARENT IK
         targetLimb = pm.listConnections(limb.bhvIKTargetLimb)
         if not targetLimb:
@@ -324,8 +343,8 @@ class Test_UI:
         groups = pm.listConnections(limb.bhvIKPoleVectorGrp)
         if not groups:
             return
-        group = groups[0]
-        index = group.IKTargetGroup.get()
+        ikGroup = groups[0]
+        index = ikGroup.IKTargetGroup.get()
         targetGroup = self.grpMng.GetLimbGroups(targetLimb)[index]
         targetControl = pm.listConnections(targetGroup.control)[0]
 
@@ -333,6 +352,9 @@ class Test_UI:
         handle = pm.listConnections(ikJoint.message)[0]
         handle.v.set(0)
         pm.parent(handle, targetControl)
+
+        # PARENT POLE VECTOR CONTROL to target Control group, see above
+        pm.parent(ikGroup, targetGroup)
 
         # PARENT FK
         fkGroup = pm.listConnections(joints[0].bhvFKGrp)[0]
@@ -349,6 +371,8 @@ class Test_UI:
         fkikControl = pm.listConnections(fkikGroup.control)[0]
         invertFKIKNode = pm.listConnections(fkikControl.fkikInvert)[0]
         pm.connectAttr(invertFKIKNode.output1D, fkGroup.v)
+        pm.connectAttr(fkikControl.fkikSwitch, ikGroup.v)
+        
 
     def Teardown_FKIK(self, limb):
         pm.delete(pm.listConnections(limb.bhvFKIK_FKJoint))

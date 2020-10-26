@@ -95,7 +95,8 @@ class PayneFreeRigSuite_UI():
                     range(5), 
                     True)
         # Testing Joints
-        path = r'D:/Assets/Programming/Python/Maya/ModularAutoRigger/TEST_OUTPUT/temp_joints2.ma'
+        # path = r'D:/Assets/Programming/Python/Maya/ModularAutoRigger/TEST_OUTPUT/temp_joints2.ma'
+        path = r'D:/Assets/Programming/Python/Maya/ModularAutoRigger/TEST_OUTPUT/temp_joints.ma'
         pm.importFile(path)
         self.UpdateEnableUI()
         pm.tabLayout(self.rig_ui.tab, e=1, sti=2) # Select Limb setup tab

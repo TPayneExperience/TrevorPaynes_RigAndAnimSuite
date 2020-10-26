@@ -24,7 +24,6 @@ class BHV_Group_Properties_UI:
     def SetGroup(self, group):
         self.group = group
         pm.frameLayout(self.groupLayout, e=1, en=1)
-        # pm.optionMenu(self.ikTargetLimb_om, e=1, en=0)
         self.UpdateUI()
 
 
@@ -38,35 +37,12 @@ class BHV_Group_Properties_UI:
                                                         min=0.0,
                                                         max=1.0,
                                                         at='persp.translateX')
-                # self.ikTargetLimb_om = pm.optionMenu(   l='IK Target Limb', 
-                #                                         cc=self.SetIKTargetLimb)
-
-                                                        
-#========== FUNCTIONALITY ===============================
-
-    def UpdateGroupPosition(self, ignore):
-        self.grpMng.UpdateLockedGroupPosition(self.group)
-
-    # def SetIKTargetLimb(self, limbName):
-    #     limb = self.limbs[limbName]
-    #     pm.disconnectAttr(self.group.IKTargetLimb)
-    #     pm.connectAttr(limb.bhvIKSourceLimb, self.group.IKTargetLimb)
-    #     groups = self.grpMng.GetLimbGroups(limb)
-    #     groupNames = []
-    #     for group in groups:
-    #         if (group.groupType.get() == 0):
-    #             if (pm.listConnections(group.joint)):
-    #                 groupNames.append(self.grpMng.GetJointGroupName(group))
-    #             else:
-    #                 groupNames.append(self.grpMng.GetLimbGroupName(group))
-    #     if groupNames:
-    #         pm.addAttr(self.group.IKTargetGroup, e=1, en=':'.join(groupNames))
-    #     else:
-    #         pm.addAttr(self.group.IKTargetGroup, e=1, en='None')
-    #     self.UpdateUI()
-                                                   
+                          
 #========== UPDATE UI ===============================
 
+    def UpdateGroupPosition(self, ignore):
+        self.grpMng.UpdateIKGroupPosition(self.group)
+                                  
     def UpdateUI(self):
         group = self.group
         groupType = group.groupType.get()
