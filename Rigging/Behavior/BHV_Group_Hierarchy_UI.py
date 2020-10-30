@@ -12,7 +12,7 @@ class BHV_Group_Hierarchy_UI:
         self._Setup()
 
     def Populate(self):
-        self.Depopulate()
+        pm.treeView(self.widget, e=1, removeAll=1)
         for group in self.grpMng.GetLimbGroups(self.limb):
             groupID = group.ID.get()
             if pm.listConnections(group.joint):
@@ -23,6 +23,7 @@ class BHV_Group_Hierarchy_UI:
             pm.treeView(self.widget, e=1, dl=(groupID, name))
     
     def Depopulate(self):
+        self.limb = None
         pm.treeView(self.widget, e=1, removeAll=1)
 
 # #=========== SETUP ====================================

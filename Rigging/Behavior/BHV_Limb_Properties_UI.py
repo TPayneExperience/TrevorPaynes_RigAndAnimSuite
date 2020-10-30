@@ -14,7 +14,7 @@ class BHV_Limb_Properties_UI:
         self.cstType_at = None
         self.jntLimbs = {} # limbName : limb
         self.jntLimbOrder = [] # limbs
-        self.fkLimbs = {} # limbName : limb
+        self.fkEmptyLimbs = {} # limbName : limb
         self.fkLimbOrder = [] # limbs
 
         self._Setup()
@@ -36,10 +36,6 @@ class BHV_Limb_Properties_UI:
 
         self.UpdateGroupParentUI()
         self.UpdateUI()
-
-    def SetGroup(self):
-        pm.frameLayout(self.limbLayout, e=1, en=0)
-        pm.frameLayout(self.miscLayout, e=1, en=0)
 
 
 #=========== SETUP UI ==============================================
@@ -64,16 +60,23 @@ class BHV_Limb_Properties_UI:
 
     def SetBhvType(self): # Mostly UI
         bhvTypeStr = pm.optionMenu(self.bhvType_om, q=1, v=1)
-        bhvTypeIndex = self.bhvMng.GetBhvIndex(bhvTypeStr)
-        if self.bhvMng.SetBhvType(self.limb, bhvTypeIndex):
-            isIK = (bhvTypeIndex in self.bhvMng.ikTypeIndexes)
-            isCst = (bhvTypeIndex == 3)
+        newBhvTypeIndex = self.bhvMng.GetBhvIndex(bhvTypeStr)
+        oldBhvTypeIndex = self.limb.bhvType.get()
+        oldSourceLimbs = pm.listConnections(self.limb.bhvIKSourceLimb)
+        if self.bhvMng.SetBhvType(self.limb, newBhvTypeIndex):
+            # Force IKs which Targeted this limb, to find other
+            if oldBhvTypeIndex in self.bhvMng.ikTargetTypeIndexes:
+                if newBhvTypeIndex not in self.bhvMng.ikTargetTypeIndexes:
+                    for limb in oldSourceLimbs:
+                        self._SetIKBhv(limb)
+            isIK = (newBhvTypeIndex in self.bhvMng.ikTypeIndexes)
+            isCst = (newBhvTypeIndex == 3)
             enabled = any([isCst, isIK])
             pm.frameLayout(self.miscLayout, e=1, en=enabled)
             if isCst:
                 self._SetCstBhv()
             elif isIK:
-                self._SetIKBhv()
+                self._SetIKBhv(self.limb)
             self.Populate()
             self.UpdateUI()
             self.parent.SetBhvType(self.limb) 
@@ -108,45 +111,87 @@ class BHV_Limb_Properties_UI:
 
 #=========== IK ==============================================
 
-    def _SetIKBhv(self):
-        targetLimb = None
-        for possibleLimb in self.fkLimbOrder:
-            if (possibleLimb != self.limb):
-                targetLimb = possibleLimb
+    def _SetIKBhv(self, sourceLimb):
+        distances = {} # dist : group
+        sourceGroups = self.grpMng.GetLimbGroups(sourceLimb)
+        sourceGroup = sourceGroups[0]
+        sourcePos = pm.xform(sourceGroup, q=1, t=1)
+        # Create distance dictionary to groups
+        for targetGroup in self.grpMng.GetAllGroups():
+            if targetGroup not in sourceGroups:
+                targetPos = pm.xform(targetGroup, q=1, t=1)
+                dist = 0
+                for i in range(3):
+                    dist += (sourcePos[i]-targetPos[i])**2
+                distances[dist] = targetGroup
+        # Get Closest limb
+        for dist in sorted(list(distances.keys())):
+            closestGroup = distances[dist]
+            closestLimbs = pm.listConnections(closestGroup.limb)
+            if closestLimbs:
+                targetLimb = closestLimbs[0]
                 break
         else:
-            msg = 'No Valid Target for IK Limb "%s"' % self.limb
+            msg = 'No Valid Target for IK Limb "%s"' % sourceLimb
             pm.confirmDialog(t='IK Error', m=msg, icon='warning', b='Ok')
             return
-        name = self.GetLimbName(targetLimb)
-        self.SetIKTargetLimb(name)
+        self._SetIKTargetLimb(sourceLimb, targetLimb)
 
     def SetIKTargetLimb(self, limbName):
-        limb = self.jntLimbs[limbName]
-        pm.disconnectAttr(self.limb.bhvIKTargetLimb)
-        pm.connectAttr(limb.bhvIKSourceLimb, self.limb.bhvIKTargetLimb)
-        groupNames = []
-        for group in self.grpMng.GetLimbGroups(limb):
-            if (group.groupType.get() == 0):
-                if (pm.listConnections(group.joint)):
-                    groupNames.append(self.grpMng.GetJointGroupName(group))
-                else:
-                    groupNames.append(self.grpMng.GetLimbGroupName(group))
-        if groupNames:
-            for group in self.grpMng.GetLimbGroups(self.limb):
-                if (group.groupType.get() in [1, 6]): # IK Pole / IK Chain
-                    pm.addAttr(group.IKTargetGroup, e=1, en=':'.join(groupNames))
+        targetLimb = self.fkEmptyLimbs[limbName]
+        self._SetIKTargetLimb(self.limb, targetLimb)
+    
+    def _SetIKTargetLimb(self, sourceLimb, targetLimb):
+        targetGroups = self.grpMng.GetLimbGroups(targetLimb)
+        targetGroupNames = [self.GetGroupName(g) for g in targetGroups] # should be fk/empty
+        sourceGroups = self.grpMng.GetLimbGroups(sourceLimb)
+        if targetGroupNames:
+            names = ':'.join(targetGroupNames)
+            # For each group, set target to closest group on target limb
+            for sourceGroup in sourceGroups:
+                if (sourceGroup.groupType.get() in [1, 6]): # IK Pole / IK Chain
+                    pm.addAttr(sourceGroup.IKTargetGroup, e=1, en=names)
+                    sourcePos = pm.xform(sourceGroup, q=1, t=1, ws=1)
+                    # Get Distances from source group to target groups
+                    distances = {} # dist : targetGroup
+                    for targetGroup in targetGroups:
+                        targetPos = pm.xform(targetGroup, q=1, t=1, ws=1)
+                        dist = 0
+                        for i in range(3):
+                            dist += (sourcePos[i]-targetPos[i])**2
+                        if dist not in distances:
+                            distances[dist] = []
+                        distances[dist].append(targetGroup)
+                    # Set source Group's target group index
+                    targetDist = sorted(list(distances.keys()))[0]
+                    targetGroup = distances[targetDist][0]
+                    targetGroupName = self.GetGroupName(targetGroup)
+                    index = targetGroupNames.index(targetGroupName)
+                    sourceGroup.IKTargetGroup.set(index)
         else:
-            for group in self.grpMng.GetLimbGroups(self.limb):
-                if (group.groupType.get() in [1, 6]):
-                    pm.addAttr(group.IKTargetGroup, e=1, en='None')
+            for sourceGroup in sourceGroups:
+                if (sourceGroup.groupType.get() in [1, 6]):
+                    pm.addAttr(sourceGroup.IKTargetGroup, e=1, en='None')
+        pm.disconnectAttr(sourceLimb.bhvIKTargetLimb)
+        pm.connectAttr(targetLimb.bhvIKSourceLimb, sourceLimb.bhvIKTargetLimb)
 
 #=========== UI UPDATES ==============================================
+
+    def GetGroupName(self, group):
+        if (pm.listConnections(group.joint)):
+            return self.grpMng.GetJointGroupName(group)
+        else:
+            return self.grpMng.GetLimbGroupName(group)
 
     def GetLimbName(self, limb):
         prefix = self.limbMng.GetLimbPrefix(limb)
         side = self.limbMng.GetLimbSide(limb)
         return '%s_%s_%s' % (prefix, limb.pfrsName.get(), side)
+
+    def Depopulate(self):
+        self.limb = None
+        pm.frameLayout(self.limbLayout, e=1, en=0)
+        pm.frameLayout(self.miscLayout, e=1, en=0)
 
     def Populate(self):
         self.PopulateIKTargetLimbs()
@@ -166,14 +211,14 @@ class BHV_Limb_Properties_UI:
 
     def PopulateIKTargetLimbs(self):
         pm.optionMenu(self.ikTargetLimb_om, e=1, dai=1)
-        self.fkLimbs = {}
+        self.fkEmptyLimbs = {}
         self.fkLimbOrder = []
         for rootLimb in self.limbMng.GetRootLimbs():
             for limb in self.limbMng.GetLimbCreationOrder(rootLimb):
                 if (limb.bhvType.get() in self.bhvMng.ikTargetTypeIndexes):
                     name = self.GetLimbName(limb)
                     pm.menuItem(l=name, p=self.ikTargetLimb_om)
-                    self.fkLimbs[name] = limb
+                    self.fkEmptyLimbs[name] = limb
                     self.fkLimbOrder.append(limb)
 
     def UpdateGroupParentUI(self):

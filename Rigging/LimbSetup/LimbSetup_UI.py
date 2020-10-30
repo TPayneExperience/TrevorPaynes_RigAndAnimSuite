@@ -15,6 +15,8 @@ class LimbSetup_UI:
         self.nameMng = nameMng
         self.parent = parent
 
+        self.scriptJob = None
+
         self._Setup()
 
     def Populate(self): # CALLED BY MAIN WINDOW
@@ -34,7 +36,8 @@ class LimbSetup_UI:
     def _Setup(self):
         with pm.verticalLayout():
             with pm.frameLayout(l='---', bv=1) as self.sceneHier_fl:
-                self.sceneHier_ui = sceneHier_UI.LS_Scene_Hierarchy_UI(self.jntMng,
+                self.sceneHier_ui = sceneHier_UI.LS_Scene_Hierarchy_UI( self.limbMng,
+                                                                        self.jntMng,
                                                                         self)
         with pm.verticalLayout():
             with pm.frameLayout('Limbs', bv=1):
@@ -57,21 +60,35 @@ class LimbSetup_UI:
                 pm.disconnectAttr(joint.tempLimb)
                 pm.connectAttr(limb.tempJoints, joint.tempLimb)
         self.Populate()
+        if not self.scriptJob:
+            self.scriptJob = pm.scriptJob( e=("SelectionChanged",self.sceneHier_ui.SelectSceneHierJoints), pro=True)
+            print ('STARTING selection detection script...')
 
     def Teardown_Editable(self):
+        self.KillScripts()
         for limb in self.limbMng.GetAllLimbs():
             joints = self.jntMng.GetLimbTempJoints(limb)
             for joint in joints:
                 self.jntMng.AddPerm(limb, joint)
+            limbType = limb.limbType.get()
             if not joints:
                 limb.limbType.set(0)
-            elif (len(joints) == 1):
+                self.parent.UpdateLimb(limb)
+            elif (len(joints) == 1) and limbType != 1:
                 limb.limbType.set(1)
-            elif self.jntMng.AreJointsChained(joints):
+                self.parent.UpdateLimb(limb)
+            elif self.jntMng.AreJointsChained(joints) and limbType != 2:
                 limb.limbType.set(2)
-            elif self.jntMng.AreJointsSiblings(joints):
+                self.parent.UpdateLimb(limb)
+            elif self.jntMng.AreJointsSiblings(joints) and limbType != 3:
                 limb.limbType.set(3)
-            self.parent.UpdateLimb(limb)
+                self.parent.UpdateLimb(limb)
+    
+    def KillScripts(self):
+        if self.scriptJob:
+            pm.scriptJob( kill=self.scriptJob, f=True)
+            self.scriptJob = None
+            print ('KILLING selection detection script...\n')
 
 #=========== LIMB FUNCTIONALITY ====================================
     

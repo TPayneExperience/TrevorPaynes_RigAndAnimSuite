@@ -3,11 +3,13 @@ import pymel.core as pm
 
 
 class LS_Scene_Hierarchy_UI:
-    def __init__(self, jntMng, parent):
+    def __init__(self, limbMng, jntMng, parent):
+        self.limbMng = limbMng
         self.jntMng = jntMng
         self.parent = parent
 
         self.selectableJoints = []
+        self.acceptSelection = True
 
         self._Setup()
 
@@ -33,7 +35,8 @@ class LS_Scene_Hierarchy_UI:
     def _Setup(self):
         self.widget = pm.treeView(adr=0, arp=0, sc=self.Selection, scc=self.SelectionChanged)
         with pm.popupMenu():
-            pm.menuItem(l='Auto Build Limbs', c=self.AutoBuildLimbs)
+            pm.menuItem(l='Auto Build by HIERARCHY', c=self.AutoBuildByHierarchy)
+            pm.menuItem(l='Auto Build by NAMES', c=self.AutoBuildByName)
 
     def GetSelectedJoints(self):
         names = pm.treeView(self.widget, q=1, selectItem=1)
@@ -45,12 +48,20 @@ class LS_Scene_Hierarchy_UI:
         return name in self.selectableJoints
     
     def SelectionChanged(self):
+        self.acceptSelection = False
         pm.select(self.GetSelectedJoints())
+        self.acceptSelection = True
 
+    def SelectSceneHierJoints(self):
+        if self.acceptSelection:
+            sel = pm.ls(sl=1, type='joint')
+            pm.treeView(self.widget, e=1, cs=1)
+            for joint in sel:
+                pm.treeView(self.widget, e=1, si=(joint.longName(), 1))
 
-#============= AUTO BUILDER ============================
+#============= AUTO BUILDERS ============================
 
-    def AutoBuildLimbs(self, ignore):
+    def AutoBuildByHierarchy(self, ignore):
         jointParents = {}   # childJoint : parentJoint
         newLimbJointSets = []  # [[jnt1, jnt2], [jnt3], ...]
         allJoints = pm.ls(type='joint')
@@ -83,19 +94,94 @@ class LS_Scene_Hierarchy_UI:
         self.parent.Populate()
         self.parent.UpdateSceneFrame()
 
+    def AutoBuildByName(self, ignore):
+        # VERY INFLEXIBLE! NEED TO BUILD UI FOR BETTER USER
+        # CUSTOMIZATION LATER, like the rig setup ui
+        allJoints = pm.ls(type='joint')
+        limbJoints = self.jntMng.GetAllJoints()
+        newLimbs = {} # limbName : jointList
+        invalidJoints = []
+        for joint in list(set(allJoints) - set(limbJoints)):
+            splitName = joint.shortName().split('_')
+            if len(splitName) != 3:
+                invalidJoints.append(joint)
+                continue
+            limbSideName = '_'.join(splitName[:-1])
+            if limbSideName not in newLimbs:
+                newLimbs[limbSideName] = []
+            newLimbs[limbSideName].append(joint)
+        # ERROR IF INVALID JOINT NAMES
+        if invalidJoints:
+            msg = 'Joints must be named as "LimbName_Side_JointName"'
+            msg += '\nThe following joints are misnamed'
+            for joint in invalidJoints:
+                msg += '\n\t- %s' % joint
+            pm.confirmDialog(   t='Breaking IK Connections!', 
+                                m=msg, 
+                                icon='error', 
+                                b='Ok')
+            return
+        invalidLimbs = []
+        validLimbs = []
+        for limbName, sourceJoints in newLimbs.items():
+            isChain = self.jntMng.AreJointsChained(sourceJoints)
+            isBranch = self.jntMng.AreJointsSiblings(sourceJoints)
+            if isChain or isBranch:
+                limb = self.parent.AddLimbByJoints(sourceJoints)
+                tempJoint = sourceJoints[0]
+                splitName = tempJoint.shortName().split('_')
+                self.limbMng.Rename(limb.ID.get(), splitName[0])
+                for joint in sourceJoints:
+                    splitName = joint.shortName().split('_')
+                    joint.pfrsName.set(splitName[-1])
+                validLimbs.append(limb)
+            else:
+                invalidLimbs.append(limbName)
+        for limb in validLimbs:
+            tempJoint = self.jntMng.GetLimbTempJoints(limb)[0]
+            side = tempJoint.shortName().split('_')[1]
+            if side.upper() == 'L':
+                limb.side.set(1)
+            elif side.upper() == 'R':
+                limb.side.set(2)
+            self.parent.parent.AddLimb(limb)
+
+        # WARNING IF LIMB JOINTS WRONG
+        if invalidLimbs:
+            msg = 'Limbs may only have the following joint arrangements:\n'
+            msg += '\n- 0 or 1 joint selected'
+            msg += '\n- 2+ joints that are all the immediate children '
+            msg += 'of the same parent [BRANCH]'
+            msg += '\n- 2+ joints that are parented to one another [CHAIN]'
+            msg += '\n--------------------------'
+            msg += '\nThe following limbs were skipped:'
+            for limbName in invalidLimbs:
+                msg += '\n\t- %s' % limbName
+            pm.confirmDialog(   t='Limbs Skipped', 
+                                m=msg, 
+                                icon='warning', 
+                                b='Ok')
+        self.parent.Populate()
+        self.parent.UpdateSceneFrame()
+
     def GetJointChain(self, startJoint):
         joints = [startJoint]
         if self.HasSibling(startJoint):
             return joints
+        lastPos = pm.xform(startJoint, q=1, t=1, ws=1)
         parent = pm.listRelatives(startJoint, parent=1)
         for i in range(99):
             if not parent:
                 return joints
             parent = parent[0]
+            curPos = pm.xform(parent, q=1, t=1, ws=1)
+            if curPos == lastPos:
+                return joints
             joints.append(parent)
             if self.HasSibling(parent):
                 return joints
             parent = pm.listRelatives(parent, parent=1)
+            lastPos = curPos[:]
 
     def GetJointBranch(self, startJoint):
         joints = [startJoint]

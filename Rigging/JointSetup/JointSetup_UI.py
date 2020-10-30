@@ -13,5 +13,14 @@ class JointSetup_UI:
                 with pm.rowLayout(adj=1, rat=(1,'top', 5)):
                     with pm.columnLayout(adj=1, cat=('both', 5), rs=5):
                         pm.button(l='Joint Tool', c=pm.Callback(pm.mel.eval, 'JointTool()'))
-
+                        pm.button(l='Insert Limb End Joint', c=self.InsertLimbEndJoint)
+    
+    def InsertLimbEndJoint(self, ignore):
+        joints = pm.ls(sl=1, type='joint')
+        if not joints:
+            return
+        oldJoint = joints[0]
+        newJoint = pm.duplicate(oldJoint, po=1, rc=1)[0]
+        newJoint.radius.set(0.2)
+        pm.parent(oldJoint, newJoint)
 

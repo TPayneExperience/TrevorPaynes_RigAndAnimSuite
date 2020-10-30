@@ -54,34 +54,34 @@ class BHV_Group_Manager:
         index = limb.bhvType.get()
         if index in [0,6]: # FK - Chain, Branch
             groups = pm.listConnections(limb.bhvFKGrps)
-            return self._SortGroups(groups)
+            return self.SortGroups(groups)
 
         if index == 1: # IK
             return pm.listConnections(limb.bhvIKPoleVectorGrp)
 
         if index == 2: # FK IK
-            groups = pm.listConnections(limb.bhvFKIKSwitchGrp)
-            groups += self._SortGroups(pm.listConnections(limb.bhvFKGrps))
+            groups = self.SortGroups(pm.listConnections(limb.bhvFKGrps))
             groups += pm.listConnections(limb.bhvIKPoleVectorGrp)
+            groups += pm.listConnections(limb.bhvFKIKSwitchGrp)
             return groups
 
         if index == 3: # Constraint
             groups = pm.listConnections(limb.bhvCstGrps)
-            return self._SortGroups(groups)
+            return self.SortGroups(groups)
 
         if index == 4: # Look At
             return pm.listConnections(limb.bhvLookAtGrp)
 
         if index == 5: # IK Chain
             groups = pm.listConnections(limb.bhvIKChainGrps)
-            return self._SortGroups(groups)
+            return self.SortGroups(groups)
             
         if index == 7: # EMPTY
             return pm.listConnections(limb.bhvEmptyGrp)
 
         if index == 8: # FK - Reverse Chain
             groups = pm.listConnections(limb.bhvFKGrps)
-            return self._SortGroups(groups)[::-1]
+            return self.SortGroups(groups)[::-1]
 
     def GetAllGroups(self):
         return list(self._groups.values())
@@ -142,8 +142,9 @@ class BHV_Group_Manager:
         pm.addAttr(group, ln='IKTargetGroup', at='enum', en='None')
         pm.connectAttr(joint.bhvIKGrp, group.joint)
         pm.connectAttr(limb.bhvIKChainGrps, group.limb)
+        self.PosRotGroupToJoint(group, joint)
         self._LockGroup(group)
-        self.UpdateIKGroupPosition(group)
+        # self.UpdateIKGroupPosition(group)
         self._UpdateGroupName(limb, group, self.GetJointGroupName(group))
         return group
 
@@ -211,7 +212,7 @@ class BHV_Group_Manager:
 
 #============= PRIVATE ============================
 
-    def _SortGroups(self, groups):
+    def SortGroups(self, groups):
         indexGroups = {} # jointIndex : group
         orderedGroups = []
         for group in groups:

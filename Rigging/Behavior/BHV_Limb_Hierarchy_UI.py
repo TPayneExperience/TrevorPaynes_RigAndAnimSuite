@@ -49,11 +49,15 @@ class BHV_Limb_Hierarchy_UI:
         if limbIDStrs:
             self.parent.LimbSelected(int(limbIDStrs[0]))
     
-    def Reparent(self, limbIDsStr, i1, i2, newParentIDStr, i3, i4, i5):
-        limbID = int(limbIDsStr[0])
-        parentID = int(newParentIDStr)
-        self.limbMng.Reparent(limbID, parentID)
-        self.parent.UpdateLimbParentGroups(limbID)
+    def Reparent(self, limbIDsStr, oldParents, i2, newParentIDStr, i3, i4, i5):
+        if oldParents[0] != newParentIDStr:
+            limbID = int(limbIDsStr[0])
+            if newParentIDStr:
+                parentID = int(newParentIDStr)
+            else:
+                parentID = -1
+            self.limbMng.Reparent(limbID, parentID)
+            self.parent.UpdateLimbParentGroups(limbID)
     
 #=========== RMB ====================================
 

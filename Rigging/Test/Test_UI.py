@@ -153,7 +153,7 @@ class Test_UI:
                     pm.parent(childGroup, parentCtrs[0])
 
     def Bind_FK_Joints(self, limb):
-        for joint in self.jntMng.GetLimbJoints(limb):
+        for joint in self.jntMng.GetLimbJoints(limb)[:-1]:
             group = pm.listConnections(joint.bhvFKGrp)[0]
             ctr = self.ctrMng.GetGroupControl(group)
             pm.parentConstraint(ctr, joint, mo=1)

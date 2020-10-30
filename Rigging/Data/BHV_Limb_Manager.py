@@ -16,6 +16,7 @@ class BHV_Limb_Manager:
         self.threeJntChainLimbIndexes = [0, 1, 2, 3, 5, 6, 8]
         self.branchLimbIndexes = [6, 3]
 
+        self.fkTypeIndexes = [0, 3, 6, 8]
         self.ikPVTypeIndexes = [1, 2]
         self.ikTypeIndexes = [1, 2, 5]
         self.ikTargetTypeIndexes = [0, 6, 7, 8]
@@ -58,8 +59,8 @@ class BHV_Limb_Manager:
         oldBhvIndex = limb.bhvType.get()
         if (self.Teardown_Bhv(limb, oldBhvIndex, newBhvIndex)):
             limb.bhvType.set(newBhvIndex)
-            if newBhvIndex in self.ikTargetTypeIndexes:
-                self.Setup_FK(limb)
+            if newBhvIndex in [0, 8]:
+                self.Setup_FKChain(limb)
             elif newBhvIndex == 1:
                 self.Setup_IKPoleVector(limb)
             elif newBhvIndex == 2:
@@ -70,6 +71,8 @@ class BHV_Limb_Manager:
                 self.Setup_LookAt(limb)
             elif newBhvIndex == 5:
                 self.Setup_IKChain(limb)
+            elif newBhvIndex == 6:
+                self.Setup_FKBranch(limb)
             elif newBhvIndex == 7:
                 self.Setup_Empty(limb)
             return True
@@ -118,13 +121,14 @@ class BHV_Limb_Manager:
 
     def Teardown_Bhv(self, limb, oldBhvIndex, newBhvIndex):
         '''Creates Warning Dialogs if there are inter-dependencies'''
+        # If limb has IK dependencies, Warning Dialog
         if oldBhvIndex in self.ikTargetTypeIndexes:
             if newBhvIndex not in self.ikTargetTypeIndexes:
-                groups = pm.listConnections(limb.bhvIKSourceLimb)
-                if groups:
+                limbs = pm.listConnections(limb.bhvIKSourceLimb)
+                if limbs:
                     msg = 'Changing limb "%s"s type off FK will break:' % limb
-                    for group in groups:
-                        msg += '\n - %s' % group.pfrsName.get()
+                    for limb in limbs:
+                        msg += '\n - %s' % limb.pfrsName.get()
                     result = pm.confirmDialog(  t='Breaking IK Connections!', 
                                                 m=msg, 
                                                 icon='warning', 
@@ -132,16 +136,40 @@ class BHV_Limb_Manager:
                     if (result == 'Cancel'):
                         return False
                     pm.disconnectAttr(limb.bhvIKSourceLimb)
+        # Hide Unused FK Groups
+        if oldBhvIndex in self.fkTypeIndexes:
+            if newBhvIndex not in self.fkTypeIndexes:
+                for group in pm.listConnections(limb.bhvFKGrps):
+                    group.v.set(0)
+                pm.disconnectAttr(limb.bhvFKGrps)
+        # Hide Unused IK Pole Vector Groups
+        if oldBhvIndex in self.ikPVTypeIndexes:
+            if newBhvIndex not in self.ikPVTypeIndexes:
+                for group in pm.listConnections(limb.bhvIKPoleVectorGrp):
+                    group.v.set(0)
+                    pm.disconnectAttr(group.IKPoleVectorJoint)
         return True
 
 #============= SETUP BHV ============================
 
-    def Setup_FK(self, limb):
-        pm.disconnectAttr(limb.bhvFKGrps)
+    def Setup_FKBranch(self, limb):
         for joint in self.jntMng.GetLimbJoints(limb):
             groups = pm.listConnections(joint.bhvFKGrp)
             if groups:
                 group = groups[0]
+                group.v.set(1)
+                pm.disconnectAttr(group.limb)
+                pm.connectAttr(limb.bhvFKGrps, group.limb)
+            else:
+                group = self.grpMng.Add_FK(limb, joint)
+                self.ctrMng.Add(group)
+
+    def Setup_FKChain(self, limb):
+        for joint in self.jntMng.GetLimbJoints(limb)[:-1]:
+            groups = pm.listConnections(joint.bhvFKGrp)
+            if groups:
+                group = groups[0]
+                group.v.set(1)
                 pm.disconnectAttr(group.limb)
                 pm.connectAttr(limb.bhvFKGrps, group.limb)
             else:
@@ -152,6 +180,7 @@ class BHV_Limb_Manager:
         groups = pm.listConnections(limb.bhvIKPoleVectorGrp)
         if groups:
             group = groups[0]
+            group.v.set(1)
             pm.disconnectAttr(group.IKPoleVectorJoint)
         else:
             group = self.grpMng.Add_IKPoleVector(limb)
@@ -168,7 +197,7 @@ class BHV_Limb_Manager:
         else:
             group = self.grpMng.Add_FKIKSwitch(limb)
             self.ctrMng.Add(group)
-        self.Setup_FK(limb)
+        self.Setup_FKChain(limb)
         self.Setup_IKPoleVector(limb)
         names = [j.pfrsName.get() for j in self.jntMng.GetLimbJoints(limb)]
         pm.addAttr(group.parentGroup, e=1, en=':'.join(names))

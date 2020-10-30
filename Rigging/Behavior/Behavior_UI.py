@@ -54,11 +54,15 @@ class Behavior_UI:
 #=========== SETUP + TEARDOWN ====================================
 
     def Setup_Editable(self):
-        self.limbProp_ui.Populate()
         self.limbHier_ui.Populate()
+        self.limbProp_ui.Depopulate()
+        self.limbProp_ui.Populate()
         self.ctrMng.SetLayerState(True, True)
     
     def Teardown_Editable(self):
+        self.limbProp_ui.Depopulate()
+        self.grpHier_ui.Depopulate()
+        self.grpProp_ui.Depopulate()
         self.ctrMng.SetLayerState(True, True)
 
 #=========== LIMBS ====================================
@@ -67,18 +71,34 @@ class Behavior_UI:
         self.limbProp_ui.UpdateGroupParentUI()
 
     def UpdateLimbParentGroups(self, limbID):
-        '''Set child's parent group enum'''
+        '''Updates limb parent group enum to closest to root group'''
         limb = self.limbMng.GetLimb(limbID)
+        bhvType = limb.bhvType.get()
         parents = pm.listConnections(limb.parentLimb)
-        if parents:
-            groups = self.grpMng.GetLimbGroups(parents[0])
+        if parents and (bhvType in [0, 2, 4, 6, 7, 8]):
+            parent = parents[0]
+            distances = {}
             names = []
-            for group in groups:
-                if (pm.listConnections(group.joint)):
-                    names.append(self.grpMng.GetJointGroupName(group))
+            rootGroup = self.grpMng.GetLimbGroups(limb)[0]
+            sourcePos = pm.xform(rootGroup, q=1, t=1, ws=1)
+            for parentGroup in self.grpMng.GetLimbGroups(parent):
+                # Create distance dict
+                targetPos = pm.xform(parentGroup, q=1, t=1, ws=1)
+                dist = 0
+                for i in range(3):
+                    dist += (sourcePos[i]-targetPos[i])**2
+                distances[dist] = parentGroup
+                # Create names list for enum
+                if (pm.listConnections(parentGroup.joint)):
+                    names.append(self.grpMng.GetJointGroupName(parentGroup))
                 else:
-                    names.append(self.grpMng.GetLimbGroupName(group))
+                    names.append(self.grpMng.GetLimbGroupName(parentGroup))
             pm.addAttr(limb.parentGroup, e=1, en=':'.join(names))
+            # Set Closest Group Index
+            closestDist = sorted(list(distances.keys()))[0]
+            closestGroup = distances[closestDist]
+            index = self.grpMng.GetLimbGroups(parent).index(closestGroup)
+            limb.parentGroup.set(index)
         else:
             pm.addAttr(limb.parentGroup, e=1, en='None')
     
@@ -88,12 +108,12 @@ class Behavior_UI:
         pm.select(joints)
         self.limbProp_ui.SetLimb(limbID)
         self.grpHier_ui.SetLimb(limbID)
-        self.grpProp_ui.SetLimb()
+        self.grpProp_ui.Depopulate()
 
     def GroupSelected(self, groupID):
         group = self.grpMng.GetGroup(groupID)
         pm.select(group)
-        self.limbProp_ui.SetGroup()
+        self.limbProp_ui.Depopulate()
         self.grpProp_ui.SetGroup(group)
 
     def SetBhvType(self, limb):

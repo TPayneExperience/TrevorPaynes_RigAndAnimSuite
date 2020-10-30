@@ -18,8 +18,8 @@ class BHV_Group_Properties_UI:
 
         self._Setup()
     
-    def SetLimb(self):
-        pm.frameLayout(self.groupLayout, e=1, en=0)
+    # def SetLimb(self):
+    #     pm.frameLayout(self.groupLayout, e=1, en=0)
 
     def SetGroup(self, group):
         self.group = group
@@ -39,6 +39,19 @@ class BHV_Group_Properties_UI:
                                                         at='persp.translateX')
                           
 #========== UPDATE UI ===============================
+
+    def Depopulate(self):
+        pm.frameLayout(self.groupLayout, e=1, en=0)
+        self.group = None
+        if self.weight_at:
+            pm.deleteUI(self.weight_at)
+            self.weight_at = None
+        if self.parentSub_at:
+            pm.deleteUI(self.parentSub_at)
+            self.parentSub_at = None
+        if self.pfrsAxis_om:
+            pm.deleteUI(self.pfrsAxis_om)
+            self.pfrsAxis_om = None
 
     def UpdateGroupPosition(self, ignore):
         self.grpMng.UpdateIKGroupPosition(self.group)

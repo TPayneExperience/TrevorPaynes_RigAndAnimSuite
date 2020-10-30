@@ -125,6 +125,7 @@ class PayneFreeRigSuite_UI():
                     tabLabel=(  (self.rigging_l,'Rigging'), 
                                 (self.skinning_l,'Skinning'), 
                                 (self.animation_l,'Animation')))
+        pm.window(self.win, e=1, cc=self.closeEvent)
         self._Setup_MenuBar()
         pm.showWindow()
     
@@ -179,10 +180,7 @@ class PayneFreeRigSuite_UI():
     #     self.limbs_ui.UpdateNaming()
 
     def closeEvent(self):
-        # self.pfrs.limbSetup.skel.sceneMng.KillScriptJobs()
-        # self.pfrs.limbSetup.skel.sceneMng.KillSelectionJob()
-        pm.deleteUI(self.win, window=True)
-    
+        self.rig_ui.limbSetup_ui.KillScripts()
 
     def UpdateEnableUI(self):
         pm.tabLayout(self.rigTabs, e=1, en=bool(self.rigRoot))
