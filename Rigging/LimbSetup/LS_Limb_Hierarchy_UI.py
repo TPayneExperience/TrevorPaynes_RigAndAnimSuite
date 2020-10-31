@@ -56,12 +56,15 @@ class LS_Limb_Hierarchy_UI:
         pm.treeView(self.widget, e=1,   editLabelCommand=self.Rename,
                                         scc=self.SelectionChanged)
         with pm.popupMenu():
-            pm.menuItem(l='Add Limb', c=self.parent.AddLimb)
+            self.add_mi = pm.menuItem(l='Add Limb', c=self.parent.AddLimb)
             self.flipSides_mi = pm.menuItem(l='Flip Sides', en=0, c=self.FlipSides)
             pm.menuItem(divider=1)
             self.remove_mi = pm.menuItem(l='Remove Limb', en=0, c=self.Remove)
 
 #=========== FUNCTIONALITY ====================================
+
+    def SetAddEnabled(self, areJointsValid):
+        pm.menuItem(self.add_mi, e=1, en=areJointsValid)
 
     def SelectionChanged(self):
         pm.menuItem(self.flipSides_mi, e=1, en=0)
@@ -74,6 +77,8 @@ class LS_Limb_Hierarchy_UI:
             if self.limbMng.GetLimbMirror(limb):
                 pm.menuItem(self.flipSides_mi, e=1, en=1)
             self.parent.LimbSelected(limbID)
+        else:
+            self.parent.LimbSelected(-1)
 
     def Remove(self, ignore):
         limbIDStrs = pm.treeView(self.widget, q=1, selectItem=1)
@@ -86,7 +91,8 @@ class LS_Limb_Hierarchy_UI:
                                     cancelButton='No', 
                                     dismissString='No') == 'Yes'):
                 limb = self.limbMng.GetLimb(int(limbIDStrs[0]))
-                for joint in self.jntMng.GetLimbTempJoints(limb):
+                joints = self.jntMng.GetLimbTempJoints(limb)
+                for joint in joints:
                     self.jntMng.RemoveTemp(joint)
                 mirror = self.limbMng.GetLimbMirror(limb)
                 self.parent.RemoveLimb(limb)

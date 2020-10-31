@@ -48,16 +48,15 @@ class LS_Scene_Hierarchy_UI:
         return name in self.selectableJoints
     
     def SelectionChanged(self):
-        self.acceptSelection = False
-        pm.select(self.GetSelectedJoints())
-        self.acceptSelection = True
+        self.parent.SelectJoints(self.GetSelectedJoints())
 
     def SelectSceneHierJoints(self):
         if self.acceptSelection:
             sel = pm.ls(sl=1, type='joint')
             pm.treeView(self.widget, e=1, cs=1)
             for joint in sel:
-                pm.treeView(self.widget, e=1, si=(joint.longName(), 1))
+                if joint.longName() in self.selectableJoints:
+                    pm.treeView(self.widget, e=1, si=(joint.longName(), 1))
 
 #============= AUTO BUILDERS ============================
 

@@ -16,6 +16,8 @@ class LimbSetup_UI:
         self.parent = parent
 
         self.scriptJob = None
+        self.jointsToAdd = []
+        self.limb = None 
 
         self._Setup()
 
@@ -93,18 +95,12 @@ class LimbSetup_UI:
 #=========== LIMB FUNCTIONALITY ====================================
     
     def AddLimb(self, ignore): # Limb Hier UI > RMB > Add
-        joints = self.GetSelectedSceneJoints()
-        if not (len(joints) < 2) and \
-            not self.jntMng.AreJointsChained(joints) and \
-            not self.jntMng.AreJointsSiblings(joints):
-            self.SceneJointsIncorrectDialog()
-        else:
-            limb = self.limbMng.Add()
-            self.jntHier_ui.SetLimb(limb.ID.get())
-            self.jntHier_ui.Add()
-            self.Populate()
-            self.UpdateSceneFrame()
-            self.parent.AddLimb(limb)
+        limb = self.limbMng.Add()
+        self.jntHier_ui.SetLimb(limb.ID.get())
+        self.jntHier_ui.Add()
+        # self.Populate()
+        self.limbHier_ui.Populate()
+        self.parent.AddLimb(limb)
     
     def AddLimbByJoints(self, joints): # Scene hier UI > RMB > Autobuild
         limb = None
@@ -136,10 +132,14 @@ class LimbSetup_UI:
         self.Populate()
 
     def LimbSelected(self, limbID):
-        limb = self.limbMng.GetLimb(limbID)
-        joints = self.jntMng.GetLimbTempJoints(limb)
-        pm.select(joints)
-        self.jntHier_ui.SetLimb(limbID)
+        if limbID == -1:
+            self.limb = None
+            self.jntHier_ui.Depopulate()
+        else:
+            self.limb = self.limbMng.GetLimb(limbID)
+            joints = self.jntMng.GetLimbTempJoints(self.limb)
+            self.SelectJoints(joints)
+            self.jntHier_ui.SetLimb(limbID)
         self.UpdateJointFrame(limbID)
 
     def GetSelectedSceneJoints(self):
@@ -147,16 +147,55 @@ class LimbSetup_UI:
 
 #=========== MISC FUNCTIONALITY ====================================
     
-    def SceneJointsIncorrectDialog(self):
-        msg = 'Limbs may only have the following joint arrangements:\n'
-        msg += '\n- 0 or 1 joint selected'
-        msg += '\n- 2+ joints that are all the immediate children '
-        msg += 'of the same parent [BRANCH]'
-        msg += '\n- 2+ joints that are parented to one another [CHAIN]'
-        msg += '\n--------------------------'
-        msg += '\n- Limbs cannot contain joints from OTHER limbs'
-        pm.confirmDialog(   t='Joint Selection Mismatch', icn='warning', 
-                            m=msg, button=['Cool Beans'])
+    # def SceneJointsIncorrectDialog(self):
+    #     msg = 'Limbs may only have the following joint arrangements:\n'
+    #     msg += '\n- 0 or 1 joint selected'
+    #     msg += '\n- 2+ joints that are all the immediate children '
+    #     msg += 'of the same parent [BRANCH]'
+    #     msg += '\n- 2+ joints that are parented to one another [CHAIN]'
+    #     msg += '\n--------------------------'
+    #     msg += '\n- Limbs cannot contain joints from OTHER limbs'
+    #     pm.confirmDialog(   t='Joint Selection Mismatch', icn='warning', 
+    #                         m=msg, button=['Cool Beans'])
+
+    def SetJointsToAdd(self, joints):
+        self.jntHier_ui.SetAddEnabled(0)
+        self.limbHier_ui.SetAddEnabled(1)
+        self.jointsToAdd = []
+        if joints:
+            # Set Limb Hier RMB > Add Limb
+            if len(joints) == 1 or self.jntMng.AreJointsSiblings(joints):
+                self.jointsToAdd = joints
+            elif self.jntMng.AreJointsChained(joints):
+                self.jointsToAdd = self.jntMng.GetJointChain(joints)
+            else:
+                self.limbHier_ui.SetAddEnabled(0)
+                return
+
+            # Set Joint Hier RMB > Add Joints
+            if self.limb:
+                limbJoints = self.jntMng.GetLimbTempJoints(self.limb)
+                allJoints = joints + limbJoints
+                if len(allJoints) == 1:
+                    self.jntHier_ui.SetAddEnabled(1)
+                elif self.jntMng.AreJointsChained(allJoints):
+                    jointChain = self.jntMng.GetJointChain(allJoints)
+                    for joint in jointChain:
+                        if self.jntMng.HasLimb(joint) and \
+                            (self.jntMng.GetLimb(joint) != self.limb):
+                            self.jointsToAdd = []
+                            return
+                    else:
+                        self.jointsToAdd = []
+                        for joint in jointChain:
+                            if not self.jntMng.HasLimb(joint):
+                                self.jointsToAdd.append(joint)
+                        self.jntHier_ui.SetAddEnabled(1)
+                elif self.jntMng.AreJointsSiblings(allJoints):
+                    self.jntHier_ui.SetAddEnabled(1)
+                else:
+                    self.jointsToAdd = []
+        
 
     def UpdateSceneFrame(self):
         sceneCount = len(pm.ls(type='joint'))
@@ -171,8 +210,13 @@ class LimbSetup_UI:
             limb = self.limbMng.GetLimb(limbID)
             name = limb.pfrsName.get()
             limbType = self.limbMng.limbTypes[limb.limbType.get()]
-            txt = "%s's Joints (Type: %s)" % (name, limbType)
+            txt = "%s's Joints (Previous Limb Type: %s)" % (name, limbType)
         pm.frameLayout(self.jntHier_fl, e=1, en=isValid, l=txt)
 
-
+    def SelectJoints(self, joints):
+        self.sceneHier_ui.acceptSelection = False
+        pm.select(joints)
+        self.sceneHier_ui.acceptSelection = True
+        jointsToAdd = [j for j in joints if j in self.sceneHier_ui.selectableJoints]
+        self.SetJointsToAdd(jointsToAdd)
 

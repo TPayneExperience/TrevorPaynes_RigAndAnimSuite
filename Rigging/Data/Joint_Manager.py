@@ -91,12 +91,8 @@ class Joint_Manager():
         pm.disconnectAttr(joint.limb)
         pm.connectAttr(limb.joints, joint.limb)
         self.UpdateJointName(joint)
-        # self._ReindexJoints(limb)
     
     def _Add(self, joint):
-        jointID = self.rigRoot.nextJointID.get()
-        self.rigRoot.nextJointID.set(jointID + 1)
-        
         if (not joint.hasAttr('pfrsName')):
             pm.addAttr(joint, ln='ID', at='short')
             pm.addAttr(joint, ln='limb', dt='string')
@@ -108,11 +104,15 @@ class Joint_Manager():
             pm.addAttr(joint, ln='bhvIKGrp', dt='string')
             pm.addAttr(joint, ln='bhvLookAtGrp', dt='string')
             pm.addAttr(joint, ln='bhvCstGrp', dt='string')
+            
+            jointID = self.rigRoot.nextJointID.get()
+            self.rigRoot.nextJointID.set(jointID + 1)
+            joint.ID.set(jointID)
             joint.pfrsName.set('Joint_%03d' % (jointID))
-        joint.ID.set(jointID)
+            pm.editDisplayLayerMembers(self.skelLayer, joint)
 
-        self._joints[jointID] = joint
-        pm.editDisplayLayerMembers(self.skelLayer, joint)
+        if joint.ID.get() not in self._joints:
+            self._joints[joint.ID.get()] = joint
 
     def RemoveTemp(self, joint):
         pm.disconnectAttr(joint.tempLimb)
