@@ -127,22 +127,77 @@ class Rigging_UI:
         if (index == 4):
             self.test_ui.Setup_Editable() 
         
-    def Teardown_Editable(self):
-        index = self.rigRoot.limbsTab.get()
-        if (index == 1): 
+    def Teardown_Editable(self, nextIndex):
+        lastIndex = self.rigRoot.limbsTab.get()
+        if (lastIndex == 1): 
             self.limbSetup_ui.Teardown_Editable()
-        if (index == 2):
+        elif (lastIndex == 2):
             self.bhv_ui.Teardown_Editable()
-        if (index == 3):
+        elif (lastIndex == 3):
             self.app_ui.Teardown_Editable() 
-        if (index == 4):
+        elif (lastIndex == 4):
             self.test_ui.Teardown_Editable() 
+
+        if lastIndex in [0, 1] and nextIndex in [3, 4, 5]:
+            self.SetupPerm_Limbs()
+        elif lastIndex in [3, 4, 5] and nextIndex in [0, 1]:
+            self.TeardownPerm_Limbs()
         
     def TabChanged(self):
-        self.Teardown_Editable()
-        nextIndex = pm.tabLayout(self.tab, q=1, selectTabIndex=1)
-        self.rigRoot.limbsTab.set(nextIndex-1)
+        nextIndex = pm.tabLayout(self.tab, q=1, selectTabIndex=1)-1
+        self.Teardown_Editable(nextIndex)
+        self.rigRoot.limbsTab.set(nextIndex)
         self.Setup_Editable()
+
+    def SetupPerm_Limbs(self):
+        '''When switchin from tabs 1/2 to 3/4'''
+        allLimbs = self.limbMng.GetAllLimbs()
+        for limb in allLimbs:
+            # Create joints to limbs Permanent Connection
+            joints = self.jntMng.GetLimbTempJoints(limb)
+            for joint in joints:
+                self.jntMng.AddPerm(limb, joint)
+            # If limb type changed, reset to default
+            limbType = limb.limbType.get()
+            if not joints:
+                limb.limbType.set(0)
+                self.UpdateLimb(limb)
+            elif (len(joints) == 1) and limbType != 1:
+                limb.limbType.set(1)
+                self.UpdateLimb(limb)
+            elif self.jntMng.AreJointsChained(joints) and limbType != 2:
+                limb.limbType.set(2)
+                self.UpdateLimb(limb)
+            elif self.jntMng.AreJointsSiblings(joints) and limbType != 3:
+                limb.limbType.set(3)
+                self.UpdateLimb(limb)
+
+            # Parent / Position LIMB groups
+            if limbType in self.bhvMng.ikPVTypeIndexes: # IK Pole Vector + FKIK
+                self.grpMng.UpdateIKPoleVectorGroupParent(limb)
+            if (limbType == 2): # FKIK
+                self.grpMng.UpdateFKIKSwitchJoint()
+
+            # Create joint group to Limb Connections
+            bhvType = self.limb.bhvType.get()
+            if (bhvType == 0):
+                for joint in joints:
+                    group = joint.bhvFKGrp
+                    pm.connectAttr(limb.bhvFKGrps, group.limb)
+
+        # JOINT GROUPS
+        # FK, CST, LookAt, IKChain, connect group from limb
+
+
+    def TeardownPerm_Limbs(self):
+        '''When switchin from tabs 3/4 to 1/2'''
+        # JOINT GROUPS
+        # FK, CST, LookAt, IKChain, disconnect group from limb
+
+        # LIMB GROUPS
+        # IKPV, unparent group from joint
+        # FKIK, unparent group from joint
+
 
 #=========== FUNCTIONALITY ====================================
 

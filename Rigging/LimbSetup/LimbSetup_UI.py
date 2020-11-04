@@ -16,7 +16,8 @@ class LimbSetup_UI:
         self.parent = parent
 
         self.scriptJob = None
-        self.jointsToAdd = []
+        self.jointsToCreateLimb = []
+        self.jointsToAddToLimb = []
         self.limb = None 
 
         self._Setup()
@@ -68,23 +69,6 @@ class LimbSetup_UI:
 
     def Teardown_Editable(self):
         self.KillScripts()
-        for limb in self.limbMng.GetAllLimbs():
-            joints = self.jntMng.GetLimbTempJoints(limb)
-            for joint in joints:
-                self.jntMng.AddPerm(limb, joint)
-            limbType = limb.limbType.get()
-            if not joints:
-                limb.limbType.set(0)
-                self.parent.UpdateLimb(limb)
-            elif (len(joints) == 1) and limbType != 1:
-                limb.limbType.set(1)
-                self.parent.UpdateLimb(limb)
-            elif self.jntMng.AreJointsChained(joints) and limbType != 2:
-                limb.limbType.set(2)
-                self.parent.UpdateLimb(limb)
-            elif self.jntMng.AreJointsSiblings(joints) and limbType != 3:
-                limb.limbType.set(3)
-                self.parent.UpdateLimb(limb)
     
     def KillScripts(self):
         if self.scriptJob:
@@ -95,10 +79,10 @@ class LimbSetup_UI:
 #=========== LIMB FUNCTIONALITY ====================================
     
     def AddLimb(self, ignore): # Limb Hier UI > RMB > Add
-        limb = self.limbMng.Add()
+        limb = self.AddLimbByJoints(self.jointsToCreateLimb)
+        self.ClearJointsToAdd()
         self.jntHier_ui.SetLimb(limb.ID.get())
-        self.jntHier_ui.Add()
-        # self.Populate()
+        self.PopulateJoints()
         self.limbHier_ui.Populate()
         self.parent.AddLimb(limb)
     
@@ -138,7 +122,7 @@ class LimbSetup_UI:
         else:
             self.limb = self.limbMng.GetLimb(limbID)
             joints = self.jntMng.GetLimbTempJoints(self.limb)
-            self.SelectJoints(joints)
+            self.SelectSceneJoints(joints)
             self.jntHier_ui.SetLimb(limbID)
         self.UpdateJointFrame(limbID)
 
@@ -147,27 +131,19 @@ class LimbSetup_UI:
 
 #=========== MISC FUNCTIONALITY ====================================
     
-    # def SceneJointsIncorrectDialog(self):
-    #     msg = 'Limbs may only have the following joint arrangements:\n'
-    #     msg += '\n- 0 or 1 joint selected'
-    #     msg += '\n- 2+ joints that are all the immediate children '
-    #     msg += 'of the same parent [BRANCH]'
-    #     msg += '\n- 2+ joints that are parented to one another [CHAIN]'
-    #     msg += '\n--------------------------'
-    #     msg += '\n- Limbs cannot contain joints from OTHER limbs'
-    #     pm.confirmDialog(   t='Joint Selection Mismatch', icn='warning', 
-    #                         m=msg, button=['Cool Beans'])
-
     def SetJointsToAdd(self, joints):
-        self.jntHier_ui.SetAddEnabled(0)
-        self.limbHier_ui.SetAddEnabled(1)
-        self.jointsToAdd = []
+        self.ClearJointsToAdd()
         if joints:
             # Set Limb Hier RMB > Add Limb
             if len(joints) == 1 or self.jntMng.AreJointsSiblings(joints):
-                self.jointsToAdd = joints
+                self.jointsToCreateLimb = joints
             elif self.jntMng.AreJointsChained(joints):
-                self.jointsToAdd = self.jntMng.GetJointChain(joints)
+                jointChain = self.jntMng.GetJointChain(joints)
+                for joint in jointChain:
+                    if self.jntMng.HasLimb(joint):
+                        self.limbHier_ui.SetAddEnabled(0)
+                else:
+                    self.jointsToCreateLimb = jointChain
             else:
                 self.limbHier_ui.SetAddEnabled(0)
                 return
@@ -176,26 +152,24 @@ class LimbSetup_UI:
             if self.limb:
                 limbJoints = self.jntMng.GetLimbTempJoints(self.limb)
                 allJoints = joints + limbJoints
-                if len(allJoints) == 1:
+                if len(limbJoints) == 0 or self.jntMng.AreJointsSiblings(allJoints):
+                    self.jointsToAddToLimb = joints
                     self.jntHier_ui.SetAddEnabled(1)
                 elif self.jntMng.AreJointsChained(allJoints):
                     jointChain = self.jntMng.GetJointChain(allJoints)
                     for joint in jointChain:
                         if self.jntMng.HasLimb(joint) and \
                             (self.jntMng.GetLimb(joint) != self.limb):
-                            self.jointsToAdd = []
-                            return
-                    else:
-                        self.jointsToAdd = []
-                        for joint in jointChain:
-                            if not self.jntMng.HasLimb(joint):
-                                self.jointsToAdd.append(joint)
-                        self.jntHier_ui.SetAddEnabled(1)
-                elif self.jntMng.AreJointsSiblings(allJoints):
+                            return 
+                    t = [j for j in jointChain if not self.jntMng.HasLimb(j)]
+                    self.jointsToAddToLimb = t
                     self.jntHier_ui.SetAddEnabled(1)
-                else:
-                    self.jointsToAdd = []
-        
+    
+    def ClearJointsToAdd(self):
+        self.jointsToAddToLimb = []
+        self.jointsToCreateLimb = []
+        self.jntHier_ui.SetAddEnabled(0)
+        self.limbHier_ui.SetAddEnabled(1)
 
     def UpdateSceneFrame(self):
         sceneCount = len(pm.ls(type='joint'))
@@ -213,10 +187,10 @@ class LimbSetup_UI:
             txt = "%s's Joints (Previous Limb Type: %s)" % (name, limbType)
         pm.frameLayout(self.jntHier_fl, e=1, en=isValid, l=txt)
 
-    def SelectJoints(self, joints):
+    def SelectSceneJoints(self, joints):
         self.sceneHier_ui.acceptSelection = False
         pm.select(joints)
         self.sceneHier_ui.acceptSelection = True
-        jointsToAdd = [j for j in joints if j in self.sceneHier_ui.selectableJoints]
-        self.SetJointsToAdd(jointsToAdd)
+        # jointsToAdd = [j for j in joints if j in self.sceneHier_ui.selectableJoints]
+        # self.SetJointsToAdd(jointsToAdd)
 

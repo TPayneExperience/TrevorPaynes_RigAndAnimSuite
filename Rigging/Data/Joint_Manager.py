@@ -155,6 +155,8 @@ class Joint_Manager():
         return all([j in bestChain for j in joints])
     
     def GetJointChain(self, joints):
+        if len(joints) == 1:
+            return joints
         temp = {} # longName : node
         for joint in joints:
             temp[joint.longName()] = joint

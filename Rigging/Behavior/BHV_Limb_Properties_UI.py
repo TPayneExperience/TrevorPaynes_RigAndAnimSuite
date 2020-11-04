@@ -12,6 +12,9 @@ class BHV_Limb_Properties_UI:
         self.limb = None
         self.cstTargetJnt_at = None
         self.cstType_at = None
+        self.pfrsAxis_at = None
+        self.parentSub_at = None
+
         self.jntLimbs = {} # limbName : limb
         self.jntLimbOrder = [] # limbs
         self.fkEmptyLimbs = {} # limbName : limb
@@ -49,12 +52,21 @@ class BHV_Limb_Properties_UI:
                 self.grpParent_at = pm.attrEnumOptionMenu(  l='Bhv Grp Parent', 
                                                             at='perspShape.filmFit')
 
-        with pm.frameLayout('Limb IK / CONSTRAINT Properties', bv=1) as self.miscLayout:
-            with pm.columnLayout(adj=1) as self.miscProp_cl:
-                self.ikTargetLimb_om = pm.optionMenu(   l='IK Target Limb', 
-                                                        cc=self.SetIKTargetLimb)
+        with pm.frameLayout('Limb CONSTRAINT Properties', bv=1) as self.cstLayout:
+            with pm.columnLayout(adj=1) as self.cstProp_cl:
                 self.cstTargetLimb_om = pm.optionMenu(  l='Constraint Target Limb', 
                                                         cc=self.SetTargetCstLimb)
+
+        with pm.frameLayout('Limb IK POLE VECTOR Properties', bv=1) as self.ikLayout:
+            with pm.columnLayout(adj=1) as self.ikProp_cl:
+                self.ikTargetLimb_om = pm.optionMenu(   l='IK Target Limb', 
+                                                        cc=self.SetIKTargetLimb)
+                self.ikPVDist_cg = pm.attrControlGrp( l='IK Pole Vector Distance', a='persp.translateX')
+                
+
+        with pm.frameLayout('Limb LOOK AT Properties', bv=1) as self.lookAtLayout:
+            with pm.columnLayout(adj=1) as self.lookAtProp_cl:
+                self.lookAtDist_cg = pm.attrControlGrp( l='Look At Distance', a='persp.translateX')
 
 #=========== FUNCTIONALITY ==============================================
 
@@ -71,12 +83,14 @@ class BHV_Limb_Properties_UI:
                         self._SetIKBhv(limb)
             isIK = (newBhvTypeIndex in self.bhvMng.ikTypeIndexes)
             isCst = (newBhvTypeIndex == 3)
-            enabled = any([isCst, isIK])
-            pm.frameLayout(self.miscLayout, e=1, en=enabled)
+            pm.frameLayout(self.cstLayout, e=1, en=isCst)
+            pm.frameLayout(self.ikLayout, e=1, en=isIK)
             if isCst:
                 self._SetCstBhv()
             elif isIK:
                 self._SetIKBhv(self.limb)
+                if newBhvTypeIndex == 2: # FKIK
+                    self.UpdateFKIKSwitchJoint(1)
             self.Populate()
             self.UpdateUI()
             self.parent.SetBhvType(self.limb) 
@@ -191,7 +205,7 @@ class BHV_Limb_Properties_UI:
     def Depopulate(self):
         self.limb = None
         pm.frameLayout(self.limbLayout, e=1, en=0)
-        pm.frameLayout(self.miscLayout, e=1, en=0)
+        pm.frameLayout(self.cstLayout, e=1, en=0)
 
     def Populate(self):
         self.PopulateIKTargetLimbs()
@@ -232,19 +246,28 @@ class BHV_Limb_Properties_UI:
 
     def UpdateUI(self):
         if not self.limb:
-            pm.frameLayout(self.miscLayout, e=1, en=0)
+            pm.frameLayout(self.cstLayout, e=1, en=0)
             return
+        if self.parentSub_at:
+            pm.deleteUI(self.parentSub_at)
+            self.parentSub_at = None
+        if self.pfrsAxis_at:
+            pm.deleteUI(self.pfrsAxis_at)
+            self.pfrsAxis_at = None
         if self.cstTargetJnt_at:
             pm.deleteUI(self.cstTargetJnt_at)
             self.cstTargetJnt_at = None
         if self.cstType_at:
             pm.deleteUI(self.cstType_at)
             self.cstType_at = None
-        isIK = (self.limb.bhvType.get() in self.bhvMng.ikTypeIndexes)
-        isCst = (self.limb.bhvType.get() == 3)
-        enabled = any([isCst, isIK])
+        bhvType = self.limb.bhvType.get()
+        isIK = (bhvType in self.bhvMng.ikTypeIndexes)
+        isCst = (bhvType == 3)
+        isLookAt = (bhvType == 4)
 
-        pm.frameLayout(self.miscLayout, e=1, en=enabled)
+        pm.frameLayout(self.ikLayout, e=1, en=isIK)
+        pm.frameLayout(self.lookAtLayout, e=1, en=isLookAt)
+        pm.frameLayout(self.cstLayout, e=1, en=isCst)
         pm.optionMenu(self.ikTargetLimb_om, e=1, en=isIK)
         pm.optionMenu(self.cstTargetLimb_om, e=1, en=isCst)
         if isIK:
@@ -256,22 +279,57 @@ class BHV_Limb_Properties_UI:
                     pm.optionMenu(self.ikTargetLimb_om, e=1, sl=index)
                 else:
                     pm.optionMenu(self.ikTargetLimb_om, e=1, sl=0)
+        # IK PV or FKIK
+        if bhvType in self.bhvMng.ikPVTypeIndexes: 
+            pm.attrControlGrp(  self.ikPVDist_cg, e=1, en=1, 
+                                a=self.limb.bhvIKPoleVectorDistance,
+                                cc=pm.Callback(self.UpdateIKPVPosition, 1))
+            self.pfrsAxis_at = pm.attrEnumOptionMenu(l='IK Axis Direction',
+                                at=self.limb.bhvIKPoleVectorAxis,
+                                p=self.ikProp_cl,
+                                cc=self.UpdateIKPVPosition)
+            if bhvType == 2: # FKIK
+                self.parentSub_at = pm.attrEnumOptionMenu(  l='FKIK Switch Parent Joint',
+                                                            at=self.limb.bhvFKIKParentJoint, 
+                                                            p=self.bhvLimbProp_cl,
+                                                            cc=self.UpdateFKIKSwitchJoint)
+        # LOOK AT
+        if bhvType == 4: 
+            pm.attrControlGrp(  self.lookAtDist_cg, e=1, en=1, 
+                                a=self.limb.bhvLookAtDistance,
+                                cc=pm.Callback(self.UpdateLookAtPosition, 1))
+            self.pfrsAxis_at = pm.attrEnumOptionMenu(l='Look At Axis Direction',
+                                at=self.limb.bhvLookAtAxis,
+                                p=self.lookAtProp_cl,
+                                cc=self.UpdateLookAtPosition)
+        # CONSTRAINT
         if isCst:
             self.cstTargetJnt_at = pm.attrEnumOptionMenu( l='Target Joint',
                                         at=self.limb.bhvCstTargetJnt,
-                                        p=self.miscProp_cl)
+                                        p=self.cstProp_cl)
             self.cstType_at = pm.attrEnumOptionMenu(l='Constraint Type',
                                         at=self.limb.bhvCstType,
-                                        p=self.miscProp_cl)
+                                        p=self.cstProp_cl)
             cstLimbs = pm.listConnections(self.limb.bhvCstTargetLimb)
             if cstLimbs:
                 cstLimb = cstLimbs[0]
                 index = self.jntLimbOrder.index(cstLimb) + 1
                 pm.optionMenu(self.cstTargetLimb_om, e=1, sl=index)
         
-
-
-
+    def UpdateLookAtPosition(self, ignore):
+        self.grpMng.UpdateLookAtPosition(self.limb)
+               
+    def UpdateIKPVPosition(self, ignore):
+        self.grpMng.UpdateIKPVPosition(self.limb)
+               
+    def UpdateFKIKSwitchJoint(self, ignore):
+        self.grpMng.UpdateFKIKSwitchJoint(self.limb)
+        # index = self.limb.bhvFKIKParentJoint.get()
+        # joints = self.jntMng.GetLimbJoints(self.limb)
+        # group = pm.listConnections(self.limb.bhvFKIKSwitchGrp)[0]
+        # self.grpMng.SetLockGroup(group, False)
+        # self.grpMng.PosRotGroupToJoint(group, joints[index])
+        # self.grpMng.SetLockGroup(group, True)
 
 
 

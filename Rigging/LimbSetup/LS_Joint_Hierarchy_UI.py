@@ -9,7 +9,6 @@ class LS_Joint_Hierarchy_UI:
         self.parent = parent
 
         self.limb = None
-        self.jointsToAdd = []
 
         self._Setup()
 
@@ -37,6 +36,9 @@ class LS_Joint_Hierarchy_UI:
 #=========== FUNCTIONALITY ====================================
 
     def JointHierSelectionChanged(self):
+        ''' Disable RMB > Remove if chain joints + non-end + 
+            non-sequential joints selected.
+        '''
         pm.menuItem(self.remove_mi, e=1, en=0)
         jntStrs = pm.treeView(self.widget, q=1, selectItem=1)
         if jntStrs:
@@ -50,97 +52,27 @@ class LS_Joint_Hierarchy_UI:
                             pm.menuItem(self.remove_mi, e=1, en=1)
             else:
                 pm.menuItem(self.remove_mi, e=1, en=1)
-            self.parent.SelectJoints(selJoints)
+            self.parent.SelectSceneJoints(selJoints)
 
     def SetAddEnabled(self, areJointsValid):
         pm.menuItem(self.add_mi, e=1, en=areJointsValid)
-
-    # def SetJointsToAdd(self, joints):
-    #     pm.menuItem(self.add_mi, e=1, en=0)
-    #     self.jointsToAdd = []
-    #     if joints:
-    #         limbJoints = self.jntMng.GetLimbTempJoints(self.limb)
-    #         allJoints = joints + limbJoints
-    #         if len(allJoints) == 1:
-    #             self.jointsToAdd = joints
-    #             pm.menuItem(self.add_mi, e=1, en=1)
-    #         elif self.jntMng.AreJointsSiblings(limbJoints):
-    #             if self.jntMng.AreJointsSiblings(allJoints):
-    #                 self.jointsToAdd = joints
-    #                 pm.menuItem(self.add_mi, e=1, en=1)
-    #         elif self.jntMng.AreJointsChained(limbJoints):
-    #             if self.jntMng.AreJointsChained(allJoints):
-    #                 jointChain = self.jntMng.GetJointChain(allJoints)
-    #                 for joint in jointChain:
-    #                     if self.jntMng.HasLimb(joint) and \
-    #                         (self.jntMng.GetLimb(joint) != self.limb):
-    #                         break
-    #                 else:
-    #                     self.jointsToAdd = []
-    #                     for joint in jointChain:
-    #                         if not self.jntMng.HasLimb(joint):
-    #                             self.jointsToAdd.append(joint)
-    #                     pm.menuItem(self.add_mi, e=1, en=1)
 
     def SetLimb(self, limbID):
         self.limb = self.limbMng.GetLimb(limbID)
         self.Populate()
 
     def Add(self):
-        for joint in self.parent.jointsToAdd:
+        for joint in self.parent.jointsToAddToLimb:
             self.jntMng.AddTemp(self.limb, joint)
+        self.parent.ClearJointsToAdd()
         self.parent.PopulateJoints()
-        # if not self.jointsToAdd:
-        #     return
-        # joints = self.jntMng.GetLimbTempJoints(self.limb)
-        # joints += self.jointsToAdd
-
-        # ONE JOINT
-        # if (len(joints) == 1):
-        #     self.jntMng.AddTemp(self.limb, joints[0])
-        #     self.parent.PopulateJoints()
-
-        # CHAIN
-        # elif self.jntMng.AreJointsChained(joints):
-            # jointChain = self.jntMng.GetJointChain(joints)
-            # # Check if all joints are free from limbs
-            # for joint in jointChain:
-            #     if self.jntMng.HasLimb(joint):
-            #         if (self.jntMng.GetLimb(joint) != self.limb):
-            #             pm.confirmDialog(t='Joint Selection Mismatch', 
-            #                     icn='warning', 
-            #                     m='Limbs may not contain joints from other limbs', 
-            #                     button=['Cool Beans'])
-            #             return
-            # for joint in jointChain:
-            #     if not self.jntMng.HasLimb(joint):
-            #         self.jntMng.AddTemp(self.limb, joint)
-            # self.parent.PopulateJoints()
-
-        # BRANCH
-        # elif self.jntMng.AreJointsSiblings(joints):
-        #     for joint in self.jointsToAdd:
-        #         self.jntMng.AddTemp(self.limb, joint)
-        #     self.parent.PopulateJoints()
-
-        # ERROR
-        # else:
-        #     self.parent.SceneJointsIncorrectDialog()
 
     def Remove(self):
         jointIDs = [int(ID) for ID in pm.treeView(self.widget, q=1, si=1)]
-        result = pm.confirmDialog(  title='Remove Joints', 
-                                    icon='warning', 
-                                    message='Remove %d joints?' % len(jointIDs), 
-                                    button=['Yes','No'], 
-                                    defaultButton='Yes', 
-                                    cancelButton='No', 
-                                    dismissString='No' )
-        if (result == 'Yes'):
-            joints = [self.jntMng.GetJoint(ID) for ID in jointIDs]
-            for joint in joints:
-                self.jntMng.RemoveTemp(joint)
-            self.parent.PopulateJoints()
+        joints = [self.jntMng.GetJoint(ID) for ID in jointIDs]
+        for joint in joints:
+            self.jntMng.RemoveTemp(joint)
+        self.parent.PopulateJoints()
 
     def Rename(self, jointIDStr, newName):
         if self.nameMng.IsValidCharacterLength(newName):

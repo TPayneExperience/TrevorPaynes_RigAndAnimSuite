@@ -10,17 +10,18 @@ class BHV_Limb_Manager:
 
         self.cstTypes = ['Parent', 'Point', 'Orient', 'Scale']
 
+        # BHV Options
         self.emptyLimbIndexes = [7]
         self.oneJntLimbIndexes = [6, 3, 4]
         self.twoJntChainLimbIndexes = [0, 3, 5, 6, 8]
         self.threeJntChainLimbIndexes = [0, 1, 2, 3, 5, 6, 8]
         self.branchLimbIndexes = [6, 3]
 
-        self.fkTypeIndexes = [0, 3, 6, 8]
-        self.ikPVTypeIndexes = [1, 2]
-        self.ikTypeIndexes = [1, 2, 5]
-        self.ikTargetTypeIndexes = [0, 6, 7, 8]
-        self.cstTargetTypeIndexes = [0, 1, 2, 4, 5, 6, 8]
+        # self.fkTypeIndexes = [0, 3, 6, 8]
+        # self.ikPVTypeIndexes = [1, 2]
+        # self.ikTypeIndexes = [1, 2, 5]
+        # self.ikTargetTypeIndexes = [0, 6, 7, 8]
+        # self.cstTargetTypeIndexes = [0, 1, 2, 4, 5, 6, 8]
         
         self.bhvTypes = [   'FK - Chain', # DON'T CHANGE ORDER!
 
@@ -88,34 +89,29 @@ class BHV_Limb_Manager:
 
             pm.addAttr(limb, ln='bhvType', at='enum', en=bhvTypes)
 
-            pm.addAttr(limb, ln='bhvFKGrps', dt='string')
-            pm.addAttr(limb, ln='bhvIKPoleVectorGrp', dt='string')
-            pm.addAttr(limb, ln='bhvIKChainGrps', dt='string')
-            pm.addAttr(limb, ln='bhvFKIKSwitchGrp', dt='string')
+            pm.addAttr(limb, ln='bhvJointGrps', dt='string') # FK, IKC, CSt
+            pm.addAttr(limb, ln='bhvLimbGrp', dt='string') # LookAt, IKPV
+            pm.addAttr(limb, ln='bhvEmptyGrp', dt='string') # Empty
+            pm.addAttr(limb, ln='bhvFKIKSwitchGrp', dt='string') #FKIK
+
             pm.addAttr(limb, ln='bhvFKIK_FKJoint', dt='string')
             pm.addAttr(limb, ln='bhvFKIK_IKJoint', dt='string')
-            pm.addAttr(limb, ln='bhvCstGrps', dt='string')
-            pm.addAttr(limb, ln='bhvLookAtGrp', dt='string')
-            pm.addAttr(limb, ln='bhvEmptyGrp', dt='string')
 
             pm.addAttr(limb, ln='bhvCstType', at='enum', en=bhvCstTypes)
-            pm.addAttr(limb, ln='bhvCstTargetLimb', dt='string') # for connecting to target
             pm.addAttr(limb, ln='bhvCstSourceLimb', dt='string') # Ignore, only for connections
+            pm.addAttr(limb, ln='bhvCstTargetLimb', dt='string') # for connecting to target
             pm.addAttr(limb, ln='bhvCstTargetJnt', at='enum', en='None')
             pm.addAttr(limb, ln='bhvIKSourceLimb', dt='string') # IK handles parent connection
             pm.addAttr(limb, ln='bhvIKTargetLimb', dt='string') # IK handles parent connection
     
     def RemoveLimb(self, limb):
-        pm.disconnectAttr(limb.bhvFKGrps)
-        pm.disconnectAttr(limb.bhvCstGrps)
-        pm.disconnectAttr(limb.bhvLookAtGrp)
-        groups = []
-        groups += pm.listConnections(limb.bhvIKPoleVectorGrp)
-        groups += pm.listConnections(limb.bhvIKChainGrps)
-        groups += pm.listConnections(limb.bhvFKIKSwitchGrp)
+        # Main Limb manager should actually delete the limb
+        pm.disconnectAttr(limb.bhvJointGrps)
+        groups = pm.listConnections(limb.bhvLimbGrp)
         groups += pm.listConnections(limb.bhvEmptyGrp)
-        if groups:
-            pm.delete(groups)
+        groups += pm.listConnections(limb.bhvFKIKSwitchGrp)
+        for group in groups:
+            self.grpMng.Remove(group)
 
 #============= TEARDOWN BHV ============================
 
@@ -200,7 +196,7 @@ class BHV_Limb_Manager:
         self.Setup_FKChain(limb)
         self.Setup_IKPoleVector(limb)
         names = [j.pfrsName.get() for j in self.jntMng.GetLimbJoints(limb)]
-        pm.addAttr(group.parentGroup, e=1, en=':'.join(names))
+        pm.addAttr(limb.bhvFKIKParentJoint, e=1, en=':'.join(names))
 
     def Setup_Cst(self, limb):
         pm.disconnectAttr(limb.bhvCstGrps)

@@ -14,13 +14,15 @@ class BHV_Group_Hierarchy_UI:
     def Populate(self):
         pm.treeView(self.widget, e=1, removeAll=1)
         for group in self.grpMng.GetLimbGroups(self.limb):
-            groupID = group.ID.get()
-            if pm.listConnections(group.joint):
-                name = self.grpMng.GetJointGroupName(group)
-            else:
-                name = self.grpMng.GetLimbGroupName(group)
-            pm.treeView(self.widget, e=1, ai=(groupID, ''))
-            pm.treeView(self.widget, e=1, dl=(groupID, name))
+            # ONLY FK, Cst, Empty, IK Chain
+            if group.groupType.get() in [0, 3, 5, 6]: 
+                groupID = group.ID.get()
+                if pm.listConnections(group.joint):
+                    name = self.grpMng.GetJointGroupName(group)
+                else:
+                    name = self.grpMng.GetLimbGroupName(group)
+                pm.treeView(self.widget, e=1, ai=(groupID, ''))
+                pm.treeView(self.widget, e=1, dl=(groupID, name))
     
     def Depopulate(self):
         self.limb = None

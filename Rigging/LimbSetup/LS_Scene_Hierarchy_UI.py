@@ -48,7 +48,9 @@ class LS_Scene_Hierarchy_UI:
         return name in self.selectableJoints
     
     def SelectionChanged(self):
-        self.parent.SelectJoints(self.GetSelectedJoints())
+        joints = self.GetSelectedJoints()
+        self.parent.SelectSceneJoints(joints)
+        self.parent.SetJointsToAdd(joints)
 
     def SelectSceneHierJoints(self):
         if self.acceptSelection:
