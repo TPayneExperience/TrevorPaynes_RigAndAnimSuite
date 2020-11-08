@@ -9,9 +9,11 @@ import LS_Joint_Hierarchy_UI as jointHier_UI
 reload(jointHier_UI)
 
 class LimbSetup_UI:
-    def __init__(self, limbMng, jntMng, nameMng, parent):
+    def __init__(self, limbMng, jntMng, grpMng, ctrMng, nameMng, parent):
         self.limbMng = limbMng
         self.jntMng = jntMng
+        self.grpMng = grpMng
+        self.ctrMng = ctrMng
         self.nameMng = nameMng
         self.parent = parent
 
@@ -46,6 +48,8 @@ class LimbSetup_UI:
             with pm.frameLayout('Limbs', bv=1):
                 self.limbHier_ui = limbHier_UI.LS_Limb_Hierarchy_UI(    self.limbMng,
                                                                         self.jntMng,
+                                                                        self.grpMng,
+                                                                        self.ctrMng,
                                                                         self.nameMng,
                                                                         self)
             with pm.frameLayout(l='---', bv=1) as self.jntHier_fl:
@@ -80,30 +84,39 @@ class LimbSetup_UI:
     
     def AddLimb(self, ignore): # Limb Hier UI > RMB > Add
         limb = self.AddLimbByJoints(self.jointsToCreateLimb)
+        self.parent.AddLimb(limb) # BHV Limb Mng add
         self.ClearJointsToAdd()
         self.jntHier_ui.SetLimb(limb.ID.get())
         self.PopulateJoints()
         self.limbHier_ui.Populate()
-        self.parent.AddLimb(limb)
     
     def AddLimbByJoints(self, joints): # Scene hier UI > RMB > Autobuild
         limb = None
         if (len(joints) < 2):
             limb = self.limbMng.Add()
             if joints:
-                self.jntMng.AddTemp(limb, joints[0])
+                self.jntMng.Add(limb, joints[0])
+                # self._AddJoint(limb, joints[0])
         # CHAIN LIMB
         if not limb and self.jntMng.AreJointsChained(joints):
             limb = self.limbMng.Add()
-            for joint in self.jntMng.GetJointChain(joints):
-                self.jntMng.AddTemp(limb, joint)
+            # Reverse = prevent groups from adding to joint display layer
+            for joint in self.jntMng.GetJointChain(joints)[::-1]:
+                self.jntMng.Add(limb, joint)
+            self.jntMng.ReindexJoints(limb)
 
         # BRANCH LIMB
         if not limb and self.jntMng.AreJointsSiblings(joints):
             limb = self.limbMng.Add()
             for joint in joints:
-                self.jntMng.AddTemp(limb, joint)
+                self.jntMng.Add(limb, joint)
+            self.jntMng.ReindexJoints(limb)
         return limb
+
+    # def _AddJoint(self, limb, joint):
+    #     if self.jntMng.Teardown_Editable(limb, joint):
+    #         group = self.grpMng.AddJointGroup(limb, joint)
+    #         self.ctrMng.Add(group, 'Circle_Wire') # Fix later
 
     def RemoveLimb(self, limb):
         self.UpdateJointFrame()

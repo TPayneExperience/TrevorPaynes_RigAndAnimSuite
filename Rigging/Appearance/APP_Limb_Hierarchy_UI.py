@@ -3,8 +3,9 @@ import pymel.core as pm
 
 
 class APP_Limb_Hierarchy_UI:
-    def __init__(self, limbMng, parent):
+    def __init__(self, limbMng, bhvMng, parent):
         self.limbMng = limbMng
+        self.bhvMng = bhvMng
         self.parent = parent
 
         self._Setup()
@@ -15,7 +16,8 @@ class APP_Limb_Hierarchy_UI:
         for rootLimb in self.limbMng.GetRootLimbs():
             prefix = pm.listConnections(rootLimb.rigRoot)[0].prefix.get()
             for limb in self.limbMng.GetLimbCreationOrder(rootLimb):
-                if limb.bhvType.get() in [0, 2, 4, 6, 7, 8]: # only limbs w/ctrs
+                bhvType = limb.bhvType.get()
+                if bhvType in self.bhvMng.ctrTypeIndexes: # Avoid IK Chain, CST
                     limbID = limb.ID.get()
                     name = '%s_%s' % (prefix, limb.pfrsName.get())
                     pm.treeView(self.widget, e=1, ai=(limbID, ''))

@@ -2,17 +2,18 @@
 import pymel.core as pm
 
 class APP_Control_Hierarchy_UI:
-    def __init__(self, limbMng, grpMng, ctrMng, nameMng, parent):
+    def __init__(self, limbMng, bhvMng, grpMng, ctrMng, nameMng, parent):
         self.limbMng = limbMng
+        self.bhvMng = bhvMng
         self.grpMng = grpMng
         self.ctrMng = ctrMng
         self.nameMng = nameMng
         self.parent = parent
 
         self.limb = None
-        self.ctrSuffixes = ['FK',
-                            'FKIKS',
-                            'LKAT']
+        # self.ctrSuffixes = ['FK',
+        #                     'FKIKS',
+        #                     'LKAT']
 
         self._Setup()
 
@@ -20,16 +21,23 @@ class APP_Control_Hierarchy_UI:
         self.limb = self.limbMng.GetLimb(limbID)
         self.Depopulate()
         for group in self.grpMng.GetLimbGroups(self.limb):
-            if group.groupType.get() in [0, 2, 4, 5]: # Skip IK / Constraint
-                controls = self.ctrMng.GetGroupControl(group)
-                if controls:
-                    controlID = controls[0].ID.get()
-                    if group.groupType.get() in [0, 4]:
-                        name = self.grpMng.GetJointGroupName(group)
-                    else:
-                        name = self.grpMng.GetLimbGroupName(group)
-                    pm.treeView(self.widget, e=1, addItem=(controlID, ''))
-                    pm.treeView(self.widget, e=1, displayLabel=(controlID, name))
+            control = pm.listConnections(group.control)[0]
+            controlID = control.ID.get()
+            name = control.shortName()
+            pm.treeView(self.widget, e=1, addItem=(controlID, ''))
+            pm.treeView(self.widget, e=1, displayLabel=(controlID, name))
+        # for group in self.grpMng.GetLimbGroups(self.limb):
+        #     if group.groupType.get() in [0, 2, 4, 5]: # Skip IK / Constraint
+        #         controls = self.ctrMng.GetGroupControl(group)
+        #         if controls:
+        #             controlID = controls[0].ID.get()
+        #             name = group.shortName()
+        #             if group.groupType.get() in [0, 4]:
+        #                 name = self.grpMng.GetJointGroupName(group)
+        #             else:
+        #                 name = self.grpMng.GetLimbGroupName(group)
+        #             pm.treeView(self.widget, e=1, addItem=(controlID, ''))
+        #             pm.treeView(self.widget, e=1, displayLabel=(controlID, name))
     
     def Depopulate(self):
         pm.treeView(self.widget, e=1, removeAll=1)

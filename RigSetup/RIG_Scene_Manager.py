@@ -45,10 +45,10 @@
 #         # SCENE
 #         cmds.flushUndo()
 #         cmds.file(newFile=1, force=1)
-#         rootGrpName = '%s_ROOT' % self.nameMng.GetPrefix()
-#         self.rootGrp = cmds.group(name=rootGrpName, em=True)
-#         self.meshGrp = cmds.group(name='Mesh_GRP', em=True)
-#         cmds.parent(self.meshGrp, self.rootGrp)
+#         rootGroupName = '%s_ROOT' % self.nameMng.GetPrefix()
+#         self.rootGroup = cmds.group(name=rootGroupName, em=True)
+#         self.meshGroup = cmds.group(name='Mesh_GRP', em=True)
+#         cmds.parent(self.meshGroup, self.rootGroup)
 
 #         # MESH LAYER
 #         self.meshLayer = cmds.createDisplayLayer(n='Rig Mesh', e=True)
@@ -62,18 +62,18 @@
 #             cmds.file(meshPath, i=True, f=True)
 #             meshShapes = cmds.ls(type='mesh')
 #             meshes = cmds.listRelatives(meshShapes, p=1)
-#             cmds.parent(meshes, self.meshGrp)
+#             cmds.parent(meshes, self.meshGroup)
 #             cmds.editDisplayLayerMembers(self.meshLayer, meshes)
     
 #     def UpdatePrefix(self):
-#         rootGrpName = '%s_ROOT' % self.nameMng.GetPrefix()
-#         self.rootGrp = cmds.rename(self.rootGrp, rootGrpName)
+#         rootGroupName = '%s_ROOT' % self.nameMng.GetPrefix()
+#         self.rootGroup = cmds.rename(self.rootGroup, rootGroupName)
 
 #     def UpdateMeshes(self):
 #         cmds.select(d=1)
-#         cmds.delete(self.meshGrp)
-#         self.meshGrp = cmds.group(name='Mesh_GRP', em=True)
-#         cmds.parent(self.meshGrp, self.rootGrp)
+#         cmds.delete(self.meshGroup)
+#         self.meshGroup = cmds.group(name='Mesh_GRP', em=True)
+#         cmds.parent(self.meshGroup, self.rootGroup)
 #         self._Import_Meshes()
 
 

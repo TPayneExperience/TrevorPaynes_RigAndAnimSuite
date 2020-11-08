@@ -24,7 +24,7 @@ class SaveTemplate_UI:
 
     def _Setup(self):
         form = pm.setParent(q=1)
-        self.name_grp = pm.textFieldGrp(  l='', adj=1, pht='Biped Arm...', 
+        self.name_grp = pm.textFieldGroup(  l='', adj=1, pht='Biped Arm...', 
                                             tcc=self.NameChanged, cw=(2,80), 
                                             cal=(1,'left'), p=form)
         temp_fl = pm.frameLayout(l='Select limbs to SAVE in Template', 
@@ -99,7 +99,7 @@ class SaveTemplate_UI:
                 if self.nameMng.AreAllValidCharacters(text):
                     self.nameValid = True
         msg = 'TEMPLATE NAME | '+ self.nameMng.errorMsg[5:]
-        pm.textFieldGrp(self.name_grp, e=1, l=msg)
+        pm.textFieldGroup(self.name_grp, e=1, l=msg)
         self.Update_SaveBtn()
 
     def Update_SaveBtn(self):

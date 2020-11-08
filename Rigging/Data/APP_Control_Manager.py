@@ -8,12 +8,16 @@ class APP_Control_Manager:
         self.nameMng = nameMng
 
         self._ctrs = {} # ctrID : ctr
-        self._ctrTemplates = {} # shortName : transformNode
+        self.ctrTypes = [   'Square_Wire', # Empty
+                            'Circle_Wire', # Joint
+                            'Diamond_Wire', # Distance
+                            'Pin_Wire'] # FKIK
+        self._ctrTemplates = {} # CtrType/Name : ControlTemplate
     
     def NewRig(self, rigRoot):
         self.rigRoot = rigRoot
         self._ctrs = {} # ctrID : ctr
-        self.ctrGrp = pm.group(name='ControlGroups', em=1)
+        self.ctrGroup = pm.group(name='ControlGroups', em=1)
         self.ctrTemplatesParent = pm.group(name='Internal', em=1)
         self.ctrTemplatesParent.v.set(0)
         pm.addAttr(rigRoot, ln='nextCtrID', at='long')
@@ -43,54 +47,46 @@ class APP_Control_Manager:
 
 #============= FUNCTIONALITY ============================
 
-    def Add(self, group):
+    def Add(self, group, ctrType):
         ctrID = self.rigRoot.nextCtrID.get()
         self.rigRoot.nextCtrID.set(ctrID + 1)
-        grpType = group.groupType.get()
-        if grpType in [0, 4, 5]: # FK, LookAt, Empty
-            ctr = self._Add('Circle_Wire', ctrID)
-        elif grpType == 1: # IK PV
-            ctr = self._Add('Diamond_Wire', ctrID)
-        elif (group.groupType.get() == 2): # FK / IK Switch
-            ctr = self._Add('FKIK_Wire', ctrID)
-        else:
-            return None
+        
+        ctr = pm.duplicate(self._ctrTemplates[ctrType])[0]
+        pm.addAttr(ctr, ln='ID', at='long', dv=ctrID)
+        pm.addAttr(ctr, ln='group', dt='string')
+
+        pm.editDisplayLayerMembers(self.ctrLayer, ctr)
         pm.connectAttr(group.control, ctr.group)
-        self._CopyXForm(group, ctr)
+        pm.xform(ctr, t=[0,0,0], ro=[0,0,0], s=[1,1,1])
         pm.parent(ctr, group)
+
         self._ctrs[ctrID] = ctr
         return ctr
 
     def Remove(self, control):
         del(self._ctrs[control.ID.get()])
-        pm.delete(control)
 
+    # Broken
     def SetType(self, control, ctrType):
-        newCtr = self._Add(ctrType, control.ID.get())
-        self._CopyXForm(control, newCtr)
         group = pm.listConnections(control.group)[0]
-        pm.disconnectAttr(control.group)
-        pm.connectAttr(group.control , newCtr.group)
+        pm.disconnectAttr(group.control)
+        newCtr = self.Add(group, ctrType)
+        pm.parent(newCtr, control)
+        pm.xform(newCtr, t=[0,0,0], ro=[0,0,0], s=[1,1,1])
         pm.parent(newCtr, group)
         self._ctrs[newCtr.ID.get()] = newCtr
+        self.Remove(control)
         pm.delete(control)
 
 #============= PRIVATE ============================
 
-    def _Add(self, ctrType, ctrID):
-        ctr = pm.duplicate(self._ctrTemplates[ctrType])[0]
-        pm.addAttr(ctr, ln='ID', at='long', dv=ctrID)
-        pm.addAttr(ctr, ln='group', dt='string')
-        pm.editDisplayLayerMembers(self.ctrLayer, ctr)
-        return ctr
-
-    def _CopyXForm(self, source, target):
-        pos = pm.xform(source, q=1, t=1, ws=1)
-        rot = pm.xform(source, q=1, ro=1, ws=1)
-        scale = pm.xform(source, q=1, s=1, ws=1)
-        pm.xform(target, t=pos, ws=1)
-        pm.xform(target, ro=rot, ws=1)
-        pm.xform(target, s=scale, ws=1)
+    # def _CopyXForm(self, source, target):
+    #     pos = pm.xform(source, q=1, t=1, ws=1)
+    #     rot = pm.xform(source, q=1, ro=1, ws=1)
+    #     scale = pm.xform(source, q=1, s=1, ws=1)
+    #     pm.xform(target, t=pos, ws=1)
+    #     pm.xform(target, ro=rot, ws=1)
+    #     pm.xform(target, s=scale, ws=1)
 
     def _SortGroups(self, groups):
         indexGroups = {} # jointIndex : group

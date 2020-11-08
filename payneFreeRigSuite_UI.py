@@ -73,15 +73,15 @@ class PayneFreeRigSuite_UI():
         self.meshLayer = pm.createDisplayLayer(n='Rig Mesh', e=True)
         pm.setAttr(self.meshLayer + '.displayType', 2)
         pm.select(d=True)
-        self.meshGrp = pm.group(name='Mesh_GRP', em=True)
-        pm.parent(self.meshGrp, self.rigRoot)
+        self.meshGroup = pm.group(name='Mesh_GRP', em=True)
+        pm.parent(self.meshGroup, self.rigRoot)
         self.UpdatePrefix()
         self.nameMng.NewRig(self.rigRoot)
         self.rig_ui.NewRig(self.rigRoot)
         # self.pfrs.rigSetup.NewRig('somePrefix', [0,1,2,3,4], True)
         # self.rig_ui.NewRig(self.pfrs.rigSetup.rigRoot)
         # self.pfrs.rigSceneMng.NewRig()
-        # self.limbs_tw.NewRig(self.pfrs.rigSceneMng.rootGrp)
+        # self.limbs_tw.NewRig(self.pfrs.rigSceneMng.rootGroup)
         # self.pfrs.saveLoadRig.Save()
 
     def UpdatePrefix(self):
@@ -149,7 +149,7 @@ class PayneFreeRigSuite_UI():
                 pm.menuItem(l='Load Template...')
                 pm.menuItem(l='Save Template...')
                 pm.menuItem(divider=1)
-                pm.menuItem(l='Clean Up Unused Controls') # Deletes Unused Ctrs + grps
+                pm.menuItem(l='Clean Up Unused Controls') # Deletes Unused Ctrs + Groups
 
             with pm.menu('Skinning'):
                 pm.menuItem(l='disabled')
@@ -169,8 +169,8 @@ class PayneFreeRigSuite_UI():
     def RemoveLimb(self, limb):
         pass
 
-    def UpdateLimb(self, limb):
-        pass
+    # def UpdateLimb(self, limb):
+    #     pass
 
     
 #=========== FUNCTIONALITY ====================================

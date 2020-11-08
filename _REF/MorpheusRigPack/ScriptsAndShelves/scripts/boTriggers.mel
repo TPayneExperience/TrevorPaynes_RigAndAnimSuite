@@ -679,12 +679,12 @@ global proc btrTrigRefresh() {
 	int $trigCount = 0;
     string $appendCmd;
 	string $selectCmd;
-    string $trigList[], $trigGrpList[];
+    string $trigList[], $trigGroupList[];
     
     //get lists
     $trigList = `ls -r 1 "*btrTrig_*"`;
-	$trigGrpList = `ls -r 1 "*btrTrigGrp_*"`;
-    $trigCount = size($trigList)+size($trigGrpList);
+	$trigGroupList = `ls -r 1 "*btrTrigGroup_*"`;
+    $trigCount = size($trigList)+size($trigGroupList);
     
 	//REGULAR
 	$appendCmd = "textScrollList -e ";
@@ -695,7 +695,7 @@ global proc btrTrigRefresh() {
 		
     //GROUPED
 	$appendCmd = "textScrollList -e ";
-    for ($trig in $trigGrpList)
+    for ($trig in $trigGroupList)
 		$appendCmd += ("-a "+$trig+" ");
 	$appendCmd += "btrTrigList";
 	eval($appendCmd);
@@ -721,14 +721,14 @@ global proc btrTrigCheck(int $useSelected, int $promptUpdate) {
     int $nonUnique = 0;
     int $notUpdated = 0;
 	int $notRecognized = 0;
-    string $trigList[], $trigGrpList[], $unrecogList[];
+    string $trigList[], $trigGroupList[], $unrecogList[];
     
     //get lists
 	if ($useSelected) {
 		string $selected[] = `textScrollList -q -si btrTrigList`;
 		for ($trig in $selected) {
-			if (`gmatch $trig "*btrTrigGrp_*"`) {
-				$trigGrpList[size($trigGrpList)] = $trig;
+			if (`gmatch $trig "*btrTrigGroup_*"`) {
+				$trigGroupList[size($trigGroupList)] = $trig;
 			} else {
 				$trigList[size($trigList)] = $trig;
 			}
@@ -736,9 +736,9 @@ global proc btrTrigCheck(int $useSelected, int $promptUpdate) {
 	} else {
 		//get lists
 		$trigList = `ls -r 1 "*btrTrig_*"`;
-		$trigGrpList = `ls -r 1 "*btrTrigGrp_*"`;
+		$trigGroupList = `ls -r 1 "*btrTrigGroup_*"`;
 	}
-    $trigCount = size($trigList)+size($trigGrpList);
+    $trigCount = size($trigList)+size($trigGroupList);
     
 	if ($trigCount > 0) {
         progressBar -e -min 0 -max $trigCount -pr 0 btrTrigProgBar;
@@ -756,7 +756,7 @@ global proc btrTrigCheck(int $useSelected, int $promptUpdate) {
         }
 		
         //GROUPED
-		for ($trig in $trigGrpList) {
+		for ($trig in $trigGroupList) {
 			if (btrTrig_getVersion($trig) == "") {
 				$notRecognized++;
 				$unrecogList[size($unrecogList)] = $trig;
@@ -988,7 +988,7 @@ global proc btrTrigGroupCreate() {
 			error("cannot group/ungroup referenced triggers because they are read only, group or ungroup them before referencing");
 			return;
 		}
-		if (size(`match "btrTrigGrp_" $trig`)) {
+		if (size(`match "btrTrigGroup_" $trig`)) {
 			error ("cannot group a group trigger, ungroup first then select all of the groups triggers");
 			return;
 		}
@@ -1016,13 +1016,13 @@ global proc btrTrigGroupCreate() {
 		return;
 	}
 	//check for unique
-	if (size(`ls ("btrTrigGrp_"+$groupName)`) > 0)
+	if (size(`ls ("btrTrigGroup_"+$groupName)`) > 0)
 		return;
 	
 	
 	//generate the script
 	$trigScript = `btrTrig_createTrigGroupScript $groupName $trigList`;
-	$trigScriptNode = ("btrTrigGrp_"+$groupName);
+	$trigScriptNode = ("btrTrigGroup_"+$groupName);
 	
 	scriptNode -st 1 -bs $trigScript[0] -as $trigScript[1] -n $trigScriptNode;
     scriptNode -eb $trigScriptNode;
@@ -1053,7 +1053,7 @@ global proc btrTrigGroupExpand() {
 			error("cannot group/ungroup referenced triggers because they are read only. group or ungroup them before referencing");
 			return;
 		}
-		if (!size(`match "btrTrigGrp" $trig`)) {
+		if (!size(`match "btrTrigGroup" $trig`)) {
 			error("cannot ungroup normal triggers");
 			return;
 		}
@@ -1105,7 +1105,7 @@ global proc btrTrigLoad() {
     textScrollList -e -da btrSetattrObjList;
     
     for ($i = 0; $i < size($trigList); $i++) {
-		if (size(`match ".*btrTrigGrp_.*" $trigList[$i]`))
+		if (size(`match ".*btrTrigGroup_.*" $trigList[$i]`))
 			continue;
 		
         //get the information
@@ -1208,16 +1208,16 @@ global proc btrTrigDelete(string $trigList[]) {
 }
 global proc btrTrigUpdate(int $useSelected) {
     //counters
-    int $fixed = 0, $fixedGrp = 0;
-    string $trigList[], $trigGrpList[], $unrecogList[];
+    int $fixed = 0, $fixedGroup = 0;
+    string $trigList[], $trigGroupList[], $unrecogList[];
 	clear $trigList;
-	clear $trigGrpList;
+	clear $trigGroupList;
 	
 	if ($useSelected) {
 		string $selected[] = `textScrollList -q -si btrTrigList`;
 		for ($trig in $selected) {
-			if (`gmatch $trig "*btrTrigGrp_*"`) {
-				$trigGrpList[size($trigGrpList)] = $trig;
+			if (`gmatch $trig "*btrTrigGroup_*"`) {
+				$trigGroupList[size($trigGroupList)] = $trig;
 			} else {
 				$trigList[size($trigList)] = $trig;
 			}
@@ -1225,10 +1225,10 @@ global proc btrTrigUpdate(int $useSelected) {
 	} else {
 		//get lists
 		$trigList = `ls -r 1 "*btrTrig_*"`;
-		$trigGrpList = `ls -r 1 "*btrTrigGrp_*"`;
+		$trigGroupList = `ls -r 1 "*btrTrigGroup_*"`;
 	}
 	
-    $trigCount = size($trigList)+size($trigGrpList);
+    $trigCount = size($trigList)+size($trigGroupList);
 	
     if ($trigCount == 0) {
         print ("//no triggers to update\n");
@@ -1297,27 +1297,27 @@ global proc btrTrigUpdate(int $useSelected) {
     
 	
 	//REBUILD GROUP TRIGGERS
-	for ($i = 0; $i < size($trigGrpList); $i++) {
+	for ($i = 0; $i < size($trigGroupList); $i++) {
 		//groups didn't exist before 1.3, so theyre all updateable
 		string $type = "none";
-		if (size(`match ":btrTrigGrp" (""+$trigGrpList[$i])`)) {
+		if (size(`match ":btrTrigGroup" (""+$trigGroupList[$i])`)) {
 			$type = ":";
-		} else if (size(`match "_btrTrigGrp" (""+$trigGrpList[$i])`)) {
+		} else if (size(`match "_btrTrigGroup" (""+$trigGroupList[$i])`)) {
 			$type = "_";
 		}
         //get trigger group info
 		string $ctlObjs[] = {};
 		string $actions[] = {};
-		$ctlObjs = btrTrig_getCtlObjs($trigGrpList[$i]);
-		$actions = btrTrig_getActions($trigGrpList[$i]);
+		$ctlObjs = btrTrig_getCtlObjs($trigGroupList[$i]);
+		$actions = btrTrig_getActions($trigGroupList[$i]);
 		string $ctlObjStr = "^";
 		//
-		string $groupName = `substitute ".*btrTrigGrp_" $trigGrpList[$i] ""`;
+		string $groupName = `substitute ".*btrTrigGroup_" $trigGroupList[$i] ""`;
 		$groupName = `substitute "_btrTrigProc$" $groupName ""`;
 		//
         string $prefix = "";
 		if ($type != "none") {
-			$prefix = `substitute ($type+"btrTrigGrp_.*") $trigGrpList[$i] ""`;
+			$prefix = `substitute ($type+"btrTrigGroup_.*") $trigGroupList[$i] ""`;
 		}
 		
 		//in order to allow for multiples of the same character, we need to append the prefix to the end of group name
@@ -1371,11 +1371,11 @@ global proc btrTrigUpdate(int $useSelected) {
 		
         //generate scriptNode script
         //edit the script node
-        scriptNode -ea $trigGrpList[$i];
-        scriptNode -e -bs $beforeScript -as $afterScript $trigGrpList[$i];
-        scriptNode -eb $trigGrpList[$i];
+        scriptNode -ea $trigGroupList[$i];
+        scriptNode -e -bs $beforeScript -as $afterScript $trigGroupList[$i];
+        scriptNode -eb $trigGroupList[$i];
         
-        $fixedGrp++;
+        $fixedGroup++;
 	}
 	
 	//print unrecognized list
@@ -1391,8 +1391,8 @@ global proc btrTrigUpdate(int $useSelected) {
     $printStr = "";
     if ($fixed > 0)
         $printStr += ($fixed+" trigger(s) updated/rebuilt; ");
-	if ($fixedGrp > 0)
-		$printStr += ($fixedGrp+" trigger group(s) updated/rebuilt; ");
+	if ($fixedGroup > 0)
+		$printStr += ($fixedGroup+" trigger group(s) updated/rebuilt; ");
     if (size($unrecogList) > 0)
        $printStr += (size($unrecogList)+" triggers weren't recognized (see script editor for list)");
     $printStr += "\n";
@@ -1694,7 +1694,7 @@ global proc string btrTrig_getMelscript(string $actions) {
 global proc int btrTrig_groupCheck(string $trig) {
 //returns 1 if it's a group, 0 if it's a regular trigger
 
-	if (size(`match "btrTrigGrp_" $trig`)) {
+	if (size(`match "btrTrigGroup_" $trig`)) {
 		return 1;
 	} else {
 		return 0;
@@ -1831,7 +1831,7 @@ global proc string btrTrig_createTrigGroupBeforeScript(string $groupName, string
 	$beforeScript = "//boTriggers v1.3\n";
 	$beforeScript += "\t\n";
 	$beforeScript += "//GROUP_TRIGGER\n";
-	$beforeScript += "global proc btrTrigGrp_"+$groupName+"_btrTrigProc() {\n";
+	$beforeScript += "global proc btrTrigGroup_"+$groupName+"_btrTrigProc() {\n";
 	$beforeScript += "\tglobal int $btrTrigSelectionMode;\n";
 	$beforeScript += "\tif ($btrTrigSelectionMode == 1) return;\n";
 	$beforeScript += "string $selString = (\"^\" + stringArrayToString(`ls -sl -r 1`, \"^\") + \"^\");\n";
@@ -1842,14 +1842,14 @@ global proc string btrTrig_createTrigGroupBeforeScript(string $groupName, string
 	}
 	$beforeScript += "	//END_TRIGGERS\n";
 	$beforeScript += "}\n";
-	$beforeScript += "scriptJob -cu 1 -kws -e \"SelectionChanged\" \"btrTrigGrp_"+$groupName+"_btrTrigProc\";";
+	$beforeScript += "scriptJob -cu 1 -kws -e \"SelectionChanged\" \"btrTrigGroup_"+$groupName+"_btrTrigProc\";";
 	
 	return $beforeScript;
 }
 global proc string btrTrig_createTrigAfterScript(int $group, string $ctlObj) {
 //returns the after script determined by if its a group, and the ctlObj
 	
-	string $groupStr = ($group == 1 ? "btrTrigGrp_" : "");
+	string $groupStr = ($group == 1 ? "btrTrigGroup_" : "");
 	string $afterScript = "proc "+$groupStr+$ctlObj+"_btrTrigKillProc() {\n";
 	$afterScript += "\tstring \$scriptJobList[] = `scriptJob -lj`;\n";
 	$afterScript += "\tfor (\$job in \$scriptJobList) {\n";
@@ -1989,7 +1989,7 @@ global proc btrTriggersHelp() {
 			frameLayout -w 274 -cll 1 -cl 1 -li 10 -l "Grouping" -bs "etchedOut";
 				columnLayout;
 					separator -h 2 -st none;
-					text -w 270 -al "center" -l "Using the Advanced > Group Triggers feature\nyou can join multiple triggers into one scriptNode.\nThis will cause them to evaluate instantaneously,\nbut still be separate. The lag that is usually\nexperienced when selecting many triggers will be\neliminated. To restore the original triggers,\nselect a btrTrigGrp and then choose\nAdvanced > Expand Trigger.";
+					text -w 270 -al "center" -l "Using the Advanced > Group Triggers feature\nyou can join multiple triggers into one scriptNode.\nThis will cause them to evaluate instantaneously,\nbut still be separate. The lag that is usually\nexperienced when selecting many triggers will be\neliminated. To restore the original triggers,\nselect a btrTrigGroup and then choose\nAdvanced > Expand Trigger.";
 					setParent ..;
 				setParent ..;
 			separator -h 10 -st none;
@@ -2215,7 +2215,7 @@ $btrTrig_triggerCTLJobNum = `scriptJob -cu 1 -kws -e "SelectionChanged" "trigger
 //boTriggers v1.2
  
 //GROUP_TRIGGER
-global proc btrTrigGrp_groupName_trigProc() {
+global proc btrTrigGroup_groupName_trigProc() {
     global int $btrTrigSelectionMode;
     if ($btrTrigSelectionMode == 1) return;
     string $selList[] = `ls -sl`;
@@ -2233,7 +2233,7 @@ global proc btrTrigGrp_groupName_trigProc() {
     //LOOP_END
 }
  
-$btrTrigbobJobNum = `scriptJob -cu 1 -kws -e "SelectionChanged" "btrTrigGrp_groupName_trigProc"` ;
+$btrTrigbobJobNum = `scriptJob -cu 1 -kws -e "SelectionChanged" "btrTrigGroup_groupName_trigProc"` ;
 //--------------------------------------------------
 //====================================================================================================
 
@@ -2293,7 +2293,7 @@ triggerCTL_btrTrigKillProc;
 //boTriggers v1.3
 	
 //GROUP_TRIGGER
-global proc btrTrigGrp_groupName_btrTrigProc() {
+global proc btrTrigGroup_groupName_btrTrigProc() {
 	global int $btrTrigSelectionMode;
 	if ($btrTrigSelectionMode == 1) return;
 	string $selString = ("^" + stringArrayToString(`ls -sl -r 1`, "^") + "^");
@@ -2346,7 +2346,7 @@ headsUpMessage "triggers 1.3!";
 //TRIGGER_END_002
 	//END_TRIGGERS
 }
-scriptJob -cu 1 -kws -e "SelectionChanged" "btrTrigGrp_groupName_btrTrigProc";
+scriptJob -cu 1 -kws -e "SelectionChanged" "btrTrigGroup_groupName_btrTrigProc";
 //--------------------------------------------------
 end version info */
 //====================================================================================================

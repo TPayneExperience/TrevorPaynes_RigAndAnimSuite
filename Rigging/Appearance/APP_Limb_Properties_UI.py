@@ -93,13 +93,16 @@ class APP_Limb_Properties_UI:
             pm.attrEnumOptionMenu(self.targetType, e=1, en=0)
 
     def SetControlType(self, ctrType):
-        print ctrType
         for group in self.grpMng.GetLimbGroups(self.limb):
-            if group.groupType.get() in [0, 2, 4, 5]: # Skip IK / Constraint
-                controls = self.ctrMng.GetGroupControl(group)
-                if controls:
-                    control = controls[0]
-                    self.ctrMng.SetType(control, ctrType)
+            control = pm.listConnections(group.control)[0]
+            self.ctrMng.SetType(control, ctrType)
+        # print ctrType
+        # for group in self.grpMng.GetLimbGroups(self.limb):
+        #     if group.groupType.get() in [0, 2, 4, 5]: # Skip IK / Constraint
+        #         controls = self.ctrMng.GetGroupControl(group)
+        #         if controls:
+        #             control = controls[0]
+        #             self.ctrMng.SetType(control, ctrType)
 
 
 

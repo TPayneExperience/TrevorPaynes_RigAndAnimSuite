@@ -12,9 +12,10 @@ reload(limbProp_UI)
 
 
 class Appearance_UI:
-    def __init__(self, limbMng, grpMng, ctrMng, nameMng, parent):
+    def __init__(self, limbMng, bhvMng, grpMng, ctrMng, nameMng, parent):
 
         self.limbMng = limbMng
+        self.bhvMng = bhvMng
         self.grpMng = grpMng
         self.ctrMng = ctrMng
         self.nameMng = nameMng
@@ -32,10 +33,12 @@ class Appearance_UI:
             with pm.frameLayout('Limb Hierarchy', bv=1):
                 self.limbHier_ui = limbHier_UI.APP_Limb_Hierarchy_UI(
                                                         self.limbMng,
+                                                        self.bhvMng,
                                                         # self.jntMng,
                                                         self)
             with pm.frameLayout('Control Hierarchy', bv=1):
                 self.ctrHier_ui = ctrHier_UI.APP_Control_Hierarchy_UI(  self.limbMng,
+                                                                        self.bhvMng,
                                                                         self.grpMng,
                                                                         self.ctrMng,
                                                                         self.nameMng,

@@ -49,7 +49,7 @@ class BHV_Limb_Properties_UI:
             with pm.columnLayout(adj=1) as self.bhvLimbProp_cl:
                 self.bhvType_om = pm.optionMenu(l='Bhv Type', 
                                                 cc=pm.Callback(self.SetBhvType))
-                self.grpParent_at = pm.attrEnumOptionMenu(  l='Bhv Grp Parent', 
+                self.grpParent_at = pm.attrEnumOptionMenu(  l='Bhv Group Parent', 
                                                             at='perspShape.filmFit')
 
         with pm.frameLayout('Limb CONSTRAINT Properties', bv=1) as self.cstLayout:
@@ -72,25 +72,26 @@ class BHV_Limb_Properties_UI:
 
     def SetBhvType(self): # Mostly UI
         bhvTypeStr = pm.optionMenu(self.bhvType_om, q=1, v=1)
-        newBhvTypeIndex = self.bhvMng.GetBhvIndex(bhvTypeStr)
-        oldBhvTypeIndex = self.limb.bhvType.get()
+        newBhvIndex = self.bhvMng.GetBhvIndex(bhvTypeStr)
+        oldBhvIndex = self.limb.bhvType.get()
         oldSourceLimbs = pm.listConnections(self.limb.bhvIKSourceLimb)
-        if self.bhvMng.SetBhvType(self.limb, newBhvTypeIndex):
+        if self.bhvMng.SetBhvType(self.limb, oldBhvIndex, newBhvIndex):
             # Force IKs which Targeted this limb, to find other
-            if oldBhvTypeIndex in self.bhvMng.ikTargetTypeIndexes:
-                if newBhvTypeIndex not in self.bhvMng.ikTargetTypeIndexes:
+            if oldBhvIndex in self.bhvMng.ikTargetTypeIndexes:
+                if newBhvIndex not in self.bhvMng.ikTargetTypeIndexes:
                     for limb in oldSourceLimbs:
                         self._SetIKBhv(limb)
-            isIK = (newBhvTypeIndex in self.bhvMng.ikTypeIndexes)
-            isCst = (newBhvTypeIndex == 3)
+            isIK = (newBhvIndex in self.bhvMng.ikTypeIndexes)
+            isCst = (newBhvIndex == 3)
             pm.frameLayout(self.cstLayout, e=1, en=isCst)
             pm.frameLayout(self.ikLayout, e=1, en=isIK)
             if isCst:
                 self._SetCstBhv()
             elif isIK:
                 self._SetIKBhv(self.limb)
-                if newBhvTypeIndex == 2: # FKIK
-                    self.UpdateFKIKSwitchJoint(1)
+                # if newBhvIndex == 2: # FKIK
+                    # joints = self.jntMng.GetLimbJoints(self.limb)
+                    # self.UpdateFKIKSwitchJoint(1, joints)
             self.Populate()
             self.UpdateUI()
             self.parent.SetBhvType(self.limb) 
@@ -157,7 +158,8 @@ class BHV_Limb_Properties_UI:
     
     def _SetIKTargetLimb(self, sourceLimb, targetLimb):
         targetGroups = self.grpMng.GetLimbGroups(targetLimb)
-        targetGroupNames = [self.GetGroupName(g) for g in targetGroups] # should be fk/empty
+        # targetGroupNames = [self.GetGroupName(g) for g in targetGroups] # should be fk/empty
+        targetGroupNames = [g.shortName() for g in targetGroups] # should be fk/empty
         sourceGroups = self.grpMng.GetLimbGroups(sourceLimb)
         if targetGroupNames:
             names = ':'.join(targetGroupNames)
@@ -179,8 +181,9 @@ class BHV_Limb_Properties_UI:
                     # Set source Group's target group index
                     targetDist = sorted(list(distances.keys()))[0]
                     targetGroup = distances[targetDist][0]
-                    targetGroupName = self.GetGroupName(targetGroup)
-                    index = targetGroupNames.index(targetGroupName)
+                    # targetGroupName = self.GetGroupName(targetGroup)
+                    # index = targetGroupNames.index(targetGroupName)
+                    index = targetGroupNames.index(targetGroup.shortName())
                     sourceGroup.IKTargetGroup.set(index)
         else:
             for sourceGroup in sourceGroups:
@@ -191,11 +194,11 @@ class BHV_Limb_Properties_UI:
 
 #=========== UI UPDATES ==============================================
 
-    def GetGroupName(self, group):
-        if (pm.listConnections(group.joint)):
-            return self.grpMng.GetJointGroupName(group)
-        else:
-            return self.grpMng.GetLimbGroupName(group)
+    # def GetGroupName(self, group):
+    #     if (pm.listConnections(group.joint)):
+    #         return self.grpMng.GetJointGroupName(group)
+    #     else:
+    #         return self.grpMng.GetLimbGroupName(group)
 
     def GetLimbName(self, limb):
         prefix = self.limbMng.GetLimbPrefix(limb)
@@ -240,7 +243,7 @@ class BHV_Limb_Properties_UI:
             return
         pm.deleteUI(self.grpParent_at)
         self.grpParent_at = pm.attrEnumOptionMenu(  self.grpParent_at, 
-                                                    l='Bhv Grp Parent', 
+                                                    l='Bhv Group Parent', 
                                                     p=self.bhvLimbProp_cl,
                                                     at=self.limb.parentGroup)
 
@@ -323,10 +326,12 @@ class BHV_Limb_Properties_UI:
         self.grpMng.UpdateIKPVPosition(self.limb)
                
     def UpdateFKIKSwitchJoint(self, ignore):
-        self.grpMng.UpdateFKIKSwitchJoint(self.limb)
+        joints = self.jntMng.GetLimbJoints(self.limb)
+        group = pm.listConnections(self.limb.bhvFKIKSwitchGroup)
+        self.grpMng.UpdateFKIKSwitchJoint(group, joints)
         # index = self.limb.bhvFKIKParentJoint.get()
         # joints = self.jntMng.GetLimbJoints(self.limb)
-        # group = pm.listConnections(self.limb.bhvFKIKSwitchGrp)[0]
+        # group = pm.listConnections(self.limb.bhvFKIKSwitchGroup)[0]
         # self.grpMng.SetLockGroup(group, False)
         # self.grpMng.PosRotGroupToJoint(group, joints[index])
         # self.grpMng.SetLockGroup(group, True)

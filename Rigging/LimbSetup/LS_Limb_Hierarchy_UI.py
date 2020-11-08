@@ -3,10 +3,12 @@ import pymel.core as pm
 
 
 class LS_Limb_Hierarchy_UI:
-    def __init__(self, limbMng, jntMng, nameMng, skelUI):
+    def __init__(self, limbMng, jntMng, grpMng, ctrMng, nameMng, skelUI):
 
         self.limbMng = limbMng
         self.jntMng = jntMng
+        self.grpMng = grpMng
+        self.ctrMng = ctrMng
         self.nameMng = nameMng
         self.parent = skelUI
 
@@ -91,9 +93,18 @@ class LS_Limb_Hierarchy_UI:
                                     cancelButton='No', 
                                     dismissString='No') == 'Yes'):
                 limb = self.limbMng.GetLimb(int(limbIDStrs[0]))
-                joints = self.jntMng.GetLimbTempJoints(limb)
-                for joint in joints:
+                for joint in self.jntMng.GetLimbTempJoints(limb):
                     self.jntMng.RemoveTemp(joint)
+
+                limbGroups = pm.listConnections(limb.bhvDistanceGroup)
+                limbGroups += pm.listConnections(limb.bhvEmptyGroup)
+                limbGroups += pm.listConnections(limb.bhvFKIKSwitchGroup)
+                for group in limbGroups:
+                    ctr = pm.listConnections(group.control)[0]
+                    self.ctrMng.Remove(ctr)
+                    self.grpMng.Remove(group)
+                pm.delete(limbGroups)
+                
                 mirror = self.limbMng.GetLimbMirror(limb)
                 self.parent.RemoveLimb(limb)
                 self.limbMng.Remove(limb)

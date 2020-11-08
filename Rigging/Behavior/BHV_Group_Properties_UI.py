@@ -2,10 +2,11 @@
 import pymel.core as pm
 
 class BHV_Group_Properties_UI:
-    def __init__(self, limbMng, jntMng, grpMng, parent):
+    def __init__(self, limbMng, jntMng, bhvMng, grpMng, parent):
 
         self.limbMng = limbMng
         self.jntMng = jntMng
+        self.bhvMng = bhvMng
         self.grpMng = grpMng
         self.parent = parent
 
@@ -26,7 +27,7 @@ class BHV_Group_Properties_UI:
 
     def _Setup(self):
         with pm.frameLayout('Group Properties', bv=1, en=0) as self.groupLayout:
-            with pm.columnLayout(adj=1) as self.bhvGrpProp_cl:
+            with pm.columnLayout(adj=1) as self.bhvGroupProp_cl:
                 self.weight_sg = pm.attrFieldSliderGrp( l='Constraint Weight', 
                                                         min=0.0,
                                                         max=1.0,
@@ -43,22 +44,24 @@ class BHV_Group_Properties_UI:
 
     def UpdateUI(self):
         group = self.group
-        groupType = group.groupType.get()
+        limb = pm.listConnections(group.limb)[0]
+        bhvType = limb.bhvType.get()
         pm.attrFieldSliderGrp(self.weight_sg, e=1, en=0)
         # DELETE OLD ATTRS
         if self.parentSub_at:
             pm.deleteUI(self.parentSub_at)
             self.parentSub_at = None
 
-        # IK PV + Chain Parenting
-        if groupType in [1, 6]:
-            self.parentSub_at = pm.attrEnumOptionMenu(  l='Parent Group',
-                                                        at=group.IKTargetGroup, 
-                                                        p=self.bhvGrpProp_cl)
+        # CONSTRAINT
+        if bhvType == 3: 
+            pm.attrFieldSliderGrp(self.weight_sg, e=1, en=1, 
+                                                    at=self.group.weight)
 
-        # Cst Weight attr
-        if groupType == 3:
-            pm.attrFieldSliderGrp(self.weight_sg, e=1, en=1, at=group.weight)
+        # IK CHAIN
+        elif bhvType == 5: 
+            self.parentSub_at = pm.attrEnumOptionMenu(  l='IK Target Joint',
+                                                    at=self.group.targetJoint, 
+                                                    p=self.bhvGroupProp_cl)
 
 
 

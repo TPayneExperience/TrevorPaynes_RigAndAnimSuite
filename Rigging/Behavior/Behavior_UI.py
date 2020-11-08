@@ -21,6 +21,7 @@ class Behavior_UI:
         self.bhvMng = bhvMng
         self.grpMng = grpMng
         self.ctrMng = ctrMng
+        
 
         self._Setup()
 
@@ -48,6 +49,7 @@ class Behavior_UI:
                                                                     self)
             self.grpProp_ui = bhvProp_UI.BHV_Group_Properties_UI(   self.limbMng,
                                                                     self.jntMng,
+                                                                    self.bhvMng,
                                                                     self.grpMng,
                                                                     self)
     
@@ -89,10 +91,11 @@ class Behavior_UI:
                     dist += (sourcePos[i]-targetPos[i])**2
                 distances[dist] = parentGroup
                 # Create names list for enum
-                if (pm.listConnections(parentGroup.joint)):
-                    names.append(self.grpMng.GetJointGroupName(parentGroup))
-                else:
-                    names.append(self.grpMng.GetLimbGroupName(parentGroup))
+                names.append(parentGroup.shortName())
+                # if (pm.listConnections(parentGroup.joint)):
+                #     names.append(self.grpMng.GetJointGroupName(parentGroup))
+                # else:
+                #     names.append(self.grpMng.GetLimbGroupName(parentGroup))
             pm.addAttr(limb.parentGroup, e=1, en=':'.join(names))
             # Set Closest Group Index
             closestDist = sorted(list(distances.keys()))[0]
@@ -119,3 +122,39 @@ class Behavior_UI:
     def SetBhvType(self, limb):
         self.grpHier_ui.Populate()
 
+
+#============= UPDATE ============================
+
+    # def UpdateIKPoleVectorGroupParent(self, limb):
+    #     group = pm.listConnections(limb.bhvDistanceGroup)[0]
+    #     joints = self.jntMng.GetLimbJoints(limb)
+    #     joint = joints[len(joints)/2]
+        # self.PosRotGroupToJoint(group, joint)
+        # self.SetLockGroup(group, True)
+        # pm.parent(group, joint)
+        # pm.xform(group, t=[0,0,0], ro=[0,0,0], s=[1,1,1])
+        # self.UpdateGroupDistance(group)
+
+    # def UpdateGroupDistance(self, group):
+    #     pos = self.grpMng.axes[group.bhvAxis.get()][:]
+    #     dist = group.bhvDistance.get()
+    #     pos = [p*dist for p in pos]
+    #     # for attr in ['.tx', '.ty', '.tz']:
+    #     #     pm.setAttr(group+attr, l=0, k=0, cb=0)
+    #     pm.xform(group, t=pos)
+    #     # for attr in ['.tx', '.ty', '.tz']:
+    #     #     pm.setAttr(group+attr, l=1, k=0, cb=0)
+
+    # def UpdateFKIKSwitchJoint(self, limb):
+    #     group = pm.listConnections(limb.bhvFKIKSwitchGroup)[0]
+    #     index = group.targetJoint.get()
+    #     joints = self.jntMng.GetLimbJoints(limb)
+    #     modIndex = index % len(joints)
+    #     if modIndex != index:
+    #         limb.bhvFKIKParentJoint.set(modIndex)
+    #     # self.SetLockGroup(group, False)
+    #     joint = joints[modIndex]
+    #     # self.PosRotGroupToJoint(group, joint)
+    #     pm.parent(group, joint)
+    #     # pm.xform(group, t=[0,0,0], ro=[0,0,0], s=[1,1,1])
+    #     # self.SetLockGroup(group, True)

@@ -739,7 +739,7 @@
                                   <item>
                                    <widget class="QLabel" name="label_8">
                                     <property name="text">
-                                     <string>Bhv Parent Grp</string>
+                                     <string>Bhv Parent Group</string>
                                     </property>
                                    </widget>
                                   </item>
@@ -892,7 +892,7 @@
                            <item>
                             <widget class="QGroupBox" name="groupBox_23">
                              <property name="title">
-                              <string>Constraint, Grp</string>
+                              <string>Constraint, Group</string>
                              </property>
                              <layout class="QVBoxLayout" name="verticalLayout_110">
                               <item>
@@ -1105,7 +1105,7 @@
                                   <item>
                                    <widget class="QLabel" name="label_23">
                                     <property name="text">
-                                     <string>IK Parent Grp</string>
+                                     <string>IK Parent Group</string>
                                     </property>
                                    </widget>
                                   </item>

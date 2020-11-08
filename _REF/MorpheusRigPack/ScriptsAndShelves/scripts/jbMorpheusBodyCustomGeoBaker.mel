@@ -184,13 +184,13 @@ copySkinWeights -ds $customGeoSkinName -ss $skinCluster -noMirror -surfaceAssoci
 addAttr -ln "customGeofied"  -dt "string" $customGeoProperName;
 addAttr -ln "skinName" -dt "string" $customGeoProperName;
 addAttr -ln "bsNodeName" -dt "string" $customGeoProperName;
-addAttr -ln "bsShapesGrpName" -dt "string" $customGeoProperName;
+addAttr -ln "bsShapesGroupName" -dt "string" $customGeoProperName;
 addAttr -ln "orignalName" -dt "string" $customGeoProperName;
 addAttr -ln "skinTemplate" -dt "string" $customGeoProperName;
 
 setAttr -type "string" ($customGeoProperName+".skinName") $customGeoSkinName;
 setAttr -type "string" ($customGeoProperName+".bsNodeName") $customGeoBlendShapeNode;
-setAttr -type "string" ($customGeoProperName+".bsShapesGrpName") $bakedCustomGeoGroupName;
+setAttr -type "string" ($customGeoProperName+".bsShapesGroupName") $bakedCustomGeoGroupName;
 setAttr -type "string" ($customGeoProperName+".orignalName") $customGeo;
 setAttr -type "string" ($customGeoProperName+".skinTemplate") $skinCluster;
 

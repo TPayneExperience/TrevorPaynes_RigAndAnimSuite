@@ -2,9 +2,11 @@
 import pymel.core as pm
 
 class Joint_Manager():
-    def __init__(self, limbMng, nameMng):
+    def __init__(self, limbMng, grpMng, ctrMng, nameMng):
 
         self.limbMng = limbMng
+        self.grpMng = grpMng
+        self.ctrMng = ctrMng
         self.nameMng = nameMng
         self.mirrorXform = {'X': [-1,1,1],
                             'Y': [1,-1,1],
@@ -17,8 +19,8 @@ class Joint_Manager():
         pm.addAttr(rigRoot, ln='joints', dt='string')
 
         pm.select(d=1)
-        self.jntGrp = pm.group(name='Skeleton', em=1)
-        pm.parent(self.jntGrp, rigRoot)
+        self.jntGroup = pm.group(name='Skeleton', em=1)
+        pm.parent(self.jntGroup, rigRoot)
         self.skelLayer = pm.createDisplayLayer(n='Skel Joints', e=True)
         self.skelLayer.displayType.set(2)
 
@@ -72,7 +74,7 @@ class Joint_Manager():
 
 #============= FUNCTIONALITY ============================
 
-    def _ReindexJoints(self, limb):
+    def ReindexJoints(self, limb):
         temp = {} # longName : joint
         for joint in pm.listConnections(limb.tempJoints):
             temp[joint.longName()] = joint
@@ -81,29 +83,33 @@ class Joint_Manager():
             temp[key].limbIndex.set(i)
             i += 1
 
-    def AddTemp(self, limb, joint): # for Limb Setup
-        self._Add(joint)
+    def Teardown_Editable(self, limb, joint): # for Limb Setup
+        '''Connect limb.temp to joint.temp, disconnect joint group'''
+        group = pm.listConnections(joint.group)[0]
+        pm.disconnectAttr(group.limb)
         pm.disconnectAttr(joint.tempLimb)
         pm.connectAttr(limb.tempJoints, joint.tempLimb)
-        self._ReindexJoints(limb)
+        self.ReindexJoints(limb)
     
-    def AddPerm(self, limb, joint):
+    def Setup_Editable(self, limb, joint):
         pm.disconnectAttr(joint.limb)
         pm.connectAttr(limb.joints, joint.limb)
+        group = pm.listConnections(joint.group)[0]
+        pm.connectAttr(limb.bhvJointGroups, group.limb)
         self.UpdateJointName(joint)
     
-    def _Add(self, joint):
+    def Add(self, limb, joint):
         if (not joint.hasAttr('pfrsName')):
             pm.addAttr(joint, ln='ID', at='short')
             pm.addAttr(joint, ln='limb', dt='string')
             pm.addAttr(joint, ln='tempLimb', dt='string') # limb setup
             pm.addAttr(joint, ln='limbIndex', at='short')
             pm.addAttr(joint, ln='pfrsName', dt='string')
-            
-            pm.addAttr(joint, ln='bhvFKGrp', dt='string')
-            pm.addAttr(joint, ln='bhvIKGrp', dt='string')
-            pm.addAttr(joint, ln='bhvLookAtGrp', dt='string')
-            pm.addAttr(joint, ln='bhvCstGrp', dt='string')
+            pm.addAttr(joint, ln='group', dt='string')
+            pm.addAttr(joint, ln='bhvDistanceGroup', dt='string')
+            # pm.addAttr(joint, ln='bhvFKGroup', dt='string')
+            # pm.addAttr(joint, ln='bhvIKGroup', dt='string')
+            # pm.addAttr(joint, ln='bhvCstGroup', dt='string')
             
             jointID = self.rigRoot.nextJointID.get()
             self.rigRoot.nextJointID.set(jointID + 1)
@@ -111,6 +117,10 @@ class Joint_Manager():
             joint.pfrsName.set('Joint_%03d' % (jointID))
             pm.editDisplayLayerMembers(self.skelLayer, joint)
 
+            group = self.grpMng.AddJointGroup(limb, joint)
+            self.ctrMng.Add(group, self.ctrMng.ctrTypes[1])
+
+        pm.connectAttr(limb.tempJoints, joint.tempLimb)
         if joint.ID.get() not in self._joints:
             self._joints[joint.ID.get()] = joint
 
@@ -118,10 +128,10 @@ class Joint_Manager():
         pm.disconnectAttr(joint.tempLimb)
         del(self._joints[joint.ID.get()])
 
-    def RemovePerm(self, joint):
-        pm.disconnectAttr(joint.limb)
-        joint.rename('Joint_%03d' % joint.ID.get())
-        del(self._joints[joint.ID.get()])
+    # def RemovePerm(self, joint):
+    #     pm.disconnectAttr(joint.limb)
+    #     joint.rename('Joint_%03d' % joint.ID.get())
+    #     # del(self._joints[joint.ID.get()])
 
     def UpdateAllJointNames(self): # if prefix changed
         for joint in self.GetAllJoints():
@@ -194,7 +204,7 @@ class Joint_Manager():
     #     temp = pm.group(w=1, a=1, em=1)
     #     pm.parent(joints, temp)
     #     pm.xform(temp, s=self.mirrorXform[axis])
-    #     pm.parent(joints, self.jntGrp)
+    #     pm.parent(joints, self.jntGroup)
     #     pm.delete(temp)
     #     for joint in joints:
     #         aim = [i*-1 for i in list(joint.aimAxis.get())]

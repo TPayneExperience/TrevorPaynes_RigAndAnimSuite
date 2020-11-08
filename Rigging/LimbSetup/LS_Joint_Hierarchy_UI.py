@@ -63,7 +63,7 @@ class LS_Joint_Hierarchy_UI:
 
     def Add(self):
         for joint in self.parent.jointsToAddToLimb:
-            self.jntMng.AddTemp(self.limb, joint)
+            self.jntMng.Teardown_Editable(self.limb, joint)
         self.parent.ClearJointsToAdd()
         self.parent.PopulateJoints()
 
