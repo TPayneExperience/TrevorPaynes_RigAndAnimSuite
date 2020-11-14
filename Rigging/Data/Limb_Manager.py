@@ -11,13 +11,13 @@ class Limb_Manager:
                             'Chain', 
                             'Branch']
         self.limbSides = ['M', 'L', 'R', '-']
-        self.ctrTypes = [   'Circle_Wire',
-                            'Cube_Wire',
-                            'Sphere_Poly',
-                            'Cube_Poly',
-                            'Cylinder_Poly',
-                            'FKIK_Wire',
-                            'Diamond_Wire'] # Duplication of data, but whatever
+        # self.ctrTypes = [   'Circle_Wire',
+        #                     'Cube_Wire',
+        #                     'Sphere_Poly',
+        #                     'Cube_Poly',
+        #                     'Cylinder_Poly',
+        #                     'FKIK_Wire',
+        #                     'Diamond_Wire'] # Duplication of data, but whatever
         
     def NewRig(self, rigRoot):
         self.rigRoot = rigRoot
@@ -66,10 +66,10 @@ class Limb_Manager:
         limbID = self.rigRoot.nextLimbID.get()
         self.rigRoot.nextLimbID.set(limbID + 1)
         
-        pfrsName = 'Limb_%03d' % limbID
+        pfrsName = 'Limb%03d' % limbID
         limbTypes = ':'.join(self.limbTypes)
         limbSides = ':'.join(self.limbSides)
-        ctrTypes = ':'.join(self.ctrTypes)
+        # ctrTypes = ':'.join(self.ctrTypes)
 
         limb = pm.createNode('network', name=pfrsName)
         pm.addAttr(limb, ln='ID', at='long', dv=limbID)
@@ -90,7 +90,7 @@ class Limb_Manager:
         pm.addAttr(limb, ln='rigRoot', dt='string')
 
         # APP
-        pm.addAttr(limb, ln='appControlType', at='enum', en=ctrTypes)
+        pm.addAttr(limb, ln='appControlType', at='enum', en='None')
         pm.addAttr(limb, ln='appLockHidePos', at='bool')
         pm.addAttr(limb, ln='appLockHideRot', at='bool')
         pm.addAttr(limb, ln='appLockHideScale', at='bool')

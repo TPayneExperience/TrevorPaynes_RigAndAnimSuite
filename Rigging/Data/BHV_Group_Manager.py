@@ -69,8 +69,32 @@ class BHV_Group_Manager:
             return pm.listConnections(limb.bhvEmptyGroup)
 
         if bhvType == 8: # FK - Reverse Chain
-            groups = pm.listConnections(limb.bhvFKGroups)
+            groups = pm.listConnections(limb.bhvJointGroups)
             return self.SortGroups(groups)[::-1]
+
+    def GetLimbIKGroups(self, limb):
+        bhvType = limb.bhvType.get()
+        if bhvType in [0, 3, 5, 6]: # FK Chain, Cst, IK Chain, FK Branch
+            groups = pm.listConnections(limb.bhvJointGroups)
+            return self.SortGroups(groups)
+        if bhvType in [1, 2, 4]: # IK PV, LookAt
+            return pm.listConnections(limb.bhvDistanceGroup)
+    
+    def GetLimbFKGroups(self, limb):
+        bhvType = limb.bhvType.get()
+        if bhvType in [0, 2, 6]: # FK Chain, FKIK, Branch, Reverse
+            groups = pm.listConnections(limb.bhvJointGroups)
+            return self.SortGroups(groups)
+        if bhvType == 7: # EMPTY
+            return pm.listConnections(limb.bhvEmptyGroup)
+        if bhvType == 8: # FK - Reverse Chain
+            groups = pm.listConnections(limb.bhvJointGroups)
+            return self.SortGroups(groups)[::-1]
+    
+
+
+
+
 
 #============= ADD + REMOVE ============================
 
@@ -120,6 +144,7 @@ class BHV_Group_Manager:
     def AddDistanceGroup(self, limb):
         group = self._AddGroup(limb)
         group.groupType.set(2)
+        pm.addAttr(group, ln='targetJoint', at='enum', en='None') # IK PV
         pm.addAttr(group, ln='distanceJoint', dt='string') # for easy Test Connections
         pm.addAttr(group, ln='distance', at='float', min=0) # IKPV, LookAt
         pm.addAttr(group, ln='axis', at='enum', en='X:-X:Y:-Y:Z:-Z') # IKPV, LookAt
@@ -186,8 +211,8 @@ class BHV_Group_Manager:
         group.rename(name)
 
     def UpdateGroupDistance(self, group):
-        pos = self.axes[group.bhvAxis.get()][:]
-        dist = group.bhvDistance.get()
+        pos = self.axes[group.axis.get()][:]
+        dist = group.distance.get()
         pos = [p*dist for p in pos]
         # for attr in ['.tx', '.ty', '.tz']:
         #     pm.setAttr(group+attr, l=0, k=0, cb=0)
@@ -199,6 +224,7 @@ class BHV_Group_Manager:
         index = group.targetJoint.get()
         joint = joints[index]
         pm.parent(group, joint)
+    
         # group = pm.listConnections(limb.bhvFKIKSwitchGroup)[0]
         # modIndex = index % len(joints)
         # if modIndex != index:

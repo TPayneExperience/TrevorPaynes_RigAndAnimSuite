@@ -19,11 +19,15 @@ class BHV_Limb_Manager:
 
         self.fkTypeIndexes = [0, 2, 6, 8]
         self.distanceIndexes = [1, 2, 4]
+        self.targetIndexes = [1, 2, 3, 5]
+        self.parentableIndexes = [0, 2, 6, 7, 8]
+
         self.ikTargetTypeIndexes = [0, 6, 7, 8]
         self.ikPVTypeIndexes = [1, 2]
         self.ikTypeIndexes = [1, 2, 5]
         self.cstTargetTypeIndexes = [0, 1, 2, 4, 5, 6, 8]
-        self.ctrTypeIndexes = [0, 1, 2, 4, 6, 7, 8] # For APP > Limb hier
+        self.ctrTypeIndexes = [0, 2, 4, 6, 7, 8] # For APP > Limb hier
+
         
         self.bhvTypes = [   'FK - Chain', # DON'T CHANGE ORDER!
 
@@ -78,7 +82,9 @@ class BHV_Limb_Manager:
     def AddLimb(self, limb):
         bhvTypes = ':'.join(self.bhvTypes)
         bhvCstTypes = ':'.join(self.cstTypes)
+        ctrTypes = ':'.join(self.ctrMng.GetControlTypes())
 
+        pm.addAttr(limb.appControlType, e=1, en=ctrTypes)
         pm.addAttr(limb, ln='bhvType', at='enum', en=bhvTypes)
 
         pm.addAttr(limb, ln='bhvJointGroups', dt='string') # FK, IKChain, CST
@@ -105,7 +111,6 @@ class BHV_Limb_Manager:
         for group in groups:
             self.grpMng.Remove(group)
 
-
 #============= SETUP BHV ============================
     # EMPTY Created by Limb Setup UI > Teardown Tab
     # JOINT Groups created by Limb Setup UI > Add Limb
@@ -120,11 +125,13 @@ class BHV_Limb_Manager:
         group = self._Setup_Distance(limb)
         joints = self.jntMng.GetLimbJoints(limb)
         self.grpMng.SetupEditable_IKPVGroup(group, joints)
+        # self.grpMng.UpdateGroupDistance(group)
 
     def Setup_LookAt(self, limb):
         group = self._Setup_Distance(limb)
         joint = self.jntMng.GetLimbJoints(limb)[0]
         self.grpMng.SetupEditable_DistanceGroup(group, joint)
+        # self.grpMng.UpdateGroupDistance(group)
 
     def _Setup_Distance(self, limb):
         groups = pm.listConnections(limb.bhvDistanceGroup)
@@ -142,7 +149,7 @@ class BHV_Limb_Manager:
         if groups:
             group = groups[0]
         else:
-            group = self.grpMng.Add_FKIKSwitch(limb)
+            group = self.grpMng.AddFKIKSwitchGroup(limb)
             self.ctrMng.Add(group, self.ctrMng.ctrTypes[3])
         joints = self.jntMng.GetLimbJoints(limb)
         names = [j.pfrsName.get() for j in joints]

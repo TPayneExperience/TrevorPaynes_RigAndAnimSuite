@@ -85,7 +85,7 @@ class Rigging_UI:
     def _Setup(self):
         with pm.tabLayout(cc=self.TabChanged) as self.tab:
             with pm.horizontalLayout() as self.jntSetupTab:
-                self.jntSetup_ui = js_ui.JointSetup_UI()
+                self.jntSetup_ui = js_ui.JointSetup_UI( self.jntMng)
             with pm.horizontalLayout() as self.limbSetupTab:
                 self.limbSetup_ui = ls_ui.LimbSetup_UI( self.limbMng, 
                                                         self.jntMng,
@@ -124,18 +124,22 @@ class Rigging_UI:
 
     def Setup_Editable(self):
         index = self.rigRoot.limbsTab.get()
-        if (index == 1):
+        if (index == 0):
+            self.jntSetup_ui.Setup_Editable()
+        elif (index == 1):
             self.limbSetup_ui.Setup_Editable()
-        if (index == 2):
+        elif (index == 2):
             self.bhv_ui.Setup_Editable()
-        if (index == 3):
+        elif (index == 3):
             self.app_ui.Setup_Editable() 
-        if (index == 4):
+        elif (index == 4):
             self.test_ui.Setup_Editable() 
         
     def Teardown_Editable(self, nextIndex):
         lastIndex = self.rigRoot.limbsTab.get()
-        if (lastIndex == 1): 
+        if (lastIndex == 0): 
+            self.jntSetup_ui.Teardown_Editable()
+        elif (lastIndex == 1): 
             self.limbSetup_ui.Teardown_Editable()
         elif (lastIndex == 2):
             self.bhv_ui.Teardown_Editable()

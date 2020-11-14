@@ -23,7 +23,7 @@ class RigSetup_UI:
                             'Type (JNT, CTR)']
     
     def NewRig_Dialog(self):
-        self.startPrefix = 'tempPrefix'
+        self.startPrefix = 'PFX'
         self.startShowPrefix = True
         self.startNameOrder = [0,1,2,3,4]
         self._CopyInitValues()

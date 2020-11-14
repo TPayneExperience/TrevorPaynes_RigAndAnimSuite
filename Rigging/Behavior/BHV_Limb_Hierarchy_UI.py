@@ -2,9 +2,10 @@
 import pymel.core as pm
 
 class BHV_Limb_Hierarchy_UI:
-    def __init__(self, limbMng, jntMng, parent):
+    def __init__(self, limbMng, jntMng, bhvMng, parent):
         self.limbMng = limbMng
         self.jntMng = jntMng
+        self.bhvMng = bhvMng
         self.parent = parent
 
         self._Setup()
@@ -28,12 +29,16 @@ class BHV_Limb_Hierarchy_UI:
                     pm.treeView(self.widget, e=1, bti=(limbID, 1, side))
                 else:
                     pm.treeView(self.widget, e=1, bvf=(limbID, 1, 0))
+                if limb.bhvType.get() in self.bhvMng.parentableIndexes:
+                    pm.treeView(self.widget, e=1, ornament=(limbID, 1, 0, 4))
                 self.parent.UpdateLimbParentGroups(limbID)
 
 #=========== SETUP ====================================
 
     def _Setup(self):
-        self.widget = pm.treeView(ams=0, nb=1, ann='MMB + Drag + Drop to reparent')
+        msg = '- MMB + Drag + Drop to reparent'
+        msg += '\n- Items with the circle can be parented to'
+        self.widget = pm.treeView(ams=0, nb=1, ann=msg)
         pm.treeView(self.widget, e=1, scc=self.SelectionChanged)
         pm.treeView(self.widget, e=1, dad=self.Reparent)
         with pm.popupMenu():
@@ -54,6 +59,11 @@ class BHV_Limb_Hierarchy_UI:
             limbID = int(limbIDsStr[0])
             if newParentIDStr:
                 parentID = int(newParentIDStr)
+                parentLimb = self.limbMng.GetLimb(parentID)
+                parentBhvType = parentLimb.bhvType.get()
+                if parentBhvType not in self.bhvMng.parentableIndexes:
+                    self.Populate()
+                    return
             else:
                 parentID = -1
             self.limbMng.Reparent(limbID, parentID)
@@ -66,7 +76,7 @@ class BHV_Limb_Hierarchy_UI:
         for child, parent in limbParents.items():
             self.limbMng.Reparent(child.ID.get(), parent.ID.get())
             self.parent.UpdateLimbParentGroups(child.ID.get())
-        self.parent.UpdateLimbUI()
+        # self.parent.UpdateLimbUI()
         self.Populate()
     
     def LoadDefaultHier(self, ignore):

@@ -69,3 +69,5 @@ class Appearance_UI:
         self.ctrHier_ui.SetLimb(limbID)
         self.limbProp_ui.SetLimb(limbID)
 
+    def ControlTypeChanged(self):
+        self.ctrHier_ui.Populate()

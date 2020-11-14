@@ -38,6 +38,9 @@ class APP_Control_Manager:
     def GetGroupControl(self, group):
         return pm.listConnections(group.control)
 
+    def GetControlTypes(self):
+        return list(self._ctrTemplates.keys())
+
     def SetLayerState(self, isVisible, isReference):
         self.ctrLayer.displayType.set(isReference) # 2 = reference, 0 = default
         self.ctrLayer.visibility.set(isVisible) # 0 = off, 1 = on
@@ -57,8 +60,8 @@ class APP_Control_Manager:
 
         pm.editDisplayLayerMembers(self.ctrLayer, ctr)
         pm.connectAttr(group.control, ctr.group)
-        pm.xform(ctr, t=[0,0,0], ro=[0,0,0], s=[1,1,1])
         pm.parent(ctr, group)
+        pm.xform(ctr, t=[0,0,0], ro=[0,0,0], s=[1,1,1])
 
         self._ctrs[ctrID] = ctr
         return ctr
@@ -66,7 +69,6 @@ class APP_Control_Manager:
     def Remove(self, control):
         del(self._ctrs[control.ID.get()])
 
-    # Broken
     def SetType(self, control, ctrType):
         group = pm.listConnections(control.group)[0]
         pm.disconnectAttr(group.control)
@@ -79,14 +81,6 @@ class APP_Control_Manager:
         pm.delete(control)
 
 #============= PRIVATE ============================
-
-    # def _CopyXForm(self, source, target):
-    #     pos = pm.xform(source, q=1, t=1, ws=1)
-    #     rot = pm.xform(source, q=1, ro=1, ws=1)
-    #     scale = pm.xform(source, q=1, s=1, ws=1)
-    #     pm.xform(target, t=pos, ws=1)
-    #     pm.xform(target, ro=rot, ws=1)
-    #     pm.xform(target, s=scale, ws=1)
 
     def _SortGroups(self, groups):
         indexGroups = {} # jointIndex : group

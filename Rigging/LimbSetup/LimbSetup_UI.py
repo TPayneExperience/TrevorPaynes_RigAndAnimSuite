@@ -69,7 +69,7 @@ class LimbSetup_UI:
         self.Populate()
         if not self.scriptJob:
             self.scriptJob = pm.scriptJob( e=("SelectionChanged",self.sceneHier_ui.SelectSceneHierJoints), pro=True)
-            print ('STARTING selection detection script...')
+            print ('STARTING LimbSetup selection detection script...')
 
     def Teardown_Editable(self):
         self.KillScripts()
@@ -78,7 +78,7 @@ class LimbSetup_UI:
         if self.scriptJob:
             pm.scriptJob( kill=self.scriptJob, f=True)
             self.scriptJob = None
-            print ('KILLING selection detection script...\n')
+            print ('KILLING LimbSetup selection detection script...\n')
 
 #=========== LIMB FUNCTIONALITY ====================================
     

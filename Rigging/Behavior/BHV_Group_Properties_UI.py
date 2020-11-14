@@ -28,9 +28,12 @@ class BHV_Group_Properties_UI:
     def _Setup(self):
         with pm.frameLayout('Group Properties', bv=1, en=0) as self.groupLayout:
             with pm.columnLayout(adj=1) as self.bhvGroupProp_cl:
-                self.weight_sg = pm.attrFieldSliderGrp( l='Constraint Weight', 
+                self.weight_sg = pm.attrFieldSliderGrp( l='Cst Weight', 
                                                         min=0.0,
                                                         max=1.0,
+                                                        adj=3,
+                                                        pre=3,
+                                                        cw=((1, 60), (2, 55), (3, 55)),
                                                         at='persp.translateX')
                           
 #========== UPDATE UI ===============================
@@ -59,7 +62,7 @@ class BHV_Group_Properties_UI:
 
         # IK CHAIN
         elif bhvType == 5: 
-            self.parentSub_at = pm.attrEnumOptionMenu(  l='IK Target Joint',
+            self.parentSub_at = pm.attrEnumOptionMenu(  l='Target Joint',
                                                     at=self.group.targetJoint, 
                                                     p=self.bhvGroupProp_cl)
 

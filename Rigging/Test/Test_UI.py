@@ -240,11 +240,12 @@ class Test_UI:
             pm.confirmDialog(t='IK CHAIN Error', m=msg, icon='warning', b='Ok')
             return
         targetLimb = targetLimb[0]
-        for group in self.grpMng.GetLimbGroups(limb):
-            index = group.IKTargetGroup.get()
+        sourceGroups = self.grpMng.GetLimbGroups(limb)[1:] # Skip First
+        for sourceGroup in sourceGroups:
+            index = sourceGroup.targetJoint.get()
             targetGroup = self.grpMng.GetLimbGroups(targetLimb)[index]
             targetControl = pm.listConnections(targetGroup.control)[0]
-            childJoint = pm.listConnections(group.joint)
+            childJoint = pm.listConnections(sourceGroup.joint)
             parentJoint = pm.listRelatives(childJoint, p=1)[0]
             handle = pm.listConnections(parentJoint.message)[0]
             handle.v.set(0)
@@ -255,7 +256,7 @@ class Test_UI:
         startJoint = joints[0]
         endJoint = joints[-1]
         handle = pm.ikHandle(sj=startJoint, ee=endJoint)[0]
-        group = pm.listConnections(limb.bhvIKPoleVectorGroup)[0]
+        group = pm.listConnections(limb.bhvDistanceGroup)[0]
         control = pm.listConnections(group.control)[0]
         pm.poleVectorConstraint(control, handle)
 
@@ -267,11 +268,11 @@ class Test_UI:
             pm.confirmDialog(t='IK POLE VECTOR Error', m=msg, icon='error', b='Ok')
             return
         targetLimb = targetLimb[0]
-        groups = pm.listConnections(limb.bhvIKPoleVectorGroup)
+        groups = pm.listConnections(limb.bhvDistanceGroup)
         if not groups:
             return
         group = groups[0]
-        index = group.IKTargetGroup.get()
+        index = group.targetJoint.get()
         targetGroup = self.grpMng.GetLimbGroups(targetLimb)[index]
         targetControl = pm.listConnections(targetGroup.control)[0]
 
@@ -340,7 +341,7 @@ class Test_UI:
 
         # Create IK handle
         handle = pm.ikHandle(sj=ikJoints[0], ee=ikJoints[-1])[0]
-        group = pm.listConnections(limb.bhvIKPoleVectorGroup)[0]
+        group = pm.listConnections(limb.bhvDistanceGroup)[0]
         control = pm.listConnections(group.control)[0]
         pm.poleVectorConstraint(control, handle)
 
@@ -355,11 +356,11 @@ class Test_UI:
             pm.confirmDialog(t='IK POLE VECTOR Error', m=msg, icon='error', b='Ok')
             return
         targetLimb = targetLimb[0]
-        groups = pm.listConnections(limb.bhvIKPoleVectorGroup)
+        groups = pm.listConnections(limb.bhvDistanceGroup)
         if not groups:
             return
         ikGroup = groups[0]
-        index = ikGroup.IKTargetGroup.get()
+        index = ikGroup.targetJoint.get()
         targetGroup = self.grpMng.GetLimbGroups(targetLimb)[index]
         targetControl = pm.listConnections(targetGroup.control)[0]
 

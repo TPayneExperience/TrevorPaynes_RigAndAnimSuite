@@ -19,6 +19,9 @@ class APP_Control_Hierarchy_UI:
 
     def SetLimb(self, limbID):
         self.limb = self.limbMng.GetLimb(limbID)
+        self.Populate()
+    
+    def Populate(self):
         self.Depopulate()
         for group in self.grpMng.GetLimbGroups(self.limb):
             control = pm.listConnections(group.control)[0]

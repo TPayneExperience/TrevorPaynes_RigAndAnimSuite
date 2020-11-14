@@ -91,7 +91,7 @@ class PayneFreeRigSuite_UI():
         self.rigRoot = rigRoot
 
     def Debug(self):
-        self.NewRig('tempPrefix', 
+        self.NewRig('PFX', 
                     range(5), 
                     True)
         # Testing Joints
@@ -180,6 +180,7 @@ class PayneFreeRigSuite_UI():
     #     self.limbs_ui.UpdateNaming()
 
     def closeEvent(self):
+        self.rig_ui.jntSetup_ui.KillScripts()
         self.rig_ui.limbSetup_ui.KillScripts()
 
     def UpdateEnableUI(self):

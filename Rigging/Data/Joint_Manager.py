@@ -114,7 +114,7 @@ class Joint_Manager():
             jointID = self.rigRoot.nextJointID.get()
             self.rigRoot.nextJointID.set(jointID + 1)
             joint.ID.set(jointID)
-            joint.pfrsName.set('Joint_%03d' % (jointID))
+            joint.pfrsName.set('Joint%03d' % (jointID))
             pm.editDisplayLayerMembers(self.skelLayer, joint)
 
             group = self.grpMng.AddJointGroup(limb, joint)
@@ -128,10 +128,23 @@ class Joint_Manager():
         pm.disconnectAttr(joint.tempLimb)
         del(self._joints[joint.ID.get()])
 
-    # def RemovePerm(self, joint):
-    #     pm.disconnectAttr(joint.limb)
-    #     joint.rename('Joint_%03d' % joint.ID.get())
-    #     # del(self._joints[joint.ID.get()])
+    def RemovePerm(self, joint):
+        parents = pm.listRelatives(joint, p=1)
+        children = pm.listRelatives(joint, c=1, type='joint')
+        if parents:
+            pm.parent(children, parents[0])
+        else:
+            pm.parent(children, w=1)
+
+        if joint.hasAttr('group'):
+            groups = pm.listConnections(joint.group)
+            if groups:
+                group = groups[0]
+                control = pm.listConnections(group.control)[0]
+                self.ctrMng.Remove(control)
+                self.grpMng.Remove(group)
+        pm.delete(joint)
+        
 
     def UpdateAllJointNames(self): # if prefix changed
         for joint in self.GetAllJoints():
