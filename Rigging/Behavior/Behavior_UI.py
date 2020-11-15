@@ -60,13 +60,11 @@ class Behavior_UI:
         self.limbHier_ui.Populate()
         self.limbProp_ui.Depopulate()
         # self.limbProp_ui.Populate()
-        self.ctrMng.SetLayerState(True, True)
     
     def Teardown_Editable(self):
         self.limbProp_ui.Depopulate()
         self.grpHier_ui.Depopulate()
         self.grpProp_ui.Depopulate()
-        self.ctrMng.SetLayerState(True, True)
 
 #=========== LIMBS ====================================
 

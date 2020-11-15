@@ -134,6 +134,14 @@ class Rigging_UI:
             self.app_ui.Setup_Editable() 
         elif (index == 4):
             self.test_ui.Setup_Editable() 
+
+        # SET CONTROLS OFF / LOCKED / ON
+        if index in [0, 1]:
+            self.ctrMng.SetLayerState(False, True)
+        elif index == 2:
+            self.ctrMng.SetLayerState(True, True)
+        elif index in [3, 4]:
+            self.ctrMng.SetLayerState(True, False)
         
     def Teardown_Editable(self, nextIndex):
         lastIndex = self.rigRoot.limbsTab.get()
@@ -244,6 +252,9 @@ class Rigging_UI:
     def RemoveLimb(self, limb): # Limb Setup > Remove
         self.parent.RemoveLimb(limb)
     
+    def AutoBuildHier(self):
+        self.bhv_ui.limbHier_ui.LoadSkelHier(1)
+
     # def UpdateLimb(self, limb): # Limb Setup Tab > Teardown
     #     bhvs = self.bhvMng.GetBhvOptions(limb)
     #     bhvIndex = self.bhvMng.GetBhvIndex(bhvs[0])

@@ -95,6 +95,7 @@ class Joint_Manager():
         pm.disconnectAttr(joint.limb)
         pm.connectAttr(limb.joints, joint.limb)
         group = pm.listConnections(joint.group)[0]
+        pm.disconnectAttr(group.limb)
         pm.connectAttr(limb.bhvJointGroups, group.limb)
         self.UpdateJointName(joint)
     
@@ -115,7 +116,7 @@ class Joint_Manager():
             self.rigRoot.nextJointID.set(jointID + 1)
             joint.ID.set(jointID)
             joint.pfrsName.set('Joint%03d' % (jointID))
-            pm.editDisplayLayerMembers(self.skelLayer, joint)
+            pm.editDisplayLayerMembers(self.skelLayer, joint, nr=1)
 
             group = self.grpMng.AddJointGroup(limb, joint)
             self.ctrMng.Add(group, self.ctrMng.ctrTypes[1])

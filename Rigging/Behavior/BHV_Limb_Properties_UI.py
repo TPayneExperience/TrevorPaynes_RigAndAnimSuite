@@ -145,17 +145,17 @@ class BHV_Limb_Properties_UI:
     def _SetIKBhv(self, sourceLimb):
         '''Set closest FK limb to current IK limb as target'''
         distances = {} # dist : group
-        sourceGroups = self.grpMng.GetLimbGroups(sourceLimb)
-        sourceGroup = sourceGroups[0]
-        sourcePos = pm.xform(sourceGroup, q=1, t=1)
+        sourceGroup = self.grpMng.GetLimbGroups(sourceLimb)[0]
+        sourcePos = pm.xform(sourceGroup, q=1, t=1, ws=1)
         # Create distance dictionary to groups
-        for targetGroup in self.grpMng.GetAllGroups():
-            if targetGroup not in sourceGroups:
-                targetPos = pm.xform(targetGroup, q=1, t=1)
-                dist = 0
-                for i in range(3):
-                    dist += (sourcePos[i]-targetPos[i])**2
-                distances[dist] = targetGroup
+        for limb in self.limbMng.GetAllLimbs():
+            if limb.bhvType.get() in self.bhvMng.ikTargetTypeIndexes:
+                for targetGroup in self.grpMng.GetLimbGroups(limb):
+                    targetPos = pm.xform(targetGroup, q=1, t=1, ws=1)
+                    dist = 0
+                    for i in range(3):
+                        dist += (sourcePos[i]-targetPos[i])**2
+                    distances[dist] = targetGroup
         # Get Closest limb
         for dist in sorted(list(distances.keys())):
             closestGroup = distances[dist]
@@ -174,6 +174,9 @@ class BHV_Limb_Properties_UI:
         # targetGroups = self.grpMng.GetLimbGroups(targetLimb)
         targetJoints = self.jntMng.GetLimbJoints(targetLimb)
         sourceGroups = self.grpMng.GetLimbIKGroups(sourceLimb)
+        pm.disconnectAttr(sourceLimb.bhvIKTargetLimb)
+        pm.connectAttr(targetLimb.bhvIKSourceLimb, sourceLimb.bhvIKTargetLimb)
+        # If only one target, set and return
         if len(targetJoints) < 2:
             if targetLimb.bhvType.get() == 7: # Empty
                 for sourceGroup in sourceGroups:
@@ -182,32 +185,48 @@ class BHV_Limb_Properties_UI:
                 jointName = targetJoints[0].pfrsName.get()
                 for sourceGroup in sourceGroups:
                     pm.addAttr(sourceGroup.targetJoint, e=1, en=jointName)
-        else:
-            targetJointNames = [j.pfrsName.get() for j in targetJoints]
-            names = ':'.join(targetJointNames)
-            # For each group, set target to closest group on target limb
+            return
+        targetJointNames = [j.pfrsName.get() for j in targetJoints]
+        names = ':'.join(targetJointNames)
+        # For each group, set target to closest group on target limb
+        bhvType = sourceLimb.bhvType.get()
+
+        # IK PV / FKIK
+        if bhvType in self.bhvMng.ikPVTypeIndexes: 
+            sourceGroup = sourceGroups[0]
+            pm.addAttr(sourceGroup.targetJoint, e=1, en=names)
+            sourceJoint = self.jntMng.GetLimbJoints(sourceLimb)[-1]
+            sourcePos = pm.xform(sourceJoint, q=1, t=1, ws=1)
+            targetJoint = self._GetClosestJoint(sourcePos, targetJoints)
+            index = targetJointNames.index(targetJoint.pfrsName.get())
+            sourceGroup.targetJoint.set(index)
+
+        # IK Chain
+        elif bhvType == 5:
             for sourceGroup in sourceGroups:
                 pm.addAttr(sourceGroup.targetJoint, e=1, en=names)
-                sourcePos = pm.xform(sourceGroup, q=1, t=1, ws=1)
-                # Get Distances from source group to target groups
-                distances = {} # dist : targetGroup
-                for targetJoint in targetJoints:
-                    targetPos = pm.xform(targetJoint, q=1, t=1, ws=1)
-                    dist = 0
-                    for i in range(3):
-                        dist += (sourcePos[i]-targetPos[i])**2
-                    if dist not in distances:
-                        distances[dist] = []
-                    distances[dist].append(targetJoint)
-                # Set source Group's target group index
-                targetDist = sorted(list(distances.keys()))[0]
-                targetJoint = distances[targetDist][0]
+                sourceJoint = pm.listConnections(sourceGroup.joint)[0]
+                sourcePos = pm.xform(sourceJoint, q=1, t=1, ws=1)
+                targetJoint = self._GetClosestJoint(sourcePos, targetJoints)
                 index = targetJointNames.index(targetJoint.pfrsName.get())
                 sourceGroup.targetJoint.set(index)
-        pm.disconnectAttr(sourceLimb.bhvIKTargetLimb)
-        pm.connectAttr(targetLimb.bhvIKSourceLimb, sourceLimb.bhvIKTargetLimb)
         # if sourceLimb.bhvType.get() in self.bhvMng.ikPVTypeIndexes:
         #     self.grpMng.UpdateGroupDistance(sourceGroups[0])
+
+    def _GetClosestJoint(self, sourcePos, targetJoints):
+        distances = {} # dist : targetJoint
+        for targetJoint in targetJoints:
+            targetPos = pm.xform(targetJoint, q=1, t=1, ws=1)
+            dist = 0
+            for i in range(3):
+                dist += (sourcePos[i]-targetPos[i])**2
+            if dist not in distances:
+                distances[dist] = []
+            distances[dist].append(targetJoint)
+        # Set source Group's target group index
+        targetDist = sorted(list(distances.keys()))[0]
+        return distances[targetDist][0]
+
 
 #=========== UI UPDATES ==============================================
 

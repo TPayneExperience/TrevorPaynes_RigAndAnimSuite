@@ -57,10 +57,9 @@ class Appearance_UI:
         self.limbProp_ui.Populate()
         self.ctrHier_ui.Depopulate()
         pm.frameLayout(self.prop_l, e=1, en=0)
-        self.ctrMng.SetLayerState(True, False)
     
     def Teardown_Editable(self):
-        self.ctrMng.SetLayerState(True, True)
+        pass
 
 #=========== LIMBS ====================================
 

@@ -92,6 +92,10 @@ class LS_Scene_Hierarchy_UI:
             limb = self.parent.AddLimbByJoints(newLimbJoints)
             if limb:
                 self.parent.parent.AddLimb(limb)
+                for joint in newLimbJoints:
+                    self.jntMng.Setup_Editable(limb, joint)
+                self.jntMng.ReindexJoints(limb)
+        self.parent.parent.AutoBuildHier()
         self.parent.Populate()
         self.parent.UpdateSceneFrame()
 
@@ -139,13 +143,17 @@ class LS_Scene_Hierarchy_UI:
             else:
                 invalidLimbs.append(limbName)
         for limb in validLimbs:
-            tempJoint = self.jntMng.GetLimbTempJoints(limb)[0]
+            tempJoints = self.jntMng.GetLimbTempJoints(limb)
+            tempJoint = tempJoints[0]
             side = tempJoint.shortName().split('_')[1]
             if side.upper() == 'L':
                 limb.side.set(1)
             elif side.upper() == 'R':
                 limb.side.set(2)
             self.parent.parent.AddLimb(limb)
+            for joint in tempJoints:
+                self.jntMng.Setup_Editable(limb, joint)
+            self.jntMng.ReindexJoints(limb)
 
         # WARNING IF LIMB JOINTS WRONG
         if invalidLimbs:
@@ -162,6 +170,7 @@ class LS_Scene_Hierarchy_UI:
                                 m=msg, 
                                 icon='warning', 
                                 b='Ok')
+        self.parent.parent.AutoBuildHier()
         self.parent.Populate()
         self.parent.UpdateSceneFrame()
 

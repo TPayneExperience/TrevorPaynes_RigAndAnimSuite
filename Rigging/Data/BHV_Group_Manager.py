@@ -2,9 +2,8 @@
 import pymel.core as pm
 
 class BHV_Group_Manager:
-    def __init__(self, limbMng,  nameMng):
+    def __init__(self, limbMng, nameMng):
         self.limbMng = limbMng
-        # self.jntMng = jntMng
         self.nameMng = nameMng
 
         self.axes = [   [1,0,0],
@@ -91,11 +90,6 @@ class BHV_Group_Manager:
             groups = pm.listConnections(limb.bhvJointGroups)
             return self.SortGroups(groups)[::-1]
     
-
-
-
-
-
 #============= ADD + REMOVE ============================
 
     def _AddGroup(self, limb):

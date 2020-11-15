@@ -42,7 +42,11 @@ class APP_Control_Manager:
         return list(self._ctrTemplates.keys())
 
     def SetLayerState(self, isVisible, isReference):
-        self.ctrLayer.displayType.set(isReference) # 2 = reference, 0 = default
+        # Maya Bug: Layer Editor won't refresh buttons
+        if isReference:
+            self.ctrLayer.displayType.set(2) # 2 = reference, 0 = default
+        else:
+            self.ctrLayer.displayType.set(0)
         self.ctrLayer.visibility.set(isVisible) # 0 = off, 1 = on
 
     def GetAllControls(self):
@@ -58,7 +62,7 @@ class APP_Control_Manager:
         pm.addAttr(ctr, ln='ID', at='long', dv=ctrID)
         pm.addAttr(ctr, ln='group', dt='string')
 
-        pm.editDisplayLayerMembers(self.ctrLayer, ctr)
+        pm.editDisplayLayerMembers(self.ctrLayer, ctr, nr=1)
         pm.connectAttr(group.control, ctr.group)
         pm.parent(ctr, group)
         pm.xform(ctr, t=[0,0,0], ro=[0,0,0], s=[1,1,1])

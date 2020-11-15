@@ -26,7 +26,7 @@ class BHV_Limb_Manager:
         self.ikPVTypeIndexes = [1, 2]
         self.ikTypeIndexes = [1, 2, 5]
         self.cstTargetTypeIndexes = [0, 1, 2, 4, 5, 6, 8]
-        self.ctrTypeIndexes = [0, 2, 4, 6, 7, 8] # For APP > Limb hier
+        self.ctrTypeIndexes = [0, 1, 2, 4, 6, 7, 8] # For APP > Limb hier
 
         
         self.bhvTypes = [   'FK - Chain', # DON'T CHANGE ORDER!
@@ -158,37 +158,37 @@ class BHV_Limb_Manager:
 
 # ============= TEARDOWN BHV ============================
 
-    def Teardown_Bhv(self, limb, oldBhvIndex, newBhvIndex):
+    def Teardown_Bhv(self, targetLimb, oldBhvIndex, newBhvIndex):
         '''Creates Warning Dialogs if there are inter-dependencies'''
         # If limb has IK dependencies, Warning Dialog
         if oldBhvIndex in self.ikTargetTypeIndexes:
             if newBhvIndex not in self.ikTargetTypeIndexes:
-                limbs = pm.listConnections(limb.bhvIKSourceLimb)
-                if limbs:
-                    msg = 'Changing limb "%s"s type off FK will break:' % limb
-                    for limb in limbs:
-                        msg += '\n - %s' % limb.pfrsName.get()
+                sourceLimbs = pm.listConnections(targetLimb.bhvIKSourceLimb)
+                if sourceLimbs:
+                    msg = 'Changing limb "%s"s type off FK will break:' % targetLimb
+                    for sourceLimb in sourceLimbs:
+                        msg += '\n - %s' % sourceLimb.pfrsName.get()
                     result = pm.confirmDialog(  t='Breaking IK Connections!', 
                                                 m=msg, 
                                                 icon='warning', 
                                                 b=['Cancel', 'Continue'])
                     if (result == 'Cancel'):
                         return False
-                    pm.disconnectAttr(limb.bhvIKSourceLimb)
+                    pm.disconnectAttr(targetLimb.bhvIKSourceLimb)
         # Hide Unused FK Groups [FK Chain, Reverse Chain, Branch]
         if oldBhvIndex in self.fkTypeIndexes:
             if newBhvIndex not in self.fkTypeIndexes:
-                for group in pm.listConnections(limb.bhvJointGroups):
+                for group in pm.listConnections(targetLimb.bhvJointGroups):
                     group.v.set(0)
         # Hide Unused Distance Group
         if oldBhvIndex in self.distanceIndexes:
             if newBhvIndex not in self.distanceIndexes:
-                group = pm.listConnections(limb.bhvDistanceGroup)[0]
+                group = pm.listConnections(targetLimb.bhvDistanceGroup)[0]
                 group.v.set(0)
         # Hide Unused FKIK Switch Group
         if oldBhvIndex == 2:
             if newBhvIndex != 2:
-                group = pm.listConnections(limb.bhvFKIKSwitchGroup)[0]
+                group = pm.listConnections(targetLimb.bhvFKIKSwitchGroup)[0]
                 group.v.set(0)
         return True
 

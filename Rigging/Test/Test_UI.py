@@ -23,7 +23,6 @@ class Test_UI:
         self.Setup_Controls()
         self.Setup_Internal()
         self.Setup_External()
-        self.ctrMng.SetLayerState(True, False)
         pm.select(d=1)
 
     def Teardown_Editable(self):
@@ -111,7 +110,8 @@ class Test_UI:
             bhvType = limb.bhvType.get()
             if bhvType in self.bhvMng.distanceIndexes:
                 group = pm.listConnections(limb.bhvDistanceGroup)[0]
-                # MISSING PARENTING
+                joint = pm.listConnections(group.distanceJoint)[0]
+                pm.parent(group, joint)
                 
         # for group in self.grpMng.GetAllGroups():
         #     grpType = group.groupType.get()
@@ -162,8 +162,6 @@ class Test_UI:
             parentControl = pm.listConnections(parentGroup.control)[0]
             for childGroup in self.grpMng.GetLimbGroups(limb):
                 pm.parent(childGroup, parentControl)
-            # parentCtrs = self.ctrMng.GetGroupControl(parentGroup)
-            # if parentCtrs:
 
     def Bind_FK_Joints(self, limb):
         for joint in self.jntMng.GetLimbJoints(limb)[:-1]:
@@ -271,8 +269,8 @@ class Test_UI:
         groups = pm.listConnections(limb.bhvDistanceGroup)
         if not groups:
             return
-        group = groups[0]
-        index = group.targetJoint.get()
+        distGroup = groups[0]
+        index = distGroup.targetJoint.get()
         targetGroup = self.grpMng.GetLimbGroups(targetLimb)[index]
         targetControl = pm.listConnections(targetGroup.control)[0]
 
@@ -281,21 +279,27 @@ class Test_UI:
         handle.v.set(0)
         pm.parent(handle, targetControl)
 
-        # PARENT POLE VECTOR CONTROL to target Control group
-        # - this way if hand is parented to table/world
-        #   the pv is also!
-        pm.parent(group, targetGroup)
+        # PARENT IKPV Control
+        parent = self.limbMng.GetLimbParent(limb)
+        if parent:
+            index = limb.parentGroup.get()
+            parentGroup = self.grpMng.GetLimbGroups(parent)[index]
+            parentControl = pm.listConnections(parentGroup.control)[0]
+            pm.parent(distGroup, parentControl)
+        else:
+            pm.parent(distGroup, self.grpMng.bhvGroup)
 
 #=========== FK IK ====================================
     
     def Setup_Internal_FKIK(self, limb):
         joints = self.jntMng.GetLimbJoints(limb)
 
-        # FKIK SWITCH
+        # FKIK SWITCH + Visibility
         fkikGroup = pm.listConnections(limb.bhvFKIKSwitchGroup)[0]
         for attr in ['.tx', '.ty', '.tz', '.rx', '.ry', '.rz']:
             pm.setAttr(fkikGroup + attr, l=0, k=1, cb=0)
-        parentIndex = fkikGroup.parentGroup.get()
+        pm.parent(fkikGroup, self.grpMng.bhvGroup)
+        parentIndex = fkikGroup.targetJoint.get()
         pm.parentConstraint(joints[parentIndex], fkikGroup)
         fkikControl = pm.listConnections(fkikGroup.control)[0]
         if not fkikControl.hasAttr('fkikSwitch'):
@@ -310,7 +314,7 @@ class Test_UI:
         pm.connectAttr(fkikControl.fkikSwitch, invertFKIKNode.input1D[1])
         pm.connectAttr(fkikControl.fkikInvert, invertFKIKNode.fkikSwitch)
 
-        # JOINTS
+        # Create FKIK JOINTS + Bind
         fkJoints = pm.duplicate(joints, po=1, rc=1)
         ikJoints = pm.duplicate(joints, po=1, rc=1)
         pm.connectAttr(limb.bhvFKIK_FKJoint, fkJoints[0].limb)
@@ -331,9 +335,12 @@ class Test_UI:
             group = pm.listConnections(joint.group)[0]
             ctr = self.ctrMng.GetGroupControl(group)
             pm.parentConstraint(ctr, fkJoints, mo=1)
+            fkJoint.v.set(0)
+            ikJoint.v.set(0)
 
         # Parent FK controls internally
-        groups = self.grpMng.GetLimbGroups(limb)
+        # groups = self.grpMng.GetLimbGroups(limb)
+        groups = [pm.listConnections(j.group)[0] for j in joints]
         for i in range(len(groups)-1, 0, -1):
             childGroup = groups[i]
             parentCtr = self.ctrMng.GetGroupControl(groups[i-1])[0]
@@ -344,7 +351,6 @@ class Test_UI:
         group = pm.listConnections(limb.bhvDistanceGroup)[0]
         control = pm.listConnections(group.control)[0]
         pm.poleVectorConstraint(control, handle)
-
     
     def Setup_External_FKIK(self, limb):
         joints = self.jntMng.GetLimbJoints(limb)
@@ -356,10 +362,7 @@ class Test_UI:
             pm.confirmDialog(t='IK POLE VECTOR Error', m=msg, icon='error', b='Ok')
             return
         targetLimb = targetLimb[0]
-        groups = pm.listConnections(limb.bhvDistanceGroup)
-        if not groups:
-            return
-        ikGroup = groups[0]
+        ikGroup = pm.listConnections(limb.bhvDistanceGroup)[0]
         index = ikGroup.targetJoint.get()
         targetGroup = self.grpMng.GetLimbGroups(targetLimb)[index]
         targetControl = pm.listConnections(targetGroup.control)[0]
@@ -369,19 +372,17 @@ class Test_UI:
         handle.v.set(0)
         pm.parent(handle, targetControl)
 
-        # PARENT POLE VECTOR CONTROL to target Control group, see above
-        pm.parent(ikGroup, targetGroup)
-
-        # PARENT FK
-        # fkGroup = pm.listConnections(joints[0].bhvFKGroup)[0]
+        # PARENT FK + DISTANCE CONTROL to target Control group
         fkGroup = pm.listConnections(joints[0].group)[0]
         parent = self.limbMng.GetLimbParent(limb)
         if parent:
+            distGroup = pm.listConnections(limb.bhvDistanceGroup)[0]
             index = limb.parentGroup.get()
             parentGroup = self.grpMng.GetLimbGroups(parent)[index]
             parentCtrs = self.ctrMng.GetGroupControl(parentGroup)
             if parentCtrs:
                 pm.parent(fkGroup, parentCtrs[0])
+                pm.parent(distGroup, parentCtrs[0])
 
         # Setup Visibility on controls + external controls
         fkikGroup = pm.listConnections(limb.bhvFKIKSwitchGroup)[0]
@@ -394,9 +395,11 @@ class Test_UI:
     def Teardown_FKIK(self, limb):
         pm.delete(pm.listConnections(limb.bhvFKIK_FKJoint))
         pm.delete(pm.listConnections(limb.bhvFKIK_IKJoint))
-
-
-
+        fkikGroup = pm.listConnections(limb.bhvFKIKSwitchGroup)[0]
+        fkikControl = pm.listConnections(fkikGroup.control)[0]
+        pm.delete(pm.listConnections(fkikControl.fkikInvert))
+        pm.disconnectAttr(fkikControl.fkikSwitch)
+        # Set FK / Dist group vis to on
 
 #=========== MISC ====================================
     
