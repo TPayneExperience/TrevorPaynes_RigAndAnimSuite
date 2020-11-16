@@ -12,7 +12,7 @@ class BHV_Limb_Properties_UI:
         self.limb = None
         self.targetJnt_at = None
         self.cstType_at = None
-        self.ctrAxis_at = None
+        # self.ctrAxis_at = None
         self.fkikJoint_at = None
 
         self.jntLimbs = {} # limbName : limb
@@ -40,7 +40,7 @@ class BHV_Limb_Properties_UI:
 
         self.PopulateBhvFrame(bhvType)
         self.PopulateTargetFrame(bhvType)
-        self.PopulateControlFrame(bhvType)
+        # self.PopulateControlFrame(bhvType)
 
         # self.UpdateBhvFrame()
         # self.UpdateUI()
@@ -62,11 +62,11 @@ class BHV_Limb_Properties_UI:
                 self.targetLimb_om = pm.optionMenu( l='Target Limb', 
                                                     cc=self.SetTargetLimb)
 
-        with pm.frameLayout('IKPV / LookAt CONTROL Position', bv=1, en=0) as self.ctrLayout:
-            with pm.columnLayout(adj=1) as self.ctrProp_cl:
-                self.ctrDist_cg = pm.attrControlGrp( l='Control Distance', a='persp.translateX')
-                # self.ikTargetLimb_om = pm.optionMenu(   l='Target Limb', 
-                #                                         cc=self.SetIKTargetLimb)
+        # with pm.frameLayout('IKPV / LookAt CONTROL Position', bv=1, en=0) as self.ctrLayout:
+        #     with pm.columnLayout(adj=1) as self.ctrProp_cl:
+        #         self.ctrDist_cg = pm.attrControlGrp( l='Control Distance', a='persp.translateX')
+        #         # self.ikTargetLimb_om = pm.optionMenu(   l='Target Limb', 
+        #         #                                         cc=self.SetIKTargetLimb)
                 
 
 #=========== FUNCTIONALITY ==============================================
@@ -85,7 +85,7 @@ class BHV_Limb_Properties_UI:
             isIK = (newBhvIndex in self.bhvMng.ikTypeIndexes)
             isCst = (newBhvIndex == 3)
             pm.frameLayout(self.targetLayout, e=1, en=isCst)
-            pm.frameLayout(self.ctrLayout, e=1, en=isIK)
+            # pm.frameLayout(self.ctrLayout, e=1, en=isIK)
             if isCst:
                 self._SetCstBhv()
             elif isIK:
@@ -98,7 +98,7 @@ class BHV_Limb_Properties_UI:
                 self.grpMng.UpdateGroupDistance(group)
             self.PopulateBhvFrame(newBhvIndex)
             self.PopulateTargetFrame(newBhvIndex)
-            self.PopulateControlFrame(newBhvIndex)
+            # self.PopulateControlFrame(newBhvIndex)
             # self.Populate()
             # self.PopulateTargetLimbs()
             # self.UpdateUI()
@@ -245,7 +245,7 @@ class BHV_Limb_Properties_UI:
         self.limb = None
         pm.frameLayout(self.limbLayout, e=1, en=0)
         pm.frameLayout(self.targetLayout, e=1, en=0)
-        pm.frameLayout(self.ctrLayout, e=1, en=0)
+        # pm.frameLayout(self.ctrLayout, e=1, en=0)
 
     # def PopulateTargetLimbs(self):
     #     pm.optionMenu(self.targetLimb_om, e=1, dai=1)
@@ -308,22 +308,22 @@ class BHV_Limb_Properties_UI:
                                                     at=self.limb.bhvCstType,
                                                     p=self.targetProp_cl)
 
-    def PopulateControlFrame(self, bhvType):
-        isDist = bhvType in self.bhvMng.distanceIndexes
-        pm.frameLayout(self.ctrLayout, e=1, en=isDist)
-        if not isDist:
-            return
-        if self.ctrAxis_at:
-            pm.deleteUI(self.ctrAxis_at)
-            self.ctrAxis_at = None
-        group = pm.listConnections(self.limb.bhvDistanceGroup)[0]
-        pm.attrControlGrp(  self.ctrDist_cg, e=1, en=1, 
-                            a=group.distance,
-                            cc=pm.Callback(self.UpdateGroupDistance, 1))
-        self.ctrAxis_at = pm.attrEnumOptionMenu(l='Position Axis',
-                                                at=group.axis,
-                                                p=self.ctrProp_cl,
-                                                cc=self.UpdateGroupDistance)
+    # def PopulateControlFrame(self, bhvType):
+    #     isDist = bhvType in self.bhvMng.distanceIndexes
+    #     pm.frameLayout(self.ctrLayout, e=1, en=isDist)
+    #     if not isDist:
+    #         return
+    #     if self.ctrAxis_at:
+    #         pm.deleteUI(self.ctrAxis_at)
+    #         self.ctrAxis_at = None
+    #     group = pm.listConnections(self.limb.bhvDistanceGroup)[0]
+    #     pm.attrControlGrp(  self.ctrDist_cg, e=1, en=1, 
+    #                         a=group.distance,
+    #                         cc=pm.Callback(self.UpdateGroupDistance, 1))
+    #     self.ctrAxis_at = pm.attrEnumOptionMenu(l='Position Axis',
+    #                                             at=group.axis,
+    #                                             p=self.ctrProp_cl,
+    #                                             cc=self.UpdateGroupDistance)
 
     def PopulateTargetFrame(self, bhvType):
         isTarget = bhvType in self.bhvMng.targetIndexes
@@ -439,9 +439,9 @@ class BHV_Limb_Properties_UI:
         #         index = self.jntLimbOrder.index(cstLimb) + 1
         #         pm.optionMenu(self.targetLimb_om, e=1, sl=index)
         
-    def UpdateGroupDistance(self, ignore):
-        group = pm.listConnections(self.limb.bhvDistanceGroup)[0]
-        self.grpMng.UpdateGroupDistance(group)
+    # def UpdateGroupDistance(self, ignore):
+    #     group = pm.listConnections(self.limb.bhvDistanceGroup)[0]
+    #     self.grpMng.UpdateGroupDistance(group)
 
     # def UpdateLookAtPosition(self, ignore):
     #     self.grpMng.UpdateLookAtPosition(self.limb)

@@ -2,19 +2,23 @@
 import pymel.core as pm
 
 class APP_Limb_Properties_UI:
-    def __init__(self, limbMng, grpMng, ctrMng, parent):
+    def __init__(self, limbMng, grpMng, bhvMng, ctrMng, parent):
         self.limbMng = limbMng
         self.grpMng = grpMng
+        self.bhvMng = bhvMng
         self.ctrMng = ctrMng
         self.parent = parent
 
+        self.ctrAxis_at = None
         self.limbs = {} # name : limb
         self.limbOrder = []
 
         self._Setup()
     
     def SetLimb(self, limbID):
+        pm.frameLayout(self.prop_l, e=1, en=1)
         self.limb = self.limbMng.GetLimb(limbID)
+        bhvType = self.limb.bhvType.get()
         pm.deleteUI(self.targetType)
         pm.deleteUI(self.ctrType)
 
@@ -29,9 +33,25 @@ class APP_Limb_Properties_UI:
         pm.attrControlGrp(self.lockRot, e=1, a=self.limb.appLockHideRot)
         pm.attrControlGrp(self.lockScale, e=1, a=self.limb.appLockHideScale)
         
-        isFK = (self.limb.bhvType.get() in [0, 6, 8])
+        isFK = (bhvType in self.bhvMng.fkTypeIndexes)
         pm.optionMenu(self.fkikTargetLimb_om, e=1, en=isFK)
         self.GetTargetFKIK()
+        
+        # CONTROL DISTANCE
+        isDist = bhvType in self.bhvMng.distanceIndexes
+        pm.frameLayout(self.ctrLayout, e=1, en=isDist)
+        if self.ctrAxis_at:
+            pm.deleteUI(self.ctrAxis_at)
+            self.ctrAxis_at = None
+        group = pm.listConnections(self.limb.bhvDistanceGroup)[0]
+        pm.attrControlGrp(  self.ctrDist_cg, e=1, en=1, 
+                            a=group.distance,
+                            cc=pm.Callback(self.UpdateGroupDistance, 1))
+        self.ctrAxis_at = pm.attrEnumOptionMenu(l='Position Axis',
+                                                at=group.axis,
+                                                p=self.ctrProp_cl,
+                                                cc=self.UpdateGroupDistance)
+
 
     def Populate(self):
         '''Called when Bhvs tab clicked, 
@@ -51,21 +71,29 @@ class APP_Limb_Properties_UI:
                     self.limbs[name] = limb
                     self.limbOrder.append(name)
 
+    def Depopulate(self):
+        pm.frameLayout(self.prop_l, e=1, en=0)
+        pm.frameLayout(self.ctrLayout, e=1, en=0)
 
 #=========== SETUP UI ==============================================
 
     def _Setup(self):
-        with pm.columnLayout(adj=1) as self.appLimbProp_cl:
-            self.lockPos = pm.attrControlGrp(l='Lock + Hide Translate',
-                                            a='perspShape.shakeEnabled')
-            self.lockRot = pm.attrControlGrp(l='Lock + Hide Rotate',
-                                            a='perspShape.shakeEnabled')
-            self.lockScale = pm.attrControlGrp(l='Lock + Hide Scale',
-                                            a='perspShape.shakeEnabled')
-            self.fkikTargetLimb_om = pm.optionMenu( l='Target FK / IK Limb',
-                                                    cc=self.SetTargetFKIK)
-            self.targetType = pm.attrEnumOptionMenu(at='perspShape.filmFit')
-            self.ctrType = pm.attrEnumOptionMenu(at='perspShape.filmFit')
+        with pm.frameLayout('Limb Properties', bv=1, en=0) as self.prop_l:
+            with pm.columnLayout(adj=1) as self.appLimbProp_cl:
+                self.lockPos = pm.attrControlGrp(l='Lock + Hide Translate',
+                                                a='perspShape.shakeEnabled')
+                self.lockRot = pm.attrControlGrp(l='Lock + Hide Rotate',
+                                                a='perspShape.shakeEnabled')
+                self.lockScale = pm.attrControlGrp(l='Lock + Hide Scale',
+                                                a='perspShape.shakeEnabled')
+                self.fkikTargetLimb_om = pm.optionMenu( l='Target FK / IK Limb',
+                                                        cc=self.SetTargetFKIK)
+                self.targetType = pm.attrEnumOptionMenu(at='perspShape.filmFit')
+                self.ctrType = pm.attrEnumOptionMenu(at='perspShape.filmFit')
+
+        with pm.frameLayout('IKPV / LookAt CONTROL Position', bv=1, en=0) as self.ctrLayout:
+            with pm.columnLayout(adj=1) as self.ctrProp_cl:
+                self.ctrDist_cg = pm.attrControlGrp( l='Control Distance', a='persp.translateX')
 
 
 #=========== FUNCTIONALITY ==============================================
@@ -105,6 +133,29 @@ class APP_Limb_Properties_UI:
         #             control = controls[0]
         #             self.ctrMng.SetType(control, ctrType)
 
+
+#=========== CONTROL DISTANCE ==============================================
+
+    def UpdateGroupDistance(self, ignore):
+        group = pm.listConnections(self.limb.bhvDistanceGroup)[0]
+        self.grpMng.UpdateGroupDistance(group)
+
+    # def PopulateControlFrame(self, bhvType):
+    #     isDist = bhvType in self.bhvMng.distanceIndexes
+    #     pm.frameLayout(self.ctrLayout, e=1, en=isDist)
+    #     if not isDist:
+    #         return
+    #     if self.ctrAxis_at:
+    #         pm.deleteUI(self.ctrAxis_at)
+    #         self.ctrAxis_at = None
+    #     group = pm.listConnections(self.limb.bhvDistanceGroup)[0]
+    #     pm.attrControlGrp(  self.ctrDist_cg, e=1, en=1, 
+    #                         a=group.distance,
+    #                         cc=pm.Callback(self.UpdateGroupDistance, 1))
+    #     self.ctrAxis_at = pm.attrEnumOptionMenu(l='Position Axis',
+    #                                             at=group.axis,
+    #                                             p=self.ctrProp_cl,
+    #                                             cc=self.UpdateGroupDistance)
 
 
 

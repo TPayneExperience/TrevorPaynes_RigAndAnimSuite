@@ -44,11 +44,12 @@ class Appearance_UI:
                                                                         self.nameMng,
                                                                         self)
         with pm.verticalLayout():
-            with pm.frameLayout('Limb Properties', bv=1, en=0) as self.prop_l:
-                self.limbProp_ui = limbProp_UI.APP_Limb_Properties_UI(  self.limbMng,
-                                                                        self.grpMng,
-                                                                        self.ctrMng,
-                                                                        self)
+            # with pm.frameLayout('Limb Properties', bv=1, en=0) as self.prop_l:
+            self.limbProp_ui = limbProp_UI.APP_Limb_Properties_UI(  self.limbMng,
+                                                                    self.grpMng,
+                                                                    self.bhvMng,
+                                                                    self.ctrMng,
+                                                                    self)
 
 #=========== SETUP + TEARDOWN ====================================
 
@@ -56,7 +57,7 @@ class Appearance_UI:
         self.limbHier_ui.Populate()
         self.limbProp_ui.Populate()
         self.ctrHier_ui.Depopulate()
-        pm.frameLayout(self.prop_l, e=1, en=0)
+        # pm.frameLayout(self.prop_l, e=1, en=0)
     
     def Teardown_Editable(self):
         pass
@@ -64,7 +65,7 @@ class Appearance_UI:
 #=========== LIMBS ====================================
 
     def LimbSelected(self, limbID):
-        pm.frameLayout(self.prop_l, e=1, en=1)
+        # pm.frameLayout(self.prop_l, e=1, en=1)
         self.ctrHier_ui.SetLimb(limbID)
         self.limbProp_ui.SetLimb(limbID)
 

@@ -133,7 +133,8 @@ class Test_UI:
         groups = self.grpMng.GetLimbGroups(limb)
         for i in range(len(groups)-1, 0, -1):
             childGroup = groups[i]
-            parentCtr = self.ctrMng.GetGroupControl(groups[i-1])[0]
+            parentCtr = pm.listConnections(groups[i-1].control)[0]
+            # parentCtr = self.ctrMng.GetGroupControl(groups[i-1])[0]
             pm.parent(childGroup, parentCtr)
         self.Bind_FK_Joints(limb)
         
@@ -167,7 +168,8 @@ class Test_UI:
         for joint in self.jntMng.GetLimbJoints(limb)[:-1]:
             # group = pm.listConnections(joint.bhvFKGroup)[0]
             group = pm.listConnections(joint.group)[0]
-            ctr = self.ctrMng.GetGroupControl(group)
+            ctr = pm.listConnections(group.control)[0]
+            # ctr = self.ctrMng.GetGroupControl(group)
             pm.parentConstraint(ctr, joint, mo=1)
 
 #=========== CONSTRAINT ====================================
@@ -294,7 +296,7 @@ class Test_UI:
     def Setup_Internal_FKIK(self, limb):
         joints = self.jntMng.GetLimbJoints(limb)
 
-        # FKIK SWITCH + Visibility
+        # FKIK SWITCH + Inverse node setup
         fkikGroup = pm.listConnections(limb.bhvFKIKSwitchGroup)[0]
         for attr in ['.tx', '.ty', '.tz', '.rx', '.ry', '.rz']:
             pm.setAttr(fkikGroup + attr, l=0, k=1, cb=0)
@@ -327,14 +329,16 @@ class Test_UI:
             
             # Bind Constraint weights to switch
             cst = pm.parentConstraint(fkJoint, ikJoint, joint)
-            pm.connectAttr(fkikControl.fkikSwitch, cst + '.%sW0' % fkJoint)
-            pm.connectAttr(invertFKIKNode.output1D, cst + '.%sW1' % ikJoint)
+            pm.connectAttr(invertFKIKNode.output1D, cst + '.%sW0' % fkJoint)
+            pm.connectAttr(fkikControl.fkikSwitch, cst + '.%sW1' % ikJoint)
 
             # Bind FK joint to FK Control
             # group = pm.listConnections(joint.bhvFKGroup)[0]
             group = pm.listConnections(joint.group)[0]
-            ctr = self.ctrMng.GetGroupControl(group)
-            pm.parentConstraint(ctr, fkJoints, mo=1)
+            ctr = pm.listConnections(group.control)[0]
+            # ctr = self.ctrMng.GetGroupControl(group)
+            # pm.parentConstraint(ctr, fkJoints, mo=1)
+            pm.parentConstraint(ctr, fkJoint, mo=1)
             fkJoint.v.set(0)
             ikJoint.v.set(0)
 
@@ -343,7 +347,8 @@ class Test_UI:
         groups = [pm.listConnections(j.group)[0] for j in joints]
         for i in range(len(groups)-1, 0, -1):
             childGroup = groups[i]
-            parentCtr = self.ctrMng.GetGroupControl(groups[i-1])[0]
+            parentCtr = pm.listConnections(groups[i-1].control)[0]
+            # parentCtr = self.ctrMng.GetGroupControl(groups[i-1])[0]
             pm.parent(childGroup, parentCtr)
 
         # Create IK handle
@@ -376,20 +381,24 @@ class Test_UI:
         fkGroup = pm.listConnections(joints[0].group)[0]
         parent = self.limbMng.GetLimbParent(limb)
         if parent:
-            distGroup = pm.listConnections(limb.bhvDistanceGroup)[0]
             index = limb.parentGroup.get()
             parentGroup = self.grpMng.GetLimbGroups(parent)[index]
-            parentCtrs = self.ctrMng.GetGroupControl(parentGroup)
+            # parentCtrs = self.ctrMng.GetGroupControl(parentGroup)
+            parentCtrs = pm.listConnections(parentGroup.control)[0]
             if parentCtrs:
                 pm.parent(fkGroup, parentCtrs[0])
-                pm.parent(distGroup, parentCtrs[0])
+                pm.parent(ikGroup, parentCtrs[0])
 
         # Setup Visibility on controls + external controls
         fkikGroup = pm.listConnections(limb.bhvFKIKSwitchGroup)[0]
         fkikControl = pm.listConnections(fkikGroup.control)[0]
         invertFKIKNode = pm.listConnections(fkikControl.fkikInvert)[0]
-        pm.connectAttr(invertFKIKNode.output1D, fkGroup.v)
-        pm.connectAttr(fkikControl.fkikSwitch, ikGroup.v)
+        for fk in pm.listConnections(fkikGroup.FKVisTargets):
+            pm.connectAttr(invertFKIKNode.output1D, fk.v)
+        for ik in pm.listConnections(fkikGroup.IKVisTargets):
+            pm.connectAttr(fkikControl.fkikSwitch, ik.v)
+        # pm.connectAttr(invertFKIKNode.output1D, fkGroup.v)
+        # pm.connectAttr(fkikControl.fkikSwitch, ikGroup.v)
         
 
     def Teardown_FKIK(self, limb):
@@ -399,7 +408,10 @@ class Test_UI:
         fkikControl = pm.listConnections(fkikGroup.control)[0]
         pm.delete(pm.listConnections(fkikControl.fkikInvert))
         pm.disconnectAttr(fkikControl.fkikSwitch)
-        # Set FK / Dist group vis to on
+        for fk in pm.listConnections(fkikGroup.FKVisTargets):
+            fk.v.set(1)
+        for ik in pm.listConnections(fkikGroup.IKVisTargets):
+            ik.v.set(1)
 
 #=========== MISC ====================================
     
@@ -409,13 +421,15 @@ class Test_UI:
             childGroup = self.grpMng.GetLimbGroups(limb)[0]
             index = limb.parentGroup.get()
             parentGroup = self.grpMng.GetLimbGroups(parent)[index]
-            parentCtrs = self.ctrMng.GetGroupControl(parentGroup)
+            parentCtrs = pm.listConnections(parentGroup.control)[0]
+            # parentCtrs = self.ctrMng.GetGroupControl(parentGroup)
             if parentCtrs:
                 pm.parent(childGroup, parentCtrs[0])
 
     def Setup_Internal_LookAt(self, limb):
         joint = self.jntMng.GetLimbJoints(limb)[0]
         group = self.grpMng.GetLimbGroups(limb)[0]
-        control = self.ctrMng.GetGroupControl(group)
+        # control = self.ctrMng.GetGroupControl(group)
+        control = pm.listConnections(group.control)[0]
         pm.aimConstraint(control, joint, mo=1)
 

@@ -147,14 +147,21 @@ class BHV_Limb_Manager:
     def Setup_FKIK(self, limb):
         groups = pm.listConnections(limb.bhvFKIKSwitchGroup)
         if groups:
-            group = groups[0]
+            fkikGroup = groups[0]
         else:
-            group = self.grpMng.AddFKIKSwitchGroup(limb)
-            self.ctrMng.Add(group, self.ctrMng.ctrTypes[3])
+            fkikGroup = self.grpMng.AddFKIKSwitchGroup(limb)
+            self.ctrMng.Add(fkikGroup, self.ctrMng.ctrTypes[3])
         joints = self.jntMng.GetLimbJoints(limb)
         names = [j.pfrsName.get() for j in joints]
-        pm.addAttr(group.targetJoint, e=1, en=':'.join(names))
-        self.grpMng.UpdateFKIKSwitchJoint(group, joints)
+        pm.addAttr(fkikGroup.targetJoint, e=1, en=':'.join(names))
+
+        # Visibility Groups
+        distGroup = pm.listConnections(limb.bhvDistanceGroup)[0]
+        pm.connectAttr(fkikGroup.IKVisTargets, distGroup.FKIKVisSource)
+        # jointGroups = [pm.listConnections(j.group) for j in joints]
+        fkGroup = pm.listConnections(joints[0].group)[0]
+        pm.connectAttr(fkikGroup.FKVisTargets, fkGroup.FKIKVisSource)
+        self.grpMng.UpdateFKIKSwitchJoint(fkikGroup, joints)
 
 # ============= TEARDOWN BHV ============================
 

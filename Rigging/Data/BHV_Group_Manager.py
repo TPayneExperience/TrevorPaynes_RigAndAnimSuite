@@ -102,6 +102,7 @@ class BHV_Group_Manager:
         pm.addAttr(group, ln='ID', at='long', dv=groupID)
         pm.addAttr(group, ln='control', dt='string')
         pm.addAttr(group, ln='limb', dt='string')
+        pm.addAttr(group, ln='FKIKVisSource', dt='string')
         pm.addAttr(group, ln='groupType', at='enum', en=groupTypes) # IKPV, LookAt
         for attr in ['.sx', '.sy', '.sz']:
             pm.setAttr(group + attr, l=1, k=0, cb=0)
@@ -152,6 +153,8 @@ class BHV_Group_Manager:
         group = self._AddGroup(limb)
         group.groupType.set(3)
         pm.addAttr(group, ln='targetJoint', at='enum', en='None')
+        pm.addAttr(group, ln='FKVisTargets', dt='string') # for easy Test Connections
+        pm.addAttr(group, ln='IKVisTargets', dt='string') # for easy Test Connections
         pm.connectAttr(limb.bhvFKIKSwitchGroup, group.limb)
         self.UpdateGroupName(limb, group)
         for attr in ['.tx', '.ty', '.tz', '.rx', '.ry', '.rz']:

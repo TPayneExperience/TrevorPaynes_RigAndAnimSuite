@@ -35,8 +35,8 @@ class APP_Control_Manager:
     def GetControl(self, ctrID):
         return self._ctrs[ctrID]
 
-    def GetGroupControl(self, group):
-        return pm.listConnections(group.control)
+    # def GetGroupControl(self, group):
+    #     return pm.listConnections(group.control)
 
     def GetControlTypes(self):
         return list(self._ctrTemplates.keys())
