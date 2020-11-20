@@ -20,8 +20,10 @@ class JointSetup_UI:
                 with pm.rowLayout(adj=1, rat=(1,'top', 5)):
                     with pm.columnLayout(adj=1, cat=('both', 5), rs=5):
                         pm.button(l='Joint Tool', c=pm.Callback(pm.mel.eval, 'JointTool()'))
-                        self.insert_b = pm.button(  l='Insert Limb End Joint', 
-                                                    c=self.InsertLimbEndJoint)
+                        self.insertMid_b = pm.button(  l='Insert MID Parent Joint', 
+                                                    c=self.InsertParentMidJoint)
+                        self.insertEnd_b = pm.button(  l='Insert END Parent Joint', 
+                                                    c=self.InsertParentEndJoint)
                         msg = 'PLEASE USE! Removes joint and all bound data properly'
                         self.remove_b = pm.button(  l='Remove Joint', 
                                                     c=self.RemoveJoint, 
@@ -29,7 +31,24 @@ class JointSetup_UI:
 
 #=========== FUNCTIONS ====================================
 
-    def InsertLimbEndJoint(self, ignore):
+    def InsertParentMidJoint(self, ignore):
+        joints = pm.ls(sl=1, type='joint')
+        if not joints:
+            return
+        oldJoint = joints[0]
+        newJoint = pm.duplicate(oldJoint, po=1, rc=1)[0]
+        parent = pm.listRelatives(oldJoint, p=1)
+        startPos = pm.xform(parent,q=1, t=1, ws=1)
+        startRot = pm.xform(parent,q=1, ro=1, ws=1)
+        endPos = pm.xform(oldJoint, q=1, t=1, ws=1)
+        endRot = pm.xform(oldJoint, q=1, ro=1, ws=1)
+        midPos = [(startPos[i] + endPos[i])/2 for i in range(3)]
+        midRot = [(startRot[i] + endRot[i])/2 for i in range(3)]
+        pm.xform(newJoint, t=midPos, ro=midRot, ws=1)
+        newJoint.radius.set(0.2)
+        pm.parent(oldJoint, newJoint)
+
+    def InsertParentEndJoint(self, ignore):
         joints = pm.ls(sl=1, type='joint')
         if not joints:
             return
@@ -43,9 +62,14 @@ class JointSetup_UI:
             self.jntMng.RemovePerm(joint)
     
     def UpdateButtons(self):
-        isEnabled = bool(pm.ls(sl=1, type='joint'))
-        pm.button(self.insert_b, e=1, en=isEnabled)
-        pm.button(self.remove_b, e=1, en=isEnabled)
+        pm.button(self.insertMid_b, e=1, en=0)
+        joints = pm.ls(sl=1, type='joint')
+        jointSelected = bool(joints)
+        if joints:
+            if pm.listRelatives(joints[0], p=1):
+                pm.button(self.insertMid_b, e=1, en=1)
+        pm.button(self.insertEnd_b, e=1, en=jointSelected)
+        pm.button(self.remove_b, e=1, en=jointSelected)
 
 #=========== TAB FUNCTIONALITY ====================================
     

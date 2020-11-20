@@ -141,8 +141,8 @@ class BHV_Group_Manager:
         group.groupType.set(2)
         pm.addAttr(group, ln='targetJoint', at='enum', en='None') # IK PV
         pm.addAttr(group, ln='distanceJoint', dt='string') # for easy Test Connections
-        pm.addAttr(group, ln='distance', at='float', min=0) # IKPV, LookAt
-        pm.addAttr(group, ln='axis', at='enum', en='X:-X:Y:-Y:Z:-Z') # IKPV, LookAt
+        pm.addAttr(group, ln='distance', at='float', min=0, dv=1) # IKPV, LookAt
+        pm.addAttr(group, ln='axis', at='enum', en='X:-X:Y:-Y:Z:-Z', dv=4) # IKPV, LookAt
         pm.connectAttr(limb.bhvDistanceGroup, group.limb)
         self.UpdateGroupName(limb, group)
         return group

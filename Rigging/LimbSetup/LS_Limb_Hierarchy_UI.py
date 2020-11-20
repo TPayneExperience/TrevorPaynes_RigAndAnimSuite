@@ -33,7 +33,8 @@ class LS_Limb_Hierarchy_UI:
                     pm.treeView(self.widget, e=1, bti=(limbID, 1, side))
                 else:
                     pm.treeView(self.widget, e=1, bvf=(limbID, 1, 0))
-                joints = self.jntMng.GetLimbTempJoints(limb)
+                # joints = self.jntMng.GetLimbTempJoints(limb)
+                joints = self.jntMng.GetLimbJoints(limb)
                 index = limb.limbType.get()
                 if (index == 0) and joints:
                     pm.treeView(self.widget, e=1, ornament=(limbID, 1, 0, 4))
@@ -93,7 +94,8 @@ class LS_Limb_Hierarchy_UI:
                                     cancelButton='No', 
                                     dismissString='No') == 'Yes'):
                 limb = self.limbMng.GetLimb(int(limbIDStrs[0]))
-                for joint in self.jntMng.GetLimbTempJoints(limb):
+                # for joint in self.jntMng.GetLimbTempJoints(limb):
+                for joint in self.jntMng.GetLimbJoints(limb):
                     self.jntMng.RemoveTemp(joint)
 
                 limbGroups = pm.listConnections(limb.bhvDistanceGroup)

@@ -26,9 +26,9 @@ class Test_UI:
         pm.select(d=1)
 
     def Teardown_Editable(self):
-        self.Reset_Controls()
+        self.Teardown_Controls()
         self.Remove_Constraints()
-        self.Reparent_Groups()
+        self.Teardown_Groups()
 
 #=========== SETUP FUNCTIONALITY ====================================
     
@@ -40,13 +40,21 @@ class Test_UI:
 
     def Setup_Controls(self):
         for control in self.ctrMng.GetAllControls():
-            pm.makeIdentity(control, a=1, t=1, r=1, s=1)
             group = pm.listConnections(control.group)[0]
+            groupType = group.groupType.get()
+            if groupType == 2: # Distance
+                for attr in ['.tx', '.ty', '.tz']:
+                    pm.setAttr(control + attr, l=0, k=1, cb=1)
+            pm.makeIdentity(control, a=1, t=1, r=1, s=1)
             pos = pm.xform(group, q=1, t=1)
             pm.move(pos[0], pos[1], pos[2], 
                         control.scalePivot, 
                         control.rotatePivot, 
                         a=1)
+            if groupType == 2: # Distance
+                for attr in ['.rx', '.ry', '.rz', '.sx', '.sy', '.sz']:
+                    pm.setAttr(control + attr, l=1, k=0, cb=0)
+            
 
     def Setup_Internal(self):
         for limb in self.limbMng.GetAllLimbs():
@@ -84,9 +92,16 @@ class Test_UI:
 
 #=========== TEARDOWN FUNCTIONALITY ====================================
     
-    def Reset_Controls(self):
+    def Teardown_Controls(self):
         for control in self.ctrMng.GetAllControls():
+            group = pm.listConnections(control.group)[0]
+            if group.groupType.get() == 2: # Distance
+                for attr in ['.rx', '.ry', '.rz', '.sx', '.sy', '.sz']:
+                    pm.setAttr(control + attr, l=0, k=1, cb=1)
             pm.xform(control, t=[0,0,0], ro=[0,0,0], s=[1,1,1])
+            if group.groupType.get() == 2: # Distance
+                for attr in ['.tx', '.ty', '.tz']:
+                    pm.setAttr(control + attr, l=1, k=0, cb=0)
         pm.refresh() # Forces IK Handles to re-evaluate
     
     def Remove_Constraints(self):
@@ -95,6 +110,7 @@ class Test_UI:
         pm.delete(pm.ls(type='pointConstraint'))
         pm.delete(pm.ls(type='orientConstraint'))
         pm.delete(pm.ls(type='scaleConstraint'))
+        pm.delete(pm.ls(type='aimConstraint'))
         pm.delete(pm.ls(type='plusMinusAverage')) # Delete FKIK extra nodes
         for limb in self.limbMng.GetAllLimbs(): 
             if (limb.bhvType.get() == 2):
@@ -102,7 +118,7 @@ class Test_UI:
         #     if (limb.bhvType.get() == 3):
         #         self.Teardown_Constraint(limb)
     
-    def Reparent_Groups(self):
+    def Teardown_Groups(self):
         for joint in self.jntMng.GetAllJoints():
             group = pm.listConnections(joint.group)[0]
             pm.parent(group, joint)

@@ -119,7 +119,8 @@ class Behavior_UI:
     
     def LimbSelected(self, limbID):
         limb = self.limbMng.GetLimb(limbID)
-        joints = self.jntMng.GetLimbTempJoints(limb)
+        # joints = self.jntMng.GetLimbTempJoints(limb)
+        joints = self.jntMng.GetLimbJoints(limb)
         pm.select(joints)
         self.limbProp_ui.SetLimb(limbID)
         self.grpHier_ui.SetLimb(limbID)

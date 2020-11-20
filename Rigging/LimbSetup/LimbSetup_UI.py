@@ -62,10 +62,10 @@ class LimbSetup_UI:
     
     def Setup_Editable(self):
         self.limbMng.RebuildLimbDict()
-        for limb in self.limbMng.GetAllLimbs():
-            for joint in self.jntMng.GetLimbJoints(limb):
-                pm.disconnectAttr(joint.tempLimb)
-                pm.connectAttr(limb.tempJoints, joint.tempLimb)
+        # for limb in self.limbMng.GetAllLimbs():
+            # for joint in self.jntMng.GetLimbJoints(limb):
+                # pm.disconnectAttr(joint.tempLimb)
+                # pm.connectAttr(limb.tempJoints, joint.tempLimb)
         self.Populate()
         if not self.scriptJob:
             self.scriptJob = pm.scriptJob( e=("SelectionChanged",self.sceneHier_ui.SelectSceneHierJoints), pro=True)
@@ -86,6 +86,7 @@ class LimbSetup_UI:
         limb = self.AddLimbByJoints(self.jointsToCreateLimb)
         self.parent.AddLimb(limb) # BHV Limb Mng add
         self.ClearJointsToAdd()
+        pm.select(d=1)
         self.jntHier_ui.SetLimb(limb.ID.get())
         self.PopulateJoints()
         self.limbHier_ui.Populate()
@@ -134,7 +135,8 @@ class LimbSetup_UI:
             self.jntHier_ui.Depopulate()
         else:
             self.limb = self.limbMng.GetLimb(limbID)
-            joints = self.jntMng.GetLimbTempJoints(self.limb)
+            # joints = self.jntMng.GetLimbTempJoints(self.limb)
+            joints = self.jntMng.GetLimbJoints(self.limb)
             self.SelectSceneJoints(joints)
             self.jntHier_ui.SetLimb(limbID)
         self.UpdateJointFrame(limbID)
@@ -163,7 +165,8 @@ class LimbSetup_UI:
 
             # Set Joint Hier RMB > Add Joints
             if self.limb:
-                limbJoints = self.jntMng.GetLimbTempJoints(self.limb)
+                # limbJoints = self.jntMng.GetLimbTempJoints(self.limb)
+                limbJoints = self.jntMng.GetLimbJoints(self.limb)
                 allJoints = joints + limbJoints
                 if len(limbJoints) == 0 or self.jntMng.AreJointsSiblings(allJoints):
                     self.jointsToAddToLimb = joints
@@ -171,9 +174,13 @@ class LimbSetup_UI:
                 elif self.jntMng.AreJointsChained(allJoints):
                     jointChain = self.jntMng.GetJointChain(allJoints)
                     for joint in jointChain:
+                        # if self.jntMng.HasTempLimb(joint) and \
+                        #     (self.jntMng.GetTempLimb(joint) != self.limb):
+                        #     return 
                         if self.jntMng.HasLimb(joint) and \
                             (self.jntMng.GetLimb(joint) != self.limb):
                             return 
+                    # t = [j for j in jointChain if not self.jntMng.HasTempLimb(j)]
                     t = [j for j in jointChain if not self.jntMng.HasLimb(j)]
                     self.jointsToAddToLimb = t
                     self.jntHier_ui.SetAddEnabled(1)

@@ -17,7 +17,7 @@ class LS_Scene_Hierarchy_UI:
         self.selectableJoints = []
         pm.treeView(self.widget, e=1, removeAll=1)
         self.allJoints = {} # longName : joint
-        limbJoints = list(self.jntMng._joints.values())
+        limbJoints = list(self.jntMng.GetAllJoints())
         for joint in pm.ls(type='joint'):
             self.allJoints[joint.longName()] = joint
         for longName in sorted(list(self.allJoints.keys())):
@@ -143,7 +143,8 @@ class LS_Scene_Hierarchy_UI:
             else:
                 invalidLimbs.append(limbName)
         for limb in validLimbs:
-            tempJoints = self.jntMng.GetLimbTempJoints(limb)
+            # tempJoints = self.jntMng.GetLimbTempJoints(limb)
+            tempJoints = self.jntMng.GetLimbJoints(limb)
             tempJoint = tempJoints[0]
             side = tempJoint.shortName().split('_')[1]
             if side.upper() == 'L':

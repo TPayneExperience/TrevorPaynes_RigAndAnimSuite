@@ -14,7 +14,8 @@ class LS_Joint_Hierarchy_UI:
 
     def Populate(self):
         self.Depopulate()
-        for joint in self.jntMng.GetLimbTempJoints(self.limb):
+        # for joint in self.jntMng.GetLimbTempJoints(self.limb):
+        for joint in self.jntMng.GetLimbJoints(self.limb):
             jointID = joint.ID.get()
             name = joint.pfrsName.get()
             pm.treeView(self.widget, e=1, addItem=(jointID, ''))
@@ -43,7 +44,8 @@ class LS_Joint_Hierarchy_UI:
         jntStrs = pm.treeView(self.widget, q=1, selectItem=1)
         if jntStrs:
             selJoints = [self.jntMng.GetJoint(int(ID)) for ID in jntStrs]
-            joints = self.jntMng.GetLimbTempJoints(self.limb)
+            # joints = self.jntMng.GetLimbTempJoints(self.limb)
+            joints = self.jntMng.GetLimbJoints(self.limb)
             if len(joints) > 1 and self.jntMng.AreJointsChained(joints):
                 if self.jntMng.AreJointsChained(selJoints):
                     chainJoints = self.jntMng.GetJointChain(selJoints)
@@ -63,7 +65,9 @@ class LS_Joint_Hierarchy_UI:
 
     def Add(self):
         for joint in self.parent.jointsToAddToLimb:
-            self.jntMng.Teardown_Editable(self.limb, joint)
+            # self.jntMng.Teardown_Editable(self.limb, joint)
+            self.jntMng.Add(self.limb, joint)
+        self.jntMng.ReindexJoints(self.limb)
         self.parent.ClearJointsToAdd()
         self.parent.PopulateJoints()
 
@@ -79,7 +83,8 @@ class LS_Joint_Hierarchy_UI:
             if self.nameMng.DoesNotStartWithNumber(newName):
                 if self.nameMng.AreAllValidCharacters(newName):
                     jointNames = []
-                    for joint in self.jntMng.GetLimbTempJoints(self.limb):
+                    # for joint in self.jntMng.GetLimbTempJoints(self.limb):
+                    for joint in self.jntMng.GetLimbJoints(self.limb):
                         jointNames.append(joint.pfrsName.get())
                     if (newName not in jointNames):
                         jointID = int(jointIDStr)

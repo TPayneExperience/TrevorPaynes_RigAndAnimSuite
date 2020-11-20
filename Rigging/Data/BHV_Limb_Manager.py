@@ -141,7 +141,9 @@ class BHV_Limb_Manager:
             pm.disconnectAttr(group.distanceJoint)
         else:
             group = self.grpMng.AddDistanceGroup(limb)
-            self.ctrMng.Add(group, self.ctrMng.ctrTypes[2])
+            ctr = self.ctrMng.Add(group, self.ctrMng.ctrTypes[2])
+            for attr in ['.tx', '.ty', '.tz', '.v']:
+                pm.setAttr(ctr+attr, l=1, k=0, cb=0)
         return group
 
     def Setup_FKIK(self, limb):
@@ -150,7 +152,9 @@ class BHV_Limb_Manager:
             fkikGroup = groups[0]
         else:
             fkikGroup = self.grpMng.AddFKIKSwitchGroup(limb)
-            self.ctrMng.Add(fkikGroup, self.ctrMng.ctrTypes[3])
+            ctr = self.ctrMng.Add(fkikGroup, self.ctrMng.ctrTypes[3])
+            for attr in ['.tx', '.ty', '.tz', '.v']:
+                pm.setAttr(ctr+attr, l=1, k=0, cb=0)
         joints = self.jntMng.GetLimbJoints(limb)
         names = [j.pfrsName.get() for j in joints]
         pm.addAttr(fkikGroup.targetJoint, e=1, en=':'.join(names))

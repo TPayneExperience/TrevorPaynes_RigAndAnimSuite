@@ -172,7 +172,8 @@ class Rigging_UI:
         allLimbs = self.limbMng.GetAllLimbs()
         for limb in allLimbs:
             # Create joints to limbs Permanent Connection
-            joints = self.jntMng.GetLimbTempJoints(limb)
+            # joints = self.jntMng.GetLimbTempJoints(limb)
+            joints = self.jntMng.GetLimbJoints(limb)
             for joint in joints:
                 self.jntMng.Setup_Editable(limb, joint)
 
