@@ -55,6 +55,7 @@ class LimbSetup_UI:
             with pm.frameLayout(l='---', bv=1) as self.jntHier_fl:
                 self.jntHier_ui = jointHier_UI.LS_Joint_Hierarchy_UI(   self.limbMng,
                                                                         self.jntMng,
+                                                                        self.grpMng,
                                                                         self.nameMng,
                                                                         self)
            
@@ -123,7 +124,7 @@ class LimbSetup_UI:
         self.UpdateJointFrame()
         self.parent.RemoveLimb(limb)
 
-    def RenameLimbs(self, limbs):
+    def RenameLimbs(self):
         self.Populate()
 
     def FlipSides(self):

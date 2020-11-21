@@ -184,20 +184,23 @@ class Rigging_UI:
             if not joints:
                 limb.limbType.set(0)
                 limb.bhvType.set(7) # Empty
-            elif (len(joints) == 1) and limbType != 1:
-                limb.limbType.set(1)
-                limb.bhvType.set(6) # FK Branch
-                group = pm.listConnections(joints[0].group)[0]
-            elif self.jntMng.AreJointsChained(joints) and limbType != 2:
-                limb.limbType.set(2)
-                limb.bhvType.set(0) # FK Chain
-                for joint in joints:
-                    group = pm.listConnections(joint.group)[0]
-            elif self.jntMng.AreJointsSiblings(joints) and limbType != 3:
-                limb.limbType.set(3)
-                limb.bhvType.set(6) # FK Branch
-                for joint in joints:
-                    group = pm.listConnections(joint.group)[0]
+            elif (len(joints) == 1):
+                if limbType != 1:
+                    limb.limbType.set(1)
+                    limb.bhvType.set(6) # FK Branch
+                # group = pm.listConnections(joints[0].group)[0]
+            elif self.jntMng.AreJointsChained(joints):
+                if limbType != 2:
+                    limb.limbType.set(2)
+                    limb.bhvType.set(0) # FK Chain
+                # for joint in joints:
+                #     group = pm.listConnections(joint.group)[0]
+            elif self.jntMng.AreJointsSiblings(joints):
+                if limbType != 3:
+                    limb.limbType.set(3)
+                    limb.bhvType.set(6) # FK Branch
+                # for joint in joints:
+                #     group = pm.listConnections(joint.group)[0]
 
             # Enable Group Vis (created in bhv tab by bhv switching)
             bhvType = limb.bhvType.get()
@@ -221,6 +224,7 @@ class Rigging_UI:
                 else:
                     group = self.grpMng.AddEmptyGroup(limb)
                     self.ctrMng.Add(group, self.ctrMng.ctrTypes[0])
+                    self.grpMng.UpdateGroupName(limb, group)
             if (bhvType == 2): # FKIK
                 group = pm.listConnections(limb.bhvFKIKSwitchGroup)[0]
                 group.v.set(1)

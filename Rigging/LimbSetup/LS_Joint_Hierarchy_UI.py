@@ -2,9 +2,10 @@
 import pymel.core as pm
 
 class LS_Joint_Hierarchy_UI:
-    def __init__(self, limbMng, jntMng, nameMng, parent=None):
+    def __init__(self, limbMng, jntMng, grpMng, nameMng, parent):
         self.limbMng = limbMng
         self.jntMng = jntMng
+        self.grpMng = grpMng
         self.nameMng = nameMng
         self.parent = parent
 
@@ -90,6 +91,9 @@ class LS_Joint_Hierarchy_UI:
                         jointID = int(jointIDStr)
                         joint = self.jntMng.GetJoint(jointID)
                         joint.pfrsName.set(newName)
+                        limb = pm.listConnections(joint.limb)[0]
+                        group = pm.listConnections(joint.group)[0]
+                        self.grpMng.UpdateGroupName(limb, group)
                         self.parent.PopulateJoints()
         return ''
 

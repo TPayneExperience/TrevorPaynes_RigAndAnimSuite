@@ -129,6 +129,7 @@ class Joint_Manager():
 
             group = self.grpMng.AddJointGroup(limb, joint)
             self.ctrMng.Add(group, self.ctrMng.ctrTypes[1])
+            self.grpMng.UpdateGroupName(limb, group)
 
         # pm.connectAttr(limb.tempJoints, joint.tempLimb)
         pm.connectAttr(limb.joints, joint.limb)

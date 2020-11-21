@@ -40,6 +40,8 @@ class APP_Limb_Properties_UI:
         # CONTROL DISTANCE
         isDist = bhvType in self.bhvMng.distanceIndexes
         pm.frameLayout(self.ctrLayout, e=1, en=isDist)
+        if not isDist:
+            return
         if self.ctrAxis_at:
             pm.deleteUI(self.ctrAxis_at)
             self.ctrAxis_at = None

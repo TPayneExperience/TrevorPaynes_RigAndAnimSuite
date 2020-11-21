@@ -121,17 +121,24 @@ class LS_Limb_Hierarchy_UI:
                 if self.nameMng.AreAllValidCharacters(newName):
                     limbID = int(limbIDStr)
                     limb = self.limbMng.GetLimb(limbID)
-                    oldMirror = self.limbMng.GetLimbMirror(limb)
+                    # oldMirror = self.limbMng.GetLimbMirror(limb)
                     self.limbMng.Rename(limbID, newName)
-                    newMirror = self.limbMng.GetLimbMirror(limb)
+                    self.parent.RenameLimbs()
+                    # newMirror = self.limbMng.GetLimbMirror(limb)
 
-                    if oldMirror:
-                        self.jntMng.UpdateLimbJointNames(oldMirror[0])
-                    if newMirror:
-                        self.jntMng.UpdateLimbJointNames(newMirror[0])
-                    self.jntMng.UpdateLimbJointNames(limb)
+                    # if oldMirror:
+                    #     self.jntMng.UpdateLimbJointNames(oldMirror[0])
+                    #     for group in self.grpMng.GetAllLimbGroups(oldMirror[0]):
+                    #         self.grpMng.UpdateGroupName(oldMirror[0], group)
+                    # if newMirror:
+                    #     self.jntMng.UpdateLimbJointNames(newMirror[0])
+                    #     for group in self.grpMng.GetAllLimbGroups(newMirror[0]):
+                    #         self.grpMng.UpdateGroupName(newMirror[0], group)
+                    # self.jntMng.UpdateLimbJointNames(limb)
+                    # for group in self.grpMng.GetAllLimbGroups(limb):
+                    #     self.grpMng.UpdateGroupName(limb, group)
                     
-                    self.parent.RenameLimbs([limb] + oldMirror + newMirror)
+                    # self.parent.RenameLimbs([limb] + oldMirror + newMirror)
         return ''
 
     def FlipSides(self, ignore):

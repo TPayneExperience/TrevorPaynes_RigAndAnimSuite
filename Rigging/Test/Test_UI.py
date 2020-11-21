@@ -113,10 +113,17 @@ class Test_UI:
         pm.delete(pm.ls(type='aimConstraint'))
         pm.delete(pm.ls(type='plusMinusAverage')) # Delete FKIK extra nodes
         for limb in self.limbMng.GetAllLimbs(): 
-            if (limb.bhvType.get() == 2):
+            bhvType = limb.bhvType.get()
+            if bhvType == 2:
                 self.Teardown_FKIK(limb)
-        #     if (limb.bhvType.get() == 3):
-        #         self.Teardown_Constraint(limb)
+            elif bhvType == 3:
+                self.Teardown_Constraint(limb)
+            if bhvType in self.bhvMng.fkTypeIndexes:
+                joints = self.jntMng.GetLimbJoints(limb)
+                if len(joints) >= 3: # Ignore last joint
+                    lastJoint = joints[-1]
+                    group = pm.listConnections(lastJoint.group)[0]
+                    group.v.set(1)
     
     def Teardown_Groups(self):
         for joint in self.jntMng.GetAllJoints():
@@ -181,7 +188,14 @@ class Test_UI:
                 pm.parent(childGroup, parentControl)
 
     def Bind_FK_Joints(self, limb):
-        for joint in self.jntMng.GetLimbJoints(limb)[:-1]:
+        joints = self.jntMng.GetLimbJoints(limb)
+        bhvType = limb.bhvType.get()
+        if (bhvType != 6) and (len(joints) >= 3): # Ignore last joint
+            lastJoint = joints[-1]
+            group = pm.listConnections(lastJoint.group)[0]
+            group.v.set(0)
+            joints = joints[:-1]
+        for joint in joints:
             # group = pm.listConnections(joint.bhvFKGroup)[0]
             group = pm.listConnections(joint.group)[0]
             ctr = pm.listConnections(group.control)[0]
@@ -191,20 +205,24 @@ class Test_UI:
 #=========== CONSTRAINT ====================================
     
     def Setup_Internal_Constraint(self, limb):
-        targetLimbs = pm.listConnections(limb.bhvCstTargetLimb)
+        # targetLimbs = pm.listConnections(limb.bhvCstTargetLimb)
+        targetLimbs = pm.listConnections(limb.bhvTargetLimb)
         if not targetLimbs:
-            msg = 'Constraint Limb "%s" missing TARGET limb' % limb
+            msg = 'ERROR: Constraint Limb "%s" missing TARGET limb' % limb
+            msg += '\n(Please set target limb in BEHAVIOR Tab)'
             pm.confirmDialog(t='Constraint Error', m=msg, icon='warning', b='Ok')
             return
         parentLimb = self.limbMng.GetLimbParent(limb)
         if not parentLimb:
-            msg = 'Constraint Limb "%s" missing PARENT limb' % limb
+            msg = 'ERROR: Constraint Limb "%s" missing PARENT limb' % limb
+            msg += '\n(Please PARENT limb to another limb in BEHAVIOR Tab)'
             pm.confirmDialog(t='Constraint Error', m=msg, icon='warning', b='Ok')
             return
         sourceIndex = limb.parentGroup.get()
         sourceJoint = self.jntMng.GetLimbJoints(parentLimb)[sourceIndex]
         targetLimb = targetLimbs[0]
-        targetIndex = limb.bhvCstTargetJnt.get()
+        # targetIndex = limb.bhvCstTargetJnt.get()
+        targetIndex = limb.bhvTargetJoint.get()
         targetJoint = self.jntMng.GetLimbJoints(targetLimb)[targetIndex]
         if sourceJoint == targetJoint:
             msg = 'Constraint Limb "%s" group parent and' % limb
@@ -232,13 +250,13 @@ class Test_UI:
                 pm.setAttr('%s.%sW0' % (cst, sourceJoint), 1-weight)
                 pm.setAttr('%s.%sW1' % (cst, targetJoint), weight)
 
-    # def Teardown_Constraint(self, limb):
-    #     for joint in self.jntMng.GetLimbJoints(limb):
-    #         group = pm.listConnections(joint.bhvCstGroup)[0]
-    #         pos = pm.xform(group, q=1, t=1, ws=1)
-    #         rot = pm.xform(group, q=1, ro=1, ws=1)
-    #         scale = pm.xform(group, q=1, s=1, ws=1)
-    #         pm.xform(joint, t=pos, ro=rot, s=scale, ws=1)
+    def Teardown_Constraint(self, limb):
+        for joint in self.jntMng.GetLimbJoints(limb):
+            group = pm.listConnections(joint.group)[0]
+            pos = pm.xform(group, q=1, t=1, ws=1)
+            rot = pm.xform(group, q=1, ro=1, ws=1)
+            scale = pm.xform(group, q=1, s=1, ws=1)
+            pm.xform(joint, t=pos, ro=rot, s=scale, ws=1)
 
 #=========== IK ====================================
     
@@ -250,7 +268,8 @@ class Test_UI:
             pm.ikHandle(sj=startJoint, ee=endJoint)
 
     def Setup_External_IKChain(self, limb):
-        targetLimb = pm.listConnections(limb.bhvIKTargetLimb)
+        # targetLimb = pm.listConnections(limb.bhvIKTargetLimb)
+        targetLimb = pm.listConnections(limb.bhvTargetLimb)
         if not targetLimb:
             msg = 'IK Chain Limb "%s" missing TARGET limb' % limb
             pm.confirmDialog(t='IK CHAIN Error', m=msg, icon='warning', b='Ok')
@@ -278,7 +297,8 @@ class Test_UI:
 
     def Setup_External_IKPoleVector(self, limb):
         # PARENT IK HANDLE TO TARGET CONTROL 
-        targetLimb = pm.listConnections(limb.bhvIKTargetLimb)
+        # targetLimb = pm.listConnections(limb.bhvIKTargetLimb)
+        targetLimb = pm.listConnections(limb.bhvTargetLimb)
         if not targetLimb:
             msg = 'IK Pole Vector Limb "%s" missing TARGET limb' % limb
             pm.confirmDialog(t='IK POLE VECTOR Error', m=msg, icon='error', b='Ok')
@@ -288,7 +308,8 @@ class Test_UI:
         if not groups:
             return
         distGroup = groups[0]
-        index = distGroup.targetJoint.get()
+        # index = distGroup.targetJoint.get()
+        index = limb.bhvTargetJoint.get()
         targetGroup = self.grpMng.GetLimbGroups(targetLimb)[index]
         targetControl = pm.listConnections(targetGroup.control)[0]
 
@@ -377,14 +398,16 @@ class Test_UI:
         joints = self.jntMng.GetLimbJoints(limb)
 
         # PARENT IK
-        targetLimb = pm.listConnections(limb.bhvIKTargetLimb)
+        # targetLimb = pm.listConnections(limb.bhvIKTargetLimb)
+        targetLimb = pm.listConnections(limb.bhvTargetLimb)
         if not targetLimb:
             msg = 'FK / IK Pole Vector Limb "%s" missing TARGET limb' % limb
             pm.confirmDialog(t='IK POLE VECTOR Error', m=msg, icon='error', b='Ok')
             return
         targetLimb = targetLimb[0]
         ikGroup = pm.listConnections(limb.bhvDistanceGroup)[0]
-        index = ikGroup.targetJoint.get()
+        # index = ikGroup.targetJoint.get()
+        index = limb.bhvTargetJoint.get()
         targetGroup = self.grpMng.GetLimbGroups(targetLimb)[index]
         targetControl = pm.listConnections(targetGroup.control)[0]
 

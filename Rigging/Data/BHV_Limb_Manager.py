@@ -65,10 +65,12 @@ class BHV_Limb_Manager:
     def SetBhvType(self, limb, oldBhvIndex, newBhvIndex):
         if (self.Teardown_Bhv(limb, oldBhvIndex, newBhvIndex)):
             limb.bhvType.set(newBhvIndex)
+            # FK
             if newBhvIndex in self.fkTypeIndexes:
                 self.Setup_FK(limb)
             elif newBhvIndex == 4:
                 self.Setup_LookAt(limb)
+            # IK
             if newBhvIndex in self.ikPVTypeIndexes:
                 self.Setup_IKPoleVector(limb)
             if newBhvIndex == 2:
@@ -95,12 +97,16 @@ class BHV_Limb_Manager:
         pm.addAttr(limb, ln='bhvFKIK_FKJoint', dt='string')
         pm.addAttr(limb, ln='bhvFKIK_IKJoint', dt='string')
 
+        pm.addAttr(limb, ln='bhvSourceLimb', dt='string') # Ignore, only for connections
+        pm.addAttr(limb, ln='bhvTargetLimb', dt='string') # for connecting to target
+        pm.addAttr(limb, ln='bhvTargetJoint', at='enum', en='None')
         pm.addAttr(limb, ln='bhvCstType', at='enum', en=bhvCstTypes)
-        pm.addAttr(limb, ln='bhvCstSourceLimb', dt='string') # Ignore, only for connections
-        pm.addAttr(limb, ln='bhvCstTargetLimb', dt='string') # for connecting to target
-        pm.addAttr(limb, ln='bhvCstTargetJnt', at='enum', en='None')
-        pm.addAttr(limb, ln='bhvIKSourceLimb', dt='string') # IK handles parent connection
-        pm.addAttr(limb, ln='bhvIKTargetLimb', dt='string') # IK handles parent connection
+        
+        # pm.addAttr(limb, ln='bhvCstSourceLimb', dt='string') # Ignore, only for connections
+        # pm.addAttr(limb, ln='bhvCstTargetLimb', dt='string') # for connecting to target
+        # pm.addAttr(limb, ln='bhvCstTargetJnt', at='enum', en='None')
+        # pm.addAttr(limb, ln='bhvIKSourceLimb', dt='string') # IK handles parent connection
+        # pm.addAttr(limb, ln='bhvIKTargetLimb', dt='string') # IK handles parent connection
     
     def RemoveLimb(self, limb):
         # Main Limb manager should actually delete the limb
@@ -142,6 +148,7 @@ class BHV_Limb_Manager:
         else:
             group = self.grpMng.AddDistanceGroup(limb)
             ctr = self.ctrMng.Add(group, self.ctrMng.ctrTypes[2])
+            self.grpMng.UpdateGroupName(limb, group)
             for attr in ['.tx', '.ty', '.tz', '.v']:
                 pm.setAttr(ctr+attr, l=1, k=0, cb=0)
         return group
@@ -153,6 +160,7 @@ class BHV_Limb_Manager:
         else:
             fkikGroup = self.grpMng.AddFKIKSwitchGroup(limb)
             ctr = self.ctrMng.Add(fkikGroup, self.ctrMng.ctrTypes[3])
+            self.grpMng.UpdateGroupName(limb, fkikGroup)
             for attr in ['.tx', '.ty', '.tz', '.v']:
                 pm.setAttr(ctr+attr, l=1, k=0, cb=0)
         joints = self.jntMng.GetLimbJoints(limb)
@@ -174,7 +182,8 @@ class BHV_Limb_Manager:
         # If limb has IK dependencies, Warning Dialog
         if oldBhvIndex in self.ikTargetTypeIndexes:
             if newBhvIndex not in self.ikTargetTypeIndexes:
-                sourceLimbs = pm.listConnections(targetLimb.bhvIKSourceLimb)
+                # sourceLimbs = pm.listConnections(targetLimb.bhvIKSourceLimb)
+                sourceLimbs = pm.listConnections(targetLimb.bhvSourceLimb)
                 if sourceLimbs:
                     msg = 'Changing limb "%s"s type off FK will break:' % targetLimb
                     for sourceLimb in sourceLimbs:
@@ -185,7 +194,8 @@ class BHV_Limb_Manager:
                                                 b=['Cancel', 'Continue'])
                     if (result == 'Cancel'):
                         return False
-                    pm.disconnectAttr(targetLimb.bhvIKSourceLimb)
+                    # pm.disconnectAttr(targetLimb.bhvIKSourceLimb)
+                    pm.disconnectAttr(targetLimb.bhvSourceLimb)
         # Hide Unused FK Groups [FK Chain, Reverse Chain, Branch]
         if oldBhvIndex in self.fkTypeIndexes:
             if newBhvIndex not in self.fkTypeIndexes:

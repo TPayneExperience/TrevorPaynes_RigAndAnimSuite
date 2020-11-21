@@ -49,6 +49,13 @@ class BHV_Group_Manager:
     def GetAllGroups(self):
         return list(self._groups.values())
 
+    def GetAllLimbGroups(self, limb):
+        groups = pm.listConnections(limb.bhvJointGroups)
+        groups += pm.listConnections(limb.bhvDistanceGroup)
+        groups += pm.listConnections(limb.bhvFKIKSwitchGroup)
+        groups += pm.listConnections(limb.bhvEmptyGroup)
+        return groups
+
     def GetLimbGroups(self, limb):
         bhvType = limb.bhvType.get()
         if bhvType in [0, 3, 5, 6]: # FK Chain, Cst, IK Chain, FK Branch
@@ -115,7 +122,7 @@ class BHV_Group_Manager:
     def AddEmptyGroup(self, limb):
         group = self._AddGroup(limb)
         pm.connectAttr(limb.bhvEmptyGroup, group.limb)
-        self.UpdateGroupName(limb, group)
+        # self.UpdateGroupName(limb, group)
         return group
 
     # FK, CST, IK Chain
@@ -128,7 +135,7 @@ class BHV_Group_Manager:
         pm.addAttr(group, ln='weight', at='float', min=0, max=1) # Cst
         pm.connectAttr(joint.group, group.joint)
         
-        self.UpdateGroupName(limb, group)
+        # self.UpdateGroupName(limb, group)
         pm.parent(group, joint)
         pm.xform(group, t=[0,0,0], ro=[0,0,0], s=[1,1,1])
         group.v.set(0) 
@@ -139,12 +146,12 @@ class BHV_Group_Manager:
     def AddDistanceGroup(self, limb):
         group = self._AddGroup(limb)
         group.groupType.set(2)
-        pm.addAttr(group, ln='targetJoint', at='enum', en='None') # IK PV
+        # pm.addAttr(group, ln='targetJoint', at='enum', en='None') # IK PV
         pm.addAttr(group, ln='distanceJoint', dt='string') # for easy Test Connections
         pm.addAttr(group, ln='distance', at='float', min=0, dv=1) # IKPV, LookAt
         pm.addAttr(group, ln='axis', at='enum', en='X:-X:Y:-Y:Z:-Z', dv=4) # IKPV, LookAt
         pm.connectAttr(limb.bhvDistanceGroup, group.limb)
-        self.UpdateGroupName(limb, group)
+        # self.UpdateGroupName(limb, group)
         return group
 
     # FKIK Switch
@@ -156,7 +163,7 @@ class BHV_Group_Manager:
         pm.addAttr(group, ln='FKVisTargets', dt='string') # for easy Test Connections
         pm.addAttr(group, ln='IKVisTargets', dt='string') # for easy Test Connections
         pm.connectAttr(limb.bhvFKIKSwitchGroup, group.limb)
-        self.UpdateGroupName(limb, group)
+        # self.UpdateGroupName(limb, group)
         for attr in ['.tx', '.ty', '.tz', '.rx', '.ry', '.rz']:
             pm.setAttr(group+attr, l=1, k=0, cb=0)
         return group
@@ -198,14 +205,20 @@ class BHV_Group_Manager:
         index = group.groupType.get()
         if index == 1: # Joint
             joint = pm.listConnections(group.joint)[0]
-            groupName = joint.pfrsName.get()
+            groupPFRSName = joint.pfrsName.get()
         else:
-            groupName = self.grpTypes[index]
-        name = self.nameMng.GetName(limb.pfrsName.get(),
-                                    groupName,
+            groupPFRSName = self.grpTypes[index]
+        groupName = self.nameMng.GetName(limb.pfrsName.get(),
+                                    groupPFRSName,
                                     self.limbMng.GetLimbSide(limb), 
                                     'GRP')
-        group.rename(name)
+        group.rename(groupName)
+        control = pm.listConnections(group.control)[0]
+        controlName = self.nameMng.GetName(limb.pfrsName.get(),
+                                    groupPFRSName,
+                                    self.limbMng.GetLimbSide(limb), 
+                                    'CTR')
+        control.rename(controlName)
 
     def UpdateGroupDistance(self, group):
         pos = self.axes[group.axis.get()][:]
