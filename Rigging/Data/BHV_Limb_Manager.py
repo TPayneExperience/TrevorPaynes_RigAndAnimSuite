@@ -12,34 +12,37 @@ class BHV_Limb_Manager:
 
         # BHV Options
         self.emptyLimbIndexes = [7]
-        self.oneJntLimbIndexes = [6, 3, 4]
-        self.twoJntChainLimbIndexes = [0, 3, 5, 6, 8]
-        self.threeJntChainLimbIndexes = [0, 1, 2, 3, 5, 6, 8]
+        self.oneJntLimbIndexes = [6, 4, 3]
+        self.twoJntChainLimbIndexes = [0, 6, 8, 5, 9, 3]
+        self.threeJntChainLimbIndexes = [0, 6, 8, 1, 5, 2, 9, 3]
         self.branchLimbIndexes = [6, 3]
 
-        self.fkTypeIndexes = [0, 2, 6, 8]
+        self.fkTypeIndexes = [0, 2, 6, 8, 9]
+        self.fkikTypeIndexes = [2, 9]
         self.distanceIndexes = [1, 2, 4]
-        self.targetIndexes = [1, 2, 3, 5]
-        self.parentableIndexes = [0, 2, 6, 7, 8]
+        self.targetIndexes = [1, 2, 3, 5, 9]
+        self.parentableIndexes = [0, 2, 6, 7, 8, 9]
 
         self.ikTargetTypeIndexes = [0, 6, 7, 8]
         self.ikPVTypeIndexes = [1, 2]
-        self.ikTypeIndexes = [1, 2, 5]
-        self.cstTargetTypeIndexes = [0, 1, 2, 4, 5, 6, 8]
-        self.ctrTypeIndexes = [0, 1, 2, 4, 6, 7, 8] # For APP > Limb hier
+        self.ikChainTypeIndexes = [5, 9]
+        self.ikTypeIndexes = [1, 2, 5, 9]
+        self.cstTargetTypeIndexes = [0, 1, 2, 4, 5, 6, 8, 9]
+        self.ctrTypeIndexes = [0, 1, 2, 4, 6, 7, 8, 9] # For APP > Limb hier
 
         
         self.bhvTypes = [   'FK - Chain', # DON'T CHANGE ORDER!
 
                             'IK - Pole Vector',
-                            'FK + IK',
+                            'FK + IK Pole Vector',
                             'Constraint',
                             'Look At',
                             'IK - Chain',
 
                             'FK - Branch',
                             'Empty',
-                            'FK - Reverse Chain']
+                            'FK - Reverse Chain',
+                            'FK + IK Chain']
                             # MISSING: Relative FK
 
 
@@ -73,7 +76,7 @@ class BHV_Limb_Manager:
             # IK
             if newBhvIndex in self.ikPVTypeIndexes:
                 self.Setup_IKPoleVector(limb)
-            if newBhvIndex == 2:
+            if newBhvIndex in self.fkikTypeIndexes:
                 self.Setup_FKIK(limb)
             return True
         else:
@@ -168,9 +171,11 @@ class BHV_Limb_Manager:
         pm.addAttr(fkikGroup.targetJoint, e=1, en=':'.join(names))
 
         # Visibility Groups
-        distGroup = pm.listConnections(limb.bhvDistanceGroup)[0]
-        pm.connectAttr(fkikGroup.IKVisTargets, distGroup.FKIKVisSource)
-        # jointGroups = [pm.listConnections(j.group) for j in joints]
+        bhvType = limb.bhvType.get()
+        if bhvType == 2:
+            distGroup = pm.listConnections(limb.bhvDistanceGroup)[0]
+            pm.connectAttr(fkikGroup.IKVisTargets, distGroup.FKIKVisSource)
+            # jointGroups = [pm.listConnections(j.group) for j in joints]
         fkGroup = pm.listConnections(joints[0].group)[0]
         pm.connectAttr(fkikGroup.FKVisTargets, fkGroup.FKIKVisSource)
         self.grpMng.UpdateFKIKSwitchJoint(fkikGroup, joints)
@@ -207,8 +212,8 @@ class BHV_Limb_Manager:
                 group = pm.listConnections(targetLimb.bhvDistanceGroup)[0]
                 group.v.set(0)
         # Hide Unused FKIK Switch Group
-        if oldBhvIndex == 2:
-            if newBhvIndex != 2:
+        if oldBhvIndex in self.fkikTypeIndexes:
+            if newBhvIndex not in self.fkikTypeIndexes:
                 group = pm.listConnections(targetLimb.bhvFKIKSwitchGroup)[0]
                 group.v.set(0)
         return True

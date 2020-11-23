@@ -22,11 +22,12 @@ class APP_Control_Manager:
         self.ctrTemplatesParent.v.set(0)
         pm.addAttr(rigRoot, ln='nextCtrID', at='long')
         path = r'D:\Assets\Programming\Python\Maya\ModularAutoRigger\Rigging\Templates\Controls\Controls.ma'
+        # path = r'Rigging\Templates\Controls\Controls.ma'
         ctrSourceNodes = pm.importFile(path, returnNewNodes=1)
-        tempCtrs = [n for n in ctrSourceNodes if pm.objectType(n) == 'transform']
-        pm.parent(tempCtrs, self.ctrTemplatesParent)
-        for ctr in tempCtrs:
-            self._ctrTemplates[ctr.shortName()] = ctr
+        tempControls = [n for n in ctrSourceNodes if pm.objectType(n) == 'transform']
+        pm.parent(tempControls, self.ctrTemplatesParent)
+        for control in tempControls:
+            self._ctrTemplates[control.shortName()] = control
         self.ctrLayer = pm.createDisplayLayer(n='Controls', e=True)
         self.SetLayerState(True, True)
     
@@ -58,7 +59,7 @@ class APP_Control_Manager:
         ctrID = self.rigRoot.nextCtrID.get()
         self.rigRoot.nextCtrID.set(ctrID + 1)
         
-        ctr = pm.duplicate(self._ctrTemplates[ctrType])[0]
+        ctr = pm.duplicate(self._ctrTemplates[ctrType], ic=1)[0]
         pm.addAttr(ctr, ln='ID', at='long', dv=ctrID)
         pm.addAttr(ctr, ln='group', dt='string')
 

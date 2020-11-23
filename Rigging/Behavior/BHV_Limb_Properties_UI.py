@@ -149,7 +149,7 @@ class BHV_Limb_Properties_UI:
         # targetLimb = self._GetClosestFKLimb(sourceLimb)
         # self._SetIKTargetLimb(sourceLimb, targetLimb)
     def _SetTargetJointEnum(self, sourceLimb, enumStr):
-        if sourceLimb.bhvType.get() == 5:
+        if sourceLimb.bhvType.get() in self.bhvMng.ikChainTypeIndexes:
             for sourceGroup in self.grpMng.GetLimbIKGroups(sourceLimb):
                 pm.addAttr(sourceGroup.targetJoint, e=1, en=enumStr)
         else:
@@ -190,7 +190,7 @@ class BHV_Limb_Properties_UI:
             # sourceGroup.targetJoint.set(index)
 
         # IK Chain
-        elif bhvType == 5:
+        elif bhvType in self.bhvMng.ikChainTypeIndexes:
             for sourceGroup in sourceGroups:
                 # pm.addAttr(sourceGroup.targetJoint, e=1, en=names)
                 sourceJoint = pm.listConnections(sourceGroup.joint)[0]
@@ -306,7 +306,7 @@ class BHV_Limb_Properties_UI:
             if targetLimb in self.targetLimbs:
                 index = self.targetLimbOrder.index(targetLimb) + 1
                 pm.optionMenu(self.targetLimb_om, e=1, sl=index)
-        if bhvType != 5:
+        if bhvType not in self.bhvMng.fkikTypeIndexes:
             self.targetJnt_at = pm.attrEnumOptionMenu(  l='Target Joint',
                                                         at=self.limb.bhvTargetJoint,
                                                         # at=group.targetJoint,
@@ -316,7 +316,7 @@ class BHV_Limb_Properties_UI:
             #                                             at=group.targetJoint,
             #                                             p=self.targetProp_cl)
         # FKIK
-        if bhvType == 2: # FKIK
+        if bhvType in self.bhvMng.fkikTypeIndexes: # FKIK
             fkikGroup = pm.listConnections(self.limb.bhvFKIKSwitchGroup)[0]
             self.fkikJoint_at = pm.attrEnumOptionMenu(  l='FKIK Joint',
                                                         at=fkikGroup.targetJoint, 

@@ -69,6 +69,7 @@ class Rigging_UI:
         self.mirDialog = mir_ui.MirrorLimbs_UI(self.limbMng)
 
         self.lastTab = 1
+        self.rigRoot = None
 
         self._Setup()
     
@@ -225,7 +226,7 @@ class Rigging_UI:
                     group = self.grpMng.AddEmptyGroup(limb)
                     self.ctrMng.Add(group, self.ctrMng.ctrTypes[0])
                     self.grpMng.UpdateGroupName(limb, group)
-            if (bhvType == 2): # FKIK
+            if (bhvType in self.bhvMng.fkikTypeIndexes): # FKIK
                 group = pm.listConnections(limb.bhvFKIKSwitchGroup)[0]
                 group.v.set(1)
                 self.grpMng.UpdateFKIKSwitchJoint(group, joints)

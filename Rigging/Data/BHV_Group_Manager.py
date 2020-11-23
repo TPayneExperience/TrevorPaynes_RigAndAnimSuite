@@ -28,6 +28,7 @@ class BHV_Group_Manager:
 
         self._groups = {} # grpID : grpData
         self.bhvGroup = None
+        self.rigRoot = None
 
     def NewRig(self, rigRoot):
         self.rigRoot = rigRoot
@@ -65,9 +66,14 @@ class BHV_Group_Manager:
         if bhvType in [1, 4]: # IK PV, LookAt
             return pm.listConnections(limb.bhvDistanceGroup)
 
-        if bhvType == 2: # FK IK
+        if bhvType == 2: # FK IK PV
             groups = self.SortGroups(pm.listConnections(limb.bhvJointGroups))
             groups += pm.listConnections(limb.bhvDistanceGroup)
+            groups += pm.listConnections(limb.bhvFKIKSwitchGroup)
+            return groups
+
+        if bhvType == 9: # FK IK Chain
+            groups = self.SortGroups(pm.listConnections(limb.bhvJointGroups))
             groups += pm.listConnections(limb.bhvFKIKSwitchGroup)
             return groups
 
@@ -80,7 +86,7 @@ class BHV_Group_Manager:
 
     def GetLimbIKGroups(self, limb):
         bhvType = limb.bhvType.get()
-        if bhvType in [0, 3, 5, 6]: # FK Chain, Cst, IK Chain, FK Branch
+        if bhvType in [0, 3, 5, 6, 9]: # FK Chain, Cst, IK Chain, FK Branch
             groups = pm.listConnections(limb.bhvJointGroups)
             return self.SortGroups(groups)
         if bhvType in [1, 2, 4]: # IK PV, LookAt
@@ -88,7 +94,7 @@ class BHV_Group_Manager:
     
     def GetLimbFKGroups(self, limb):
         bhvType = limb.bhvType.get()
-        if bhvType in [0, 2, 6]: # FK Chain, FKIK, Branch, Reverse
+        if bhvType in [0, 2, 6, 9]: # FK Chain, FKIK, Branch, Reverse
             groups = pm.listConnections(limb.bhvJointGroups)
             return self.SortGroups(groups)
         if bhvType == 7: # EMPTY
@@ -161,7 +167,9 @@ class BHV_Group_Manager:
         group.groupType.set(3)
         pm.addAttr(group, ln='targetJoint', at='enum', en='None')
         pm.addAttr(group, ln='FKVisTargets', dt='string') # for easy Test Connections
-        pm.addAttr(group, ln='IKVisTargets', dt='string') # for easy Test Connections
+        pm.addAttr(group, ln='IKVisTargets', dt='string')
+        pm.addAttr(group, ln='bindSource', dt='string') # For FKIK to link to eachother
+        pm.addAttr(group, ln='bindTargets', dt='string')
         pm.connectAttr(limb.bhvFKIKSwitchGroup, group.limb)
         # self.UpdateGroupName(limb, group)
         for attr in ['.tx', '.ty', '.tz', '.rx', '.ry', '.rz']:

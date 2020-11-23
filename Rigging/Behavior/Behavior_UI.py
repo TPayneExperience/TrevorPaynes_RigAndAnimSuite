@@ -113,7 +113,7 @@ class Behavior_UI:
         # Set Closest Group Index
         closestDist = sorted(list(distances.keys()))[0]
         closestGroup = distances[closestDist]
-        closestJoint = pm.listConnections(closestGroup.joint)[0]
+        # closestJoint = pm.listConnections(closestGroup.joint)[0]
         index = self.grpMng.GetLimbGroups(parentLimb).index(closestGroup)
         childLimb.parentGroup.set(index)
     

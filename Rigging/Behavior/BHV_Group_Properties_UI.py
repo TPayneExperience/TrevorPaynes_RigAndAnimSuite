@@ -61,7 +61,7 @@ class BHV_Group_Properties_UI:
                                                     at=self.group.weight)
 
         # IK CHAIN
-        elif bhvType == 5: 
+        elif bhvType in self.bhvMng.ikChainTypeIndexes: 
             self.parentSub_at = pm.attrEnumOptionMenu(  l='Target Joint',
                                                     at=self.group.targetJoint, 
                                                     p=self.bhvGroupProp_cl)
