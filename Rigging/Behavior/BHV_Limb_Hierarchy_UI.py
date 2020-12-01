@@ -13,7 +13,7 @@ class BHV_Limb_Hierarchy_UI:
     def Populate(self):
         pm.treeView(self.widget, e=1, removeAll=1)
         self.limbMng.RebuildLimbDict()
-        for rootLimb in self.limbMng.GetRootLimbs():
+        for rootLimb in self.limbMng.GetRootLimbs()[::-1]:
             prefix = pm.listConnections(rootLimb.rigRoot)[0].prefix.get()
             for limb in self.limbMng.GetLimbCreationOrder(rootLimb):
                 limbID = limb.ID.get()
@@ -74,6 +74,8 @@ class BHV_Limb_Hierarchy_UI:
     def LoadSkelHier(self, ignore):
         limbParents = self.limbMng.GetDefaultLimbHier(self.jntMng)
         for child, parent in limbParents.items():
+            if not parent:
+                continue
             self.limbMng.Reparent(child.ID.get(), parent.ID.get())
             self.parent.UpdateLimbParentGroups(child.ID.get())
         # self.parent.UpdateLimbUI()

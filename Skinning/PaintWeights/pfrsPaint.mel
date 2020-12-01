@@ -1,0 +1,110 @@
+
+// global string $objNameList[];
+// global int $nextFreeSlot = 0;
+// global int $totalFreeSlots = 0;
+
+python("import Skinning.Data.PFRS_Weights as pfrs");
+python("reload(pfrs)");
+
+global proc pfrsPaint( string $context )
+{
+	artUserPaintCtx -e
+		-ic "initpfrsPaint"
+		-fc "finishpfrsPaint"
+		-svc "setpfrsPaintValue"
+		-gvc "getpfrsPaintValue"
+		-gsc ""
+		-cc ""
+		-tcc ""
+		-gac ""
+		$context;
+}
+
+global proc string initpfrsPaint( string $name )
+{	
+	print("Painting mesh named: " + $name + "\n");
+	// global string $objNameList[];
+	// global int $nextFreeSlot;
+	// global int $totalFreeSlots;
+
+	// int $slot;
+
+	// for ( $slot = $nextFreeSlot; $slot < $totalFreeSlots; $slot++ ) {
+	// 	if ( $objNameList[$slot] == "" ) {
+	// 		break;
+	// 	}
+	// }  
+
+	// if ( $slot == $totalFreeSlots ) {
+	// 	$totalFreeSlots++;
+	// 	$nextFreeSlot = $totalFreeSlots;
+	// }	
+	
+	// $objNameList[$slot]  = $name ;
+	
+	// string $cmd = "objExists " + $name + ".testAttr" ;
+	
+	// if ( eval($cmd) == 0) {
+	// 	addAttr -longName "testAttr" -dt doubleArray pPlaneShape1;
+	// 	setAttr pPlaneShape1.testAttr -type doubleArray  36 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0;
+	// }
+	python("pfrs.initPFRSPyPaint()");
+	// return ( "-id " + $slot);
+	return ( "-id " + 0);
+		   
+}
+
+global proc finishpfrsPaint( int $slot )
+{
+	// global string $objNameList[];
+	// global int $nextFreeSlot;
+
+	// $objNameList[$slot] = "";
+	// if ( $slot < $nextFreeSlot ) {
+	// 	$nextFreeSlot = $slot;
+	// }
+	python("pfrs.finishPFRSPyPaint();");
+}
+
+global proc setpfrsPaintValue(
+	int $slot,
+	int $index,
+	float $val
+)
+{
+	// global string $objNameList[];
+	// string $objname ;
+	// if ( $objNameList[$slot] != "" ) {
+	// 	$objname = $objNameList[$slot] ;
+	// }
+	
+	// string $cmd = "getAttr " + $objname + ".testAttr" ;
+	// float $attrValues[] = eval($cmd) ;
+	// $attrValues[$index] = $val ;
+	
+	// string $newAttrValues = "36 ";
+	// for ( $attrValue in $attrValues ) {
+	// 	$newAttrValues += ($attrValue + " ");
+	// }
+	
+	// $cmd = "setAttr " +$objname + ".testAttr -type doubleArray " +  $newAttrValues ;
+	// eval($cmd) ;
+	python("pfrs.setPFRSPyPaintValue();");
+}
+
+global proc float getpfrsPaintValue( int $slot, int $index )
+{
+	// global string $objNameList[];
+	// string $objname ;
+	
+	// if ( $objNameList[$slot] != "" ) {
+	// 	$objname = $objNameList[$slot] ;
+	// }
+	// string $cmd = "getAttr " + $objname + ".testAttr" ;
+	// float $attrValues[] = eval($cmd) ;
+	python("pfrs.getPFRSPyPaintValue();");
+	// return $attrValues[$index]  ;
+	return 1.0;
+}
+
+

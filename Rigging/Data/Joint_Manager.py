@@ -1,7 +1,7 @@
 
 import pymel.core as pm
 
-class Joint_Manager():
+class Joint_Manager:
     def __init__(self, limbMng, grpMng, ctrMng, nameMng):
 
         self.limbMng = limbMng
@@ -13,10 +13,10 @@ class Joint_Manager():
                             'Z': [1,1,-1]}
 
     def NewRig(self, rigRoot):
-        self.rigRoot = rigRoot
         self._joints = {} # jointID: jointNode
+        self.rigRoot = rigRoot
         pm.addAttr(rigRoot, ln='nextJointID', at='short', dv=1)
-        pm.addAttr(rigRoot, ln='joints', dt='string')
+        # pm.addAttr(rigRoot, ln='joints', dt='string')
 
         pm.select(d=1)
         self.jntGroup = pm.group(name='Skeleton', em=1)

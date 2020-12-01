@@ -19,6 +19,7 @@ class Test_UI:
 #=========== TAB FUNCTIONALITY ====================================
     
     def Setup_Editable(self):
+        print ('test, setup')
         self.Setup_Groups()
         self.Setup_Controls()
         self.Setup_Internal()
@@ -26,6 +27,7 @@ class Test_UI:
         pm.select(d=1)
 
     def Teardown_Editable(self):
+        print ('test, teardown')
         self.Teardown_Controls()
         self.Remove_Constraints()
         self.Teardown_Groups()

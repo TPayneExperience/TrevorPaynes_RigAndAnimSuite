@@ -57,11 +57,13 @@ class Behavior_UI:
 #=========== SETUP + TEARDOWN ====================================
 
     def Setup_Editable(self):
+        print ('Behavior, setup')
         self.limbHier_ui.Populate()
         self.limbProp_ui.Depopulate()
         # self.limbProp_ui.Populate()
     
     def Teardown_Editable(self):
+        print ('Behavior, Teardown')
         self.limbProp_ui.Depopulate()
         self.grpHier_ui.Depopulate()
         self.grpProp_ui.Depopulate()

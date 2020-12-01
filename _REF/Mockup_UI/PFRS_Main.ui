@@ -34,7 +34,7 @@
         <item>
          <widget class="QTabWidget" name="tabWidget">
           <property name="currentIndex">
-           <number>3</number>
+           <number>1</number>
           </property>
           <widget class="QWidget" name="tab">
            <attribute name="title">
@@ -1513,7 +1513,7 @@
                  <bool>true</bool>
                 </property>
                 <property name="currentIndex">
-                 <number>2</number>
+                 <number>0</number>
                 </property>
                 <widget class="QWidget" name="tab_19">
                  <attribute name="title">
@@ -1525,7 +1525,7 @@
                     <item>
                      <widget class="QGroupBox" name="groupBox_12">
                       <property name="title">
-                       <string>Current Meshes</string>
+                       <string>Available Meshes</string>
                       </property>
                       <layout class="QVBoxLayout" name="verticalLayout_15">
                        <item>
@@ -1548,7 +1548,7 @@
                     <item>
                      <widget class="QGroupBox" name="groupBox_15">
                       <property name="title">
-                       <string>Available</string>
+                       <string>Skinned Meshes</string>
                       </property>
                       <layout class="QVBoxLayout" name="verticalLayout_27">
                        <item>
@@ -1570,17 +1570,17 @@
                          </item>
                         </widget>
                        </item>
+                       <item>
+                        <widget class="QPlainTextEdit" name="plainTextEdit">
+                         <property name="plainText">
+                          <string>RMB: Add Selected to Skinned, Replace, Remove Skinned Meshes</string>
+                         </property>
+                        </widget>
+                       </item>
                       </layout>
                      </widget>
                     </item>
                    </layout>
-                  </item>
-                  <item>
-                   <widget class="QPushButton" name="pushButton_6">
-                    <property name="text">
-                     <string>Change Meshes</string>
-                    </property>
-                   </widget>
                   </item>
                  </layout>
                 </widget>
@@ -3775,7 +3775,7 @@
                <bool>true</bool>
               </property>
               <property name="currentIndex">
-               <number>0</number>
+               <number>1</number>
               </property>
               <widget class="QWidget" name="tab_4">
                <attribute name="title">
@@ -3926,7 +3926,7 @@
                             <x>0</x>
                             <y>0</y>
                             <width>191</width>
-                            <height>164</height>
+                            <height>143</height>
                            </rect>
                           </property>
                           <layout class="QVBoxLayout" name="verticalLayout_14">

@@ -54,12 +54,14 @@ class Appearance_UI:
 #=========== SETUP + TEARDOWN ====================================
 
     def Setup_Editable(self):
+        print ('appearance, setup')
         self.limbHier_ui.Populate()
         self.limbProp_ui.Populate()
         self.ctrHier_ui.Depopulate()
         # pm.frameLayout(self.prop_l, e=1, en=0)
     
     def Teardown_Editable(self):
+        print ('appearance, teardown')
         pass
 
 #=========== LIMBS ====================================

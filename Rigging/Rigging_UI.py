@@ -74,7 +74,7 @@ class Rigging_UI:
         self._Setup()
     
     def NewRig(self, rigRoot):
-        pm.addAttr(rigRoot, ln='lastLimbsTabIndex', at='short')
+        # pm.addAttr(rigRoot, ln='lastRiggingTabIndex', at='short')
         self.rigRoot = rigRoot
         self.limbMng.NewRig(rigRoot)
         self.jntMng.NewRig(rigRoot)
@@ -114,7 +114,7 @@ class Rigging_UI:
                                                 self.grpMng,
                                                 self.ctrMng)
         pm.tabLayout(  self.tab, 
-                    edit=1, 
+                    e=1, 
                     tabLabel=(  (self.jntSetupTab,'Joint Setup'), 
                                 (self.limbSetupTab, 'Limb Setup'), 
                                 (self.bhvTab, 'Behaviors'), 
@@ -124,7 +124,8 @@ class Rigging_UI:
 #=========== TAB SWITCHING ====================================
 
     def Setup_Editable(self):
-        index = self.rigRoot.limbsTab.get()
+        print ('\nrigging, setup')
+        index = self.rigRoot.riggingTab.get()
         if (index == 0):
             self.jntSetup_ui.Setup_Editable()
         elif (index == 1):
@@ -145,7 +146,8 @@ class Rigging_UI:
             self.ctrMng.SetLayerState(True, False)
         
     def Teardown_Editable(self, nextIndex):
-        lastIndex = self.rigRoot.limbsTab.get()
+        print ('rigging, teardown')
+        lastIndex = self.rigRoot.riggingTab.get()
         if (lastIndex == 0): 
             self.jntSetup_ui.Teardown_Editable()
         elif (lastIndex == 1): 
@@ -165,7 +167,7 @@ class Rigging_UI:
     def TabChanged(self):
         nextIndex = pm.tabLayout(self.tab, q=1, selectTabIndex=1)-1
         self.Teardown_Editable(nextIndex)
-        self.rigRoot.limbsTab.set(nextIndex)
+        self.rigRoot.riggingTab.set(nextIndex)
         self.Setup_Editable()
 
     def SetupEditable_Limbs(self):

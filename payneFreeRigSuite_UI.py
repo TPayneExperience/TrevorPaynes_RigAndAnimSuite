@@ -3,6 +3,8 @@ import pymel.core as pm
 
 import Rigging.Rigging_UI as rig_ui
 reload(rig_ui)
+import Skinning.Skinning_UI as skin_ui
+reload(skin_ui)
 import RigSetup.RigSetup_UI as rs_ui
 reload(rs_ui)
 
@@ -63,8 +65,10 @@ class PayneFreeRigSuite_UI():
         pm.addAttr(self.rigRoot, ln='typeIndex', at='short', dv=nameOrder[4])
         pm.addAttr(self.rigRoot, ln='showPrefix', at='bool', dv=showPrefix)
         pm.addAttr(self.rigRoot, ln='mainTab', at='enum', en='Rig:Skin:Anim')
-        pm.addAttr(self.rigRoot, ln='limbsTab', at='enum', en='Jnt:Limbs:Bhv:App:Test')
-        pm.addAttr(self.rigRoot, ln='meshDefTab', at='enum', en='Mesh:QW:Paint')
+        pm.addAttr(self.rigRoot, ln='riggingTab', at='enum',
+                                    en='Joint:Limbs:Behaviors:Appearance:Test')
+        pm.addAttr(self.rigRoot, ln='skinningTab', at='enum', 
+                                    en='Mesh:QuickWeights:PaintWeights:Test')
         pm.addAttr(self.rigRoot, ln='prefix', dt='string')
         self.rigRoot.prefix.set(prefix)
         # pm.setAttr(self.rigRoot +'.prefix', prefix)
@@ -78,6 +82,7 @@ class PayneFreeRigSuite_UI():
         self.UpdatePrefix()
         self.nameMng.NewRig(self.rigRoot)
         self.rig_ui.NewRig(self.rigRoot)
+        self.skin_ui.NewRig(self.rigRoot)
         # self.pfrs.rigSetup.NewRig('somePrefix', [0,1,2,3,4], True)
         # self.rig_ui.NewRig(self.pfrs.rigSetup.rigRoot)
         # self.pfrs.rigSceneMng.NewRig()
@@ -100,6 +105,8 @@ class PayneFreeRigSuite_UI():
         # path += r'/TEST_OUTPUT/temp_joints2.ma'
         pm.importFile(path)
         self.UpdateEnableUI()
+        self.Setup_Editable()
+        # self.rigRoot.riggingTab.set(1)
         pm.tabLayout(self.rig_ui.tab, e=1, sti=2) # Select Limb setup tab
 
 #=========== SETUP ====================================
@@ -108,21 +115,25 @@ class PayneFreeRigSuite_UI():
         name = '%s - Payne Free %s Suite - v%s' % (LICENSE, SUITE, __version__)
         name += ' - by Trevor Payne'
         with pm.window(mb=True,mbv=True, t=name, w=500, h=500) as self.win:
-            with pm.tabLayout(enable=0) as self.rigTabs:
+            with pm.tabLayout(e=0, cc=self.TabChanged) as self.tab:
                 with pm.horizontalLayout() as self.rigging_l:
-                    self.rig_ui = rig_ui.Rigging_UI(  self.nameMng,
-                                                            self.fileMng,
-                                                            self.jsonMng,
-                                                            self)
+                    self.rig_ui = rig_ui.Rigging_UI(self.nameMng,
+                                                    self.fileMng,
+                                                    self.jsonMng,
+                                                    self)
                 with pm.horizontalLayout() as self.skinning_l:
-                    with pm.tabLayout() as self.mdTab:
-                        with pm.horizontalLayout():
-                            pm.button('test', label='Three')
+                    self.skin_ui = skin_ui.Skinning_UI( self.rig_ui.limbMng,
+                                                        self.rig_ui.jntMng,
+                                                        self.nameMng,
+                                                        self)
+                    # with pm.tabLayout() as self.mdTab:
+                    #     with pm.horizontalLayout():
+                    #         pm.button('test', label='Three')
                 with pm.horizontalLayout() as self.animation_l:
                     with pm.tabLayout() as self.mdTab:
                         with pm.horizontalLayout():
                             pm.button('test', label='Three')
-        pm.tabLayout(self.rigTabs, edit=1, 
+        pm.tabLayout(self.tab, e=1, 
                     tabLabel=(  (self.rigging_l,'Rigging'), 
                                 (self.skinning_l,'Skinning'), 
                                 (self.animation_l,'Animation')))
@@ -174,6 +185,32 @@ class PayneFreeRigSuite_UI():
     #     pass
 
     
+#=========== TAB SWITCHING ====================================
+
+    def Setup_Editable(self):
+        print ('\n=== main, setup ===')
+        index = self.rigRoot.mainTab.get()
+        if (index == 0):
+            self.rig_ui.Setup_Editable()
+        elif (index == 1):
+            self.skin_ui.Setup_Editable()
+        
+    def Teardown_Editable(self, nextIndex):
+        print ('--- main, teardown')
+        lastIndex = self.rigRoot.mainTab.get()
+        if (lastIndex == 0): 
+            index = self.rigRoot.riggingTab.get()
+            self.rig_ui.Teardown_Editable(index)
+        elif (lastIndex == 1): 
+            index = self.rigRoot.skinningTab.get()
+            self.skin_ui.Teardown_Editable(index)
+        
+    def TabChanged(self):
+        nextIndex = pm.tabLayout(self.tab, q=1, selectTabIndex=1)-1
+        self.Teardown_Editable(nextIndex)
+        self.rigRoot.mainTab.set(nextIndex)
+        self.Setup_Editable()
+    
 #=========== FUNCTIONALITY ====================================
 
     # def UpdateNaming(self):
@@ -185,7 +222,7 @@ class PayneFreeRigSuite_UI():
         self.rig_ui.limbSetup_ui.KillScripts()
 
     def UpdateEnableUI(self):
-        pm.tabLayout(self.rigTabs, e=1, en=bool(self.rigRoot))
+        pm.tabLayout(self.tab, e=1, en=bool(self.rigRoot))
 
     def NewRig_Dialog(self, ignore):
         self.rigSetupUI.NewRig_Dialog()

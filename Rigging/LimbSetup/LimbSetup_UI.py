@@ -62,6 +62,7 @@ class LimbSetup_UI:
 #=========== TAB FUNCTIONALITY ====================================
     
     def Setup_Editable(self):
+        print ('Limb Setup, setup')
         self.limbMng.RebuildLimbDict()
         # for limb in self.limbMng.GetAllLimbs():
             # for joint in self.jntMng.GetLimbJoints(limb):
@@ -73,6 +74,7 @@ class LimbSetup_UI:
             print ('STARTING LimbSetup selection detection script...')
 
     def Teardown_Editable(self):
+        print ('Limb Setup, Teardown')
         self.KillScripts()
     
     def KillScripts(self):

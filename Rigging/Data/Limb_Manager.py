@@ -180,7 +180,6 @@ class Limb_Manager:
                 self._limbs[limbID] = limb
 
     def GetDefaultLimbHier(self, jntMng):
-        # UNTESTED
         limbParents = {} # childLimb : parentLimb
         for childLimb in list(self._limbs.values()):
             joints = jntMng.GetLimbJoints(childLimb)
@@ -190,6 +189,8 @@ class Limb_Manager:
                 if parentJoint:
                     parentLimb = jntMng.GetLimb(parentJoint[0])
                     limbParents[childLimb] = parentLimb
+                else:
+                    limbParents[childLimb] = None
         return limbParents
 
     def GetRootLimbs(self):
@@ -206,7 +207,7 @@ class Limb_Manager:
         while(parents):
             children = []
             for parent in parents:
-                children += pm.listConnections(parent.childrenLimbs)
+                children += sorted(pm.listConnections(parent.childrenLimbs))
             parents = children[:]
             orderedLimbs += children[:]
         return orderedLimbs

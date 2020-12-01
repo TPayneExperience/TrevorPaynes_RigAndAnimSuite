@@ -74,6 +74,7 @@ class JointSetup_UI:
 #=========== TAB FUNCTIONALITY ====================================
     
     def Setup_Editable(self):
+        print ('joint Setup, setup')
         self.UpdateButtons()
         if not self.scriptJob:
             self.scriptJob = pm.scriptJob(  e=("SelectionChanged",
@@ -82,6 +83,7 @@ class JointSetup_UI:
             print ('STARTING JointSetup selection detection script...')
 
     def Teardown_Editable(self):
+        print ('joint Setup, teardown')
         self.KillScripts()
     
     def KillScripts(self):
