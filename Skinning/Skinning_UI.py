@@ -9,7 +9,6 @@ import PaintWeights.PaintWeights_UI as paint_ui
 reload(paint_ui)
 import Data.Skin_Manager as skinMng
 reload(skinMng)
-# from Data.PFRS_Weights import *
 
 
 class Skinning_UI:
@@ -45,6 +44,7 @@ class Skinning_UI:
                 self.paint_ui = paint_ui.PaintWeights_UI(   self.limbMng,
                                                             self.jntMng,
                                                             self.meshMng,
+                                                            self.skinMng,
                                                             self)
             with pm.horizontalLayout() as self.testTab:
                 pm.button('test', label='TEST')
@@ -106,10 +106,20 @@ class Skinning_UI:
         # elif (lastIndex == 4):
         #     self.test_ui.Teardown_Editable() 
 
-        # if lastIndex in [0, 1] and nextIndex in [2, 3, 4]:
-        #     self.SetupEditable_Limbs()
-        # elif lastIndex in [2, 3, 4] and nextIndex in [0, 1]:
-        #     self.TeardownEditable_Limbs()
+        # Skin Weights for all but Mesh Setup
+        if lastIndex == 0 and nextIndex in [1, 2, 3]:
+            self.skinMng.Setup_Skins()
+        elif lastIndex in [1, 2, 3] and nextIndex == 0:
+            self.skinMng.Teardown_Skins()
+        
+        # Paint Display for Quick/Paint weights
+        if lastIndex in [0, 3] and nextIndex in [1, 2]:
+            # self.skinMng.Setup_PaintDisplay()
+            self.skinMng.Setup_JointAnim()
+        elif lastIndex in [1, 2] and nextIndex in [0, 3]:
+            # self.skinMng.Teardown_PaintDisplay()
+            self.skinMng.Teardown_JointAnim()
+        
         
     def TabChanged(self):
         nextIndex = pm.tabLayout(self.tab, q=1, selectTabIndex=1)-1

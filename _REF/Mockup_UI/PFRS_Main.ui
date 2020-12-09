@@ -1513,7 +1513,7 @@
                  <bool>true</bool>
                 </property>
                 <property name="currentIndex">
-                 <number>0</number>
+                 <number>2</number>
                 </property>
                 <widget class="QWidget" name="tab_19">
                  <attribute name="title">
@@ -1848,13 +1848,96 @@
                 </widget>
                 <widget class="QWidget" name="tab_10">
                  <attribute name="title">
-                  <string>Paint</string>
+                  <string>Paint Weights</string>
                  </attribute>
                  <layout class="QHBoxLayout" name="horizontalLayout_8">
                   <item>
                    <layout class="QHBoxLayout" name="horizontalLayout_33">
                     <item>
                      <layout class="QVBoxLayout" name="verticalLayout_111">
+                      <item>
+                       <widget class="QGroupBox" name="groupBox_62">
+                        <property name="title">
+                         <string>Skinned Meshes</string>
+                        </property>
+                        <layout class="QHBoxLayout" name="horizontalLayout_110">
+                         <item>
+                          <layout class="QVBoxLayout" name="verticalLayout_119">
+                           <item>
+                            <widget class="QTreeWidget" name="treeWidget_13">
+                             <property name="autoScrollMargin">
+                              <number>16</number>
+                             </property>
+                             <property name="dragDropMode">
+                              <enum>QAbstractItemView::InternalMove</enum>
+                             </property>
+                             <property name="alternatingRowColors">
+                              <bool>true</bool>
+                             </property>
+                             <property name="selectionMode">
+                              <enum>QAbstractItemView::ExtendedSelection</enum>
+                             </property>
+                             <property name="autoExpandDelay">
+                              <number>-1</number>
+                             </property>
+                             <property name="indentation">
+                              <number>10</number>
+                             </property>
+                             <property name="headerHidden">
+                              <bool>true</bool>
+                             </property>
+                             <column>
+                              <property name="text">
+                               <string notr="true">1</string>
+                              </property>
+                             </column>
+                             <item>
+                              <property name="text">
+                               <string>Body</string>
+                              </property>
+                             </item>
+                             <item>
+                              <property name="text">
+                               <string>Armor</string>
+                              </property>
+                             </item>
+                             <item>
+                              <property name="text">
+                               <string>Eyes</string>
+                              </property>
+                             </item>
+                             <item>
+                              <property name="text">
+                               <string>New Item</string>
+                              </property>
+                             </item>
+                             <item>
+                              <property name="text">
+                               <string>New Item</string>
+                              </property>
+                             </item>
+                             <item>
+                              <property name="text">
+                               <string>New Item</string>
+                              </property>
+                             </item>
+                             <item>
+                              <property name="text">
+                               <string>New Item</string>
+                              </property>
+                             </item>
+                             <item>
+                              <property name="text">
+                               <string>New Item</string>
+                              </property>
+                             </item>
+                            </widget>
+                           </item>
+                          </layout>
+                         </item>
+                        </layout>
+                       </widget>
+                      </item>
                       <item>
                        <widget class="QGroupBox" name="groupBox_60">
                         <property name="title">
@@ -1936,7 +2019,7 @@
                       <item>
                        <widget class="QGroupBox" name="groupBox_61">
                         <property name="title">
-                         <string>Limb Joints</string>
+                         <string>Joint Hier</string>
                         </property>
                         <layout class="QVBoxLayout" name="verticalLayout_115">
                          <item>
@@ -1970,6 +2053,13 @@
                            </item>
                           </layout>
                          </item>
+                         <item>
+                          <widget class="QLabel" name="label_30">
+                           <property name="text">
+                            <string>LMB a joint or limb, and the tool set to Brush!</string>
+                           </property>
+                          </widget>
+                         </item>
                         </layout>
                        </widget>
                       </item>
@@ -1978,26 +2068,94 @@
                     <item>
                      <layout class="QVBoxLayout" name="verticalLayout_117">
                       <item>
-                       <widget class="QPushButton" name="pushButton_24">
-                        <property name="text">
-                         <string>Brush / Flood</string>
-                        </property>
-                       </widget>
-                      </item>
-                      <item>
                        <widget class="QGroupBox" name="groupBox_64">
                         <property name="title">
-                         <string>Joint Brush Settings</string>
+                         <string>Brush Properties</string>
                         </property>
                         <layout class="QVBoxLayout" name="verticalLayout_118">
                          <item>
                           <layout class="QVBoxLayout" name="verticalLayout_138">
                            <item>
+                            <layout class="QHBoxLayout" name="horizontalLayout_109">
+                             <item>
+                              <widget class="QLabel" name="label_53">
+                               <property name="text">
+                                <string>Paint Mode</string>
+                               </property>
+                              </widget>
+                             </item>
+                             <item>
+                              <layout class="QVBoxLayout" name="verticalLayout_139">
+                               <item>
+                                <widget class="QRadioButton" name="radioButton_11">
+                                 <property name="sizePolicy">
+                                  <sizepolicy hsizetype="Ignored" vsizetype="Expanding">
+                                   <horstretch>0</horstretch>
+                                   <verstretch>0</verstretch>
+                                  </sizepolicy>
+                                 </property>
+                                 <property name="minimumSize">
+                                  <size>
+                                   <width>0</width>
+                                   <height>0</height>
+                                  </size>
+                                 </property>
+                                 <property name="text">
+                                  <string>Replace</string>
+                                 </property>
+                                 <property name="checked">
+                                  <bool>true</bool>
+                                 </property>
+                                </widget>
+                               </item>
+                               <item>
+                                <widget class="QRadioButton" name="radioButton_12">
+                                 <property name="sizePolicy">
+                                  <sizepolicy hsizetype="Ignored" vsizetype="Expanding">
+                                   <horstretch>0</horstretch>
+                                   <verstretch>0</verstretch>
+                                  </sizepolicy>
+                                 </property>
+                                 <property name="minimumSize">
+                                  <size>
+                                   <width>0</width>
+                                   <height>0</height>
+                                  </size>
+                                 </property>
+                                 <property name="text">
+                                  <string>Add</string>
+                                 </property>
+                                </widget>
+                               </item>
+                               <item>
+                                <widget class="QRadioButton" name="radioButton_13">
+                                 <property name="sizePolicy">
+                                  <sizepolicy hsizetype="Ignored" vsizetype="Expanding">
+                                   <horstretch>0</horstretch>
+                                   <verstretch>0</verstretch>
+                                  </sizepolicy>
+                                 </property>
+                                 <property name="minimumSize">
+                                  <size>
+                                   <width>0</width>
+                                   <height>0</height>
+                                  </size>
+                                 </property>
+                                 <property name="text">
+                                  <string>Smooth</string>
+                                 </property>
+                                </widget>
+                               </item>
+                              </layout>
+                             </item>
+                            </layout>
+                           </item>
+                           <item>
                             <layout class="QHBoxLayout" name="horizontalLayout_106">
                              <item>
                               <widget class="QLabel" name="label_50">
                                <property name="text">
-                                <string>Intensity</string>
+                                <string>Value</string>
                                </property>
                               </widget>
                              </item>
@@ -2149,79 +2307,11 @@
                             </layout>
                            </item>
                            <item>
-                            <layout class="QHBoxLayout" name="horizontalLayout_109">
-                             <item>
-                              <widget class="QLabel" name="label_53">
-                               <property name="text">
-                                <string>Mode</string>
-                               </property>
-                              </widget>
-                             </item>
-                             <item>
-                              <layout class="QVBoxLayout" name="verticalLayout_139">
-                               <item>
-                                <widget class="QRadioButton" name="radioButton_11">
-                                 <property name="sizePolicy">
-                                  <sizepolicy hsizetype="Ignored" vsizetype="Expanding">
-                                   <horstretch>0</horstretch>
-                                   <verstretch>0</verstretch>
-                                  </sizepolicy>
-                                 </property>
-                                 <property name="minimumSize">
-                                  <size>
-                                   <width>0</width>
-                                   <height>0</height>
-                                  </size>
-                                 </property>
-                                 <property name="text">
-                                  <string>Replace</string>
-                                 </property>
-                                 <property name="checked">
-                                  <bool>true</bool>
-                                 </property>
-                                </widget>
-                               </item>
-                               <item>
-                                <widget class="QRadioButton" name="radioButton_12">
-                                 <property name="sizePolicy">
-                                  <sizepolicy hsizetype="Ignored" vsizetype="Expanding">
-                                   <horstretch>0</horstretch>
-                                   <verstretch>0</verstretch>
-                                  </sizepolicy>
-                                 </property>
-                                 <property name="minimumSize">
-                                  <size>
-                                   <width>0</width>
-                                   <height>0</height>
-                                  </size>
-                                 </property>
-                                 <property name="text">
-                                  <string>Add</string>
-                                 </property>
-                                </widget>
-                               </item>
-                               <item>
-                                <widget class="QRadioButton" name="radioButton_13">
-                                 <property name="sizePolicy">
-                                  <sizepolicy hsizetype="Ignored" vsizetype="Expanding">
-                                   <horstretch>0</horstretch>
-                                   <verstretch>0</verstretch>
-                                  </sizepolicy>
-                                 </property>
-                                 <property name="minimumSize">
-                                  <size>
-                                   <width>0</width>
-                                   <height>0</height>
-                                  </size>
-                                 </property>
-                                 <property name="text">
-                                  <string>Smooth</string>
-                                 </property>
-                                </widget>
-                               </item>
-                              </layout>
-                             </item>
-                            </layout>
+                            <widget class="QPushButton" name="pushButton_24">
+                             <property name="text">
+                              <string>Flood</string>
+                             </property>
+                            </widget>
                            </item>
                            <item>
                             <widget class="QCheckBox" name="checkBox_5">
@@ -3925,8 +4015,8 @@
                            <rect>
                             <x>0</x>
                             <y>0</y>
-                            <width>191</width>
-                            <height>143</height>
+                            <width>114</width>
+                            <height>134</height>
                            </rect>
                           </property>
                           <layout class="QVBoxLayout" name="verticalLayout_14">

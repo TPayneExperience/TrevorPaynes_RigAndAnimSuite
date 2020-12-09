@@ -14,6 +14,8 @@ class PW_Joint_Hierarchy_UI:
     
     def Populate(self):
         self.Depopulate()
+        if self.limb.limbType.get() == 1: # Skip one joint limbs
+            return 
         for joint in self.jntMng.GetLimbJoints(self.limb):
             jointID = joint.ID.get()
             name = joint.pfrsName.get()
@@ -35,7 +37,8 @@ class PW_Joint_Hierarchy_UI:
         jntStrs = pm.treeView(self.widget, q=1, selectItem=1)
         if not jntStrs:
             return
-        joint = self.jntMng.GetJoint(int(jntStrs[0]))
+        # joint = self.jntMng.GetJoint(int(jntStrs[0]))
+        self.parent.JointSelected(int(jntStrs[0]))
 
     def SetLimb(self, limbID):
         self.limb = self.limbMng.GetLimb(limbID)

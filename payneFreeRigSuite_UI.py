@@ -99,15 +99,53 @@ class PayneFreeRigSuite_UI():
         self.NewRig('PFX', 
                     range(5), 
                     True)
+        # ========== ARM TEST ===============================
         # Testing Joints
         path = r'D:/Assets/Programming/Python/Maya/ModularAutoRigger'
-        path += r'/TEST_OUTPUT/temp_joints.ma'
-        # path += r'/TEST_OUTPUT/temp_joints2.ma'
+        path += r'/TEST_OUTPUT/temp_joints2.ma'
         pm.importFile(path)
         self.UpdateEnableUI()
         self.Setup_Editable()
-        # self.rigRoot.riggingTab.set(1)
         pm.tabLayout(self.rig_ui.tab, e=1, sti=2) # Select Limb setup tab
+        self.rig_ui.limbSetup_ui.sceneHier_ui.AutoBuildByName(0)
+        # joints = pm.ls('Pelvis_Root_M')
+        # joints += pm.ls('Spine_M_S01')
+        # limb = self.rig_ui.limbSetup_ui.AddLimbByJoints(joints)
+        # self.rig_ui.AddLimb(limb)
+        pm.tabLayout(self.tab, e=1, sti=2) # Select SKINNING tab
+        mesh1 = pm.ls('pCylinderShape1')[0]
+        mesh2 = pm.ls('pCylinderShape2')[0]
+        mesh3 = pm.ls('pCylinderShape3')[0]
+        self.skin_ui.meshMng.AddMesh(mesh1)
+        self.skin_ui.meshMng.AddMesh(mesh2)
+        self.skin_ui.meshMng.AddMesh(mesh3)
+        self.skin_ui.skinMng.AddSkinAttrs(mesh1)
+        self.skin_ui.skinMng.AddSkinAttrs(mesh2)
+        self.skin_ui.skinMng.AddSkinAttrs(mesh3)
+        pm.tabLayout(self.skin_ui.tab, e=1, sti=3) # Select PAINT WEIGHTS tab
+
+        # ========== SKEL TEST ===============================
+        # # Testing Joints
+        # path = r'D:/Assets/Programming/Python/Maya/ModularAutoRigger'
+        # path += r'/TEST_OUTPUT/temp_joints.ma'
+        # # path += r'/TEST_OUTPUT/temp_joints2.ma'
+        # pm.importFile(path)
+        # self.UpdateEnableUI()
+        # self.Setup_Editable()
+        # # self.rigRoot.riggingTab.set(1)
+        # pm.tabLayout(self.rig_ui.tab, e=1, sti=2) # Select Limb setup tab
+        # joints = pm.ls('Pelvis_Root_M')
+        # joints += pm.ls('Spine_M_S01')
+        # limb = self.rig_ui.limbSetup_ui.AddLimbByJoints(joints)
+        # self.rig_ui.AddLimb(limb)
+        # pm.tabLayout(self.tab, e=1, sti=2) # Select SKINNING tab
+        # mesh1 = pm.ls('pSphereShape1')[0]
+        # mesh2 = pm.ls('pCubeShape1')[0]
+        # self.skin_ui.meshMng.AddMesh(mesh1)
+        # self.skin_ui.meshMng.AddMesh(mesh2)
+        # self.skin_ui.skinMng.AddSkinAttrs(mesh1)
+        # self.skin_ui.skinMng.AddSkinAttrs(mesh2)
+        # pm.tabLayout(self.skin_ui.tab, e=1, sti=3) # Select PAINT WEIGHTS tab
 
 #=========== SETUP ====================================
 
@@ -126,9 +164,6 @@ class PayneFreeRigSuite_UI():
                                                         self.rig_ui.jntMng,
                                                         self.nameMng,
                                                         self)
-                    # with pm.tabLayout() as self.mdTab:
-                    #     with pm.horizontalLayout():
-                    #         pm.button('test', label='Three')
                 with pm.horizontalLayout() as self.animation_l:
                     with pm.tabLayout() as self.mdTab:
                         with pm.horizontalLayout():
@@ -176,10 +211,12 @@ class PayneFreeRigSuite_UI():
 #=========== LIMBS ====================================
 
     def AddLimb(self, limb):
-        pass
+        for mesh in self.skin_ui.meshMng.GetAllMeshes():
+            self.skin_ui.skinMng.AddLimbAttrs(mesh, limb)
 
     def RemoveLimb(self, limb):
-        pass
+        for mesh in self.skin_ui.meshMng.GetAllMeshes():
+            self.skin_ui.skinMng.RemoveLimbAttrs(mesh, limb)
 
     # def UpdateLimb(self, limb):
     #     pass
@@ -193,6 +230,7 @@ class PayneFreeRigSuite_UI():
         if (index == 0):
             self.rig_ui.Setup_Editable()
         elif (index == 1):
+            # self.skin_ui.skinMng.Setup_Skins()
             self.skin_ui.Setup_Editable()
         
     def Teardown_Editable(self, nextIndex):
@@ -204,6 +242,7 @@ class PayneFreeRigSuite_UI():
         elif (lastIndex == 1): 
             index = self.rigRoot.skinningTab.get()
             self.skin_ui.Teardown_Editable(index)
+            # self.skin_ui.skinMng.Teardown_Skins()
         
     def TabChanged(self):
         nextIndex = pm.tabLayout(self.tab, q=1, selectTabIndex=1)-1

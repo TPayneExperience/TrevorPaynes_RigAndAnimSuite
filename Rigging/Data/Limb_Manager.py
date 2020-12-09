@@ -7,8 +7,8 @@ class Limb_Manager:
         self.nameMng = nameMng
 
         self.limbTypes = [  'Empty',
-                            'OneJoint',
-                            'Chain', 
+                            'One_Joint',
+                            'ThreePlus_JointChain', 
                             'Branch']
         self.limbSides = ['M', 'L', 'R', '-']
         # self.ctrTypes = [   'Circle_Wire',

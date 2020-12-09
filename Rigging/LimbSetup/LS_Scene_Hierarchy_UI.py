@@ -100,6 +100,7 @@ class LS_Scene_Hierarchy_UI:
         self.parent.UpdateSceneFrame()
 
     def AutoBuildByName(self, ignore):
+        '''Auto builds limb/joint hier by name LIMB_SIDE[M/R/L]_JOINT'''
         # VERY INFLEXIBLE! NEED TO BUILD UI FOR BETTER USER
         # CUSTOMIZATION LATER, like the rig setup ui
         allJoints = pm.ls(type='joint')
