@@ -1,16 +1,18 @@
 
 # GLOBAL VARS / FUNCTIONS for painting / viewing skin weights
 import pymel.core as pm
+import maya.api.OpenMaya as om
 
 PFRS_MESH_NAME = ''
 PFRS_ATTR = '' # J01, L22, ... J(oint)/L(imb) ID
+# PFRS_CUR_JOINT = None # joint node| if none, is limb attr
 PFRS_INF_JOINTS = [] # joint nodes. Set in PaintWeights_UI > JointSelected()
+                    # If empty, painting limb
 
-# def initPFRSPyPaint():
 def initPFRSPyPaint(meshName):
     global PFRS_MESH_NAME
     PFRS_MESH_NAME = meshName
-    print 'init py pfrs weights'
+    print 'init py pfrs weights for mesh ' + meshName
 
 def finishPFRSPyPaint():
     print 'finish py pfrs weights'
@@ -24,7 +26,6 @@ def getPFRSPyPaintValue(vertIndex):
     value = pm.getAttr(attr)[vertIndex]
     print 'PY: Get Weight %s for vert %s' %(str(value), str(vertIndex))
     return value
-    # return 1
 
 def setPFRSPyPaintValue(vertIndex, value):
     global PFRS_ATTR
@@ -35,8 +36,14 @@ def setPFRSPyPaintValue(vertIndex, value):
     values[vertIndex] = value
     pm.setAttr(mainAttr, values)
     print 'PY: attr %s vert %s set to %s' % (mainAttr, str(vertIndex), str(value))
+    
+    # If painting limb mask, return
     if not PFRS_INF_JOINTS:
+        # Set vertex color
+        SetLimbVertexColor(vertIndex, value)
         return
+
+    # Prepare to rebalance weights
     invValue = 1 - value
     otherValues = []
     for joint in PFRS_INF_JOINTS:
@@ -44,6 +51,7 @@ def setPFRSPyPaintValue(vertIndex, value):
         attr = '%s.%s' % (PFRS_MESH_NAME, 'J' + str(ID))
         otherValues.append(pm.getAttr(attr)[vertIndex])
     oldOtherTotal = sum(otherValues)
+
     # If no other weights, get closest joint, and set remaining weight
     if oldOtherTotal == 0:
         if value < 1: 
@@ -64,6 +72,7 @@ def setPFRSPyPaintValue(vertIndex, value):
             values = pm.getAttr(attr)
             values[vertIndex] = invValue
             pm.setAttr(attr, values)
+    # Else, Scale weights
     else:
         change = oldValue - value # Amount all other cha
         scalar = (oldOtherTotal + change) / oldOtherTotal
@@ -75,11 +84,45 @@ def setPFRSPyPaintValue(vertIndex, value):
             values[vertIndex] = otherValue
             pm.setAttr(meshAttr, values)
             print ('REBALANCE WEIGHTS: attr %s to %s' % (meshAttr, str(otherValue)))
+    SetJointVertexColor(vertIndex, value)
 
+#============ VERTEX COLORS =======================
 
+def SetLimbVertexColor(vertIndex, value):
+    _SetColor([vertIndex], [om.MColor([value, value, value])])
 
+def UpdateLimbVertexColors():
+    meshAttr = '%s.%s' % (PFRS_MESH_NAME, PFRS_ATTR)
+    values = pm.getAttr(meshAttr)
+    colors = [om.MColor([v, v, v]) for v in values]
+    _SetColor(range(len(values)), colors)
 
+def SetJointVertexColor(vertIndex, value):
+    finalColor = [value, value, value]
+    for joint in PFRS_INF_JOINTS:
+        color = joint.jointColor.get()
+        for i in range(3):
+            finalColor[i] = min(1, finalColor[i] + color[i])
+    _SetColor([vertIndex], [finalColor])
 
+def UpdateJointVertexColors():
+    meshAttr = '%s.%s' % (PFRS_MESH_NAME, PFRS_ATTR)
+    values = pm.getAttr(meshAttr)
+    colors = [om.MColor([v, v, v]) for v in values]
+    vertIndexes = range(len(values))
+    for joint in PFRS_INF_JOINTS:
+        color = joint.jointColor.get()
+        jointAttr = 'J%d' % joint.ID.get()
+        fullJointAttr = '%s.%s' % (PFRS_MESH_NAME, jointAttr)
+        jointValues = pm.getAttr(fullJointAttr)
+        for index in vertIndexes:
+            jVal = jointValues[index]
+            for i in range(3):
+                colors[index][i] = min(1, colors[index][i] + color[i]*jVal)
+    _SetColor(vertIndexes, colors)
 
-
-
+def _SetColor(vertIndexes, colors):
+    tempSel = om.MSelectionList()
+    tempSel.add(PFRS_MESH_NAME)
+    mfnMesh = om.MFnMesh(tempSel.getDagPath(0)) # must be dagpath
+    mfnMesh.setVertexColors(colors, vertIndexes)

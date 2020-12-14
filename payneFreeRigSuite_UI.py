@@ -108,20 +108,17 @@ class PayneFreeRigSuite_UI():
         self.Setup_Editable()
         pm.tabLayout(self.rig_ui.tab, e=1, sti=2) # Select Limb setup tab
         self.rig_ui.limbSetup_ui.sceneHier_ui.AutoBuildByName(0)
-        # joints = pm.ls('Pelvis_Root_M')
-        # joints += pm.ls('Spine_M_S01')
-        # limb = self.rig_ui.limbSetup_ui.AddLimbByJoints(joints)
-        # self.rig_ui.AddLimb(limb)
         pm.tabLayout(self.tab, e=1, sti=2) # Select SKINNING tab
         mesh1 = pm.ls('pCylinderShape1')[0]
         mesh2 = pm.ls('pCylinderShape2')[0]
         mesh3 = pm.ls('pCylinderShape3')[0]
-        self.skin_ui.meshMng.AddMesh(mesh1)
-        self.skin_ui.meshMng.AddMesh(mesh2)
-        self.skin_ui.meshMng.AddMesh(mesh3)
-        self.skin_ui.skinMng.AddSkinAttrs(mesh1)
-        self.skin_ui.skinMng.AddSkinAttrs(mesh2)
-        self.skin_ui.skinMng.AddSkinAttrs(mesh3)
+
+        for mesh in [mesh1, mesh2, mesh3]:
+            self.skin_ui.meshMng.AddMesh(mesh)
+            self.skin_ui.skinMng.AddSkinAttrs(mesh)
+            for limb in self.limbMng.GetAllLimbs():
+                self.skin_ui.skinMng.SetDefaultLimbJointWeights(mesh, limb)
+
         pm.tabLayout(self.skin_ui.tab, e=1, sti=3) # Select PAINT WEIGHTS tab
 
         # ========== SKEL TEST ===============================

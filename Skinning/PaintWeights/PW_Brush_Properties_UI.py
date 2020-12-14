@@ -35,7 +35,7 @@ class PW_Brush_Properties_UI:
                 pm.radioCollection()
                 pm.radioButton(l='Add', sl=1, onc=self.AddMode)
                 pm.radioButton(l='Replace', onc=self.ReplaceMode)
-                pm.radioButton(l='Smooth', onc=self.SmoothMode)
+                # pm.radioButton(l='Smooth', onc=self.SmoothMode)
                 self.val_sl = pm.floatSliderGrp( l='Value', f=1, min=0.0, 
                                         max=1.0, v=1, s=0.01,
                                         cw=((1, 50), (2, 40), (3, 60)),
@@ -82,9 +82,12 @@ class PW_Brush_Properties_UI:
                 soft = pm.artUserPaintCtx(self.ctx, q=1, lr=1) 
                 pm.floatSliderGrp(self.soft_sl, e=1, v=soft)
         mel.eval('pfrsPaint("pfrsPaintCtx");')
+        pm.polyOptions(cs=1)
 
     def BrushOff(self):
         pm.frameLayout(self.brush_fl, e=1, en=0, l=self._onName)
+        pm.polyOptions(cs=0)
+        pm.setToolTo('selectSuperContext')
 
 #=========== RADIO BUTTONS ==============================================
     
@@ -94,8 +97,8 @@ class PW_Brush_Properties_UI:
     def ReplaceMode(self, ignore):
         mel.eval('artAttrPaintOperation artUserPaintCtx Replace;')
 
-    def SmoothMode(self, ignore):
-        mel.eval('artAttrPaintOperation artUserPaintCtx Smooth;')
+    # def SmoothMode(self, ignore):
+    #     mel.eval('artAttrPaintOperation artUserPaintCtx Smooth;')
 
 #=========== SLIDERS ==============================================
     

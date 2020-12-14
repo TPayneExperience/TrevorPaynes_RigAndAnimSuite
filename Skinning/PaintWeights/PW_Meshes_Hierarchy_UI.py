@@ -45,7 +45,6 @@ class PW_Meshes_Hierarchy_UI:
         meshIDStrs = pm.treeView(self.widget, q=1, selectItem=1)
         if meshIDStrs:
             mesh = self._meshes[int(meshIDStrs[0])]
-            pm.select(mesh)
             self.parent.MeshSelected(mesh)
         else:
             pm.select(d=1)

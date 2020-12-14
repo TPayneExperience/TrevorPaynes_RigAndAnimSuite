@@ -23,6 +23,8 @@ class PaintWeights_UI:
         self.skinMng = skinMng
 
         self.curMesh = None
+        self.limb = None
+        self.joint = None
 
         self._Setup()
 
@@ -68,30 +70,36 @@ class PaintWeights_UI:
         self.meshHier_ui.Populate()
 
     def LimbSelected(self, limbID):
-        if limbID != -1 and self.curMesh:
+        if limbID != -1:
+            self.limb = self.limbMng.GetLimb(limbID)
             paint.PFRS_ATTR = 'L' + str(limbID)
             paint.PFRS_INF_JOINTS = []
-            self.limb = self.limbMng.GetLimb(limbID)
             self.jntHier_ui.SetLimb(limbID)
             self.skinMng.SkinTestLimbAnim(self.limb)
-            self.brush_ui.BrushOn()
+            if self.curMesh:
+                paint.UpdateLimbVertexColors()
+                pm.select(self.curMesh)
+                self.brush_ui.BrushOn()
         else:
             self.jntHier_ui.Depopulate()
             self.limb = None
             self.brush_ui.BrushOff()
 
     def JointSelected(self, jointID):
-        if jointID != -1 and self.curMesh:
-            joint = self.jntMng.GetJoint(jointID)
+        if jointID != -1:
+            self.joint = self.jntMng.GetJoint(jointID)
             joints = self.jntMng.GetLimbInfJoints(self.limb)
-            otherJoints = [j for j in joints if j != joint]
+            otherJoints = [j for j in joints if j != self.joint]
             paint.PFRS_INF_JOINTS = otherJoints
             paint.PFRS_ATTR = 'J' + str(jointID)
-            self.skinMng.SkinTestJointAnim(joint)
-            self.brush_ui.BrushOn()
+            self.skinMng.SkinTestJointAnim(self.joint)
+            if self.curMesh:
+                pm.select(self.curMesh)
+                paint.UpdateJointVertexColors()
+                self.brush_ui.BrushOn()
         else:
-            pass
             self.brush_ui.BrushOff()
+            self.joint = None
 
     def MeshSelected(self, mesh):
         if self.curMesh == mesh:
@@ -101,6 +109,13 @@ class PaintWeights_UI:
         self.curMesh = mesh
         if mesh:
             self.skinMng.Setup_PaintDisplay(mesh)
+            paint.PFRS_MESH_NAME = mesh.longName()
+            if self.joint:
+                self.JointSelected(self.joint.ID.get())
+            elif self.limb:
+                self.LimbSelected(self.limb.ID.get())
+        else:
+            self.brush_ui.BrushOff()
 
 
 

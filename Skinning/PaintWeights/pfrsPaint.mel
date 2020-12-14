@@ -8,7 +8,6 @@ python("reload(pfrs)");
 
 global proc pfrsPaint( string $context )
 {
-	// if (`artUserPaintCtx -exists pfrsPaintCtx`){
 	artUserPaintCtx -e
 		-ic "initpfrsPaint"
 		-fc "finishpfrsPaint"
@@ -19,97 +18,30 @@ global proc pfrsPaint( string $context )
 		-tcc ""
 		-gac ""
 		$context;
-	// }
 }
 
 global proc string initpfrsPaint( string $name )
 {	
 	print("Painting mesh named: " + $name + "\n");
-	// global string $objNameList[];
-	// global int $nextFreeSlot;
-	// global int $totalFreeSlots;
-
-	// int $slot;
-
-	// for ( $slot = $nextFreeSlot; $slot < $totalFreeSlots; $slot++ ) {
-	// 	if ( $objNameList[$slot] == "" ) {
-	// 		break;
-	// 	}
-	// }  
-
-	// if ( $slot == $totalFreeSlots ) {
-	// 	$totalFreeSlots++;
-	// 	$nextFreeSlot = $totalFreeSlots;
-	// }	
-	
-	// $objNameList[$slot]  = $name ;
-	
-	// string $cmd = "objExists " + $name + ".testAttr" ;
-	
-	// if ( eval($cmd) == 0) {
-	// 	addAttr -longName "testAttr" -dt doubleArray pPlaneShape1;
-	// 	setAttr pPlaneShape1.testAttr -type doubleArray  36 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0;
-	// }
 	python("pfrs.initPFRSPyPaint('" + $name + "')");
-	// return ( "-id " + $slot);
 	return ( "-id " + 0);
 		   
 }
 
 global proc finishpfrsPaint( int $slot )
 {
-	// global string $objNameList[];
-	// global int $nextFreeSlot;
-
-	// $objNameList[$slot] = "";
-	// if ( $slot < $nextFreeSlot ) {
-	// 	$nextFreeSlot = $slot;
-	// }
 	python("pfrs.finishPFRSPyPaint();");
 }
 
 global proc float getpfrsPaintValue( int $slot, int $index )
 {
-	// global string $objNameList[];
-	// string $objname ;
-	
-	// if ( $objNameList[$slot] != "" ) {
-	// 	$objname = $objNameList[$slot] ;
-	// }
-	// string $cmd = "getAttr " + $objname + ".testAttr" ;
-	// float $attrValues[] = eval($cmd) ;
-	// return $attrValues[$index]  ;
-	// return 1;
-	// print("mel: Get PFRS Value");
 	float $value = python("pfrs.getPFRSPyPaintValue(" + $index + ")");
 	print("mel get value: " + $value + "\n");
 	return $value;
 }
 
-global proc setpfrsPaintValue(
-	int $slot,
-	int $index,
-	float $val
-)
-	// global string $objNameList[];
-	// string $objname ;
-	// if ( $objNameList[$slot] != "" ) {
-	// 	$objname = $objNameList[$slot] ;
-	// }
-	
-	// string $cmd = "getAttr " + $objname + ".testAttr" ;
-	// float $attrValues[] = eval($cmd) ;
-	// $attrValues[$index] = $val ;
-	
-	// string $newAttrValues = "36 ";
-	// for ( $attrValue in $attrValues ) {
-	// 	$newAttrValues += ($attrValue + " ");
-	// }
-	
-	// $cmd = "setAttr " +$objname + ".testAttr -type doubleArray " +  $newAttrValues ;
-	// eval($cmd) ;
+global proc setpfrsPaintValue( int $slot, int $index, float $val)
 {
-	// print("mel: Set PFRS Value");
 	python("pfrs.setPFRSPyPaintValue(" + $index + ", " + $val + ")");
 }
 

@@ -1,4 +1,6 @@
 
+# from random import random
+
 import pymel.core as pm
 
 class Skin_Mananger:
@@ -30,22 +32,6 @@ class Skin_Mananger:
                 skinCst = skinCsts[0]
                 skinCst.unbind()
         
-    def Setup_PaintDisplay(self, mesh):
-        skinCluster = pm.listConnections(mesh, type='skinCluster')[0]
-        vtxColor = pm.createNode('polyColorPerVertex')
-        pm.connectAttr(skinCluster.outputGeometry[0], vtxColor.inputPolymesh)
-        pm.disconnectAttr(mesh.inMesh)
-        pm.connectAttr(vtxColor.output, mesh.inMesh)
-
-    def Teardown_PaintDisplay(self, mesh):
-        vtxColor = pm.listConnections(mesh, type='polyColorPerVertex')
-        pm.delete(vtxColor)
-        skinCluster = pm.listConnections(mesh, type='skinCluster')[0]
-        pm.connectAttr(skinCluster.outputGeometry[0], mesh.inMesh)
-
-    def Update_PaintDisplay(self):
-        pass
-
     def Setup_JointAnim(self):
         joints = []
         for rootLimb in self.limbMng.GetRootLimbs():
@@ -73,6 +59,30 @@ class Skin_Mananger:
         pm.playbackOptions(min=1, max=120)
         pm.delete(self._skinTestAnimLayer)
 
+    # def Setup_JointColors(self):
+    #     for limb in self.limbMng.GetAllLimbs():
+    #         if limb.limbType.get() == 0:
+    #             continue
+    #         for joint in self.jntMng.GetLimbInfJoints(limb):
+    #             values = [0.5 + (random()*0.5) for i in range(3)]
+    #             joint.jointColor.set(values)
+
+#============= PAINT DISPLAY ============================
+
+    def Setup_PaintDisplay(self, mesh):
+        skinCluster = pm.listConnections(mesh, type='skinCluster')[0]
+        vtxColor = pm.createNode('polyColorPerVertex')
+        pm.connectAttr(skinCluster.outputGeometry[0], vtxColor.inputPolymesh)
+        pm.disconnectAttr(mesh.inMesh)
+        pm.connectAttr(vtxColor.output, mesh.inMesh)
+
+    def Teardown_PaintDisplay(self, mesh):
+        vtxColor = pm.listConnections(mesh, type='polyColorPerVertex')
+        pm.delete(vtxColor)
+        # skinCluster = pm.listConnections(mesh, type='skinCluster')[0]
+        # pm.connectAttr(skinCluster.outputGeometry[0], mesh.inMesh)
+
+
 #============= MISC ============================
 
     # def GetSkinCluster(self, mesh):
@@ -89,9 +99,7 @@ class Skin_Mananger:
                 joints.append(joint)
         return joints
 
-#============= UPDATE SKIN COLORS ============================
-
-#============= TIMELINE ============================
+#============= LIMB / JOINT ANIM (TIMELINE) ============================
 
     def SkinTestLimbAnim(self, limb):
         joints = self.jntMng.GetLimbInfJoints(limb)
@@ -121,11 +129,11 @@ class Skin_Mananger:
     def AddLimbAttrs(self, mesh, limb):
         attr = 'L' + str(limb.ID.get())
         if not mesh.hasAttr(attr):
-            pm.addAttr(mesh, ln=attr, dt='doubleArray')
+            pm.addAttr(mesh, ln=attr, dt='doubleArray', h=1)
             if limb.limbType.get() == 2: # 3+ jointchain
                 self.SetDefaultLimbSurfaceMask(mesh, limb)
             else:
-                self.Flood(mesh, attr, 0) # FIX LATER
+                self.Flood(mesh, attr, 0.3) # FIX LATER
         for joint in self.jntMng.GetLimbJoints(limb):
             self.AddJointAttr(mesh, joint)
 
@@ -139,8 +147,8 @@ class Skin_Mananger:
     def AddJointAttr(self, mesh, joint):
         attr = 'J' + str(joint.ID.get())
         if not mesh.hasAttr(attr):
-            pm.addAttr(mesh, ln=attr, dt='doubleArray')
-            self.Flood(mesh, attr, 0)
+            pm.addAttr(mesh, ln=attr, dt='doubleArray', h=1)
+            self.Flood(mesh, attr, 0.5)
 
     def RemoveJointAttr(self, mesh, joint):
         attr = 'J' + str(joint.ID.get())

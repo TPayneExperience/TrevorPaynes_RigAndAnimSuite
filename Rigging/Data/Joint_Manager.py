@@ -1,5 +1,6 @@
 
 import pymel.core as pm
+from random import random, shuffle
 
 class Joint_Manager:
     def __init__(self, limbMng, grpMng, ctrMng, nameMng):
@@ -11,6 +12,20 @@ class Joint_Manager:
         self.mirrorXform = {'X': [-1,1,1],
                             'Y': [1,-1,1],
                             'Z': [1,1,-1]}
+        self.jointColors = [[1, 0, 0], # Red
+                            [0, 1, 0], # Green
+                            [0, 0, 1], # Blue
+                            [1, 1, 0], # Yellow
+                            [0, 1, 1], # Cyan
+                            [1, 0, 1],# Magenta
+                            [1, 0.5, 0], # 
+                            [0, 1, 0.5], # 
+                            [0.5, 0, 1],# 
+                            [0.5, 1, 0], # 
+                            [0, 0.5, 1], # 
+                            [1, 0, 0.5] # 
+                            ] 
+        self.colorIndex = 0
 
     def NewRig(self, rigRoot):
         self._joints = {} # jointID: jointNode
@@ -72,15 +87,26 @@ class Joint_Manager:
 
     def Add(self, limb, joint):
         if (not joint.hasAttr('pfrsName')):
+            colors = self.jointColors[self.colorIndex]
+            self.colorIndex = (self.colorIndex + 1) % len(self.jointColors)
+            shuffle(colors)
             pm.addAttr(joint, ln='ID', at='short')
             pm.addAttr(joint, ln='limb', dt='string')
             pm.addAttr(joint, ln='limbIndex', at='short')
             pm.addAttr(joint, ln='pfrsName', dt='string')
             pm.addAttr(joint, ln='group', dt='string')
             pm.addAttr(joint, ln='bhvDistanceGroup', dt='string')
+            # SKIN ATTRS
             pm.addAttr(joint, ln='skinAnimStart', at='float')
             pm.addAttr(joint, ln='skinAnimEnd', at='float')
-            
+            pm.addAttr(joint, ln='jointColor', at='float3')
+            pm.addAttr(joint, ln='jointColorR', at='float', 
+                                p='jointColor', dv=colors[0])
+            pm.addAttr(joint, ln='jointColorG', at='float', 
+                                p='jointColor', dv=colors[1])
+            pm.addAttr(joint, ln='jointColorB', at='float', 
+                                p='jointColor', dv=colors[2])
+
             jointID = self.rigRoot.nextJointID.get()
             self.rigRoot.nextJointID.set(jointID + 1)
             joint.ID.set(jointID)
@@ -90,6 +116,7 @@ class Joint_Manager:
             group = self.grpMng.AddJointGroup(limb, joint)
             self.ctrMng.Add(group, self.ctrMng.ctrTypes[1])
             self.grpMng.UpdateGroupName(limb, group)
+            print ('adding joint: ' + joint.pfrsName.get() + 'with' + str(colors))
 
         # pm.connectAttr(limb.tempJoints, joint.tempLimb)
         pm.connectAttr(limb.joints, joint.limb)
@@ -197,6 +224,7 @@ class Joint_Manager:
             if parent == rootParent:
                 break
         return jointChain
+
 
     # def DuplicateLimb(self, sourceLimbID, targetLimbID):
     #     self._limbJoints[targetLimbID] = []
