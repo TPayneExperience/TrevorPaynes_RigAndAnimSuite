@@ -35,7 +35,7 @@ class BHV_Group_Properties_UI:
                                                         pre=3,
                                                         cw=((1, 60), (2, 55), (3, 55)),
                                                         at='persp.translateX')
-                          
+                
 #========== UPDATE UI ===============================
 
     def Depopulate(self):
@@ -46,8 +46,7 @@ class BHV_Group_Properties_UI:
             self.parentSub_at = None      
 
     def UpdateUI(self):
-        group = self.group
-        limb = pm.listConnections(group.limb)[0]
+        limb = pm.listConnections(self.group.limb)[0]
         bhvType = limb.bhvType.get()
         pm.attrFieldSliderGrp(self.weight_sg, e=1, en=0)
         # DELETE OLD ATTRS
@@ -58,13 +57,13 @@ class BHV_Group_Properties_UI:
         # CONSTRAINT
         if bhvType == 3: 
             pm.attrFieldSliderGrp(self.weight_sg, e=1, en=1, 
-                                                    at=self.group.weight)
+                                            at=self.group.weight)
 
         # IK CHAIN
         elif bhvType in self.bhvMng.ikChainTypeIndexes: 
             self.parentSub_at = pm.attrEnumOptionMenu(  l='Target Joint',
-                                                    at=self.group.targetJoint, 
-                                                    p=self.bhvGroupProp_cl)
+                                                at=self.group.targetJoint, 
+                                                p=self.bhvGroupProp_cl)
 
 
 

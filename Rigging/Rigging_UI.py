@@ -43,6 +43,7 @@ class Rigging_UI:
         self.fileMng = fileMng
         self.jsonMng = jsonMng
         self.parent = parent
+        self.logger = parent.logger
 
         # NEED A BETTER PLACE FOR THIS
         
@@ -86,7 +87,8 @@ class Rigging_UI:
     def _Setup(self):
         with pm.tabLayout(cc=self.TabChanged) as self.tab:
             with pm.horizontalLayout() as self.jntSetupTab:
-                self.jntSetup_ui = js_ui.JointSetup_UI( self.jntMng)
+                self.jntSetup_ui = js_ui.JointSetup_UI( self.jntMng,
+                                                        self)
             with pm.horizontalLayout() as self.limbSetupTab:
                 self.limbSetup_ui = ls_ui.LimbSetup_UI( self.limbMng, 
                                                         self.jntMng,
@@ -99,7 +101,8 @@ class Rigging_UI:
                                                     self.jntMng,
                                                     self.bhvMng,
                                                     self.grpMng,
-                                                    self.ctrMng)
+                                                    self.ctrMng,
+                                                    self)
             with pm.horizontalLayout() as self.appTab:
                 self.app_ui = app_ui.Appearance_UI( self.limbMng,
                                                     self.bhvMng,
@@ -124,7 +127,7 @@ class Rigging_UI:
 #=========== TAB SWITCHING ====================================
 
     def Setup_Editable(self):
-        print ('\nrigging, setup')
+        self.logger.info('RIGGING TAB > SETUP Editable')
         index = self.rigRoot.riggingTab.get()
         if (index == 0):
             self.jntSetup_ui.Setup_Editable()
@@ -146,7 +149,7 @@ class Rigging_UI:
             self.ctrMng.SetLayerState(True, False)
         
     def Teardown_Editable(self, nextIndex):
-        print ('rigging, teardown')
+        self.logger.info('RIGGING TAB > TEARDOWN Editable')
         lastIndex = self.rigRoot.riggingTab.get()
         if (lastIndex == 0): 
             self.jntSetup_ui.Teardown_Editable()
@@ -160,11 +163,18 @@ class Rigging_UI:
             self.test_ui.Teardown_Editable() 
 
         if lastIndex in [0, 1] and nextIndex in [2, 3, 4]:
+            for limb in self.limbMng.GetAllLimbs():
+                if limb.limbType.get() == 2: # 3+ chain
+                    self.jntMng.Setup_NonInfJoint(limb)
             self.SetupEditable_Limbs()
         elif lastIndex in [2, 3, 4] and nextIndex in [0, 1]:
             self.TeardownEditable_Limbs()
+            for limb in self.limbMng.GetAllLimbs():
+                if limb.limbType.get() == 2: # 3+ chain
+                    self.jntMng.Teardown_NonInfJoint(limb)
         
     def TabChanged(self):
+        self.logger.info('RIGGING TAB > Tab CHANGED')
         nextIndex = pm.tabLayout(self.tab, q=1, selectTabIndex=1)-1
         self.Teardown_Editable(nextIndex)
         self.rigRoot.riggingTab.set(nextIndex)
@@ -174,41 +184,42 @@ class Rigging_UI:
         '''When switchin from tabs 0/1 to 2/3/4'''
         allLimbs = self.limbMng.GetAllLimbs()
         for limb in allLimbs:
-            # Create joints to limbs Permanent Connection
-            # joints = self.jntMng.GetLimbTempJoints(limb)
-            joints = self.jntMng.GetLimbJoints(limb)
+            joints = self.jntMng.GetLimbJoints(limb, False)
             for joint in joints:
-                self.jntMng.Setup_Editable(limb, joint)
-
-            # MISSING: If chain joints added/remove, update joint manager/limb!
+                self.jntMng.Setup_Editable(joint)
 
             # If limb type changed, reset bhvType to default FK
-            limbType = limb.limbType.get()
-            if not joints:
-                limb.limbType.set(0)
-                limb.bhvType.set(7) # Empty
-            elif (len(joints) == 1):
-                if limbType != 1:
-                    limb.limbType.set(1)
-                    limb.bhvType.set(6) # FK Branch
-                # group = pm.listConnections(joints[0].group)[0]
-            elif self.jntMng.AreJointsChained(joints):
-                if limbType != 2:
-                    limb.limbType.set(2)
-                    limb.bhvType.set(0) # FK Chain
-                # for joint in joints:
-                #     group = pm.listConnections(joint.group)[0]
-            elif self.jntMng.AreJointsSiblings(joints):
-                if limbType != 3:
-                    limb.limbType.set(3)
-                    limb.bhvType.set(6) # FK Branch
+            # limbType = limb.limbType.get()
+            # if not joints:
+            #     limb.limbType.set(0)
+            #     limb.bhvType.set(7) # Empty
+            # elif (len(joints) == 1):
+            #     if limbType != 1:
+            #         limb.limbType.set(1)
+            #         limb.bhvType.set(6) # FK Branch
+            #     # group = pm.listConnections(joints[0].group)[0]
+            # elif self.jntMng.AreJointsChained(joints):
+            #     if (len(joints) == 2):
+            #         if (limbType != 4):
+            #             limb.limbType.set(4)
+            #             limb.bhvType.set(0) # FK Chain
+            #     elif limbType != 2:
+            #         limb.limbType.set(2)
+            #         limb.bhvType.set(0) # FK Chain
+            #     # for joint in joints:
+            #     #     group = pm.listConnections(joint.group)[0]
+            # elif self.jntMng.AreJointsSiblings(joints):
+            #     if limbType != 3:
+            #         limb.limbType.set(3)
+            #         limb.bhvType.set(6) # FK Branch
                 # for joint in joints:
                 #     group = pm.listConnections(joint.group)[0]
 
             # Enable Group Vis (created in bhv tab by bhv switching)
             bhvType = limb.bhvType.get()
             if bhvType in self.bhvMng.fkTypeIndexes:
-                for group in pm.listConnections(limb.bhvJointGroups):
+                for joint in self.jntMng.GetLimbJoints(limb, False):
+                    group = pm.listConnections(joint.group)[0]
                     group.v.set(1)
             elif bhvType in self.bhvMng.distanceIndexes:
                 group = pm.listConnections(limb.bhvDistanceGroup)[0]
@@ -237,8 +248,10 @@ class Rigging_UI:
         '''When switchin from tabs 3/4/5 to 1/2'''
         # Set Joint temp Connections, unparent limb groups
         for limb in self.limbMng.GetAllLimbs():
-            for joint in self.jntMng.GetLimbJoints(limb):
-                self.jntMng.Teardown_Editable(limb, joint)
+            jointGroups = []
+            for joint in self.jntMng.GetLimbJoints(limb, False):
+                self.jntMng.Teardown_Editable(joint)
+                jointGroups += pm.listConnections(joint.group)
             limbGroups = pm.listConnections(limb.bhvDistanceGroup)
             if limb.bhvType.get() in self.bhvMng.distanceIndexes:
                 self.grpMng.TeardownEditable_DistanceGroup(limbGroups[0])
@@ -246,9 +259,8 @@ class Rigging_UI:
             limbGroups += pm.listConnections(limb.bhvFKIKSwitchGroup)
             for group in limbGroups:
                 pm.parent(group, self.grpMng.bhvGroup)
-        # Hide all groups
-        for group in self.grpMng.GetAllGroups():
-            group.v.set(0)
+            for group in limbGroups + jointGroups:
+                group.v.set(0)
 
 
 #=========== FUNCTIONALITY ====================================

@@ -6,17 +6,17 @@ class BHV_Group_Manager:
         self.limbMng = limbMng
         self.nameMng = nameMng
 
-        self.axes = [   [1,0,0],
-                        [-1,0,0],
-                        [0,1,0],
-                        [0,-1,0],
-                        [0,0,1],
-                        [0,0,-1]]
-        self.grpTypes = [   'Empty', # DO NOT CHANGE ORDER
+        self.axes = (   (1,0,0),
+                        (-1,0,0),
+                        (0,1,0),
+                        (0,-1,0),
+                        (0,0,1),
+                        (0,0,-1))
+        self.grpTypes = (   'Empty', # DO NOT CHANGE ORDER
 
                             'Joint', 
                             'Distance',
-                            'FKIKSwitch']
+                            'FKIKSwitch')
         # EMPTY GROUP:
         #   Limb group, but no data
 
@@ -50,30 +50,40 @@ class BHV_Group_Manager:
     def GetAllGroups(self):
         return list(self._groups.values())
 
-    def GetAllLimbGroups(self, limb):
-        groups = pm.listConnections(limb.bhvJointGroups)
-        groups += pm.listConnections(limb.bhvDistanceGroup)
-        groups += pm.listConnections(limb.bhvFKIKSwitchGroup)
-        groups += pm.listConnections(limb.bhvEmptyGroup)
-        return groups
+    # def GetAllLimbGroups(self, limb):
+    #     groups = []
+    #     for joint in pm.listConnections(limb.infJoints):
+    #         groups += pm.listConnections(joint.group)
+    #     for joint in pm.listConnections(limb.nonInfjoints):
+    #         groups += pm.listConnections(joint.group)
+    #     groups += pm.listConnections(limb.bhvDistanceGroup)
+    #     groups += pm.listConnections(limb.bhvFKIKSwitchGroup)
+    #     groups += pm.listConnections(limb.bhvEmptyGroup)
+    #     return groups
 
     def GetLimbGroups(self, limb):
         bhvType = limb.bhvType.get()
+        groups = []
         if bhvType in [0, 3, 5, 6]: # FK Chain, Cst, IK Chain, FK Branch
-            groups = pm.listConnections(limb.bhvJointGroups)
+            for joint in pm.listConnections(limb.infJoints):
+                groups += pm.listConnections(joint.group)
             return self.SortGroups(groups)
 
         if bhvType in [1, 4]: # IK PV, LookAt
             return pm.listConnections(limb.bhvDistanceGroup)
 
         if bhvType == 2: # FK IK PV
-            groups = self.SortGroups(pm.listConnections(limb.bhvJointGroups))
+            for joint in pm.listConnections(limb.infJoints):
+                groups += pm.listConnections(joint.group)
+            groups = self.SortGroups(groups)
             groups += pm.listConnections(limb.bhvDistanceGroup)
             groups += pm.listConnections(limb.bhvFKIKSwitchGroup)
             return groups
 
         if bhvType == 9: # FK IK Chain
-            groups = self.SortGroups(pm.listConnections(limb.bhvJointGroups))
+            for joint in pm.listConnections(limb.infJoints):
+                groups += pm.listConnections(joint.group)
+            groups = self.SortGroups(groups)
             groups += pm.listConnections(limb.bhvFKIKSwitchGroup)
             return groups
 
@@ -81,31 +91,37 @@ class BHV_Group_Manager:
             return pm.listConnections(limb.bhvEmptyGroup)
 
         if bhvType == 8: # FK - Reverse Chain
-            groups = pm.listConnections(limb.bhvJointGroups)
+            for joint in pm.listConnections(limb.infJoints):
+                groups += pm.listConnections(joint.group)
             return self.SortGroups(groups)[::-1]
 
     def GetLimbIKGroups(self, limb):
         bhvType = limb.bhvType.get()
         if bhvType in [0, 3, 5, 6, 9]: # FK Chain, Cst, IK Chain, FK Branch
-            groups = pm.listConnections(limb.bhvJointGroups)
+            groups = []
+            for joint in pm.listConnections(limb.infJoints):
+                groups += pm.listConnections(joint.group)
             return self.SortGroups(groups)
         if bhvType in [1, 2, 4]: # IK PV, LookAt
             return pm.listConnections(limb.bhvDistanceGroup)
     
     def GetLimbFKGroups(self, limb):
         bhvType = limb.bhvType.get()
+        groups = []
         if bhvType in [0, 2, 6, 9]: # FK Chain, FKIK, Branch, Reverse
-            groups = pm.listConnections(limb.bhvJointGroups)
+            for joint in pm.listConnections(limb.infJoints):
+                groups += pm.listConnections(joint.group)
             return self.SortGroups(groups)
         if bhvType == 7: # EMPTY
             return pm.listConnections(limb.bhvEmptyGroup)
         if bhvType == 8: # FK - Reverse Chain
-            groups = pm.listConnections(limb.bhvJointGroups)
+            for joint in pm.listConnections(limb.infJoints):
+                groups += pm.listConnections(joint.group)
             return self.SortGroups(groups)[::-1]
     
 #============= ADD + REMOVE ============================
 
-    def _AddGroup(self, limb):
+    def _AddGroup(self):
         groupID = self.rigRoot.nextGroupID.get()
         self.rigRoot.nextGroupID.set(groupID + 1)
         
@@ -114,7 +130,6 @@ class BHV_Group_Manager:
         group = pm.group(em=1, w=1)
         pm.addAttr(group, ln='ID', at='long', dv=groupID)
         pm.addAttr(group, ln='control', dt='string')
-        pm.addAttr(group, ln='limb', dt='string')
         pm.addAttr(group, ln='FKIKVisSource', dt='string')
         pm.addAttr(group, ln='groupType', at='enum', en=groupTypes) # IKPV, LookAt
         for attr in ['.sx', '.sy', '.sz']:
@@ -126,15 +141,16 @@ class BHV_Group_Manager:
     # EMPTY
     # Called from Rigging > SetupEditable_Limbs()
     def AddEmptyGroup(self, limb):
-        group = self._AddGroup(limb)
+        group = self._AddGroup()
+        pm.addAttr(group, ln='limb', dt='string')
         pm.connectAttr(limb.bhvEmptyGroup, group.limb)
         # self.UpdateGroupName(limb, group)
         return group
 
     # FK, CST, IK Chain
     # Called from Limb Setup > AutoBuild OR RMB > Add Limb
-    def AddJointGroup(self, limb, joint): 
-        group = self._AddGroup(limb)
+    def AddJointGroup(self, joint): 
+        group = self._AddGroup()
         group.groupType.set(1)
         pm.addAttr(group, ln='targetJoint', at='enum', en='None') # IK Chain
         pm.addAttr(group, ln='joint', dt='string')
@@ -150,12 +166,13 @@ class BHV_Group_Manager:
     # IK PV, LookAt
     # Called from Behaviors > Set Bhv()
     def AddDistanceGroup(self, limb):
-        group = self._AddGroup(limb)
+        group = self._AddGroup()
         group.groupType.set(2)
         # pm.addAttr(group, ln='targetJoint', at='enum', en='None') # IK PV
         pm.addAttr(group, ln='distanceJoint', dt='string') # for easy Test Connections
         pm.addAttr(group, ln='distance', at='float', min=0, dv=1) # IKPV, LookAt
         pm.addAttr(group, ln='axis', at='enum', en='X:-X:Y:-Y:Z:-Z', dv=4) # IKPV, LookAt
+        pm.addAttr(group, ln='limb', dt='string')
         pm.connectAttr(limb.bhvDistanceGroup, group.limb)
         # self.UpdateGroupName(limb, group)
         return group
@@ -163,13 +180,14 @@ class BHV_Group_Manager:
     # FKIK Switch
     # Called from Behaviors > Set Bhv()
     def AddFKIKSwitchGroup(self, limb):
-        group = self._AddGroup(limb)
+        group = self._AddGroup()
         group.groupType.set(3)
         pm.addAttr(group, ln='targetJoint', at='enum', en='None')
         pm.addAttr(group, ln='FKVisTargets', dt='string') # for easy Test Connections
         pm.addAttr(group, ln='IKVisTargets', dt='string')
         pm.addAttr(group, ln='bindSource', dt='string') # For FKIK to link to eachother
         pm.addAttr(group, ln='bindTargets', dt='string')
+        pm.addAttr(group, ln='limb', dt='string')
         pm.connectAttr(limb.bhvFKIKSwitchGroup, group.limb)
         # self.UpdateGroupName(limb, group)
         for attr in ['.tx', '.ty', '.tz', '.rx', '.ry', '.rz']:

@@ -6,19 +6,14 @@ class Limb_Manager:
 
         self.nameMng = nameMng
 
-        self.limbTypes = [  'Empty',
+        self.limbTypes = (  'Empty',
+        
                             'One_Joint',
                             'ThreePlus_JointChain', 
-                            'Branch']
-        self.limbSides = ['M', 'L', 'R', '-']
-        # self.ctrTypes = [   'Circle_Wire',
-        #                     'Cube_Wire',
-        #                     'Sphere_Poly',
-        #                     'Cube_Poly',
-        #                     'Cylinder_Poly',
-        #                     'FKIK_Wire',
-        #                     'Diamond_Wire'] # Duplication of data, but whatever
-        
+                            'Branch',
+                            'Two_JointChain')
+        self.limbSides = ('M', 'L', 'R', '-')
+
     def NewRig(self, rigRoot):
         self.rigRoot = rigRoot
         self._limbs = {} # limbID : limbNode
@@ -85,9 +80,21 @@ class Limb_Manager:
         pm.addAttr(limb, ln='defaultChildrenLimbs', dt='string')
         # pm.addAttr(limb, ln='parentJntIndex', at='enum', enumName='None')
         # pm.addAttr(limb, ln='parentCtrID', at='long')
-        pm.addAttr(limb, ln='joints', dt='string')
+        pm.addAttr(limb, ln='infJoints', dt='string')
+        pm.addAttr(limb, ln='nonInfJoint', dt='string') # Only for 3+ chain
         pm.addAttr(limb, ln='tempJoints', dt='string') # limb setup
         pm.addAttr(limb, ln='rigRoot', dt='string')
+
+        pm.addAttr(limb, ln='rebuildLimbType', at='bool')
+        pm.addAttr(limb, ln='rebuildBhvType', at='bool')
+        pm.addAttr(limb, ln='rebuildBhvDep', at='bool')
+        pm.addAttr(limb, ln='rebuildAppDep', at='bool')
+        pm.addAttr(limb, ln='rebuildSkinInf', at='bool')
+        limb.rebuildLimbType.set(1)
+        limb.rebuildBhvType.set(1)
+        limb.rebuildBhvDep.set(1)
+        limb.rebuildAppDep.set(1)
+        limb.rebuildSkinInf.set(1)
 
         # APP
         pm.addAttr(limb, ln='appControlType', at='enum', en='None')
@@ -146,12 +153,12 @@ class Limb_Manager:
             sourceLimb.side.set(0)
             pm.disconnectAttr(sourceLimb.mirrorLimb)
 
-    def UpdateLimbType(self, limb):
-        joints = pm.listConnections(limb.joints)
-        if (len(joints) == 0):
-            limb.limbType.set(0)
-        elif (len(joints) == 1):
-            limb.limbType.set(1)
+    # def UpdateLimbType(self, limb):
+    #     joints = pm.listConnections(limb.joints)
+    #     if (len(joints) == 0):
+    #         limb.limbType.set(0)
+    #     elif (len(joints) == 1):
+    #         limb.limbType.set(1)
 
     def FlipSides(self, limbID):
         limb1 = self.GetLimb(limbID)
@@ -184,13 +191,13 @@ class Limb_Manager:
         for childLimb in list(self._limbs.values()):
             joints = jntMng.GetLimbJoints(childLimb)
             if joints:
+                limbParents[childLimb] = None
                 childJoint = joints[0]
                 parentJoint = pm.listRelatives(childJoint, parent=1)
                 if parentJoint:
-                    parentLimb = jntMng.GetLimb(parentJoint[0])
-                    limbParents[childLimb] = parentLimb
-                else:
-                    limbParents[childLimb] = None
+                    if pm.hasAttr(parentJoint[0], 'limb'):
+                        parentLimb = jntMng.GetLimb(parentJoint[0])
+                        limbParents[childLimb] = parentLimb
         return limbParents
 
     def GetRootLimbs(self):

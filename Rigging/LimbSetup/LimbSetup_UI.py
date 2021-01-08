@@ -46,12 +46,12 @@ class LimbSetup_UI:
                                                                         self)
         with pm.verticalLayout():
             with pm.frameLayout('Limbs', bv=1):
-                self.limbHier_ui = limbHier_UI.LS_Limb_Hierarchy_UI(    self.limbMng,
-                                                                        self.jntMng,
-                                                                        self.grpMng,
-                                                                        self.ctrMng,
-                                                                        self.nameMng,
-                                                                        self)
+                self.limbHier_ui = limbHier_UI.LS_Limb_Hierarchy_UI(self.limbMng,
+                                                                    self.jntMng,
+                                                                    self.grpMng,
+                                                                    self.ctrMng,
+                                                                    self.nameMng,
+                                                                    self)
             with pm.frameLayout(l='---', bv=1) as self.jntHier_fl:
                 self.jntHier_ui = jointHier_UI.LS_Joint_Hierarchy_UI(   self.limbMng,
                                                                         self.jntMng,
@@ -76,6 +76,7 @@ class LimbSetup_UI:
     def Teardown_Editable(self):
         print ('Limb Setup, Teardown')
         self.KillScripts()
+        self.parent.parent.RebuildLimbs()
     
     def KillScripts(self):
         if self.scriptJob:
@@ -138,7 +139,6 @@ class LimbSetup_UI:
             self.jntHier_ui.Depopulate()
         else:
             self.limb = self.limbMng.GetLimb(limbID)
-            # joints = self.jntMng.GetLimbTempJoints(self.limb)
             joints = self.jntMng.GetLimbJoints(self.limb)
             self.SelectSceneJoints(joints)
             self.jntHier_ui.SetLimb(limbID)
@@ -205,9 +205,7 @@ class LimbSetup_UI:
         isValid = (limbID != -1)
         if isValid:
             limb = self.limbMng.GetLimb(limbID)
-            name = limb.pfrsName.get()
-            limbType = self.limbMng.limbTypes[limb.limbType.get()]
-            txt = "%s's Joints (Previous Limb Type: %s)" % (name, limbType)
+            txt = "%s's Joints" % limb.pfrsName.get()
         pm.frameLayout(self.jntHier_fl, e=1, en=isValid, l=txt)
 
     def SelectSceneJoints(self, joints):

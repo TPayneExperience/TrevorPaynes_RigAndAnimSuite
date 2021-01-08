@@ -34,16 +34,16 @@ class LS_Limb_Hierarchy_UI:
                 else:
                     pm.treeView(self.widget, e=1, bvf=(limbID, 1, 0))
                 # joints = self.jntMng.GetLimbTempJoints(limb)
-                joints = self.jntMng.GetLimbJoints(limb)
-                index = limb.limbType.get()
-                if (index == 0) and joints:
-                    pm.treeView(self.widget, e=1, ornament=(limbID, 1, 0, 4))
-                if (index == 1) and len(joints) != 1:
-                    pm.treeView(self.widget, e=1, ornament=(limbID, 1, 0, 4))
-                if (index == 2) and not self.jntMng.AreJointsChained(joints):
-                    pm.treeView(self.widget, e=1, ornament=(limbID, 1, 0, 4))
-                if (index == 3) and not self.jntMng.AreJointsSiblings(joints):
-                    pm.treeView(self.widget, e=1, ornament=(limbID, 1, 0, 4))
+                # joints = self.jntMng.GetLimbJoints(limb)
+                # index = limb.limbType.get()
+                # if (index == 0) and joints:
+                #     pm.treeView(self.widget, e=1, ornament=(limbID, 1, 0, 4))
+                # if (index == 1) and len(joints) != 1:
+                #     pm.treeView(self.widget, e=1, ornament=(limbID, 1, 0, 4))
+                # if (index == 2) and not self.jntMng.AreJointsChained(joints):
+                #     pm.treeView(self.widget, e=1, ornament=(limbID, 1, 0, 4))
+                # if (index == 3) and not self.jntMng.AreJointsSiblings(joints):
+                #     pm.treeView(self.widget, e=1, ornament=(limbID, 1, 0, 4))
         # if (selectedID != -1):
         #     pm.treeView(self.widget, e=1, selectItem=(selectedID, 1))
 
@@ -53,8 +53,6 @@ class LS_Limb_Hierarchy_UI:
         tt = 'Double click to RENAME.'
         tt += '\nTo set a limb as a MIRROR,'
         tt += '\nname BOTH LIMBS with the SAME NAME.'
-        tt += '\nThe RED DOT on the right indicates the '
-        tt += "\nLIMB TYPE HAS CHANGED based on it's joints"
         self.widget = pm.treeView(ams=0, adr=0, arp=0, ann=tt, nb=1, fb=1)
         pm.treeView(self.widget, e=1,   editLabelCommand=self.Rename,
                                         scc=self.SelectionChanged)

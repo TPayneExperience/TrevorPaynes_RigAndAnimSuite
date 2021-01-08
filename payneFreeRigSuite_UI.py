@@ -1,3 +1,5 @@
+import logging
+import os
 
 import pymel.core as pm
 
@@ -28,12 +30,33 @@ class PayneFreeRigSuite_UI():
         self.nameMng = nm.Name_Manager()
         self.rigRoot = None
 
+        # LOGGER
+        self.logger = logging.getLogger(__name__)
+        path = os.path.join(os.path.dirname(__file__), 'Logs')
+        path = os.path.join(path, 'PFRS_Output.log')
+        hdlr = logging.FileHandler(path)
+        formatter = logging.Formatter('%(asctime)s %(levelname)s | %(message)s', 
+                                                    '%y-%m-%d %H:%M:%S')
+        hdlr.setFormatter(formatter)
+        self.logger.addHandler(hdlr) 
+        self.logger.setLevel(logging.INFO)
+        self.logger.info('---------- NEW SESSION ----------')
+        # self.logger.debug('DEBUG') # logger's level is logging.INFO = Ignored
+        # self.logger.info('INFO')
+        # self.logger.warning('WARNING')
+        # self.logger.error('ERROR')
+        # self.logger.critical('CRITICAL')
+
+        # UI
         self.rigSetupUI = rs_ui.RigSetup_UI(self.nameMng,
                                             self.fileMng,
                                             self)
         self._Setup()
         self.limbMng = self.rig_ui.limbMng
         self.jntMng = self.rig_ui.jntMng
+        self.bhvMng = self.rig_ui.bhvMng
+
+
         self.Debug()
         # self.Populate()
 
@@ -99,49 +122,47 @@ class PayneFreeRigSuite_UI():
         self.NewRig('PFX', 
                     range(5), 
                     True)
-        # ========== ARM TEST ===============================
+        # # ========== ARM SKIN TEST ===============================
+        # # Testing Joints
+        # path = r'D:/Assets/Programming/Python/Maya/ModularAutoRigger'
+        # path += r'/TEST_OUTPUT/temp_joints2.ma'
+        # pm.importFile(path)
+        # self.UpdateEnableUI()
+        # self.Setup_Editable()
+        # pm.tabLayout(self.rig_ui.tab, e=1, sti=2) # Select Limb setup tab
+        # self.rig_ui.limbSetup_ui.sceneHier_ui.AutoBuildByName(0)
+        # pm.tabLayout(self.tab, e=1, sti=2) # Select SKINNING tab
+        # mesh1 = pm.ls('pCylinderShape1')[0]
+        # mesh2 = pm.ls('pCylinderShape2')[0]
+        # mesh3 = pm.ls('pCylinderShape3')[0]
+
+        # for mesh in [mesh1, mesh2, mesh3]:
+        #     self.skin_ui.meshMng.AddMesh(mesh)
+        #     self.skin_ui.skinMng.AddSkinAttrs(mesh)
+        #     for limb in self.limbMng.GetAllLimbs():
+        #         self.skin_ui.skinMng.SetDefaultLimbJointWeights(mesh, limb)
+
+        # pm.tabLayout(self.skin_ui.tab, e=1, sti=3) # Select PAINT WEIGHTS tab
+
+        # ========== SKEL RIGGING TEST ===============================
         # Testing Joints
         path = r'D:/Assets/Programming/Python/Maya/ModularAutoRigger'
-        path += r'/TEST_OUTPUT/temp_joints2.ma'
+        path += r'/TEST_OUTPUT/temp_joints.ma'
         pm.importFile(path)
         self.UpdateEnableUI()
         self.Setup_Editable()
         pm.tabLayout(self.rig_ui.tab, e=1, sti=2) # Select Limb setup tab
-        self.rig_ui.limbSetup_ui.sceneHier_ui.AutoBuildByName(0)
-        pm.tabLayout(self.tab, e=1, sti=2) # Select SKINNING tab
-        mesh1 = pm.ls('pCylinderShape1')[0]
-        mesh2 = pm.ls('pCylinderShape2')[0]
-        mesh3 = pm.ls('pCylinderShape3')[0]
-
-        for mesh in [mesh1, mesh2, mesh3]:
-            self.skin_ui.meshMng.AddMesh(mesh)
-            self.skin_ui.skinMng.AddSkinAttrs(mesh)
-            for limb in self.limbMng.GetAllLimbs():
-                self.skin_ui.skinMng.SetDefaultLimbJointWeights(mesh, limb)
-
-        pm.tabLayout(self.skin_ui.tab, e=1, sti=3) # Select PAINT WEIGHTS tab
-
-        # ========== SKEL TEST ===============================
-        # # Testing Joints
-        # path = r'D:/Assets/Programming/Python/Maya/ModularAutoRigger'
-        # path += r'/TEST_OUTPUT/temp_joints.ma'
-        # # path += r'/TEST_OUTPUT/temp_joints2.ma'
-        # pm.importFile(path)
-        # self.UpdateEnableUI()
-        # self.Setup_Editable()
-        # # self.rigRoot.riggingTab.set(1)
-        # pm.tabLayout(self.rig_ui.tab, e=1, sti=2) # Select Limb setup tab
         # joints = pm.ls('Pelvis_Root_M')
         # joints += pm.ls('Spine_M_S01')
         # limb = self.rig_ui.limbSetup_ui.AddLimbByJoints(joints)
         # self.rig_ui.AddLimb(limb)
         # pm.tabLayout(self.tab, e=1, sti=2) # Select SKINNING tab
-        # mesh1 = pm.ls('pSphereShape1')[0]
-        # mesh2 = pm.ls('pCubeShape1')[0]
-        # self.skin_ui.meshMng.AddMesh(mesh1)
-        # self.skin_ui.meshMng.AddMesh(mesh2)
-        # self.skin_ui.skinMng.AddSkinAttrs(mesh1)
-        # self.skin_ui.skinMng.AddSkinAttrs(mesh2)
+        mesh1 = pm.ls('pSphereShape1')[0]
+        mesh2 = pm.ls('pCubeShape1')[0]
+        self.skin_ui.meshMng.AddMesh(mesh1)
+        self.skin_ui.meshMng.AddMesh(mesh2)
+        self.skin_ui.skinMng.AddSkinAttrs(mesh1)
+        self.skin_ui.skinMng.AddSkinAttrs(mesh2)
         # pm.tabLayout(self.skin_ui.tab, e=1, sti=3) # Select PAINT WEIGHTS tab
 
 #=========== SETUP ====================================
@@ -204,7 +225,6 @@ class PayneFreeRigSuite_UI():
                 pm.menuItem(l='Submit Feedback...', en=0)
                 pm.menuItem(l='Share...', en=0)
 
-    
 #=========== LIMBS ====================================
 
     def AddLimb(self, limb):
@@ -217,7 +237,23 @@ class PayneFreeRigSuite_UI():
 
     # def UpdateLimb(self, limb):
     #     pass
-
+    def RebuildLimbs(self):
+        allLimbs = self.limbMng.GetAllLimbs()
+        for limb in allLimbs:
+            if limb.rebuildLimbType.get():
+                self.bhvMng.RebuildLimbType(limb)
+        for limb in allLimbs:
+            if limb.rebuildBhvType.get():
+                self.bhvMng.RebuildBhvType(limb)
+        for limb in allLimbs:
+            if limb.rebuildBhvDep.get():
+                pass
+        for limb in allLimbs:
+            if limb.rebuildAppDep.get():
+                pass
+        for limb in allLimbs:
+            if limb.rebuildSkinInf.get():
+                pass
     
 #=========== TAB SWITCHING ====================================
 

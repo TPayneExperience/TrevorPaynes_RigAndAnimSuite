@@ -8,10 +8,10 @@ class APP_Control_Manager:
         self.nameMng = nameMng
 
         self._ctrs = {} # ctrID : ctr
-        self.ctrTypes = [   'PFRSCTR_Square_Wire', # Empty
+        self.ctrTypes = (   'PFRSCTR_Square_Wire', # Empty
                             'PFRSCTR_Circle_Wire', # Joint
                             'PFRSCTR_Diamond_Wire', # Distance
-                            'PFRSCTR_Pin_Wire'] # FKIK
+                            'PFRSCTR_Pin_Wire') # FKIK
         self._ctrTemplates = {} # CtrType/Name : ControlTemplate
     
     def NewRig(self, rigRoot):

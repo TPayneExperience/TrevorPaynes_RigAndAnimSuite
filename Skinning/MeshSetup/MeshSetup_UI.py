@@ -58,7 +58,7 @@ class MeshSetup_UI:
 
     def Teardown_Editable(self):
         print ('mesh, teardown')
-        pass
+        self.parent.parent.RebuildLimbs()
     
 #=========== ACCESSORS ====================================
 

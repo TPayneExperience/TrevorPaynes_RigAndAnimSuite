@@ -9,22 +9,21 @@ class Joint_Manager:
         self.grpMng = grpMng
         self.ctrMng = ctrMng
         self.nameMng = nameMng
-        self.mirrorXform = {'X': [-1,1,1],
-                            'Y': [1,-1,1],
-                            'Z': [1,1,-1]}
-        self.jointColors = [[1, 0, 0], # Red
-                            [0, 1, 0], # Green
-                            [0, 0, 1], # Blue
-                            [1, 1, 0], # Yellow
-                            [0, 1, 1], # Cyan
-                            [1, 0, 1],# Magenta
-                            [1, 0.5, 0], # 
-                            [0, 1, 0.5], # 
-                            [0.5, 0, 1],# 
-                            [0.5, 1, 0], # 
-                            [0, 0.5, 1], # 
-                            [1, 0, 0.5] # 
-                            ] 
+        self.mirrorXform = {'X': (-1,1,1),
+                            'Y': (1,-1,1),
+                            'Z': (1,1,-1)}
+        self.jointColors = ((1, 0, 0), # Red
+                            (0, 1, 0), # Green
+                            (0, 0, 1), # Blue
+                            (1, 1, 0), # Yellow
+                            (0, 1, 1), # Cyan
+                            (1, 0, 1),# Magenta
+                            (1, 0.5, 0), # 
+                            (0, 1, 0.5), # 
+                            (0.5, 0, 1),# 
+                            (0.5, 1, 0), # 
+                            (0, 0.5, 1), # 
+                            (1, 0, 0.5)) 
         self.colorIndex = 0
 
     def NewRig(self, rigRoot):
@@ -64,21 +63,18 @@ class Joint_Manager:
     def GetLimb(self, joint):
         return pm.listConnections(joint.limb)[0]
 
-    def GetLimbJoints(self, limb):
+    def GetLimbJoints(self, limb, includeNonInf=True):
         '''Order joints by internal joint index'''
         orderedJoints = []
         temp = {}
-        for joint in pm.listConnections(limb.joints):
+        joints = pm.listConnections(limb.infJoints)
+        if includeNonInf:
+            joints += pm.listConnections(limb.nonInfJoint)
+        for joint in joints:
             temp[joint.limbIndex.get()] = joint
         for index in sorted(list(temp.keys())):
             orderedJoints.append(temp[index])
         return orderedJoints
-
-    def GetLimbInfJoints(self, limb):
-        joints = self.GetLimbJoints(limb)
-        if limb.bhvType.get() == 2: # 3+ Joint Chain
-            joints = joints[:-1]
-        return joints
 
     def GetJointCount(self): # for Skel tool label
         return len(self._joints)
@@ -87,7 +83,7 @@ class Joint_Manager:
 
     def Add(self, limb, joint):
         if (not joint.hasAttr('pfrsName')):
-            colors = self.jointColors[self.colorIndex]
+            colors = list(self.jointColors[self.colorIndex])
             self.colorIndex = (self.colorIndex + 1) % len(self.jointColors)
             shuffle(colors)
             pm.addAttr(joint, ln='ID', at='short')
@@ -113,18 +109,16 @@ class Joint_Manager:
             joint.pfrsName.set('Joint%03d' % (jointID))
             pm.editDisplayLayerMembers(self.skelLayer, joint, nr=1)
 
-            group = self.grpMng.AddJointGroup(limb, joint)
+            group = self.grpMng.AddJointGroup(joint)
             self.ctrMng.Add(group, self.ctrMng.ctrTypes[1])
-            self.grpMng.UpdateGroupName(limb, group)
-            print ('adding joint: ' + joint.pfrsName.get() + 'with' + str(colors))
-
-        # pm.connectAttr(limb.tempJoints, joint.tempLimb)
-        pm.connectAttr(limb.joints, joint.limb)
+            # self.grpMng.UpdateGroupName(limb, group)
+            # print ('adding joint: ' + joint.pfrsName.get() + ' with ' + str(colors))
+        
+        pm.connectAttr(limb.infJoints, joint.limb)
         if joint.ID.get() not in self._joints:
             self._joints[joint.ID.get()] = joint
 
     def RemoveTemp(self, joint):
-        # pm.disconnectAttr(joint.tempLimb)
         pm.disconnectAttr(joint.limb)
         del(self._joints[joint.ID.get()])
 
@@ -145,33 +139,53 @@ class Joint_Manager:
                 self.grpMng.Remove(group)
         pm.delete(joint)
         
+#============= NON INF JOINT HANDLING ============================
+
+    # def _ConnectLimbToJoint(self, limb, joint):
+    #     pm.connectAttr(limb.infJoints, joint.limb)
+        # self._SetupNonInfJoint(limb)
+
+    # def _DisconnectLimbJoint(self, joint):
+    #     limb = pm.listConnections(joint.limb)[0]
+    #     nonInfJoints = pm.listConnections(limb.nonInfJoint)
+    #     if nonInfJoints:
+    #         nonInfJoint = nonInfJoints[0]
+    #         pm.disconnectAttr(nonInfJoint.limb)
+    #         pm.connectAttr(limb.infJoints, nonInfJoint.limb)
+        # self._SetupNonInfJoint(limb)
+
+    def Setup_NonInfJoint(self, limb):
+        joint = self.GetLimbJoints(limb)[-1]
+        pm.disconnectAttr(joint.limb)
+        pm.connectAttr(limb.nonInfJoint, joint.limb)
+
+    def Teardown_NonInfJoint(self, limb):
+        joint = self.GetLimbJoints(limb)[-1]
+        pm.disconnectAttr(joint.limb)
+        pm.connectAttr(limb.infJoints, joint.limb)
 
 #============= FUNCTIONALITY ============================
 
     def ReindexJoints(self, limb):
         temp = {} # longName : joint
-        # for joint in pm.listConnections(limb.tempJoints):
-        for joint in pm.listConnections(limb.joints):
+        for joint in pm.listConnections(limb.infJoints):
             temp[joint.longName()] = joint
         i = 0
         for key in sorted(list(temp.keys())):
             temp[key].limbIndex.set(i)
             i += 1
 
-    def Teardown_Editable(self, limb, joint): # for Limb Setup
-        '''Connect limb.temp to joint.temp, disconnect joint group'''
-        group = pm.listConnections(joint.group)[0]
-        pm.disconnectAttr(group.limb)
+    def Teardown_Editable(self, joint): # for Limb Setup
+        pass
+        # group = pm.listConnections(joint.group)[0]
+        # pm.disconnectAttr(group.limb)
         # pm.disconnectAttr(joint.tempLimb)
         # pm.connectAttr(limb.tempJoints, joint.tempLimb)
         # self.ReindexJoints(limb)
     
-    def Setup_Editable(self, limb, joint):
-        # pm.disconnectAttr(joint.limb)
-        # pm.connectAttr(limb.joints, joint.limb)
-        group = pm.listConnections(joint.group)[0]
-        pm.disconnectAttr(group.limb)
-        pm.connectAttr(limb.bhvJointGroups, group.limb)
+    def Setup_Editable(self, joint):
+        # group = pm.listConnections(joint.group)[0]
+        # pm.disconnectAttr(group.limb)
         self.UpdateJointName(joint)
     
     def UpdateAllJointNames(self): # if prefix changed

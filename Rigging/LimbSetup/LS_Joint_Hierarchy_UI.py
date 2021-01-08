@@ -65,18 +65,22 @@ class LS_Joint_Hierarchy_UI:
         self.Populate()
 
     def Add(self):
+        print('LS-JntHier: ADDING Joints from Selected limb')
         for joint in self.parent.jointsToAddToLimb:
             # self.jntMng.Teardown_Editable(self.limb, joint)
             self.jntMng.Add(self.limb, joint)
         self.jntMng.ReindexJoints(self.limb)
+        self.limb.rebuildLimbType.set(1)
         self.parent.ClearJointsToAdd()
         self.parent.PopulateJoints()
 
     def Remove(self):
+        print('LS-JntHier: REMOVING Joints from Selected limb')
         jointIDs = [int(ID) for ID in pm.treeView(self.widget, q=1, si=1)]
         joints = [self.jntMng.GetJoint(ID) for ID in jointIDs]
         for joint in joints:
             self.jntMng.RemoveTemp(joint)
+        self.limb.rebuildLimbType.set(1)
         self.parent.PopulateJoints()
 
     def Rename(self, jointIDStr, newName):

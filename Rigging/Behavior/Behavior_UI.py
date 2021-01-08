@@ -14,13 +14,14 @@ reload(bhvProp_UI)
 
 
 class Behavior_UI:
-    def __init__(self, limbMng, jntMng, bhvMng, grpMng, ctrMng):
+    def __init__(self, limbMng, jntMng, bhvMng, grpMng, ctrMng, parent):
 
         self.limbMng = limbMng
         self.jntMng = jntMng
         self.bhvMng = bhvMng
         self.grpMng = grpMng
         self.ctrMng = ctrMng
+        self.parent = parent
         
 
         self._Setup()
@@ -67,6 +68,7 @@ class Behavior_UI:
         self.limbProp_ui.Depopulate()
         self.grpHier_ui.Depopulate()
         self.grpProp_ui.Depopulate()
+        self.parent.parent.RebuildLimbs()
 
 #=========== LIMBS ====================================
 

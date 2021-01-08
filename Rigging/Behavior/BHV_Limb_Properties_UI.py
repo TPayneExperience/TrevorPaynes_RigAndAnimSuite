@@ -66,177 +66,104 @@ class BHV_Limb_Properties_UI:
 
     def SetBhvType(self): # Mostly UI
         bhvTypeStr = pm.optionMenu(self.bhvType_om, q=1, v=1)
-        newBhvIndex = self.bhvMng.GetBhvIndex(bhvTypeStr)
-        oldBhvIndex = self.limb.bhvType.get()
-        # oldSourceLimbs = pm.listConnections(self.limb.bhvIKSourceLimb)
-        oldSourceLimbs = pm.listConnections(self.limb.bhvSourceLimb)
-        if self.bhvMng.SetBhvType(self.limb, oldBhvIndex, newBhvIndex):
-            # Force IKs which Targeted this limb, to find other
-            if oldBhvIndex in self.bhvMng.ikTargetTypeIndexes:
-                if newBhvIndex not in self.bhvMng.ikTargetTypeIndexes:
-                    for sourceLimb in oldSourceLimbs:
-                        # self._SetIKBhv(limb)
-                        targetLimb = self._GetClosestFKLimb(sourceLimb)
-                        self._SetIKTargetLimb(sourceLimb, targetLimb)
-            isIK = (newBhvIndex in self.bhvMng.ikTypeIndexes)
-            isCst = (newBhvIndex == 3)
-            pm.frameLayout(self.targetLayout, e=1, en=isCst)
-            # pm.frameLayout(self.ctrLayout, e=1, en=isIK)
-            if isCst:
-                # self._SetCstBhv()
-                targetLimb = self._GetClosestFKLimb(self.limb)
-                self._SetCstTargetLimb(self.limb, targetLimb)
-            elif isIK:
-                targetLimb = self._GetClosestFKLimb(self.limb)
-                self._SetIKTargetLimb(self.limb, targetLimb)
-                # self._SetIKBhv(self.limb)
-                # if newBhvIndex == 2: # FKIK
-                    # joints = self.jntMng.GetLimbJoints(self.limb)
-                    # self.UpdateFKIKSwitchJoint(1, joints)
-            if newBhvIndex in self.bhvMng.distanceIndexes:
-                group = pm.listConnections(self.limb.bhvDistanceGroup)[0]
-                self.grpMng.UpdateGroupDistance(group)
-            self.PopulateBhvFrame(newBhvIndex)
-            self.PopulateTargetFrame(newBhvIndex)
-            # self.PopulateControlFrame(newBhvIndex)
-            # self.Populate()
-            # self.PopulateTargetLimbs()
-            # self.UpdateUI()
-            self.parent.SetBhvType(self.limb) 
-        else:
-            self.SetLimb(self.limb.ID.get())
+        newBhvIndex = self.bhvMng.bhvTypes.index(bhvTypeStr)
+        
+        self.bhvMng.SetBhvType(self.limb, newBhvIndex)
+        self.PopulateBhvFrame(newBhvIndex)
+        self.PopulateTargetFrame(newBhvIndex)
+        # self.PopulateControlFrame(newBhvIndex)
+        # self.Populate()
+        # self.PopulateTargetLimbs()
+        # self.UpdateUI()
+        self.parent.SetBhvType(self.limb) 
+
+        # else:
+        #     self.SetLimb(self.limb.ID.get())
 
 #=========== CONSTRAINT ==============================================
 
     def SetTargetLimb(self, limbName): # Called by UI
         targetLimb = self.targetLimbs[limbName]
         bhvType = self.limb.bhvType.get()
-        if bhvType == 3:
-            self._SetCstTargetLimb(self.limb, targetLimb)
+        isCst = (bhvType in self.bhvMng.cstTypeIndexes) 
+        pm.frameLayout(self.targetLayout, e=1, en=isCst)
+        if isCst:
+            self.bhvMng.SetCstTargetLimb(self.limb, targetLimb)
         else:
-            self._SetIKTargetLimb(self.limb, targetLimb)
+            self.bhvMng.SetIKTargetLimb(self.limb, targetLimb)
         # self.UpdateUI()
-
-    # def _SetCstBhv(self):
-    #     targetLimb = None
-    #     for possibleLimb in self.jntLimbOrder:
-    #         if (possibleLimb != self.limb):
-    #             targetLimb = possibleLimb
-    #             break
-    #     else:
-    #         msg = 'No Valid Target for Constraint Limb "%s"' % self.limb
-    #         pm.confirmDialog(t='Constraint Error', m=msg, icon='warning', b='Ok')
-    #         return
-    #     self._SetCstTargetLimb(self.limb, targetLimb)
-
-    def _SetCstTargetLimb(self, sourceLimb, targetLimb):
-        # pm.disconnectAttr(sourceLimb.bhvCstTargetLimb)
-        # pm.connectAttr(targetLimb.bhvCstSourceLimb, sourceLimb.bhvCstTargetLimb)
-        pm.disconnectAttr(sourceLimb.bhvTargetLimb)
-        pm.connectAttr(targetLimb.bhvSourceLimb, sourceLimb.bhvTargetLimb)
-        joints = self.jntMng.GetLimbJoints(targetLimb)
-        jointNames = [j.pfrsName.get() for j in joints]
-        # pm.addAttr(sourceLimb.bhvCstTargetJnt, e=1, en=':'.join(jointNames))
-        pm.addAttr(sourceLimb.bhvTargetJoint, e=1, en=':'.join(jointNames))
 
 #=========== IK ==============================================
 
-    def SetIKTargetLimb(self, limbName):
-        targetLimb = self.targetLimbs[limbName]
-        self._SetIKTargetLimb(self.limb, targetLimb)
+    # def SetIKTargetLimb(self, limbName):
+    #     targetLimb = self.targetLimbs[limbName]
+    #     self.bhvMng.SetIKTargetLimb(self.limb, targetLimb)
     
     # def _SetIKBhv(self, sourceLimb):
         # targetLimb = self._GetClosestFKLimb(sourceLimb)
         # self._SetIKTargetLimb(sourceLimb, targetLimb)
-    def _SetTargetJointEnum(self, sourceLimb, enumStr):
-        if sourceLimb.bhvType.get() in self.bhvMng.ikChainTypeIndexes:
-            for sourceGroup in self.grpMng.GetLimbIKGroups(sourceLimb):
-                pm.addAttr(sourceGroup.targetJoint, e=1, en=enumStr)
-        else:
-            pm.addAttr(sourceLimb.bhvTargetJoint, e=1, en=enumStr)
 
-    def _SetIKTargetLimb(self, sourceLimb, targetLimb):
-        '''Auto assign each IK limb group to closest FK limb's group'''
-        # targetGroups = self.grpMng.GetLimbGroups(targetLimb)
-        targetJoints = self.jntMng.GetLimbJoints(targetLimb)
-        sourceGroups = self.grpMng.GetLimbIKGroups(sourceLimb)
-        # pm.disconnectAttr(sourceLimb.bhvIKTargetLimb)
-        # pm.connectAttr(targetLimb.bhvIKSourceLimb, sourceLimb.bhvIKTargetLimb)
-        pm.disconnectAttr(sourceLimb.bhvTargetLimb)
-        pm.connectAttr(targetLimb.bhvSourceLimb, sourceLimb.bhvTargetLimb)
-        # If only one target, set and return
-        if len(targetJoints) < 2:
-            if targetLimb.bhvType.get() == 7: # Empty
-                self._SetTargetJointEnum(sourceLimb, 'Empty')
-            else:
-                jointName = targetJoints[0].pfrsName.get()
-                self._SetTargetJointEnum(sourceLimb, jointName)
-            return
-        targetJointNames = [j.pfrsName.get() for j in targetJoints]
-        names = ':'.join(targetJointNames)
-        # For each group, set target to closest group on target limb
-        bhvType = sourceLimb.bhvType.get()
+        # # For each group, set target to closest group on target limb
+        # # IK PV / FKIK
+        # bhvType = sourceLimb.bhvType.get()
+        # if bhvType in self.bhvMng.ikPVTypeIndexes: 
+        #     # sourceGroup = sourceGroups[0]
+        #     # pm.addAttr(sourceGroup.targetJoint, e=1, en=names)
+        #     sourceJoint = self.jntMng.GetLimbJoints(sourceLimb)[-1]
+        #     sourcePos = pm.xform(sourceJoint, q=1, t=1, ws=1)
+        #     targetJoint = self._GetClosestJoint(sourcePos, targetJoints)
+        #     index = targetJointNames.index(targetJoint.pfrsName.get())
+        #     sourceLimb.bhvTargetJoint.set(index)
+        #     # sourceGroup.targetJoint.set(index)
 
-        # IK PV / FKIK
-        self._SetTargetJointEnum(sourceLimb, names)
-        if bhvType in self.bhvMng.ikPVTypeIndexes: 
-            # sourceGroup = sourceGroups[0]
-            # pm.addAttr(sourceGroup.targetJoint, e=1, en=names)
-            sourceJoint = self.jntMng.GetLimbJoints(sourceLimb)[-1]
-            sourcePos = pm.xform(sourceJoint, q=1, t=1, ws=1)
-            targetJoint = self._GetClosestJoint(sourcePos, targetJoints)
-            index = targetJointNames.index(targetJoint.pfrsName.get())
-            sourceLimb.bhvTargetJoint.set(index)
-            # sourceGroup.targetJoint.set(index)
-
-        # IK Chain
-        elif bhvType in self.bhvMng.ikChainTypeIndexes:
-            for sourceGroup in sourceGroups:
-                # pm.addAttr(sourceGroup.targetJoint, e=1, en=names)
-                sourceJoint = pm.listConnections(sourceGroup.joint)[0]
-                sourcePos = pm.xform(sourceJoint, q=1, t=1, ws=1)
-                targetJoint = self._GetClosestJoint(sourcePos, targetJoints)
-                index = targetJointNames.index(targetJoint.pfrsName.get())
-                sourceGroup.targetJoint.set(index)
+        # # IK Chain
+        # elif bhvType in self.bhvMng.ikChainTypeIndexes:
+        #     for sourceGroup in sourceGroups:
+        #         # pm.addAttr(sourceGroup.targetJoint, e=1, en=names)
+        #         sourceJoint = pm.listConnections(sourceGroup.joint)[0]
+        #         sourcePos = pm.xform(sourceJoint, q=1, t=1, ws=1)
+        #         targetJoint = self._GetClosestJoint(sourcePos, targetJoints)
+        #         index = targetJointNames.index(targetJoint.pfrsName.get())
+        #         sourceGroup.targetJoint.set(index)
         # if sourceLimb.bhvType.get() in self.bhvMng.ikPVTypeIndexes:
         #     self.grpMng.UpdateGroupDistance(sourceGroups[0])
 
-    def _GetClosestFKLimb(self, sourceLimb):
-        distances = {} # dist : group
-        sourceGroup = self.grpMng.GetLimbGroups(sourceLimb)[0]
-        sourcePos = pm.xform(sourceGroup, q=1, t=1, ws=1)
-        # Create distance dictionary to groups
-        for limb in self.limbMng.GetAllLimbs():
-            if limb.bhvType.get() in self.bhvMng.ikTargetTypeIndexes:
-                for targetGroup in self.grpMng.GetLimbGroups(limb):
-                    targetPos = pm.xform(targetGroup, q=1, t=1, ws=1)
-                    dist = 0
-                    for i in range(3):
-                        dist += (sourcePos[i]-targetPos[i])**2
-                    distances[dist] = targetGroup
-        # Get Closest limb
-        for dist in sorted(list(distances.keys())):
-            closestGroup = distances[dist]
-            closestLimbs = pm.listConnections(closestGroup.limb)
-            if closestLimbs:
-                return closestLimbs[0]
-        msg = 'No Valid Target for IK Limb "%s"' % sourceLimb
-        pm.confirmDialog(t='IK Error', m=msg, icon='warning', b='Ok')
-        return None
+    # def _GetClosestJoint(self, sourcePos, targetJoints):
+    #     distances = {} # dist : targetJoint
+    #     for targetJoint in targetJoints:
+    #         targetPos = pm.xform(targetJoint, q=1, t=1, ws=1)
+    #         dist = 0
+    #         for i in range(3):
+    #             dist += (sourcePos[i]-targetPos[i])**2
+    #         if dist not in distances:
+    #             distances[dist] = []
+    #         distances[dist].append(targetJoint)
+    #     # Set source Group's target group index
+    #     targetDist = sorted(list(distances.keys()))[0]
+    #     return distances[targetDist][0]
 
-    def _GetClosestJoint(self, sourcePos, targetJoints):
-        distances = {} # dist : targetJoint
-        for targetJoint in targetJoints:
-            targetPos = pm.xform(targetJoint, q=1, t=1, ws=1)
-            dist = 0
-            for i in range(3):
-                dist += (sourcePos[i]-targetPos[i])**2
-            if dist not in distances:
-                distances[dist] = []
-            distances[dist].append(targetJoint)
-        # Set source Group's target group index
-        targetDist = sorted(list(distances.keys()))[0]
-        return distances[targetDist][0]
+    # def _GetClosestFKLimb(self, sourceLimb):
+    #     distances = {} # dist : group
+    #     sourceGroup = self.grpMng.GetLimbGroups(sourceLimb)[0]
+    #     sourcePos = pm.xform(sourceGroup, q=1, t=1, ws=1)
+    #     # Create distance dictionary to groups
+    #     for limb in self.limbMng.GetAllLimbs():
+    #         if limb.bhvType.get() in self.bhvMng.ikTargetableIndexes:
+    #             for targetGroup in self.grpMng.GetLimbGroups(limb):
+    #                 targetPos = pm.xform(targetGroup, q=1, t=1, ws=1)
+    #                 dist = 0
+    #                 for i in range(3):
+    #                     dist += (sourcePos[i]-targetPos[i])**2
+    #                 distances[dist] = targetGroup
+    #     # Get Closest limb
+    #     for dist in sorted(list(distances.keys())):
+    #         closestGroup = distances[dist]
+    #         closestLimbs = pm.listConnections(closestGroup.limb)
+    #         if closestLimbs:
+    #             return closestLimbs[0]
+    #     msg = 'No Valid Target for IK Limb "%s"' % sourceLimb
+    #     pm.confirmDialog(t='IK Error', m=msg, icon='warning', b='Ok')
+    #     return None
 
 
 
@@ -285,7 +212,7 @@ class BHV_Limb_Properties_UI:
         if bhvType == 3: #Cst
             bhvFilter = self.bhvMng.cstTargetTypeIndexes
         elif bhvType in self.bhvMng.ikTypeIndexes:
-            bhvFilter = self.bhvMng.ikTargetTypeIndexes
+            bhvFilter = self.bhvMng.ikTargetableIndexes
         else:
             return
         self.targetLimbs = {}
@@ -333,6 +260,18 @@ class BHV_Limb_Properties_UI:
         # self.grpMng.SetLockGroup(group, False)
         # self.grpMng.PosRotGroupToJoint(group, joints[index])
         # self.grpMng.SetLockGroup(group, True)
+
+    # def _SetCstBhv(self):
+    #     targetLimb = None
+    #     for possibleLimb in self.jntLimbOrder:
+    #         if (possibleLimb != self.limb):
+    #             targetLimb = possibleLimb
+    #             break
+    #     else:
+    #         msg = 'No Valid Target for Constraint Limb "%s"' % self.limb
+    #         pm.confirmDialog(t='Constraint Error', m=msg, icon='warning', b='Ok')
+    #         return
+    #     self._SetCstTargetLimb(self.limb, targetLimb)
 
     # def GetGroupName(self, group):
     #     if (pm.listConnections(group.joint)):
@@ -424,7 +363,7 @@ class BHV_Limb_Properties_UI:
     #     if bhvType == 3: #Cst
     #         bhvFilter = self.bhvMng.cstTargetTypeIndexes
     #     elif bhvType in self.bhvMng.ikTypeIndexes:
-    #         bhvFilter = self.bhvMng.ikTargetTypeIndexes
+    #         bhvFilter = self.bhvMng.ikTargetableIndexes
     #     else:
     #         return
     #     self.targetLimbs = {}
@@ -459,7 +398,7 @@ class BHV_Limb_Properties_UI:
     #     self.fkLimbOrder = []
     #     for rootLimb in self.limbMng.GetRootLimbs():
     #         for limb in self.limbMng.GetLimbCreationOrder(rootLimb):
-    #             if (limb.bhvType.get() in self.bhvMng.ikTargetTypeIndexes):
+    #             if (limb.bhvType.get() in self.bhvMng.ikTargetableIndexes):
     #                 name = self.GetLimbName(limb)
     #                 pm.menuItem(l=name, p=self.ikTargetLimb_om)
     #                 self.fkEmptyLimbs[name] = limb

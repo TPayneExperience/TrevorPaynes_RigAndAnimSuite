@@ -62,7 +62,7 @@ class Appearance_UI:
     
     def Teardown_Editable(self):
         print ('appearance, teardown')
-        pass
+        self.parent.parent.RebuildLimbs()
 
 #=========== LIMBS ====================================
 

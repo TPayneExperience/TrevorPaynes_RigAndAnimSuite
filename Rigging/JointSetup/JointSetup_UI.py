@@ -2,8 +2,10 @@
 import pymel.core as pm
 
 class JointSetup_UI:
-    def __init__(self, jntMng):
+    def __init__(self, jntMng, parent):
         self.jntMng = jntMng
+        self.parent = parent
+
         self.scriptJob = None
         self._Setup()
 
@@ -85,6 +87,7 @@ class JointSetup_UI:
     def Teardown_Editable(self):
         print ('joint Setup, teardown')
         self.KillScripts()
+        self.parent.parent.RebuildLimbs()
     
     def KillScripts(self):
         if self.scriptJob:
