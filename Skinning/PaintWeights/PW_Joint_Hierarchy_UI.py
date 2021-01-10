@@ -6,6 +6,7 @@ class PW_Joint_Hierarchy_UI:
         self.limbMng = limbMng
         self.jntMng = jntMng
         self.parent = parent
+        self.logger = parent.logger
 
         self.limb = None
 
@@ -14,6 +15,8 @@ class PW_Joint_Hierarchy_UI:
     
     def Populate(self):
         self.Depopulate()
+        if not self.limb:
+            return
         if self.limb.limbType.get() == 1: # Skip one joint limbs
             return 
         for joint in self.jntMng.GetLimbJoints(self.limb):
@@ -36,11 +39,14 @@ class PW_Joint_Hierarchy_UI:
     def SelectionChanged(self):
         jntStrs = pm.treeView(self.widget, q=1, selectItem=1)
         if not jntStrs:
+            self.logger.info('\t\tJointHier > DESELECTED joint')
             return
-        # joint = self.jntMng.GetJoint(int(jntStrs[0]))
-        self.parent.JointSelected(int(jntStrs[0]))
+        joint = self.jntMng.GetJoint(int(jntStrs[0]))
+        msg = '\t\tJointHier > SELECTED joint "%s"'% joint.pfrsName.get()
+        self.logger.info(msg)
+        self.parent.JointSelected(joint)
 
-    def SetLimb(self, limbID):
-        self.limb = self.limbMng.GetLimb(limbID)
+    def SetLimb(self, limb):
+        self.limb = limb
         self.Populate()
 

@@ -7,6 +7,7 @@ class APP_Limb_Hierarchy_UI:
         self.limbMng = limbMng
         self.bhvMng = bhvMng
         self.parent = parent
+        self.logger = parent.logger
 
         self._Setup()
 
@@ -39,7 +40,13 @@ class APP_Limb_Hierarchy_UI:
     def SelectionChanged(self):
         limbIDStrs = pm.treeView(self.widget, q=1, selectItem=1)
         if limbIDStrs:
-            self.parent.LimbSelected(int(limbIDStrs[0]))
+            limb = self.limbMng.GetLimb(int(limbIDStrs[0]))
+            msg = '\t\tLimbHier > SELECTED limb "%s"'% limb.pfrsName.get()
+            self.logger.info(msg)
+            self.parent.LimbSelected(limb)
+        else:
+            self.logger.info('\t\tLimbHier > DESELECTED limb')
+            self.parent.LimbSelected(None)
     
     
     

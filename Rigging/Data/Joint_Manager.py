@@ -3,12 +3,14 @@ import pymel.core as pm
 from random import random, shuffle
 
 class Joint_Manager:
-    def __init__(self, limbMng, grpMng, ctrMng, nameMng):
+    def __init__(self, limbMng, grpMng, ctrMng, nameMng, parent):
 
         self.limbMng = limbMng
         self.grpMng = grpMng
         self.ctrMng = ctrMng
         self.nameMng = nameMng
+        self.logger = parent.logger
+
         self.mirrorXform = {'X': (-1,1,1),
                             'Y': (1,-1,1),
                             'Z': (1,1,-1)}
@@ -114,9 +116,17 @@ class Joint_Manager:
             # self.grpMng.UpdateGroupName(limb, group)
             # print ('adding joint: ' + joint.pfrsName.get() + ' with ' + str(colors))
         
+        # Only add Joint if pfrs name not already on limb
+        name = joint.pfrsName.get()
+        names = [j.pfrsName.get() for j in pm.listConnections(limb.infJoints)]
+        if name in names:
+            self.logger.error('\t\t\tCannot add joint: joint of same pfrsName')
+            self.logger.error('\t\t\t\talready exists on limb')
+            return
         pm.connectAttr(limb.infJoints, joint.limb)
         if joint.ID.get() not in self._joints:
             self._joints[joint.ID.get()] = joint
+
 
     def RemoveTemp(self, joint):
         pm.disconnectAttr(joint.limb)

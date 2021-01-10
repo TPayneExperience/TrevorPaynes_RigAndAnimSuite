@@ -7,6 +7,7 @@ class LS_Scene_Hierarchy_UI:
         self.limbMng = limbMng
         self.jntMng = jntMng
         self.parent = parent
+        self.logger = parent.logger
 
         self.selectableJoints = []
         self.acceptSelection = True
@@ -49,6 +50,9 @@ class LS_Scene_Hierarchy_UI:
     
     def SelectionChanged(self):
         joints = self.GetSelectedJoints()
+        self.logger.info('\t\tSceneJointHier > SELECTED joints:')
+        for joint in joints:
+            self.logger.info('\t\t\t' + str(joint))
         self.parent.SelectSceneJoints(joints)
         self.parent.SetJointsToAdd(joints)
 
@@ -63,6 +67,7 @@ class LS_Scene_Hierarchy_UI:
 #============= AUTO BUILDERS ============================
 
     def AutoBuildByHierarchy(self, ignore):
+        self.logger.info('\t\tSceneJointHier > Auto Build by Hierarchy')
         jointParents = {}   # childJoint : parentJoint
         newLimbJointSets = []  # [[jnt1, jnt2], [jnt3], ...]
         allJoints = pm.ls(type='joint')
@@ -98,9 +103,11 @@ class LS_Scene_Hierarchy_UI:
         self.parent.parent.AutoBuildHier()
         self.parent.Populate()
         self.parent.UpdateSceneFrame()
+        self.logger.info('\t\tComplete')
 
     def AutoBuildByName(self, ignore):
         '''Auto builds limb/joint hier by name LIMB_SIDE[M/R/L]_JOINT'''
+        self.logger.info('\t\tSceneJointHier > Auto Build by Name')
         # VERY INFLEXIBLE! NEED TO BUILD UI FOR BETTER USER
         # CUSTOMIZATION LATER, like the rig setup ui
         allJoints = pm.ls(type='joint')
@@ -136,7 +143,7 @@ class LS_Scene_Hierarchy_UI:
                 limb = self.parent.AddLimbByJoints(sourceJoints)
                 tempJoint = sourceJoints[0]
                 splitName = tempJoint.shortName().split('_')
-                self.limbMng.Rename(limb.ID.get(), splitName[0])
+                self.limbMng.Rename(limb, splitName[0])
                 for joint in sourceJoints:
                     splitName = joint.shortName().split('_')
                     joint.pfrsName.set(splitName[-1])
@@ -175,6 +182,7 @@ class LS_Scene_Hierarchy_UI:
         self.parent.parent.AutoBuildHier()
         self.parent.Populate()
         self.parent.UpdateSceneFrame()
+        self.logger.info('\t\tComplete')
 
     def GetJointChain(self, startJoint):
         joints = [startJoint]

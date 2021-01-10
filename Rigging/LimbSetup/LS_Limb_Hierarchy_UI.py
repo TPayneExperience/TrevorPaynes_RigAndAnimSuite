@@ -3,14 +3,15 @@ import pymel.core as pm
 
 
 class LS_Limb_Hierarchy_UI:
-    def __init__(self, limbMng, jntMng, grpMng, ctrMng, nameMng, skelUI):
+    def __init__(self, limbMng, jntMng, grpMng, ctrMng, nameMng, parent):
 
         self.limbMng = limbMng
         self.jntMng = jntMng
         self.grpMng = grpMng
         self.ctrMng = ctrMng
         self.nameMng = nameMng
-        self.parent = skelUI
+        self.parent = parent
+        self.logger = parent.logger
 
         self._Setup()
 
@@ -73,84 +74,97 @@ class LS_Limb_Hierarchy_UI:
         limbIDStrs = pm.treeView(self.widget, q=1, selectItem=1)
         if limbIDStrs:
             pm.menuItem(self.remove_mi, e=1, en=1)
-            limbID = int(limbIDStrs[0])
-            limb = self.limbMng.GetLimb(limbID)
-            if self.limbMng.GetLimbMirror(limb):
+            limb = self.limbMng.GetLimb(int(limbIDStrs[0]))
+            name = limb.pfrsName.get()
+            self.logger.info('\t\tLimbHier > SELECTED limb "%s"' % name)
+            if pm.listConnections(limb.mirrorLimb):
                 pm.menuItem(self.flipSides_mi, e=1, en=1)
-            self.parent.LimbSelected(limbID)
+            self.parent.LimbSelected(limb)
         else:
-            self.parent.LimbSelected(-1)
+            self.parent.LimbSelected(None)
+            self.logger.info('\t\tLimbHier > DESELECTED limb')
 
     def Remove(self, ignore):
         limbIDStrs = pm.treeView(self.widget, q=1, selectItem=1)
-        if limbIDStrs:
-            if (pm.confirmDialog(   title='Remove Limb', 
-                                    icon='warning', 
-                                    message='Remove limb?', 
-                                    button=['Yes','No'], 
-                                    defaultButton='Yes', 
-                                    cancelButton='No', 
-                                    dismissString='No') == 'Yes'):
-                limb = self.limbMng.GetLimb(int(limbIDStrs[0]))
-                # for joint in self.jntMng.GetLimbTempJoints(limb):
-                for joint in self.jntMng.GetLimbJoints(limb):
-                    self.jntMng.RemoveTemp(joint)
+        if not limbIDStrs:
+            return
+        if (pm.confirmDialog(   title='Remove Limb', 
+                                icon='warning', 
+                                message='Remove limb?', 
+                                button=['Yes','No'], 
+                                defaultButton='Yes', 
+                                cancelButton='No', 
+                                dismissString='No') == 'No'):
+            return
+        limb = self.limbMng.GetLimb(int(limbIDStrs[0]))
+        name = limb.pfrsName.get()
+        self.logger.info('\t\tLimbHier > REMOVE Limb "%s"' % name)
+        # for joint in self.jntMng.GetLimbTempJoints(limb):
+        for joint in self.jntMng.GetLimbJoints(limb):
+            self.jntMng.RemoveTemp(joint)
 
-                limbGroups = pm.listConnections(limb.bhvDistanceGroup)
-                limbGroups += pm.listConnections(limb.bhvEmptyGroup)
-                limbGroups += pm.listConnections(limb.bhvFKIKSwitchGroup)
-                for group in limbGroups:
-                    ctr = pm.listConnections(group.control)[0]
-                    self.ctrMng.Remove(ctr)
-                    self.grpMng.Remove(group)
-                pm.delete(limbGroups)
-                
-                mirror = self.limbMng.GetLimbMirror(limb)
-                self.parent.RemoveLimb(limb)
-                self.limbMng.Remove(limb)
-                if mirror:
-                    self.jntMng.UpdateLimbJointNames(mirror[0])
-                self.parent.Populate()
-                self.parent.UpdateSceneFrame()
+        limbGroups = pm.listConnections(limb.bhvDistanceGroup)
+        limbGroups += pm.listConnections(limb.bhvEmptyGroup)
+        limbGroups += pm.listConnections(limb.bhvFKIKSwitchGroup)
+        for group in limbGroups:
+            ctr = pm.listConnections(group.control)[0]
+            self.ctrMng.Remove(ctr)
+            self.grpMng.Remove(group)
+        pm.delete(limbGroups)
+        
+        mirror = pm.listConnections(limb.mirrorLimb)
+        self.parent.RemoveLimb(limb)
+        self.limbMng.Remove(limb)
+        if mirror:
+            self.jntMng.UpdateLimbJointNames(mirror[0])
+        self.parent.Populate()
+        self.parent.UpdateSceneFrame()
 
     def Rename(self, limbIDStr, newName):
-        if self.nameMng.IsValidCharacterLength(newName):
-            if self.nameMng.DoesNotStartWithNumber(newName):
-                if self.nameMng.AreAllValidCharacters(newName):
-                    limbID = int(limbIDStr)
-                    limb = self.limbMng.GetLimb(limbID)
-                    # oldMirror = self.limbMng.GetLimbMirror(limb)
-                    self.limbMng.Rename(limbID, newName)
-                    self.parent.RenameLimbs()
-                    # newMirror = self.limbMng.GetLimbMirror(limb)
+        limb = self.limbMng.GetLimb(int(limbIDStr))
+        oldName = limb.pfrsName.get()
+        msg = '\t\tLimbHier > RENAMING "%s" to "%s"' % (oldName, newName)
+        self.logger.info(msg)
 
-                    # if oldMirror:
-                    #     self.jntMng.UpdateLimbJointNames(oldMirror[0])
-                    #     for group in self.grpMng.GetAllLimbGroups(oldMirror[0]):
-                    #         self.grpMng.UpdateGroupName(oldMirror[0], group)
-                    # if newMirror:
-                    #     self.jntMng.UpdateLimbJointNames(newMirror[0])
-                    #     for group in self.grpMng.GetAllLimbGroups(newMirror[0]):
-                    #         self.grpMng.UpdateGroupName(newMirror[0], group)
-                    # self.jntMng.UpdateLimbJointNames(limb)
-                    # for group in self.grpMng.GetAllLimbGroups(limb):
-                    #     self.grpMng.UpdateGroupName(limb, group)
-                    
-                    # self.parent.RenameLimbs([limb] + oldMirror + newMirror)
+        if not self.nameMng.IsValidCharacterLength(newName):
+            return ''
+        if not self.nameMng.DoesNotStartWithNumber(newName):
+            return ''
+        if not self.nameMng.AreAllValidCharacters(newName):
+            return ''
+
+        # oldMirror = self.limbMng.GetLimbMirror(limb)
+        if self.limbMng.Rename(limb, newName):
+            self.parent.RenameLimbs()
+        else:
+            msg = '\t\t\tTwo limbs MAX may have same name'
+            self.logger.error(msg)
+        # newMirror = self.limbMng.GetLimbMirror(limb)
+
+        # if oldMirror:
+        #     self.jntMng.UpdateLimbJointNames(oldMirror[0])
+        #     for group in self.grpMng.GetAllLimbGroups(oldMirror[0]):
+        #         self.grpMng.UpdateGroupName(oldMirror[0], group)
+        # if newMirror:
+        #     self.jntMng.UpdateLimbJointNames(newMirror[0])
+        #     for group in self.grpMng.GetAllLimbGroups(newMirror[0]):
+        #         self.grpMng.UpdateGroupName(newMirror[0], group)
+        # self.jntMng.UpdateLimbJointNames(limb)
+        # for group in self.grpMng.GetAllLimbGroups(limb):
+        #     self.grpMng.UpdateGroupName(limb, group)
+        
+        # self.parent.RenameLimbs([limb] + oldMirror + newMirror)
         return ''
 
     def FlipSides(self, ignore):
+        self.logger.info('\t\tLimbHier > Flip Sides')
         limbIDStrs = pm.treeView(self.widget, q=1, selectItem=1)
-        if limbIDStrs:
-            limbID = int(limbIDStrs[0])
-            sourceLimb = self.limbMng.GetLimb(limbID)
-            mirrorLimbs = self.limbMng.GetLimbMirror(sourceLimb)
-            if mirrorLimbs:
-                mirrorLimb = mirrorLimbs[0]
-                self.limbMng.FlipSides(limbID)
-                self.jntMng.UpdateLimbJointNames(sourceLimb)
-                self.jntMng.UpdateLimbJointNames(mirrorLimb)
-                self.parent.FlipSides()
+        sourceLimb = self.limbMng.GetLimb(int(limbIDStrs[0]))
+        mirrorLimb = pm.listConnections(sourceLimb.mirrorLimb)[0]
+        self.limbMng.FlipSides(sourceLimb)
+        self.jntMng.UpdateLimbJointNames(sourceLimb)
+        self.jntMng.UpdateLimbJointNames(mirrorLimb)
+        self.parent.FlipSides()
 
 
 

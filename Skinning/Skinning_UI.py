@@ -17,6 +17,7 @@ class Skinning_UI:
         self.jntMng = jntMng
         self.nameMng = nameMng
         self.parent = parent
+        self.logger = parent.logger
 
         self.meshMng = meshMng.Mesh_Manager()
         self.skinMng = skinMng.Skin_Mananger(   self.limbMng, 
@@ -71,7 +72,7 @@ class Skinning_UI:
 #=========== TAB SWITCHING ====================================
 
     def Setup_Editable(self):
-        print ('\nskinning, setup')
+        self.logger.info('Skinning > SETUP')
         index = self.rigRoot.skinningTab.get()
         if (index == 0):
             self.meshSetup_ui.Setup_Editable()
@@ -93,7 +94,6 @@ class Skinning_UI:
         #     self.ctrMng.SetLayerState(True, False)
         
     def Teardown_Editable(self, nextIndex):
-        print ('skinning, teardown')
         lastIndex = self.rigRoot.skinningTab.get()
         if (lastIndex == 0): 
             self.meshSetup_ui.Teardown_Editable()
@@ -119,6 +119,8 @@ class Skinning_UI:
         elif lastIndex in [1, 2] and nextIndex in [0, 3]:
             # self.skinMng.Teardown_PaintDisplay()
             self.skinMng.Teardown_JointAnim()
+        self.logger.info('Skinning > TEARDOWN\n')
+        self.logger.info('--------------------------------\n')
         
         
     def TabChanged(self):

@@ -3,12 +3,14 @@ import pymel.core as pm
 
 
 class Test_UI:
-    def __init__(self, limbMng, jntMng, bhvMng, grpMng, ctrMng):
+    def __init__(self, limbMng, jntMng, bhvMng, grpMng, ctrMng, parent):
         self.limbMng = limbMng
         self.jntMng = jntMng
         self.bhvMng = bhvMng
         self.grpMng = grpMng
         self.ctrMng = ctrMng
+        self.parent = parent
+        self.logger = parent.logger
 
         self._Setup()
 
@@ -19,7 +21,7 @@ class Test_UI:
 #=========== TAB FUNCTIONALITY ====================================
     
     def Setup_Editable(self):
-        print ('test, setup')
+        self.logger.info('\tTest > SETUP')
         self.Setup_Groups()
         self.Setup_Controls()
         self.Setup_Internal()
@@ -27,7 +29,7 @@ class Test_UI:
         pm.select(d=1)
 
     def Teardown_Editable(self):
-        print ('test, teardown')
+        self.logger.info('\tTest > TEARDOWN\n')
         self.Teardown_Controls()
         self.Remove_Constraints()
         self.Teardown_Groups()

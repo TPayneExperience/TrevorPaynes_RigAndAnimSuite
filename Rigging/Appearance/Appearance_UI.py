@@ -20,6 +20,7 @@ class Appearance_UI:
         self.ctrMng = ctrMng
         self.nameMng = nameMng
         self.parent = parent
+        self.logger = parent.logger
 
         self._Setup()
 
@@ -54,22 +55,22 @@ class Appearance_UI:
 #=========== SETUP + TEARDOWN ====================================
 
     def Setup_Editable(self):
-        print ('appearance, setup')
+        self.logger.info('\tAppearance > SETUP')
         self.limbHier_ui.Populate()
         self.limbProp_ui.Populate()
         self.ctrHier_ui.Depopulate()
         # pm.frameLayout(self.prop_l, e=1, en=0)
     
     def Teardown_Editable(self):
-        print ('appearance, teardown')
+        self.logger.info('\tAppearance > TEARDOWN\n')
         self.parent.parent.RebuildLimbs()
 
 #=========== LIMBS ====================================
 
-    def LimbSelected(self, limbID):
+    def LimbSelected(self, limb):
         # pm.frameLayout(self.prop_l, e=1, en=1)
-        self.ctrHier_ui.SetLimb(limbID)
-        self.limbProp_ui.SetLimb(limbID)
+        self.ctrHier_ui.SetLimb(limb)
+        self.limbProp_ui.SetLimb(limb)
 
     def ControlTypeChanged(self):
         self.ctrHier_ui.Populate()

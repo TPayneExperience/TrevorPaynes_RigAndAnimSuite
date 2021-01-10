@@ -41,8 +41,8 @@ class Limb_Manager:
             return parent[0]
         return None
 
-    def GetLimbMirror(self, limb):
-        return pm.listConnections(limb.mirrorLimb)
+    # def GetLimbMirror(self, limb):
+    #     return pm.listConnections(limb.mirrorLimb)
 
     def GetLimbPrefix(self, limb):
         rigRoot = pm.listConnections(limb.rigRoot)[0]
@@ -87,11 +87,13 @@ class Limb_Manager:
 
         pm.addAttr(limb, ln='rebuildLimbType', at='bool')
         pm.addAttr(limb, ln='rebuildBhvType', at='bool')
+        pm.addAttr(limb, ln='rebuildLimbGroup', at='bool')
         pm.addAttr(limb, ln='rebuildBhvDep', at='bool')
         pm.addAttr(limb, ln='rebuildAppDep', at='bool')
         pm.addAttr(limb, ln='rebuildSkinInf', at='bool')
         limb.rebuildLimbType.set(1)
         limb.rebuildBhvType.set(1)
+        limb.rebuildLimbGroup.set(1)
         limb.rebuildBhvDep.set(1)
         limb.rebuildAppDep.set(1)
         limb.rebuildSkinInf.set(1)
@@ -111,7 +113,8 @@ class Limb_Manager:
         return limb
 
     def Remove(self, limb): # Should be called after joints deleted
-        self._BreakMirror(limb)
+        if pm.listConnections(limb.mirrorLimb):
+            self._BreakMirror(limb)
         del(self._limbs[limb.ID.get()])
         pm.select(d=1)
         pm.delete(limb)
@@ -123,14 +126,14 @@ class Limb_Manager:
             parent = self.GetLimb(parentID)
             pm.connectAttr(parent.childrenLimbs, child.parentLimb)
 
-    def Rename(self, sourceLimbID, newName): # list should repopulate after call
+    def Rename(self, sourceLimb, newName): # list should repopulate after call
         names = [limb.pfrsName.get() for limb in self._limbs.values()]
         if (names.count(newName) >= 2): # Only 2 can have same name
-            return 
+            return False
 
         # PAIR WITH MIRROR
         if (names.count(newName) == 1):
-            sourceLimb = self.GetLimb(sourceLimbID)
+            # sourceLimb = self.GetLimb(sourceLimbID)
             for mirrorLimb in list(self._limbs.values()):
                 if (mirrorLimb.pfrsName.get() == newName):
                     break
@@ -142,16 +145,17 @@ class Limb_Manager:
 
         # BREAK MIRROR
         else:
-            sourceLimb = self.GetLimb(sourceLimbID)
-            self._BreakMirror(sourceLimb)
+            # sourceLimb = self.GetLimb(sourceLimbID)
+            if pm.listConnections(sourceLimb.mirrorLimb):
+                self._BreakMirror(sourceLimb)
         sourceLimb.pfrsName.set(newName)
+        return True
     
     def _BreakMirror(self, sourceLimb):
-        mirrorLimbs = self.GetLimbMirror(sourceLimb)
-        if mirrorLimbs:
-            mirrorLimbs[0].side.set(0)
-            sourceLimb.side.set(0)
-            pm.disconnectAttr(sourceLimb.mirrorLimb)
+        mirrorLimb = pm.listConnections(sourceLimb.mirrorLimb)[0]
+        mirrorLimb.side.set(0)
+        sourceLimb.side.set(0)
+        pm.disconnectAttr(sourceLimb.mirrorLimb)
 
     # def UpdateLimbType(self, limb):
     #     joints = pm.listConnections(limb.joints)
@@ -160,15 +164,12 @@ class Limb_Manager:
     #     elif (len(joints) == 1):
     #         limb.limbType.set(1)
 
-    def FlipSides(self, limbID):
-        limb1 = self.GetLimb(limbID)
-        limb2 = pm.listConnections(limb1.mirrorLimb)
-        if limb2:
-            limb2 = limb2[0]
-            side1 = limb1.side.get()
-            side2 = limb2.side.get()
-            limb1.side.set(side2)
-            limb2.side.set(side1)
+    def FlipSides(self, limb1):
+        limb2 = pm.listConnections(limb1.mirrorLimb)[0]
+        side1 = limb1.side.get()
+        side2 = limb2.side.get()
+        limb1.side.set(side2)
+        limb2.side.set(side1)
 
 
 #============= PARENTS / TREE MANIPULATION ============================

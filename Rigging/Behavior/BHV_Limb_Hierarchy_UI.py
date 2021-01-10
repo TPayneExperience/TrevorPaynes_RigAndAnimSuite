@@ -7,6 +7,7 @@ class BHV_Limb_Hierarchy_UI:
         self.jntMng = jntMng
         self.bhvMng = bhvMng
         self.parent = parent
+        self.logger = parent.logger
 
         self._Setup()
 
@@ -52,26 +53,40 @@ class BHV_Limb_Hierarchy_UI:
     def SelectionChanged(self):
         limbIDStrs = pm.treeView(self.widget, q=1, selectItem=1)
         if limbIDStrs:
-            self.parent.LimbSelected(int(limbIDStrs[0]))
+            limb = self.limbMng.GetLimb(int(limbIDStrs[0]))
+            msg = '\t\tLimbHier > SELECTED limb "%s"'% limb.pfrsName.get()
+            self.logger.info(msg)
+            self.parent.LimbSelected(limb)
+        else:
+            self.logger.info('\t\tLimbHier > DESELECTED limb')
+            self.parent.LimbSelected(None)
+
     
     def Reparent(self, limbIDsStr, oldParents, i2, newParentIDStr, i3, i4, i5):
-        if oldParents[0] != newParentIDStr:
-            limbID = int(limbIDsStr[0])
-            if newParentIDStr:
-                parentID = int(newParentIDStr)
-                parentLimb = self.limbMng.GetLimb(parentID)
-                parentBhvType = parentLimb.bhvType.get()
-                if parentBhvType not in self.bhvMng.parentableIndexes:
-                    self.Populate()
-                    return
-            else:
-                parentID = -1
-            self.limbMng.Reparent(limbID, parentID)
-            self.parent.UpdateLimbParentGroups(limbID)
+        if oldParents[0] == newParentIDStr:
+            return
+        limbID = int(limbIDsStr[0])
+        name = self.limbMng.GetLimb(limbID).pfrsName.get()
+        if newParentIDStr:
+            parentID = int(newParentIDStr)
+            parentLimb = self.limbMng.GetLimb(parentID)
+            msg = '\t\tLimbHier > REPARENTING '
+            msg += '"%s" to "%s"' % (name, parentLimb.pfrsName.get())
+            self.logger.info(msg)
+            parentBhvType = parentLimb.bhvType.get()
+            if parentBhvType not in self.bhvMng.parentableIndexes:
+                self.Populate()
+                return
+        else:
+            self.logger.info('\t\tLimbHier > REPARENTING "%s" to world' % name)
+            parentID = -1
+        self.limbMng.Reparent(limbID, parentID)
+        self.parent.UpdateLimbParentGroups(limbID)
     
 #=========== RMB ====================================
 
     def LoadSkelHier(self, ignore):
+        self.logger.info('\t\tLimbHier > LOAD SKELETON hierarchy')
         limbParents = self.limbMng.GetDefaultLimbHier(self.jntMng)
         for child, parent in limbParents.items():
             if not parent:
@@ -82,6 +97,7 @@ class BHV_Limb_Hierarchy_UI:
         self.Populate()
     
     def LoadDefaultHier(self, ignore):
+        self.logger.info('\t\tLimbHier > LOAD DEFAULT hierarchy')
         for limb in self.limbMng.GetAllLimbs():
             pm.disconnectAttr(limb.parentLimb)
             parents = pm.listConnections(limb.defaultParentLimb)
@@ -90,6 +106,7 @@ class BHV_Limb_Hierarchy_UI:
         self.Populate()
     
     def SaveAsDefaultHier(self, ignore):
+        self.logger.info('\t\tLimbHier > SAVE DEFAULT hierarchy')
         for limb in self.limbMng.GetAllLimbs():
             pm.disconnectAttr(limb.defaultParentLimb)
             parents = pm.listConnections(limb.parentLimb)

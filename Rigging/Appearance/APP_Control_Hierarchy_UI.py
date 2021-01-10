@@ -9,6 +9,7 @@ class APP_Control_Hierarchy_UI:
         self.ctrMng = ctrMng
         self.nameMng = nameMng
         self.parent = parent
+        self.logger = parent.logger
 
         self.limb = None
         # self.ctrSuffixes = ['FK',
@@ -17,12 +18,14 @@ class APP_Control_Hierarchy_UI:
 
         self._Setup()
 
-    def SetLimb(self, limbID):
-        self.limb = self.limbMng.GetLimb(limbID)
+    def SetLimb(self, limb):
+        self.limb = limb
         self.Populate()
     
     def Populate(self):
         self.Depopulate()
+        if not self.limb:
+            return
         for group in self.grpMng.GetLimbGroups(self.limb):
             control = pm.listConnections(group.control)[0]
             controlID = control.ID.get()
@@ -56,7 +59,12 @@ class APP_Control_Hierarchy_UI:
     def SelectionChanged(self):
         ctrStr = pm.treeView(self.widget, q=1, selectItem=1)
         if ctrStr:
-            pm.select(self.ctrMng.GetControl(int(ctrStr[0])))
+            ctr = self.ctrMng.GetControl(int(ctrStr[0]))
+            msg = '\t\tCtrHier > SELECTED control "%s"'% str(ctr)
+            self.logger.info(msg)
+            pm.select(ctr)
+        else:
+            self.logger.info('\t\tCtrHier > DESELECTED control')
 
 
 

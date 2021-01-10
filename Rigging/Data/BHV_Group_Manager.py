@@ -6,12 +6,18 @@ class BHV_Group_Manager:
         self.limbMng = limbMng
         self.nameMng = nameMng
 
-        self.axes = (   (1,0,0),
-                        (-1,0,0),
-                        (0,1,0),
-                        (0,-1,0),
-                        (0,0,1),
-                        (0,0,-1))
+        self.axesXforms =   ((1,0,0),
+                            (-1,0,0),
+                            (0,1,0),
+                            (0,-1,0),
+                            (0,0,1),
+                            (0,0,-1))
+        self.axesNames =    ('X',
+                            '-X',
+                            'Y',
+                            '-Y',
+                            'Z',
+                            '-Z')
         self.grpTypes = (   'Empty', # DO NOT CHANGE ORDER
 
                             'Joint', 
@@ -166,12 +172,13 @@ class BHV_Group_Manager:
     # IK PV, LookAt
     # Called from Behaviors > Set Bhv()
     def AddDistanceGroup(self, limb):
+        axes = ':'.join(self.axesNames)
         group = self._AddGroup()
         group.groupType.set(2)
         # pm.addAttr(group, ln='targetJoint', at='enum', en='None') # IK PV
         pm.addAttr(group, ln='distanceJoint', dt='string') # for easy Test Connections
         pm.addAttr(group, ln='distance', at='float', min=0, dv=1) # IKPV, LookAt
-        pm.addAttr(group, ln='axis', at='enum', en='X:-X:Y:-Y:Z:-Z', dv=4) # IKPV, LookAt
+        pm.addAttr(group, ln='axis', at='enum', en=axes, dv=4) # IKPV, LookAt
         pm.addAttr(group, ln='limb', dt='string')
         pm.connectAttr(limb.bhvDistanceGroup, group.limb)
         # self.UpdateGroupName(limb, group)
@@ -199,7 +206,6 @@ class BHV_Group_Manager:
         pm.delete(group)
 
 #============= SETUP / TEARDOWNS ============================
-# Called by Rigging UI > Setup/Teardown limbs
 
     def SetupEditable_IKPVGroup(self, group, joints):
         joint = joints[len(joints)/2]
@@ -227,27 +233,30 @@ class BHV_Group_Manager:
             orderedGroups.append(indexGroups[index])
         return orderedGroups
 
-    def UpdateGroupName(self, limb, group):
+    def UpdateGroupName(self, group):
         index = group.groupType.get()
+        groupType = self.grpTypes[index]
         if index == 1: # Joint
             joint = pm.listConnections(group.joint)[0]
-            groupPFRSName = joint.pfrsName.get()
+            pfrsName = joint.pfrsName.get()
+            limb = pm.listConnections(joint.limb)[0]
         else:
-            groupPFRSName = self.grpTypes[index]
-        groupName = self.nameMng.GetName(limb.pfrsName.get(),
-                                    groupPFRSName,
+            limb = pm.listConnections(group.limb)[0]
+            pfrsName = limb.pfrsName.get()
+        groupName = self.nameMng.GetName(pfrsName,
+                                    groupType,
                                     self.limbMng.GetLimbSide(limb), 
                                     'GRP')
-        group.rename(groupName)
+        group.rename(groupName + '_#')
         control = pm.listConnections(group.control)[0]
-        controlName = self.nameMng.GetName(limb.pfrsName.get(),
-                                    groupPFRSName,
+        controlName = self.nameMng.GetName(pfrsName,
+                                    groupType,
                                     self.limbMng.GetLimbSide(limb), 
                                     'CTR')
-        control.rename(controlName)
+        control.rename(controlName + '_#')
 
     def UpdateGroupDistance(self, group):
-        pos = self.axes[group.axis.get()][:]
+        pos = self.axesXforms[group.axis.get()][:]
         dist = group.distance.get()
         pos = [p*dist for p in pos]
         # for attr in ['.tx', '.ty', '.tz']:
@@ -297,7 +306,7 @@ class BHV_Group_Manager:
 
 #     def UpdateGroupDistance(self, limb):
 #         group = pm.listConnections(limb.bhvLimbGroup)[0]
-#         pos = self.axes[group.bhvAxis.get()][:]
+#         pos = self.axesXforms[group.bhvAxis.get()][:]
 #         dist = group.bhvDistance.get()
 #         pos = [p*dist for p in pos]
 #         for attr in ['.tx', '.ty', '.tz']:
@@ -335,7 +344,7 @@ class BHV_Group_Manager:
 
     # def UpdateLookAtPosition(self, limb):
     #     group = pm.listConnections(limb.bhvLookAtGroup)[0]
-    #     pos = self.axes[limb.bhvLookAtAxis.get()][:]
+    #     pos = self.axesXforms[limb.bhvLookAtAxis.get()][:]
     #     dist = limb.bhvLookAtDistance.get()
     #     pos = [p*dist for p in pos]
     #     for attr in ['.tx', '.ty', '.tz']:

@@ -1,5 +1,8 @@
 import logging
 import os
+import platform
+import subprocess
+import time
 
 import pymel.core as pm
 
@@ -25,27 +28,12 @@ SUITE = 'Rig'
 
 class PayneFreeRigSuite_UI():
     def __init__(self):
+        self.StartLogger()
+
         self.fileMng = fm.File_Manager()
         self.jsonMng = js.Json_Manager()
-        self.nameMng = nm.Name_Manager()
+        self.nameMng = nm.Name_Manager(self)
         self.rigRoot = None
-
-        # LOGGER
-        self.logger = logging.getLogger(__name__)
-        path = os.path.join(os.path.dirname(__file__), 'Logs')
-        path = os.path.join(path, 'PFRS_Output.log')
-        hdlr = logging.FileHandler(path)
-        formatter = logging.Formatter('%(asctime)s %(levelname)s | %(message)s', 
-                                                    '%y-%m-%d %H:%M:%S')
-        hdlr.setFormatter(formatter)
-        self.logger.addHandler(hdlr) 
-        self.logger.setLevel(logging.INFO)
-        self.logger.info('---------- NEW SESSION ----------')
-        # self.logger.debug('DEBUG') # logger's level is logging.INFO = Ignored
-        # self.logger.info('INFO')
-        # self.logger.warning('WARNING')
-        # self.logger.error('ERROR')
-        # self.logger.critical('CRITICAL')
 
         # UI
         self.rigSetupUI = rs_ui.RigSetup_UI(self.nameMng,
@@ -53,6 +41,7 @@ class PayneFreeRigSuite_UI():
                                             self)
         self._Setup()
         self.limbMng = self.rig_ui.limbMng
+        self.grpMng = self.rig_ui.grpMng
         self.jntMng = self.rig_ui.jntMng
         self.bhvMng = self.rig_ui.bhvMng
 
@@ -224,6 +213,7 @@ class PayneFreeRigSuite_UI():
                 pm.menuItem(divider=1)
                 pm.menuItem(l='Submit Feedback...', en=0)
                 pm.menuItem(l='Share...', en=0)
+                pm.menuItem(l='Open Log', c=self.OpenLog)
 
 #=========== LIMBS ====================================
 
@@ -239,21 +229,37 @@ class PayneFreeRigSuite_UI():
     #     pass
     def RebuildLimbs(self):
         allLimbs = self.limbMng.GetAllLimbs()
+        self.logger.info('--- REBUILDING LIMBS START ---')
+        self.logger.info('Rebuilding LIMB TYPES for:')
         for limb in allLimbs:
             if limb.rebuildLimbType.get():
+                self.logger.info('\t%s' % limb.pfrsName.get())
                 self.bhvMng.RebuildLimbType(limb)
+        self.logger.info('Rebuilding BEHAVIOR TYPES for:')
         for limb in allLimbs:
             if limb.rebuildBhvType.get():
+                self.logger.info('\t%s' % limb.pfrsName.get())
                 self.bhvMng.RebuildBhvType(limb)
+        self.logger.info('Rebuilding LIMB GROUPS for:')
+        for limb in allLimbs:
+            if limb.rebuildLimbGroup.get():
+                self.logger.info('\t%s' % limb.pfrsName.get())
+                self.bhvMng.RebuildLimbGroup(limb)
+        self.logger.info('Rebuilding BEHAVIOR DEPENDENCIES for:')
         for limb in allLimbs:
             if limb.rebuildBhvDep.get():
-                pass
+                self.logger.info('\t%s' % limb.pfrsName.get())
+                self.bhvMng.RebuildBhvDep(limb)
+        self.logger.info('Rebuilding APPEARANCE DEPENDENCIES for:')
         for limb in allLimbs:
             if limb.rebuildAppDep.get():
                 pass
+        self.logger.info('Rebuilding SKIN INFLUENCES for:')
         for limb in allLimbs:
             if limb.rebuildSkinInf.get():
                 pass
+        msg = '--- REBUILDING LIMBS END ---\n'
+        self.logger.info(msg)
     
 #=========== TAB SWITCHING ====================================
 
@@ -270,8 +276,7 @@ class PayneFreeRigSuite_UI():
         print ('--- main, teardown')
         lastIndex = self.rigRoot.mainTab.get()
         if (lastIndex == 0): 
-            index = self.rigRoot.riggingTab.get()
-            self.rig_ui.Teardown_Editable(index)
+            self.rig_ui.Teardown_Editable()
         elif (lastIndex == 1): 
             index = self.rigRoot.skinningTab.get()
             self.skin_ui.Teardown_Editable(index)
@@ -292,6 +297,7 @@ class PayneFreeRigSuite_UI():
     def closeEvent(self):
         self.rig_ui.jntSetup_ui.KillScripts()
         self.rig_ui.limbSetup_ui.KillScripts()
+        self.EndLogger()
 
     def UpdateEnableUI(self):
         pm.tabLayout(self.tab, e=1, en=bool(self.rigRoot))
@@ -353,4 +359,54 @@ class PayneFreeRigSuite_UI():
         # if (filePath):
         #     self.pfrs.fileMng.SetOutputFile(filePath)
         #     self.pfrs.saveLoadRig.Save()
+
+#=========== LOGGER ====================================
+
+    def OpenLog(self, ignore):
+        if platform.system() == 'Darwin':       # macOS
+            subprocess.call(('open', self.logFile))
+        elif platform.system() == 'Windows':    # Windows
+            os.startfile(self.logFile)
+        else:                                   # linux variants
+            subprocess.call(('xdg-open', self.logFile))
+
+    def StartLogger(self):
+        self.logger = logging.getLogger(__name__)
+        if not self.logger.handlers:
+            path = os.path.join(os.path.dirname(__file__), 'Logs')
+            t = time.localtime()
+            fileName = '%02d-%02d-%02d_PFRS.log' % (t[0] %100, t[1], t[2])
+            self.logFile = os.path.join(path, fileName)
+            hdlr = logging.FileHandler(self.logFile)
+            formatter = logging.Formatter('%(asctime)s %(levelname)s | %(message)s', 
+                                                        '%H:%M:%S')
+            hdlr.setFormatter(formatter)
+            self.logger.addHandler(hdlr) 
+        else:
+            handler = self.logger.handlers[0]
+            self.logFile = handler.baseFilename
+        self.logger.setLevel(logging.INFO)
+        startTxt = '\n'
+        startTxt += '='*40
+        startTxt += '\n'
+        startTxt += '-'*15
+        startTxt += ' START '
+        startTxt += '-'*15
+        startTxt += '\n'
+        self.logger.info(startTxt)
+        # self.logger.debug('DEBUG') # logger's level is logging.INFO = Ignored
+        # self.logger.info('INFO')
+        # self.logger.warning('WARNING')
+        # self.logger.error('ERROR')
+        # self.logger.critical('CRITICAL')
+    
+    def EndLogger(self):
+        endTxt = '\n\n'
+        endTxt += '-'*15
+        endTxt += ' END '
+        endTxt += '-'*15
+        endTxt += '\n'
+        endTxt += '='*40
+        endTxt += '\n\n'
+        self.logger.info(endTxt)
 

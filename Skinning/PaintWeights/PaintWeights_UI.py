@@ -18,9 +18,10 @@ class PaintWeights_UI:
     def __init__(self, limbMng, jntMng, meshMng, skinMng, parent):
         self.limbMng = limbMng
         self.jntMng = jntMng
-        self.parent = parent
         self.meshMng = meshMng
         self.skinMng = skinMng
+        self.parent = parent
+        self.logger = parent.logger
 
         self.curMesh = None
         self.limb = None
@@ -69,29 +70,27 @@ class PaintWeights_UI:
         self.limbHier_ui.Populate()
         self.meshHier_ui.Populate()
 
-    def LimbSelected(self, limbID):
-        if limbID != -1:
-            self.limb = self.limbMng.GetLimb(limbID)
-            paint.PFRS_ATTR = 'L' + str(limbID)
+    def LimbSelected(self, limb):
+        self.limb = limb
+        self.jntHier_ui.SetLimb(limb)
+        if limb:
+            paint.PFRS_ATTR = 'L' + str(limb.ID.get())
             paint.PFRS_INF_JOINTS = []
-            self.jntHier_ui.SetLimb(limbID)
-            self.skinMng.SkinTestLimbAnim(self.limb)
+            self.skinMng.SkinTestLimbAnim(limb)
             if self.curMesh:
                 paint.UpdateLimbVertexColors()
                 pm.select(self.curMesh)
                 self.brush_ui.BrushOn()
         else:
-            self.jntHier_ui.Depopulate()
-            self.limb = None
             self.brush_ui.BrushOff()
 
-    def JointSelected(self, jointID):
-        if jointID != -1:
-            self.joint = self.jntMng.GetJoint(jointID)
+    def JointSelected(self, joint):
+        self.joint = joint
+        if joint:
             joints = self.jntMng.GetLimbJoints(self.limb, False)
             otherJoints = [j for j in joints if j != self.joint]
             paint.PFRS_INF_JOINTS = otherJoints
-            paint.PFRS_ATTR = 'J' + str(jointID)
+            paint.PFRS_ATTR = 'J' + str(joint.ID.get())
             self.skinMng.SkinTestJointAnim(self.joint)
             if self.curMesh:
                 pm.select(self.curMesh)
@@ -99,7 +98,6 @@ class PaintWeights_UI:
                 self.brush_ui.BrushOn()
         else:
             self.brush_ui.BrushOff()
-            self.joint = None
 
     def MeshSelected(self, mesh):
         if self.curMesh == mesh:

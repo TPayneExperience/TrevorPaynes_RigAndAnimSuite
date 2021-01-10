@@ -181,7 +181,6 @@ class BHV_Limb_Manager:
 #============= REBUILD ============================
 
     def RebuildLimbType(self, limb):
-        print ('rebuilding LIMB TYPE: ' + limb.pfrsName.get())
         joints = self.jntMng.GetLimbJoints(limb)
         limbType = limb.limbType.get()
         limbTypeChanged = False
@@ -215,7 +214,6 @@ class BHV_Limb_Manager:
         limb.rebuildLimbType.set(0)
 
     def RebuildBhvType(self, limb):
-        print ('rebuilding BHV TYPE: ' + limb.pfrsName.get())
         limb.rebuildBhvType.set(0)
         limbType = limb.limbType.get()
         bhvType = limb.bhvType.get()
@@ -236,8 +234,30 @@ class BHV_Limb_Manager:
             if bhvType not in self.branchLimbIndexes:
                 self.SetBhvType(limb, self.branchLimbIndexes[0])
 
+    def RebuildLimbGroup(self, limb):
+        limb.rebuildLimbGroup.set(0)
+        bhvType = limb.bhvType.get()
+        if bhvType in self.distanceIndexes:
+            if not pm.listConnections(limb.bhvDistanceGroup):
+                group = self.grpMng.AddDistanceGroup(limb)
+                self.ctrMng.Add(group, self.ctrMng.ctrTypes[2])
+                self.grpMng.UpdateGroupName(group)
+                # for attr in ['.tx', '.ty', '.tz', '.v']:
+                #     pm.setAttr(ctr+attr, l=1, k=0, cb=0)
+        if bhvType in self.fkikTypeIndexes:
+            if not pm.listConnections(limb.bhvFKIKSwitchGroup):
+                group = self.grpMng.AddFKIKSwitchGroup(limb)
+                self.ctrMng.Add(group, self.ctrMng.ctrTypes[3])
+                self.grpMng.UpdateGroupName(group)
+                # for attr in ['.tx', '.ty', '.tz', '.v']:
+                #     pm.setAttr(ctr+attr, l=1, k=0, cb=0)
+        elif bhvType in self.emptyLimbIndexes:
+            if not pm.listConnections(limb.bhvEmptyGroup):
+                group = self.grpMng.AddEmptyGroup(limb)
+                self.ctrMng.Add(group, self.ctrMng.ctrTypes[0])
+                self.grpMng.UpdateGroupName(group)
+
     def RebuildBhvDep(self, sourceLimb):
-        print ('rebuilding BHV DEP: ' + sourceLimb.pfrsName.get())
         bhvType = sourceLimb.bhvType.get()
         if bhvType not in self.cstTypeIndexes + self.ikTypeIndexes:
             sourceLimb.rebuildBhvDep.set(0)
@@ -335,29 +355,32 @@ class BHV_Limb_Manager:
         # self.grpMng.UpdateGroupDistance(group)
 
     def Setup_Distance(self, limb):
-        groups = pm.listConnections(limb.bhvDistanceGroup)
-        if groups:
-            group = groups[0]
-            group.v.set(1)
-            pm.disconnectAttr(group.distanceJoint)
-        else:
-            group = self.grpMng.AddDistanceGroup(limb)
-            ctr = self.ctrMng.Add(group, self.ctrMng.ctrTypes[2])
-            self.grpMng.UpdateGroupName(limb, group)
-            for attr in ['.tx', '.ty', '.tz', '.v']:
-                pm.setAttr(ctr+attr, l=1, k=0, cb=0)
+        group = pm.listConnections(limb.bhvDistanceGroup)[0]
+        group.v.set(1)
+        pm.disconnectAttr(group.distanceJoint)
+        # groups = pm.listConnections(limb.bhvDistanceGroup)
+        # if groups:
+        #     group = groups[0]
+        #     group.v.set(1)
+        #     pm.disconnectAttr(group.distanceJoint)
+        # else:
+        #     group = self.grpMng.AddDistanceGroup(limb)
+        #     ctr = self.ctrMng.Add(group, self.ctrMng.ctrTypes[2])
+        #     self.grpMng.UpdateGroupName(limb, group)
+        #     for attr in ['.tx', '.ty', '.tz', '.v']:
+        #         pm.setAttr(ctr+attr, l=1, k=0, cb=0)
         return group
 
     def Setup_FKIK(self, limb):
         groups = pm.listConnections(limb.bhvFKIKSwitchGroup)
-        if groups:
-            fkikGroup = groups[0]
-        else:
-            fkikGroup = self.grpMng.AddFKIKSwitchGroup(limb)
-            ctr = self.ctrMng.Add(fkikGroup, self.ctrMng.ctrTypes[3])
-            self.grpMng.UpdateGroupName(limb, fkikGroup)
-            for attr in ['.tx', '.ty', '.tz', '.v']:
-                pm.setAttr(ctr+attr, l=1, k=0, cb=0)
+        # if groups:
+        #     fkikGroup = groups[0]
+        # else:
+        #     fkikGroup = self.grpMng.AddFKIKSwitchGroup(limb)
+        #     ctr = self.ctrMng.Add(fkikGroup, self.ctrMng.ctrTypes[3])
+        #     self.grpMng.UpdateGroupName(limb, fkikGroup)
+        #     for attr in ['.tx', '.ty', '.tz', '.v']:
+        #         pm.setAttr(ctr+attr, l=1, k=0, cb=0)
         joints = self.jntMng.GetLimbJoints(limb)
         names = [j.pfrsName.get() for j in joints]
         pm.addAttr(fkikGroup.targetJoint, e=1, en=':'.join(names))
@@ -369,6 +392,7 @@ class BHV_Limb_Manager:
             pm.connectAttr(fkikGroup.IKVisTargets, distGroup.FKIKVisSource)
             # jointGroups = [pm.listConnections(j.group) for j in joints]
         fkGroup = pm.listConnections(joints[0].group)[0]
+        pm.disconnectAttr(fkGroup.FKIKVisSource)
         pm.connectAttr(fkikGroup.FKVisTargets, fkGroup.FKIKVisSource)
         self.grpMng.UpdateFKIKSwitchJoint(fkikGroup, joints)
 

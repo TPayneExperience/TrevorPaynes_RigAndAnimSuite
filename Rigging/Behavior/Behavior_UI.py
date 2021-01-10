@@ -15,15 +15,14 @@ reload(bhvProp_UI)
 
 class Behavior_UI:
     def __init__(self, limbMng, jntMng, bhvMng, grpMng, ctrMng, parent):
-
         self.limbMng = limbMng
         self.jntMng = jntMng
         self.bhvMng = bhvMng
         self.grpMng = grpMng
         self.ctrMng = ctrMng
         self.parent = parent
+        self.logger = parent.logger
         
-
         self._Setup()
 
     def NewRig(self, rigRoot):
@@ -58,15 +57,15 @@ class Behavior_UI:
 #=========== SETUP + TEARDOWN ====================================
 
     def Setup_Editable(self):
-        print ('Behavior, setup')
+        self.logger.info('\tBehavior > SETUP')
         self.limbHier_ui.Populate()
         self.limbProp_ui.Depopulate()
         # self.limbProp_ui.Populate()
     
     def Teardown_Editable(self):
-        print ('Behavior, Teardown')
+        self.logger.info('\tBehavior > TEARDOWN\n')
         self.limbProp_ui.Depopulate()
-        self.grpHier_ui.Depopulate()
+        self.grpHier_ui.SetLimb(None)
         self.grpProp_ui.Depopulate()
         self.parent.parent.RebuildLimbs()
 
@@ -121,17 +120,15 @@ class Behavior_UI:
         index = self.grpMng.GetLimbGroups(parentLimb).index(closestGroup)
         childLimb.parentGroup.set(index)
     
-    def LimbSelected(self, limbID):
-        limb = self.limbMng.GetLimb(limbID)
-        # joints = self.jntMng.GetLimbTempJoints(limb)
-        joints = self.jntMng.GetLimbJoints(limb)
-        pm.select(joints)
-        self.limbProp_ui.SetLimb(limbID)
-        self.grpHier_ui.SetLimb(limbID)
+    def LimbSelected(self, limb):
+        if limb:
+            joints = self.jntMng.GetLimbJoints(limb)
+            pm.select(joints)
+        self.limbProp_ui.SetLimb(limb)
+        self.grpHier_ui.SetLimb(limb)
         self.grpProp_ui.Depopulate()
 
-    def GroupSelected(self, groupID):
-        group = self.grpMng.GetGroup(groupID)
+    def GroupSelected(self, group):
         pm.select(group)
         self.limbProp_ui.Depopulate()
         self.grpProp_ui.SetGroup(group)

@@ -5,6 +5,7 @@ class JointSetup_UI:
     def __init__(self, jntMng, parent):
         self.jntMng = jntMng
         self.parent = parent
+        self.logger = self.parent.logger
 
         self.scriptJob = None
         self._Setup()
@@ -76,7 +77,7 @@ class JointSetup_UI:
 #=========== TAB FUNCTIONALITY ====================================
     
     def Setup_Editable(self):
-        print ('joint Setup, setup')
+        self.logger.info('\tJoint Setup > SETUP')
         self.UpdateButtons()
         if not self.scriptJob:
             self.scriptJob = pm.scriptJob(  e=("SelectionChanged",
@@ -85,7 +86,7 @@ class JointSetup_UI:
             print ('STARTING JointSetup selection detection script...')
 
     def Teardown_Editable(self):
-        print ('joint Setup, teardown')
+        self.logger.info('\tJoint Setup > TEARDOWN\n')
         self.KillScripts()
         self.parent.parent.RebuildLimbs()
     

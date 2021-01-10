@@ -9,6 +9,7 @@ class BHV_Group_Properties_UI:
         self.bhvMng = bhvMng
         self.grpMng = grpMng
         self.parent = parent
+        self.logger = parent.logger
 
         self.parentSub_at = None
         
@@ -34,9 +35,13 @@ class BHV_Group_Properties_UI:
                                                         adj=3,
                                                         pre=3,
                                                         cw=((1, 60), (2, 55), (3, 55)),
-                                                        at='persp.translateX')
+                                                        at='persp.translateX',
+                                                        cc=self.LogCstWeight)
                 
 #========== UPDATE UI ===============================
+
+    def LogCstWeight(self, ignore, value):
+        self.logger.info('\t\tGroupProp > Weight SET to %f' + value)
 
     def Depopulate(self):
         pm.frameLayout(self.groupLayout, e=1, en=0)
@@ -46,7 +51,8 @@ class BHV_Group_Properties_UI:
             self.parentSub_at = None      
 
     def UpdateUI(self):
-        limb = pm.listConnections(self.group.limb)[0]
+        joint = pm.listConnections(self.group.joint)[0]
+        limb = pm.listConnections(joint.limb)[0]
         bhvType = limb.bhvType.get()
         pm.attrFieldSliderGrp(self.weight_sg, e=1, en=0)
         # DELETE OLD ATTRS

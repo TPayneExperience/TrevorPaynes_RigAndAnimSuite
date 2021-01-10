@@ -6,13 +6,16 @@ class BHV_Group_Hierarchy_UI:
         self.limbMng = limbMng
         self.grpMng = grpMng
         self.parent = parent
+        self.logger = parent.logger
 
         self.limb = None
 
         self._Setup()
 
     def Populate(self):
-        pm.treeView(self.widget, e=1, removeAll=1)
+        self.Depopulate()
+        if not self.limb:
+            return
         for group in self.grpMng.GetLimbGroups(self.limb):
             # ONLY FK, Cst, Empty, IK Chain
             if group.groupType.get() in [0, 1]: 
@@ -26,7 +29,6 @@ class BHV_Group_Hierarchy_UI:
                 pm.treeView(self.widget, e=1, dl=(groupID, name))
     
     def Depopulate(self):
-        self.limb = None
         pm.treeView(self.widget, e=1, removeAll=1)
 
 # #=========== SETUP ====================================
@@ -37,14 +39,20 @@ class BHV_Group_Hierarchy_UI:
     
 #=========== FUNCTIONALITY ====================================
 
-    def SetLimb(self, limbID):
-        self.limb = self.limbMng.GetLimb(limbID)
+    def SetLimb(self, limb):
+        self.limb = limb
         self.Populate()
 
     def SelectionChanged(self):
         groupIDStr = pm.treeView(self.widget, q=1, selectItem=1)
         if groupIDStr:
-            self.parent.GroupSelected(int(groupIDStr[0]))
+            group = self.grpMng.GetGroup(int(groupIDStr[0]))
+            msg = '\t\tGroupHier > SELECTED group "%s"'% group
+            self.logger.info(msg)
+            self.parent.GroupSelected(group)
+        else:
+            self.logger.info('\t\tGroupHier > DESELECTED group')
+
 
 
 

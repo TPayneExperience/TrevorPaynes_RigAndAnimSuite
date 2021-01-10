@@ -8,6 +8,7 @@ class APP_Limb_Properties_UI:
         self.bhvMng = bhvMng
         self.ctrMng = ctrMng
         self.parent = parent
+        self.logger = parent.logger
 
         self.ctrAxis_at = None
         self.limb = None
@@ -63,22 +64,44 @@ class APP_Limb_Properties_UI:
 
 #=========== FUNCTIONALITY ==============================================
 
-    def SetLimb(self, limbID):
+    def LogLockPos(self, ignore):
+        value = str(self.limb.appLockHidePos.get())
+        msg = '\t\tLimbProp > SET LOCK POSITION to "%s"' % value
+        self.logger.info(msg)
+
+    def LogLockRot(self, ignore):
+        value = str(self.limb.appLockHideRot.get())
+        msg = '\t\tLimbProp > SET LOCK ROTATION to "%s"' % value
+        self.logger.info(msg)
+
+    def LogLockScale(self, ignore):
+        value = str(self.limb.appLockHideScale.get())
+        msg = '\t\tLimbProp > SET LOCK SCALE to "%s"' % value
+        self.logger.info(msg)
+
+    def SetLimb(self, limb):
+        self.limb = limb
+        if not limb:
+            pm.frameLayout(self.prop_l, e=1, en=0)
+            return
         pm.frameLayout(self.prop_l, e=1, en=1)
-        self.limb = self.limbMng.GetLimb(limbID)
         bhvType = self.limb.bhvType.get()
         pm.deleteUI(self.targetType)
         pm.deleteUI(self.ctrType)
         self.targetType = pm.attrEnumOptionMenu(l='FK or IK?',
                                                 at=self.limb.appTargetFKIKType,
-                                                p=self.appLimbProp_cl)
+                                                p=self.appLimbProp_cl,
+                                                cc=self.LogSelectFKIK)
         self.ctrType = pm.attrEnumOptionMenu(   l='Control Type',
                                                 at=self.limb.appControlType,
                                                 p=self.appLimbProp_cl,
                                                 cc=self.SetControlType)
-        pm.attrControlGrp(self.lockPos, e=1, a=self.limb.appLockHidePos)
-        pm.attrControlGrp(self.lockRot, e=1, a=self.limb.appLockHideRot)
-        pm.attrControlGrp(self.lockScale, e=1, a=self.limb.appLockHideScale)
+        pm.attrControlGrp(self.lockPos, e=1, a=self.limb.appLockHidePos,
+                                        cc=pm.Callback(self.LogLockPos, 1))
+        pm.attrControlGrp(self.lockRot, e=1, a=self.limb.appLockHideRot,
+                                        cc=pm.Callback(self.LogLockRot, 1))
+        pm.attrControlGrp(self.lockScale, e=1, a=self.limb.appLockHideScale,
+                                        cc=pm.Callback(self.LogLockScale, 1))
         
         isFK = (bhvType in self.bhvMng.fkTypeIndexes)
         pm.optionMenu(self.fkikTargetLimb_om, e=1, en=isFK)
@@ -103,6 +126,7 @@ class APP_Limb_Properties_UI:
                                                 cc=self.UpdateGroupDistance)
 
     def SetTargetFKIK(self, limbName):
+        self.logger.info('\t\tLimbProp > SET TARGET FKIK to ' + limbName)
         isEnabled = (limbName != 'None')
         # pm.attrEnumOptionMenu(self.targetType, e=1, en=0)
         pm.disconnectAttr(self.limb.appTargetFKIKLimb)
@@ -146,6 +170,8 @@ class APP_Limb_Properties_UI:
             pm.optionMenu(self.fkikTargetLimb_om, e=1, sl=1)
 
     def SetControlType(self, ctrType):
+        msg = '\t\tLimbProp > SET CONTROL TYPE to "%s"' % ctrType
+        self.logger.info(msg)
         for group in self.grpMng.GetLimbGroups(self.limb):
             control = pm.listConnections(group.control)[0]
             self.ctrMng.SetType(control, ctrType)
@@ -161,8 +187,18 @@ class APP_Limb_Properties_UI:
 
 #=========== CONTROL DISTANCE ==============================================
 
+    def LogSelectFKIK(self, fkikType):
+        msg = '\t\tLimbProp > SELECT FKIK TYPE to "%s"' % fkikType
+        self.logger.info(msg)
+
     def UpdateGroupDistance(self, ignore):
         group = pm.listConnections(self.limb.bhvDistanceGroup)[0]
+        dist = str(group.distance.get())
+        axis = self.grpMng.axesNames[group.axis.get()]
+        msg1 = '\t\tLimbProp > SET CONTROL DISTANCE to "%s"' % dist
+        msg2 = '\t\tLimbProp > SET CONTROL AXIS to "%s"' % axis
+        self.logger.info(msg1)
+        self.logger.info(msg2)
         self.grpMng.UpdateGroupDistance(group)
 
     # def PopulateControlFrame(self, bhvType):

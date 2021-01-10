@@ -4,8 +4,8 @@ import re
 import pymel.core as pm
 
 class Name_Manager():
-    def __init__(self):
-        self.errorMsg = ''
+    def __init__(self, parent):
+        self.logger = parent.logger
 
     def NewRig(self, rigRoot):
         self.rigRoot = rigRoot
@@ -24,28 +24,25 @@ class Name_Manager():
 
     def IsValidCharacterLength(self, name):
         if (len(name) < 2):
-            self.errorMsg = 'NAME ERROR: Must be 2 or more characters'
+            self.logger.error('\t\t\tMust be 2 or more characters')
             return False
-        else:
-            self.errorMsg = ''
-            return True
+        return True
 
     def DoesNotStartWithNumber(self, name):
         if (name[0] in ['0','1','2','3','4','5','6','7','8','9', '_']):
-            self.errorMsg = 'NAME ERROR: Cannot start with number OR _'
+            self.logger.error('\t\t\tCannot start with number OR _')
             return False
-        else:
-            self.errorMsg = ''
-            return True
+        return True
 
     def AreAllValidCharacters(self, name):
         try:
             g = re.search('[A-Za-z0-9_]+', name).group(0)
             if (len(g) == len(name)):
-                self.errorMsg = ''
                 return True
+            self.logger.error('\t\t\tMay only contain A-Z, a-z, 0-9, _')
+            return False
         except:
-            self.errorMsg = 'NAME ERROR: May only contain A-Z, a-z, 0-9, _'
+            self.logger.error('\t\t\tMay only contain A-Z, a-z, 0-9, _')
             return False
 
 

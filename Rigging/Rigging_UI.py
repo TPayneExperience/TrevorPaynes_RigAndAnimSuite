@@ -55,7 +55,8 @@ class Rigging_UI:
         self.jntMng = jm.Joint_Manager( self.limbMng, 
                                         self.grpMng,
                                         self.ctrMng,
-                                        nameMng)
+                                        nameMng,
+                                        self)
         self.bhvMng = bhv.BHV_Limb_Manager( self.limbMng, 
                                             self.jntMng, 
                                             self.grpMng,
@@ -115,7 +116,8 @@ class Rigging_UI:
                                                 self.jntMng,
                                                 self.bhvMng,
                                                 self.grpMng,
-                                                self.ctrMng)
+                                                self.ctrMng,
+                                                self)
         pm.tabLayout(  self.tab, 
                     e=1, 
                     tabLabel=(  (self.jntSetupTab,'Joint Setup'), 
@@ -127,8 +129,13 @@ class Rigging_UI:
 #=========== TAB SWITCHING ====================================
 
     def Setup_Editable(self):
-        self.logger.info('RIGGING TAB > SETUP Editable')
-        index = self.rigRoot.riggingTab.get()
+        self.logger.info('Rigging > SETUP')
+        self.Setup_SubTab()
+        self.UpdateControlStates()
+    
+    def Setup_SubTab(self):
+        index = pm.tabLayout(self.tab, q=1, selectTabIndex=1)-1
+        self.rigRoot.riggingTab.set(index)
         if (index == 0):
             self.jntSetup_ui.Setup_Editable()
         elif (index == 1):
@@ -140,16 +147,13 @@ class Rigging_UI:
         elif (index == 4):
             self.test_ui.Setup_Editable() 
 
-        # SET CONTROLS OFF / LOCKED / ON
-        if index in [0, 1]:
-            self.ctrMng.SetLayerState(False, True)
-        elif index == 2:
-            self.ctrMng.SetLayerState(True, True)
-        elif index in [3, 4]:
-            self.ctrMng.SetLayerState(True, False)
-        
-    def Teardown_Editable(self, nextIndex):
-        self.logger.info('RIGGING TAB > TEARDOWN Editable')
+    def Teardown_Editable(self):
+        self.Teardown_SubTab()
+        self.UpdateNonInfJoints()
+        self.logger.info('Rigging > TEARDOWN\n')
+        self.logger.info('--------------------------------\n')
+    
+    def Teardown_SubTab(self):
         lastIndex = self.rigRoot.riggingTab.get()
         if (lastIndex == 0): 
             self.jntSetup_ui.Teardown_Editable()
@@ -162,6 +166,9 @@ class Rigging_UI:
         elif (lastIndex == 4):
             self.test_ui.Teardown_Editable() 
 
+    def UpdateNonInfJoints(self):
+        lastIndex = self.rigRoot.riggingTab.get()
+        nextIndex = pm.tabLayout(self.tab, q=1, selectTabIndex=1)-1
         if lastIndex in [0, 1] and nextIndex in [2, 3, 4]:
             for limb in self.limbMng.GetAllLimbs():
                 if limb.limbType.get() == 2: # 3+ chain
@@ -173,12 +180,20 @@ class Rigging_UI:
                 if limb.limbType.get() == 2: # 3+ chain
                     self.jntMng.Teardown_NonInfJoint(limb)
         
+    def UpdateControlStates(self):
+        index = self.rigRoot.riggingTab.get()
+        if index in [0, 1]:
+            self.ctrMng.SetLayerState(False, True)
+        elif index == 2:
+            self.ctrMng.SetLayerState(True, True)
+        elif index in [3, 4]:
+            self.ctrMng.SetLayerState(True, False)
+        
     def TabChanged(self):
-        self.logger.info('RIGGING TAB > Tab CHANGED')
-        nextIndex = pm.tabLayout(self.tab, q=1, selectTabIndex=1)-1
-        self.Teardown_Editable(nextIndex)
-        self.rigRoot.riggingTab.set(nextIndex)
-        self.Setup_Editable()
+        self.Teardown_SubTab()
+        self.UpdateNonInfJoints()
+        self.Setup_SubTab()
+        self.UpdateControlStates()
 
     def SetupEditable_Limbs(self):
         '''When switchin from tabs 0/1 to 2/3/4'''
@@ -231,14 +246,16 @@ class Rigging_UI:
                     self.grpMng.SetupEditable_IKPVGroup(group, joints)
                     self.grpMng.UpdateGroupDistance(group)
             elif (bhvType == 7): # EMPTY
-                groups = pm.listConnections(limb.bhvEmptyGroup)
-                if groups:
-                    group = groups[0]
-                    group.v.set(1)
-                else:
-                    group = self.grpMng.AddEmptyGroup(limb)
-                    self.ctrMng.Add(group, self.ctrMng.ctrTypes[0])
-                    self.grpMng.UpdateGroupName(limb, group)
+                group = pm.listConnections(limb.bhvEmptyGroup)[0]
+                group.v.set(1)
+                # groups = pm.listConnections(limb.bhvEmptyGroup)
+                # if groups:
+                #     group = groups[0]
+                #     group.v.set(1)
+                # else:
+                #     group = self.grpMng.AddEmptyGroup(limb)
+                #     self.ctrMng.Add(group, self.ctrMng.ctrTypes[0])
+                #     self.grpMng.UpdateGroupName(limb, group)
             if (bhvType in self.bhvMng.fkikTypeIndexes): # FKIK
                 group = pm.listConnections(limb.bhvFKIKSwitchGroup)[0]
                 group.v.set(1)
