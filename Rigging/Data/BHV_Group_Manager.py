@@ -23,6 +23,8 @@ class BHV_Group_Manager:
                             'Joint', 
                             'Distance',
                             'FKIKSwitch')
+        self.hideAttrs = False
+
         # EMPTY GROUP:
         #   Limb group, but no data
 
@@ -150,7 +152,6 @@ class BHV_Group_Manager:
         group = self._AddGroup()
         pm.addAttr(group, ln='limb', dt='string')
         pm.connectAttr(limb.bhvEmptyGroup, group.limb)
-        # self.UpdateGroupName(limb, group)
         return group
 
     # FK, CST, IK Chain
@@ -163,7 +164,6 @@ class BHV_Group_Manager:
         pm.addAttr(group, ln='weight', at='float', min=0, max=1) # Cst
         pm.connectAttr(joint.group, group.joint)
         
-        # self.UpdateGroupName(limb, group)
         pm.parent(group, joint)
         pm.xform(group, t=[0,0,0], ro=[0,0,0], s=[1,1,1])
         group.v.set(0) 
@@ -181,7 +181,6 @@ class BHV_Group_Manager:
         pm.addAttr(group, ln='axis', at='enum', en=axes, dv=4) # IKPV, LookAt
         pm.addAttr(group, ln='limb', dt='string')
         pm.connectAttr(limb.bhvDistanceGroup, group.limb)
-        # self.UpdateGroupName(limb, group)
         return group
 
     # FKIK Switch
@@ -196,7 +195,6 @@ class BHV_Group_Manager:
         pm.addAttr(group, ln='bindTargets', dt='string')
         pm.addAttr(group, ln='limb', dt='string')
         pm.connectAttr(limb.bhvFKIKSwitchGroup, group.limb)
-        # self.UpdateGroupName(limb, group)
         for attr in ['.tx', '.ty', '.tz', '.rx', '.ry', '.rz']:
             pm.setAttr(group+attr, l=1, k=0, cb=0)
         return group
@@ -234,6 +232,7 @@ class BHV_Group_Manager:
         return orderedGroups
 
     def UpdateGroupName(self, group):
+        '''Updates limb + joint GROUP + CONTROL renaming'''
         index = group.groupType.get()
         groupType = self.grpTypes[index]
         if index == 1: # Joint
@@ -247,13 +246,13 @@ class BHV_Group_Manager:
                                     groupType,
                                     self.limbMng.GetLimbSide(limb), 
                                     'GRP')
-        group.rename(groupName + '_#')
+        group.rename(groupName)
         control = pm.listConnections(group.control)[0]
         controlName = self.nameMng.GetName(pfrsName,
                                     groupType,
                                     self.limbMng.GetLimbSide(limb), 
                                     'CTR')
-        control.rename(controlName + '_#')
+        control.rename(controlName)
 
     def UpdateGroupDistance(self, group):
         pos = self.axesXforms[group.axis.get()][:]

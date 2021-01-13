@@ -13,6 +13,7 @@ class Limb_Manager:
                             'Branch',
                             'Two_JointChain')
         self.limbSides = ('M', 'L', 'R', '-')
+        self.hideAttrs = False
 
     def NewRig(self, rigRoot):
         self.rigRoot = rigRoot
@@ -67,30 +68,35 @@ class Limb_Manager:
         # ctrTypes = ':'.join(self.ctrTypes)
 
         limb = pm.createNode('network', name=pfrsName)
-        pm.addAttr(limb, ln='ID', at='long', dv=limbID)
-        pm.addAttr(limb, ln='pfrsName', dt='string')
+        pm.addAttr(limb, ln='ID', at='long', dv=limbID, h=self.hideAttrs)
+        pm.addAttr(limb, ln='pfrsName', dt='string', h=self.hideAttrs)
         limb.pfrsName.set(pfrsName)
-        pm.addAttr(limb, ln='limbType', at='enum', enumName=limbTypes)
-        pm.addAttr(limb, ln='side', at='enum', enumName=limbSides)
-        pm.addAttr(limb, ln='mirrorLimb', at='long')
-        pm.addAttr(limb, ln='parentLimb', dt='string')
-        pm.addAttr(limb, ln='parentGroup', at='enum', en='None')
-        pm.addAttr(limb, ln='childrenLimbs', dt='string')
-        pm.addAttr(limb, ln='defaultParentLimb', dt='string')
-        pm.addAttr(limb, ln='defaultChildrenLimbs', dt='string')
+        pm.addAttr(limb, ln='limbType', at='enum', enumName=limbTypes,
+                                        h=self.hideAttrs)
+        pm.addAttr(limb, ln='side', at='enum', enumName=limbSides,
+                                        h=self.hideAttrs)
+        pm.addAttr(limb, ln='mirrorLimb', at='long', h=self.hideAttrs)
+        pm.addAttr(limb, ln='parentLimb', dt='string', h=self.hideAttrs)
+        pm.addAttr(limb, ln='parentGroup', at='enum', en='None', 
+                                        h=self.hideAttrs)
+        pm.addAttr(limb, ln='childrenLimbs', dt='string', h=self.hideAttrs)
+        pm.addAttr(limb, ln='defaultParentLimb', dt='string', 
+                                        h=self.hideAttrs)
+        pm.addAttr(limb, ln='defaultChildrenLimbs', dt='string', 
+                                        h=self.hideAttrs)
         # pm.addAttr(limb, ln='parentJntIndex', at='enum', enumName='None')
         # pm.addAttr(limb, ln='parentCtrID', at='long')
-        pm.addAttr(limb, ln='infJoints', dt='string')
-        pm.addAttr(limb, ln='nonInfJoint', dt='string') # Only for 3+ chain
-        pm.addAttr(limb, ln='tempJoints', dt='string') # limb setup
-        pm.addAttr(limb, ln='rigRoot', dt='string')
+        pm.addAttr(limb, ln='infJoints', dt='string', h=self.hideAttrs)
+        pm.addAttr(limb, ln='nonInfJoint', dt='string', h=self.hideAttrs) # Only for 3+ chain
+        # pm.addAttr(limb, ln='tempJoints', dt='string', h=self.hideAttrs) # limb setup
+        pm.addAttr(limb, ln='rigRoot', dt='string', h=self.hideAttrs)
 
-        pm.addAttr(limb, ln='rebuildLimbType', at='bool')
-        pm.addAttr(limb, ln='rebuildBhvType', at='bool')
-        pm.addAttr(limb, ln='rebuildLimbGroup', at='bool')
-        pm.addAttr(limb, ln='rebuildBhvDep', at='bool')
-        pm.addAttr(limb, ln='rebuildAppDep', at='bool')
-        pm.addAttr(limb, ln='rebuildSkinInf', at='bool')
+        pm.addAttr(limb, ln='rebuildLimbType', at='bool', h=self.hideAttrs)
+        pm.addAttr(limb, ln='rebuildBhvType', at='bool', h=self.hideAttrs)
+        pm.addAttr(limb, ln='rebuildLimbGroup', at='bool', h=self.hideAttrs)
+        pm.addAttr(limb, ln='rebuildBhvDep', at='bool', h=self.hideAttrs)
+        pm.addAttr(limb, ln='rebuildAppDep', at='bool', h=self.hideAttrs)
+        pm.addAttr(limb, ln='rebuildSkinInf', at='bool', h=self.hideAttrs)
         limb.rebuildLimbType.set(1)
         limb.rebuildBhvType.set(1)
         limb.rebuildLimbGroup.set(1)
@@ -99,14 +105,16 @@ class Limb_Manager:
         limb.rebuildSkinInf.set(1)
 
         # APP
-        pm.addAttr(limb, ln='appControlType', at='enum', en='None')
-        pm.addAttr(limb, ln='appLockHidePos', at='bool')
-        pm.addAttr(limb, ln='appLockHideRot', at='bool')
-        pm.addAttr(limb, ln='appLockHideScale', at='bool')
+        pm.addAttr(limb, ln='appControlType', at='enum', en='None', 
+                                        h=self.hideAttrs)
+        pm.addAttr(limb, ln='appLockHidePos', at='bool', h=self.hideAttrs)
+        pm.addAttr(limb, ln='appLockHideRot', at='bool', h=self.hideAttrs)
+        pm.addAttr(limb, ln='appLockHideScale', at='bool', h=self.hideAttrs)
         # Connect to FKIK switch of another limb
-        pm.addAttr(limb, ln='appTargetFKIKLimb', dt='string') 
-        pm.addAttr(limb, ln='appSourceFKIKLimb', dt='string')
-        pm.addAttr(limb, ln='appTargetFKIKType', at='enum', en='FK:IK')
+        pm.addAttr(limb, ln='appTargetFKIKLimb', dt='string', h=self.hideAttrs) 
+        pm.addAttr(limb, ln='appSourceFKIKLimb', dt='string', h=self.hideAttrs)
+        pm.addAttr(limb, ln='appTargetFKIKType', at='enum', en='FK:IK', 
+                                        h=self.hideAttrs)
         pm.connectAttr(self.rigRoot.limbs, limb.rigRoot)
 
         self._limbs[limbID] = limb

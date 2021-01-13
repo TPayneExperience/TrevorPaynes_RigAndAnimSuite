@@ -27,6 +27,7 @@ class Joint_Manager:
                             (0, 0.5, 1), # 
                             (1, 0, 0.5)) 
         self.colorIndex = 0
+        self.hideAttrs = False
 
     def NewRig(self, rigRoot):
         self._joints = {} # jointID: jointNode
@@ -113,9 +114,8 @@ class Joint_Manager:
 
             group = self.grpMng.AddJointGroup(joint)
             self.ctrMng.Add(group, self.ctrMng.ctrTypes[1])
-            # self.grpMng.UpdateGroupName(limb, group)
-            # print ('adding joint: ' + joint.pfrsName.get() + ' with ' + str(colors))
-        
+            # self.grpMng.UpdateGroupName(group)
+            
         # Only add Joint if pfrs name not already on limb
         name = joint.pfrsName.get()
         names = [j.pfrsName.get() for j in pm.listConnections(limb.infJoints)]
@@ -124,6 +124,8 @@ class Joint_Manager:
             self.logger.error('\t\t\t\talready exists on limb')
             return
         pm.connectAttr(limb.infJoints, joint.limb)
+        group = pm.listConnections(joint.group)[0]
+        self.grpMng.UpdateGroupName(group)
         if joint.ID.get() not in self._joints:
             self._joints[joint.ID.get()] = joint
 
@@ -185,18 +187,18 @@ class Joint_Manager:
             temp[key].limbIndex.set(i)
             i += 1
 
-    def Teardown_Editable(self, joint): # for Limb Setup
-        pass
+    # def Teardown_Editable(self, joint): # for Limb Setup
+    #     pass
         # group = pm.listConnections(joint.group)[0]
         # pm.disconnectAttr(group.limb)
         # pm.disconnectAttr(joint.tempLimb)
         # pm.connectAttr(limb.tempJoints, joint.tempLimb)
         # self.ReindexJoints(limb)
     
-    def Setup_Editable(self, joint):
-        # group = pm.listConnections(joint.group)[0]
-        # pm.disconnectAttr(group.limb)
-        self.UpdateJointName(joint)
+    # def Setup_Editable(self, joint):
+    #     # group = pm.listConnections(joint.group)[0]
+    #     # pm.disconnectAttr(group.limb)
+    #     self.UpdateJointName(joint)
     
     def UpdateAllJointNames(self): # if prefix changed
         for joint in self.GetAllJoints():
@@ -230,6 +232,7 @@ class Joint_Manager:
         return all([j in bestChain for j in joints])
     
     def GetJointChain(self, joints):
+        '''returns child most to parent most joint list'''
         if len(joints) == 1:
             return joints
         temp = {} # longName : node

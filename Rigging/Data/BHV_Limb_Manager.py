@@ -9,6 +9,7 @@ class BHV_Limb_Manager:
         self.ctrMng = ctrMng
 
         self.cstTypes = ('Parent', 'Point', 'Orient', 'Scale')
+        self.hideAttrs = False
 
         # BHV Options
         self.emptyLimbIndexes = (7,)
@@ -79,6 +80,8 @@ class BHV_Limb_Manager:
             self.Teardown_FKIK(limb)
 
         limb.bhvType.set(newBhvIndex)
+        self.RebuildLimbGroup(limb)
+
         # SETUP
         if newBhvIndex in self.fkTypeIndexes:
             self.Setup_FK(limb)
@@ -150,19 +153,21 @@ class BHV_Limb_Manager:
         ctrTypes = ':'.join(self.ctrMng.GetControlTypes())
 
         pm.addAttr(limb.appControlType, e=1, en=ctrTypes)
-        pm.addAttr(limb, ln='bhvType', at='enum', en=bhvTypes)
+        pm.addAttr(limb, ln='bhvType', at='enum', en=bhvTypes,
+                                    h=self.hideAttrs)
 
-        pm.addAttr(limb, ln='bhvDistanceGroup', dt='string') # LookAt, IKPV
-        pm.addAttr(limb, ln='bhvEmptyGroup', dt='string') # Empty
-        pm.addAttr(limb, ln='bhvFKIKSwitchGroup', dt='string') #FKIK
+        # LookAt, IKPV
+        pm.addAttr(limb, ln='bhvDistanceGroup', dt='string', h=self.hideAttrs)
+        pm.addAttr(limb, ln='bhvEmptyGroup', dt='string', h=self.hideAttrs)
+        pm.addAttr(limb, ln='bhvFKIKSwitchGroup', dt='string', h=self.hideAttrs) 
 
-        pm.addAttr(limb, ln='bhvFKIK_FKJoint', dt='string')
-        pm.addAttr(limb, ln='bhvFKIK_IKJoint', dt='string')
+        pm.addAttr(limb, ln='bhvFKIK_FKJoint', dt='string', h=self.hideAttrs)
+        pm.addAttr(limb, ln='bhvFKIK_IKJoint', dt='string', h=self.hideAttrs)
 
-        pm.addAttr(limb, ln='bhvSourceLimb', dt='string') # Ignore, only for connections
-        pm.addAttr(limb, ln='bhvTargetLimb', dt='string') # for connecting to target
-        pm.addAttr(limb, ln='bhvTargetJoint', at='enum', en='None')
-        pm.addAttr(limb, ln='bhvCstType', at='enum', en=bhvCstTypes)
+        pm.addAttr(limb, ln='bhvSourceLimb', dt='string', h=self.hideAttrs) 
+        pm.addAttr(limb, ln='bhvTargetLimb', dt='string', h=self.hideAttrs) 
+        pm.addAttr(limb, ln='bhvTargetJoint', at='enum', en='None', h=self.hideAttrs)
+        pm.addAttr(limb, ln='bhvCstType', at='enum', en=bhvCstTypes, h=self.hideAttrs)
         
         # pm.addAttr(limb, ln='bhvCstSourceLimb', dt='string') # Ignore, only for connections
         # pm.addAttr(limb, ln='bhvCstTargetLimb', dt='string') # for connecting to target

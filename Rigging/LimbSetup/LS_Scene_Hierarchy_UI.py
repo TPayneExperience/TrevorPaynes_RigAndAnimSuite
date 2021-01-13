@@ -32,12 +32,17 @@ class LS_Scene_Hierarchy_UI:
             if joint not in limbJoints:
                 self.selectableJoints.append(longName)
             pm.treeView(self.widget, e=1, dl=(longName, joint.shortName()))
+        hasJoints = bool(self.allJoints)
+        pm.menuItem(self.buildHier_mi, e=1, en=hasJoints)
+        pm.menuItem(self.buildNames_mi, e=1, en=hasJoints)
 
     def _Setup(self):
         self.widget = pm.treeView(adr=0, arp=0, sc=self.Selection, scc=self.SelectionChanged)
         with pm.popupMenu():
-            pm.menuItem(l='Auto Build by HIERARCHY', c=self.AutoBuildByHierarchy)
-            pm.menuItem(l='Auto Build by NAMES', c=self.AutoBuildByName)
+            self.buildHier_mi = pm.menuItem(l='Auto Build by HIERARCHY', 
+                                            c=self.AutoBuildByHierarchy)
+            self.buildNames_mi = pm.menuItem(l='Auto Build by NAMES', 
+                                            c=self.AutoBuildByName)
 
     def GetSelectedJoints(self):
         names = pm.treeView(self.widget, q=1, selectItem=1)
@@ -68,18 +73,73 @@ class LS_Scene_Hierarchy_UI:
 
     def AutoBuildByHierarchy(self, ignore):
         self.logger.info('\t\tSceneJointHier > Auto Build by Hierarchy')
+        # Build Joint Parent Dictionary
         jointParents = {}   # childJoint : parentJoint
-        newLimbJointSets = []  # [[jnt1, jnt2], [jnt3], ...]
-        allJoints = pm.ls(type='joint')
-        for joint in allJoints:
+        for joint in pm.ls(type='joint'):
             parent = pm.listRelatives(joint, parent=1)
             if parent:
                 jointParents[joint] = parent[0]
             else:
                 jointParents[joint] = None
+        # # NEW ALGORITHM
+        # # Branches, then chains, repeat
+        # branches = {None: []} # parent : [[j1], [j2, j3], ...]
+        # chains = {None: []} # parent : [[j1], [j2, j3], ...]
+        # for i in range(99):
+        #     # BRANCHES
+        #     children = set(jointParents.keys())
+        #     parents = set(jointParents.values())
+        #     for child in list(children - parents):
+        #         if child not in jointParents:
+        #             continue
+        #         joints = self.GetJointBranch(child)
+        #         if len(joints) == 1:
+        #             continue
+        #         parent = pm.listRelatives(child, p=1)
+        #         if parent:
+        #             parent = parent[0]
+        #             if parent not in branches:
+        #                 branches[parent] = []
+        #             branches[parent].append(joints)
+        #             pm.parent(joints, w=1)
+        #         else:
+        #             branches[None].append(joints)
+        #         for joint in joints:
+        #             del(jointParents[joint])
+        #     # CHAINS
+        #     children = set(jointParents.keys())
+        #     parents = set(jointParents.values())
+        #     for child in list(children - parents):
+        #         if child not in jointParents:
+        #             continue
+        #         joints = self.GetJointChain(child)
+        #         parent = pm.listRelatives(joints[-1], p=1)
+        #         if parent:
+        #             parent = parent[0]
+        #             if parent not in chains:
+        #                 chains[parent] = []
+        #             chains[parent].append(joints)
+        #             pm.parent(joints, w=1)
+        #         else:
+        #             chains[None].append(joints)
+        #         for joint in joints:
+        #             del(jointParents[joint])
+        # for parent, children in branches.items():
+        #     if len(children) == 1:
+        #         pm.parent(children[0], parent)
+        #     else:
+        #         pm.parent(children, parent)
+        # for parent, children in chains.items():
+        #     if len(children) == 1:
+        #         pm.parent(children[0], parent)
+        #     else:
+        #         pm.parent(children, parent)
+        
+        # OLD ALGORITHM
+        # Group joints by limb structure: one, chain or branch
+        disconnectJoints = {} # parent : [[j1, j2], [j3], ...]
+        newLimbJointSets = []  # [[jnt1, jnt2], [jnt3], ...]
         for i in range(99):
-            if len(jointParents) == 0:
-                break
             children = set(jointParents.keys())
             parents = set(jointParents.values())
             # Iterate through all end children,
@@ -87,19 +147,33 @@ class LS_Scene_Hierarchy_UI:
             for child in list(children - parents):
                 if child not in jointParents:
                     continue
+                # Unparent CHAIN root joint + track
                 joints = self.GetJointChain(child)
                 if len(joints) == 1:
                     joints = self.GetJointBranch(child)
+                    parent = pm.listRelatives(child, p=1)
+                    if parent:
+                        parent = parent[0]
+                        if parent not in disconnectJoints:
+                            disconnectJoints[parent] = []
+                        disconnectJoints[parent] += joints
+                        if len(joints) == 1:
+                            pm.parent(joints[0], w=1)
+                        else:
+                            pm.parent(joints, w=1)
                 newLimbJointSets.append(joints)
                 for joint in joints:
                     del(jointParents[joint])
+        for parent, children in disconnectJoints.items():
+            pm.parent(children, parent)
         for newLimbJoints in newLimbJointSets:
             limb = self.parent.AddLimbByJoints(newLimbJoints)
-            if limb:
-                self.parent.parent.AddLimb(limb)
-                for joint in newLimbJoints:
-                    self.jntMng.Setup_Editable(limb, joint)
-                self.jntMng.ReindexJoints(limb)
+            # if limb:
+            self.parent.parent.AddLimb(limb)
+            for joint in newLimbJoints:
+                # self.jntMng.Setup_Editable(limb, joint)
+                self.jntMng.UpdateJointName(joint)
+            self.jntMng.ReindexJoints(limb)
         self.parent.parent.AutoBuildHier()
         self.parent.Populate()
         self.parent.UpdateSceneFrame()
@@ -161,7 +235,8 @@ class LS_Scene_Hierarchy_UI:
                 limb.side.set(2)
             self.parent.parent.AddLimb(limb)
             for joint in tempJoints:
-                self.jntMng.Setup_Editable(limb, joint)
+                # self.jntMng.Setup_Editable(limb, joint)
+                self.jntMng.UpdateJointName(joint)
             self.jntMng.ReindexJoints(limb)
 
         # WARNING IF LIMB JOINTS WRONG

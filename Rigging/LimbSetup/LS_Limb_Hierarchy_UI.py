@@ -30,8 +30,12 @@ class LS_Limb_Hierarchy_UI:
                 pm.treeView(self.widget, e=1, ai=(limbID, ''))
                 pm.treeView(self.widget, e=1, dl=(limbID, limbName))
                 side = self.limbMng.GetLimbSide(limb)
-                if (side == 'L' or side == 'R'):
-                    pm.treeView(self.widget, e=1, bti=(limbID, 1, side))
+                if (side == 'L'):
+                    pm.treeView(self.widget, e=1, bti=(limbID, 1, side),
+                            lbc=(limbID, 0.1, 0.1, 0.3))
+                elif (side == 'R'):
+                    pm.treeView(self.widget, e=1, bti=(limbID, 1, side),
+                            lbc=(limbID, 0.3, 0.1, 0.1))
                 else:
                     pm.treeView(self.widget, e=1, bvf=(limbID, 1, 0))
                 # joints = self.jntMng.GetLimbTempJoints(limb)
@@ -56,7 +60,8 @@ class LS_Limb_Hierarchy_UI:
         tt += '\nname BOTH LIMBS with the SAME NAME.'
         self.widget = pm.treeView(ams=0, adr=0, arp=0, ann=tt, nb=1, fb=1)
         pm.treeView(self.widget, e=1,   editLabelCommand=self.Rename,
-                                        scc=self.SelectionChanged)
+                                        scc=self.SelectionChanged,
+                                        enk=1)
         with pm.popupMenu():
             self.add_mi = pm.menuItem(l='Add Limb', c=self.parent.AddLimb)
             self.flipSides_mi = pm.menuItem(l='Flip Sides', en=0, c=self.FlipSides)
@@ -135,7 +140,7 @@ class LS_Limb_Hierarchy_UI:
 
         # oldMirror = self.limbMng.GetLimbMirror(limb)
         if self.limbMng.Rename(limb, newName):
-            self.parent.RenameLimbs()
+            self.parent.RenameLimbs(limb)
         else:
             msg = '\t\t\tTwo limbs MAX may have same name'
             self.logger.error(msg)

@@ -129,7 +129,16 @@ class LimbSetup_UI:
         self.UpdateJointFrame()
         self.parent.RemoveLimb(limb)
 
-    def RenameLimbs(self):
+    def RenameLimbs(self, limb):
+        groups = pm.listConnections(limb.bhvDistanceGroup)
+        groups += pm.listConnections(limb.bhvEmptyGroup)
+        groups += pm.listConnections(limb.bhvFKIKSwitchGroup)
+        for group in groups:
+            self.grpMng.UpdateGroupName(group)
+        for joint in pm.listConnections(limb.infJoints):
+            self.jntMng.UpdateJointName(joint)
+            group = pm.listConnections(joint.group)[0]
+            self.grpMng.UpdateGroupName(group)
         self.Populate()
 
     def FlipSides(self):

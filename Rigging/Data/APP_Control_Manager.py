@@ -13,6 +13,7 @@ class APP_Control_Manager:
                             'PFRSCTR_Diamond_Wire', # Distance
                             'PFRSCTR_Pin_Wire') # FKIK
         self._ctrTemplates = {} # CtrType/Name : ControlTemplate
+        self.hideAttrs = False
     
     def NewRig(self, rigRoot):
         self.rigRoot = rigRoot

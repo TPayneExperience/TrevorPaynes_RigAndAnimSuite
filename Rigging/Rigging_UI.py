@@ -201,7 +201,8 @@ class Rigging_UI:
         for limb in allLimbs:
             joints = self.jntMng.GetLimbJoints(limb, False)
             for joint in joints:
-                self.jntMng.Setup_Editable(joint)
+                self.jntMng.UpdateJointName(joint)
+                # self.jntMng.Setup_Editable(joint)
 
             # If limb type changed, reset bhvType to default FK
             # limbType = limb.limbType.get()
@@ -267,7 +268,7 @@ class Rigging_UI:
         for limb in self.limbMng.GetAllLimbs():
             jointGroups = []
             for joint in self.jntMng.GetLimbJoints(limb, False):
-                self.jntMng.Teardown_Editable(joint)
+                # self.jntMng.Teardown_Editable(joint)
                 jointGroups += pm.listConnections(joint.group)
             limbGroups = pm.listConnections(limb.bhvDistanceGroup)
             if limb.bhvType.get() in self.bhvMng.distanceIndexes:

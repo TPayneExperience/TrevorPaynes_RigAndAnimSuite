@@ -26,12 +26,16 @@ class BHV_Limb_Hierarchy_UI:
                 pm.treeView(self.widget, e=1, ai=(limbID, parentID))
                 pm.treeView(self.widget, e=1, dl=(limbID, name))
                 side = self.limbMng.GetLimbSide(limb)
-                if (side == 'L' or side == 'R'):
-                    pm.treeView(self.widget, e=1, bti=(limbID, 1, side))
+                if (side == 'L'):
+                    pm.treeView(self.widget, e=1, bti=(limbID, 1, side),
+                            lbc=(limbID, 0.1, 0.1, 0.3))
+                elif (side == 'R'):
+                    pm.treeView(self.widget, e=1, bti=(limbID, 1, side),
+                            lbc=(limbID, 0.3, 0.1, 0.1))
                 else:
                     pm.treeView(self.widget, e=1, bvf=(limbID, 1, 0))
                 if limb.bhvType.get() in self.bhvMng.parentableIndexes:
-                    pm.treeView(self.widget, e=1, ornament=(limbID, 1, 0, 4))
+                    pm.treeView(self.widget, e=1, ornament=(limbID, 1, 0, 3))
                 self.parent.UpdateLimbParentGroups(limbID)
 
 #=========== SETUP ====================================

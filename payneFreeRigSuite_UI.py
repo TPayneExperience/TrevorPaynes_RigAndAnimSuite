@@ -34,17 +34,26 @@ class PayneFreeRigSuite_UI():
         self.jsonMng = js.Json_Manager()
         self.nameMng = nm.Name_Manager(self)
         self.rigRoot = None
+        self.hideAttrs = False
+        # self.hideAttrs = True
 
         # UI
         self.rigSetupUI = rs_ui.RigSetup_UI(self.nameMng,
                                             self.fileMng,
                                             self)
         self._Setup()
+        
         self.limbMng = self.rig_ui.limbMng
         self.grpMng = self.rig_ui.grpMng
         self.jntMng = self.rig_ui.jntMng
         self.bhvMng = self.rig_ui.bhvMng
+        self.ctrMng = self.rig_ui.ctrMng
 
+        self.limbMng.hideAttrs = self.hideAttrs
+        self.grpMng.hideAttrs = self.hideAttrs
+        self.jntMng.hideAttrs = self.hideAttrs
+        self.bhvMng.hideAttrs = self.hideAttrs
+        self.ctrMng.hideAttrs = self.hideAttrs
 
         self.Debug()
         # self.Populate()
