@@ -94,6 +94,7 @@ class Joint_Manager:
             pm.addAttr(joint, ln='limbIndex', at='short')
             pm.addAttr(joint, ln='pfrsName', dt='string')
             pm.addAttr(joint, ln='group', dt='string')
+            pm.addAttr(joint, ln='bhvRFKGroup', dt='string')
             pm.addAttr(joint, ln='bhvDistanceGroup', dt='string')
             # SKIN ATTRS
             pm.addAttr(joint, ln='skinAnimStart', at='float')

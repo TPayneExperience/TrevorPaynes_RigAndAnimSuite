@@ -171,14 +171,16 @@ class Rigging_UI:
         nextIndex = pm.tabLayout(self.tab, q=1, selectTabIndex=1)-1
         if lastIndex in [0, 1] and nextIndex in [2, 3, 4]:
             for limb in self.limbMng.GetAllLimbs():
-                if limb.limbType.get() == 2: # 3+ chain
-                    self.jntMng.Setup_NonInfJoint(limb)
+                if limb.bhvType.get() not in self.bhvMng.rfkTypeIndexes:
+                    if limb.limbType.get() == 2: # 3+ chain
+                        self.jntMng.Setup_NonInfJoint(limb)
             self.SetupEditable_Limbs()
         elif lastIndex in [2, 3, 4] and nextIndex in [0, 1]:
             self.TeardownEditable_Limbs()
             for limb in self.limbMng.GetAllLimbs():
-                if limb.limbType.get() == 2: # 3+ chain
-                    self.jntMng.Teardown_NonInfJoint(limb)
+                if limb.bhvType.get() not in self.bhvMng.rfkTypeIndexes:
+                    if limb.limbType.get() == 2: # 3+ chain
+                        self.jntMng.Teardown_NonInfJoint(limb)
         
     def UpdateControlStates(self):
         index = self.rigRoot.riggingTab.get()

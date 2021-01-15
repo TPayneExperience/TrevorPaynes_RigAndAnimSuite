@@ -158,6 +158,19 @@ class Test_UI:
 
 #=========== FK ====================================
     
+    # RELATIVE FK
+    def Setup_Internal_RelativeFK(self, limb):
+        # Dup original joints
+        # Dup center joint
+        # Reverse IK hier parenting
+        # parent ik root to fk root joint
+        # 
+        pass
+
+    def Setup_External_RelativeFK(self, limb):
+        pass
+
+
     # FK CHAIN / REVERSE CHAIN
     def Setup_Internal_FKChain(self, limb):
         groups = self.grpMng.GetLimbGroups(limb)
@@ -173,7 +186,9 @@ class Test_UI:
         if parent:
             childGroup = self.grpMng.GetLimbGroups(limb)[0]
             index = limb.parentGroup.get()
-            parentGroup = self.grpMng.GetLimbGroups(parent)[index]
+            parentGroups = self.grpMng.GetLimbFKGroups(parent)
+            parentGroup = parentGroups[index]
+            # parentGroup = self.grpMng.GetLimbGroups(parent)[index]
             parentControl = pm.listConnections(parentGroup.control)[0]
             pm.parent(childGroup, parentControl)
             # parentCtrs = self.ctrMng.GetGroupControl(parentGroup)
@@ -492,7 +507,6 @@ class Test_UI:
         for ik in ikVisTargets:
             pm.connectAttr(fkikControl.fkikSwitch, ik.v)
         
-
     def Teardown_FKIK(self, limb):
         pm.delete(pm.listConnections(limb.bhvFKIK_FKJoint))
         pm.delete(pm.listConnections(limb.bhvFKIK_IKJoint))

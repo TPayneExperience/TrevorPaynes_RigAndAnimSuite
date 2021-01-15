@@ -1,4 +1,6 @@
 
+import math
+
 import pymel.core as pm
 
 class BHV_Limb_Manager:
@@ -15,23 +17,24 @@ class BHV_Limb_Manager:
         self.emptyLimbIndexes = (7,)
         self.oneJntLimbIndexes = (6, 4, 3)
         self.twoJntChainLimbIndexes = (0, 6, 8, 5, 9, 3)
-        self.threeJntChainLimbIndexes = (0, 6, 8, 1, 5, 2, 9, 3)
+        self.threeJntChainLimbIndexes = (0, 6, 8, 10, 1, 5, 2, 9, 3)
         self.branchLimbIndexes = (6, 3)
 
         self.fkTypeIndexes = (0, 2, 6, 8, 9)
+        self.rfkTypeIndexes = (10,)
         self.fkikTypeIndexes = (2, 9)
         self.cstTypeIndexes = (3,)
         self.lookAtTypeIndexes = (4,)
         self.distanceIndexes = (1, 2, 4)
         self.targetIndexes = (1, 2, 3, 5, 9)
-        self.parentableIndexes = (0, 2, 6, 7, 8, 9)
+        self.parentableIndexes = (0, 2, 6, 7, 8, 9, 10)
 
         self.ikTargetableIndexes = (0, 6, 7, 8)
         self.ikPVTypeIndexes = (1, 2)
         self.ikChainTypeIndexes = (5, 9)
         self.ikTypeIndexes = (1, 2, 5, 9)
         self.cstTargetTypeIndexes = (0, 1, 2, 4, 5, 6, 8, 9)
-        self.ctrTypeIndexes = (0, 1, 2, 4, 6, 7, 8, 9) # For APP > Limb hier
+        self.ctrTypeIndexes = (0, 1, 2, 4, 6, 7, 8, 9, 10) # For APP > Limb hier
 
         
         self.bhvTypes = (   'FK - Chain', # DON'T CHANGE ORDER!
@@ -45,8 +48,8 @@ class BHV_Limb_Manager:
                             'FK - Branch',
                             'Empty',
                             'FK - Reverse Chain',
-                            'FK + IK Chain')
-                            # MISSING: Relative FK
+                            'FK + IK Chain', 
+                            'FK - Relative')
 
 
 #============= ACCESSORS ============================
@@ -78,6 +81,8 @@ class BHV_Limb_Manager:
             self.Teardown_Distance(limb)
         if oldBhvIndex in self.fkikTypeIndexes:
             self.Teardown_FKIK(limb)
+        if oldBhvIndex in self.rfkTypeIndexes:
+            self.Teardown_RFK(limb)
 
         limb.bhvType.set(newBhvIndex)
         self.RebuildLimbGroup(limb)
@@ -91,6 +96,8 @@ class BHV_Limb_Manager:
             self.Setup_IKPoleVector(limb)
         if newBhvIndex in self.fkikTypeIndexes:
             self.Setup_FKIK(limb)
+        if newBhvIndex in self.rfkTypeIndexes:
+            self.Setup_RFK(limb)
         
         # # Force IKs which Targeted this limb, to find other
         # if oldBhvIndex in self.ikTargetableIndexes:
@@ -124,7 +131,7 @@ class BHV_Limb_Manager:
     def SetIKTargetLimb(self, sourceLimb, targetLimb):
         '''Auto assign each IK limb group to closest FK limb's group'''
         targetJoints = self.jntMng.GetLimbJoints(targetLimb)
-        sourceGroups = self.grpMng.GetLimbIKGroups(sourceLimb)
+        # sourceGroups = self.grpMng.GetLimbIKGroups(sourceLimb)
         pm.disconnectAttr(sourceLimb.bhvTargetLimb)
         pm.connectAttr(targetLimb.bhvSourceLimb, sourceLimb.bhvTargetLimb)
         # If only one target, set and return
@@ -161,9 +168,16 @@ class BHV_Limb_Manager:
         pm.addAttr(limb, ln='bhvEmptyGroup', dt='string', h=self.hideAttrs)
         pm.addAttr(limb, ln='bhvFKIKSwitchGroup', dt='string', h=self.hideAttrs) 
 
+        # FKIK
         pm.addAttr(limb, ln='bhvFKIK_FKJoint', dt='string', h=self.hideAttrs)
         pm.addAttr(limb, ln='bhvFKIK_IKJoint', dt='string', h=self.hideAttrs)
 
+        # Relative FK
+        pm.addAttr(limb, ln='bhvRFKCenterGroup', dt='string', h=self.hideAttrs)
+        pm.addAttr(limb, ln='bhvRFKBottomGroup', dt='string', h=self.hideAttrs)
+        pm.addAttr(limb, ln='bhvRFKTopGroup', dt='string', h=self.hideAttrs) 
+        pm.addAttr(limb, ln='bhvRFKCenterJoint', at='enum', en='None', h=self.hideAttrs)
+        
         pm.addAttr(limb, ln='bhvSourceLimb', dt='string', h=self.hideAttrs) 
         pm.addAttr(limb, ln='bhvTargetLimb', dt='string', h=self.hideAttrs) 
         pm.addAttr(limb, ln='bhvTargetJoint', at='enum', en='None', h=self.hideAttrs)
@@ -180,6 +194,9 @@ class BHV_Limb_Manager:
         groups = pm.listConnections(limb.bhvDistanceGroup)
         groups += pm.listConnections(limb.bhvEmptyGroup)
         groups += pm.listConnections(limb.bhvFKIKSwitchGroup)
+        groups += pm.listConnections(limb.bhvRFKCenterGroup)
+        groups += pm.listConnections(limb.bhvRFKBottomGroup)
+        groups += pm.listConnections(limb.bhvRFKTopGroup)
         for group in groups:
             self.grpMng.Remove(group)
 
@@ -256,11 +273,16 @@ class BHV_Limb_Manager:
                 self.grpMng.UpdateGroupName(group)
                 # for attr in ['.tx', '.ty', '.tz', '.v']:
                 #     pm.setAttr(ctr+attr, l=1, k=0, cb=0)
-        elif bhvType in self.emptyLimbIndexes:
+        if bhvType in self.emptyLimbIndexes:
             if not pm.listConnections(limb.bhvEmptyGroup):
                 group = self.grpMng.AddEmptyGroup(limb)
                 self.ctrMng.Add(group, self.ctrMng.ctrTypes[0])
                 self.grpMng.UpdateGroupName(group)
+        if bhvType in self.rfkTypeIndexes:
+            if not pm.listConnections(limb.bhvRFKCenterGroup):
+                for group in self.grpMng.AddRFKGroups(limb):
+                    self.ctrMng.Add(group, self.ctrMng.ctrTypes[0])
+                    # self.grpMng.UpdateGroupName(group)
 
     def RebuildBhvDep(self, sourceLimb):
         bhvType = sourceLimb.bhvType.get()
@@ -336,7 +358,6 @@ class BHV_Limb_Manager:
         return None
 
 
-
 #============= SETUP BHV ============================
     # EMPTY Created by Limb Setup UI > Teardown Tab
     # JOINT Groups created by Limb Setup UI > Add Limb
@@ -377,7 +398,7 @@ class BHV_Limb_Manager:
         return group
 
     def Setup_FKIK(self, limb):
-        groups = pm.listConnections(limb.bhvFKIKSwitchGroup)
+        fkikGroup = pm.listConnections(limb.bhvFKIKSwitchGroup)[0]
         # if groups:
         #     fkikGroup = groups[0]
         # else:
@@ -401,6 +422,28 @@ class BHV_Limb_Manager:
         pm.connectAttr(fkikGroup.FKVisTargets, fkGroup.FKIKVisSource)
         self.grpMng.UpdateFKIKSwitchJoint(fkikGroup, joints)
 
+    def Setup_RFK(self, limb):
+        for group in self.grpMng.GetLimbGroups(limb):
+            group.v.set(1)
+        joints = self.jntMng.GetLimbJoints(limb)
+        names = [j.pfrsName.get() for j in joints[1:-1]]
+        pm.addAttr(limb.bhvRFKCenterJoint, e=1, en=':'.join(names))
+        index = len(joints) / 2
+        limb.bhvRFKCenterJoint.set(index-1)
+        self.UpdateRFKConnections(limb)
+
+    def UpdateRFKConnections(self, limb):
+        joints = self.jntMng.GetLimbJoints(limb)
+        index = limb.bhvRFKCenterJoint.get() + 1
+        groups = self.grpMng.GetLimbGroups(limb)
+        for i in range(3):
+            pm.disconnectAttr(groups[i].joint)
+        for i in range(3):
+            pm.connectAttr(groups[i].joint, joints[index-1+i].bhvRFKGroup)
+            pm.parent(groups[i], joints[index-1+i])
+            pm.xform(groups[i], t=[0,0,0], ro=[0,0,0], s=[1,1,1])
+            self.grpMng.UpdateGroupName(groups[i])
+
 # ============= TEARDOWN BHV ============================
 
     def Teardown_FK(self, limb):
@@ -420,6 +463,14 @@ class BHV_Limb_Manager:
     def Teardown_FKIK(self, limb):
         group = pm.listConnections(limb.bhvFKIKSwitchGroup)[0]
         group.v.set(0)
+
+    def Teardown_RFK(self, limb):
+        groups = pm.listConnections(limb.bhvRFKCenterGroup)
+        groups += pm.listConnections(limb.bhvRFKBottomGroup)
+        groups += pm.listConnections(limb.bhvRFKTopGroup)
+        for group in groups:
+            group.v.set(0)
+
 
 
 

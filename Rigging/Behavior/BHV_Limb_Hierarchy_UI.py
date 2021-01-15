@@ -2,10 +2,11 @@
 import pymel.core as pm
 
 class BHV_Limb_Hierarchy_UI:
-    def __init__(self, limbMng, jntMng, bhvMng, parent):
+    def __init__(self, limbMng, jntMng, bhvMng, grpMng, parent):
         self.limbMng = limbMng
         self.jntMng = jntMng
         self.bhvMng = bhvMng
+        self.grpMng = grpMng
         self.parent = parent
         self.logger = parent.logger
 
@@ -36,7 +37,7 @@ class BHV_Limb_Hierarchy_UI:
                     pm.treeView(self.widget, e=1, bvf=(limbID, 1, 0))
                 if limb.bhvType.get() in self.bhvMng.parentableIndexes:
                     pm.treeView(self.widget, e=1, ornament=(limbID, 1, 0, 3))
-                self.parent.UpdateLimbParentGroups(limbID)
+                self.grpMng.UpdateLimbParentGroups(limb)
 
 #=========== SETUP ====================================
 
@@ -70,6 +71,7 @@ class BHV_Limb_Hierarchy_UI:
         if oldParents[0] == newParentIDStr:
             return
         limbID = int(limbIDsStr[0])
+        limb = self.limbMng.GetLimb(limbID)
         name = self.limbMng.GetLimb(limbID).pfrsName.get()
         if newParentIDStr:
             parentID = int(newParentIDStr)
@@ -85,7 +87,7 @@ class BHV_Limb_Hierarchy_UI:
             self.logger.info('\t\tLimbHier > REPARENTING "%s" to world' % name)
             parentID = -1
         self.limbMng.Reparent(limbID, parentID)
-        self.parent.UpdateLimbParentGroups(limbID)
+        self.grpMng.UpdateLimbParentGroups(limb)
     
 #=========== RMB ====================================
 
@@ -96,7 +98,7 @@ class BHV_Limb_Hierarchy_UI:
             if not parent:
                 continue
             self.limbMng.Reparent(child.ID.get(), parent.ID.get())
-            self.parent.UpdateLimbParentGroups(child.ID.get())
+            self.grpMng.UpdateLimbParentGroups(child)
         # self.parent.UpdateLimbUI()
         self.Populate()
     

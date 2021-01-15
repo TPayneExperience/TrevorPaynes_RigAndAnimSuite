@@ -6,12 +6,13 @@ class Limb_Manager:
 
         self.nameMng = nameMng
 
-        self.limbTypes = (  'Empty',
+        self.limbTypes = (  'Empty_Rigging',
         
                             'One_Joint',
                             'ThreePlus_JointChain', 
                             'Branch',
                             'Two_JointChain')
+                            # 'Empty_Animation') # only Anim mode can add/remove
         self.limbSides = ('M', 'L', 'R', '-')
         self.hideAttrs = False
 
@@ -116,7 +117,7 @@ class Limb_Manager:
         pm.addAttr(limb, ln='appTargetFKIKType', at='enum', en='FK:IK', 
                                         h=self.hideAttrs)
         pm.connectAttr(self.rigRoot.limbs, limb.rigRoot)
-
+        self.UpdateLimbName(limb)
         self._limbs[limbID] = limb
         return limb
 
@@ -157,6 +158,7 @@ class Limb_Manager:
             if pm.listConnections(sourceLimb.mirrorLimb):
                 self._BreakMirror(sourceLimb)
         sourceLimb.pfrsName.set(newName)
+        self.UpdateLimbName(sourceLimb)
         return True
     
     def _BreakMirror(self, sourceLimb):
@@ -164,6 +166,7 @@ class Limb_Manager:
         mirrorLimb.side.set(0)
         sourceLimb.side.set(0)
         pm.disconnectAttr(sourceLimb.mirrorLimb)
+        self.UpdateLimbName(mirrorLimb)
 
     # def UpdateLimbType(self, limb):
     #     joints = pm.listConnections(limb.joints)
@@ -228,6 +231,13 @@ class Limb_Manager:
             orderedLimbs += children[:]
         return orderedLimbs
     
+    def UpdateLimbName(self, limb):
+        pfrsName = limb.pfrsName.get()
+        limbName = self.nameMng.GetName(pfrsName,
+                                    'Limb',
+                                    self.GetLimbSide(limb), 
+                                    'NODE')
+        limb.rename(limbName)
 
     # def DuplicateLimb(self, sourceLimbID):
     #     targetID = self.rigRoot.nextLimbID.get()

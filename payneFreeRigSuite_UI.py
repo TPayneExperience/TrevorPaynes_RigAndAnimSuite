@@ -20,6 +20,8 @@ reload(js)
 import RigSetup.Name_Manager as nm
 reload(nm)
 
+import PFRS_Debug as debug
+reload(debug)
 
 __author__ = 'Trevor Payne'
 __version__ = '0.1'
@@ -55,7 +57,7 @@ class PayneFreeRigSuite_UI():
         self.bhvMng.hideAttrs = self.hideAttrs
         self.ctrMng.hideAttrs = self.hideAttrs
 
-        self.Debug()
+        debug.PFRS_Debug(self)
         # self.Populate()
 
     # def Populate(self):
@@ -115,53 +117,6 @@ class PayneFreeRigSuite_UI():
 
     def SetRig(self, rigRoot):
         self.rigRoot = rigRoot
-
-    def Debug(self):
-        self.NewRig('PFX', 
-                    range(5), 
-                    True)
-        # # ========== ARM SKIN TEST ===============================
-        # # Testing Joints
-        # path = r'D:/Assets/Programming/Python/Maya/ModularAutoRigger'
-        # path += r'/TEST_OUTPUT/temp_joints2.ma'
-        # pm.importFile(path)
-        # self.UpdateEnableUI()
-        # self.Setup_Editable()
-        # pm.tabLayout(self.rig_ui.tab, e=1, sti=2) # Select Limb setup tab
-        # self.rig_ui.limbSetup_ui.sceneHier_ui.AutoBuildByName(0)
-        # pm.tabLayout(self.tab, e=1, sti=2) # Select SKINNING tab
-        # mesh1 = pm.ls('pCylinderShape1')[0]
-        # mesh2 = pm.ls('pCylinderShape2')[0]
-        # mesh3 = pm.ls('pCylinderShape3')[0]
-
-        # for mesh in [mesh1, mesh2, mesh3]:
-        #     self.skin_ui.meshMng.AddMesh(mesh)
-        #     self.skin_ui.skinMng.AddSkinAttrs(mesh)
-        #     for limb in self.limbMng.GetAllLimbs():
-        #         self.skin_ui.skinMng.SetDefaultLimbJointWeights(mesh, limb)
-
-        # pm.tabLayout(self.skin_ui.tab, e=1, sti=3) # Select PAINT WEIGHTS tab
-
-        # ========== SKEL RIGGING TEST ===============================
-        # Testing Joints
-        path = r'D:/Assets/Programming/Python/Maya/ModularAutoRigger'
-        path += r'/TEST_OUTPUT/temp_joints.ma'
-        pm.importFile(path)
-        self.UpdateEnableUI()
-        self.Setup_Editable()
-        pm.tabLayout(self.rig_ui.tab, e=1, sti=2) # Select Limb setup tab
-        # joints = pm.ls('Pelvis_Root_M')
-        # joints += pm.ls('Spine_M_S01')
-        # limb = self.rig_ui.limbSetup_ui.AddLimbByJoints(joints)
-        # self.rig_ui.AddLimb(limb)
-        # pm.tabLayout(self.tab, e=1, sti=2) # Select SKINNING tab
-        mesh1 = pm.ls('pSphereShape1')[0]
-        mesh2 = pm.ls('pCubeShape1')[0]
-        self.skin_ui.meshMng.AddMesh(mesh1)
-        self.skin_ui.meshMng.AddMesh(mesh2)
-        self.skin_ui.skinMng.AddSkinAttrs(mesh1)
-        self.skin_ui.skinMng.AddSkinAttrs(mesh2)
-        # pm.tabLayout(self.skin_ui.tab, e=1, sti=3) # Select PAINT WEIGHTS tab
 
 #=========== SETUP ====================================
 

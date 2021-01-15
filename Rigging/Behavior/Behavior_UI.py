@@ -37,6 +37,7 @@ class Behavior_UI:
                                                         self.limbMng,
                                                         self.jntMng,
                                                         self.bhvMng,
+                                                        self.grpMng,
                                                         self)
             with pm.frameLayout('Behavior Groups / Control Pivots', bv=1):
                 self.grpHier_ui = groupHier_UI.BHV_Group_Hierarchy_UI(  self.limbMng,
@@ -74,51 +75,43 @@ class Behavior_UI:
     # def UpdateLimbUI(self):
     #     self.limbProp_ui.UpdateGroupParentUI()
 
-    def UpdateLimbParentGroups(self, limbID):
-        '''Updates limb parent group enum to closest to root group'''
-        childLimb = self.limbMng.GetLimb(limbID)
-        parents = pm.listConnections(childLimb.parentLimb)
+    # def UpdateLimbParentGroups(self, childLimb):
+    #     '''Updates limb parent group enum to closest to root group'''
+    #     # childLimb = self.limbMng.GetLimb(limbID)
+    #     parents = pm.listConnections(childLimb.parentLimb)
 
-        # If NO PARENT or parent EMPTY, set and return
-        if not parents:
-            pm.addAttr(childLimb.parentGroup, e=1, en='None')
-            return
-        parentLimb = parents[0]
-        parentBhvType = parentLimb.bhvType.get()
-        if parentBhvType == 7:
-            pm.addAttr(childLimb.parentGroup, e=1, en='Empty')
-            return
+    #     # If NO PARENT or parent EMPTY, set and return
+    #     if not parents:
+    #         pm.addAttr(childLimb.parentGroup, e=1, en='None')
+    #         return
+    #     parentLimb = parents[0]
+    #     parentBhvType = parentLimb.bhvType.get()
+    #     if parentBhvType == 7:
+    #         pm.addAttr(childLimb.parentGroup, e=1, en='Empty')
+    #         return
         
-        # Default target group to closest to first group
-        distances = {}
-        names = []
-        rootGroup = self.grpMng.GetLimbGroups(childLimb)[0]
-        sourcePos = pm.xform(rootGroup, q=1, t=1, ws=1)
-        parentGroups = self.grpMng.GetLimbFKGroups(parentLimb)
-        for parentGroup in parentGroups:
-            # Create distance dict
-            joint = pm.listConnections(parentGroup.joint)[0]
-            targetPos = pm.xform(joint, q=1, t=1, ws=1)
-            dist = 0
-            for i in range(3):
-                dist += (sourcePos[i]-targetPos[i])**2
-            distances[dist] = parentGroup
-            names.append(joint.pfrsName.get())
-            # Create names list for enum
-            # names.append(parentGroup.shortName())
-            # if (pm.listConnections(parentGroup.joint)):
-            #     names.append(self.grpMng.GetJointGroupName(parentGroup))
-            # else:
-            #     names.append(self.grpMng.GetLimbGroupName(parentGroup))
-        # else:
-        #     names = [pm.listConnections(g.joint)[0].pfrsName.get() for g in parentGroups]
-        pm.addAttr(childLimb.parentGroup, e=1, en=':'.join(names))
-        # Set Closest Group Index
-        closestDist = sorted(list(distances.keys()))[0]
-        closestGroup = distances[closestDist]
-        # closestJoint = pm.listConnections(closestGroup.joint)[0]
-        index = self.grpMng.GetLimbGroups(parentLimb).index(closestGroup)
-        childLimb.parentGroup.set(index)
+    #     # Default target group to closest to first group
+    #     distances = {}
+    #     names = []
+    #     rootGroup = self.grpMng.GetLimbGroups(childLimb)[0]
+    #     sourcePos = pm.xform(rootGroup, q=1, t=1, ws=1)
+    #     parentGroups = self.grpMng.GetLimbFKGroups(parentLimb)
+    #     for parentGroup in parentGroups:
+    #         # Create distance dict
+    #         joint = pm.listConnections(parentGroup.joint)[0]
+    #         targetPos = pm.xform(joint, q=1, t=1, ws=1)
+    #         dist = 0
+    #         for i in range(3):
+    #             dist += (sourcePos[i]-targetPos[i])**2
+    #         distances[dist] = parentGroup
+    #         names.append(joint.pfrsName.get())
+    #     pm.addAttr(childLimb.parentGroup, e=1, en=':'.join(names))
+    #     # Set Closest Group Index
+    #     closestDist = sorted(list(distances.keys()))[0]
+    #     closestGroup = distances[closestDist]
+    #     index = parentGroups.index(closestGroup)
+    #     # index = self.grpMng.GetLimbGroups(parentLimb).index(closestGroup)
+    #     childLimb.parentGroup.set(index)
     
     def LimbSelected(self, limb):
         if limb:

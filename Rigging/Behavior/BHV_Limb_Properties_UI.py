@@ -13,6 +13,7 @@ class BHV_Limb_Properties_UI:
         self.limb = None
         self.targetJnt_at = None
         self.cstType_at = None
+        self.rkfType_at = None
         # self.ctrAxis_at = None
         self.fkikJoint_at = None
 
@@ -126,11 +127,19 @@ class BHV_Limb_Properties_UI:
         if self.cstType_at:
             pm.deleteUI(self.cstType_at)
             self.cstType_at = None
-        if bhvType == 3:
+        if bhvType in self.bhvMng.cstTypeIndexes:
             self.cstType_at = pm.attrEnumOptionMenu(l='Constraint Type',
                                                     at=self.limb.bhvCstType,
                                                     p=self.targetProp_cl,
                                                     cc=self.LogCstType)
+        if self.rkfType_at:
+            pm.deleteUI(self.rkfType_at)
+            self.rkfType_at = None
+        if bhvType in self.bhvMng.rfkTypeIndexes:
+            self.rkfType_at = pm.attrEnumOptionMenu(l='Relative FK Center Joint',
+                                                    at=self.limb.bhvRFKCenterJoint,
+                                                    p=self.bhvLimbProp_cl,
+                                                    cc=self.UpdateRFKTargetJoint)
 
     def LogGroupParent(self, jointName):
         msg = '\t\tLimbProp > SET GROUP PARENT to '
@@ -141,6 +150,12 @@ class BHV_Limb_Properties_UI:
         msg = '\t\tLimbIKCst > SET CONSTRAINT to '
         msg += '"%s"' % cstTypeStr
         self.logger.info(msg)
+
+    def UpdateRFKTargetJoint(self, targetJointStr):
+        msg = '\t\tLimbIKCst > SET Relative FK CENTER joint to '
+        msg += '"%s"' % targetJointStr
+        self.logger.info(msg)
+        self.bhvMng.UpdateRFKConnections(self.limb)
 
     def PopulateTargetFrame(self, bhvType):
         isTarget = bhvType in self.bhvMng.targetIndexes
