@@ -8,19 +8,31 @@ class PFRS_Debug:
                     range(5), 
                     True)
                     
-        # ========== RELATIVE FK ==========================
+        # # ========== RELATIVE FK ==========================
+        # path = r'D:/Assets/Programming/Python/Maya/ModularAutoRigger'
+        # path += r'/TEST_OUTPUT/TEST_RelativeFK_01.ma'
+        # pm.importFile(path)
+        # self.parent.UpdateEnableUI()
+        # self.parent.Setup_Editable()
+        # pm.tabLayout(self.parent.rig_ui.tab, e=1, sti=2) # Select Limb setup tab
+        # self.parent.rig_ui.limbSetup_ui.sceneHier_ui.AutoBuildByName(0)
+        # spine = pm.ls('PFX_Spine_Limb_M_NODE', type='transform')[0]
+        # # self.parent.bhvMng.SetBhvType(spine, 10) # Relative FK
+        # root = pm.ls('PFX_Root_Limb_M_NODE', type='transform')[0]
+        # self.parent.limbMng.Reparent(spine.ID.get(), -1)
+        # self.parent.limbMng.Reparent(root.ID.get(), spine.ID.get())
+        # pm.tabLayout(self.parent.rig_ui.tab, e=1, sti=3) # Select Limb setup tab
+        # # -------------------------------------------------
+
+        # ========== LIMB TYPES ==========================
         path = r'D:/Assets/Programming/Python/Maya/ModularAutoRigger'
-        path += r'/TEST_OUTPUT/TEST_RelativeFK_01.ma'
+        path += r'/TEST_OUTPUT/TEST_LimbTypes_01.ma'
         pm.importFile(path)
         self.parent.UpdateEnableUI()
         self.parent.Setup_Editable()
         pm.tabLayout(self.parent.rig_ui.tab, e=1, sti=2) # Select Limb setup tab
         self.parent.rig_ui.limbSetup_ui.sceneHier_ui.AutoBuildByName(0)
-        spine = pm.ls('PFX_Spine_Limb_M_NODE', type='network')[0]
-        self.parent.bhvMng.SetBhvType(spine, 10) # Relative FK
-        root = pm.ls('PFX_Root_Limb_M_NODE', type='network')[0]
-        self.parent.limbMng.Reparent(spine.ID.get(), -1)
-        self.parent.limbMng.Reparent(root.ID.get(), spine.ID.get())
+        pm.tabLayout(self.parent.rig_ui.tab, e=1, sti=3) # Select Limb setup tab
         # -------------------------------------------------
 
 

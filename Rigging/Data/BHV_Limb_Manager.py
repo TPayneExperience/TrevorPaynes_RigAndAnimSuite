@@ -378,7 +378,7 @@ class BHV_Limb_Manager:
         group = self.Setup_Distance(limb)
         joint = self.jntMng.GetLimbJoints(limb)[0]
         self.grpMng.SetupEditable_DistanceGroup(group, joint)
-        # self.grpMng.UpdateGroupDistance(group)
+        self.grpMng.UpdateGroupDistance(group)
 
     def Setup_Distance(self, limb):
         group = pm.listConnections(limb.bhvDistanceGroup)[0]
@@ -436,13 +436,19 @@ class BHV_Limb_Manager:
         joints = self.jntMng.GetLimbJoints(limb)
         index = limb.bhvRFKCenterJoint.get() + 1
         groups = self.grpMng.GetLimbGroups(limb)
+        pm.parent(groups, w=1)
         for i in range(3):
             pm.disconnectAttr(groups[i].joint)
         for i in range(3):
-            pm.connectAttr(groups[i].joint, joints[index-1+i].bhvRFKGroup)
-            pm.parent(groups[i], joints[index-1+i])
-            pm.xform(groups[i], t=[0,0,0], ro=[0,0,0], s=[1,1,1])
+            joint = joints[index-1+i]
+            pm.connectAttr(groups[i].joint, joint.bhvRFKGroup)
+            pos = pm.xform(joint, q=1, t=1, ws=1)
+            rot = pm.xform(joint, q=1, ro=1, ws=1)
+            pm.xform(groups[i], t=pos, ro=rot, s=[1,1,1], ws=1)
             self.grpMng.UpdateGroupName(groups[i])
+        pm.parent(groups[0], groups[1])
+        pm.parent(groups[2], groups[1])
+        pm.parent(groups[1], limb)
 
 # ============= TEARDOWN BHV ============================
 

@@ -21,6 +21,7 @@ class Limb_Manager:
         self._limbs = {} # limbID : limbNode
         pm.addAttr(rigRoot, ln='nextLimbID', at='short', dv=1)
         pm.addAttr(rigRoot, ln='limbs', dt='string')
+        self.limbGroup = pm.group(name='LIMBS', em=1, p=rigRoot)
 
     def SetRig(self, rigRoot):
         # MISSING: for multiple rigs in scene, remap limb IDs, only for anim though
@@ -68,7 +69,10 @@ class Limb_Manager:
         limbSides = ':'.join(self.limbSides)
         # ctrTypes = ':'.join(self.ctrTypes)
 
-        limb = pm.createNode('network', name=pfrsName)
+        # limb = pm.createNode('network', name=pfrsName)
+        limb = pm.group(name=pfrsName, em=1, p=self.limbGroup)
+        for attr in ['tx', 'ty', 'tz', 'rx', 'ry', 'rz', 'sx', 'sy', 'sz', 'v']:
+            pm.setAttr(limb + '.' + attr, l=1, k=0, cb=0)
         pm.addAttr(limb, ln='ID', at='long', dv=limbID, h=self.hideAttrs)
         pm.addAttr(limb, ln='pfrsName', dt='string', h=self.hideAttrs)
         limb.pfrsName.set(pfrsName)
@@ -78,7 +82,7 @@ class Limb_Manager:
                                         h=self.hideAttrs)
         pm.addAttr(limb, ln='mirrorLimb', at='long', h=self.hideAttrs)
         pm.addAttr(limb, ln='parentLimb', dt='string', h=self.hideAttrs)
-        pm.addAttr(limb, ln='parentGroup', at='enum', en='None', 
+        pm.addAttr(limb, ln='parentJoint', at='enum', en='None', 
                                         h=self.hideAttrs)
         pm.addAttr(limb, ln='childrenLimbs', dt='string', h=self.hideAttrs)
         pm.addAttr(limb, ln='defaultParentLimb', dt='string', 
@@ -187,16 +191,15 @@ class Limb_Manager:
 
     def RebuildLimbDict(self):
         self._limbs = {}
-        for limb in pm.ls(type='network'):
-            if pm.hasAttr(limb, 'pfrsName'):
-                limbID = limb.ID.get()
-                if limbID in self._limbs:
-                    nextID = self.rigRoot.nextLimbID.get()
-                    maxID = max(list(self._limbs.keys())) + 1
-                    limbID = max(nextID, maxID)
-                    self.rigRoot.nextLimbID.set(limbID + 1)
-                    limb.ID.set(limbID)
-                self._limbs[limbID] = limb
+        for limb in pm.listRelatives(self.limbGroup, c=1):
+            limbID = limb.ID.get()
+            if limbID in self._limbs:
+                nextID = self.rigRoot.nextLimbID.get()
+                maxID = max(list(self._limbs.keys())) + 1
+                limbID = max(nextID, maxID)
+                self.rigRoot.nextLimbID.set(limbID + 1)
+                limb.ID.set(limbID)
+            self._limbs[limbID] = limb
 
     def GetDefaultLimbHier(self, jntMng):
         limbParents = {} # childLimb : parentLimb

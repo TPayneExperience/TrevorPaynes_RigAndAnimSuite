@@ -18,7 +18,7 @@ class APP_Control_Manager:
     def NewRig(self, rigRoot):
         self.rigRoot = rigRoot
         self._ctrs = {} # ctrID : ctr
-        self.ctrGroup = pm.group(name='ControlGroups', em=1)
+        # self.ctrGroup = pm.group(name='ControlGroups', em=1)
         self.ctrTemplatesParent = pm.group(name='Internal', em=1)
         self.ctrTemplatesParent.v.set(0)
         pm.addAttr(rigRoot, ln='nextCtrID', at='long')

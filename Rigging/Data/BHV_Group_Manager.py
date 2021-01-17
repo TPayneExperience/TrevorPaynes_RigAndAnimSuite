@@ -36,7 +36,7 @@ class BHV_Group_Manager:
         #   IK PV, LookAt, FKIK Switch
 
         self._groups = {} # grpID : grpData
-        self.bhvGroup = None
+        # self.bhvGroup = None
         self.rigRoot = None
 
     def NewRig(self, rigRoot):
@@ -45,8 +45,7 @@ class BHV_Group_Manager:
         self._groups = {} # grpID : grpData
 
         pm.select(d=1)
-        self.bhvGroup = pm.group(name='BehaviorGroups', em=1)
-        pm.parent(self.bhvGroup, rigRoot)
+        # self.bhvGroup = pm.group(name='BehaviorGroups', em=1, p=rigRoot)
         pm.addAttr(rigRoot, ln='behaviors', dt='string')
         pm.addAttr(rigRoot, ln='nextGroupID', at='long')
 
@@ -161,6 +160,7 @@ class BHV_Group_Manager:
         group = self._AddGroup()
         pm.addAttr(group, ln='limb', dt='string')
         pm.connectAttr(limb.bhvEmptyGroup, group.limb)
+        pm.parent(group, limb)
         return group
 
     # FK, CST, IK Chain
@@ -186,9 +186,12 @@ class BHV_Group_Manager:
             pm.addAttr(groups[i], ln='limb', dt='string')
             groups[i].v.set(0) 
             groups[i].groupType.set(4)
-        pm.connectAttr(limb.bhvRFKCenterGroup, groups[0].limb)
-        pm.connectAttr(limb.bhvRFKBottomGroup, groups[1].limb)
-        pm.connectAttr(limb.bhvRFKTopGroup, groups[2].limb)
+        pm.connectAttr(limb.bhvRFKTopGroup, groups[0].limb)
+        pm.connectAttr(limb.bhvRFKCenterGroup, groups[1].limb)
+        pm.connectAttr(limb.bhvRFKBottomGroup, groups[2].limb)
+        pm.parent(groups[0], groups[1])
+        pm.parent(groups[2], groups[1])
+        pm.parent(groups[1], limb)
         return groups
 
     # IK PV, LookAt
@@ -203,6 +206,7 @@ class BHV_Group_Manager:
         pm.addAttr(group, ln='axis', at='enum', en=axes, dv=4) # IKPV, LookAt
         pm.addAttr(group, ln='limb', dt='string')
         pm.connectAttr(limb.bhvDistanceGroup, group.limb)
+        pm.parent(group, limb)
         return group
 
     # FKIK Switch
@@ -217,6 +221,7 @@ class BHV_Group_Manager:
         pm.addAttr(group, ln='bindTargets', dt='string')
         pm.addAttr(group, ln='limb', dt='string')
         pm.connectAttr(limb.bhvFKIKSwitchGroup, group.limb)
+        pm.parent(group, limb)
         for attr in ['.tx', '.ty', '.tz', '.rx', '.ry', '.rz']:
             pm.setAttr(group+attr, l=1, k=0, cb=0)
         return group
@@ -237,7 +242,8 @@ class BHV_Group_Manager:
 
     def TeardownEditable_DistanceGroup(self, group):
         pm.disconnectAttr(group.distanceJoint)
-        pm.parent(group, self.bhvGroup)
+        limb = pm.listConnections(group.limb)[0]
+        pm.parent(group, limb)
 
 #============= UTILS ============================
 
@@ -280,11 +286,7 @@ class BHV_Group_Manager:
         pos = self.axesXforms[group.axis.get()][:]
         dist = group.distance.get()
         pos = [p*dist for p in pos]
-        # for attr in ['.tx', '.ty', '.tz']:
-        #     pm.setAttr(group+attr, l=0, k=0, cb=0)
         pm.xform(group, t=pos)
-        # for attr in ['.tx', '.ty', '.tz']:
-        #     pm.setAttr(group+attr, l=1, k=0, cb=0)
 
     def UpdateFKIKSwitchJoint(self, group, joints):
         index = group.targetJoint.get()
@@ -300,44 +302,7 @@ class BHV_Group_Manager:
         # pm.xform(group, t=[0,0,0], ro=[0,0,0], s=[1,1,1])
         # self.SetLockGroup(group, True)
 
-    def UpdateLimbParentGroups(self, childLimb):
-        '''Updates limb parent group enum to closest to root group'''
-        # childLimb = self.limbMng.GetLimb(limbID)
-        parents = pm.listConnections(childLimb.parentLimb)
 
-        # If NO PARENT or parent EMPTY, set and return
-        if not parents:
-            pm.addAttr(childLimb.parentGroup, e=1, en='None')
-            return
-        parentLimb = parents[0]
-        parentBhvType = parentLimb.bhvType.get()
-        if parentBhvType == 7:
-            pm.addAttr(childLimb.parentGroup, e=1, en='Empty')
-            return
-        
-        # Default target group to closest to first group
-        distances = {}
-        names = []
-        rootGroup = self.GetLimbGroups(childLimb)[0]
-        sourcePos = pm.xform(rootGroup, q=1, t=1, ws=1)
-        parentGroups = self.GetLimbFKGroups(parentLimb)
-        for parentGroup in parentGroups:
-            # Create distance dict
-            joint = pm.listConnections(parentGroup.joint)[0]
-            targetPos = pm.xform(joint, q=1, t=1, ws=1)
-            dist = 0
-            for i in range(3):
-                dist += (sourcePos[i]-targetPos[i])**2
-            distances[dist] = parentGroup
-            names.append(joint.pfrsName.get())
-        pm.addAttr(childLimb.parentGroup, e=1, en=':'.join(names))
-        # Set Closest Group Index
-        closestDist = sorted(list(distances.keys()))[0]
-        closestGroup = distances[closestDist]
-        index = parentGroups.index(closestGroup)
-        # index = self.grpMng.GetLimbGroups(parentLimb).index(closestGroup)
-        childLimb.parentGroup.set(index)
-    
     # def SetupEditable_JointGroup(self, group):
     #     joint = pm.listConnections(group.joint)[0]
     #     pm.parent(group, joint)

@@ -37,7 +37,7 @@ class BHV_Limb_Hierarchy_UI:
                     pm.treeView(self.widget, e=1, bvf=(limbID, 1, 0))
                 if limb.bhvType.get() in self.bhvMng.parentableIndexes:
                     pm.treeView(self.widget, e=1, ornament=(limbID, 1, 0, 3))
-                self.grpMng.UpdateLimbParentGroups(limb)
+                self.jntMng.UpdateLimbParentJoint(limb)
 
 #=========== SETUP ====================================
 
@@ -87,7 +87,7 @@ class BHV_Limb_Hierarchy_UI:
             self.logger.info('\t\tLimbHier > REPARENTING "%s" to world' % name)
             parentID = -1
         self.limbMng.Reparent(limbID, parentID)
-        self.grpMng.UpdateLimbParentGroups(limb)
+        self.jntMng.UpdateLimbParentJoint(limb)
     
 #=========== RMB ====================================
 
@@ -98,7 +98,7 @@ class BHV_Limb_Hierarchy_UI:
             if not parent:
                 continue
             self.limbMng.Reparent(child.ID.get(), parent.ID.get())
-            self.grpMng.UpdateLimbParentGroups(child)
+            self.jntMng.UpdateLimbParentJoint(child)
         # self.parent.UpdateLimbUI()
         self.Populate()
     

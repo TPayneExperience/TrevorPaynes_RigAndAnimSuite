@@ -40,7 +40,13 @@ class Test_UI:
         for group in self.grpMng.GetAllGroups():
             for attr in ['.tx', '.ty', '.tz', '.rx', '.ry', '.rz']:
                 pm.setAttr(group+attr, l=0)
-            pm.parent(group, self.grpMng.bhvGroup)
+            if group.groupType.get() == 1: # joint
+                joint = pm.listConnections(group.joint)[0]
+                limb = pm.listConnections(joint.limb)[0]
+                pm.parent(group, limb)
+            else:
+                limb = pm.listConnections(group.limb)[0]
+                pm.parent(group, limb)
 
     def Setup_Controls(self):
         for control in self.ctrMng.GetAllControls():
@@ -60,7 +66,6 @@ class Test_UI:
                 for attr in ['.rx', '.ry', '.rz', '.sx', '.sy', '.sz']:
                     pm.setAttr(control + attr, l=1, k=0, cb=0)
             
-
     def Setup_Internal(self):
         for limb in self.limbMng.GetAllLimbs():
             bhvType = limb.bhvType.get()
@@ -182,32 +187,24 @@ class Test_UI:
         self.Bind_FK_Joints(limb)
         
     def Setup_External_FKChain(self, limb):
-        parent = self.limbMng.GetLimbParent(limb)
-        if parent:
-            childGroup = self.grpMng.GetLimbGroups(limb)[0]
-            index = limb.parentGroup.get()
-            parentGroups = self.grpMng.GetLimbFKGroups(parent)
-            parentGroup = parentGroups[index]
-            # parentGroup = self.grpMng.GetLimbGroups(parent)[index]
-            parentControl = pm.listConnections(parentGroup.control)[0]
-            pm.parent(childGroup, parentControl)
-            # parentCtrs = self.ctrMng.GetGroupControl(parentGroup)
-            # if parentCtrs:
-            #     pm.parent(childGroup, parentCtrs[0])
+        childGroup = self.grpMng.GetLimbGroups(limb)[0]
+        self.ParentConstrainGroup(limb, childGroup)
 
     # FK BRANCH
     def Setup_Internal_FKBranch(self, limb):
         self.Bind_FK_Joints(limb)
         
     def Setup_External_FKBranch(self, limb):
-        parent = self.limbMng.GetLimbParent(limb)
-        if parent:
-            childGroup = self.grpMng.GetLimbGroups(limb)[0]
-            index = limb.parentGroup.get()
-            parentGroup = self.grpMng.GetLimbGroups(parent)[index]
-            parentControl = pm.listConnections(parentGroup.control)[0]
-            for childGroup in self.grpMng.GetLimbGroups(limb):
-                pm.parent(childGroup, parentControl)
+        for childGroup in self.grpMng.GetLimbGroups(limb):
+            self.ParentConstrainGroup(limb, childGroup)
+        # parent = self.limbMng.GetLimbParent(limb)
+        # if parent:
+        #     childGroup = self.grpMng.GetLimbGroups(limb)[0]
+        #     index = limb.parentJoint.get()
+        #     parentGroup = self.grpMng.GetLimbGroups(parent)[index]
+        #     parentControl = pm.listConnections(parentGroup.control)[0]
+        #     for childGroup in self.grpMng.GetLimbGroups(limb):
+        #         pm.parent(childGroup, parentControl)
 
     def Bind_FK_Joints(self, limb):
         joints = self.jntMng.GetLimbJoints(limb)
@@ -242,7 +239,7 @@ class Test_UI:
             msg += '\n(Please PARENT limb to another limb in BEHAVIOR Tab)'
             pm.confirmDialog(t='Constraint Error', m=msg, icon='warning', b='Ok')
             return
-        sourceIndex = limb.parentGroup.get()
+        sourceIndex = limb.parentJoint.get()
         sourceJoint = self.jntMng.GetLimbJoints(parentLimb)[sourceIndex]
         targetLimb = targetLimbs[0]
         # targetIndex = limb.bhvCstTargetJnt.get()
@@ -298,8 +295,7 @@ class Test_UI:
             pm.confirmDialog(t='IK CHAIN Error', m=msg, icon='warning', b='Ok')
             return
         targetLimb = targetLimb[0]
-        sourceGroups = self.grpMng.GetLimbGroups(limb)[1:] # Skip First
-        for sourceGroup in sourceGroups:
+        for sourceGroup in self.grpMng.GetLimbGroups(limb)[1:]: # Skip First
             index = sourceGroup.targetJoint.get()
             targetGroup = self.grpMng.GetLimbGroups(targetLimb)[index]
             targetControl = pm.listConnections(targetGroup.control)[0]
@@ -344,7 +340,7 @@ class Test_UI:
         # PARENT IKPV Control
         parent = self.limbMng.GetLimbParent(limb)
         if parent:
-            index = limb.parentGroup.get()
+            index = limb.parentJoint.get()
             parentGroup = self.grpMng.GetLimbGroups(parent)[index]
             parentControl = pm.listConnections(parentGroup.control)[0]
             pm.parent(distGroup, parentControl)
@@ -482,7 +478,7 @@ class Test_UI:
         fkGroup = pm.listConnections(joints[0].group)[0]
         parent = self.limbMng.GetLimbParent(limb)
         if parent:
-            index = limb.parentGroup.get()
+            index = limb.parentJoint.get()
             parentGroup = self.grpMng.GetLimbGroups(parent)[index]
             # parentCtrs = self.ctrMng.GetGroupControl(parentGroup)
             parentCtrs = pm.listConnections(parentGroup.control)[0]
@@ -526,15 +522,16 @@ class Test_UI:
 #=========== MISC ====================================
     
     def Setup_External_SingleControl(self, limb):
-        parent = self.limbMng.GetLimbParent(limb)
-        if parent:
-            childGroup = self.grpMng.GetLimbGroups(limb)[0]
-            index = limb.parentGroup.get()
-            parentGroup = self.grpMng.GetLimbGroups(parent)[index]
-            parentCtrs = pm.listConnections(parentGroup.control)[0]
-            # parentCtrs = self.ctrMng.GetGroupControl(parentGroup)
-            if parentCtrs:
-                pm.parent(childGroup, parentCtrs[0])
+        childGroup = self.grpMng.GetLimbGroups(limb)[0]
+        self.ParentConstrainGroup(limb, childGroup)
+        # parent = self.limbMng.GetLimbParent(limb)
+        # if parent:
+        #     childGroup = self.grpMng.GetLimbGroups(limb)[0]
+        #     index = limb.parentJoint.get()
+        #     parentGroup = self.grpMng.GetLimbGroups(parent)[index]
+        #     parentCtrs = pm.listConnections(parentGroup.control)[0]
+        #     if parentCtrs:
+        #         pm.parent(childGroup, parentCtrs[0])
 
     def Setup_Internal_LookAt(self, limb):
         joint = self.jntMng.GetLimbJoints(limb)[0]
@@ -542,4 +539,16 @@ class Test_UI:
         # control = self.ctrMng.GetGroupControl(group)
         control = pm.listConnections(group.control)[0]
         pm.aimConstraint(control, joint, mo=1)
+
+    def ParentConstrainGroup(self, limb, childGroup):
+        parent = self.limbMng.GetLimbParent(limb)
+        if not parent:
+            return 
+        if parent.bhvType.get() in self.bhvMng.emptyLimbIndexes:
+            group = self.grpMng.GetLimbGroups(parent)[0]
+            parentJoint = pm.listConnections(group.control)[0]
+        else:
+            index = limb.parentJoint.get()
+            parentJoint = self.jntMng.GetLimbJoints(parent)[index]
+        pm.parentConstraint(parentJoint, childGroup, mo=1)   
 

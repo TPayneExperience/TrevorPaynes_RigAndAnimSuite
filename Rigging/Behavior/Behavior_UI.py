@@ -75,19 +75,19 @@ class Behavior_UI:
     # def UpdateLimbUI(self):
     #     self.limbProp_ui.UpdateGroupParentUI()
 
-    # def UpdateLimbParentGroups(self, childLimb):
+    # def UpdateLimbParentJoint(self, childLimb):
     #     '''Updates limb parent group enum to closest to root group'''
     #     # childLimb = self.limbMng.GetLimb(limbID)
     #     parents = pm.listConnections(childLimb.parentLimb)
 
     #     # If NO PARENT or parent EMPTY, set and return
     #     if not parents:
-    #         pm.addAttr(childLimb.parentGroup, e=1, en='None')
+    #         pm.addAttr(childLimb.parentJoint, e=1, en='None')
     #         return
     #     parentLimb = parents[0]
     #     parentBhvType = parentLimb.bhvType.get()
     #     if parentBhvType == 7:
-    #         pm.addAttr(childLimb.parentGroup, e=1, en='Empty')
+    #         pm.addAttr(childLimb.parentJoint, e=1, en='Empty')
     #         return
         
     #     # Default target group to closest to first group
@@ -105,13 +105,13 @@ class Behavior_UI:
     #             dist += (sourcePos[i]-targetPos[i])**2
     #         distances[dist] = parentGroup
     #         names.append(joint.pfrsName.get())
-    #     pm.addAttr(childLimb.parentGroup, e=1, en=':'.join(names))
+    #     pm.addAttr(childLimb.parentJoint, e=1, en=':'.join(names))
     #     # Set Closest Group Index
     #     closestDist = sorted(list(distances.keys()))[0]
     #     closestGroup = distances[closestDist]
     #     index = parentGroups.index(closestGroup)
     #     # index = self.grpMng.GetLimbGroups(parentLimb).index(closestGroup)
-    #     childLimb.parentGroup.set(index)
+    #     childLimb.parentJoint.set(index)
     
     def LimbSelected(self, limb):
         if limb:

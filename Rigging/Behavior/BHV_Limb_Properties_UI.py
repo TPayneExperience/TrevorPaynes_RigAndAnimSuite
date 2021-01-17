@@ -59,7 +59,7 @@ class BHV_Limb_Properties_UI:
             with pm.columnLayout(adj=1) as self.bhvLimbProp_cl:
                 self.bhvType_om = pm.optionMenu(l='Bhv Type', 
                                                 cc=pm.Callback(self.SetBhvType))
-                self.grpParent_at = pm.attrEnumOptionMenu(  l='Bhv Group Parent', 
+                self.grpParent_at = pm.attrEnumOptionMenu(  l='Parent Joint', 
                                                             at='perspShape.filmFit')
 
         with pm.frameLayout('Limb IK / Constraint Target', bv=1, en=0) as self.targetLayout:
@@ -120,9 +120,9 @@ class BHV_Limb_Properties_UI:
     def PopulateBhvFrame(self, bhvType):
         pm.deleteUI(self.grpParent_at)
         self.grpParent_at = pm.attrEnumOptionMenu(  self.grpParent_at, 
-                                                    l='Bhv Group Parent', 
+                                                    l='Parent Joint', 
                                                     p=self.bhvLimbProp_cl,
-                                                    at=self.limb.parentGroup,
+                                                    at=self.limb.parentJoint,
                                                     cc=self.LogGroupParent)
         if self.cstType_at:
             pm.deleteUI(self.cstType_at)

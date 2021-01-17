@@ -36,8 +36,7 @@ class Joint_Manager:
         # pm.addAttr(rigRoot, ln='joints', dt='string')
 
         pm.select(d=1)
-        self.jntGroup = pm.group(name='Skeleton', em=1)
-        pm.parent(self.jntGroup, rigRoot)
+        self.jntGroup = pm.group(name='Skeleton', em=1, p=rigRoot)
         self.skelLayer = pm.createDisplayLayer(n='Skel Joints', e=True)
         self.skelLayer.displayType.set(2)
 
@@ -67,7 +66,7 @@ class Joint_Manager:
         return pm.listConnections(joint.limb)[0]
 
     def GetLimbJoints(self, limb, includeNonInf=True):
-        '''Order joints by internal joint index'''
+        '''Order joints by internal joint index. child to root parent'''
         orderedJoints = []
         temp = {}
         joints = pm.listConnections(limb.infJoints)
@@ -252,6 +251,43 @@ class Joint_Manager:
             if parent == rootParent:
                 break
         return jointChain
+
+    def UpdateLimbParentJoint(self, childLimb):
+        '''Updates limb parent group enum to closest to root group'''
+        # childLimb = self.limbMng.GetLimb(limbID)
+        parents = pm.listConnections(childLimb.parentLimb)
+
+        # If NO PARENT or parent EMPTY, set and return
+        if not parents:
+            pm.addAttr(childLimb.parentJoint, e=1, en='None')
+            return
+        parentLimb = parents[0]
+        parentBhvType = parentLimb.bhvType.get()
+        if parentBhvType == 7:
+            pm.addAttr(childLimb.parentJoint, e=1, en='Empty')
+            return
+        
+        # Default to closest joint
+        distances = {} # dist : joint
+        names = []
+        # joints = self.jngMng.GetLimbJoints(parentLimb)
+        rootGroup = self.grpMng.GetLimbGroups(childLimb)[0]
+        sourcePos = pm.xform(rootGroup, q=1, t=1, ws=1)
+        parentJoints = self.GetLimbJoints(parentLimb)
+        for joint in parentJoints:
+            # Create distance dict
+            targetPos = pm.xform(joint, q=1, t=1, ws=1)
+            dist = 0
+            for i in range(3):
+                dist += (sourcePos[i]-targetPos[i])**2
+            distances[dist] = joint
+            names.append(joint.pfrsName.get())
+        pm.addAttr(childLimb.parentJoint, e=1, en=':'.join(names))
+        # Set Closest Group Index
+        closestDist = sorted(list(distances.keys()))[0]
+        index = parentJoints.index(distances[closestDist])
+        # index = self.grpMng.GetLimbGroups(parentLimb).index(closestGroup)
+        childLimb.parentJoint.set(index)
 
 
     # def DuplicateLimb(self, sourceLimbID, targetLimbID):
