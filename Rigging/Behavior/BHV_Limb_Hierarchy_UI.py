@@ -35,8 +35,8 @@ class BHV_Limb_Hierarchy_UI:
                             lbc=(limbID, 0.3, 0.1, 0.1))
                 else:
                     pm.treeView(self.widget, e=1, bvf=(limbID, 1, 0))
-                if limb.bhvType.get() in self.bhvMng.parentableIndexes:
-                    pm.treeView(self.widget, e=1, ornament=(limbID, 1, 0, 3))
+                # if limb.bhvType.get() in self.bhvMng.parentableIndexes:
+                #     pm.treeView(self.widget, e=1, ornament=(limbID, 1, 0, 3))
                 self.jntMng.UpdateLimbParentJoint(limb)
 
 #=========== SETUP ====================================

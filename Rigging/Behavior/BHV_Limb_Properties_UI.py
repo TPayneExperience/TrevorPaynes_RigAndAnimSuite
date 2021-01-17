@@ -158,26 +158,26 @@ class BHV_Limb_Properties_UI:
         self.bhvMng.UpdateRFKConnections(self.limb)
 
     def PopulateTargetFrame(self, bhvType):
-        isTarget = bhvType in self.bhvMng.targetIndexes
-        pm.frameLayout(self.targetLayout, e=1, en=isTarget)
-        if not isTarget:
-            return
+        pm.frameLayout(self.targetLayout, e=1, en=0)
         if self.targetJnt_at:
             pm.deleteUI(self.targetJnt_at)
             self.targetJnt_at = None
         if self.fkikJoint_at:
             pm.deleteUI(self.fkikJoint_at)
             self.fkikJoint_at = None
+        if bhvType not in self.bhvMng.targetIndexes:
+            return
 
         # POPULATE TARGET LIMBS
         pm.optionMenu(self.targetLimb_om, e=1, dai=1)
         bhvType = self.limb.bhvType.get()
-        if bhvType == 3: #Cst
+        if bhvType in self.bhvMng.cstTypes:
             bhvFilter = self.bhvMng.cstTargetTypeIndexes
         elif bhvType in self.bhvMng.ikTypeIndexes:
             bhvFilter = self.bhvMng.ikTargetableIndexes
         else:
             return
+        pm.frameLayout(self.targetLayout, e=1, en=1)
         self.targetLimbs = {}
         self.targetLimbOrder = []
         for rootLimb in self.limbMng.GetRootLimbs():
@@ -193,10 +193,11 @@ class BHV_Limb_Properties_UI:
         targetLimbs = pm.listConnections(self.limb.bhvTargetLimb)
         if targetLimbs:
             targetLimb = targetLimbs[0]
-            if targetLimb in self.targetLimbs:
+            if targetLimb in self.targetLimbOrder:
                 index = self.targetLimbOrder.index(targetLimb) + 1
                 pm.optionMenu(self.targetLimb_om, e=1, sl=index)
-        if bhvType not in self.bhvMng.fkikTypeIndexes:
+        # if bhvType not in self.bhvMng.fkikTypeIndexes:
+        if bhvType in self.bhvMng.ikPVTypeIndexes + self.bhvMng.cstTypeIndexes:
             self.targetJnt_at = pm.attrEnumOptionMenu(  l='Target Joint',
                                                         at=self.limb.bhvTargetJoint,
                                                         p=self.targetProp_cl,
@@ -223,7 +224,8 @@ class BHV_Limb_Properties_UI:
         self.logger.info(msg)
         joints = self.jntMng.GetLimbJoints(self.limb)
         group = pm.listConnections(self.limb.bhvFKIKSwitchGroup)[0]
-        self.grpMng.UpdateFKIKSwitchJoint(group, joints)
+        self.bhvMng.UpdateFKIKSwitchJoint(group, joints)
+        # self.grpMng.UpdateFKIKSwitchJoint(group, joints)
         # index = self.limb.bhvFKIKParentJoint.get()
         # joints = self.jntMng.GetLimbJoints(self.limb)
         # group = pm.listConnections(self.limb.bhvFKIKSwitchGroup)[0]

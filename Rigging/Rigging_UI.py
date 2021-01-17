@@ -243,11 +243,15 @@ class Rigging_UI:
                 group = pm.listConnections(limb.bhvDistanceGroup)[0]
                 group.v.set(1)
                 if (bhvType == 4): # LookAt
-                    self.grpMng.SetupEditable_DistanceGroup(group, joints[0])
-                    self.grpMng.UpdateGroupDistance(group)
+                    self.grpMng.SetupEditable_DistanceGroup(limb, joints[0])
+                    self.bhvMng.UpdateGroupDistance(limb)
+                    # self.grpMng.SetupEditable_DistanceGroup(group, joints[0])
+                    # self.grpMng.UpdateGroupDistance(group)
                 elif bhvType in [1,2]: # IKPV
-                    self.grpMng.SetupEditable_IKPVGroup(group, joints)
-                    self.grpMng.UpdateGroupDistance(group)
+                    self.grpMng.SetupEditable_IKPVGroup(limb, joints)
+                    self.bhvMng.UpdateGroupDistance(limb)
+                    # self.grpMng.SetupEditable_IKPVGroup(group, joints)
+                    # self.bhvMng.UpdateGroupDistance(group)
             elif (bhvType == 7): # EMPTY
                 group = pm.listConnections(limb.bhvEmptyGroup)[0]
                 group.v.set(1)
@@ -262,7 +266,8 @@ class Rigging_UI:
             if (bhvType in self.bhvMng.fkikTypeIndexes): # FKIK
                 group = pm.listConnections(limb.bhvFKIKSwitchGroup)[0]
                 group.v.set(1)
-                self.grpMng.UpdateFKIKSwitchJoint(group, joints)
+                self.bhvMng.UpdateFKIKSwitchJoint(group, joints)
+                # self.grpMng.UpdateFKIKSwitchJoint(group, joints)
 
     def TeardownEditable_Limbs(self):
         '''When switchin from tabs 3/4/5 to 1/2'''
@@ -274,11 +279,12 @@ class Rigging_UI:
                 jointGroups += pm.listConnections(joint.group)
             limbGroups = pm.listConnections(limb.bhvDistanceGroup)
             if limb.bhvType.get() in self.bhvMng.distanceIndexes:
-                self.grpMng.TeardownEditable_DistanceGroup(limbGroups[0])
+                self.grpMng.TeardownEditable_DistanceGroup(limb)
+                # self.grpMng.TeardownEditable_DistanceGroup(limbGroups[0])
             limbGroups += pm.listConnections(limb.bhvEmptyGroup)
             limbGroups += pm.listConnections(limb.bhvFKIKSwitchGroup)
-            for group in limbGroups:
-                pm.parent(group, self.grpMng.bhvGroup)
+            # for group in limbGroups:
+            #     pm.parent(group, self.grpMng.bhvGroup)
             for group in limbGroups + jointGroups:
                 group.v.set(0)
 

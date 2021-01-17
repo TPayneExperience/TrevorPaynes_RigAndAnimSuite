@@ -116,12 +116,14 @@ class APP_Limb_Properties_UI:
         if self.ctrAxis_at:
             pm.deleteUI(self.ctrAxis_at)
             self.ctrAxis_at = None
-        group = pm.listConnections(self.limb.bhvDistanceGroup)[0]
+        # group = pm.listConnections(self.limb.bhvDistanceGroup)[0]
         pm.attrControlGrp(  self.ctrDist_cg, e=1, en=1, 
-                            a=group.distance,
+                            # a=group.distance,
+                            a=self.limb.bhvDistance,
                             cc=pm.Callback(self.UpdateGroupDistance, 1))
         self.ctrAxis_at = pm.attrEnumOptionMenu(l='Position Axis',
-                                                at=group.axis,
+                                                # at=group.axis,
+                                                at=limb.bhvAxis,
                                                 p=self.ctrProp_cl,
                                                 cc=self.UpdateGroupDistance)
 
@@ -192,14 +194,17 @@ class APP_Limb_Properties_UI:
         self.logger.info(msg)
 
     def UpdateGroupDistance(self, ignore):
-        group = pm.listConnections(self.limb.bhvDistanceGroup)[0]
-        dist = str(group.distance.get())
-        axis = self.grpMng.axesNames[group.axis.get()]
+        # group = pm.listConnections(self.limb.bhvDistanceGroup)[0]
+        # dist = str(group.distance.get())
+        dist = str(self.limb.bhvDistance.get())
+        # axis = self.grpMng.axesNames[group.axis.get()]
+        axis = self.bhvMng.axesNames[self.limb.bhvAxis.get()]
         msg1 = '\t\tLimbProp > SET CONTROL DISTANCE to "%s"' % dist
         msg2 = '\t\tLimbProp > SET CONTROL AXIS to "%s"' % axis
         self.logger.info(msg1)
         self.logger.info(msg2)
-        self.grpMng.UpdateGroupDistance(group)
+        self.bhvMng.UpdateGroupDistance(self.limb)
+        # self.grpMng.UpdateGroupDistance(group)
 
     # def PopulateControlFrame(self, bhvType):
     #     isDist = bhvType in self.bhvMng.distanceIndexes

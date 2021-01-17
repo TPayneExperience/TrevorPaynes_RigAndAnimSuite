@@ -6,18 +6,18 @@ class BHV_Group_Manager:
         self.limbMng = limbMng
         self.nameMng = nameMng
 
-        self.axesXforms =   ((1,0,0),
-                            (-1,0,0),
-                            (0,1,0),
-                            (0,-1,0),
-                            (0,0,1),
-                            (0,0,-1))
-        self.axesNames =    ('X',
-                            '-X',
-                            'Y',
-                            '-Y',
-                            'Z',
-                            '-Z')
+        # self.axesXforms =   ((1,0,0),
+        #                     (-1,0,0),
+        #                     (0,1,0),
+        #                     (0,-1,0),
+        #                     (0,0,1),
+        #                     (0,0,-1))
+        # self.axesNames =    ('X',
+        #                     '-X',
+        #                     'Y',
+        #                     '-Y',
+        #                     'Z',
+        #                     '-Z')
         self.grpTypes = (   'Empty', # DO NOT CHANGE ORDER
 
                             'Joint', 
@@ -197,13 +197,13 @@ class BHV_Group_Manager:
     # IK PV, LookAt
     # Called from Behaviors > Set Bhv()
     def AddDistanceGroup(self, limb):
-        axes = ':'.join(self.axesNames)
+        # axes = ':'.join(self.axesNames)
         group = self._AddGroup()
         group.groupType.set(2)
         # pm.addAttr(group, ln='targetJoint', at='enum', en='None') # IK PV
-        pm.addAttr(group, ln='distanceJoint', dt='string') # for easy Test Connections
-        pm.addAttr(group, ln='distance', at='float', min=0, dv=1) # IKPV, LookAt
-        pm.addAttr(group, ln='axis', at='enum', en=axes, dv=4) # IKPV, LookAt
+        # pm.addAttr(group, ln='distanceJoint', dt='string') # for easy Test Connections
+        # pm.addAttr(group, ln='distance', at='float', min=0, dv=1) # IKPV, LookAt
+        # pm.addAttr(group, ln='axis', at='enum', en=axes, dv=4) # IKPV, LookAt
         pm.addAttr(group, ln='limb', dt='string')
         pm.connectAttr(limb.bhvDistanceGroup, group.limb)
         pm.parent(group, limb)
@@ -232,18 +232,32 @@ class BHV_Group_Manager:
 
 #============= SETUP / TEARDOWNS ============================
 
-    def SetupEditable_IKPVGroup(self, group, joints):
+    def SetupEditable_IKPVGroup(self, limb, joints):
         joint = joints[len(joints)/2]
-        self.SetupEditable_DistanceGroup(group, joint)
+        self.SetupEditable_DistanceGroup(limb, joint)
 
-    def SetupEditable_DistanceGroup(self, group, joint):
-        pm.connectAttr(joint.bhvDistanceGroup, group.distanceJoint)
+    # def SetupEditable_IKPVGroup(self, group, joints):
+    #     joint = joints[len(joints)/2]
+    #     self.SetupEditable_DistanceGroup(group, joint)
+
+    def SetupEditable_DistanceGroup(self, limb, joint):
+        pm.connectAttr(joint.bhvDistanceGroup, limb.bhvDistanceJoint)
+        group = self.GetLimbIKGroups(limb)[0]
         pm.parent(group, joint)
 
-    def TeardownEditable_DistanceGroup(self, group):
-        pm.disconnectAttr(group.distanceJoint)
-        limb = pm.listConnections(group.limb)[0]
+    # def SetupEditable_DistanceGroup(self, group, joint):
+    #     pm.connectAttr(joint.bhvDistanceGroup, group.distanceJoint)
+    #     pm.parent(group, joint)
+
+    def TeardownEditable_DistanceGroup(self, limb):
+        pm.disconnectAttr(limb.bhvDistanceJoint)
+        group = self.GetLimbIKGroups(limb)[0]
         pm.parent(group, limb)
+
+    # def TeardownEditable_DistanceGroup(self, group):
+    #     pm.disconnectAttr(group.distanceJoint)
+    #     limb = pm.listConnections(group.limb)[0]
+    #     pm.parent(group, limb)
 
 #============= UTILS ============================
 
@@ -282,25 +296,25 @@ class BHV_Group_Manager:
                                     'CTR')
         control.rename(controlName)
 
-    def UpdateGroupDistance(self, group):
-        pos = self.axesXforms[group.axis.get()][:]
-        dist = group.distance.get()
-        pos = [p*dist for p in pos]
-        pm.xform(group, t=pos)
+    # def UpdateGroupDistance(self, group):
+    #     pos = self.axesXforms[group.axis.get()][:]
+    #     dist = group.distance.get()
+    #     pos = [p*dist for p in pos]
+    #     pm.xform(group, t=pos)
 
-    def UpdateFKIKSwitchJoint(self, group, joints):
-        index = group.targetJoint.get()
-        joint = joints[index]
-        pm.parent(group, joint)
+    # def UpdateFKIKSwitchJoint(self, group, joints):
+    #     index = group.targetJoint.get()
+    #     joint = joints[index]
+    #     pm.parent(group, joint)
     
-        # group = pm.listConnections(limb.bhvFKIKSwitchGroup)[0]
-        # modIndex = index % len(joints)
-        # if modIndex != index:
-        #     limb.bhvFKIKParentJoint.set(modIndex)
-        # self.SetLockGroup(group, False)
-        # self.PosRotGroupToJoint(group, joint)
-        # pm.xform(group, t=[0,0,0], ro=[0,0,0], s=[1,1,1])
-        # self.SetLockGroup(group, True)
+    #     # group = pm.listConnections(limb.bhvFKIKSwitchGroup)[0]
+    #     # modIndex = index % len(joints)
+    #     # if modIndex != index:
+    #     #     limb.bhvFKIKParentJoint.set(modIndex)
+    #     # self.SetLockGroup(group, False)
+    #     # self.PosRotGroupToJoint(group, joint)
+    #     # pm.xform(group, t=[0,0,0], ro=[0,0,0], s=[1,1,1])
+    #     # self.SetLockGroup(group, True)
 
 
     # def SetupEditable_JointGroup(self, group):

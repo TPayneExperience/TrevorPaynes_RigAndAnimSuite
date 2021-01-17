@@ -471,9 +471,6 @@ class Test_UI:
                 handle.v.set(0)
                 pm.parent(handle, targetControl)
 
-
-
-
         # PARENT FK + DISTANCE CONTROL to target Control group
         fkGroup = pm.listConnections(joints[0].group)[0]
         parent = self.limbMng.GetLimbParent(limb)

@@ -20,8 +20,30 @@ class BHV_Group_Properties_UI:
     
     def SetGroup(self, group):
         self.group = group
+        if group.groupType.get() != 1: # Make sure is joint group
+            pm.frameLayout(self.groupLayout, e=1, en=0)
+            return
         pm.frameLayout(self.groupLayout, e=1, en=1)
-        self.UpdateUI()
+        # DELETE OLD ATTRS
+        if self.parentSub_at:
+            pm.deleteUI(self.parentSub_at)
+            self.parentSub_at = None
+        joint = pm.listConnections(self.group.joint)[0]
+        limb = pm.listConnections(joint.limb)[0]
+        bhvType = limb.bhvType.get()
+        pm.attrFieldSliderGrp(self.weight_sg, e=1, en=0)
+
+        # CONSTRAINT
+        if bhvType == 3: 
+            pm.attrFieldSliderGrp(self.weight_sg, e=1, en=1, 
+                                            at=self.group.weight)
+
+        # IK CHAIN
+        elif bhvType in self.bhvMng.ikChainTypeIndexes: 
+            self.parentSub_at = pm.attrEnumOptionMenu(  l='Target Joint',
+                                                at=self.group.targetJoint, 
+                                                p=self.bhvGroupProp_cl)
+
 
 
 #========== SETUP ===============================
@@ -49,27 +71,6 @@ class BHV_Group_Properties_UI:
         if self.parentSub_at:
             pm.deleteUI(self.parentSub_at)
             self.parentSub_at = None      
-
-    def UpdateUI(self):
-        joint = pm.listConnections(self.group.joint)[0]
-        limb = pm.listConnections(joint.limb)[0]
-        bhvType = limb.bhvType.get()
-        pm.attrFieldSliderGrp(self.weight_sg, e=1, en=0)
-        # DELETE OLD ATTRS
-        if self.parentSub_at:
-            pm.deleteUI(self.parentSub_at)
-            self.parentSub_at = None
-
-        # CONSTRAINT
-        if bhvType == 3: 
-            pm.attrFieldSliderGrp(self.weight_sg, e=1, en=1, 
-                                            at=self.group.weight)
-
-        # IK CHAIN
-        elif bhvType in self.bhvMng.ikChainTypeIndexes: 
-            self.parentSub_at = pm.attrEnumOptionMenu(  l='Target Joint',
-                                                at=self.group.targetJoint, 
-                                                p=self.bhvGroupProp_cl)
 
 
 
