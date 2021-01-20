@@ -36,7 +36,10 @@ class Skin_Mananger:
         joints = []
         for rootLimb in self.limbMng.GetRootLimbs():
             for limb in self.limbMng.GetLimbCreationOrder(rootLimb):
-                joints += self.jntMng.GetLimbJoints(limb, False)
+                if limb.limbType.get() == 2:
+                    joints += self.jntMng.GetLimbJoints(limb)[:-1]
+                else:
+                    joints += self.jntMng.GetLimbJoints(limb)
         pm.select(joints)
         pm.animLayer(self._skinTestAnimLayer, aso=1, s=1)
         pm.select(d=1)
@@ -102,7 +105,9 @@ class Skin_Mananger:
 #============= LIMB / JOINT ANIM (TIMELINE) ============================
 
     def SkinTestLimbAnim(self, limb):
-        joints = self.jntMng.GetLimbJoints(limb, False)
+        joints = self.jntMng.GetLimbJoints(limb)
+        if limb.limbType.get() == 2:
+            joints = joints[:-1]
         start = joints[0].skinAnimStart.get()
         end = joints[-1].skinAnimEnd.get()
         pm.playbackOptions(min=start, max=end)
@@ -163,7 +168,9 @@ class Skin_Mananger:
 
     def SetDefaultLimbJointWeights(self, mesh, limb):
         # set limb mask to all vert influenced by child joints
-        joints = self.jntMng.GetLimbJoints(limb, False)
+        joints = self.jntMng.GetLimbJoints(limb)
+        if limb.limbType.get() == 2:
+            joints = joints[:-1]
         jointPos = {} # joint : pos
         jointValues = {} # joint : [jointValueList1, jointValueList2...]
         vertCount = pm.polyEvaluate(mesh, v=1)

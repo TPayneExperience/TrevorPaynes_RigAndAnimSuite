@@ -65,14 +65,16 @@ class Joint_Manager:
     def GetLimb(self, joint):
         return pm.listConnections(joint.limb)[0]
 
-    def GetLimbJoints(self, limb, includeNonInf=True):
+    # def GetLimbJoints(self, limb, includeNonInf=True):
+    def GetLimbJoints(self, limb):
         '''Order joints by internal joint index. child to root parent'''
         orderedJoints = []
         temp = {}
-        joints = pm.listConnections(limb.infJoints)
-        if includeNonInf:
-            joints += pm.listConnections(limb.nonInfJoint)
-        for joint in joints:
+        # joints = pm.listConnections(limb.infJoints)
+        # if includeNonInf:
+        #     joints += pm.listConnections(limb.nonInfJoint)
+        # for joint in joints:
+        for joint in pm.listConnections(limb.joints):
             temp[joint.limbIndex.get()] = joint
         for index in sorted(list(temp.keys())):
             orderedJoints.append(temp[index])
@@ -118,12 +120,14 @@ class Joint_Manager:
             
         # Only add Joint if pfrs name not already on limb
         name = joint.pfrsName.get()
-        names = [j.pfrsName.get() for j in pm.listConnections(limb.infJoints)]
+        # names = [j.pfrsName.get() for j in pm.listConnections(limb.infJoints)]
+        names = [j.pfrsName.get() for j in pm.listConnections(limb.joints)]
         if name in names:
             self.logger.error('\t\t\tCannot add joint: joint of same pfrsName')
             self.logger.error('\t\t\t\talready exists on limb')
             return
-        pm.connectAttr(limb.infJoints, joint.limb)
+        # pm.connectAttr(limb.infJoints, joint.limb)
+        pm.connectAttr(limb.joints, joint.limb)
         group = pm.listConnections(joint.group)[0]
         self.grpMng.UpdateGroupName(group)
         if joint.ID.get() not in self._joints:
@@ -166,21 +170,22 @@ class Joint_Manager:
     #         pm.connectAttr(limb.infJoints, nonInfJoint.limb)
         # self._SetupNonInfJoint(limb)
 
-    def Setup_NonInfJoint(self, limb):
-        joint = self.GetLimbJoints(limb)[-1]
-        pm.disconnectAttr(joint.limb)
-        pm.connectAttr(limb.nonInfJoint, joint.limb)
+    # def Setup_NonInfJoint(self, limb):
+    #     joint = self.GetLimbJoints(limb)[-1]
+    #     pm.disconnectAttr(joint.limb)
+    #     pm.connectAttr(limb.nonInfJoint, joint.limb)
 
-    def Teardown_NonInfJoint(self, limb):
-        joint = self.GetLimbJoints(limb)[-1]
-        pm.disconnectAttr(joint.limb)
-        pm.connectAttr(limb.infJoints, joint.limb)
+    # def Teardown_NonInfJoint(self, limb):
+    #     joint = self.GetLimbJoints(limb)[-1]
+    #     pm.disconnectAttr(joint.limb)
+    #     pm.connectAttr(limb.infJoints, joint.limb)
 
 #============= FUNCTIONALITY ============================
 
     def ReindexJoints(self, limb):
         temp = {} # longName : joint
-        for joint in pm.listConnections(limb.infJoints):
+        # for joint in pm.listConnections(limb.infJoints):
+        for joint in pm.listConnections(limb.joints):
             temp[joint.longName()] = joint
         i = 0
         for key in sorted(list(temp.keys())):

@@ -87,7 +87,9 @@ class PaintWeights_UI:
     def JointSelected(self, joint):
         self.joint = joint
         if joint:
-            joints = self.jntMng.GetLimbJoints(self.limb, False)
+            joints = self.jntMng.GetLimbJoints(self.limb)
+            if self.limb.limbType.get() == 2:
+                joints = joints[:-1]
             otherJoints = [j for j in joints if j != self.joint]
             paint.PFRS_INF_JOINTS = otherJoints
             paint.PFRS_ATTR = 'J' + str(joint.ID.get())

@@ -91,9 +91,10 @@ class Limb_Manager:
                                         h=self.hideAttrs)
         # pm.addAttr(limb, ln='parentJntIndex', at='enum', enumName='None')
         # pm.addAttr(limb, ln='parentCtrID', at='long')
-        pm.addAttr(limb, ln='infJoints', dt='string', h=self.hideAttrs)
-        pm.addAttr(limb, ln='nonInfJoint', dt='string', h=self.hideAttrs) # Only for 3+ chain
+        # pm.addAttr(limb, ln='infJoints', dt='string', h=self.hideAttrs)
+        # pm.addAttr(limb, ln='nonInfJoint', dt='string', h=self.hideAttrs) # Only for 3+ chain
         # pm.addAttr(limb, ln='tempJoints', dt='string', h=self.hideAttrs) # limb setup
+        pm.addAttr(limb, ln='joints', dt='string', h=self.hideAttrs)
         pm.addAttr(limb, ln='rigRoot', dt='string', h=self.hideAttrs)
 
         pm.addAttr(limb, ln='rebuildLimbType', at='bool', h=self.hideAttrs)

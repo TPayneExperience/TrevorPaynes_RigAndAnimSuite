@@ -135,7 +135,8 @@ class LimbSetup_UI:
         groups += pm.listConnections(limb.bhvFKIKSwitchGroup)
         for group in groups:
             self.grpMng.UpdateGroupName(group)
-        for joint in pm.listConnections(limb.infJoints):
+        # for joint in pm.listConnections(limb.infJoints):
+        for joint in pm.listConnections(limb.joints):
             self.jntMng.UpdateJointName(joint)
             group = pm.listConnections(joint.group)[0]
             self.grpMng.UpdateGroupName(group)

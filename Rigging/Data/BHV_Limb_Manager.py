@@ -366,6 +366,8 @@ class BHV_Limb_Manager:
         sourcePos = pm.xform(sourceJoint, q=1, t=1, ws=1)
         # Create distance dictionary to groups
         for limb in self.limbMng.GetAllLimbs():
+            if limb == sourceLimb:
+                continue
             if limb.bhvType.get() in bhvFilter:
                 for targetGroup in self.grpMng.GetLimbGroups(limb):
                     targetPos = pm.xform(targetGroup, q=1, t=1, ws=1)
@@ -373,6 +375,8 @@ class BHV_Limb_Manager:
                     for i in range(3):
                         dist += (sourcePos[i]-targetPos[i])**2
                     distances[dist] = limb
+        if not distances:
+            return None
         # Get Closest limb
         dist = sorted(list(distances.keys()))[0]
         return distances[dist]
@@ -383,7 +387,10 @@ class BHV_Limb_Manager:
     # All Others set by BHV UI > Set Bhv
 
     def Setup_FK(self, limb):
-        for joint in self.jntMng.GetLimbJoints(limb, False):
+        joints = self.jntMng.GetLimbJoints(limb)
+        if limb.limbType.get() == 2:
+            joints = joints[:-1]
+        for joint in joints:
             group = pm.listConnections(joint.group)[0]
             group.v.set(1)
 
@@ -474,14 +481,14 @@ class BHV_Limb_Manager:
             rot = pm.xform(joint, q=1, ro=1, ws=1)
             pm.xform(groups[i], t=pos, ro=rot, s=[1,1,1], ws=1)
             self.grpMng.UpdateGroupName(groups[i])
-        pm.parent(groups[0], groups[1])
-        pm.parent(groups[2], groups[1])
+        pm.parent(groups[0], groups[2], groups[1])
         pm.parent(groups[1], limb)
 
 # ============= TEARDOWN BHV ============================
 
     def Teardown_FK(self, limb):
-        for joint in pm.listConnections(limb.infJoints):
+        # for joint in pm.listConnections(limb.infJoints):
+        for joint in pm.listConnections(limb.joints):
             group = pm.listConnections(joint.group)[0]
             group.v.set(0)
 

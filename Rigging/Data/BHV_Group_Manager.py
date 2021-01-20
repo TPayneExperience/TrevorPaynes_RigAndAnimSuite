@@ -72,16 +72,25 @@ class BHV_Group_Manager:
     def GetLimbGroups(self, limb):
         bhvType = limb.bhvType.get()
         groups = []
-        if bhvType in [0, 3, 5, 6]: # FK Chain, Cst, IK Chain, FK Branch
-            for joint in pm.listConnections(limb.infJoints):
+        if bhvType in [0, 3, 5, 6]: # FK Chain, Cst, FK Branch
+            for joint in pm.listConnections(limb.joints):
                 groups += pm.listConnections(joint.group)
             return self.SortGroups(groups)
-
+            # for joint in pm.listConnections(limb.infJoints):
+            #     groups += pm.listConnections(joint.group)
+            # return self.SortGroups(groups)
+        # if bhvType == 5: # IK Chain
+        #     for joint in pm.listConnections(limb.infJoints):
+        #         groups += pm.listConnections(joint.group)
+        #     for joint in pm.listConnections(limb.nonInfJoint):
+        #         groups += pm.listConnections(joint.group)
+        #     return self.SortGroups(groups)[1:]
         if bhvType in [1, 4]: # IK PV, LookAt
             return pm.listConnections(limb.bhvDistanceGroup)
 
         if bhvType == 2: # FK IK PV
-            for joint in pm.listConnections(limb.infJoints):
+            # for joint in pm.listConnections(limb.infJoints):
+            for joint in pm.listConnections(limb.joints):
                 groups += pm.listConnections(joint.group)
             groups = self.SortGroups(groups)
             groups += pm.listConnections(limb.bhvDistanceGroup)
@@ -89,7 +98,8 @@ class BHV_Group_Manager:
             return groups
 
         if bhvType == 9: # FK IK Chain
-            for joint in pm.listConnections(limb.infJoints):
+            # for joint in pm.listConnections(limb.infJoints):
+            for joint in pm.listConnections(limb.joints):
                 groups += pm.listConnections(joint.group)
             groups = self.SortGroups(groups)
             groups += pm.listConnections(limb.bhvFKIKSwitchGroup)
@@ -99,22 +109,23 @@ class BHV_Group_Manager:
             return pm.listConnections(limb.bhvEmptyGroup)
 
         if bhvType == 8: # FK - Reverse Chain
-            for joint in pm.listConnections(limb.infJoints):
+            # for joint in pm.listConnections(limb.infJoints):
+            for joint in pm.listConnections(limb.joints):
                 groups += pm.listConnections(joint.group)
             return self.SortGroups(groups)[::-1]
         
         if bhvType == 10: # Relative FK
-            groups = pm.listConnections(limb.bhvRFKTopGroup)
+            groups = pm.listConnections(limb.bhvRFKBottomGroup)
             groups += pm.listConnections(limb.bhvRFKCenterGroup)
-            groups += pm.listConnections(limb.bhvRFKBottomGroup)
+            groups += pm.listConnections(limb.bhvRFKTopGroup)
             return groups
             
-
     def GetLimbIKGroups(self, limb):
         bhvType = limb.bhvType.get()
         if bhvType in [0, 3, 5, 6, 9]: # FK Chain, Cst, IK Chain, FK Branch
             groups = []
-            for joint in pm.listConnections(limb.infJoints):
+            # for joint in pm.listConnections(limb.infJoints):
+            for joint in pm.listConnections(limb.joints):
                 groups += pm.listConnections(joint.group)
             return self.SortGroups(groups)
         if bhvType in [1, 2, 4]: # IK PV, LookAt
@@ -125,13 +136,15 @@ class BHV_Group_Manager:
         groups = []
         # FK Chain, FKIK, Branch, Reverse, Relative
         if bhvType in [0, 2, 6, 9, 10]:
-            for joint in pm.listConnections(limb.infJoints):
+            # for joint in pm.listConnections(limb.infJoints):
+            for joint in pm.listConnections(limb.joints):
                 groups += pm.listConnections(joint.group)
             return self.SortGroups(groups)
         if bhvType == 7: # EMPTY
             return pm.listConnections(limb.bhvEmptyGroup)
         if bhvType == 8: # FK - Reverse Chain
-            for joint in pm.listConnections(limb.infJoints):
+            # for joint in pm.listConnections(limb.infJoints):
+            for joint in pm.listConnections(limb.joints):
                 groups += pm.listConnections(joint.group)
             return self.SortGroups(groups)[::-1]
     
@@ -186,9 +199,9 @@ class BHV_Group_Manager:
             pm.addAttr(groups[i], ln='limb', dt='string')
             groups[i].v.set(0) 
             groups[i].groupType.set(4)
-        pm.connectAttr(limb.bhvRFKTopGroup, groups[0].limb)
+        pm.connectAttr(limb.bhvRFKBottomGroup, groups[0].limb)
         pm.connectAttr(limb.bhvRFKCenterGroup, groups[1].limb)
-        pm.connectAttr(limb.bhvRFKBottomGroup, groups[2].limb)
+        pm.connectAttr(limb.bhvRFKTopGroup, groups[2].limb)
         pm.parent(groups[0], groups[1])
         pm.parent(groups[2], groups[1])
         pm.parent(groups[1], limb)
