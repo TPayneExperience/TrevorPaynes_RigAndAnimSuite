@@ -16,6 +16,7 @@ class LS_Limb_Hierarchy_UI:
         self._Setup()
 
     def Populate(self):
+        self.logger.debug('\tLS_LimbHier > Populate')
         pm.treeView(self.widget, e=1, removeAll=1)
         temp = {} # pfrsName : [limbs]
         for limb in self.limbMng.GetAllLimbs():
@@ -71,9 +72,11 @@ class LS_Limb_Hierarchy_UI:
 #=========== FUNCTIONALITY ====================================
 
     def SetAddEnabled(self, areJointsValid):
+        self.logger.debug('\tLS_LimbHier > SetAddEnabled ' + str(areJointsValid))
         pm.menuItem(self.add_mi, e=1, en=areJointsValid)
 
     def SelectionChanged(self):
+        self.logger.debug('\tLS_LimbHier > SelectionChanged')
         pm.menuItem(self.flipSides_mi, e=1, en=0)
         pm.menuItem(self.remove_mi, e=1, en=0)
         limbIDStrs = pm.treeView(self.widget, q=1, selectItem=1)
@@ -81,15 +84,16 @@ class LS_Limb_Hierarchy_UI:
             pm.menuItem(self.remove_mi, e=1, en=1)
             limb = self.limbMng.GetLimb(int(limbIDStrs[0]))
             name = limb.pfrsName.get()
-            self.logger.info('\t\tLimbHier > SELECTED limb "%s"' % name)
+            self.logger.info('\tLimbHier > SELECTED limb "%s"' % name)
             if pm.listConnections(limb.mirrorLimb):
                 pm.menuItem(self.flipSides_mi, e=1, en=1)
             self.parent.LimbSelected(limb)
         else:
             self.parent.LimbSelected(None)
-            self.logger.info('\t\tLimbHier > DESELECTED limb')
+            self.logger.info('\tLimbHier > DESELECTED limb')
 
     def Remove(self, ignore):
+        self.logger.debug('\tLS_LimbHier > Remove')
         limbIDStrs = pm.treeView(self.widget, q=1, selectItem=1)
         if not limbIDStrs:
             return
@@ -103,7 +107,7 @@ class LS_Limb_Hierarchy_UI:
             return
         limb = self.limbMng.GetLimb(int(limbIDStrs[0]))
         name = limb.pfrsName.get()
-        self.logger.info('\t\tLimbHier > REMOVE Limb "%s"' % name)
+        self.logger.info('\tLimbHier > REMOVE Limb "%s"' % name)
         # for joint in self.jntMng.GetLimbTempJoints(limb):
         for joint in self.jntMng.GetLimbJoints(limb):
             self.jntMng.RemoveTemp(joint)
@@ -126,9 +130,10 @@ class LS_Limb_Hierarchy_UI:
         self.parent.UpdateSceneFrame()
 
     def Rename(self, limbIDStr, newName):
+        self.logger.debug('\tLS_LimbHier > Rename')
         limb = self.limbMng.GetLimb(int(limbIDStr))
         oldName = limb.pfrsName.get()
-        msg = '\t\tLimbHier > RENAMING "%s" to "%s"' % (oldName, newName)
+        msg = '\tLimbHier > RENAMING "%s" to "%s"' % (oldName, newName)
         self.logger.info(msg)
 
         if not self.nameMng.IsValidCharacterLength(newName):
@@ -142,7 +147,7 @@ class LS_Limb_Hierarchy_UI:
         if self.limbMng.Rename(limb, newName):
             self.parent.RenameLimbs(limb)
         else:
-            msg = '\t\t\tTwo limbs MAX may have same name'
+            msg = '**** Two limbs MAX may have same name'
             self.logger.error(msg)
         # newMirror = self.limbMng.GetLimbMirror(limb)
 
@@ -162,7 +167,7 @@ class LS_Limb_Hierarchy_UI:
         return ''
 
     def FlipSides(self, ignore):
-        self.logger.info('\t\tLimbHier > Flip Sides')
+        self.logger.info('\tLimbHier > Flip Sides')
         limbIDStrs = pm.treeView(self.widget, q=1, selectItem=1)
         sourceLimb = self.limbMng.GetLimb(int(limbIDStrs[0]))
         mirrorLimb = pm.listConnections(sourceLimb.mirrorLimb)[0]

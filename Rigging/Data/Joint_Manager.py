@@ -30,6 +30,7 @@ class Joint_Manager:
         self.hideAttrs = False
 
     def NewRig(self, rigRoot):
+        self.logger.debug('\tJntMng > NewRig')
         self._joints = {} # jointID: jointNode
         self.rigRoot = rigRoot
         pm.addAttr(rigRoot, ln='nextJointID', at='short', dv=1)
@@ -52,22 +53,27 @@ class Joint_Manager:
 #============= ACCESSORS + MUTATORS ============================
 
     def GetJoint(self, jointID):
+        self.logger.debug('\tJntMng > GetJoint')
         return self._joints[jointID]
 
     def GetAllJoints(self):
+        self.logger.debug('\tJntMng > GetAllJoints')
         return list(self._joints.values())
 
     def HasLimb(self, joint):
+        self.logger.debug('\tJntMng > HasLimb')
         if not joint.hasAttr('limb'):
             return False
         return bool(pm.listConnections(joint.limb))
 
     def GetLimb(self, joint):
+        self.logger.debug('\tJntMng > GetLimb')
         return pm.listConnections(joint.limb)[0]
 
     # def GetLimbJoints(self, limb, includeNonInf=True):
     def GetLimbJoints(self, limb):
         '''Order joints by internal joint index. child to root parent'''
+        self.logger.debug('\tJntMng > GetLimbJoints')
         orderedJoints = []
         temp = {}
         # joints = pm.listConnections(limb.infJoints)
@@ -81,11 +87,13 @@ class Joint_Manager:
         return orderedJoints
 
     def GetJointCount(self): # for Skel tool label
+        self.logger.debug('\tJntMng > GetJointCount')
         return len(self._joints)
 
 #============= ADD + REMOVE ============================
 
     def Add(self, limb, joint):
+        self.logger.debug('\tJntMng > Add')
         if (not joint.hasAttr('pfrsName')):
             colors = list(self.jointColors[self.colorIndex])
             self.colorIndex = (self.colorIndex + 1) % len(self.jointColors)
@@ -123,8 +131,8 @@ class Joint_Manager:
         # names = [j.pfrsName.get() for j in pm.listConnections(limb.infJoints)]
         names = [j.pfrsName.get() for j in pm.listConnections(limb.joints)]
         if name in names:
-            self.logger.error('\t\t\tCannot add joint: joint of same pfrsName')
-            self.logger.error('\t\t\t\talready exists on limb')
+            self.logger.error('**** Cannot add joint: joint of same pfrsName')
+            self.logger.error('****     already exists on limb')
             return
         # pm.connectAttr(limb.infJoints, joint.limb)
         pm.connectAttr(limb.joints, joint.limb)
@@ -133,12 +141,13 @@ class Joint_Manager:
         if joint.ID.get() not in self._joints:
             self._joints[joint.ID.get()] = joint
 
-
     def RemoveTemp(self, joint):
+        self.logger.debug('\tJntMng > RemoveTemp')
         pm.disconnectAttr(joint.limb)
         del(self._joints[joint.ID.get()])
 
     def RemovePerm(self, joint):
+        self.logger.debug('\tJntMng > RemovePerm')
         parents = pm.listRelatives(joint, p=1)
         children = pm.listRelatives(joint, c=1, type='joint')
         if parents:
@@ -183,6 +192,7 @@ class Joint_Manager:
 #============= FUNCTIONALITY ============================
 
     def ReindexJoints(self, limb):
+        self.logger.debug('\tJntMng > ReindexJoints')
         temp = {} # longName : joint
         # for joint in pm.listConnections(limb.infJoints):
         for joint in pm.listConnections(limb.joints):
@@ -206,14 +216,17 @@ class Joint_Manager:
     #     self.UpdateJointName(joint)
     
     def UpdateAllJointNames(self): # if prefix changed
+        self.logger.debug('\tJntMng > UpdateAllJointNames')
         for joint in self.GetAllJoints():
             self.UpdateJointName(joint)
 
     def UpdateLimbJointNames(self, limb):
+        self.logger.debug('\tJntMng > UpdateLimbJointNames')
         for joint in self.GetLimbJoints(limb):
             self.UpdateJointName(joint)
 
     def UpdateJointName(self, joint):
+        self.logger.debug('\tJntMng > UpdateJointName')
         limb = self.GetLimb(joint)
         name = self.nameMng.GetName(limb.pfrsName.get(),
                                     joint.pfrsName.get(),
@@ -224,6 +237,7 @@ class Joint_Manager:
 #============= UTILS ============================
 
     def AreJointsSiblings(self, joints):
+        self.logger.debug('\tJntMng > AreJointsSiblings')
         isBranch = True
         parent1 = pm.listRelatives(joints[0], parent=1)
         for joint in joints[1:]:
@@ -233,11 +247,13 @@ class Joint_Manager:
         return isBranch
     
     def AreJointsChained(self, joints):
+        self.logger.debug('\tJntMng > AreJointsChained')
         bestChain = self.GetJointChain(joints)
         return all([j in bestChain for j in joints])
     
     def GetJointChain(self, joints):
         '''returns child most to parent most joint list'''
+        self.logger.debug('\tJntMng > GetJointChain')
         if len(joints) == 1:
             return joints
         temp = {} # longName : node
@@ -259,6 +275,7 @@ class Joint_Manager:
 
     def UpdateLimbParentJoint(self, childLimb):
         '''Updates limb parent group enum to closest to root group'''
+        self.logger.debug('\tJntMng > UpdateLimbParentJoint')
         # childLimb = self.limbMng.GetLimb(limbID)
         parents = pm.listConnections(childLimb.parentLimb)
 

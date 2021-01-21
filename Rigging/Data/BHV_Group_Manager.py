@@ -2,9 +2,10 @@
 import pymel.core as pm
 
 class BHV_Group_Manager:
-    def __init__(self, limbMng, nameMng):
+    def __init__(self, limbMng, nameMng, parent):
         self.limbMng = limbMng
         self.nameMng = nameMng
+        self.logger = parent.logger
 
         # self.axesXforms =   ((1,0,0),
         #                     (-1,0,0),
@@ -40,6 +41,7 @@ class BHV_Group_Manager:
         self.rigRoot = None
 
     def NewRig(self, rigRoot):
+        self.logger.debug('\tGrpMng > NewRig')
         self.rigRoot = rigRoot
 
         self._groups = {} # grpID : grpData
@@ -53,9 +55,11 @@ class BHV_Group_Manager:
 #============= ACCESSORS  ============================
 
     def GetGroup(self, groupID):
+        self.logger.debug('\tGrpMng > GetGroup')
         return self._groups[groupID]
 
     def GetAllGroups(self):
+        self.logger.debug('\tGrpMng > GetAllGroups')
         return list(self._groups.values())
 
     # def GetAllLimbGroups(self, limb):
@@ -70,6 +74,7 @@ class BHV_Group_Manager:
     #     return groups
 
     def GetLimbGroups(self, limb):
+        self.logger.debug('\tGrpMng > GetLimbGroups')
         bhvType = limb.bhvType.get()
         groups = []
         if bhvType in [0, 3, 5, 6]: # FK Chain, Cst, FK Branch
@@ -121,6 +126,7 @@ class BHV_Group_Manager:
             return groups
             
     def GetLimbIKGroups(self, limb):
+        self.logger.debug('\tGrpMng > GetLimbIKGroups')
         bhvType = limb.bhvType.get()
         if bhvType in [0, 3, 5, 6, 9]: # FK Chain, Cst, IK Chain, FK Branch
             groups = []
@@ -132,6 +138,7 @@ class BHV_Group_Manager:
             return pm.listConnections(limb.bhvDistanceGroup)
     
     def GetLimbFKGroups(self, limb):
+        self.logger.debug('\tGrpMng > GetLimbFKGroups')
         bhvType = limb.bhvType.get()
         groups = []
         # FK Chain, FKIK, Branch, Reverse, Relative
@@ -170,6 +177,7 @@ class BHV_Group_Manager:
     # EMPTY
     # Called from Rigging > SetupEditable_Limbs()
     def AddEmptyGroup(self, limb):
+        self.logger.debug('\tGrpMng > AddEmptyGroup')
         group = self._AddGroup()
         pm.addAttr(group, ln='limb', dt='string')
         pm.connectAttr(limb.bhvEmptyGroup, group.limb)
@@ -179,6 +187,7 @@ class BHV_Group_Manager:
     # FK, CST, IK Chain
     # Called from Limb Setup > AutoBuild OR RMB > Add Limb
     def AddJointGroup(self, joint): 
+        self.logger.debug('\tGrpMng > AddJointGroup')
         group = self._AddGroup()
         group.groupType.set(1)
         pm.addAttr(group, ln='targetJoint', at='enum', en='None') # IK Chain
@@ -192,6 +201,7 @@ class BHV_Group_Manager:
         return group
 
     def AddRFKGroups(self, limb):
+        self.logger.debug('\tGrpMng > AddRFKGroups')
         groups = []
         for i in range(3):
             groups.append(self._AddGroup())
@@ -210,6 +220,7 @@ class BHV_Group_Manager:
     # IK PV, LookAt
     # Called from Behaviors > Set Bhv()
     def AddDistanceGroup(self, limb):
+        self.logger.debug('\tGrpMng > AddDistanceGroup')
         # axes = ':'.join(self.axesNames)
         group = self._AddGroup()
         group.groupType.set(2)
@@ -225,6 +236,7 @@ class BHV_Group_Manager:
     # FKIK Switch
     # Called from Behaviors > Set Bhv()
     def AddFKIKSwitchGroup(self, limb):
+        self.logger.debug('\tGrpMng > AddFKIKSwitchGroup')
         group = self._AddGroup()
         group.groupType.set(3)
         pm.addAttr(group, ln='targetJoint', at='enum', en='None')
@@ -240,12 +252,14 @@ class BHV_Group_Manager:
         return group
 
     def Remove(self, group):
+        self.logger.debug('\tGrpMng > Remove')
         del(self._groups[group.ID.get()])
         pm.delete(group)
 
 #============= SETUP / TEARDOWNS ============================
 
     def SetupEditable_IKPVGroup(self, limb, joints):
+        self.logger.debug('\tGrpMng > SetupEditable_IKPVGroup')
         joint = joints[len(joints)/2]
         self.SetupEditable_DistanceGroup(limb, joint)
 
@@ -254,6 +268,7 @@ class BHV_Group_Manager:
     #     self.SetupEditable_DistanceGroup(group, joint)
 
     def SetupEditable_DistanceGroup(self, limb, joint):
+        self.logger.debug('\tGrpMng > SetupEditable_DistanceGroup')
         pm.connectAttr(joint.bhvDistanceGroup, limb.bhvDistanceJoint)
         group = self.GetLimbIKGroups(limb)[0]
         pm.parent(group, joint)
@@ -263,6 +278,7 @@ class BHV_Group_Manager:
     #     pm.parent(group, joint)
 
     def TeardownEditable_DistanceGroup(self, limb):
+        self.logger.debug('\tGrpMng > TeardownEditable_DistanceGroup')
         pm.disconnectAttr(limb.bhvDistanceJoint)
         group = self.GetLimbIKGroups(limb)[0]
         pm.parent(group, limb)
@@ -275,6 +291,7 @@ class BHV_Group_Manager:
 #============= UTILS ============================
 
     def SortGroups(self, groups):
+        self.logger.debug('\tGrpMng > SortGroups')
         indexGroups = {} # jointIndex : group
         orderedGroups = []
         for group in groups:
@@ -287,6 +304,7 @@ class BHV_Group_Manager:
         return orderedGroups
 
     def UpdateGroupName(self, group):
+        self.logger.debug('\tGrpMng > UpdateGroupName')
         '''Updates limb + joint GROUP + CONTROL renaming'''
         index = group.groupType.get()
         groupType = self.grpTypes[index]

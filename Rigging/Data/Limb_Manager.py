@@ -2,9 +2,10 @@
 import pymel.core as pm
 
 class Limb_Manager:
-    def __init__(self, nameMng):
+    def __init__(self, nameMng, parent):
 
         self.nameMng = nameMng
+        self.logger = parent.logger
 
         self.limbTypes = (  'Empty_Rigging',
         
@@ -17,6 +18,7 @@ class Limb_Manager:
         self.hideAttrs = False
 
     def NewRig(self, rigRoot):
+        self.logger.debug('\tLimbMng > NewRig')
         self.rigRoot = rigRoot
         self._limbs = {} # limbID : limbNode
         pm.addAttr(rigRoot, ln='nextLimbID', at='short', dv=1)
@@ -24,6 +26,7 @@ class Limb_Manager:
         self.limbGroup = pm.group(name='LIMBS', em=1, p=rigRoot)
 
     def SetRig(self, rigRoot):
+        self.logger.debug('\tLimbMng > SetRig')
         # MISSING: for multiple rigs in scene, remap limb IDs, only for anim though
         self.rigRoot = rigRoot
         self._limbs = {} # limbID : limbNode
@@ -33,12 +36,15 @@ class Limb_Manager:
 #============= ACCESSORS + MUTATORS ============================
 
     def GetLimb(self, limbID):
+        self.logger.debug('\tLimbMng > GetLimb')
         return self._limbs[limbID]
     
     def GetLimbSide(self, limb): # Name Manager + button labels
+        self.logger.debug('\tLimbMng > GetLimbSide')
         return self.limbSides[limb.side.get()]
     
     def GetLimbParent(self, limb):
+        self.logger.debug('\tLimbMng > GetLimbParent')
         parent = pm.listConnections(limb.parentLimb)
         if parent:
             return parent[0]
@@ -48,10 +54,12 @@ class Limb_Manager:
     #     return pm.listConnections(limb.mirrorLimb)
 
     def GetLimbPrefix(self, limb):
+        self.logger.debug('\tLimbMng > GetLimbPrefix')
         rigRoot = pm.listConnections(limb.rigRoot)[0]
         return rigRoot.prefix.get()
 
     def GetAllLimbs(self): # used for bhv limb selection comboboxes
+        self.logger.debug('\tLimbMng > GetAllLimbs')
         return list(self._limbs.values())
 
 #============= FUNCTIONS ============================
@@ -61,6 +69,7 @@ class Limb_Manager:
         ID's are used for the TreeView UI items ONLY,
         most all data tracked through storage and connections.
         '''
+        self.logger.debug('\tLimbMng > Add')
         limbID = self.rigRoot.nextLimbID.get()
         self.rigRoot.nextLimbID.set(limbID + 1)
         
@@ -127,6 +136,7 @@ class Limb_Manager:
         return limb
 
     def Remove(self, limb): # Should be called after joints deleted
+        self.logger.debug('\tLimbMng > Remove')
         if pm.listConnections(limb.mirrorLimb):
             self._BreakMirror(limb)
         del(self._limbs[limb.ID.get()])
@@ -134,6 +144,7 @@ class Limb_Manager:
         pm.delete(limb)
 
     def Reparent(self, childID, parentID):
+        self.logger.debug('\tLimbMng > Reparent')
         child = self.GetLimb(childID)
         pm.disconnectAttr(child.parentLimb)
         if (parentID != -1):
@@ -141,6 +152,7 @@ class Limb_Manager:
             pm.connectAttr(parent.childrenLimbs, child.parentLimb)
 
     def Rename(self, sourceLimb, newName): # list should repopulate after call
+        self.logger.debug('\tLimbMng > Rename')
         names = [limb.pfrsName.get() for limb in self._limbs.values()]
         if (names.count(newName) >= 2): # Only 2 can have same name
             return False
@@ -167,6 +179,7 @@ class Limb_Manager:
         return True
     
     def _BreakMirror(self, sourceLimb):
+        self.logger.debug('\tLimbMng > _BreakMirror')
         mirrorLimb = pm.listConnections(sourceLimb.mirrorLimb)[0]
         mirrorLimb.side.set(0)
         sourceLimb.side.set(0)
@@ -181,6 +194,7 @@ class Limb_Manager:
     #         limb.limbType.set(1)
 
     def FlipSides(self, limb1):
+        self.logger.debug('\tLimbMng > FlipSides')
         limb2 = pm.listConnections(limb1.mirrorLimb)[0]
         side1 = limb1.side.get()
         side2 = limb2.side.get()
@@ -191,6 +205,7 @@ class Limb_Manager:
 #============= PARENTS / TREE MANIPULATION ============================
 
     def RebuildLimbDict(self):
+        self.logger.debug('\tLimbMng > RebuildLimbDict')
         self._limbs = {}
         for limb in pm.listRelatives(self.limbGroup, c=1):
             limbID = limb.ID.get()
@@ -203,6 +218,7 @@ class Limb_Manager:
             self._limbs[limbID] = limb
 
     def GetDefaultLimbHier(self, jntMng):
+        self.logger.debug('\tLimbMng > GetDefaultLimbHier')
         limbParents = {} # childLimb : parentLimb
         for childLimb in list(self._limbs.values()):
             joints = jntMng.GetLimbJoints(childLimb)
@@ -217,6 +233,7 @@ class Limb_Manager:
         return limbParents
 
     def GetRootLimbs(self):
+        self.logger.debug('\tLimbMng > GetRootLimbs')
         rootLimbs = []
         for limb in list(self._limbs.values()):
             if not pm.listConnections(limb.parentLimb):
@@ -225,6 +242,7 @@ class Limb_Manager:
 
     def GetLimbCreationOrder(self, rootLimb):
         '''Returns an ordered list of limb IDs FROM ROOT TO bottom most CHILD'''
+        self.logger.debug('\tLimbMng > GetLimbCreationOrder')
         orderedLimbs = [rootLimb]
         parents = [rootLimb]
         while(parents):
@@ -236,6 +254,7 @@ class Limb_Manager:
         return orderedLimbs
     
     def UpdateLimbName(self, limb):
+        self.logger.debug('\tLimbMng > UpdateLimbName')
         pfrsName = limb.pfrsName.get()
         limbName = self.nameMng.GetName(pfrsName,
                                     'Limb',

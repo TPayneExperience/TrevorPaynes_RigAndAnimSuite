@@ -20,7 +20,7 @@ class Test_UI:
 #=========== TAB FUNCTIONALITY ====================================
     
     def Setup_Editable(self):
-        self.logger.info('\tTest > SETUP')
+        self.logger.info('Rigging > Test SETUP')
         self.Setup_Groups()
         self.Setup_Controls()
         self.Setup_Internal()
@@ -28,7 +28,7 @@ class Test_UI:
         pm.select(d=1)
 
     def Teardown_Editable(self):
-        self.logger.info('\tTest > TEARDOWN\n')
+        self.logger.info('Rigging > Test TEARDOWN\n')
         self.Teardown_Controls()
         self.Remove_Constraints()
         self.Teardown_Groups()
@@ -36,6 +36,7 @@ class Test_UI:
 #=========== SETUP FUNCTIONALITY ====================================
     
     def Setup_Groups(self):
+        self.logger.debug('\tTest_UI > Setup_Groups')
         for group in self.grpMng.GetAllGroups():
             for attr in ['.tx', '.ty', '.tz', '.rx', '.ry', '.rz']:
                 pm.setAttr(group+attr, l=0)
@@ -48,6 +49,7 @@ class Test_UI:
                 pm.parent(group, limb)
 
     def Setup_Controls(self):
+        self.logger.debug('\tTest_UI > Setup_Controls')
         for control in self.ctrMng.GetAllControls():
             group = pm.listConnections(control.group)[0]
             groupType = group.groupType.get()
@@ -66,6 +68,7 @@ class Test_UI:
                     pm.setAttr(control + attr, l=1, k=0, cb=0)
             
     def Setup_Internal(self):
+        self.logger.debug('\tTest_UI > Setup_Internal')
         for limb in self.limbMng.GetAllLimbs():
             bhvType = limb.bhvType.get()
             if bhvType in [0, 8]: # fk chain + reverse
@@ -86,6 +89,7 @@ class Test_UI:
                 self.Setup_Internal_RelativeFK(limb)
 
     def Setup_External(self):
+        self.logger.debug('\tTest_UI > Setup_External')
         for limb in self.limbMng.GetAllLimbs():
             bhvType = limb.bhvType.get()
             if bhvType in [0,8]: # fk chain + reverse
@@ -106,6 +110,7 @@ class Test_UI:
 #=========== TEARDOWN FUNCTIONALITY ====================================
     
     def Teardown_Controls(self):
+        self.logger.debug('\tTest_UI > Teardown_Controls')
         for control in self.ctrMng.GetAllControls():
             group = pm.listConnections(control.group)[0]
             if group.groupType.get() == 2: # Distance
@@ -121,6 +126,7 @@ class Test_UI:
         pm.refresh() # Forces IK Handles to re-evaluate
     
     def Remove_Constraints(self):
+        self.logger.debug('\tTest_UI > Remove_Constraints')
         pm.delete(pm.ls(type='ikHandle'))
         pm.delete(pm.ls(type='parentConstraint'))
         pm.delete(pm.ls(type='pointConstraint'))
@@ -146,6 +152,7 @@ class Test_UI:
                     shape.v.set(1)
     
     def Teardown_Groups(self):
+        self.logger.debug('\tTest_UI > Teardown_Groups')
         for joint in self.jntMng.GetAllJoints():
             group = pm.listConnections(joint.group)[0]
             pm.parent(group, joint)
@@ -173,6 +180,7 @@ class Test_UI:
     
     # RELATIVE FK
     def Setup_Internal_RelativeFK(self, limb):
+        self.logger.debug('\tTest_UI > Setup_Internal_RelativeFK')
         joints = self.jntMng.GetLimbJoints(limb)
         groups = self.grpMng.GetLimbGroups(limb)
         bottomGroup = groups[0]
@@ -265,11 +273,13 @@ class Test_UI:
         #     pm.setAttr(centerControl+attr, l=1, k=0, cb=0)
 
     def Setup_External_RelativeFK(self, limb):
+        self.logger.debug('\tTest_UI > Setup_External_RelativeFK')
         # Parent fk joint to parent target joint
         fkJoint = pm.listConnections(limb.bhvFKIK_FKJoint)[0]
         self.ParentConstrainGroup(limb, fkJoint)
 
     def Teardown_RelativeFK(self, limb):
+        self.logger.debug('\tTest_UI > Teardown_RelativeFK')
         pm.delete(pm.listConnections(limb.bhvFKIK_FKJoint))
         groups = self.grpMng.GetLimbGroups(limb)
         bottomGroup = groups[0]
@@ -287,6 +297,7 @@ class Test_UI:
 
     # FK CHAIN / REVERSE CHAIN
     def Setup_Internal_FKChain(self, limb):
+        self.logger.debug('\tTest_UI > Setup_Internal_FKChain')
         groups = self.grpMng.GetLimbGroups(limb)
         for i in range(len(groups)-1, 0, -1):
             childGroup = groups[i]
@@ -296,14 +307,17 @@ class Test_UI:
         self.Bind_FK_Joints(limb)
         
     def Setup_External_FKChain(self, limb):
+        self.logger.debug('\tTest_UI > Setup_External_FKChain')
         childGroup = self.grpMng.GetLimbGroups(limb)[0]
         self.ParentConstrainGroup(limb, childGroup)
 
     # FK BRANCH
     def Setup_Internal_FKBranch(self, limb):
+        self.logger.debug('\tTest_UI > Setup_Internal_FKBranch')
         self.Bind_FK_Joints(limb)
         
     def Setup_External_FKBranch(self, limb):
+        self.logger.debug('\tTest_UI > Setup_External_FKBranch')
         for childGroup in self.grpMng.GetLimbGroups(limb):
             self.ParentConstrainGroup(limb, childGroup)
         # parent = self.limbMng.GetLimbParent(limb)
@@ -316,6 +330,7 @@ class Test_UI:
         #         pm.parent(childGroup, parentControl)
 
     def Bind_FK_Joints(self, limb):
+        self.logger.debug('\tTest_UI > Bind_FK_Joints')
         joints = self.jntMng.GetLimbJoints(limb)
         bhvType = limb.bhvType.get()
         if (bhvType != 6) and (len(joints) >= 3): # Ignore last joint
@@ -335,6 +350,7 @@ class Test_UI:
 #=========== CONSTRAINT ====================================
     
     def Setup_Internal_Constraint(self, limb):
+        self.logger.debug('\tTest_UI > Setup_Internal_Constraint')
         # targetLimbs = pm.listConnections(limb.bhvCstTargetLimb)
         targetLimbs = pm.listConnections(limb.bhvTargetLimb)
         if not targetLimbs:
@@ -381,6 +397,7 @@ class Test_UI:
                 pm.setAttr('%s.%sW1' % (cst, targetJoint), weight)
 
     def Teardown_Constraint(self, limb):
+        self.logger.debug('\tTest_UI > Teardown_Constraint')
         for joint in self.jntMng.GetLimbJoints(limb):
             group = pm.listConnections(joint.group)[0]
             pos = pm.xform(group, q=1, t=1, ws=1)
@@ -391,6 +408,7 @@ class Test_UI:
 #=========== IK ====================================
     
     def Setup_Internal_IKChain(self, limb):
+        self.logger.debug('\tTest_UI > Setup_Internal_IKChain')
         joints = self.jntMng.GetLimbJoints(limb)
         for i in range(len(joints)-1):
             startJoint = joints[i]
@@ -398,6 +416,7 @@ class Test_UI:
             pm.ikHandle(sj=startJoint, ee=endJoint)
 
     def Setup_External_IKChain(self, limb):
+        self.logger.debug('\tTest_UI > Setup_External_IKChain')
         targetLimb = pm.listConnections(limb.bhvTargetLimb)
         if not targetLimb:
             msg = 'IK Chain Limb "%s" missing TARGET limb' % limb
@@ -415,6 +434,7 @@ class Test_UI:
             pm.parent(handle, targetControl)
 
     def Setup_Internal_IKPoleVector(self, limb):
+        self.logger.debug('\tTest_UI > Setup_Internal_IKPoleVector')
         joints = self.jntMng.GetLimbJoints(limb)
         startJoint = joints[0]
         endJoint = joints[-1]
@@ -424,6 +444,7 @@ class Test_UI:
         pm.poleVectorConstraint(control, handle)
 
     def Setup_External_IKPoleVector(self, limb):
+        self.logger.debug('\tTest_UI > Setup_External_IKPoleVector')
         # PARENT IK HANDLE TO TARGET CONTROL 
         # targetLimb = pm.listConnections(limb.bhvIKTargetLimb)
         targetLimb = pm.listConnections(limb.bhvTargetLimb)
@@ -459,6 +480,7 @@ class Test_UI:
 #=========== FK IK ====================================
     
     def Setup_Internal_FKIK(self, limb):
+        self.logger.debug('\tTest_UI > Setup_Internal_FKIK')
         joints = self.jntMng.GetLimbJoints(limb)
 
         # FKIK SWITCH + Inverse node setup
@@ -544,6 +566,7 @@ class Test_UI:
                 pm.ikHandle(sj=startJoint, ee=endJoint)
     
     def Setup_External_FKIK(self, limb):
+        self.logger.debug('\tTest_UI > Setup_External_FKIK')
         joints = self.jntMng.GetLimbJoints(limb)
 
         # PARENT IK
@@ -610,6 +633,7 @@ class Test_UI:
             pm.connectAttr(fkikControl.fkikSwitch, ik.v)
         
     def Teardown_FKIK(self, limb):
+        self.logger.debug('\tTest_UI > Teardown_FKIK')
         pm.delete(pm.listConnections(limb.bhvFKIK_FKJoint))
         pm.delete(pm.listConnections(limb.bhvFKIK_IKJoint))
         fkikGroup = pm.listConnections(limb.bhvFKIKSwitchGroup)[0]
@@ -628,6 +652,7 @@ class Test_UI:
 #=========== MISC ====================================
     
     def Setup_External_SingleControl(self, limb):
+        self.logger.debug('\tTest_UI > Setup_External_SingleControl')
         childGroup = self.grpMng.GetLimbGroups(limb)[0]
         self.ParentConstrainGroup(limb, childGroup)
         # parent = self.limbMng.GetLimbParent(limb)
@@ -640,6 +665,7 @@ class Test_UI:
         #         pm.parent(childGroup, parentCtrs[0])
 
     def Setup_Internal_LookAt(self, limb):
+        self.logger.debug('\tTest_UI > Setup_Internal_LookAt')
         joint = self.jntMng.GetLimbJoints(limb)[0]
         group = self.grpMng.GetLimbGroups(limb)[0]
         # control = self.ctrMng.GetGroupControl(group)
@@ -647,6 +673,7 @@ class Test_UI:
         pm.aimConstraint(control, joint, mo=1)
 
     def ParentConstrainGroup(self, limb, childGroup):
+        self.logger.debug('\tTest_UI > ParentConstrainGroup')
         parent = self.limbMng.GetLimbParent(limb)
         if not parent:
             return 

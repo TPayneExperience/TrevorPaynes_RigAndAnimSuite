@@ -73,6 +73,11 @@ class PayneFreeRigSuite_UI():
         # self.pfrs.NewRig('somePrefix', [0,1,2,3,4], True)
 
     def NewRig(self, prefix, nameOrder, showPrefix):
+        msg = '\tPFRS_UI > NewRig'
+        msg += '\t\tPrefix = ' + prefix
+        msg += '\t\tNameOrder = ' + str(nameOrder)
+        msg += '\t\tShowPrefix = ' + str(showPrefix)
+        self.logger.debug(msg)
         # prefix = 'somePrefix'
         # nameOrder = range(5)
         # showPrefix = True
@@ -227,7 +232,7 @@ class PayneFreeRigSuite_UI():
 #=========== TAB SWITCHING ====================================
 
     def Setup_Editable(self):
-        print ('\n=== main, setup ===')
+        self.logger.debug('\tPFRS_UI > SETUP_Editable')
         index = self.rigRoot.mainTab.get()
         if (index == 0):
             self.rig_ui.Setup_Editable()
@@ -236,7 +241,7 @@ class PayneFreeRigSuite_UI():
             self.skin_ui.Setup_Editable()
         
     def Teardown_Editable(self, nextIndex):
-        print ('--- main, teardown')
+        self.logger.debug('\tPFRS_UI > TEARDOWN_Editable')
         lastIndex = self.rigRoot.mainTab.get()
         if (lastIndex == 0): 
             self.rig_ui.Teardown_Editable()
@@ -348,7 +353,8 @@ class PayneFreeRigSuite_UI():
         else:
             handler = self.logger.handlers[0]
             self.logFile = handler.baseFilename
-        self.logger.setLevel(logging.INFO)
+        # self.logger.setLevel(logging.INFO)
+        self.logger.setLevel(logging.DEBUG)
         startTxt = '\n'
         startTxt += '='*40
         startTxt += '\n'

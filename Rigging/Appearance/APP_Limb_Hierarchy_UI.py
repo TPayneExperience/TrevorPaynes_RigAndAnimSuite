@@ -12,6 +12,7 @@ class APP_Limb_Hierarchy_UI:
         self._Setup()
 
     def Populate(self):
+        self.logger.debug('\tApp_LimbHier > Populate')
         pm.treeView(self.widget, e=1, removeAll=1)
         self.limbMng.RebuildLimbDict()
         for rootLimb in self.limbMng.GetRootLimbs():
@@ -38,14 +39,15 @@ class APP_Limb_Hierarchy_UI:
 #=========== FUNCTIONS ====================================
 
     def SelectionChanged(self):
+        self.logger.debug('\tApp_LimbHier > SelectionChanged')
         limbIDStrs = pm.treeView(self.widget, q=1, selectItem=1)
         if limbIDStrs:
             limb = self.limbMng.GetLimb(int(limbIDStrs[0]))
-            msg = '\t\tLimbHier > SELECTED limb "%s"'% limb.pfrsName.get()
+            msg = '\tLimbHier > SELECTED limb "%s"'% limb.pfrsName.get()
             self.logger.info(msg)
             self.parent.LimbSelected(limb)
         else:
-            self.logger.info('\t\tLimbHier > DESELECTED limb')
+            self.logger.info('\tLimbHier > DESELECTED limb')
             self.parent.LimbSelected(None)
     
     

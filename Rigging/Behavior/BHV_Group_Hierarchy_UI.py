@@ -13,6 +13,7 @@ class BHV_Group_Hierarchy_UI:
         self._Setup()
 
     def Populate(self):
+        self.logger.debug('\tBhv_GroupHier > Populate')
         self.Depopulate()
         if not self.limb:
             return
@@ -40,18 +41,20 @@ class BHV_Group_Hierarchy_UI:
 #=========== FUNCTIONALITY ====================================
 
     def SetLimb(self, limb):
+        self.logger.debug('\tBhv_GroupHier > SetLimb')
         self.limb = limb
         self.Populate()
 
     def SelectionChanged(self):
+        self.logger.debug('\tBhv_GroupHier > SelectionChanged')
         groupIDStr = pm.treeView(self.widget, q=1, selectItem=1)
         if groupIDStr:
             group = self.grpMng.GetGroup(int(groupIDStr[0]))
-            msg = '\t\tGroupHier > SELECTED group "%s"'% group
+            msg = '\tGroupHier > SELECTED group "%s"'% group
             self.logger.info(msg)
             self.parent.GroupSelected(group)
         else:
-            self.logger.info('\t\tGroupHier > DESELECTED group')
+            self.logger.info('\tGroupHier > DESELECTED group')
 
 
 

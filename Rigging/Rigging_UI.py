@@ -47,11 +47,13 @@ class Rigging_UI:
 
         # NEED A BETTER PLACE FOR THIS
         
-        self.limbMng = lm.Limb_Manager(nameMng)
+        self.limbMng = lm.Limb_Manager(nameMng, self)
         self.grpMng = grp.BHV_Group_Manager(self.limbMng,
-                                            self.nameMng)
+                                            self.nameMng,
+                                            self)
         self.ctrMng = ctr.APP_Control_Manager(  self.grpMng,
-                                                self.nameMng)
+                                                self.nameMng,
+                                                self)
         self.jntMng = jm.Joint_Manager( self.limbMng, 
                                         self.grpMng,
                                         self.ctrMng,
@@ -60,7 +62,8 @@ class Rigging_UI:
         self.bhvMng = bhv.BHV_Limb_Manager( self.limbMng, 
                                             self.jntMng, 
                                             self.grpMng,
-                                            self.ctrMng)
+                                            self.ctrMng,
+                                            self)
         self.saveLoadSkel = saveLoadSkel.SaveLoad_Skeleton( self.limbMng, 
                                                     self.jntMng)
 
@@ -76,6 +79,7 @@ class Rigging_UI:
         self._Setup()
     
     def NewRig(self, rigRoot):
+        self.logger.debug('\tRigging_UI > NewRig')
         # pm.addAttr(rigRoot, ln='lastRiggingTabIndex', at='short')
         self.rigRoot = rigRoot
         self.limbMng.NewRig(rigRoot)
@@ -129,11 +133,12 @@ class Rigging_UI:
 #=========== TAB SWITCHING ====================================
 
     def Setup_Editable(self):
-        self.logger.info('Rigging > SETUP')
+        self.logger.info('Rigging SETUP')
         self.Setup_SubTab()
         self.UpdateControlStates()
     
     def Setup_SubTab(self):
+        self.logger.debug('\tRigging_UI > Setup_SubTab')
         index = pm.tabLayout(self.tab, q=1, selectTabIndex=1)-1
         self.rigRoot.riggingTab.set(index)
         if (index == 0):
@@ -150,10 +155,11 @@ class Rigging_UI:
     def Teardown_Editable(self):
         self.Teardown_SubTab()
         # self.UpdateNonInfJoints()
-        self.logger.info('Rigging > TEARDOWN\n')
+        self.logger.info('Rigging TEARDOWN\n')
         self.logger.info('--------------------------------\n')
     
     def Teardown_SubTab(self):
+        self.logger.debug('\tRigging_UI > Teardown_SubTab')
         lastIndex = self.rigRoot.riggingTab.get()
         if (lastIndex == 0): 
             self.jntSetup_ui.Teardown_Editable()
@@ -185,6 +191,7 @@ class Rigging_UI:
     #                     self.jntMng.Teardown_NonInfJoint(limb)
         
     def UpdateControlStates(self):
+        self.logger.debug('\tRigging_UI > UpdateControlStates')
         index = self.rigRoot.riggingTab.get()
         if index in [0, 1]:
             self.ctrMng.SetLayerState(False, True)
@@ -201,6 +208,7 @@ class Rigging_UI:
 
     def SetupEditable_Limbs(self):
         '''When switchin from tabs 0/1 to 2/3/4'''
+        self.logger.debug('\tRigging_UI > SetupEditable_Limbs')
         allLimbs = self.limbMng.GetAllLimbs()
         for limb in allLimbs:
             joints = self.jntMng.GetLimbJoints(limb)
@@ -278,6 +286,7 @@ class Rigging_UI:
 
     def TeardownEditable_Limbs(self):
         '''When switchin from tabs 3/4/5 to 1/2'''
+        self.logger.debug('\tRigging_UI > TeardownEditable_Limbs')
         # Set Joint temp Connections, unparent limb groups
         for limb in self.limbMng.GetAllLimbs():
             jointGroups = []

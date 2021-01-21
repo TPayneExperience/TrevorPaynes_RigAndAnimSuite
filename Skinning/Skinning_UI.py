@@ -72,7 +72,7 @@ class Skinning_UI:
 #=========== TAB SWITCHING ====================================
 
     def Setup_Editable(self):
-        self.logger.info('Skinning > SETUP')
+        self.logger.info('Rigging > Skinning SETUP')
         index = self.rigRoot.skinningTab.get()
         if (index == 0):
             self.meshSetup_ui.Setup_Editable()
@@ -119,7 +119,7 @@ class Skinning_UI:
         elif lastIndex in [1, 2] and nextIndex in [0, 3]:
             # self.skinMng.Teardown_PaintDisplay()
             self.skinMng.Teardown_JointAnim()
-        self.logger.info('Skinning > TEARDOWN\n')
+        self.logger.info('Rigging > Skinning TEARDOWN\n')
         self.logger.info('--------------------------------\n')
         
         

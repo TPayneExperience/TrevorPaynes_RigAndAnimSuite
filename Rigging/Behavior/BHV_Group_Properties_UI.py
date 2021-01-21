@@ -19,6 +19,7 @@ class BHV_Group_Properties_UI:
         self._Setup()
     
     def SetGroup(self, group):
+        self.logger.debug('\tBhv_GroupProp > SetGroup')
         self.group = group
         if group.groupType.get() != 1: # Make sure is joint group
             pm.frameLayout(self.groupLayout, e=1, en=0)
@@ -63,9 +64,10 @@ class BHV_Group_Properties_UI:
 #========== UPDATE UI ===============================
 
     def LogCstWeight(self, ignore, value):
-        self.logger.info('\t\tGroupProp > Weight SET to %f' + value)
+        self.logger.info('\tGroupProp > Weight SET to %f' + value)
 
     def Depopulate(self):
+        self.logger.debug('\tBhv_GroupProp > Depopulate')
         pm.frameLayout(self.groupLayout, e=1, en=0)
         self.group = None
         if self.parentSub_at:

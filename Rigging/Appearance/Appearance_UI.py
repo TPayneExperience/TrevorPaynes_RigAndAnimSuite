@@ -55,22 +55,24 @@ class Appearance_UI:
 #=========== SETUP + TEARDOWN ====================================
 
     def Setup_Editable(self):
-        self.logger.info('\tAppearance > SETUP')
+        self.logger.info('Rigging > Appearance SETUP')
         self.limbHier_ui.Populate()
         self.limbProp_ui.Populate()
         self.ctrHier_ui.Depopulate()
         # pm.frameLayout(self.prop_l, e=1, en=0)
     
     def Teardown_Editable(self):
-        self.logger.info('\tAppearance > TEARDOWN\n')
+        self.logger.info('Rigging > Appearance TEARDOWN\n')
         self.parent.parent.RebuildLimbs()
 
 #=========== LIMBS ====================================
 
     def LimbSelected(self, limb):
+        self.logger.debug('\tAppearance_UI > LimbSelected')
         # pm.frameLayout(self.prop_l, e=1, en=1)
         self.ctrHier_ui.SetLimb(limb)
         self.limbProp_ui.SetLimb(limb)
 
     def ControlTypeChanged(self):
+        self.logger.debug('\tAppearance_UI > ControlTypeChanged')
         self.ctrHier_ui.Populate()

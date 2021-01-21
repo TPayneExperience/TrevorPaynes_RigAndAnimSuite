@@ -4,11 +4,12 @@ import math
 import pymel.core as pm
 
 class BHV_Limb_Manager:
-    def __init__ (self, limbMng, jntMng, grpMng, ctrMng):
+    def __init__ (self, limbMng, jntMng, grpMng, ctrMng, parent):
         self.limbMng = limbMng
         self.jntMng = jntMng
         self.grpMng = grpMng
         self.ctrMng = ctrMng
+        self.logger = parent.logger
 
         self.cstTypes = ('Parent', 'Point', 'Orient', 'Scale')
         self.hideAttrs = False
@@ -69,6 +70,7 @@ class BHV_Limb_Manager:
 #============= ACCESSORS ============================
 
     def GetBhvOptions(self, limb):
+        self.logger.debug('\tBhvMng > GetBhvOptions')
         limbType = limb.limbType.get()
         if limbType == 0: # Empty
             return [self.bhvTypes[i] for i in self.emptyLimbIndexes]
@@ -84,6 +86,7 @@ class BHV_Limb_Manager:
 #============= SET BHV ============================
 
     def SetBhvType(self, limb, newBhvIndex):
+        self.logger.debug('\tBhvMng > SetBhvType')
         # oldSourceLimbs = pm.listConnections(limb.bhvSourceLimb)
         oldBhvIndex = limb.bhvType.get()
         # TEARDOWN
@@ -138,6 +141,7 @@ class BHV_Limb_Manager:
         #     self.grpMng.UpdateGroupDistance(group)
 
     def SetCstTargetLimb(self, sourceLimb, targetLimb):
+        self.logger.debug('\tBhvMng > SetCstTargetLimb')
         pm.disconnectAttr(sourceLimb.bhvTargetLimb)
         pm.connectAttr(targetLimb.bhvSourceLimb, sourceLimb.bhvTargetLimb)
         joints = self.jntMng.GetLimbJoints(targetLimb)
@@ -146,6 +150,7 @@ class BHV_Limb_Manager:
 
     def SetIKTargetLimb(self, sourceLimb, targetLimb):
         '''Auto assign each IK limb group to closest FK limb's group'''
+        self.logger.debug('\tBhvMng > SetIKTargetLimb')
         targetJoints = self.jntMng.GetLimbJoints(targetLimb)
         # sourceGroups = self.grpMng.GetLimbIKGroups(sourceLimb)
         pm.disconnectAttr(sourceLimb.bhvTargetLimb)
@@ -163,6 +168,7 @@ class BHV_Limb_Manager:
         self._SetTargetJointEnum(sourceLimb, names)
 
     def _SetTargetJointEnum(self, sourceLimb, enumStr):
+        self.logger.debug('\tBhvMng > _SetTargetJointEnum')
         if sourceLimb.bhvType.get() in self.ikChainTypeIndexes:
             for sourceGroup in self.grpMng.GetLimbIKGroups(sourceLimb):
                 pm.addAttr(sourceGroup.targetJoint, e=1, en=enumStr)
@@ -172,6 +178,7 @@ class BHV_Limb_Manager:
 #============= ADD / REMOVE LIMB  ============================
 
     def AddLimb(self, limb):
+        self.logger.debug('\tBhvMng > AddLimb')
         bhvTypes = ':'.join(self.bhvTypes)
         bhvCstTypes = ':'.join(self.cstTypes)
         ctrTypes = ':'.join(self.ctrMng.GetControlTypes())
@@ -214,6 +221,7 @@ class BHV_Limb_Manager:
         # pm.addAttr(limb, ln='bhvIKTargetLimb', dt='string') # IK handles parent connection
     
     def RemoveLimb(self, limb):
+        self.logger.debug('\tBhvMng > RemoveLimb')
         # Main Limb manager should actually delete the limb
         groups = pm.listConnections(limb.bhvDistanceGroup)
         groups += pm.listConnections(limb.bhvEmptyGroup)
@@ -227,6 +235,7 @@ class BHV_Limb_Manager:
 #============= REBUILD ============================
 
     def RebuildLimbType(self, limb):
+        self.logger.debug('\tBhvMng > RebuildLimbType')
         joints = self.jntMng.GetLimbJoints(limb)
         limbType = limb.limbType.get()
         limbTypeChanged = False
@@ -260,6 +269,7 @@ class BHV_Limb_Manager:
         limb.rebuildLimbType.set(0)
 
     def RebuildBhvType(self, limb):
+        self.logger.debug('\tBhvMng > RebuildBhvType')
         limb.rebuildBhvType.set(0)
         limbType = limb.limbType.get()
         bhvType = limb.bhvType.get()
@@ -281,6 +291,7 @@ class BHV_Limb_Manager:
                 self.SetBhvType(limb, self.branchLimbIndexes[0])
 
     def RebuildLimbGroup(self, limb):
+        self.logger.debug('\tBhvMng > RebuildLimbGroup')
         limb.rebuildLimbGroup.set(0)
         bhvType = limb.bhvType.get()
         if bhvType in self.distanceIndexes:
@@ -309,6 +320,7 @@ class BHV_Limb_Manager:
                     # self.grpMng.UpdateGroupName(group)
 
     def RebuildBhvDep(self, sourceLimb):
+        self.logger.debug('\tBhvMng > RebuildBhvDep')
         bhvType = sourceLimb.bhvType.get()
         if bhvType not in self.cstTypeIndexes + self.ikTypeIndexes:
             sourceLimb.rebuildBhvDep.set(0)
@@ -346,6 +358,7 @@ class BHV_Limb_Manager:
                 sourceGroup.targetJoint.set(index)
 
     def _GetClosestJointIndex(self, sourcePos, targetLimb):
+        self.logger.debug('\tBhvMng > _GetClosestJointIndex')
         targetJoints = self.jntMng.GetLimbJoints(targetLimb)
         distances = {} # dist : [targetJoint1, joint2...]
         for targetJoint in targetJoints:
@@ -361,6 +374,7 @@ class BHV_Limb_Manager:
         return targetJoints.index(joint)
 
     def _GetClosestLimb(self, sourceLimb, bhvFilter):
+        self.logger.debug('\tBhvMng > _GetClosestLimb')
         distances = {} # dist : group
         sourceJoint = self.jntMng.GetLimbJoints(sourceLimb)[-1]
         sourcePos = pm.xform(sourceJoint, q=1, t=1, ws=1)
@@ -387,6 +401,7 @@ class BHV_Limb_Manager:
     # All Others set by BHV UI > Set Bhv
 
     def Setup_FK(self, limb):
+        self.logger.debug('\tBhvMng > Setup_FK')
         joints = self.jntMng.GetLimbJoints(limb)
         if limb.limbType.get() == 2:
             joints = joints[:-1]
@@ -395,6 +410,7 @@ class BHV_Limb_Manager:
             group.v.set(1)
 
     def Setup_IKPoleVector(self, limb):
+        self.logger.debug('\tBhvMng > Setup_IKPoleVector')
         # group = self.Setup_Distance(limb)
         joints = self.jntMng.GetLimbJoints(limb)
         self.grpMng.SetupEditable_IKPVGroup(limb, joints)
@@ -404,9 +420,11 @@ class BHV_Limb_Manager:
         # self.grpMng.UpdateGroupDistance(group)
 
     def Setup_IKChain(self, limb):
+        self.logger.debug('\tBhvMng > Setup_IKChain')
         self.RebuildBhvDep(limb)
 
     def Setup_LookAt(self, limb):
+        self.logger.debug('\tBhvMng > Setup_LookAt')
         # group = self.Setup_Distance(limb)
         joint = self.jntMng.GetLimbJoints(limb)[0]
         self.grpMng.SetupEditable_DistanceGroup(limb, joint)
@@ -415,6 +433,7 @@ class BHV_Limb_Manager:
         # self.grpMng.UpdateGroupDistance(group)
 
     def Setup_Distance(self, limb):
+        self.logger.debug('\tBhvMng > Setup_Distance')
         group = pm.listConnections(limb.bhvDistanceGroup)[0]
         group.v.set(1)
         pm.disconnectAttr(group.distanceJoint)
@@ -432,6 +451,7 @@ class BHV_Limb_Manager:
         return group
 
     def Setup_FKIK(self, limb):
+        self.logger.debug('\tBhvMng > Setup_FKIK')
         fkikGroup = pm.listConnections(limb.bhvFKIKSwitchGroup)[0]
         # if groups:
         #     fkikGroup = groups[0]
@@ -458,6 +478,7 @@ class BHV_Limb_Manager:
         # self.grpMng.UpdateFKIKSwitchJoint(fkikGroup, joints)
 
     def Setup_RFK(self, limb):
+        self.logger.debug('\tBhvMng > Setup_RFK')
         for group in self.grpMng.GetLimbGroups(limb):
             group.v.set(1)
         joints = self.jntMng.GetLimbJoints(limb)
@@ -468,6 +489,7 @@ class BHV_Limb_Manager:
         self.UpdateRFKConnections(limb)
 
     def UpdateRFKConnections(self, limb):
+        self.logger.debug('\tBhvMng > UpdateRFKConnections')
         joints = self.jntMng.GetLimbJoints(limb)
         index = limb.bhvRFKCenterJoint.get() + 1
         groups = self.grpMng.GetLimbGroups(limb)
@@ -487,25 +509,30 @@ class BHV_Limb_Manager:
 # ============= TEARDOWN BHV ============================
 
     def Teardown_FK(self, limb):
+        self.logger.debug('\tBhvMng > Teardown_FK')
         # for joint in pm.listConnections(limb.infJoints):
         for joint in pm.listConnections(limb.joints):
             group = pm.listConnections(joint.group)[0]
             group.v.set(0)
 
     def Teardown_IKTargetable(self, limb):
+        self.logger.debug('\tBhvMng > Teardown_IKTargetable')
         for sourceLimb in pm.listConnections(limb.bhvSourceLimb):
             sourceLimb.rebuildBhvDep.set(1)
         pm.disconnectAttr(limb.bhvSourceLimb)
 
     def Teardown_Distance(self, limb):
+        self.logger.debug('\tBhvMng > Teardown_Distance')
         group = pm.listConnections(limb.bhvDistanceGroup)[0]
         group.v.set(0)
 
     def Teardown_FKIK(self, limb):
+        self.logger.debug('\tBhvMng > Teardown_FKIK')
         group = pm.listConnections(limb.bhvFKIKSwitchGroup)[0]
         group.v.set(0)
 
     def Teardown_RFK(self, limb):
+        self.logger.debug('\tBhvMng > Teardown_RFK')
         groups = pm.listConnections(limb.bhvRFKCenterGroup)
         groups += pm.listConnections(limb.bhvRFKBottomGroup)
         groups += pm.listConnections(limb.bhvRFKTopGroup)
@@ -515,6 +542,7 @@ class BHV_Limb_Manager:
 # ============= MISC ============================
 
     def UpdateGroupDistance(self, limb):
+        self.logger.debug('\tBhvMng > UpdateGroupDistance')
         pos = self.axesXforms[limb.bhvAxis.get()]
         dist = limb.bhvDistance.get()
         pos = [p*dist for p in pos]
@@ -528,6 +556,7 @@ class BHV_Limb_Manager:
     #     pm.xform(group, t=pos)
 
     def UpdateFKIKSwitchJoint(self, group, joints):
+        self.logger.debug('\tBhvMng > UpdateFKIKSwitchJoint')
         index = group.targetJoint.get()
         joint = joints[index]
         pm.parent(group, joint)

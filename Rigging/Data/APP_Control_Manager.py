@@ -3,9 +3,10 @@ import pymel.core as pm
 
 
 class APP_Control_Manager:
-    def __init__(self, grpMng, nameMng):
+    def __init__(self, grpMng, nameMng, parent):
         self.grpMng = grpMng
         self.nameMng = nameMng
+        self.logger = parent.logger
 
         self._ctrs = {} # ctrID : ctr
         self.ctrTypes = (   'PFRSCTR_Square_Wire', # Empty
@@ -16,6 +17,7 @@ class APP_Control_Manager:
         self.hideAttrs = False
     
     def NewRig(self, rigRoot):
+        self.logger.debug('\tCtrMng > NewRig')
         self.rigRoot = rigRoot
         self._ctrs = {} # ctrID : ctr
         # self.ctrGroup = pm.group(name='ControlGroups', em=1)
@@ -35,15 +37,18 @@ class APP_Control_Manager:
 #============= ACCESSORS + MUTATORS ============================
 
     def GetControl(self, ctrID):
+        self.logger.debug('\tCtrMng > GetControl')
         return self._ctrs[ctrID]
 
     # def GetGroupControl(self, group):
     #     return pm.listConnections(group.control)
 
     def GetControlTypes(self):
+        self.logger.debug('\tCtrMng > GetControlTypes')
         return list(self._ctrTemplates.keys())
 
     def SetLayerState(self, isVisible, isReference):
+        self.logger.debug('\tCtrMng > SetLayerState')
         # Maya Bug: Layer Editor won't refresh buttons
         if isReference:
             self.ctrLayer.displayType.set(2) # 2 = reference, 0 = default
@@ -52,11 +57,13 @@ class APP_Control_Manager:
         self.ctrLayer.visibility.set(isVisible) # 0 = off, 1 = on
 
     def GetAllControls(self):
+        self.logger.debug('\tCtrMng > NewRig')
         return list(self._ctrs.values())
 
 #============= FUNCTIONALITY ============================
 
     def Add(self, group, ctrType):
+        self.logger.debug('\tCtrMng > NewRig')
         ctrID = self.rigRoot.nextCtrID.get()
         self.rigRoot.nextCtrID.set(ctrID + 1)
         
@@ -73,9 +80,11 @@ class APP_Control_Manager:
         return ctr
 
     def Remove(self, control):
+        self.logger.debug('\tCtrMng > Remove')
         del(self._ctrs[control.ID.get()])
 
     def SetType(self, control, ctrType):
+        self.logger.debug('\tCtrMng > SetType')
         group = pm.listConnections(control.group)[0]
         pm.disconnectAttr(group.control)
         newCtr = self.Add(group, ctrType)
@@ -89,6 +98,7 @@ class APP_Control_Manager:
 #============= PRIVATE ============================
 
     def _SortGroups(self, groups):
+        self.logger.debug('\tCtrMng > _SortGroups')
         indexGroups = {} # jointIndex : group
         orderedGroups = []
         for group in groups:

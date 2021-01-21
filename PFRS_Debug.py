@@ -9,7 +9,7 @@ class PFRS_Debug:
                     True)
                     
         # # ========== LEG TEST ===============================
-        # # Testing Joints
+        # self.parent.logger.info('DEBUG TESTS > Leg + Foot')
         # path = r'D:/Assets/Programming/Python/Maya/ModularAutoRigger'
         # path += r'/TEST_OUTPUT/TEST_LegFoot_01.ma'
         # pm.importFile(path)
@@ -20,23 +20,34 @@ class PFRS_Debug:
         # pm.tabLayout(self.parent.rig_ui.tab, e=1, sti=3) # Select Limb setup tab
         #  # -------------------------------------------------
 
-        # ========== RELATIVE FK ==========================
+        # # ========== RELATIVE FK ==========================
+        # self.parent.logger.info('DEBUG TESTS > Relative FK')
+        # path = r'D:/Assets/Programming/Python/Maya/ModularAutoRigger'
+        # path += r'/TEST_OUTPUT/TEST_Spine_01.ma'
+        # pm.importFile(path)
+        # self.parent.UpdateEnableUI()
+        # self.parent.Setup_Editable()
+        # pm.tabLayout(self.parent.rig_ui.tab, e=1, sti=2) # Select Limb setup tab
+        # self.parent.rig_ui.limbSetup_ui.sceneHier_ui.AutoBuildByName(0)
+        # spine = pm.ls('PFX_Spine_Limb_M_NODE', type='transform')[0]
+        # self.parent.bhvMng.SetBhvType(spine, 10) # Relative FK
+        # # root = pm.ls('PFX_Root_Limb_M_NODE', type='transform')[0]
+        # # self.parent.limbMng.Reparent(spine.ID.get(), -1)
+        # # self.parent.limbMng.Reparent(root.ID.get(), spine.ID.get())
+        # pm.tabLayout(self.parent.rig_ui.tab, e=1, sti=3) # Select Limb setup tab
+        # # -------------------------------------------------
+
+        # ========== EMPTY / NO AUTO BUILD ==========================
+        self.parent.logger.info('DEBUG TESTS > Limb Types')
         path = r'D:/Assets/Programming/Python/Maya/ModularAutoRigger'
-        path += r'/TEST_OUTPUT/TEST_Spine_01.ma'
+        path += r'/TEST_OUTPUT/TEST_LimbTypes_01.ma'
         pm.importFile(path)
-        self.parent.UpdateEnableUI()
-        self.parent.Setup_Editable()
-        pm.tabLayout(self.parent.rig_ui.tab, e=1, sti=2) # Select Limb setup tab
-        self.parent.rig_ui.limbSetup_ui.sceneHier_ui.AutoBuildByName(0)
-        spine = pm.ls('PFX_Spine_Limb_M_NODE', type='transform')[0]
-        self.parent.bhvMng.SetBhvType(spine, 10) # Relative FK
-        root = pm.ls('PFX_Root_Limb_M_NODE', type='transform')[0]
-        # self.parent.limbMng.Reparent(spine.ID.get(), -1)
-        # self.parent.limbMng.Reparent(root.ID.get(), spine.ID.get())
-        pm.tabLayout(self.parent.rig_ui.tab, e=1, sti=3) # Select Limb setup tab
+        # self.parent.UpdateEnableUI()
+        # self.parent.Setup_Editable()
         # -------------------------------------------------
 
         # # ========== LIMB TYPES ==========================
+        # self.parent.logger.info('DEBUG TESTS > Limb Types')
         # path = r'D:/Assets/Programming/Python/Maya/ModularAutoRigger'
         # path += r'/TEST_OUTPUT/TEST_LimbTypes_01.ma'
         # pm.importFile(path)
@@ -49,7 +60,7 @@ class PFRS_Debug:
 
 
         # # ========== ARM SKIN TEST ===============================
-        # # Testing Joints
+        # self.parent.logger.info('DEBUG TESTS > Arm Skin')
         # path = r'D:/Assets/Programming/Python/Maya/ModularAutoRigger'
         # path += r'/TEST_OUTPUT/temp_joints2.ma'
         # pm.importFile(path)
@@ -72,7 +83,7 @@ class PFRS_Debug:
         # # -------------------------------------------------
 
         # # ========== SKEL RIGGING TEST ===============================
-        # # Testing Joints
+        # self.parent.logger.info('DEBUG TESTS > Full Skeleton')
         # path = r'D:/Assets/Programming/Python/Maya/ModularAutoRigger'
         # path += r'/TEST_OUTPUT/temp_joints.ma'
         # pm.importFile(path)

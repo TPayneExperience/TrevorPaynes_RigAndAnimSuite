@@ -39,10 +39,10 @@ class PW_Joint_Hierarchy_UI:
     def SelectionChanged(self):
         jntStrs = pm.treeView(self.widget, q=1, selectItem=1)
         if not jntStrs:
-            self.logger.info('\t\tJointHier > DESELECTED joint')
+            self.logger.info('\tJointHier > DESELECTED joint')
             return
         joint = self.jntMng.GetJoint(int(jntStrs[0]))
-        msg = '\t\tJointHier > SELECTED joint "%s"'% joint.pfrsName.get()
+        msg = '\tJointHier > SELECTED joint "%s"'% joint.pfrsName.get()
         self.logger.info(msg)
         self.parent.JointSelected(joint)
 

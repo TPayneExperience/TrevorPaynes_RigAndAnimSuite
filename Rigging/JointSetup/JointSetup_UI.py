@@ -35,6 +35,7 @@ class JointSetup_UI:
 #=========== FUNCTIONS ====================================
 
     def InsertParentMidJoint(self, ignore):
+        self.logger.debug('\tJointSetup_UI > InsertParentMidJoint')
         joints = pm.ls(sl=1, type='joint')
         if not joints:
             return
@@ -52,6 +53,7 @@ class JointSetup_UI:
         pm.parent(oldJoint, newJoint)
 
     def InsertParentEndJoint(self, ignore):
+        self.logger.debug('\tJointSetup_UI > InsertParentEndJoint')
         joints = pm.ls(sl=1, type='joint')
         if not joints:
             return
@@ -61,10 +63,12 @@ class JointSetup_UI:
         pm.parent(oldJoint, newJoint)
 
     def RemoveJoint(self, ignore):
+        self.logger.debug('\tJointSetup_UI > RemoveJoint')
         for joint in pm.ls(sl=1, type='joint'):
             self.jntMng.RemovePerm(joint)
     
     def UpdateButtons(self):
+        self.logger.debug('\tJointSetup_UI > UpdateButtons')
         pm.button(self.insertMid_b, e=1, en=0)
         joints = pm.ls(sl=1, type='joint')
         jointSelected = bool(joints)
@@ -77,7 +81,7 @@ class JointSetup_UI:
 #=========== TAB FUNCTIONALITY ====================================
     
     def Setup_Editable(self):
-        self.logger.info('\tJoint Setup > SETUP')
+        self.logger.info('Rigging > Joint Setup SETUP')
         self.UpdateButtons()
         if not self.scriptJob:
             self.scriptJob = pm.scriptJob(  e=("SelectionChanged",
@@ -86,7 +90,7 @@ class JointSetup_UI:
             print ('STARTING JointSetup selection detection script...')
 
     def Teardown_Editable(self):
-        self.logger.info('\tJoint Setup > TEARDOWN\n')
+        self.logger.info('Rigging > Joint Setup TEARDOWN\n')
         self.KillScripts()
         self.parent.parent.RebuildLimbs()
     

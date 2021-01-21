@@ -21,6 +21,7 @@ class APP_Limb_Properties_UI:
         '''Called when Bhvs tab clicked, 
         populates Constraint Target Limbs option menu
         '''
+        self.logger.debug('\tApp_LimbProp > Populate')
         pm.optionMenu(self.fkikTargetLimb_om, e=1, dai=1)
         self.limbs = {} # name : limb
         self.limbOrder = []
@@ -66,20 +67,21 @@ class APP_Limb_Properties_UI:
 
     def LogLockPos(self, ignore):
         value = str(self.limb.appLockHidePos.get())
-        msg = '\t\tLimbProp > SET LOCK POSITION to "%s"' % value
+        msg = '\tLimbProp > SET LOCK POSITION to "%s"' % value
         self.logger.info(msg)
 
     def LogLockRot(self, ignore):
         value = str(self.limb.appLockHideRot.get())
-        msg = '\t\tLimbProp > SET LOCK ROTATION to "%s"' % value
+        msg = '\tLimbProp > SET LOCK ROTATION to "%s"' % value
         self.logger.info(msg)
 
     def LogLockScale(self, ignore):
         value = str(self.limb.appLockHideScale.get())
-        msg = '\t\tLimbProp > SET LOCK SCALE to "%s"' % value
+        msg = '\tLimbProp > SET LOCK SCALE to "%s"' % value
         self.logger.info(msg)
 
     def SetLimb(self, limb):
+        self.logger.debug('\tApp_LimbProp > SetLimb')
         self.limb = limb
         if not limb:
             pm.frameLayout(self.prop_l, e=1, en=0)
@@ -128,7 +130,7 @@ class APP_Limb_Properties_UI:
                                                 cc=self.UpdateGroupDistance)
 
     def SetTargetFKIK(self, limbName):
-        self.logger.info('\t\tLimbProp > SET TARGET FKIK to ' + limbName)
+        self.logger.info('\tLimbProp > SET TARGET FKIK to ' + limbName)
         isEnabled = (limbName != 'None')
         # pm.attrEnumOptionMenu(self.targetType, e=1, en=0)
         pm.disconnectAttr(self.limb.appTargetFKIKLimb)
@@ -147,6 +149,7 @@ class APP_Limb_Properties_UI:
                 # pm.attrEnumOptionMenu(self.targetType, e=1, en=1)
                 
     def UpdateTargetFKIK(self):
+        self.logger.debug('\tApp_LimbProp > UpdateTargetFKIK')
         pm.attrEnumOptionMenu(self.targetType, e=1, en=0)
         if self.limb.bhvType.get() in self.bhvMng.fkikTypeIndexes:
             fkikGroup = pm.listConnections(self.limb.bhvFKIKSwitchGroup)[0]
@@ -172,7 +175,7 @@ class APP_Limb_Properties_UI:
             pm.optionMenu(self.fkikTargetLimb_om, e=1, sl=1)
 
     def SetControlType(self, ctrType):
-        msg = '\t\tLimbProp > SET CONTROL TYPE to "%s"' % ctrType
+        msg = '\tLimbProp > SET CONTROL TYPE to "%s"' % ctrType
         self.logger.info(msg)
         for group in self.grpMng.GetLimbGroups(self.limb):
             control = pm.listConnections(group.control)[0]
@@ -190,17 +193,18 @@ class APP_Limb_Properties_UI:
 #=========== CONTROL DISTANCE ==============================================
 
     def LogSelectFKIK(self, fkikType):
-        msg = '\t\tLimbProp > SELECT FKIK TYPE to "%s"' % fkikType
+        msg = '\tLimbProp > SELECT FKIK TYPE to "%s"' % fkikType
         self.logger.info(msg)
 
     def UpdateGroupDistance(self, ignore):
+        self.logger.debug('\tApp_LimbProp > UpdateGroupDistance')
         # group = pm.listConnections(self.limb.bhvDistanceGroup)[0]
         # dist = str(group.distance.get())
         dist = str(self.limb.bhvDistance.get())
         # axis = self.grpMng.axesNames[group.axis.get()]
         axis = self.bhvMng.axesNames[self.limb.bhvAxis.get()]
-        msg1 = '\t\tLimbProp > SET CONTROL DISTANCE to "%s"' % dist
-        msg2 = '\t\tLimbProp > SET CONTROL AXIS to "%s"' % axis
+        msg1 = '\tLimbProp > SET CONTROL DISTANCE to "%s"' % dist
+        msg2 = '\tLimbProp > SET CONTROL AXIS to "%s"' % axis
         self.logger.info(msg1)
         self.logger.info(msg2)
         self.bhvMng.UpdateGroupDistance(self.limb)

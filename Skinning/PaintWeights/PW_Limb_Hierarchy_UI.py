@@ -60,11 +60,11 @@ class PW_Limb_Hierarchy_UI:
         limbIDStrs = pm.treeView(self.widget, q=1, selectItem=1)
         if limbIDStrs:
             limb = self.limbMng.GetLimb(int(limbIDStrs[0]))
-            msg = '\t\tLimbHier > SELECTED limb "%s"'% limb.pfrsName.get()
+            msg = '\tLimbHier > SELECTED limb "%s"'% limb.pfrsName.get()
             self.logger.info(msg)
             self.parent.LimbSelected(limb)
         else:
-            msg = '\t\tLimbHier > DESELECTED limb'% limb.pfrsName.get()
+            msg = '\tLimbHier > DESELECTED limb'% limb.pfrsName.get()
             self.logger.info(msg)
             self.parent.LimbSelected(None)
     

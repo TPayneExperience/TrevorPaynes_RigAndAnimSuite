@@ -19,10 +19,12 @@ class APP_Control_Hierarchy_UI:
         self._Setup()
 
     def SetLimb(self, limb):
+        self.logger.debug('\tApp_ControlHier > SetLimb')
         self.limb = limb
         self.Populate()
     
     def Populate(self):
+        self.logger.debug('\tApp_ControlHier > Populate')
         self.Depopulate()
         if not self.limb:
             return
@@ -57,14 +59,15 @@ class APP_Control_Hierarchy_UI:
 #=========== FUNCTIONALITY ====================================
 
     def SelectionChanged(self):
+        self.logger.debug('\tApp_ControlHier > SelectionChanged')
         ctrStr = pm.treeView(self.widget, q=1, selectItem=1)
         if ctrStr:
             ctr = self.ctrMng.GetControl(int(ctrStr[0]))
-            msg = '\t\tCtrHier > SELECTED control "%s"'% str(ctr)
+            msg = '\tCtrHier > SELECTED control "%s"'% str(ctr)
             self.logger.info(msg)
             pm.select(ctr)
         else:
-            self.logger.info('\t\tCtrHier > DESELECTED control')
+            self.logger.info('\tCtrHier > DESELECTED control')
 
 
 

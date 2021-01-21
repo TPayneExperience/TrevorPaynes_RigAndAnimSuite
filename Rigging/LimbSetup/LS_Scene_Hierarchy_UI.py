@@ -15,6 +15,7 @@ class LS_Scene_Hierarchy_UI:
         self._Setup()
 
     def Populate(self):
+        self.logger.debug('\tLS_SceneHier > Populate')
         self.selectableJoints = []
         pm.treeView(self.widget, e=1, removeAll=1)
         self.allJoints = {} # longName : joint
@@ -36,6 +37,8 @@ class LS_Scene_Hierarchy_UI:
         pm.menuItem(self.buildHier_mi, e=1, en=hasJoints)
         pm.menuItem(self.buildNames_mi, e=1, en=hasJoints)
 
+#=========== SETUP ====================================
+
     def _Setup(self):
         self.widget = pm.treeView(adr=0, arp=0, sc=self.Selection, scc=self.SelectionChanged)
         with pm.popupMenu():
@@ -44,7 +47,10 @@ class LS_Scene_Hierarchy_UI:
             self.buildNames_mi = pm.menuItem(l='Auto Build by NAMES', 
                                             c=self.AutoBuildByName)
 
+#=========== FUNCTIONALITY ====================================
+
     def GetSelectedJoints(self):
+        self.logger.debug('\tLS_SceneHier > GetSelectedJoints')
         names = pm.treeView(self.widget, q=1, selectItem=1)
         if not names:
             return []
@@ -54,14 +60,15 @@ class LS_Scene_Hierarchy_UI:
         return name in self.selectableJoints
     
     def SelectionChanged(self):
+        self.logger.info('\tSceneJointHier > SELECTED joints:')
         joints = self.GetSelectedJoints()
-        self.logger.info('\t\tSceneJointHier > SELECTED joints:')
         for joint in joints:
-            self.logger.info('\t\t\t' + str(joint))
+            self.logger.info('\t\t' + str(joint))
         self.parent.SelectSceneJoints(joints)
         self.parent.SetJointsToAdd(joints)
 
     def SelectSceneHierJoints(self):
+        self.logger.debug('\tLS_SceneHier > SelectSceneHierJoints')
         if self.acceptSelection:
             sel = pm.ls(sl=1, type='joint')
             pm.treeView(self.widget, e=1, cs=1)
@@ -72,7 +79,7 @@ class LS_Scene_Hierarchy_UI:
 #============= AUTO BUILDERS ============================
 
     def AutoBuildByHierarchy(self, ignore):
-        self.logger.info('\t\tSceneJointHier > Auto Build by Hierarchy')
+        self.logger.info('\tSceneJointHier > Auto Build by Hierarchy')
         # Build Joint Parent Dictionary
         jointParents = {}   # childJoint : parentJoint
         for joint in pm.ls(type='joint'):
@@ -177,11 +184,11 @@ class LS_Scene_Hierarchy_UI:
         self.parent.parent.AutoBuildHier()
         self.parent.Populate()
         self.parent.UpdateSceneFrame()
-        self.logger.info('\t\tComplete')
+        self.logger.info('\tComplete')
 
     def AutoBuildByName(self, ignore):
         '''Auto builds limb/joint hier by name LIMB_SIDE[M/R/L]_JOINT'''
-        self.logger.info('\t\tSceneJointHier > Auto Build by Name')
+        self.logger.info('\tSceneJointHier > Auto Build by Name')
         # VERY INFLEXIBLE! NEED TO BUILD UI FOR BETTER USER
         # CUSTOMIZATION LATER, like the rig setup ui
         allJoints = pm.ls(type='joint')
@@ -257,9 +264,10 @@ class LS_Scene_Hierarchy_UI:
         self.parent.parent.AutoBuildHier()
         self.parent.Populate()
         self.parent.UpdateSceneFrame()
-        self.logger.info('\t\tComplete')
+        self.logger.info('\tComplete')
 
     def GetJointChain(self, startJoint):
+        self.logger.debug('\tLS_SceneHier > GetJointChain')
         joints = [startJoint]
         if self.HasSibling(startJoint):
             return joints
@@ -279,6 +287,7 @@ class LS_Scene_Hierarchy_UI:
             lastPos = curPos[:]
 
     def GetJointBranch(self, startJoint):
+        self.logger.debug('\tLS_SceneHier > GetJointBranch')
         joints = [startJoint]
         parent = pm.listRelatives(startJoint, parent=1)
         if not parent:
@@ -290,6 +299,7 @@ class LS_Scene_Hierarchy_UI:
         return joints
 
     def HasSibling(self, joint):
+        self.logger.debug('\tLS_SceneHier > HasSibling')
         parent = pm.listRelatives(joint, parent=1, type='joint')
         if not parent:
             return False

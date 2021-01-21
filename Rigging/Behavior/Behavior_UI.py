@@ -58,13 +58,13 @@ class Behavior_UI:
 #=========== SETUP + TEARDOWN ====================================
 
     def Setup_Editable(self):
-        self.logger.info('\tBehavior > SETUP')
+        self.logger.info('Rigging > Behavior SETUP')
         self.limbHier_ui.Populate()
         self.limbProp_ui.Depopulate()
         # self.limbProp_ui.Populate()
     
     def Teardown_Editable(self):
-        self.logger.info('\tBehavior > TEARDOWN\n')
+        self.logger.info('Rigging > Behavior TEARDOWN\n')
         self.limbProp_ui.Depopulate()
         self.grpHier_ui.SetLimb(None)
         self.grpProp_ui.Depopulate()
@@ -114,6 +114,7 @@ class Behavior_UI:
     #     childLimb.parentJoint.set(index)
     
     def LimbSelected(self, limb):
+        self.logger.debug('\tBehavior_UI > LimbSelected')
         if limb:
             joints = self.jntMng.GetLimbJoints(limb)
             pm.select(joints)
@@ -122,11 +123,13 @@ class Behavior_UI:
         self.grpProp_ui.Depopulate()
 
     def GroupSelected(self, group):
+        self.logger.debug('\tBehavior_UI > GroupSelected')
         pm.select(group)
         self.limbProp_ui.Depopulate()
         self.grpProp_ui.SetGroup(group)
 
     def SetBhvType(self, limb):
+        self.logger.debug('\tBehavior_UI > SetBhvType')
         self.grpHier_ui.Populate()
 
 

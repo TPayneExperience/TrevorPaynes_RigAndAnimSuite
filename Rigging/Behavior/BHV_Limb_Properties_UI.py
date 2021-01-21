@@ -25,6 +25,7 @@ class BHV_Limb_Properties_UI:
         self._Setup()
     
     def SetLimb(self, limb):
+        self.logger.debug('\tBhv_LimbProp > SetLimb')
         self.limb = limb
         if not limb:
             pm.frameLayout(self.limbLayout, e=1, en=0)
@@ -70,11 +71,12 @@ class BHV_Limb_Properties_UI:
 #=========== FUNCTIONALITY ==============================================
 
     def SetBhvType(self): # Mostly UI
+        self.logger.debug('\tBhv_LimbProp > SetBhvType')
         bhvTypeStr = pm.optionMenu(self.bhvType_om, q=1, v=1)
         newBhvIndex = self.bhvMng.bhvTypes.index(bhvTypeStr)
         old = self.bhvMng.bhvTypes[self.limb.bhvType.get()]
-        self.logger.info('\t\tLimbProp > SET BEHAVIOR:')
-        self.logger.info('\t\t\t%s >>> %s' % (old, bhvTypeStr))
+        self.logger.info('\tLimbProp > SET BEHAVIOR:')
+        self.logger.info('\t\t%s >>> %s' % (old, bhvTypeStr))
         
         self.bhvMng.SetBhvType(self.limb, newBhvIndex)
         self.PopulateBhvFrame(newBhvIndex)
@@ -91,8 +93,9 @@ class BHV_Limb_Properties_UI:
 #=========== CONSTRAINT ==============================================
 
     def SetTargetLimb(self, limbName): # Called by UI
+        self.logger.debug('\tBhv_LimbProp > SetTargetLimb')
         targetLimb = self.targetLimbs[limbName]
-        msg = '\t\tLimbIKCst > SET TARGET LIMB to "%s"' % targetLimb.pfrsName.get()
+        msg = '\tLimbIKCst > SET TARGET LIMB to "%s"' % targetLimb.pfrsName.get()
         self.logger.info(msg)
         bhvType = self.limb.bhvType.get()
         isCst = (bhvType in self.bhvMng.cstTypeIndexes) 
@@ -107,17 +110,20 @@ class BHV_Limb_Properties_UI:
 #=========== UI UPDATES ==============================================
 
     def GetLimbName(self, limb):
+        self.logger.debug('\tBhv_LimbProp > GetLimbName')
         prefix = self.limbMng.GetLimbPrefix(limb)
         side = self.limbMng.GetLimbSide(limb)
         return '%s_%s_%s' % (prefix, limb.pfrsName.get(), side)
 
     def Depopulate(self):
+        self.logger.debug('\tBhv_LimbProp > Depopulate')
         # self.limb = None
         pm.frameLayout(self.limbLayout, e=1, en=0)
         pm.frameLayout(self.targetLayout, e=1, en=0)
         # pm.frameLayout(self.ctrLayout, e=1, en=0)
 
     def PopulateBhvFrame(self, bhvType):
+        self.logger.debug('\tBhv_LimbProp > PopulateBhvFrame')
         pm.deleteUI(self.grpParent_at)
         self.grpParent_at = pm.attrEnumOptionMenu(  self.grpParent_at, 
                                                     l='Parent Joint', 
@@ -142,22 +148,23 @@ class BHV_Limb_Properties_UI:
                                                     cc=self.UpdateRFKTargetJoint)
 
     def LogGroupParent(self, jointName):
-        msg = '\t\tLimbProp > SET GROUP PARENT to '
+        msg = '\tLimbProp > SET GROUP PARENT to '
         msg += '"%s"' % jointName
         self.logger.info(msg)
     
     def LogCstType(self, cstTypeStr):
-        msg = '\t\tLimbIKCst > SET CONSTRAINT to '
+        msg = '\tLimbIKCst > SET CONSTRAINT to '
         msg += '"%s"' % cstTypeStr
         self.logger.info(msg)
 
     def UpdateRFKTargetJoint(self, targetJointStr):
-        msg = '\t\tLimbIKCst > SET Relative FK CENTER joint to '
+        msg = '\tLimbIKCst > SET Relative FK CENTER joint to '
         msg += '"%s"' % targetJointStr
         self.logger.info(msg)
         self.bhvMng.UpdateRFKConnections(self.limb)
 
     def PopulateTargetFrame(self, bhvType):
+        self.logger.debug('\tBhv_LimbProp > PopulateTargetFrame')
         pm.frameLayout(self.targetLayout, e=1, en=0)
         if self.targetJnt_at:
             pm.deleteUI(self.targetJnt_at)
@@ -215,12 +222,12 @@ class BHV_Limb_Properties_UI:
                                                         cc=self.UpdateFKIKSwitchJoint)
 
     def LogTargetJoint(self, targetJointStr):
-        msg = '\t\tLimbIKCst > SET TARGET JOINT to '
+        msg = '\tLimbIKCst > SET TARGET JOINT to '
         msg += '"%s"' % targetJointStr
         self.logger.info(msg)
 
     def UpdateFKIKSwitchJoint(self, jointStr):
-        msg = '\t\tLimbIKCst > FKIK JOINT to "%s"' % jointStr
+        msg = '\tLimbIKCst > FKIK JOINT to "%s"' % jointStr
         self.logger.info(msg)
         joints = self.jntMng.GetLimbJoints(self.limb)
         group = pm.listConnections(self.limb.bhvFKIKSwitchGroup)[0]
