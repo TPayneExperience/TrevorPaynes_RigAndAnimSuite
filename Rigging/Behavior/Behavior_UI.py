@@ -42,6 +42,7 @@ class Behavior_UI:
             with pm.frameLayout('Behavior Groups / Control Pivots', bv=1):
                 self.grpHier_ui = groupHier_UI.BHV_Group_Hierarchy_UI(  self.limbMng,
                                                                         self.grpMng,
+                                                                        self.bhvMng,
                                                                         self)
         with pm.verticalLayout():
             self.limbProp_ui = limbProp_UI.BHV_Limb_Properties_UI(  self.limbMng,
@@ -72,47 +73,6 @@ class Behavior_UI:
 
 #=========== LIMBS ====================================
 
-    # def UpdateLimbUI(self):
-    #     self.limbProp_ui.UpdateGroupParentUI()
-
-    # def UpdateLimbParentJoint(self, childLimb):
-    #     '''Updates limb parent group enum to closest to root group'''
-    #     # childLimb = self.limbMng.GetLimb(limbID)
-    #     parents = pm.listConnections(childLimb.parentLimb)
-
-    #     # If NO PARENT or parent EMPTY, set and return
-    #     if not parents:
-    #         pm.addAttr(childLimb.parentJoint, e=1, en='None')
-    #         return
-    #     parentLimb = parents[0]
-    #     parentBhvType = parentLimb.bhvType.get()
-    #     if parentBhvType == 7:
-    #         pm.addAttr(childLimb.parentJoint, e=1, en='Empty')
-    #         return
-        
-    #     # Default target group to closest to first group
-    #     distances = {}
-    #     names = []
-    #     rootGroup = self.grpMng.GetLimbGroups(childLimb)[0]
-    #     sourcePos = pm.xform(rootGroup, q=1, t=1, ws=1)
-    #     parentGroups = self.grpMng.GetLimbFKGroups(parentLimb)
-    #     for parentGroup in parentGroups:
-    #         # Create distance dict
-    #         joint = pm.listConnections(parentGroup.joint)[0]
-    #         targetPos = pm.xform(joint, q=1, t=1, ws=1)
-    #         dist = 0
-    #         for i in range(3):
-    #             dist += (sourcePos[i]-targetPos[i])**2
-    #         distances[dist] = parentGroup
-    #         names.append(joint.pfrsName.get())
-    #     pm.addAttr(childLimb.parentJoint, e=1, en=':'.join(names))
-    #     # Set Closest Group Index
-    #     closestDist = sorted(list(distances.keys()))[0]
-    #     closestGroup = distances[closestDist]
-    #     index = parentGroups.index(closestGroup)
-    #     # index = self.grpMng.GetLimbGroups(parentLimb).index(closestGroup)
-    #     childLimb.parentJoint.set(index)
-    
     def LimbSelected(self, limb):
         self.logger.debug('\tBehavior_UI > LimbSelected')
         if limb:
@@ -132,39 +92,3 @@ class Behavior_UI:
         self.logger.debug('\tBehavior_UI > SetBhvType')
         self.grpHier_ui.Populate()
 
-
-#============= UPDATE ============================
-
-    # def UpdateIKPoleVectorGroupParent(self, limb):
-    #     group = pm.listConnections(limb.bhvDistanceGroup)[0]
-    #     joints = self.jntMng.GetLimbJoints(limb)
-    #     joint = joints[len(joints)/2]
-        # self.PosRotGroupToJoint(group, joint)
-        # self.SetLockGroup(group, True)
-        # pm.parent(group, joint)
-        # pm.xform(group, t=[0,0,0], ro=[0,0,0], s=[1,1,1])
-        # self.UpdateGroupDistance(group)
-
-    # def UpdateGroupDistance(self, group):
-    #     pos = self.grpMng.axes[group.bhvAxis.get()][:]
-    #     dist = group.bhvDistance.get()
-    #     pos = [p*dist for p in pos]
-    #     # for attr in ['.tx', '.ty', '.tz']:
-    #     #     pm.setAttr(group+attr, l=0, k=0, cb=0)
-    #     pm.xform(group, t=pos)
-    #     # for attr in ['.tx', '.ty', '.tz']:
-    #     #     pm.setAttr(group+attr, l=1, k=0, cb=0)
-
-    # def UpdateFKIKSwitchJoint(self, limb):
-    #     group = pm.listConnections(limb.bhvFKIKSwitchGroup)[0]
-    #     index = group.targetJoint.get()
-    #     joints = self.jntMng.GetLimbJoints(limb)
-    #     modIndex = index % len(joints)
-    #     if modIndex != index:
-    #         limb.bhvFKIKParentJoint.set(modIndex)
-    #     # self.SetLockGroup(group, False)
-    #     joint = joints[modIndex]
-    #     # self.PosRotGroupToJoint(group, joint)
-    #     pm.parent(group, joint)
-    #     # pm.xform(group, t=[0,0,0], ro=[0,0,0], s=[1,1,1])
-    #     # self.SetLockGroup(group, True)

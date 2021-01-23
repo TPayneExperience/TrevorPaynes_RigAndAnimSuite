@@ -181,8 +181,7 @@ class Test_UI:
     # RELATIVE FK
     def Setup_Internal_RelativeFK(self, limb):
         self.logger.debug('\tTest_UI > Setup_Internal_RelativeFK')
-        joints = self.jntMng.GetLimbJoints(limb)
-        groups = self.grpMng.GetLimbGroups(limb)
+        groups = self.bhvMng.GetLimbGroups(limb)
         bottomGroup = groups[0]
         centerGroup = groups[1]
         topGroup = groups[2]
@@ -192,6 +191,7 @@ class Test_UI:
         index = limb.bhvRFKCenterJoint.get() + 1
 
         # FK IK JOINT CREATION
+        joints = self.jntMng.GetLimbJoints(limb)
         dupJoints = pm.duplicate(joints, po=1, rc=1)
         fkJoints = dupJoints[index:]
         ikJoints = dupJoints[:index]
@@ -281,7 +281,7 @@ class Test_UI:
     def Teardown_RelativeFK(self, limb):
         self.logger.debug('\tTest_UI > Teardown_RelativeFK')
         pm.delete(pm.listConnections(limb.bhvFKIK_FKJoint))
-        groups = self.grpMng.GetLimbGroups(limb)
+        groups = self.bhvMng.GetLimbGroups(limb)
         bottomGroup = groups[0]
         centerGroup = groups[1]
         topGroup = groups[2]
@@ -298,7 +298,7 @@ class Test_UI:
     # FK CHAIN / REVERSE CHAIN
     def Setup_Internal_FKChain(self, limb):
         self.logger.debug('\tTest_UI > Setup_Internal_FKChain')
-        groups = self.grpMng.GetLimbGroups(limb)
+        groups = self.bhvMng.GetJointGroups(limb)
         for i in range(len(groups)-1, 0, -1):
             childGroup = groups[i]
             parentCtr = pm.listConnections(groups[i-1].control)[0]
@@ -308,7 +308,7 @@ class Test_UI:
         
     def Setup_External_FKChain(self, limb):
         self.logger.debug('\tTest_UI > Setup_External_FKChain')
-        childGroup = self.grpMng.GetLimbGroups(limb)[0]
+        childGroup = self.bhvMng.GetJointGroups(limb)[0]
         self.ParentConstrainGroup(limb, childGroup)
 
     # FK BRANCH
@@ -318,7 +318,7 @@ class Test_UI:
         
     def Setup_External_FKBranch(self, limb):
         self.logger.debug('\tTest_UI > Setup_External_FKBranch')
-        for childGroup in self.grpMng.GetLimbGroups(limb):
+        for childGroup in self.bhvMng.GetJointGroups(limb):
             self.ParentConstrainGroup(limb, childGroup)
         # parent = self.limbMng.GetLimbParent(limb)
         # if parent:
@@ -375,7 +375,7 @@ class Test_UI:
             msg += ' target constraint joint CANNOT be the same'
             pm.confirmDialog(t='Constraint Error', m=msg, icon='warning', b='Ok')
             return
-        for group in self.grpMng.GetLimbGroups(limb):
+        for group in self.bhvMng.GetJointGroups(limb):
             joint = pm.listConnections(group.joint)[0]
             cstType = limb.bhvCstType.get()
             weight = group.weight.get()
@@ -422,10 +422,10 @@ class Test_UI:
             msg = 'IK Chain Limb "%s" missing TARGET limb' % limb
             pm.confirmDialog(t='IK CHAIN Error', m=msg, icon='warning', b='Ok')
             return
-        targetLimb = targetLimb[0]
-        for sourceGroup in self.grpMng.GetLimbGroups(limb): # Skip First
+        targetGroups = self.bhvMng.GetJointGroups(targetLimb[0])
+        for sourceGroup in self.bhvMng.GetJointGroups(limb): # Skip First
             index = sourceGroup.targetJoint.get()
-            targetGroup = self.grpMng.GetLimbGroups(targetLimb)[index]
+            targetGroup = targetGroups[index]
             targetControl = pm.listConnections(targetGroup.control)[0]
             childJoint = pm.listConnections(sourceGroup.joint)
             parentJoint = pm.listRelatives(childJoint, p=1)[0]
@@ -446,7 +446,6 @@ class Test_UI:
     def Setup_External_IKPoleVector(self, limb):
         self.logger.debug('\tTest_UI > Setup_External_IKPoleVector')
         # PARENT IK HANDLE TO TARGET CONTROL 
-        # targetLimb = pm.listConnections(limb.bhvIKTargetLimb)
         targetLimb = pm.listConnections(limb.bhvTargetLimb)
         if not targetLimb:
             msg = 'IK Pole Vector Limb "%s" missing TARGET limb' % limb
@@ -457,9 +456,8 @@ class Test_UI:
         if not groups:
             return
         distGroup = groups[0]
-        # index = distGroup.targetJoint.get()
         index = limb.bhvTargetJoint.get()
-        targetGroup = self.grpMng.GetLimbGroups(targetLimb)[index]
+        targetGroup = self.bhvMng.GetJointGroups(targetLimb)[index]
         targetControl = pm.listConnections(targetGroup.control)[0]
 
         joints = self.jntMng.GetLimbJoints(limb)
@@ -471,7 +469,7 @@ class Test_UI:
         parent = self.limbMng.GetLimbParent(limb)
         if parent:
             index = limb.parentJoint.get()
-            parentGroup = self.grpMng.GetLimbGroups(parent)[index]
+            parentGroup = self.bhvMng.GetJointGroups(parent)[index]
             parentControl = pm.listConnections(parentGroup.control)[0]
             pm.parent(distGroup, parentControl)
         else:
@@ -582,7 +580,7 @@ class Test_UI:
         if limb.bhvType.get() == 2:
             ikGroup = pm.listConnections(limb.bhvDistanceGroup)[0]
             index = limb.bhvTargetJoint.get()
-            targetGroup = self.grpMng.GetLimbGroups(targetLimb)[index]
+            targetGroup = self.bhvMng.GetJointGroups(targetLimb)[index]
             targetControl = pm.listConnections(targetGroup.control)[0]
 
             ikJoint = pm.listConnections(limb.bhvFKIK_IKJoint)[0]
@@ -595,7 +593,7 @@ class Test_UI:
             sourceGroups = self.grpMng.GetLimbIKGroups(limb)[1:] # Skip First
             for sourceGroup in sourceGroups:
                 index = sourceGroup.targetJoint.get()
-                targetGroup = self.grpMng.GetLimbGroups(targetLimb)[index]
+                targetGroup = self.bhvMng.GetJointGroups(targetLimb)[index]
                 targetControl = pm.listConnections(targetGroup.control)[0]
                 childJoint = pm.listConnections(sourceGroup.joint)
                 parentJoint = pm.listRelatives(childJoint, p=1)[0]
@@ -608,7 +606,7 @@ class Test_UI:
         parent = self.limbMng.GetLimbParent(limb)
         if parent:
             index = limb.parentJoint.get()
-            parentGroup = self.grpMng.GetLimbGroups(parent)[index]
+            parentGroup = self.bhvMng.GetJointGroups(parent)[index]
             # parentCtrs = self.ctrMng.GetGroupControl(parentGroup)
             parentCtrs = pm.listConnections(parentGroup.control)[0]
             if parentCtrs:
@@ -653,7 +651,7 @@ class Test_UI:
     
     def Setup_External_SingleControl(self, limb):
         self.logger.debug('\tTest_UI > Setup_External_SingleControl')
-        childGroup = self.grpMng.GetLimbGroups(limb)[0]
+        childGroup = self.bhvMng.GetJointGroups(limb)[0]
         self.ParentConstrainGroup(limb, childGroup)
         # parent = self.limbMng.GetLimbParent(limb)
         # if parent:
@@ -667,8 +665,7 @@ class Test_UI:
     def Setup_Internal_LookAt(self, limb):
         self.logger.debug('\tTest_UI > Setup_Internal_LookAt')
         joint = self.jntMng.GetLimbJoints(limb)[0]
-        group = self.grpMng.GetLimbGroups(limb)[0]
-        # control = self.ctrMng.GetGroupControl(group)
+        group = pm.listConnections(joint.group)[0]
         control = pm.listConnections(group.control)[0]
         pm.aimConstraint(control, joint, mo=1)
 
@@ -678,7 +675,7 @@ class Test_UI:
         if not parent:
             return 
         if parent.bhvType.get() in self.bhvMng.emptyLimbIndexes:
-            group = self.grpMng.GetLimbGroups(parent)[0]
+            group = pm.listConnections(limb.bhvEmptyGroup)[0]
             parentJoint = pm.listConnections(group.control)[0]
         else:
             index = limb.parentJoint.get()

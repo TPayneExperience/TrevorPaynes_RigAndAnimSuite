@@ -2,9 +2,10 @@
 import pymel.core as pm
 
 class BHV_Group_Hierarchy_UI:
-    def __init__(self, limbMng, grpMng, parent):
+    def __init__(self, limbMng, grpMng, bhvMng, parent):
         self.limbMng = limbMng
         self.grpMng = grpMng
+        self.bhvMng = bhvMng
         self.parent = parent
         self.logger = parent.logger
 
@@ -17,17 +18,17 @@ class BHV_Group_Hierarchy_UI:
         self.Depopulate()
         if not self.limb:
             return
-        for group in self.grpMng.GetLimbGroups(self.limb):
-            # ONLY FK, Cst, Empty, IK Chain
-            if group.groupType.get() in [0, 1]: 
-                groupID = group.ID.get()
-                name = group.shortName()
-                # if pm.listConnections(group.joint):
-                #     name = self.grpMng.GetJointGroupName(group)
-                # else:
-                #     name = self.grpMng.GetLimbGroupName(group)
-                pm.treeView(self.widget, e=1, ai=(groupID, ''))
-                pm.treeView(self.widget, e=1, dl=(groupID, name))
+        bhvType = self.limb.bhvType.get()
+        groups = self.bhvMng.GetJointGroups(self.limb)
+        if bhvType in self.bhvMng.omitFirstJointTypes:
+            groups = groups[1:]
+        if bhvType in self.bhvMng.omitLastJointTypes:
+            groups = groups[:-1]
+        for group in groups:
+            groupID = group.ID.get()
+            name = group.shortName()
+            pm.treeView(self.widget, e=1, ai=(groupID, ''))
+            pm.treeView(self.widget, e=1, dl=(groupID, name))
     
     def Depopulate(self):
         pm.treeView(self.widget, e=1, removeAll=1)

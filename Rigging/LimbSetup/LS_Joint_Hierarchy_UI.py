@@ -19,7 +19,6 @@ class LS_Joint_Hierarchy_UI:
         self.Depopulate()
         if not self.limb:
             return
-        # for joint in self.jntMng.GetLimbTempJoints(self.limb):
         for joint in self.jntMng.GetLimbJoints(self.limb):
             jointID = joint.ID.get()
             name = joint.pfrsName.get()

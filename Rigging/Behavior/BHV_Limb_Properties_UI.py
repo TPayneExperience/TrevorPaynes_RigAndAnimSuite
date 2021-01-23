@@ -229,16 +229,11 @@ class BHV_Limb_Properties_UI:
     def UpdateFKIKSwitchJoint(self, jointStr):
         msg = '\tLimbIKCst > FKIK JOINT to "%s"' % jointStr
         self.logger.info(msg)
-        joints = self.jntMng.GetLimbJoints(self.limb)
-        group = pm.listConnections(self.limb.bhvFKIKSwitchGroup)[0]
-        self.bhvMng.UpdateFKIKSwitchJoint(group, joints)
-        # self.grpMng.UpdateFKIKSwitchJoint(group, joints)
-        # index = self.limb.bhvFKIKParentJoint.get()
         # joints = self.jntMng.GetLimbJoints(self.limb)
         # group = pm.listConnections(self.limb.bhvFKIKSwitchGroup)[0]
-        # self.grpMng.SetLockGroup(group, False)
-        # self.grpMng.PosRotGroupToJoint(group, joints[index])
-        # self.grpMng.SetLockGroup(group, True)
+        self.bhvMng.UpdateFKIKSwitchJoint(self.limb)
+        # self.bhvMng.UpdateFKIKSwitchJoint(group, joints)
+        
 
     # def _SetCstBhv(self):
     #     targetLimb = None

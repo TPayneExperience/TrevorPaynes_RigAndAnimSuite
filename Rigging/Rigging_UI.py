@@ -135,22 +135,32 @@ class Rigging_UI:
     def Setup_Editable(self):
         self.logger.info('Rigging SETUP')
         self.Setup_SubTab()
-        self.UpdateControlStates()
+        self.UpdateControlVis()
     
     def Setup_SubTab(self):
         self.logger.debug('\tRigging_UI > Setup_SubTab')
-        index = pm.tabLayout(self.tab, q=1, selectTabIndex=1)-1
-        self.rigRoot.riggingTab.set(index)
-        if (index == 0):
+        oldIndex = self.rigRoot.riggingTab.get()
+        newIndex = pm.tabLayout(self.tab, q=1, selectTabIndex=1)-1
+        self.rigRoot.riggingTab.set(newIndex)
+        if (newIndex == 0):
             self.jntSetup_ui.Setup_Editable()
-        elif (index == 1):
+        elif (newIndex == 1):
             self.limbSetup_ui.Setup_Editable()
-        elif (index == 2):
+        elif (newIndex == 2):
             self.bhv_ui.Setup_Editable()
-        elif (index == 3):
+        elif (newIndex == 3):
             self.app_ui.Setup_Editable() 
-        elif (index == 4):
+        elif (newIndex == 4):
             self.test_ui.Setup_Editable() 
+        
+        # joint, test >>> bhv, App
+        if oldIndex in (0, 4) and newIndex in (2, 3):
+            for limb in self.limbMng.GetAllLimbs():
+                self.bhvMng.SetupEditable_GroupParenting(limb)
+        # bhv, App >>> joint, test
+        elif oldIndex in (2, 3) and newIndex in (0, 4):
+            for limb in self.limbMng.GetAllLimbs():
+                self.bhvMng.TeardownEditable_GroupParenting(limb)
 
     def Teardown_Editable(self):
         self.Teardown_SubTab()
@@ -172,26 +182,8 @@ class Rigging_UI:
         elif (lastIndex == 4):
             self.test_ui.Teardown_Editable() 
 
-    # def UpdateNonInfJoints(self):
-    #     bhvFilter = self.bhvMng.rfkTypeIndexes
-    #     # bhvFilter += self.bhvMng.ikChainTypeIndexes
-    #     lastIndex = self.rigRoot.riggingTab.get()
-    #     nextIndex = pm.tabLayout(self.tab, q=1, selectTabIndex=1)-1
-    #     if lastIndex in [0, 1] and nextIndex in [2, 3, 4]:
-    #         for limb in self.limbMng.GetAllLimbs():
-    #             if limb.bhvType.get() not in bhvFilter:
-    #                 if limb.limbType.get() == 2: # 3+ chain
-    #                     self.jntMng.Setup_NonInfJoint(limb)
-    #         self.SetupEditable_Limbs()
-    #     elif lastIndex in [2, 3, 4] and nextIndex in [0, 1]:
-    #         self.TeardownEditable_Limbs()
-    #         for limb in self.limbMng.GetAllLimbs():
-    #             if limb.bhvType.get() not in bhvFilter:
-    #                 if limb.limbType.get() == 2: # 3+ chain
-    #                     self.jntMng.Teardown_NonInfJoint(limb)
-        
-    def UpdateControlStates(self):
-        self.logger.debug('\tRigging_UI > UpdateControlStates')
+    def UpdateControlVis(self):
+        self.logger.debug('\tRigging_UI > UpdateControlVis')
         index = self.rigRoot.riggingTab.get()
         if index in [0, 1]:
             self.ctrMng.SetLayerState(False, True)
@@ -204,114 +196,44 @@ class Rigging_UI:
         self.Teardown_SubTab()
         # self.UpdateNonInfJoints()
         self.Setup_SubTab()
-        self.UpdateControlStates()
+        self.UpdateControlVis()
 
-    def SetupEditable_Limbs(self):
-        '''When switchin from tabs 0/1 to 2/3/4'''
-        self.logger.debug('\tRigging_UI > SetupEditable_Limbs')
-        allLimbs = self.limbMng.GetAllLimbs()
-        for limb in allLimbs:
-            joints = self.jntMng.GetLimbJoints(limb)
-            if limb.limbType.get() == 2:
-                joints = joints[:-1]
-            for joint in joints:
-                self.jntMng.UpdateJointName(joint)
-                # self.jntMng.Setup_Editable(joint)
+    # def SetupEditable_Limbs(self):
+    #     '''When switchin from tabs 0/1 to 2/3/4'''
+    #     self.logger.debug('\tRigging_UI > SetupEditable_Limbs')
+    #     for limb in self.limbMng.GetAllLimbs():
+    #         self.bhvMng.Setup_LimbGroupVisibility(limb)
 
-            # If limb type changed, reset bhvType to default FK
-            # limbType = limb.limbType.get()
-            # if not joints:
-            #     limb.limbType.set(0)
-            #     limb.bhvType.set(7) # Empty
-            # elif (len(joints) == 1):
-            #     if limbType != 1:
-            #         limb.limbType.set(1)
-            #         limb.bhvType.set(6) # FK Branch
-            #     # group = pm.listConnections(joints[0].group)[0]
-            # elif self.jntMng.AreJointsChained(joints):
-            #     if (len(joints) == 2):
-            #         if (limbType != 4):
-            #             limb.limbType.set(4)
-            #             limb.bhvType.set(0) # FK Chain
-            #     elif limbType != 2:
-            #         limb.limbType.set(2)
-            #         limb.bhvType.set(0) # FK Chain
-            #     # for joint in joints:
-            #     #     group = pm.listConnections(joint.group)[0]
-            # elif self.jntMng.AreJointsSiblings(joints):
-            #     if limbType != 3:
-            #         limb.limbType.set(3)
-            #         limb.bhvType.set(6) # FK Branch
-                # for joint in joints:
-                #     group = pm.listConnections(joint.group)[0]
-
-            # Enable Group Vis (created in bhv tab by bhv switching)
-            bhvType = limb.bhvType.get()
-            if bhvType in self.bhvMng.fkTypeIndexes:
-                joints = self.jntMng.GetLimbJoints(limb)
-                if limb.limbType.get() == 2:
-                    joints = joints[:-1]
-                for joint in joints:
-                    group = pm.listConnections(joint.group)[0]
-                    group.v.set(1)
-            elif bhvType in self.bhvMng.distanceIndexes:
-                group = pm.listConnections(limb.bhvDistanceGroup)[0]
-                group.v.set(1)
-                if (bhvType == 4): # LookAt
-                    self.grpMng.SetupEditable_DistanceGroup(limb, joints[0])
-                    self.bhvMng.UpdateGroupDistance(limb)
-                    # self.grpMng.SetupEditable_DistanceGroup(group, joints[0])
-                    # self.grpMng.UpdateGroupDistance(group)
-                elif bhvType in [1,2]: # IKPV
-                    self.grpMng.SetupEditable_IKPVGroup(limb, joints)
-                    self.bhvMng.UpdateGroupDistance(limb)
-                    # self.grpMng.SetupEditable_IKPVGroup(group, joints)
-                    # self.bhvMng.UpdateGroupDistance(group)
-            elif (bhvType == 7): # EMPTY
-                group = pm.listConnections(limb.bhvEmptyGroup)[0]
-                group.v.set(1)
-                # groups = pm.listConnections(limb.bhvEmptyGroup)
-                # if groups:
-                #     group = groups[0]
-                #     group.v.set(1)
-                # else:
-                #     group = self.grpMng.AddEmptyGroup(limb)
-                #     self.ctrMng.Add(group, self.ctrMng.ctrTypes[0])
-                #     self.grpMng.UpdateGroupName(limb, group)
-            if (bhvType in self.bhvMng.fkikTypeIndexes): # FKIK
-                group = pm.listConnections(limb.bhvFKIKSwitchGroup)[0]
-                group.v.set(1)
-                self.bhvMng.UpdateFKIKSwitchJoint(group, joints)
-                # self.grpMng.UpdateFKIKSwitchJoint(group, joints)
-
-    def TeardownEditable_Limbs(self):
-        '''When switchin from tabs 3/4/5 to 1/2'''
-        self.logger.debug('\tRigging_UI > TeardownEditable_Limbs')
-        # Set Joint temp Connections, unparent limb groups
-        for limb in self.limbMng.GetAllLimbs():
-            jointGroups = []
-            joints = self.jntMng.GetLimbJoints(limb)
-            if limb.limbType.get() == 2:
-                joints = joints[:-1]
-            for joint in joints:
-                # self.jntMng.Teardown_Editable(joint)
-                jointGroups += pm.listConnections(joint.group)
-            limbGroups = pm.listConnections(limb.bhvDistanceGroup)
-            if limb.bhvType.get() in self.bhvMng.distanceIndexes:
-                self.grpMng.TeardownEditable_DistanceGroup(limb)
-                # self.grpMng.TeardownEditable_DistanceGroup(limbGroups[0])
-            limbGroups += pm.listConnections(limb.bhvEmptyGroup)
-            limbGroups += pm.listConnections(limb.bhvFKIKSwitchGroup)
-            # for group in limbGroups:
-            #     pm.parent(group, self.grpMng.bhvGroup)
-            for group in limbGroups + jointGroups:
-                group.v.set(0)
+    # def TeardownEditable_Limbs(self):
+    #     '''When switchin from tabs 3/4/5 to 1/2'''
+    #     self.logger.debug('\tRigging_UI > TeardownEditable_Limbs')
+    #     # Set Joint temp Connections, unparent limb groups
+    #     for limb in self.limbMng.GetAllLimbs():
+    #         bhvType = limb.bhvType.get()
+    #         jointGroups = []
+    #         joints = self.jntMng.GetLimbJoints(limb)
+    #         if bhvType in self.bhvMng.omitLastJointTypes:
+    #             joints = joints[:-1]
+    #         for joint in joints:
+    #             # self.jntMng.Teardown_Editable(joint)
+    #             jointGroups += pm.listConnections(joint.group)
+    #         limbGroups = pm.listConnections(limb.bhvDistanceGroup)
+    #         # if bhvType in self.bhvMng.distanceIndexes:
+    #         #     self.grpMng.Teardown_DistanceGroup(limb)
+    #             # self.grpMng.Teardown_DistanceGroup(limbGroups[0])
+    #         limbGroups += pm.listConnections(limb.bhvEmptyGroup)
+    #         limbGroups += pm.listConnections(limb.bhvFKIKSwitchGroup)
+    #         # for group in limbGroups:
+    #         #     pm.parent(group, self.grpMng.bhvGroup)
+    #         for group in limbGroups + jointGroups:
+    #             group.v.set(0)
 
 
 #=========== FUNCTIONALITY ====================================
 
     def AddLimb(self, limb): # Limb Setup > Add
         self.bhvMng.AddLimb(limb)
+        self.bhvMng.Setup_LimbGroupVisibility(limb)
         self.parent.AddLimb(limb)
 
     def RemoveLimb(self, limb): # Limb Setup > Remove

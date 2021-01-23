@@ -104,7 +104,8 @@ class Joint_Manager:
             pm.addAttr(joint, ln='pfrsName', dt='string')
             pm.addAttr(joint, ln='group', dt='string')
             pm.addAttr(joint, ln='bhvRFKGroup', dt='string')
-            pm.addAttr(joint, ln='bhvDistanceGroup', dt='string')
+            pm.addAttr(joint, ln='bhvDistanceJoint', dt='string')
+            pm.addAttr(joint, ln='bhvFKIKSwitchSource', dt='string')
             # SKIN ATTRS
             pm.addAttr(joint, ln='skinAnimStart', at='float')
             pm.addAttr(joint, ln='skinAnimEnd', at='float')
@@ -273,43 +274,42 @@ class Joint_Manager:
                 break
         return jointChain
 
-    def UpdateLimbParentJoint(self, childLimb):
-        '''Updates limb parent group enum to closest to root group'''
-        self.logger.debug('\tJntMng > UpdateLimbParentJoint')
-        # childLimb = self.limbMng.GetLimb(limbID)
-        parents = pm.listConnections(childLimb.parentLimb)
+    # def UpdateLimbParentJoint(self, childLimb):
+    #     '''Updates limb parent group enum to closest to root group'''
+    #     self.logger.debug('\tJntMng > UpdateLimbParentJoint')
+    #     # childLimb = self.limbMng.GetLimb(limbID)
+    #     parents = pm.listConnections(childLimb.parentLimb)
 
-        # If NO PARENT or parent EMPTY, set and return
-        if not parents:
-            pm.addAttr(childLimb.parentJoint, e=1, en='None')
-            return
-        parentLimb = parents[0]
-        parentBhvType = parentLimb.bhvType.get()
-        if parentBhvType == 7:
-            pm.addAttr(childLimb.parentJoint, e=1, en='Empty')
-            return
+    #     # If NO PARENT or parent EMPTY, set and return
+    #     if not parents:
+    #         pm.addAttr(childLimb.parentJoint, e=1, en='None')
+    #         return
+    #     parentLimb = parents[0]
+    #     parentBhvType = parentLimb.bhvType.get()
+    #     if parentBhvType == 7:
+    #         pm.addAttr(childLimb.parentJoint, e=1, en='Empty')
+    #         return
         
-        # Default to closest joint
-        distances = {} # dist : joint
-        names = []
-        # joints = self.jngMng.GetLimbJoints(parentLimb)
-        rootGroup = self.grpMng.GetLimbGroups(childLimb)[0]
-        sourcePos = pm.xform(rootGroup, q=1, t=1, ws=1)
-        parentJoints = self.GetLimbJoints(parentLimb)
-        for joint in parentJoints:
-            # Create distance dict
-            targetPos = pm.xform(joint, q=1, t=1, ws=1)
-            dist = 0
-            for i in range(3):
-                dist += (sourcePos[i]-targetPos[i])**2
-            distances[dist] = joint
-            names.append(joint.pfrsName.get())
-        pm.addAttr(childLimb.parentJoint, e=1, en=':'.join(names))
-        # Set Closest Group Index
-        closestDist = sorted(list(distances.keys()))[0]
-        index = parentJoints.index(distances[closestDist])
-        # index = self.grpMng.GetLimbGroups(parentLimb).index(closestGroup)
-        childLimb.parentJoint.set(index)
+    #     # Default to closest joint
+    #     distances = {} # dist : joint
+    #     names = []
+    #     # joints = self.jngMng.GetLimbJoints(parentLimb)
+    #     rootGroup = self.grpMng.GetLimbGroups(childLimb)[0]
+    #     sourcePos = pm.xform(rootGroup, q=1, t=1, ws=1)
+    #     parentJoints = self.GetLimbJoints(parentLimb)
+    #     for joint in parentJoints:
+    #         # Create distance dict
+    #         targetPos = pm.xform(joint, q=1, t=1, ws=1)
+    #         dist = 0
+    #         for i in range(3):
+    #             dist += (sourcePos[i]-targetPos[i])**2
+    #         distances[dist] = joint
+    #         names.append(joint.pfrsName.get())
+    #     pm.addAttr(childLimb.parentJoint, e=1, en=':'.join(names))
+    #     # Set Closest Group Index
+    #     closestDist = sorted(list(distances.keys()))[0]
+    #     index = parentJoints.index(distances[closestDist])
+    #     childLimb.parentJoint.set(index)
 
 
     # def DuplicateLimb(self, sourceLimbID, targetLimbID):

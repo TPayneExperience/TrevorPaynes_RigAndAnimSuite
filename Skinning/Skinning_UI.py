@@ -12,9 +12,10 @@ reload(skinMng)
 
 
 class Skinning_UI:
-    def __init__(self, limbMng, jntMng, nameMng, parent):
+    def __init__(self, limbMng, jntMng, bhvMng, nameMng, parent):
         self.limbMng = limbMng
         self.jntMng = jntMng
+        self.bhvMng = bhvMng
         self.nameMng = nameMng
         self.parent = parent
         self.logger = parent.logger
@@ -22,7 +23,9 @@ class Skinning_UI:
         self.meshMng = meshMng.Mesh_Manager()
         self.skinMng = skinMng.Skin_Mananger(   self.limbMng, 
                                                 self.jntMng, 
-                                                self.meshMng)
+                                                self.bhvMng,
+                                                self.meshMng,
+                                                self)
 
         self._Setup()
 

@@ -96,8 +96,8 @@ class APP_Limb_Properties_UI:
                                                 cc=self.LogSelectFKIK)
         self.ctrType = pm.attrEnumOptionMenu(   l='Control Type',
                                                 at=self.limb.appControlType,
-                                                p=self.appLimbProp_cl,
-                                                cc=self.SetControlType)
+                                                p=self.appLimbProp_cl )#,
+                                                # cc=self.SetControlType)
         pm.attrControlGrp(self.lockPos, e=1, a=self.limb.appLockHidePos,
                                         cc=pm.Callback(self.LogLockPos, 1))
         pm.attrControlGrp(self.lockRot, e=1, a=self.limb.appLockHideRot,
@@ -174,20 +174,13 @@ class APP_Limb_Properties_UI:
         else:
             pm.optionMenu(self.fkikTargetLimb_om, e=1, sl=1)
 
-    def SetControlType(self, ctrType):
-        msg = '\tLimbProp > SET CONTROL TYPE to "%s"' % ctrType
-        self.logger.info(msg)
-        for group in self.grpMng.GetLimbGroups(self.limb):
-            control = pm.listConnections(group.control)[0]
-            self.ctrMng.SetType(control, ctrType)
-        self.parent.ControlTypeChanged()
-        # print ctrType
-        # for group in self.grpMng.GetLimbGroups(self.limb):
-        #     if group.groupType.get() in [0, 2, 4, 5]: # Skip IK / Constraint
-        #         controls = self.ctrMng.GetGroupControl(group)
-        #         if controls:
-        #             control = controls[0]
-        #             self.ctrMng.SetType(control, ctrType)
+    # def SetControlType(self, ctrType):
+    #     msg = '\tLimbProp > SET CONTROL TYPE to "%s"' % ctrType
+    #     self.logger.info(msg)
+    #     for group in self.grpMng.GetLimbGroups(self.limb):
+    #         control = pm.listConnections(group.control)[0]
+    #         self.ctrMng.SetType(control, ctrType)
+    #     self.parent.ControlTypeChanged()
 
 
 #=========== CONTROL DISTANCE ==============================================

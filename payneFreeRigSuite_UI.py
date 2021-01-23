@@ -137,6 +137,7 @@ class PayneFreeRigSuite_UI():
                 with pm.horizontalLayout() as self.skinning_l:
                     self.skin_ui = skin_ui.Skinning_UI( self.rig_ui.limbMng,
                                                         self.rig_ui.jntMng,
+                                                        self.rig_ui.bhvMng,
                                                         self.nameMng,
                                                         self)
                 with pm.horizontalLayout() as self.animation_l:
@@ -353,8 +354,8 @@ class PayneFreeRigSuite_UI():
         else:
             handler = self.logger.handlers[0]
             self.logFile = handler.baseFilename
-        # self.logger.setLevel(logging.INFO)
-        self.logger.setLevel(logging.DEBUG)
+        self.logger.setLevel(logging.INFO)
+        # self.logger.setLevel(logging.DEBUG)
         startTxt = '\n'
         startTxt += '='*40
         startTxt += '\n'

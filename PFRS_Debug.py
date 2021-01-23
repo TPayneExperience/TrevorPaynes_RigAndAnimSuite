@@ -42,8 +42,9 @@ class PFRS_Debug:
         path = r'D:/Assets/Programming/Python/Maya/ModularAutoRigger'
         path += r'/TEST_OUTPUT/TEST_LimbTypes_01.ma'
         pm.importFile(path)
-        # self.parent.UpdateEnableUI()
-        # self.parent.Setup_Editable()
+        self.parent.UpdateEnableUI()
+        self.parent.Setup_Editable()
+        pm.tabLayout(self.parent.rig_ui.tab, e=1, sti=2)
         # -------------------------------------------------
 
         # # ========== LIMB TYPES ==========================
