@@ -2,8 +2,8 @@
 import pymel.core as pm
 
 class PW_Meshes_Hierarchy_UI:
-    def __init__(self, meshMng, parent):
-        self.meshMng = meshMng
+    def __init__(self, parent):
+        self.meshMng = parent.meshMng
         self.parent = parent
 
         self._meshes = {} # MeshName : meshNode

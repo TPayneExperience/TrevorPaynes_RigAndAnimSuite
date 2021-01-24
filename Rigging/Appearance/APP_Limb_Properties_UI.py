@@ -2,12 +2,12 @@
 import pymel.core as pm
 
 class APP_Limb_Properties_UI:
-    def __init__(self, limbMng, grpMng, bhvMng, ctrMng, parent):
-        self.limbMng = limbMng
-        self.grpMng = grpMng
-        self.bhvMng = bhvMng
-        self.ctrMng = ctrMng
+    def __init__(self, parent):
         self.parent = parent
+        self.limbMng = parent.limbMng
+        self.grpMng = parent.grpMng
+        self.bhvMng = parent.bhvMng
+        self.ctrMng = parent.ctrMng
         self.logger = parent.logger
 
         self.ctrAxis_at = None

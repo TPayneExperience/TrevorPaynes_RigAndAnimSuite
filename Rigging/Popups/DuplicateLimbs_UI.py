@@ -2,8 +2,8 @@
 import pymel.core as pm
 
 class DuplicateLimbs_UI:
-    def __init__(self, limbMng):
-        self.limbMng = limbMng
+    def __init__(self, parent):
+        self.limbMng = parent.limbMng
 
     def Duplicate_Dialog(self):
         self.selectedLimbs = []

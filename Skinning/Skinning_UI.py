@@ -12,20 +12,16 @@ reload(skinMng)
 
 
 class Skinning_UI:
-    def __init__(self, limbMng, jntMng, bhvMng, nameMng, parent):
-        self.limbMng = limbMng
-        self.jntMng = jntMng
-        self.bhvMng = bhvMng
-        self.nameMng = nameMng
+    def __init__(self, parent):
         self.parent = parent
+        self.limbMng = parent.limbMng
+        self.jntMng = parent.jntMng
+        self.bhvMng = parent.bhvMng
+        self.nameMng = parent.nameMng
         self.logger = parent.logger
 
         self.meshMng = meshMng.Mesh_Manager()
-        self.skinMng = skinMng.Skin_Mananger(   self.limbMng, 
-                                                self.jntMng, 
-                                                self.bhvMng,
-                                                self.meshMng,
-                                                self)
+        self.skinMng = skinMng.Skin_Mananger(self)
 
         self._Setup()
 
@@ -39,17 +35,11 @@ class Skinning_UI:
     def _Setup(self):
         with pm.tabLayout(cc=self.TabChanged) as self.tab:
             with pm.horizontalLayout() as self.meshSetupTab:
-                self.meshSetup_ui = mesh_ui.MeshSetup_UI(   self.meshMng, 
-                                                            self.skinMng,
-                                                            self)
+                self.meshSetup_ui = mesh_ui.MeshSetup_UI(self)
             with pm.horizontalLayout() as self.quickWeightsTab:
                 pm.button('test', label='2')
             with pm.horizontalLayout() as self.paintWeightsTab:
-                self.paint_ui = paint_ui.PaintWeights_UI(   self.limbMng,
-                                                            self.jntMng,
-                                                            self.meshMng,
-                                                            self.skinMng,
-                                                            self)
+                self.paint_ui = paint_ui.PaintWeights_UI(self)
             with pm.horizontalLayout() as self.testTab:
                 pm.button('test', label='TEST')
             # with pm.horizontalLayout() as self.appTab:

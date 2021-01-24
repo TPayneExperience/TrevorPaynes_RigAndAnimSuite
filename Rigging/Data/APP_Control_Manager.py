@@ -3,34 +3,51 @@ import pymel.core as pm
 
 
 class APP_Control_Manager:
-    def __init__(self, grpMng, nameMng, parent):
-        self.grpMng = grpMng
-        self.nameMng = nameMng
+    def __init__(self, parent):
+        self.nameMng = parent.nameMng
         self.logger = parent.logger
 
         self._ctrs = {} # ctrID : ctr
-        self.ctrTypes = (   'PFRSCTR_Square_Wire', # Empty
-                            'PFRSCTR_Circle_Wire', # Joint
-                            'PFRSCTR_Diamond_Wire', # Distance
-                            'PFRSCTR_Pin_Wire') # FKIK
+        # self.ctrTypes = (   'PFRSCTR_Square_Wire', # Empty
+        #                     'PFRSCTR_Circle_Wire', # Joint
+        #                     'PFRSCTR_Diamond_Wire', # Distance
+        #                     'PFRSCTR_Pin_Wire') # FKIK
         self._ctrTemplates = {} # CtrType/Name : ControlTemplate
+        self.ctrTypesStr = '' # 'ctr1:ctr2...'
         self.hideAttrs = False
     
     def NewRig(self, rigRoot):
         self.logger.debug('\tCtrMng > NewRig')
         self.rigRoot = rigRoot
         self._ctrs = {} # ctrID : ctr
-        # self.ctrGroup = pm.group(name='ControlGroups', em=1)
         self.ctrTemplatesParent = pm.group(name='Internal', em=1)
         self.ctrTemplatesParent.v.set(0)
-        pm.addAttr(rigRoot, ln='nextCtrID', at='long')
-        path = r'D:\Assets\Programming\Python\Maya\ModularAutoRigger\Rigging\Templates\Controls\Controls.ma'
-        # path = r'Rigging\Templates\Controls\Controls.ma'
-        ctrSourceNodes = pm.importFile(path, returnNewNodes=1)
-        tempControls = [n for n in ctrSourceNodes if pm.objectType(n) == 'transform']
+        path = r'D:\Assets\Programming\Python\Maya\ModularAutoRigger'
+        path += r'\Rigging\Templates\Controls\Controls.ma'
+        nodes = pm.importFile(path, returnNewNodes=1)
+        tempControls = [n for n in nodes if pm.objectType(n) == 'transform']
         pm.parent(tempControls, self.ctrTemplatesParent)
         for control in tempControls:
             self._ctrTemplates[control.shortName()] = control
+        names = list(self._ctrTemplates.keys())
+        names = [name[8:] for name in names]
+        self.ctrTypesStr = ':'.join(names)
+        pm.addAttr(rigRoot, ln='nextCtrID', at='long')
+        pm.addAttr(rigRoot, ln='appEmptyCtrShape', at='enum', 
+                            en=self.ctrTypesStr, h=self.hideAttrs)
+        pm.addAttr(rigRoot, ln='appJointCtrShape', at='enum', 
+                            en=self.ctrTypesStr, h=self.hideAttrs)
+        pm.addAttr(rigRoot, ln='appDistCtrShape', at='enum', 
+                            en=self.ctrTypesStr, h=self.hideAttrs)
+        pm.addAttr(rigRoot, ln='appFKIKCtrShape', at='enum', 
+                            en=self.ctrTypesStr, h=self.hideAttrs)
+        pm.addAttr(rigRoot, ln='appRFKCtrShape', at='enum', 
+                            en=self.ctrTypesStr, h=self.hideAttrs)
+        rigRoot.appEmptyCtrShape.set(names.index('Square_Wire'))
+        rigRoot.appJointCtrShape.set(names.index('Sphere_Poly'))
+        rigRoot.appDistCtrShape.set(names.index('Diamond_Wire'))
+        rigRoot.appFKIKCtrShape.set(names.index('Pin_Wire'))
+        rigRoot.appRFKCtrShape.set(names.index('Cylinder_Poly'))
         self.ctrLayer = pm.createDisplayLayer(n='Controls', e=True)
         self.SetLayerState(True, True)
     
@@ -43,9 +60,9 @@ class APP_Control_Manager:
     # def GetGroupControl(self, group):
     #     return pm.listConnections(group.control)
 
-    def GetControlTypes(self):
-        self.logger.debug('\tCtrMng > GetControlTypes')
-        return list(self._ctrTemplates.keys())
+    # def GetControlTypes(self):
+    #     self.logger.debug('\tCtrMng > GetControlTypes')
+    #     return list(self._ctrTemplates.keys())
 
     def SetLayerState(self, isVisible, isReference):
         self.logger.debug('\tCtrMng > SetLayerState')
@@ -62,34 +79,72 @@ class APP_Control_Manager:
 
 #============= FUNCTIONALITY ============================
 
-    def Add(self, group, ctrType):
+    def _Add(self, group, index):
         self.logger.debug('\tCtrMng > NewRig')
         ctrID = self.rigRoot.nextCtrID.get()
         self.rigRoot.nextCtrID.set(ctrID + 1)
         
-        ctr = pm.duplicate(self._ctrTemplates[ctrType], ic=1)[0]
+        shapeName = list(self._ctrTemplates.keys())[index]
+        sourceShape = self._ctrTemplates[shapeName]
+        ctr = pm.duplicate(sourceShape, ic=1)[0]
         pm.addAttr(ctr, ln='ID', at='long', dv=ctrID)
         pm.addAttr(ctr, ln='group', dt='string')
 
         pm.editDisplayLayerMembers(self.ctrLayer, ctr, nr=1)
         pm.connectAttr(group.control, ctr.group)
         pm.parent(ctr, group)
-        pm.xform(ctr, t=[0,0,0], ro=[0,0,0], s=[1,1,1])
+        # pm.xform(ctr, t=(0,0,0), ro=(0,0,0), s=(1,1,1))
 
         self._ctrs[ctrID] = ctr
         return ctr
+
+    def AddEmptyControl(self, group):
+        index = self.rigRoot.appEmptyCtrShape.get()
+        self._Add(group, index)
+
+    def AddJointControl(self, group):
+        index = self.rigRoot.appJointCtrShape.get()
+        self._Add(group, index)
+
+    def AddDistanceControl(self, group):
+        index = self.rigRoot.appDistCtrShape.get()
+        self._Add(group, index)
+
+    def AddFKIKControl(self, group):
+        index = self.rigRoot.appFKIKCtrShape.get()
+        self._Add(group, index)
+
+    def AddRKFControl(self, group):
+        index = self.rigRoot.appRFKCtrShape.get()
+        self._Add(group, index)
 
     def Remove(self, control):
         self.logger.debug('\tCtrMng > Remove')
         del(self._ctrs[control.ID.get()])
 
-    def SetType(self, control, ctrType):
-        self.logger.debug('\tCtrMng > SetType')
-        group = pm.listConnections(control.group)[0]
+    def GetShapeName(self, group):
+        groupType = group.groupType.get()
+        if groupType == 0:
+            index = self.rigRoot.appEmptyCtrShape.get()
+        elif groupType == 1:
+            index = self.rigRoot.appJointCtrShape.get()
+        elif groupType == 2:
+            index = self.rigRoot.appDistCtrShape.get()
+        elif groupType == 3:
+            index = self.rigRoot.appFKIKCtrShape.get()
+        elif groupType == 4:
+            index = self.rigRoot.appRFKCtrShape.get()
+        shapeNames = list(self._ctrTemplates.keys())
+        return shapeNames[index]
+
+
+    def SetShape(self, group, shape):
+        self.logger.debug('\tCtrMng > SetShape')
+        control = pm.listConnections(group.control)[0]
         pm.disconnectAttr(group.control)
-        newCtr = self.Add(group, ctrType)
+        newCtr = self.Add(group)
         pm.parent(newCtr, control)
-        pm.xform(newCtr, t=[0,0,0], ro=[0,0,0], s=[1,1,1])
+        pm.xform(newCtr, t=(0,0,0), ro=(0,0,0), s=(1,1,1))
         pm.parent(newCtr, group)
         self._ctrs[newCtr.ID.get()] = newCtr
         self.Remove(control)

@@ -2,10 +2,10 @@
 import pymel.core as pm
 
 class JointSetup_UI:
-    def __init__(self, jntMng, parent):
-        self.jntMng = jntMng
+    def __init__(self, parent):
         self.parent = parent
-        self.logger = self.parent.logger
+        self.jntMng = parent.jntMng
+        self.logger = parent.logger
 
         self.scriptJob = None
         self._Setup()

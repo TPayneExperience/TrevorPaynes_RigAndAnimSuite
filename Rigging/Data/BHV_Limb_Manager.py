@@ -4,11 +4,11 @@ import math
 import pymel.core as pm
 
 class BHV_Limb_Manager:
-    def __init__ (self, limbMng, jntMng, grpMng, ctrMng, parent):
-        self.limbMng = limbMng
-        self.jntMng = jntMng
-        self.grpMng = grpMng
-        self.ctrMng = ctrMng
+    def __init__ (self, parent):
+        self.limbMng = parent.limbMng
+        self.jntMng = parent.jntMng
+        self.grpMng = parent.grpMng
+        self.ctrMng = parent.ctrMng
         self.logger = parent.logger
 
         self.cstTypes = ('Parent', 'Point', 'Orient', 'Scale')
@@ -68,7 +68,6 @@ class BHV_Limb_Manager:
                             'FK + IK Chain', 
                             'FK - Relative')
 
-
 #============= ACCESSORS ============================
 
     def GetBhvOptions(self, limb):
@@ -109,7 +108,6 @@ class BHV_Limb_Manager:
             groups += pm.listConnections(joint.group)
         return groups
     
-
 #============= SET BHV ============================
 
     def SetBhvType(self, limb, newBhvIndex):
@@ -161,10 +159,11 @@ class BHV_Limb_Manager:
         self.logger.debug('\tBhvMng > AddLimb')
         bhvTypes = ':'.join(self.bhvTypes)
         bhvCstTypes = ':'.join(self.cstTypes)
-        ctrTypes = ':'.join(self.ctrMng.GetControlTypes())
+        # ctrTypes = ':'.join(self.ctrMng.GetControlTypes())
         axes = ':'.join(self.axesNames)
 
-        pm.addAttr(limb.appControlType, e=1, en=ctrTypes)
+        pm.addAttr(limb.appControlType, e=1, 
+                            en=self.ctrMng.ctrTypesStr)
         pm.addAttr(limb, ln='bhvType', at='enum', en=bhvTypes,
                                     h=self.hideAttrs)
 
@@ -280,24 +279,24 @@ class BHV_Limb_Manager:
         if bhvType in self.distanceIndexes:
             if not pm.listConnections(limb.bhvDistanceGroup):
                 group = self.grpMng.AddDistanceGroup(limb)
-                self.ctrMng.Add(group, self.ctrMng.ctrTypes[2])
+                # self.ctrMng.Add(group)
                 self.grpMng.UpdateGroupName(group)
             self.UpdateGroupDistance(limb)
         if bhvType in self.fkikTypeIndexes:
             if not pm.listConnections(limb.bhvFKIKSwitchGroup):
                 group = self.grpMng.AddFKIKSwitchGroup(limb)
-                self.ctrMng.Add(group, self.ctrMng.ctrTypes[3])
+                # self.ctrMng.Add(group)
                 self.grpMng.UpdateGroupName(group)
             self.UpdateFKIKSwitchJoint(limb)
         if bhvType in self.emptyLimbIndexes:
             if not pm.listConnections(limb.bhvEmptyGroup):
                 group = self.grpMng.AddEmptyGroup(limb)
-                self.ctrMng.Add(group, self.ctrMng.ctrTypes[0])
+                # self.ctrMng.Add(group)
                 self.grpMng.UpdateGroupName(group)
-        if bhvType in self.rfkTypeIndexes:
-            if not pm.listConnections(limb.bhvRFKCenterGroup):
-                for group in self.grpMng.AddRFKGroups(limb):
-                    self.ctrMng.Add(group, self.ctrMng.ctrTypes[0])
+        # if bhvType in self.rfkTypeIndexes:
+        #     if not pm.listConnections(limb.bhvRFKCenterGroup):
+        #         for group in self.grpMng.AddRFKGroups(limb):
+        #             self.ctrMng.Add(group)
                     # self.grpMng.UpdateGroupName(group)
 
     def RebuildBhvDep(self, sourceLimb):

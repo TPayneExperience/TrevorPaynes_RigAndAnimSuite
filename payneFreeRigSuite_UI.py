@@ -45,12 +45,6 @@ class PayneFreeRigSuite_UI():
                                             self)
         self._Setup()
         
-        self.limbMng = self.rig_ui.limbMng
-        self.grpMng = self.rig_ui.grpMng
-        self.jntMng = self.rig_ui.jntMng
-        self.bhvMng = self.rig_ui.bhvMng
-        self.ctrMng = self.rig_ui.ctrMng
-
         self.limbMng.hideAttrs = self.hideAttrs
         self.grpMng.hideAttrs = self.hideAttrs
         self.jntMng.hideAttrs = self.hideAttrs
@@ -99,7 +93,6 @@ class PayneFreeRigSuite_UI():
                                     en='Mesh:QuickWeights:PaintWeights:Test')
         pm.addAttr(self.rigRoot, ln='prefix', dt='string')
         self.rigRoot.prefix.set(prefix)
-        # pm.setAttr(self.rigRoot +'.prefix', prefix)
 
         # MESH LAYER
         self.meshLayer = pm.createDisplayLayer(n='Rig Mesh', e=True)
@@ -110,11 +103,7 @@ class PayneFreeRigSuite_UI():
         self.nameMng.NewRig(self.rigRoot)
         self.rig_ui.NewRig(self.rigRoot)
         self.skin_ui.NewRig(self.rigRoot)
-        # self.pfrs.rigSetup.NewRig('somePrefix', [0,1,2,3,4], True)
-        # self.rig_ui.NewRig(self.pfrs.rigSetup.rigRoot)
-        # self.pfrs.rigSceneMng.NewRig()
-        # self.limbs_tw.NewRig(self.pfrs.rigSceneMng.rootGroup)
-        # self.pfrs.saveLoadRig.Save()
+        
 
     def UpdatePrefix(self):
         self.rigRoot.rename('%s_ROOT' % self.rigRoot.prefix.get())
@@ -130,16 +119,14 @@ class PayneFreeRigSuite_UI():
         with pm.window(mb=True,mbv=True, t=name, w=500, h=500) as self.win:
             with pm.tabLayout(e=0, cc=self.TabChanged) as self.tab:
                 with pm.horizontalLayout() as self.rigging_l:
-                    self.rig_ui = rig_ui.Rigging_UI(self.nameMng,
-                                                    self.fileMng,
-                                                    self.jsonMng,
-                                                    self)
+                    self.rig_ui = rig_ui.Rigging_UI(self)
+                    self.limbMng = self.rig_ui.limbMng
+                    self.grpMng = self.rig_ui.grpMng
+                    self.jntMng = self.rig_ui.jntMng
+                    self.bhvMng = self.rig_ui.bhvMng
+                    self.ctrMng = self.rig_ui.ctrMng
                 with pm.horizontalLayout() as self.skinning_l:
-                    self.skin_ui = skin_ui.Skinning_UI( self.rig_ui.limbMng,
-                                                        self.rig_ui.jntMng,
-                                                        self.rig_ui.bhvMng,
-                                                        self.nameMng,
-                                                        self)
+                    self.skin_ui = skin_ui.Skinning_UI(self)
                 with pm.horizontalLayout() as self.animation_l:
                     with pm.tabLayout() as self.mdTab:
                         with pm.horizontalLayout():

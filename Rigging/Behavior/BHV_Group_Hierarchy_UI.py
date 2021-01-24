@@ -2,11 +2,11 @@
 import pymel.core as pm
 
 class BHV_Group_Hierarchy_UI:
-    def __init__(self, limbMng, grpMng, bhvMng, parent):
-        self.limbMng = limbMng
-        self.grpMng = grpMng
-        self.bhvMng = bhvMng
+    def __init__(self, parent):
         self.parent = parent
+        self.limbMng = parent.limbMng
+        self.grpMng = parent.grpMng
+        self.bhvMng = parent.bhvMng
         self.logger = parent.logger
 
         self.limb = None

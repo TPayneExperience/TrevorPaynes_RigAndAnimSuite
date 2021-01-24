@@ -2,12 +2,12 @@
 import pymel.core as pm
 
 class LS_Joint_Hierarchy_UI:
-    def __init__(self, limbMng, jntMng, grpMng, nameMng, parent):
-        self.limbMng = limbMng
-        self.jntMng = jntMng
-        self.grpMng = grpMng
-        self.nameMng = nameMng
+    def __init__(self, parent):
         self.parent = parent
+        self.limbMng = parent.limbMng
+        self.jntMng = parent.jntMng
+        self.grpMng = parent.grpMng
+        self.nameMng = parent.nameMng
         self.logger = parent.logger
 
         self.limb = None

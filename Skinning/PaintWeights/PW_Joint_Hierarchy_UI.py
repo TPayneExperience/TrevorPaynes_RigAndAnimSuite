@@ -2,10 +2,10 @@
 import pymel.core as pm
 
 class PW_Joint_Hierarchy_UI:
-    def __init__(self, limbMng, jntMng, parent):
-        self.limbMng = limbMng
-        self.jntMng = jntMng
+    def __init__(self, parent):
         self.parent = parent
+        self.limbMng = parent.limbMng
+        self.jntMng = parent.jntMng
         self.logger = parent.logger
 
         self.limb = None

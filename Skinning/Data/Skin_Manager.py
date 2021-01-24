@@ -4,11 +4,11 @@
 import pymel.core as pm
 
 class Skin_Mananger:
-    def __init__(self, limbMng, jntMng, bhvMng, meshMng, parent):
-        self.limbMng = limbMng
-        self.jntMng = jntMng
-        self.bhvMng = bhvMng
-        self.meshMng = meshMng
+    def __init__(self, parent):
+        self.limbMng = parent.limbMng
+        self.jntMng = parent.jntMng
+        self.bhvMng = parent.bhvMng
+        self.meshMng = parent.meshMng
         self.logger = parent.logger
 
         self._skinTestAnimLayer = 'Skin_Test_Anim'

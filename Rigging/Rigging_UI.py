@@ -38,40 +38,26 @@ reload(load_ui)
 
 
 class Rigging_UI:
-    def __init__(self, nameMng, fileMng, jsonMng, parent):
-        self.nameMng = nameMng
-        self.fileMng = fileMng
-        self.jsonMng = jsonMng
+    def __init__(self, parent):
         self.parent = parent
+        self.nameMng = parent.nameMng
+        self.fileMng = parent.fileMng
+        self.jsonMng = parent.jsonMng
         self.logger = parent.logger
 
         # NEED A BETTER PLACE FOR THIS
         
-        self.limbMng = lm.Limb_Manager(nameMng, self)
-        self.grpMng = grp.BHV_Group_Manager(self.limbMng,
-                                            self.nameMng,
-                                            self)
-        self.ctrMng = ctr.APP_Control_Manager(  self.grpMng,
-                                                self.nameMng,
-                                                self)
-        self.jntMng = jm.Joint_Manager( self.limbMng, 
-                                        self.grpMng,
-                                        self.ctrMng,
-                                        nameMng,
-                                        self)
-        self.bhvMng = bhv.BHV_Limb_Manager( self.limbMng, 
-                                            self.jntMng, 
-                                            self.grpMng,
-                                            self.ctrMng,
-                                            self)
-        self.saveLoadSkel = saveLoadSkel.SaveLoad_Skeleton( self.limbMng, 
-                                                    self.jntMng)
+        self.limbMng = lm.Limb_Manager(self)
+        self.ctrMng = ctr.APP_Control_Manager(self)
+        self.grpMng = grp.BHV_Group_Manager(self)
+        self.jntMng = jm.Joint_Manager(self)
+        self.bhvMng = bhv.BHV_Limb_Manager(self)
+        self.saveLoadSkel = saveLoadSkel.SaveLoad_Skeleton(self)
 
-        self.saveDialog = save_ui.SaveTemplate_UI(  self.limbMng, 
-                                                    self.nameMng)
+        self.saveDialog = save_ui.SaveTemplate_UI(self)
         self.loadDialog = load_ui.LoadTemplate_UI()
-        self.dupDialog = dup_ui.DuplicateLimbs_UI(self.limbMng)
-        self.mirDialog = mir_ui.MirrorLimbs_UI(self.limbMng)
+        self.dupDialog = dup_ui.DuplicateLimbs_UI(self)
+        self.mirDialog = mir_ui.MirrorLimbs_UI(self)
 
         self.lastTab = 1
         self.rigRoot = None
@@ -92,36 +78,15 @@ class Rigging_UI:
     def _Setup(self):
         with pm.tabLayout(cc=self.TabChanged) as self.tab:
             with pm.horizontalLayout() as self.jntSetupTab:
-                self.jntSetup_ui = js_ui.JointSetup_UI( self.jntMng,
-                                                        self)
+                self.jntSetup_ui = js_ui.JointSetup_UI(self)
             with pm.horizontalLayout() as self.limbSetupTab:
-                self.limbSetup_ui = ls_ui.LimbSetup_UI( self.limbMng, 
-                                                        self.jntMng,
-                                                        self.grpMng,
-                                                        self.ctrMng, 
-                                                        self.nameMng,
-                                                        self)
+                self.limbSetup_ui = ls_ui.LimbSetup_UI(self)
             with pm.horizontalLayout() as self.bhvTab:
-                self.bhv_ui = bhv_ui.Behavior_UI(   self.limbMng,
-                                                    self.jntMng,
-                                                    self.bhvMng,
-                                                    self.grpMng,
-                                                    self.ctrMng,
-                                                    self)
+                self.bhv_ui = bhv_ui.Behavior_UI(self)
             with pm.horizontalLayout() as self.appTab:
-                self.app_ui = app_ui.Appearance_UI( self.limbMng,
-                                                    self.bhvMng,
-                                                    self.grpMng,
-                                                    self.ctrMng,
-                                                    self.nameMng,
-                                                    self)
+                self.app_ui = app_ui.Appearance_UI(self)
             with pm.horizontalLayout() as self.testTab:
-                self.test_ui = test_ui.Test_UI( self.limbMng,
-                                                self.jntMng,
-                                                self.bhvMng,
-                                                self.grpMng,
-                                                self.ctrMng,
-                                                self)
+                self.test_ui = test_ui.Test_UI(self)
         pm.tabLayout(  self.tab, 
                     e=1, 
                     tabLabel=(  (self.jntSetupTab,'Joint Setup'), 

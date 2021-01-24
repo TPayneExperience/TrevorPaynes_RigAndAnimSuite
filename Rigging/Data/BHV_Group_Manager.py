@@ -2,9 +2,10 @@
 import pymel.core as pm
 
 class BHV_Group_Manager:
-    def __init__(self, limbMng, nameMng, parent):
-        self.limbMng = limbMng
-        self.nameMng = nameMng
+    def __init__(self, parent):
+        self.limbMng = parent.limbMng
+        self.nameMng = parent.nameMng
+        self.ctrMng = parent.ctrMng
         self.logger = parent.logger
 
         # self.axesXforms =   ((1,0,0),
@@ -189,6 +190,7 @@ class BHV_Group_Manager:
         group = self._AddGroup()
         pm.addAttr(group, ln='limb', dt='string')
         pm.connectAttr(limb.bhvEmptyGroup, group.limb)
+        self.ctrMng.AddEmptyControl(group)
         pm.parent(group, limb)
         return group
 
@@ -203,8 +205,9 @@ class BHV_Group_Manager:
         pm.addAttr(group, ln='weight', at='float', min=0, max=1) # Cst
         pm.connectAttr(joint.group, group.joint)
         
+        self.ctrMng.AddJointControl(group)
         pm.parent(group, joint)
-        pm.xform(group, t=[0,0,0], ro=[0,0,0], s=[1,1,1])
+        pm.xform(group, t=(0,0,0), ro=(0,0,0), s=(1,1,1))
         return group
 
     # IK PV, LookAt
@@ -222,6 +225,7 @@ class BHV_Group_Manager:
         pm.addAttr(group, ln='joint', dt='string')
         pm.connectAttr(limb.bhvDistanceGroup, group.limb)
         pm.parent(group, limb)
+        self.ctrMng.AddDistanceControl(group)
         return group
 
     # FKIK Switch
@@ -240,6 +244,7 @@ class BHV_Group_Manager:
         pm.parent(group, limb)
         for attr in ['.tx', '.ty', '.tz', '.rx', '.ry', '.rz']:
             pm.setAttr(group+attr, l=1, k=0, cb=0)
+        self.ctrMng.AddFKIKControl(group)
         return group
 
     def AddRFKGroups(self, limb):
@@ -250,6 +255,7 @@ class BHV_Group_Manager:
             pm.addAttr(groups[i], ln='joint', dt='string')
             pm.addAttr(groups[i], ln='limb', dt='string')
             groups[i].groupType.set(4)
+            self.ctrMng.AddRKFControl(groups[i])
         pm.connectAttr(limb.bhvRFKBottomGroup, groups[0].limb)
         pm.connectAttr(limb.bhvRFKCenterGroup, groups[1].limb)
         pm.connectAttr(limb.bhvRFKTopGroup, groups[2].limb)

@@ -9,12 +9,12 @@ import LS_Joint_Hierarchy_UI as jointHier_UI
 reload(jointHier_UI)
 
 class LimbSetup_UI:
-    def __init__(self, limbMng, jntMng, grpMng, ctrMng, nameMng, parent):
-        self.limbMng = limbMng
-        self.jntMng = jntMng
-        self.grpMng = grpMng
-        self.ctrMng = ctrMng
-        self.nameMng = nameMng
+    def __init__(self, parent):
+        self.limbMng = parent.limbMng
+        self.jntMng = parent.jntMng
+        self.grpMng = parent.grpMng
+        self.ctrMng = parent.ctrMng
+        self.nameMng = parent.nameMng
         self.parent = parent
         self.logger = parent.logger
 
@@ -44,23 +44,12 @@ class LimbSetup_UI:
     def _Setup(self):
         with pm.verticalLayout():
             with pm.frameLayout(l='---', bv=1) as self.sceneHier_fl:
-                self.sceneHier_ui = sceneHier_UI.LS_Scene_Hierarchy_UI( self.limbMng,
-                                                                        self.jntMng,
-                                                                        self)
+                self.sceneHier_ui = sceneHier_UI.LS_Scene_Hierarchy_UI(self)
         with pm.verticalLayout():
             with pm.frameLayout('Limbs', bv=1):
-                self.limbHier_ui = limbHier_UI.LS_Limb_Hierarchy_UI(self.limbMng,
-                                                                    self.jntMng,
-                                                                    self.grpMng,
-                                                                    self.ctrMng,
-                                                                    self.nameMng,
-                                                                    self)
+                self.limbHier_ui = limbHier_UI.LS_Limb_Hierarchy_UI(self)
             with pm.frameLayout(l='---', bv=1) as self.jntHier_fl:
-                self.jntHier_ui = jointHier_UI.LS_Joint_Hierarchy_UI(   self.limbMng,
-                                                                        self.jntMng,
-                                                                        self.grpMng,
-                                                                        self.nameMng,
-                                                                        self)
+                self.jntHier_ui = jointHier_UI.LS_Joint_Hierarchy_UI(self)
            
 #=========== TAB FUNCTIONALITY ====================================
     

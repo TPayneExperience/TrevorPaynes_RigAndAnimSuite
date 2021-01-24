@@ -3,12 +3,11 @@ import pymel.core as pm
 from random import random, shuffle
 
 class Joint_Manager:
-    def __init__(self, limbMng, grpMng, ctrMng, nameMng, parent):
-
-        self.limbMng = limbMng
-        self.grpMng = grpMng
-        self.ctrMng = ctrMng
-        self.nameMng = nameMng
+    def __init__(self, parent):
+        self.limbMng = parent.limbMng
+        self.grpMng = parent.grpMng
+        self.ctrMng = parent.ctrMng
+        self.nameMng = parent.nameMng
         self.logger = parent.logger
 
         self.mirrorXform = {'X': (-1,1,1),
@@ -123,8 +122,8 @@ class Joint_Manager:
             joint.pfrsName.set('Joint%03d' % (jointID))
             pm.editDisplayLayerMembers(self.skelLayer, joint, nr=1)
 
-            group = self.grpMng.AddJointGroup(joint)
-            self.ctrMng.Add(group, self.ctrMng.ctrTypes[1])
+            self.grpMng.AddJointGroup(joint)
+            # self.ctrMng.Add(group)
             # self.grpMng.UpdateGroupName(group)
             
         # Only add Joint if pfrs name not already on limb

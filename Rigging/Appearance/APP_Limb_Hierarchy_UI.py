@@ -3,10 +3,10 @@ import pymel.core as pm
 
 
 class APP_Limb_Hierarchy_UI:
-    def __init__(self, limbMng, bhvMng, parent):
-        self.limbMng = limbMng
-        self.bhvMng = bhvMng
+    def __init__(self, parent):
         self.parent = parent
+        self.limbMng = parent.limbMng
+        self.bhvMng = parent.bhvMng
         self.logger = parent.logger
 
         self._Setup()

@@ -3,14 +3,13 @@ import pymel.core as pm
 
 
 class LS_Limb_Hierarchy_UI:
-    def __init__(self, limbMng, jntMng, grpMng, ctrMng, nameMng, parent):
-
-        self.limbMng = limbMng
-        self.jntMng = jntMng
-        self.grpMng = grpMng
-        self.ctrMng = ctrMng
-        self.nameMng = nameMng
+    def __init__(self, parent):
         self.parent = parent
+        self.limbMng = parent.limbMng
+        self.jntMng = parent.jntMng
+        self.grpMng = parent.grpMng
+        self.ctrMng = parent.ctrMng
+        self.nameMng = parent.nameMng
         self.logger = parent.logger
 
         self._Setup()

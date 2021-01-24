@@ -2,9 +2,9 @@
 import pymel.core as pm
 
 class SaveLoad_Skeleton():
-    def __init__(self, limbManager, jointManager):
-        self.limbMng = limbManager
-        self.jntMng = jointManager
+    def __init__(self, parent):
+        self.limbMng = parent.limbMng
+        self.jntMng = parent.jntMng
     
     def GetData(self, limbIDs):
         data = {}

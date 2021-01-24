@@ -2,8 +2,8 @@
 import pymel.core as pm
 
 class MirrorLimbs_UI:
-    def __init__(self, limbMng):
-        self.limbMng = limbMng
+    def __init__(self, parent):
+        self.limbMng = parent.limbMng
 
         self._items = {} # ID : Item
         self._isUpdating = False

@@ -2,13 +2,13 @@
 import pymel.core as pm
 
 class APP_Control_Hierarchy_UI:
-    def __init__(self, limbMng, bhvMng, grpMng, ctrMng, nameMng, parent):
-        self.limbMng = limbMng
-        self.bhvMng = bhvMng
-        self.grpMng = grpMng
-        self.ctrMng = ctrMng
-        self.nameMng = nameMng
+    def __init__(self, parent):
         self.parent = parent
+        self.limbMng = parent.limbMng
+        self.bhvMng = parent.bhvMng
+        self.grpMng = parent.grpMng
+        self.ctrMng = parent.ctrMng
+        self.nameMng = parent.nameMng
         self.logger = parent.logger
 
         self.limb = None

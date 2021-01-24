@@ -2,13 +2,13 @@
 import pymel.core as pm
 
 class Test_UI:
-    def __init__(self, limbMng, jntMng, bhvMng, grpMng, ctrMng, parent):
-        self.limbMng = limbMng
-        self.jntMng = jntMng
-        self.bhvMng = bhvMng
-        self.grpMng = grpMng
-        self.ctrMng = ctrMng
+    def __init__(self, parent):
         self.parent = parent
+        self.limbMng = parent.limbMng
+        self.jntMng = parent.jntMng
+        self.bhvMng = parent.bhvMng
+        self.grpMng = parent.grpMng
+        self.ctrMng = parent.ctrMng
         self.logger = parent.logger
 
         self._Setup()

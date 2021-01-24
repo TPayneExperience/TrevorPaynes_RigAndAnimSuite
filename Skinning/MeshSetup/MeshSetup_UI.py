@@ -1,10 +1,10 @@
 import pymel.core as pm
 
 class MeshSetup_UI:
-    def __init__(self, meshMng, skinMng, parent):
-        self.meshMng = meshMng
-        self.skinMng = skinMng
+    def __init__(self, parent):
         self.parent = parent
+        self.meshMng = parent.meshMng
+        self.skinMng = parent.skinMng
 
         self._Setup()
 

@@ -8,10 +8,10 @@ import Skinning.Data.PFRS_Paint as paint
 reload(paint)
 
 class PW_Brush_Properties_UI:
-    def __init__(self, meshMng, skinMng, parent):
-        self.meshMng = meshMng
-        self.skinMng = skinMng
+    def __init__(self, parent):
         self.parent = parent
+        self.meshMng = parent.meshMng
+        self.skinMng = parent.skinMng
         
         self.ctx = 'pfrsPaintCtx'
         self._onName = '>> SELECT LIMB <<'

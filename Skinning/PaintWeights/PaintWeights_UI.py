@@ -15,12 +15,12 @@ import Skinning.Data.PFRS_Paint as paint
 reload(paint)
 
 class PaintWeights_UI:
-    def __init__(self, limbMng, jntMng, meshMng, skinMng, parent):
-        self.limbMng = limbMng
-        self.jntMng = jntMng
-        self.meshMng = meshMng
-        self.skinMng = skinMng
+    def __init__(self, parent):
         self.parent = parent
+        self.limbMng = parent.limbMng
+        self.jntMng = parent.jntMng
+        self.meshMng = parent.meshMng
+        self.skinMng = parent.skinMng
         self.logger = parent.logger
 
         self.curMesh = None
@@ -39,21 +39,14 @@ class PaintWeights_UI:
         with pm.verticalLayout():
             # with pm.columnLayout():
             with pm.frameLayout('Skinned Meshes', bv=1, h=33):
-                self.meshHier_ui = mesh_ui.PW_Meshes_Hierarchy_UI( self.meshMng,
-                                                                self)
+                self.meshHier_ui = mesh_ui.PW_Meshes_Hierarchy_UI(self)
             with pm.frameLayout('Limb Hierarchy', bv=1):
-                self.limbHier_ui = limb_UI.PW_Limb_Hierarchy_UI(self.limbMng,
-                                                                self.jntMng,
-                                                                self)
+                self.limbHier_ui = limb_UI.PW_Limb_Hierarchy_UI(self)
             with pm.frameLayout('Limb Joints', bv=1):
-                self.jntHier_ui = joint_ui.PW_Joint_Hierarchy_UI( self.limbMng,
-                                                                self.jntMng,
-                                                                self)
+                self.jntHier_ui = joint_ui.PW_Joint_Hierarchy_UI(self)
         
         with pm.verticalLayout():
-            self.brush_ui = brush_ui.PW_Brush_Properties_UI(self.meshMng,
-                                                            self.skinMng, 
-                                                            self)
+            self.brush_ui = brush_ui.PW_Brush_Properties_UI(self)
 
 #=========== TABS ====================================
 

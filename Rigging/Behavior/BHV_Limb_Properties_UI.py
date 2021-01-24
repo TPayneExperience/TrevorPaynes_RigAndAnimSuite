@@ -2,12 +2,12 @@
 import pymel.core as pm
 
 class BHV_Limb_Properties_UI:
-    def __init__(self, limbMng, jntMng, bhvMng, grpMng, parent):
-        self.limbMng = limbMng
-        self.jntMng = jntMng
-        self.bhvMng = bhvMng
-        self.grpMng = grpMng
+    def __init__(self, parent):
         self.parent = parent
+        self.limbMng = parent.limbMng
+        self.jntMng = parent.jntMng
+        self.bhvMng = parent.bhvMng
+        self.grpMng = parent.grpMng
         self.logger = parent.logger
 
         self.limb = None

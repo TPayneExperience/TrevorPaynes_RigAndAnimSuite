@@ -2,9 +2,9 @@
 import pymel.core as pm
 
 class Limb_Manager:
-    def __init__(self, nameMng, parent):
+    def __init__(self, parent):
 
-        self.nameMng = nameMng
+        self.nameMng = parent.nameMng
         self.logger = parent.logger
 
         self.limbTypes = (  'Empty_Rigging',
