@@ -394,30 +394,14 @@ class BHV_Limb_Manager:
         self.logger.debug('\tBhvMng > Setup_Behavior')
         bhvType = limb.bhvType.get()
 
-        # LOOK AT
-        if bhvType in self.lookAtTypeIndexes:
-            joint = self.jntMng.GetLimbJoints(limb)[0]
-            group = pm.listConnections(limb.bhvLookAtGroup)[0]
-            pm.disconnectAttr(group.joint)
-            pm.connectAttr(group.joint, joint.bhvDistanceJoint)
         # IK PV
         if bhvType in self.ikPVTypeIndexes:
-            joints = self.jntMng.GetLimbJoints(limb)
-            joint = joints[len(joints)/2]
-            group = pm.listConnections(limb.bhvIKPVGroup)[0]
-            pm.disconnectAttr(group.joint)
-            pm.connectAttr(group.joint, joint.bhvDistanceJoint)
             self.RebuildBhvDep(limb)
         # IK CHAIN
         if bhvType in self.ikChainTypeIndexes:
             self.RebuildBhvDep(limb)
         # FKIK
         if bhvType in self.fkikTypeIndexes:
-            # fkikGroup = pm.listConnections(limb.bhvFKIKSwitchGroup)[0]
-            # joints = self.jntMng.GetLimbJoints(limb)
-            # names = [j.pfrsName.get() for j in joints]
-            # pm.addAttr(fkikGroup.targetJoint, e=1, en=':'.join(names))
-            # self.UpdateFKIKSwitchJoint(fkikGroup, joints)
             self.UpdateFKIKSwitchJoint(limb)
         # RFK
         if bhvType in self.rfkTypeIndexes:
@@ -467,17 +451,6 @@ class BHV_Limb_Manager:
 
 # ============= MISC ============================
 
-    def SetupEditable_GroupParenting(self, limb):
-        self.logger.debug('\tGrpMng > SetupEditable_GroupParenting')
-        for group in self.GetLimbGroups(limb):
-            joint = pm.listConnections(group.joint)[0]
-            pm.parent(group, joint)
-            
-    def TeardownEditable_GroupParenting(self, limb):
-        self.logger.debug('\tGrpMng > TeardownEditable_GroupParenting')
-        for group in self.GetLimbGroups(limb):
-            pm.parent(group, limb)
-    
     def UpdateLimbParentJoint(self, childLimb):
         '''Updates limb parent group enum to closest to root group'''
         self.logger.debug('\tJntMng > UpdateLimbParentJoint')
@@ -523,16 +496,7 @@ class BHV_Limb_Manager:
         index = limb.targetJoint.get()
         joint = self.jntMng.GetLimbJoints(limb)[index]
         group = pm.listConnections(limb.bhvFKIKSwitchGroup)[0]
-        pm.disconnectAttr(group.joint)
-        pm.connectAttr(group.joint, joint.bhvFKIKSwitchSource)
-        self.SetupEditable_GroupParenting(limb)
 
-    # def UpdateFKIKSwitchJoint(self, group, joints):
-    #     self.logger.debug('\tBhvMng > UpdateFKIKSwitchJoint')
-    #     index = group.targetJoint.get()
-    #     joint = joints[index]
-    #     pm.parent(group, joint)
-    
     def UpdateRFKConnections(self, limb):
         self.logger.debug('\tBhvMng > UpdateRFKConnections')
         joints = self.jntMng.GetLimbJoints(limb)

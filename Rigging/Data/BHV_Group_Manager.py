@@ -13,8 +13,11 @@ class BHV_Group_Manager:
                             'Joint', # FK, CST, IK Chain
                             'IKPV',
                             'FKIKSwitch',
-                            'RFK',
-                            'LookAt')
+                            'LookAt',
+                            'RFK_B',
+
+                            'RFK_M',
+                            'RFK_T')
         self.hideAttrs = False
 
         self._groups = {} # grpID : grpData
@@ -96,7 +99,6 @@ class BHV_Group_Manager:
         group = self._AddGroup()
         group.groupType.set(2)
         pm.addAttr(group, ln='limb', dt='string')
-        pm.addAttr(group, ln='joint', dt='string')
         pm.connectAttr(limb.bhvIKPVGroup, group.limb)
         pm.parent(group, limb)
         self.ctrMng.AddIKPVControl(group)
@@ -107,9 +109,8 @@ class BHV_Group_Manager:
     def AddLookAtGroup(self, limb):
         self.logger.debug('\tGrpMng > AddLookAtGroup')
         group = self._AddGroup()
-        group.groupType.set(2)
+        group.groupType.set(4)
         pm.addAttr(group, ln='limb', dt='string')
-        pm.addAttr(group, ln='joint', dt='string')
         pm.connectAttr(limb.bhvLookAtGroup, group.limb)
         pm.parent(group, limb)
         self.ctrMng.AddLookAtControl(group)
@@ -121,7 +122,6 @@ class BHV_Group_Manager:
         self.logger.debug('\tGrpMng > AddFKIKSwitchGroup')
         group = self._AddGroup()
         group.groupType.set(3)
-        pm.addAttr(group, ln='joint', dt='string')
         pm.addAttr(group, ln='FKVisTargets', dt='string') # for easy Test Connections
         pm.addAttr(group, ln='IKVisTargets', dt='string')
         pm.addAttr(group, ln='bindSource', dt='string') # For FKIK to link to eachother
@@ -146,8 +146,10 @@ class BHV_Group_Manager:
         pm.connectAttr(limb.bhvRFKBottomGroup, groups[0].limb)
         pm.connectAttr(limb.bhvRFKCenterGroup, groups[1].limb)
         pm.connectAttr(limb.bhvRFKTopGroup, groups[2].limb)
-        pm.parent(groups[0], groups[1])
-        pm.parent(groups[2], groups[1])
+        groups[0].groupType.set(5)
+        groups[1].groupType.set(6)
+        groups[2].groupType.set(7)
+        pm.parent(groups[0], groups[2], groups[1])
         pm.parent(groups[1], limb)
         return groups
 
@@ -164,7 +166,7 @@ class BHV_Group_Manager:
         '''Updates limb + joint GROUP + CONTROL renaming'''
         index = group.groupType.get()
         groupType = self.grpTypes[index]
-        if index in (1, 4): # Joint, RFK
+        if index == 1: # Joint
             joint = pm.listConnections(group.joint)[0]
             pfrsName = joint.pfrsName.get()
             limb = pm.listConnections(joint.limb)[0]

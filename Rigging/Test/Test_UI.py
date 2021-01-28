@@ -44,9 +44,6 @@ class Test_UI:
                 joint = pm.listConnections(group.joint)[0]
                 limb = pm.listConnections(joint.limb)[0]
                 pm.parent(group, limb)
-            # else:
-            #     limb = pm.listConnections(group.limb)[0]
-            #     pm.parent(group, limb)
 
     def Setup_Controls(self):
         self.logger.debug('\tTest_UI > Setup_Controls')
@@ -63,7 +60,7 @@ class Test_UI:
                             control.scalePivot, 
                             control.rotatePivot, 
                             a=1)
-            if groupType == 2: # Distance
+            if groupType in (2, 4): # IK PV / LookAt
                 for attr in ['.rx', '.ry', '.rz', '.sx', '.sy', '.sz']:
                     pm.setAttr(control + attr, l=1, k=0, cb=0)
             
@@ -113,14 +110,12 @@ class Test_UI:
         self.logger.debug('\tTest_UI > Teardown_Controls')
         for control in self.ctrMng.GetAllControls():
             group = pm.listConnections(control.group)[0]
-            if group.groupType.get() == 2: # Distance
-                for attr in ['.rx', '.ry', '.rz', '.sx', '.sy', '.sz']:
-                    pm.setAttr(control + attr, l=0, k=1, cb=1)
-            if group.groupType.get() == 2: # Distance
+            groupType = group.groupType.get()
+            if groupType in (2, 4): # Distance
                 for attr in ['.rx', '.ry', '.rz', '.sx', '.sy', '.sz']:
                     pm.setAttr(control + attr, l=0, k=1, cb=1)
             pm.xform(control, t=[0,0,0], ro=[0,0,0], s=[1,1,1])
-            if group.groupType.get() == 2: # Distance
+            if groupType in (2, 4): # Distance
                 for attr in ['.tx', '.ty', '.tz']:
                     pm.setAttr(control + attr, l=1, k=0, cb=0)
         pm.refresh() # Forces IK Handles to re-evaluate

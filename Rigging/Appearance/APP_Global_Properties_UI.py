@@ -40,7 +40,8 @@ class APP_Global_Properties_UI:
         rigRoot = self.ctrMng.rigRoot
         pm.deleteUI(self.empty_at)
         pm.deleteUI(self.joint_at)
-        pm.deleteUI(self.dist_at)
+        pm.deleteUI(self.ikpv_at)
+        pm.deleteUI(self.lookAt_at)
         pm.deleteUI(self.fkik_at)
         pm.deleteUI(self.rfk_at)
         self.empty_at = pm.attrEnumOptionMenu(  l='Empty',
@@ -51,13 +52,13 @@ class APP_Global_Properties_UI:
                                                 p=self.prop_cl,
                                                 cc=self.UpdateJointShapes,
                                                 at=rigRoot.appJointCtrShape)
-        self.dist_at = pm.attrEnumOptionMenu(  l='IKPV',
+        self.ikpv_at = pm.attrEnumOptionMenu(   l='IKPV',
                                                 p=self.prop_cl,
-                                                cc=self.UpdateDistShapes,
+                                                cc=self.UpdateIKPVShapes,
                                                 at=rigRoot.appIKPVCtrShape)
-        self.dist_at = pm.attrEnumOptionMenu(   l='LookAt',
+        self.lookAt_at = pm.attrEnumOptionMenu( l='LookAt',
                                                 p=self.prop_cl,
-                                                cc=self.UpdateDistShapes,
+                                                cc=self.UpdateLookAtShapes,
                                                 at=rigRoot.appLookAtCtrShape)
         self.fkik_at = pm.attrEnumOptionMenu(   l='FKIK Switch',
                                                 p=self.prop_cl,
@@ -75,7 +76,8 @@ class APP_Global_Properties_UI:
             with pm.columnLayout(adj=1) as self.prop_cl:
                 self.empty_at = pm.attrEnumOptionMenu(at='perspShape.filmFit')
                 self.joint_at = pm.attrEnumOptionMenu(at='perspShape.filmFit')
-                self.dist_at = pm.attrEnumOptionMenu(at='perspShape.filmFit')
+                self.ikpv_at = pm.attrEnumOptionMenu(at='perspShape.filmFit')
+                self.lookAt_at = pm.attrEnumOptionMenu(at='perspShape.filmFit')
                 self.fkik_at = pm.attrEnumOptionMenu(at='perspShape.filmFit')
                 self.rfk_at = pm.attrEnumOptionMenu(at='perspShape.filmFit')
 
@@ -89,9 +91,13 @@ class APP_Global_Properties_UI:
         self.logger.info('\tApp_GlobalProp > UpdateJointShapes')
         self._UpdateShapes(1, shape)
 
-    def UpdateDistShapes(self, shape):
-        self.logger.info('\tApp_GlobalProp > UpdateDistShapes')
+    def UpdateIKPVShapes(self, shape):
+        self.logger.info('\tApp_GlobalProp > UpdateIKPVShapes')
         self._UpdateShapes(2, shape)
+
+    def UpdateLookAtShapes(self, shape):
+        self.logger.info('\tApp_GlobalProp > UpdateLookAtShapes')
+        self._UpdateShapes(4, shape)
 
     def UpdateFKIKShapes(self, shape):
         self.logger.deinfobug('\tApp_GlobalProp > UpdateFKIKShapes')
@@ -99,7 +105,9 @@ class APP_Global_Properties_UI:
 
     def UpdateRFKShapes(self, shape):
         self.logger.info('\tApp_GlobalProp > UpdateRFKShapes')
-        self._UpdateShapes(4, shape)
+        self._UpdateShapes(5, shape)
+        self._UpdateShapes(6, shape)
+        self._UpdateShapes(7, shape)
 
     def _UpdateShapes(self, groupType, shape):
         shapeName = 'PFRSCTR_' + shape

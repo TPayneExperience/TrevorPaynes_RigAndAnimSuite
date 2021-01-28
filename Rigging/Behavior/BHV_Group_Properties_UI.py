@@ -28,7 +28,7 @@ class BHV_Group_Properties_UI:
         if self.parentSub_at:
             pm.deleteUI(self.parentSub_at)
             self.parentSub_at = None
-        joint = pm.listConnections(self.group.joint)[0]
+        joint = pm.listConnections(group.joint)[0]
         limb = pm.listConnections(joint.limb)[0]
         bhvType = limb.bhvType.get()
         pm.attrFieldSliderGrp(self.weight_sg, e=1, en=0)

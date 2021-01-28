@@ -143,9 +143,9 @@ class APP_Control_Manager:
         elif groupType == 3:
             index = self.rigRoot.appFKIKCtrShape.get()
         elif groupType == 4:
-            index = self.rigRoot.appRFKCtrShape.get()
-        elif groupType == 5:
             index = self.rigRoot.appLookAtCtrShape.get()
+        elif groupType in (5, 6, 7):
+            index = self.rigRoot.appRFKCtrShape.get()
         shapeNames = list(self._ctrTemplates.keys())
         return shapeNames[index]
 
@@ -160,21 +160,6 @@ class APP_Control_Manager:
         self._ctrs[newCtr.ID.get()] = newCtr
         self.Remove(control)
         pm.delete(control)
-
-# #============= PRIVATE ============================
-
-#     def _SortGroups(self, groups):
-#         self.logger.debug('\tCtrMng > _SortGroups')
-#         indexGroups = {} # jointIndex : group
-#         orderedGroups = []
-#         for group in groups:
-#             joints = pm.listConnections(group.joint)
-#             if not joints:
-#                 return []
-#             indexGroups[joints[0].limbIndex.get()] = group
-#         for index in sorted(list(indexGroups.keys())):
-#             orderedGroups.append(indexGroups[index])
-#         return orderedGroups
 
 
 
