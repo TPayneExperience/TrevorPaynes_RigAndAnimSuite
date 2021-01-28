@@ -44,9 +44,9 @@ class Test_UI:
                 joint = pm.listConnections(group.joint)[0]
                 limb = pm.listConnections(joint.limb)[0]
                 pm.parent(group, limb)
-            else:
-                limb = pm.listConnections(group.limb)[0]
-                pm.parent(group, limb)
+            # else:
+            #     limb = pm.listConnections(group.limb)[0]
+            #     pm.parent(group, limb)
 
     def Setup_Controls(self):
         self.logger.debug('\tTest_UI > Setup_Controls')
@@ -156,26 +156,7 @@ class Test_UI:
         for joint in self.jntMng.GetAllJoints():
             group = pm.listConnections(joint.group)[0]
             pm.parent(group, joint)
-        for limb in self.limbMng.GetAllLimbs():
-            bhvType = limb.bhvType.get()
-            if bhvType in self.bhvMng.distanceIndexes:
-                group = pm.listConnections(limb.bhvDistanceGroup)[0]
-                joint = pm.listConnections(group.distanceJoint)[0]
-                pm.parent(group, joint)
                 
-        # for group in self.grpMng.GetAllGroups():
-        #     grpType = group.groupType.get()
-        #     if grpType in [4, 6]:
-        #         joint = pm.listConnections(group.joint)[0]
-        #         pm.parent(group, joint)
-        #     elif grpType == 1:
-        #         limb = pm.listConnections(group.limb)[0]
-        #         joints = self.jntMng.GetLimbJoints(limb)
-        #         joint = joints[len(joints)/2]
-        #         pm.parent(group, joint)
-        #     else:
-        #         pm.parent(group, self.grpMng.bhvGroup)
-
 #=========== FK ====================================
     
     # RELATIVE FK
@@ -439,7 +420,7 @@ class Test_UI:
         startJoint = joints[0]
         endJoint = joints[-1]
         handle = pm.ikHandle(sj=startJoint, ee=endJoint)[0]
-        group = pm.listConnections(limb.bhvDistanceGroup)[0]
+        group = pm.listConnections(limb.bhvIKPVGroup)[0]
         control = pm.listConnections(group.control)[0]
         pm.poleVectorConstraint(control, handle)
 
@@ -452,7 +433,7 @@ class Test_UI:
             pm.confirmDialog(t='IK POLE VECTOR Error', m=msg, icon='error', b='Ok')
             return
         targetLimb = targetLimb[0]
-        groups = pm.listConnections(limb.bhvDistanceGroup)
+        groups = pm.listConnections(limb.bhvIKPVGroup)
         if not groups:
             return
         distGroup = groups[0]
@@ -549,15 +530,16 @@ class Test_UI:
             # parentCtr = self.ctrMng.GetGroupControl(groups[i-1])[0]
             pm.parent(childGroup, parentCtr)
 
+        bhvType = limb.bhvType.get()
         # Create IK PV handle
-        if limb.bhvType.get() == 2:
+        if bhvType in self.bhvMng.ikPVTypeIndexes:
             handle = pm.ikHandle(sj=ikJoints[0], ee=ikJoints[-1])[0]
-            group = pm.listConnections(limb.bhvDistanceGroup)[0]
+            group = pm.listConnections(limb.bhvIKPVGroup)[0]
             control = pm.listConnections(group.control)[0]
             pm.poleVectorConstraint(control, handle)
 
         # Create IK Chain
-        elif limb.bhvType.get() == 9:
+        elif bhvType in self.bhvMng.ikChainTypeIndexes:
             for i in range(len(joints)-1):
                 startJoint = joints[i]
                 endJoint = joints[i+1]
@@ -578,7 +560,7 @@ class Test_UI:
 
         # IK PV
         if limb.bhvType.get() == 2:
-            ikGroup = pm.listConnections(limb.bhvDistanceGroup)[0]
+            ikGroup = pm.listConnections(limb.bhvIKPVGroup)[0]
             index = limb.bhvTargetJoint.get()
             targetGroup = self.bhvMng.GetJointGroups(targetLimb)[index]
             targetControl = pm.listConnections(targetGroup.control)[0]
@@ -590,7 +572,7 @@ class Test_UI:
 
         # IK CHAIN
         elif limb.bhvType.get() == 9:
-            sourceGroups = self.grpMng.GetLimbIKGroups(limb)[1:] # Skip First
+            sourceGroups = self.bhvMng.GetJointGroups(limb)[1:] # Skip First
             for sourceGroup in sourceGroups:
                 index = sourceGroup.targetJoint.get()
                 targetGroup = self.bhvMng.GetJointGroups(targetLimb)[index]

@@ -45,6 +45,7 @@ class PFRS_Debug:
         self.parent.UpdateEnableUI()
         self.parent.Setup_Editable()
         pm.tabLayout(self.parent.rig_ui.tab, e=1, sti=2)
+        # self.parent.rig_ui.limbSetup_ui.sceneHier_ui.AutoBuildByName(0)
         # -------------------------------------------------
 
         # # ========== LIMB TYPES ==========================

@@ -30,6 +30,8 @@ SUITE = 'Rig'
 
 class PayneFreeRigSuite_UI():
     def __init__(self):
+        # self.loggingMode = logging.INFO
+        self.loggingMode = logging.DEBUG
         self.StartLogger()
 
         self.fileMng = fm.File_Manager()
@@ -38,7 +40,7 @@ class PayneFreeRigSuite_UI():
         self.rigRoot = None
         self.hideAttrs = False
         # self.hideAttrs = True
-
+        
         # UI
         self.rigSetupUI = rs_ui.RigSetup_UI(self.nameMng,
                                             self.fileMng,
@@ -341,8 +343,7 @@ class PayneFreeRigSuite_UI():
         else:
             handler = self.logger.handlers[0]
             self.logFile = handler.baseFilename
-        self.logger.setLevel(logging.INFO)
-        # self.logger.setLevel(logging.DEBUG)
+        self.logger.setLevel(self.loggingMode)
         startTxt = '\n'
         startTxt += '='*40
         startTxt += '\n'

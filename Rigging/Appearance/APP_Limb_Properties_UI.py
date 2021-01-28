@@ -11,6 +11,7 @@ class APP_Limb_Properties_UI:
         self.logger = parent.logger
 
         self.ctrAxis_at = None
+        self.ikpvCtrJoint_at = None
         self.limb = None
         self.limbs = {} # name : limb
         self.limbOrder = []
@@ -98,6 +99,14 @@ class APP_Limb_Properties_UI:
                                                 at=self.limb.appControlType,
                                                 p=self.appLimbProp_cl )#,
                                                 # cc=self.SetControlType)
+        if self.ikpvCtrJoint_at:
+            pm.deleteUI(self.ikpvCtrJoint_at)
+            self.ikpvCtrJoint_at = None
+        if bhvType in self.bhvMng.ikPVTypeIndexes:
+            self.ikpvCtrJoint_at = pm.attrEnumOptionMenu(l='IK PV Control Joint',
+                                                    at=self.limb.bhvIKPVCtrJoint,
+                                                    p=self.appLimbProp_cl,
+                                                    cc=self.UpdateDistGroupPos)
         pm.attrControlGrp(self.lockPos, e=1, a=self.limb.appLockHidePos,
                                         cc=pm.Callback(self.LogLockPos, 1))
         pm.attrControlGrp(self.lockRot, e=1, a=self.limb.appLockHideRot,
@@ -118,16 +127,15 @@ class APP_Limb_Properties_UI:
         if self.ctrAxis_at:
             pm.deleteUI(self.ctrAxis_at)
             self.ctrAxis_at = None
-        # group = pm.listConnections(self.limb.bhvDistanceGroup)[0]
         pm.attrControlGrp(  self.ctrDist_cg, e=1, en=1, 
                             # a=group.distance,
                             a=self.limb.bhvDistance,
-                            cc=pm.Callback(self.UpdateGroupDistance, 1))
+                            cc=pm.Callback(self.UpdateDistGroupPos, 1))
         self.ctrAxis_at = pm.attrEnumOptionMenu(l='Position Axis',
                                                 # at=group.axis,
                                                 at=limb.bhvAxis,
                                                 p=self.ctrProp_cl,
-                                                cc=self.UpdateGroupDistance)
+                                                cc=self.UpdateDistGroupPos)
 
     def SetTargetFKIK(self, limbName):
         self.logger.info('\tLimbProp > SET TARGET FKIK to ' + limbName)
@@ -189,36 +197,18 @@ class APP_Limb_Properties_UI:
         msg = '\tLimbProp > SELECT FKIK TYPE to "%s"' % fkikType
         self.logger.info(msg)
 
-    def UpdateGroupDistance(self, ignore):
-        self.logger.debug('\tApp_LimbProp > UpdateGroupDistance')
-        # group = pm.listConnections(self.limb.bhvDistanceGroup)[0]
-        # dist = str(group.distance.get())
+    def UpdateDistGroupPos(self, ignore):
+        self.logger.debug('\tApp_LimbProp > UpdateDistGroupPos')
         dist = str(self.limb.bhvDistance.get())
-        # axis = self.grpMng.axesNames[group.axis.get()]
         axis = self.bhvMng.axesNames[self.limb.bhvAxis.get()]
         msg1 = '\tLimbProp > SET CONTROL DISTANCE to "%s"' % dist
         msg2 = '\tLimbProp > SET CONTROL AXIS to "%s"' % axis
         self.logger.info(msg1)
         self.logger.info(msg2)
-        self.bhvMng.UpdateGroupDistance(self.limb)
-        # self.grpMng.UpdateGroupDistance(group)
+        self.bhvMng.UpdateDistGroupPos(self.limb)
 
-    # def PopulateControlFrame(self, bhvType):
-    #     isDist = bhvType in self.bhvMng.distanceIndexes
-    #     pm.frameLayout(self.ctrLayout, e=1, en=isDist)
-    #     if not isDist:
-    #         return
-    #     if self.ctrAxis_at:
-    #         pm.deleteUI(self.ctrAxis_at)
-    #         self.ctrAxis_at = None
-    #     group = pm.listConnections(self.limb.bhvDistanceGroup)[0]
-    #     pm.attrControlGrp(  self.ctrDist_cg, e=1, en=1, 
-    #                         a=group.distance,
-    #                         cc=pm.Callback(self.UpdateGroupDistance, 1))
-    #     self.ctrAxis_at = pm.attrEnumOptionMenu(l='Position Axis',
-    #                                             at=group.axis,
-    #                                             p=self.ctrProp_cl,
-    #                                             cc=self.UpdateGroupDistance)
+    def UpdateIKPVCtrJointParent(self, ignore):
+        self.logger.debug('\tApp_LimbProp > UpdateIKPVCtrJointParent')
 
 
 

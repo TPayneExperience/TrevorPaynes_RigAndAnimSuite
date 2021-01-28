@@ -51,15 +51,19 @@ class APP_Global_Properties_UI:
                                                 p=self.prop_cl,
                                                 cc=self.UpdateJointShapes,
                                                 at=rigRoot.appJointCtrShape)
-        self.dist_at = pm.attrEnumOptionMenu(  l='IKPV / LookAt',
+        self.dist_at = pm.attrEnumOptionMenu(  l='IKPV',
                                                 p=self.prop_cl,
                                                 cc=self.UpdateDistShapes,
-                                                at=rigRoot.appDistCtrShape)
-        self.fkik_at = pm.attrEnumOptionMenu(  l='FKIK Switch',
+                                                at=rigRoot.appIKPVCtrShape)
+        self.dist_at = pm.attrEnumOptionMenu(   l='LookAt',
+                                                p=self.prop_cl,
+                                                cc=self.UpdateDistShapes,
+                                                at=rigRoot.appLookAtCtrShape)
+        self.fkik_at = pm.attrEnumOptionMenu(   l='FKIK Switch',
                                                 p=self.prop_cl,
                                                 cc=self.UpdateFKIKShapes,
                                                 at=rigRoot.appFKIKCtrShape)
-        self.rfk_at = pm.attrEnumOptionMenu(  l='Relative FK',
+        self.rfk_at = pm.attrEnumOptionMenu(    l='Relative FK',
                                                 p=self.prop_cl,
                                                 cc=self.UpdateRFKShapes,
                                                 at=rigRoot.appRFKCtrShape)

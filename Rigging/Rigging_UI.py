@@ -119,11 +119,11 @@ class Rigging_UI:
             self.test_ui.Setup_Editable() 
         
         # joint, test >>> bhv, App
-        if oldIndex in (0, 4) and newIndex in (2, 3):
+        if oldIndex in (0,) and newIndex in (2, 3):
             for limb in self.limbMng.GetAllLimbs():
                 self.bhvMng.SetupEditable_GroupParenting(limb)
         # bhv, App >>> joint, test
-        elif oldIndex in (2, 3) and newIndex in (0, 4):
+        elif oldIndex in (2, 3) and newIndex in (0,):
             for limb in self.limbMng.GetAllLimbs():
                 self.bhvMng.TeardownEditable_GroupParenting(limb)
 
@@ -162,36 +162,6 @@ class Rigging_UI:
         # self.UpdateNonInfJoints()
         self.Setup_SubTab()
         self.UpdateControlVis()
-
-    # def SetupEditable_Limbs(self):
-    #     '''When switchin from tabs 0/1 to 2/3/4'''
-    #     self.logger.debug('\tRigging_UI > SetupEditable_Limbs')
-    #     for limb in self.limbMng.GetAllLimbs():
-    #         self.bhvMng.Setup_LimbGroupVisibility(limb)
-
-    # def TeardownEditable_Limbs(self):
-    #     '''When switchin from tabs 3/4/5 to 1/2'''
-    #     self.logger.debug('\tRigging_UI > TeardownEditable_Limbs')
-    #     # Set Joint temp Connections, unparent limb groups
-    #     for limb in self.limbMng.GetAllLimbs():
-    #         bhvType = limb.bhvType.get()
-    #         jointGroups = []
-    #         joints = self.jntMng.GetLimbJoints(limb)
-    #         if bhvType in self.bhvMng.omitLastJointTypes:
-    #             joints = joints[:-1]
-    #         for joint in joints:
-    #             # self.jntMng.Teardown_Editable(joint)
-    #             jointGroups += pm.listConnections(joint.group)
-    #         limbGroups = pm.listConnections(limb.bhvDistanceGroup)
-    #         # if bhvType in self.bhvMng.distanceIndexes:
-    #         #     self.grpMng.Teardown_DistanceGroup(limb)
-    #             # self.grpMng.Teardown_DistanceGroup(limbGroups[0])
-    #         limbGroups += pm.listConnections(limb.bhvEmptyGroup)
-    #         limbGroups += pm.listConnections(limb.bhvFKIKSwitchGroup)
-    #         # for group in limbGroups:
-    #         #     pm.parent(group, self.grpMng.bhvGroup)
-    #         for group in limbGroups + jointGroups:
-    #             group.v.set(0)
 
 
 #=========== FUNCTIONALITY ====================================

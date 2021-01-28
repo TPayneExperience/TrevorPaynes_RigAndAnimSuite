@@ -19,6 +19,11 @@ class BHV_Group_Hierarchy_UI:
         if not self.limb:
             return
         bhvType = self.limb.bhvType.get()
+        bhvFilter = self.bhvMng.fkTypeIndexes
+        bhvFilter += self.bhvMng.cstTypeIndexes
+        bhvFilter += self.bhvMng.ikChainTypeIndexes
+        if bhvType not in bhvFilter:
+            return
         groups = self.bhvMng.GetJointGroups(self.limb)
         if bhvType in self.bhvMng.omitFirstJointTypes:
             groups = groups[1:]

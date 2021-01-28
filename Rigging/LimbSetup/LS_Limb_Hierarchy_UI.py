@@ -111,7 +111,8 @@ class LS_Limb_Hierarchy_UI:
         for joint in self.jntMng.GetLimbJoints(limb):
             self.jntMng.RemoveTemp(joint)
 
-        limbGroups = pm.listConnections(limb.bhvDistanceGroup)
+        limbGroups = pm.listConnections(limb.bhvIKPVGroup)
+        limbGroups += pm.listConnections(limb.bhvLookAtGroup)
         limbGroups += pm.listConnections(limb.bhvEmptyGroup)
         limbGroups += pm.listConnections(limb.bhvFKIKSwitchGroup)
         for group in limbGroups:

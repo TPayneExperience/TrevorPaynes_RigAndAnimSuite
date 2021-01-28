@@ -8,34 +8,14 @@ class BHV_Group_Manager:
         self.ctrMng = parent.ctrMng
         self.logger = parent.logger
 
-        # self.axesXforms =   ((1,0,0),
-        #                     (-1,0,0),
-        #                     (0,1,0),
-        #                     (0,-1,0),
-        #                     (0,0,1),
-        #                     (0,0,-1))
-        # self.axesNames =    ('X',
-        #                     '-X',
-        #                     'Y',
-        #                     '-Y',
-        #                     'Z',
-        #                     '-Z')
         self.grpTypes = (   'Empty', # DO NOT CHANGE ORDER
 
-                            'Joint', 
-                            'Distance',
+                            'Joint', # FK, CST, IK Chain
+                            'IKPV',
                             'FKIKSwitch',
-                            'RFK')
+                            'RFK',
+                            'LookAt')
         self.hideAttrs = False
-
-        # EMPTY GROUP:
-        #   Limb group, but no data
-
-        # JOINT GROUPS:
-        #   FK, CST, IK Chain
-
-        # LIMB GROUPS:
-        #   IK PV, LookAt, FKIK Switch
 
         self._groups = {} # grpID : grpData
         # self.bhvGroup = None
@@ -62,107 +42,6 @@ class BHV_Group_Manager:
     def GetAllGroups(self):
         self.logger.debug('\tGrpMng > GetAllGroups')
         return list(self._groups.values())
-
-    # def GetAllLimbGroups(self, limb):
-    #     groups = []
-    #     for joint in pm.listConnections(limb.infJoints):
-    #         groups += pm.listConnections(joint.group)
-    #     for joint in pm.listConnections(limb.nonInfjoints):
-    #         groups += pm.listConnections(joint.group)
-    #     groups += pm.listConnections(limb.bhvDistanceGroup)
-    #     groups += pm.listConnections(limb.bhvFKIKSwitchGroup)
-    #     groups += pm.listConnections(limb.bhvEmptyGroup)
-    #     return groups
-
-    # def GetLimbGroups(self, limb):
-    #     # Does NOT return joints, as that requires ordering via jntMng
-    #     self.logger.debug('\tGrpMng > GetLimbGroups')
-    #     groups = [] # [[Empty], [Dist], [FKIK], [RFKs]]
-    #     groups.append(pm.listConnections(limb.bhvEmptyGroup))
-    #     groups.append(pm.listConnections(limb.bhvDistanceGroup))
-    #     groups.append(pm.listConnections(limb.bhvFKIKSwitchGroup))
-    #     temp = pm.listConnections(limb.bhvRFKBottomGroup)
-    #     temp += pm.listConnections(limb.bhvRFKCenterGroup)
-    #     temp += pm.listConnections(limb.bhvRFKTopGroup)
-    #     groups.append(temp)
-    #     return groups
-
-    # def GetLimbGroups(self, limb):
-        # bhvType = limb.bhvType.get()
-        # if bhvType in [0, 3, 5, 6]: # FK Chain, Cst, FK Branch
-        #     for joint in pm.listConnections(limb.joints):
-        #         groups += pm.listConnections(joint.group)
-        #     return self.SortGroups(groups)
-        # if bhvType in [1, 4]: # IK PV, LookAt
-        #     return pm.listConnections(limb.bhvDistanceGroup)
-
-        # if bhvType == 2: # FK IK PV
-        #     for joint in pm.listConnections(limb.joints):
-        #         groups += pm.listConnections(joint.group)
-        #     groups = self.SortGroups(groups)
-        #     groups += pm.listConnections(limb.bhvDistanceGroup)
-        #     groups += pm.listConnections(limb.bhvFKIKSwitchGroup)
-        #     return groups
-
-        # if bhvType == 9: # FK IK Chain
-        #     for joint in pm.listConnections(limb.joints):
-        #         groups += pm.listConnections(joint.group)
-        #     groups = self.SortGroups(groups)
-        #     groups += pm.listConnections(limb.bhvFKIKSwitchGroup)
-        #     return groups
-
-        # if bhvType == 7: # EMPTY
-        #     return pm.listConnections(limb.bhvEmptyGroup)
-
-        # if bhvType == 8: # FK - Reverse Chain
-        #     for joint in pm.listConnections(limb.joints):
-        #         groups += pm.listConnections(joint.group)
-        #     return self.SortGroups(groups)[::-1]
-        
-        # if bhvType == 10: # Relative FK
-        #     groups = pm.listConnections(limb.bhvRFKBottomGroup)
-        #     groups += pm.listConnections(limb.bhvRFKCenterGroup)
-        #     groups += pm.listConnections(limb.bhvRFKTopGroup)
-        #     return groups
-    
-
-    # def GetLimbIKGroups(self, limb):
-    #     self.logger.debug('\tGrpMng > GetLimbIKGroups')
-    #     bhvType = limb.bhvType.get()
-    #     # if bhvType in [0, 3, 5, 6, 9]: # FK Chain, Cst, IK Chain, FK Branch
-    #     #     groups = []
-    #     #     for joint in pm.listConnections(limb.joints):
-    #     #         groups += pm.listConnections(joint.group)
-    #     #     return self.SortGroups(groups)
-    #     if bhvType in [1, 2, 4]: # IK PV, LookAt
-    #         return pm.listConnections(limb.bhvDistanceGroup)
-    
-    # def GetLimbFKGroups(self, limb):
-    #     self.logger.debug('\tGrpMng > GetLimbFKGroups')
-    #     bhvType = limb.bhvType.get()
-    #     groups = []
-    #     # FK Chain, FKIK, Branch, Reverse, Relative
-    #     if bhvType in [0, 2, 6, 9, 10]:
-    #         # for joint in pm.listConnections(limb.infJoints):
-    #         for joint in pm.listConnections(limb.joints):
-    #             groups += pm.listConnections(joint.group)
-    #         return self.SortGroups(groups)
-    #     if bhvType == 7: # EMPTY
-    #         return pm.listConnections(limb.bhvEmptyGroup)
-    #     if bhvType == 8: # FK - Reverse Chain
-    #         # for joint in pm.listConnections(limb.infJoints):
-    #         for joint in pm.listConnections(limb.joints):
-    #             groups += pm.listConnections(joint.group)
-    #         return self.SortGroups(groups)[::-1]
-    
-    # def GetLimbNonFKGroups(self, limb):
-    #     groups = pm.listConnections(limb.bhvDistanceGroup)
-    #     groups += pm.listConnections(limb.bhvEmptyGroup)
-    #     groups += pm.listConnections(limb.bhvRFKBottomGroup)
-    #     groups += pm.listConnections(limb.bhvRFKCenterGroup)
-    #     groups += pm.listConnections(limb.bhvRFKTopGroup)
-    #     groups += pm.listConnections(limb.bhvFKIKSwitchGroup)
-    #     return groups
 
 #============= ADD + REMOVE ============================
 
@@ -212,20 +91,28 @@ class BHV_Group_Manager:
 
     # IK PV, LookAt
     # Called from Behaviors > Set Bhv()
-    def AddDistanceGroup(self, limb):
-        self.logger.debug('\tGrpMng > AddDistanceGroup')
-        # axes = ':'.join(self.axesNames)
+    def AddIKPVGroup(self, limb):
+        self.logger.debug('\tGrpMng > AddIKPVGroup')
         group = self._AddGroup()
         group.groupType.set(2)
-        # pm.addAttr(group, ln='targetJoint', at='enum', en='None') # IK PV
-        # pm.addAttr(group, ln='distanceJoint', dt='string') # for easy Test Connections
-        # pm.addAttr(group, ln='distance', at='float', min=0, dv=1) # IKPV, LookAt
-        # pm.addAttr(group, ln='axis', at='enum', en=axes, dv=4) # IKPV, LookAt
         pm.addAttr(group, ln='limb', dt='string')
         pm.addAttr(group, ln='joint', dt='string')
-        pm.connectAttr(limb.bhvDistanceGroup, group.limb)
+        pm.connectAttr(limb.bhvIKPVGroup, group.limb)
         pm.parent(group, limb)
-        self.ctrMng.AddDistanceControl(group)
+        self.ctrMng.AddIKPVControl(group)
+        return group
+
+    # IK PV, LookAt
+    # Called from Behaviors > Set Bhv()
+    def AddLookAtGroup(self, limb):
+        self.logger.debug('\tGrpMng > AddLookAtGroup')
+        group = self._AddGroup()
+        group.groupType.set(2)
+        pm.addAttr(group, ln='limb', dt='string')
+        pm.addAttr(group, ln='joint', dt='string')
+        pm.connectAttr(limb.bhvLookAtGroup, group.limb)
+        pm.parent(group, limb)
+        self.ctrMng.AddLookAtControl(group)
         return group
 
     # FKIK Switch
@@ -269,59 +156,8 @@ class BHV_Group_Manager:
         del(self._groups[group.ID.get()])
         pm.delete(group)
 
-#============= SETUP / TEARDOWNS ============================
-
-    # def SetupEditable_IKPVGroup(self, limb, joints):
-    #     self.logger.debug('\tGrpMng > SetupEditable_IKPVGroup')
-    #     joint = joints[len(joints)/2]
-    #     self.Setup_DistanceGroup(limb, joint)
-
-    # def SetupEditable_IKPVGroup(self, group, joints):
-    #     joint = joints[len(joints)/2]
-    #     self.Setup_DistanceGroup(group, joint)
-
-    # def Setup_DistanceGroup(self, limb, joint):
-    #     self.logger.debug('\tGrpMng > Setup_DistanceGroup')
-    #     group = pm.listConnections(limb.bhvDistaceGroup)[0]
-    #     pm.disconnectAttr(group.joint)
-    #     pm.connectAttr(group.joint, joint.bhvDistanceJoint)
-        # group = self.GetLimbIKGroups(limb)[0]
-        # pm.parent(group, joint)
-
-    # def Teardown_DistanceGroup(self, limb):
-    #     self.logger.debug('\tGrpMng > Teardown_DistanceGroup')
-    #     pm.disconnectAttr(limb.bhvDistanceJoint)
-    #     group = self.GetLimbIKGroups(limb)[0]
-    #     pm.parent(group, limb)
-
-    # def SetupEditable_GroupParenting(self, limb):
-    #     self.logger.debug('\tGrpMng > SetupEditable_GroupParenting')
-    #     for group in self.GetLimbGroups(limb):
-    #         if group.groupType.get() in (2, 3, 4):
-    #             joint = pm.listConnections(group.joint)[0]
-    #             pm.parent(group, joint)
-            
-    # def TeardownEditable_GroupParenting(self, limb):
-    #     self.logger.debug('\tGrpMng > TeardownEditable_GroupParenting')
-    #     for group in self.GetLimbGroups(limb):
-    #         if group.groupType.get() in (2, 3, 4): 
-    #             pm.parent(group, limb)
-            
 
 #============= UTILS ============================
-
-    def SortGroups(self, groups):
-        self.logger.debug('\tGrpMng > SortGroups')
-        indexGroups = {} # jointIndex : group
-        orderedGroups = []
-        for group in groups:
-            joints = pm.listConnections(group.joint)
-            if not joints:
-                return []
-            indexGroups[joints[0].limbIndex.get()] = group
-        for index in sorted(list(indexGroups.keys())):
-            orderedGroups.append(indexGroups[index])
-        return orderedGroups
 
     def UpdateGroupName(self, group):
         self.logger.debug('\tGrpMng > UpdateGroupName')
@@ -346,175 +182,6 @@ class BHV_Group_Manager:
                                     self.limbMng.GetLimbSide(limb), 
                                     'CTR')
         control.rename(controlName)
-
-    # def UpdateGroupDistance(self, group):
-    #     pos = self.axesXforms[group.axis.get()][:]
-    #     dist = group.distance.get()
-    #     pos = [p*dist for p in pos]
-    #     pm.xform(group, t=pos)
-
-    # def UpdateFKIKSwitchJoint(self, group, joints):
-    #     index = group.targetJoint.get()
-    #     joint = joints[index]
-    #     pm.parent(group, joint)
-    
-    #     # group = pm.listConnections(limb.bhvFKIKSwitchGroup)[0]
-    #     # modIndex = index % len(joints)
-    #     # if modIndex != index:
-    #     #     limb.bhvFKIKParentJoint.set(modIndex)
-    #     # self.SetLockGroup(group, False)
-    #     # self.PosRotGroupToJoint(group, joint)
-    #     # pm.xform(group, t=[0,0,0], ro=[0,0,0], s=[1,1,1])
-    #     # self.SetLockGroup(group, True)
-
-
-    # def SetupEditable_JointGroup(self, group):
-    #     joint = pm.listConnections(group.joint)[0]
-    #     pm.parent(group, joint)
-        # Teardown uncessary, as groups are always parented
-        # to joints or to controls
-
-    # def SetLockGroup(self, group, isLocked):
-    #     attrs = ['.tx', '.ty', '.tz', '.rx', '.ry', '.rz']
-    #     if isLocked:
-    #         for attr in attrs:
-    #             pm.setAttr(group+attr, l=1, k=0, cb=0)
-    #     else:
-    #         for attr in attrs:
-    #             pm.setAttr(group+attr, l=0, k=1, cb=1)
-
-# #============= UPDATE ============================
-
-#     def UpdateIKPoleVectorGroupParent(self, limb):
-#         group = pm.listConnections(limb.bhvLimbGroup)[0]
-#         joints = self.jntMng.GetLimbJoints(limb)
-#         joint = joints[len(joints)/2]
-#         self.PosRotGroupToJoint(group, joint)
-#         self.SetLockGroup(group, True)
-#         self.UpdateGroupDistance(limb)
-
-#     def UpdateGroupDistance(self, limb):
-#         group = pm.listConnections(limb.bhvLimbGroup)[0]
-#         pos = self.axesXforms[group.bhvAxis.get()][:]
-#         dist = group.bhvDistance.get()
-#         pos = [p*dist for p in pos]
-#         for attr in ['.tx', '.ty', '.tz']:
-#             pm.setAttr(group+attr, l=0, k=0, cb=0)
-#         pm.xform(group, t=pos)
-#         for attr in ['.tx', '.ty', '.tz']:
-#             pm.setAttr(group+attr, l=1, k=0, cb=0)
-
-#     def UpdateFKIKSwitchJoint(self, limb):
-#         group = pm.listConnections(limb.bhvFKIKSwitchGroup)[0]
-#         index = group.targetJoint.get()
-#         joints = self.jntMng.GetLimbJoints(limb)
-#         modIndex = index % len(joints)
-#         if modIndex != index:
-#             limb.bhvFKIKParentJoint.set(modIndex)
-#         self.SetLockGroup(group, False)
-#         self.PosRotGroupToJoint(group, joints[modIndex])
-#         self.SetLockGroup(group, True)
-
-#============= MISC ============================
-
-    # def PosRotGroupToJoint(self, group, joint):
-    #     pos = pm.xform(joint, q=1, t=1, ws=1)
-    #     rot = pm.xform(joint, q=1, ro=1, ws=1)
-    #     scale = pm.xform(joint, q=1, s=1, ws=1)
-    #     pm.xform(group, t=pos, ro=rot, s=scale, ws=1)
-    #     pm.parent(group, joint)
-
-    # def GetLimbGroupName(self, group):
-    #     return self.grpTypes[group.groupType.get()]
-
-    # def GetJointGroupName(self, prefix, group):
-    #     joint = pm.listConnections(group.joint)[0]
-    #     return '%s_%s' % (prefix, joint.pfrsName.get())
-
-    # def UpdateLookAtPosition(self, limb):
-    #     group = pm.listConnections(limb.bhvLookAtGroup)[0]
-    #     pos = self.axesXforms[limb.bhvLookAtAxis.get()][:]
-    #     dist = limb.bhvLookAtDistance.get()
-    #     pos = [p*dist for p in pos]
-    #     for attr in ['.tx', '.ty', '.tz']:
-    #         pm.setAttr(group+attr, l=0, k=0, cb=0)
-    #     pm.xform(group, t=pos)
-    #     for attr in ['.tx', '.ty', '.tz']:
-    #         pm.setAttr(group+attr, l=1, k=0, cb=0)
-
-        
-    # DELETE LATER
-        # def Add_Empty(self, limb):
-        #     group = self._AddJointGroup()
-        #     group.groupType.set(5)
-        #     pm.connectAttr(limb.bhvEmptyGroup, group.limb)
-        #     self.UpdateGroupName(limb, group, self.GetLimbGroupName(group))
-        #     pm.parent(group, self.bhvGroup)
-        #     return group
-
-        # def Add_FK(self, limb, joint):
-        #     group = self._AddJointGroup()
-        #     group.groupType.set(0)
-        #     pm.connectAttr(joint.bhvFKGroup, group.joint)
-        #     pm.connectAttr(limb.bhvFKGroups, group.limb)
-        #     self.PosRotGroupToJoint(group, joint)
-        #     self.UpdateGroupName(limb, group, self.GetJointGroupName(group))
-        #     return group
-
-        # def Add_IKPoleVector(self, limb):
-        #     '''Positions the center for the poll vector control'''
-        #     group = self._AddJointGroup()
-        #     group.groupType.set(1)
-        #     pm.addAttr(group, ln='IKTargetGroup', at='enum', en='None')
-        #     pm.addAttr(group, ln='IKPoleVectorJoint', dt='string')
-        #     pm.connectAttr(limb.bhvIKPoleVectorGroup, group.limb)
-        #     self.UpdateIKPoleVectorGroupParent(limb)
-        #     self.UpdateGroupName(limb, group, self.GetLimbGroupName(group))
-        #     return group
-
-        # def Add_IKChain(self, limb, joint):
-        #     '''End Joints of each IK Handle, will grab parent joint'''
-        #     group = self._AddJointGroup()
-        #     group.groupType.set(6)
-        #     pm.addAttr(group, ln='IKTargetGroup', at='enum', en='None')
-        #     pm.connectAttr(joint.bhvIKGroup, group.joint)
-        #     pm.connectAttr(limb.bhvIKChainGroups, group.limb)
-        #     self.PosRotGroupToJoint(group, joint)
-        #     self.SetLockGroup(group, True)
-        #     self.UpdateGroupName(limb, group, self.GetJointGroupName(group))
-        #     return group
-
-        # def Add_FKIKSwitch(self, limb):
-        #     group = self._AddJointGroup()
-        #     group.groupType.set(2)
-        #     pm.connectAttr(limb.bhvFKIKSwitchGroup, group.limb)
-        #     self.UpdateGroupName(limb, group, self.GetLimbGroupName(group))
-        #     pm.parent(group, self.bhvGroup)
-        #     self.SetLockGroup(group, True)
-        #     return group
-
-        # def Add_Constraint(self, limb, joint):
-        #     '''Positions the center for control'''
-        #     group = self._AddJointGroup()
-        #     group.groupType.set(3)
-        #     pm.addAttr(group, ln='weight', at='float', min=0, max=1)
-        #     pm.connectAttr(limb.bhvCstGroups, group.limb)
-        #     pm.connectAttr(joint.bhvCstGroup, group.joint)
-        #     self.PosRotGroupToJoint(group, joint)
-        #     self.SetLockGroup(group, True)
-        #     self.UpdateGroupName(limb, group, self.GetJointGroupName(group))
-        #     return group
-            
-        # def Add_LookAt(self, limb, joint):
-        #     '''Positions the center for control'''
-        #     group = self._AddJointGroup()
-        #     group.groupType.set(4)
-        #     pm.connectAttr(limb.bhvLookAtGroup, group.limb)
-        #     pm.connectAttr(joint.bhvLookAtGroup, group.joint)
-        #     self.PosRotGroupToJoint(group, joint)
-        #     self.SetLockGroup(group, True)
-        #     self.UpdateGroupName(limb, group, self.GetJointGroupName(group))
-        #     return group
 
 
 

@@ -124,7 +124,8 @@ class LimbSetup_UI:
 
     def RenameLimbs(self, limb):
         self.logger.debug('\tLimbSetup_UI > RenameLimbs')
-        groups = pm.listConnections(limb.bhvDistanceGroup)
+        groups = pm.listConnections(limb.bhvIKPVGroup)
+        groups += pm.listConnections(limb.bhvLookAtGroup)
         groups += pm.listConnections(limb.bhvEmptyGroup)
         groups += pm.listConnections(limb.bhvFKIKSwitchGroup)
         for group in groups:

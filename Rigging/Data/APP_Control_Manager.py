@@ -37,7 +37,9 @@ class APP_Control_Manager:
                             en=self.ctrTypesStr, h=self.hideAttrs)
         pm.addAttr(rigRoot, ln='appJointCtrShape', at='enum', 
                             en=self.ctrTypesStr, h=self.hideAttrs)
-        pm.addAttr(rigRoot, ln='appDistCtrShape', at='enum', 
+        pm.addAttr(rigRoot, ln='appIKPVCtrShape', at='enum', 
+                            en=self.ctrTypesStr, h=self.hideAttrs)
+        pm.addAttr(rigRoot, ln='appLookAtCtrShape', at='enum', 
                             en=self.ctrTypesStr, h=self.hideAttrs)
         pm.addAttr(rigRoot, ln='appFKIKCtrShape', at='enum', 
                             en=self.ctrTypesStr, h=self.hideAttrs)
@@ -45,7 +47,8 @@ class APP_Control_Manager:
                             en=self.ctrTypesStr, h=self.hideAttrs)
         rigRoot.appEmptyCtrShape.set(names.index('Square_Wire'))
         rigRoot.appJointCtrShape.set(names.index('Sphere_Poly'))
-        rigRoot.appDistCtrShape.set(names.index('Diamond_Wire'))
+        rigRoot.appIKPVCtrShape.set(names.index('Diamond_Wire'))
+        rigRoot.appLookAtCtrShape.set(names.index('Circle_Wire'))
         rigRoot.appFKIKCtrShape.set(names.index('Pin_Wire'))
         rigRoot.appRFKCtrShape.set(names.index('Cylinder_Poly'))
         self.ctrLayer = pm.createDisplayLayer(n='Controls', e=True)
@@ -106,8 +109,12 @@ class APP_Control_Manager:
         index = self.rigRoot.appJointCtrShape.get()
         self._Add(group, index)
 
-    def AddDistanceControl(self, group):
-        index = self.rigRoot.appDistCtrShape.get()
+    def AddIKPVControl(self, group):
+        index = self.rigRoot.appIKPVCtrShape.get()
+        self._Add(group, index)
+
+    def AddLookAtControl(self, group):
+        index = self.rigRoot.appLookAtCtrShape.get()
         self._Add(group, index)
 
     def AddFKIKControl(self, group):
@@ -122,6 +129,9 @@ class APP_Control_Manager:
         self.logger.debug('\tCtrMng > Remove')
         del(self._ctrs[control.ID.get()])
 
+
+#============= SHAPE ============================
+
     def GetShapeName(self, group):
         groupType = group.groupType.get()
         if groupType == 0:
@@ -129,20 +139,21 @@ class APP_Control_Manager:
         elif groupType == 1:
             index = self.rigRoot.appJointCtrShape.get()
         elif groupType == 2:
-            index = self.rigRoot.appDistCtrShape.get()
+            index = self.rigRoot.appIKPVCtrShape.get()
         elif groupType == 3:
             index = self.rigRoot.appFKIKCtrShape.get()
         elif groupType == 4:
             index = self.rigRoot.appRFKCtrShape.get()
+        elif groupType == 5:
+            index = self.rigRoot.appLookAtCtrShape.get()
         shapeNames = list(self._ctrTemplates.keys())
         return shapeNames[index]
 
-
-    def SetShape(self, group, shape):
+    def SetShape(self, group, shapeIndex):
         self.logger.debug('\tCtrMng > SetShape')
         control = pm.listConnections(group.control)[0]
         pm.disconnectAttr(group.control)
-        newCtr = self.Add(group)
+        newCtr = self._Add(group, shapeIndex)
         pm.parent(newCtr, control)
         pm.xform(newCtr, t=(0,0,0), ro=(0,0,0), s=(1,1,1))
         pm.parent(newCtr, group)
@@ -150,20 +161,20 @@ class APP_Control_Manager:
         self.Remove(control)
         pm.delete(control)
 
-#============= PRIVATE ============================
+# #============= PRIVATE ============================
 
-    def _SortGroups(self, groups):
-        self.logger.debug('\tCtrMng > _SortGroups')
-        indexGroups = {} # jointIndex : group
-        orderedGroups = []
-        for group in groups:
-            joints = pm.listConnections(group.joint)
-            if not joints:
-                return []
-            indexGroups[joints[0].limbIndex.get()] = group
-        for index in sorted(list(indexGroups.keys())):
-            orderedGroups.append(indexGroups[index])
-        return orderedGroups
+#     def _SortGroups(self, groups):
+#         self.logger.debug('\tCtrMng > _SortGroups')
+#         indexGroups = {} # jointIndex : group
+#         orderedGroups = []
+#         for group in groups:
+#             joints = pm.listConnections(group.joint)
+#             if not joints:
+#                 return []
+#             indexGroups[joints[0].limbIndex.get()] = group
+#         for index in sorted(list(indexGroups.keys())):
+#             orderedGroups.append(indexGroups[index])
+#         return orderedGroups
 
 
 
