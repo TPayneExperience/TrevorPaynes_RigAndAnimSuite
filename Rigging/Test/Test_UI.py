@@ -469,7 +469,7 @@ class Test_UI:
             for attr in ['.tx', '.ty', '.tz', '.rx', '.ry', '.rz']:
                 pm.setAttr(fkikGroup + attr, l=0, k=1, cb=0)
             pm.parent(fkikGroup, self.grpMng.bhvGroup)
-            parentIndex = fkikGroup.targetJoint.get()
+            parentIndex = limb.bhvFKIKSwitchParentJoint.get()
             pm.parentConstraint(joints[parentIndex], fkikGroup)
             fkikControl = pm.listConnections(fkikGroup.control)[0]
         if not fkikControl.hasAttr('fkikSwitch'):
@@ -554,7 +554,7 @@ class Test_UI:
         targetLimb = targetLimb[0]
 
         # IK PV
-        if limb.bhvType.get() == 2:
+        if limb.bhvType.get() in self.bhvMng.ikPVTypeIndexes:
             ikGroup = pm.listConnections(limb.bhvIKPVGroup)[0]
             index = limb.bhvTargetJoint.get()
             targetGroup = self.bhvMng.GetJointGroups(targetLimb)[index]
@@ -566,7 +566,7 @@ class Test_UI:
             pm.parent(handle, targetControl)
 
         # IK CHAIN
-        elif limb.bhvType.get() == 9:
+        elif limb.bhvType.get() in self.bhvMng.ikChainTypeIndexes:
             sourceGroups = self.bhvMng.GetJointGroups(limb)[1:] # Skip First
             for sourceGroup in sourceGroups:
                 index = sourceGroup.targetJoint.get()

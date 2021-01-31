@@ -38,19 +38,6 @@ class LS_Limb_Hierarchy_UI:
                             lbc=(limbID, 0.3, 0.1, 0.1))
                 else:
                     pm.treeView(self.widget, e=1, bvf=(limbID, 1, 0))
-                # joints = self.jntMng.GetLimbTempJoints(limb)
-                # joints = self.jntMng.GetLimbJoints(limb)
-                # index = limb.limbType.get()
-                # if (index == 0) and joints:
-                #     pm.treeView(self.widget, e=1, ornament=(limbID, 1, 0, 4))
-                # if (index == 1) and len(joints) != 1:
-                #     pm.treeView(self.widget, e=1, ornament=(limbID, 1, 0, 4))
-                # if (index == 2) and not self.jntMng.AreJointsChained(joints):
-                #     pm.treeView(self.widget, e=1, ornament=(limbID, 1, 0, 4))
-                # if (index == 3) and not self.jntMng.AreJointsSiblings(joints):
-                #     pm.treeView(self.widget, e=1, ornament=(limbID, 1, 0, 4))
-        # if (selectedID != -1):
-        #     pm.treeView(self.widget, e=1, selectItem=(selectedID, 1))
 
 #=========== SETUP ====================================
 
@@ -145,7 +132,7 @@ class LS_Limb_Hierarchy_UI:
 
         # oldMirror = self.limbMng.GetLimbMirror(limb)
         if self.limbMng.Rename(limb, newName):
-            self.parent.RenameLimbs(limb)
+            self.parent.RenameLimb(limb)
         else:
             msg = '**** Two limbs MAX may have same name'
             self.logger.error(msg)
@@ -163,7 +150,7 @@ class LS_Limb_Hierarchy_UI:
         # for group in self.grpMng.GetAllLimbGroups(limb):
         #     self.grpMng.UpdateGroupName(limb, group)
         
-        # self.parent.RenameLimbs([limb] + oldMirror + newMirror)
+        # self.parent.RenameLimb([limb] + oldMirror + newMirror)
         return ''
 
     def FlipSides(self, ignore):

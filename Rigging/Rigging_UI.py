@@ -118,14 +118,6 @@ class Rigging_UI:
         elif (newIndex == 4):
             self.test_ui.Setup_Editable() 
         
-        # joint, test >>> bhv, App
-        if oldIndex in (0,) and newIndex in (2, 3):
-            for limb in self.limbMng.GetAllLimbs():
-                self.bhvMng.SetupEditable_GroupParenting(limb)
-        # bhv, App >>> joint, test
-        elif oldIndex in (2, 3) and newIndex in (0,):
-            for limb in self.limbMng.GetAllLimbs():
-                self.bhvMng.TeardownEditable_GroupParenting(limb)
 
     def Teardown_Editable(self):
         self.Teardown_SubTab()
@@ -174,9 +166,6 @@ class Rigging_UI:
     def RemoveLimb(self, limb): # Limb Setup > Remove
         self.parent.RemoveLimb(limb)
     
-    def AutoBuildHier(self):
-        self.bhv_ui.limbHier_ui.LoadSkelHier(1)
-
     # def UpdateLimb(self, limb): # Limb Setup Tab > Teardown
     #     bhvs = self.bhvMng.GetBhvOptions(limb)
     #     bhvIndex = self.bhvMng.GetBhvIndex(bhvs[0])

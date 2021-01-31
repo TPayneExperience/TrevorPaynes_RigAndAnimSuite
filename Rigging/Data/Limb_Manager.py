@@ -119,17 +119,6 @@ class Limb_Manager:
         limb.rebuildAppDep.set(1)
         limb.rebuildSkinInf.set(1)
 
-        # APP
-        pm.addAttr(limb, ln='appControlType', at='enum', en='None', 
-                                        h=self.hideAttrs)
-        pm.addAttr(limb, ln='appLockHidePos', at='bool', h=self.hideAttrs)
-        pm.addAttr(limb, ln='appLockHideRot', at='bool', h=self.hideAttrs)
-        pm.addAttr(limb, ln='appLockHideScale', at='bool', h=self.hideAttrs)
-        # Connect to FKIK switch of another limb
-        pm.addAttr(limb, ln='appTargetFKIKLimb', dt='string', h=self.hideAttrs) 
-        pm.addAttr(limb, ln='appSourceFKIKLimb', dt='string', h=self.hideAttrs)
-        pm.addAttr(limb, ln='appTargetFKIKType', at='enum', en='FK:IK', 
-                                        h=self.hideAttrs)
         pm.connectAttr(self.rigRoot.limbs, limb.rigRoot)
         self.UpdateLimbName(limb)
         self._limbs[limbID] = limb
@@ -143,12 +132,13 @@ class Limb_Manager:
         pm.select(d=1)
         pm.delete(limb)
 
-    def Reparent(self, childID, parentID):
+    def Reparent(self, child, parent):
         self.logger.debug('\tLimbMng > Reparent')
-        child = self.GetLimb(childID)
+        msg = '\t\tReparenting "%s"' % child.pfrsName.get()
+        msg += ' to "%s"' % parent.pfrsName.get()
+        self.logger.debug(msg)
         pm.disconnectAttr(child.parentLimb)
-        if (parentID != -1):
-            parent = self.GetLimb(parentID)
+        if parent:
             pm.connectAttr(parent.childrenLimbs, child.parentLimb)
 
     def Rename(self, sourceLimb, newName): # list should repopulate after call
@@ -159,7 +149,6 @@ class Limb_Manager:
 
         # PAIR WITH MIRROR
         if (names.count(newName) == 1):
-            # sourceLimb = self.GetLimb(sourceLimbID)
             for mirrorLimb in list(self._limbs.values()):
                 if (mirrorLimb.pfrsName.get() == newName):
                     break
@@ -171,7 +160,6 @@ class Limb_Manager:
 
         # BREAK MIRROR
         else:
-            # sourceLimb = self.GetLimb(sourceLimbID)
             if pm.listConnections(sourceLimb.mirrorLimb):
                 self._BreakMirror(sourceLimb)
         sourceLimb.pfrsName.set(newName)
@@ -217,21 +205,6 @@ class Limb_Manager:
                 limb.ID.set(limbID)
             self._limbs[limbID] = limb
 
-    def GetDefaultLimbHier(self, jntMng):
-        self.logger.debug('\tLimbMng > GetDefaultLimbHier')
-        limbParents = {} # childLimb : parentLimb
-        for childLimb in list(self._limbs.values()):
-            joints = jntMng.GetLimbJoints(childLimb)
-            if joints:
-                limbParents[childLimb] = None
-                childJoint = joints[0]
-                parentJoint = pm.listRelatives(childJoint, parent=1)
-                if parentJoint:
-                    if pm.hasAttr(parentJoint[0], 'limb'):
-                        parentLimb = jntMng.GetLimb(parentJoint[0])
-                        limbParents[childLimb] = parentLimb
-        return limbParents
-
     def GetRootLimbs(self):
         self.logger.debug('\tLimbMng > GetRootLimbs')
         rootLimbs = []
@@ -262,10 +235,9 @@ class Limb_Manager:
                                     'NODE')
         limb.rename(limbName)
 
-    # def DuplicateLimb(self, sourceLimbID):
+    # def DuplicateLimb(self, source):
     #     targetID = self.rigRoot.nextLimbID.get()
     #     self.rigRoot.nextLimbID.set(targetID + 1)
-    #     source = self.GetLimb(sourceLimbID)
     #     target = pm.duplicate(source)[0]
     #     target.ID.set(targetID)
     #     sourceName = source.pfrsName.get()
@@ -277,9 +249,7 @@ class Limb_Manager:
     #     self._limbs[targetID] = target
     #     return target.ID.get()
 
-    # def SetMirrorLimb(self, sourceID, targetID):
-    #     source = self.GetLimb(sourceID)
-    #     target = self.GetLimb(targetID)
+    # def SetMirrorLimb(self, source, target):
     #     source.mirrorLimbID.set(targetID)
     #     target.mirrorLimbID.set(sourceID)
     #     target.pfrsName.set(source.pfrsName.get())

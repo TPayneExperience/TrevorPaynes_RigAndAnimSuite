@@ -33,7 +33,7 @@ class BHV_Limb_Manager:
         self.oneJntLimbIndexes = (6, 4, 3)
         self.twoJntChainLimbIndexes = (0, 6, 8, 5, 9, 3)
         self.threeJntChainLimbIndexes = (0, 6, 8, 10, 1, 5, 2, 9, 3)
-        self.omitLastJointTypes = (0, 2, 9, 10)
+        self.omitLastJointTypes = (0, 2, 5, 9, 10)
         self.omitFirstJointTypes = (8,)
         self.branchLimbIndexes = (6, 3)
 
@@ -148,13 +148,13 @@ class BHV_Limb_Manager:
         names = ':'.join(targetJointNames)
         self._SetTargetJointEnum(sourceLimb, names)
 
-    def _SetTargetJointEnum(self, sourceLimb, enumStr):
+    def _SetTargetJointEnum(self, limb, enumStr):
         self.logger.debug('\tBhvMng > _SetTargetJointEnum')
-        if sourceLimb.bhvType.get() in self.ikChainTypeIndexes:
-            for sourceGroup in self.GetJointGroups(sourceLimb):
-                pm.addAttr(sourceGroup.targetJoint, e=1, en=enumStr)
+        if limb.bhvType.get() in self.ikChainTypeIndexes:
+            for group in self.GetJointGroups(limb):
+                pm.addAttr(group.targetJoint, e=1, en=enumStr)
         else:
-            pm.addAttr(sourceLimb.bhvTargetJoint, e=1, en=enumStr)
+            pm.addAttr(limb.bhvTargetJoint, e=1, en=enumStr)
 
 #============= ADD / REMOVE LIMB  ============================
 
@@ -165,8 +165,6 @@ class BHV_Limb_Manager:
         # ctrTypes = ':'.join(self.ctrMng.GetControlTypes())
         axes = ':'.join(self.axesNames)
 
-        pm.addAttr(limb.appControlType, e=1, 
-                            en=self.ctrMng.ctrTypesStr)
         pm.addAttr(limb, ln='bhvType', at='enum', en=bhvTypes,
                                     h=self.hideAttrs)
 
@@ -174,11 +172,16 @@ class BHV_Limb_Manager:
         pm.addAttr(limb, ln='bhvIKPVGroup', dt='string', h=self.hideAttrs)
         pm.addAttr(limb, ln='bhvLookAtGroup', dt='string', h=self.hideAttrs)
         pm.addAttr(limb, ln='bhvEmptyGroup', dt='string', h=self.hideAttrs)
-        pm.addAttr(limb, ln='bhvFKIKSwitchGroup', dt='string', h=self.hideAttrs) 
 
         # FKIK
+        pm.addAttr(limb, ln='bhvFKIKSwitchGroup', dt='string', h=self.hideAttrs) 
+        pm.addAttr(limb, ln='bhvFKIKSwitchParentJoint', at='enum', en='None', h=self.hideAttrs)
         pm.addAttr(limb, ln='bhvFKIK_FKJoint', dt='string', h=self.hideAttrs)
         pm.addAttr(limb, ln='bhvFKIK_IKJoint', dt='string', h=self.hideAttrs)
+        pm.addAttr(limb, ln='appFKIKVisParent', dt='string', h=self.hideAttrs)
+        pm.addAttr(limb, ln='appFKIKVisChildren', dt='string', h=self.hideAttrs)
+        pm.addAttr(limb, ln='appTargetFKIKType', at='enum', en='FK:IK', 
+                                                        h=self.hideAttrs)
 
         # Relative FK
         pm.addAttr(limb, ln='bhvRFKCenterGroup', dt='string', h=self.hideAttrs)
@@ -198,6 +201,12 @@ class BHV_Limb_Manager:
         pm.addAttr(limb, ln='bhvDistance', at='float', min=0, dv=1) # IKPV, LookAt
         pm.addAttr(limb, ln='bhvDistanceJoint', dt='string') # for easy Test Connections
         
+        # APP
+        pm.addAttr(limb, ln='appLockHidePos', at='bool', h=self.hideAttrs)
+        pm.addAttr(limb, ln='appLockHideRot', at='bool', h=self.hideAttrs)
+        pm.addAttr(limb, ln='appLockHideScale', at='bool', h=self.hideAttrs)
+        # Connect to FKIK switch of another limb
+
         # pm.addAttr(limb, ln='bhvCstSourceLimb', dt='string') # Ignore, only for connections
         # pm.addAttr(limb, ln='bhvCstTargetLimb', dt='string') # for connecting to target
         # pm.addAttr(limb, ln='bhvCstTargetJnt', at='enum', en='None')
@@ -222,10 +231,9 @@ class BHV_Limb_Manager:
     def RebuildLimbType(self, limb):
         '''Set limbType if invalid'''
         self.logger.debug('\tBhvMng > RebuildLimbType')
-        joints = self.jntMng.GetLimbJoints(limb)
         limbType = limb.limbType.get()
         limbTypeChanged = False
-
+        joints = pm.listConnections(limb.joints)
         if not joints:
             if limb.limbType.get() != 0:
                 limb.limbType.set(0) # empty
@@ -233,6 +241,10 @@ class BHV_Limb_Manager:
         elif (len(joints) == 1):
             if limb.limbType.get() != 1:
                 limb.limbType.set(1) # 1 joint
+                limbTypeChanged = True
+        elif self.jntMng.AreJointsSiblings(joints):
+            if limbType != 3:
+                limb.limbType.set(3) # branch
                 limbTypeChanged = True
         elif self.jntMng.AreJointsChained(joints):
             if (len(joints) == 2):
@@ -244,10 +256,6 @@ class BHV_Limb_Manager:
                 if limbType != 2:
                     limb.limbType.set(2) # 3+ joint chain
                     limbTypeChanged = True
-        elif self.jntMng.AreJointsSiblings(joints):
-            if limbType != 3:
-                limb.limbType.set(3) # branch
-                limbTypeChanged = True
 
         if limbTypeChanged:
             limb.rebuildBhvType.set(1)
@@ -416,15 +424,10 @@ class BHV_Limb_Manager:
         self.logger.debug('\tBhvMng > Teardown_Behavior')
         bhvType = limb.bhvType.get()
         if bhvType in self.ikTargetableIndexes:
-            self.Teardown_IKTargetable(limb)
+            for sourceLimb in pm.listConnections(limb.bhvSourceLimb):
+                sourceLimb.rebuildBhvDep.set(1)
+            pm.disconnectAttr(limb.bhvSourceLimb)
         
-# ============= TEARDOWN BHV ============================
-
-    def Teardown_IKTargetable(self, limb):
-        self.logger.debug('\tBhvMng > Teardown_IKTargetable')
-        for sourceLimb in pm.listConnections(limb.bhvSourceLimb):
-            sourceLimb.rebuildBhvDep.set(1)
-        pm.disconnectAttr(limb.bhvSourceLimb)
 
 # ============= GROUP VISIBILITY ============================
 
@@ -465,7 +468,10 @@ class BHV_Limb_Manager:
         if parentBhvType in self.emptyLimbIndexes:
             pm.addAttr(childLimb.parentJoint, e=1, en='Empty')
             return
-
+        parentJoints = self.jntMng.GetLimbJoints(parentLimb)
+        names = [j.pfrsName.get() for j in parentJoints]
+        namesStr = ':'.join(names)
+        pm.addAttr(childLimb.parentJoint, e=1, en=namesStr)
         rootGroup = self.GetJointGroups(childLimb)[0]
         sourcePos = pm.xform(rootGroup, q=1, t=1, ws=1)
         index = self._GetClosestJointIndex(sourcePos, parentLimb)
@@ -493,9 +499,9 @@ class BHV_Limb_Manager:
 
     def UpdateFKIKSwitchJoint(self, limb):
         self.logger.debug('\tBhvMng > UpdateFKIKSwitchJoint')
-        index = limb.targetJoint.get()
-        joint = self.jntMng.GetLimbJoints(limb)[index]
-        group = pm.listConnections(limb.bhvFKIKSwitchGroup)[0]
+        # index = limb.targetJoint.get()
+        # joint = self.jntMng.GetLimbJoints(limb)[index]
+        # group = pm.listConnections(limb.bhvFKIKSwitchGroup)[0]
 
     def UpdateRFKConnections(self, limb):
         self.logger.debug('\tBhvMng > UpdateRFKConnections')
@@ -517,4 +523,244 @@ class BHV_Limb_Manager:
         pm.parent(groups[0], groups[2], groups[1])
         pm.parent(groups[1], limb)
 
+    def GetDefaultLimbHier(self):
+        self.logger.debug('\tBhvMng > GetDefaultLimbHier')
+        limbParents = {} # childLimb : parentLimb
+        for childJoint in self.jntMng.GetAllJoints():
+            childLimb = pm.listConnections(childJoint.limb)
+            if not childLimb or childLimb[0] in limbParents:
+                continue
+            parentJoint = pm.listRelatives(childJoint, p=1, type='joint')
+            if not parentJoint or not parentJoint[0].hasAttr('limb'):
+                continue
+            parentLimb = pm.listConnections(parentJoint[0].limb)
+            if not parentLimb:
+                continue
+            if childLimb[0] != parentLimb[0]:
+                limbParents[childLimb[0]] = parentLimb[0]
+        # limbParents = {} # childLimb : parentLimb
+        # for childLimb in self.limbMng.GetAllLimbs():
+        #     joints = self.jntMng.GetLimbJoints(childLimb)
+        #     if not joints:
+        #         continue
+        #     limbParents[childLimb] = None
+        #     childJoint = joints[0]
+        #     parentJoint = pm.listRelatives(childJoint, parent=1)
+        #     if not parentJoint:
+        #         continue
+        #     if not pm.hasAttr(parentJoint[0], 'limb'):
+        #         continue
+        #     parentLimb = pm.listConnections(parentJoint[0].limb)
+        #     limbParents[childLimb] = parentLimb
+        return limbParents
+
+    def ParentLimbsBySkeleton(self):
+        limbParents = self.GetDefaultLimbHier()
+        for child, parent in limbParents.items():
+            self.limbMng.Reparent(child, parent)
+            self.UpdateLimbParentJoint(child)
+
+    def RebuildLimbs(self):
+        allLimbs = self.limbMng.GetAllLimbs()
+        self.logger.info('--- REBUILDING LIMBS START ---')
+        self.logger.info('Rebuilding LIMB TYPES for:')
+        for limb in allLimbs:
+            if limb.rebuildLimbType.get():
+                self.logger.info('\t%s' % limb.pfrsName.get())
+                self.RebuildLimbType(limb)
+        self.logger.info('Rebuilding BEHAVIOR TYPES for:')
+        for limb in allLimbs:
+            if limb.rebuildBhvType.get():
+                self.logger.info('\t%s' % limb.pfrsName.get())
+                self.RebuildBhvType(limb)
+        self.logger.info('Rebuilding LIMB GROUPS for:')
+        for limb in allLimbs:
+            if limb.rebuildLimbGroup.get():
+                self.logger.info('\t%s' % limb.pfrsName.get())
+                self.RebuildLimbGroup(limb)
+        self.logger.info('Rebuilding BEHAVIOR DEPENDENCIES for:')
+        for limb in allLimbs:
+            if limb.rebuildBhvDep.get():
+                self.logger.info('\t%s' % limb.pfrsName.get())
+                self.RebuildBhvDep(limb)
+        self.logger.info('Rebuilding APPEARANCE DEPENDENCIES for:')
+        for limb in allLimbs:
+            if limb.rebuildAppDep.get():
+                pass
+        self.logger.info('Rebuilding SKIN INFLUENCES for:')
+        for limb in allLimbs:
+            if limb.rebuildSkinInf.get():
+                pass
+        msg = '--- REBUILDING LIMBS END ---\n'
+        self.logger.info(msg)
+
+    def AddLimbByJoints(self, joints):
+        self.logger.debug('\tBhvMng > AddLimbByJoints')
+        limb = self.limbMng.Add()
+        for joint in joints:
+            self.jntMng.Add(limb, joint)
+        self.jntMng.ReindexJoints(limb)
+        return limb
+
+    def AutoBuildByHierarchy(self):
+        self.logger.debug('\tBhvMng > AutoBuildByHierarchy')
+        # Build Joint Parent Dictionary
+        jointParents = {}   # childJoint : parentJoint
+        for joint in pm.ls(type='joint'):
+            parent = pm.listRelatives(joint, parent=1)
+            if parent:
+                jointParents[joint] = parent[0]
+            else:
+                jointParents[joint] = None
+        # Group joints by limb structure: one, chain or branch
+        disconnectJoints = {} # parent : [[j1, j2], [j3], ...]
+        newLimbJointSets = []  # [[jnt1, jnt2], [jnt3], ...]
+        for i in range(99):
+            children = set(jointParents.keys())
+            parents = set(jointParents.values())
+            # Iterate through all end children,
+            # solving for branches and end chains
+            for child in list(children - parents):
+                if child not in jointParents:
+                    continue
+                # Unparent CHAIN root joint + track
+                joints = self.GetLongestJointChain(child)
+                if len(joints) == 1:
+                    joints = self.GetJointBranch(child)
+                    parent = pm.listRelatives(child, p=1)
+                    if parent:
+                        parent = parent[0]
+                        if parent not in disconnectJoints:
+                            disconnectJoints[parent] = []
+                        disconnectJoints[parent] += joints
+                        if len(joints) == 1:
+                            pm.parent(joints[0], w=1)
+                        else:
+                            pm.parent(joints, w=1)
+                newLimbJointSets.append(joints)
+                for joint in joints:
+                    del(jointParents[joint])
+        for parent, children in disconnectJoints.items():
+            pm.parent(children, parent)
+        for newLimbJoints in newLimbJointSets:
+            limb = self.AddLimbByJoints(newLimbJoints)
+            # if limb:
+            self.AddLimb(limb)
+            for joint in newLimbJoints:
+                # self.jntMng.Setup_Editable(limb, joint)
+                self.jntMng.UpdateJointName(joint)
+    
+    def AutoBuildByName(self):
+        self.logger.debug('\tBhvMng > AutoBuildByName')
+        
+        # VERY INFLEXIBLE! NEED TO BUILD UI FOR BETTER USER
+        # CUSTOMIZATION LATER, like the rig setup ui
+
+        # GROUP JOINTS AND VALIDATE NAMES
+        allJoints = pm.ls(type='joint')
+        limbJoints = self.jntMng.GetAllJoints()
+        newLimbs = {} # limbName : jointList
+        for joint in list(set(allJoints) - set(limbJoints)):
+            splitName = joint.shortName().split('_')
+            if len(splitName) != 3:
+                msg = 'Joints must be named as "LimbName_Side_JointName"'
+                msg += '\nJoint Misnamed: %s' % joint
+                pm.confirmDialog(   t='Breaking IK Connections!', 
+                                    m=msg, 
+                                    icon='error', 
+                                    b='Ok')
+                return
+            limbSideName = '_'.join(splitName[:-1])
+            if limbSideName not in newLimbs:
+                newLimbs[limbSideName] = []
+            newLimbs[limbSideName].append(joint)
+
+        # VALIDATE LIMBS
+        for limbName, joints in newLimbs.items():
+            newLimbs[limbName] = sorted(joints)
+            if self.jntMng.AreJointsSiblings(joints):
+                continue
+            if self.jntMng.AreJointsChained(joints):
+                continue
+            msg = 'Limbs may only have the following joint arrangements:\n'
+            msg += '\n- 1+ joints that are all the immediate children '
+            msg += 'of the same parent [BRANCH]'
+            msg += '\n- 2+ joints that are parented to one another [CHAIN]'
+            msg += '\n--------------------------'
+            msg += '\nLimb = ' + limbName
+            msg += '\nJoints = ' + str(joints)
+            pm.confirmDialog(   t='Limbs ERROR', 
+                                m=msg, 
+                                icon='error', 
+                                b='Ok')
+            return
+
+        # ADD LIMBS
+        # limbs = []
+        for limbName, joints in newLimbs.items():
+            limb = self.AddLimbByJoints(joints)
+            self.AddLimb(limb)
+            tempJoint = joints[0]
+            limbName, side, l = tempJoint.shortName().split('_')
+            # side = tempJoint.shortName().split('_')[1]
+            for joint in joints:
+                splitName = joint.shortName().split('_')
+                joint.pfrsName.set(splitName[-1])
+            # limbs.append(limb)
+            if side.upper() == 'L':
+                limb.side.set(1)
+            elif side.upper() == 'R':
+                limb.side.set(2)
+            self.limbMng.Rename(limb, limbName)
+                
+        # for limb in limbs:
+        #     tempJoints = self.jntMng.GetLimbJoints(limb)
+        #     tempJoint = tempJoints[0]
+            # for joint in tempJoints:
+            # for joint in joints:
+                # self.jntMng.Setup_Editable(limb, joint)
+                # self.jntMng.UpdateJointName(joint)
+            # self.jntMng.ReindexJoints(limb)
+
+    def GetLongestJointChain(self, startJoint):
+        self.logger.debug('\tBhvMng > GetLongestJointChain')
+        joints = [startJoint]
+        if self.HasSibling(startJoint):
+            return joints
+        lastPos = pm.xform(startJoint, q=1, t=1, ws=1)
+        parent = pm.listRelatives(startJoint, parent=1)
+        for i in range(99):
+            if not parent:
+                break
+            parent = parent[0]
+            curPos = pm.xform(parent, q=1, t=1, ws=1)
+            if curPos == lastPos:
+                break
+            joints.append(parent)
+            if self.HasSibling(parent):
+                break
+            parent = pm.listRelatives(parent, parent=1)
+            lastPos = curPos[:]
+        return joints[::-1]
+
+    def GetJointBranch(self, startJoint):
+        self.logger.debug('\tBhvMng > GetJointBranch')
+        joints = [startJoint]
+        parent = pm.listRelatives(startJoint, parent=1)
+        if not parent:
+            return [startJoint]
+        for child in pm.listRelatives(parent[0], c=1, type='joint'):
+            if not pm.listRelatives(child, c=1, type='joint'):
+                if child not in joints:
+                    joints.append(child)
+        return joints
+
+    def HasSibling(self, joint):
+        self.logger.debug('\tBhvMng > HasSibling')
+        parent = pm.listRelatives(joint, parent=1, type='joint')
+        if not parent:
+            return False
+        children = pm.listRelatives(parent, children=1, type='joint')
+        return (len(children) > 1)
+        
 

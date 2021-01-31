@@ -38,7 +38,7 @@ class BHV_Limb_Hierarchy_UI:
                     pm.treeView(self.widget, e=1, bvf=(limbID, 1, 0))
                 # if limb.bhvType.get() in self.bhvMng.parentableIndexes:
                 #     pm.treeView(self.widget, e=1, ornament=(limbID, 1, 0, 3))
-                self.bhvMng.UpdateLimbParentJoint(limb)
+                # self.bhvMng.UpdateLimbParentJoint(limb)
 
 #=========== SETUP ====================================
 
@@ -73,35 +73,28 @@ class BHV_Limb_Hierarchy_UI:
         self.logger.debug('\tBhv_LimbHier > Reparent')
         if oldParents[0] == newParentIDStr:
             return
-        limbID = int(limbIDsStr[0])
-        limb = self.limbMng.GetLimb(limbID)
-        name = self.limbMng.GetLimb(limbID).pfrsName.get()
+        child = self.limbMng.GetLimb(int(limbIDsStr[0]))
+        name = child.pfrsName.get()
         if newParentIDStr:
-            parentID = int(newParentIDStr)
-            parentLimb = self.limbMng.GetLimb(parentID)
+            parent = self.limbMng.GetLimb(int(newParentIDStr))
             msg = '\tLimbHier > REPARENTING '
-            msg += '"%s" to "%s"' % (name, parentLimb.pfrsName.get())
+            msg += '"%s" to "%s"' % (name, parent.pfrsName.get())
             self.logger.info(msg)
-            parentBhvType = parentLimb.bhvType.get()
+            parentBhvType = parent.bhvType.get()
             if parentBhvType not in self.bhvMng.parentableIndexes:
                 self.Populate()
                 return
         else:
+            parent = None
             self.logger.info('\tLimbHier > REPARENTING "%s" to world' % name)
-            parentID = -1
-        self.limbMng.Reparent(limbID, parentID)
-        self.bhvMng.UpdateLimbParentJoint(limb)
+        self.limbMng.Reparent(child, parent)
+        self.bhvMng.UpdateLimbParentJoint(child)
     
 #=========== RMB ====================================
 
     def LoadSkelHier(self, ignore):
         self.logger.info('\tLimbHier > LOAD SKELETON hierarchy')
-        limbParents = self.limbMng.GetDefaultLimbHier(self.jntMng)
-        for child, parent in limbParents.items():
-            if not parent:
-                continue
-            self.limbMng.Reparent(child.ID.get(), parent.ID.get())
-            self.bhvMng.UpdateLimbParentJoint(child)
+        self.bhvMng.ParentLimbsBySkeleton()
         # self.parent.UpdateLimbUI()
         self.Populate()
     

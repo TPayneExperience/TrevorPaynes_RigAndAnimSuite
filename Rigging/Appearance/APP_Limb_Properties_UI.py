@@ -41,7 +41,6 @@ class APP_Limb_Properties_UI:
 
     def Depopulate(self):
         pm.frameLayout(self.prop_l, e=1, en=0)
-        pm.frameLayout(self.ctrLayout, e=1, en=0)
 
 #=========== SETUP UI ==============================================
 
@@ -57,10 +56,6 @@ class APP_Limb_Properties_UI:
                 self.fkikTargetLimb_om = pm.optionMenu( l='Target FKIK Limb',
                                                         cc=self.SetTargetFKIK)
                 self.targetType = pm.attrEnumOptionMenu(at='perspShape.filmFit')
-                self.ctrType = pm.attrEnumOptionMenu(at='perspShape.filmFit')
-
-        with pm.frameLayout('IKPV / LookAt CONTROL Position', bv=1, en=0) as self.ctrLayout:
-            with pm.columnLayout(adj=1) as self.ctrProp_cl:
                 self.ctrDist_cg = pm.attrControlGrp( l='Control Distance', a='persp.translateX')
 
 
@@ -89,16 +84,28 @@ class APP_Limb_Properties_UI:
             return
         pm.frameLayout(self.prop_l, e=1, en=1)
         bhvType = self.limb.bhvType.get()
+
+        # CONTROL DISTANCE
+        if self.ctrAxis_at:
+            pm.deleteUI(self.ctrAxis_at)
+            self.ctrAxis_at = None
+        if bhvType in self.bhvMng.distanceIndexes:
+            pm.attrControlGrp(  self.ctrDist_cg, e=1, en=1, 
+                                a=self.limb.bhvDistance,
+                                cc=pm.Callback(self.UpdateDistGroupPos, 1))
+            self.ctrAxis_at = pm.attrEnumOptionMenu(l='Control Position Axis',
+                                                    at=limb.bhvAxis,
+                                                    p=self.appLimbProp_cl,
+                                                    cc=self.UpdateDistGroupPos)
+        else:
+            pm.attrControlGrp(self.ctrDist_cg, e=1, en=0)
+
+        # TARGET TYPE
         pm.deleteUI(self.targetType)
-        pm.deleteUI(self.ctrType)
         self.targetType = pm.attrEnumOptionMenu(l='FK or IK?',
                                                 at=self.limb.appTargetFKIKType,
                                                 p=self.appLimbProp_cl,
                                                 cc=self.LogSelectFKIK)
-        self.ctrType = pm.attrEnumOptionMenu(   l='Control Type',
-                                                at=self.limb.appControlType,
-                                                p=self.appLimbProp_cl )#,
-                                                # cc=self.SetControlType)
         if self.ikpvCtrJoint_at:
             pm.deleteUI(self.ikpvCtrJoint_at)
             self.ikpvCtrJoint_at = None
@@ -117,70 +124,30 @@ class APP_Limb_Properties_UI:
         isFK = (bhvType in self.bhvMng.fkTypeIndexes)
         pm.optionMenu(self.fkikTargetLimb_om, e=1, en=isFK)
         self.Populate()
-        self.UpdateTargetFKIK()
+        self.PopulateFKIKVisParent()
         
-        # CONTROL DISTANCE
-        isDist = bhvType in self.bhvMng.distanceIndexes
-        pm.frameLayout(self.ctrLayout, e=1, en=isDist)
-        if not isDist:
-            return
-        if self.ctrAxis_at:
-            pm.deleteUI(self.ctrAxis_at)
-            self.ctrAxis_at = None
-        pm.attrControlGrp(  self.ctrDist_cg, e=1, en=1, 
-                            # a=group.distance,
-                            a=self.limb.bhvDistance,
-                            cc=pm.Callback(self.UpdateDistGroupPos, 1))
-        self.ctrAxis_at = pm.attrEnumOptionMenu(l='Position Axis',
-                                                # at=group.axis,
-                                                at=limb.bhvAxis,
-                                                p=self.ctrProp_cl,
-                                                cc=self.UpdateDistGroupPos)
 
     def SetTargetFKIK(self, limbName):
-        self.logger.info('\tLimbProp > SET TARGET FKIK to ' + limbName)
-        isEnabled = (limbName != 'None')
-        # pm.attrEnumOptionMenu(self.targetType, e=1, en=0)
-        pm.disconnectAttr(self.limb.appTargetFKIKLimb)
-        if self.limb.bhvType.get() in self.bhvMng.fkikTypeIndexes:
-            fkikChild = pm.listConnections(self.limb.bhvFKIKSwitchGroup)[0]
-            pm.disconnectAttr(fkikChild.bindSource)
-        else:
-            fkikChild = None
-        if isEnabled:
-            limb = self.limbs[limbName]
-            if fkikChild:
-                fkikParent = pm.listConnections(limb.bhvFKIKSwitchGroup)[0]
-                pm.connectAttr(fkikParent.bindTargets, fkikChild.bindSource)
-            else:
-                pm.connectAttr(limb.appSourceFKIKLimb, self.limb.appTargetFKIKLimb)
-                # pm.attrEnumOptionMenu(self.targetType, e=1, en=1)
+        self.logger.info('\tLimbProp > SET FKIK Vis Parent to ' + limbName)
+        pm.disconnectAttr(self.limb.appFKIKVisParent)
+        if limbName == 'None':
+            return
+        limb = self.limbs[limbName]
+        pm.connectAttr(limb.appFKIKVisChildren, self.limb.appFKIKVisParent)
                 
-    def UpdateTargetFKIK(self):
-        self.logger.debug('\tApp_LimbProp > UpdateTargetFKIK')
+    def PopulateFKIKVisParent(self):
+        self.logger.debug('\tApp_LimbProp > PopulateFKIKVisParent')
         pm.attrEnumOptionMenu(self.targetType, e=1, en=0)
-        if self.limb.bhvType.get() in self.bhvMng.fkikTypeIndexes:
-            fkikGroup = pm.listConnections(self.limb.bhvFKIKSwitchGroup)[0]
-            groups = pm.listConnections(fkikGroup.bindSource)
-            if groups:
-                limbs = pm.listConnections(groups[0].limb)
-            else:
-                limbs = None
-            if pm.listConnections(fkikGroup.bindTargets):
-                pm.optionMenu(self.fkikTargetLimb_om, e=1, en=0)
-                return
-        else:
-            limbs = pm.listConnections(self.limb.appTargetFKIKLimb)
-            pm.attrEnumOptionMenu(self.targetType, e=1, en=1)
-        if limbs:
-            limb = limbs[0]
-            prefix = self.limbMng.GetLimbPrefix(limb)
-            side = self.limbMng.GetLimbSide(limb)
-            name = '%s_%s_%s' % (prefix, limb.pfrsName.get(), side)
-            index = self.limbOrder.index(name) + 2 # start index 1 + (none = 1)
-            pm.optionMenu(self.fkikTargetLimb_om, e=1, sl=index)
-        else:
+        parent = pm.listConnections(self.limb.appFKIKVisParent)
+        if not parent:
             pm.optionMenu(self.fkikTargetLimb_om, e=1, sl=1)
+            return
+        parent = parent[0]
+        prefix = self.limbMng.GetLimbPrefix(parent)
+        side = self.limbMng.GetLimbSide(parent)
+        name = '%s_%s_%s' % (prefix, parent.pfrsName.get(), side)
+        index = self.limbOrder.index(name) + 2 # start index 1 + (none = 1)
+        pm.optionMenu(self.fkikTargetLimb_om, e=1, sl=index)
 
     # def SetControlType(self, ctrType):
     #     msg = '\tLimbProp > SET CONTROL TYPE to "%s"' % ctrType

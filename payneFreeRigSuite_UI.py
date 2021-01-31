@@ -185,39 +185,6 @@ class PayneFreeRigSuite_UI():
 
     # def UpdateLimb(self, limb):
     #     pass
-    def RebuildLimbs(self):
-        allLimbs = self.limbMng.GetAllLimbs()
-        self.logger.info('--- REBUILDING LIMBS START ---')
-        self.logger.info('Rebuilding LIMB TYPES for:')
-        for limb in allLimbs:
-            if limb.rebuildLimbType.get():
-                self.logger.info('\t%s' % limb.pfrsName.get())
-                self.bhvMng.RebuildLimbType(limb)
-        self.logger.info('Rebuilding BEHAVIOR TYPES for:')
-        for limb in allLimbs:
-            if limb.rebuildBhvType.get():
-                self.logger.info('\t%s' % limb.pfrsName.get())
-                self.bhvMng.RebuildBhvType(limb)
-        self.logger.info('Rebuilding LIMB GROUPS for:')
-        for limb in allLimbs:
-            if limb.rebuildLimbGroup.get():
-                self.logger.info('\t%s' % limb.pfrsName.get())
-                self.bhvMng.RebuildLimbGroup(limb)
-        self.logger.info('Rebuilding BEHAVIOR DEPENDENCIES for:')
-        for limb in allLimbs:
-            if limb.rebuildBhvDep.get():
-                self.logger.info('\t%s' % limb.pfrsName.get())
-                self.bhvMng.RebuildBhvDep(limb)
-        self.logger.info('Rebuilding APPEARANCE DEPENDENCIES for:')
-        for limb in allLimbs:
-            if limb.rebuildAppDep.get():
-                pass
-        self.logger.info('Rebuilding SKIN INFLUENCES for:')
-        for limb in allLimbs:
-            if limb.rebuildSkinInf.get():
-                pass
-        msg = '--- REBUILDING LIMBS END ---\n'
-        self.logger.info(msg)
     
 #=========== TAB SWITCHING ====================================
 

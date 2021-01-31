@@ -4,6 +4,7 @@ import pymel.core as pm
 class PW_Limb_Hierarchy_UI:
     def __init__(self, parent):
         self.parent = parent
+        self.bhvMng = parent.bhvMng
         self.limbMng = parent.limbMng
         self.jntMng = parent.jntMng
         # self.bhvMng = bhvMng
@@ -14,7 +15,8 @@ class PW_Limb_Hierarchy_UI:
     def Populate(self):
         pm.treeView(self.widget, e=1, removeAll=1)
         # SKEL HIER
-        tempParents = self.limbMng.GetDefaultLimbHier(self.jntMng)
+        limbParents = self.bhvMng.GetDefaultLimbHier()
+        tempParents = limbParents.copy()
         if not tempParents:
             return
         limbCreationOrder = []
@@ -27,7 +29,6 @@ class PW_Limb_Hierarchy_UI:
                     limbCreationOrder.append(child)
                     del(tempParents[child])
         prefix = self.parent.parent.rigRoot.prefix.get()
-        limbParents = self.limbMng.GetDefaultLimbHier(self.jntMng)
         for limb in limbCreationOrder[::-1]:
             limbID = limb.ID.get()
             name = '%s_%s' % (prefix, limb.pfrsName.get())
@@ -48,12 +49,7 @@ class PW_Limb_Hierarchy_UI:
     def _Setup(self):
         self.widget = pm.treeView(ams=0, adr=0, arp=0, nb=1)
         pm.treeView(self.widget, e=1, scc=self.SelectionChanged)
-        # with pm.popupMenu():
-        #     pm.menuItem(l='Load Skeleton Hierarchy', c=self.LoadSkelHier)
-        #     pm.menuItem(l='Load Default Hierarchy', c=self.LoadDefaultHier)
-        #     pm.menuItem(divider=1)
-        #     pm.menuItem(l='Save as Default Hierarchy', c=self.SaveAsDefaultHier)
-
+        
 #=========== FUNCTIONS ====================================
 
     def SelectionChanged(self):

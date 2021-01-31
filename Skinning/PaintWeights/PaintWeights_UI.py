@@ -19,6 +19,7 @@ class PaintWeights_UI:
         self.parent = parent
         self.limbMng = parent.limbMng
         self.jntMng = parent.jntMng
+        self.bhvMng = parent.bhvMng
         self.meshMng = parent.meshMng
         self.skinMng = parent.skinMng
         self.logger = parent.logger

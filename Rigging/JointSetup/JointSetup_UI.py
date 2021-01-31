@@ -5,6 +5,7 @@ class JointSetup_UI:
     def __init__(self, parent):
         self.parent = parent
         self.jntMng = parent.jntMng
+        self.bhvMng = parent.bhvMng
         self.logger = parent.logger
 
         self.scriptJob = None
@@ -92,7 +93,7 @@ class JointSetup_UI:
     def Teardown_Editable(self):
         self.logger.info('Rigging > Joint Setup TEARDOWN\n')
         self.KillScripts()
-        self.parent.parent.RebuildLimbs()
+        self.bhvMng.RebuildLimbs()
     
     def KillScripts(self):
         if self.scriptJob:

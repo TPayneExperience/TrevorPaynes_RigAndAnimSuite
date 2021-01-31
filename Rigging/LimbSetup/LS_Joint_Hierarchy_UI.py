@@ -58,7 +58,7 @@ class LS_Joint_Hierarchy_UI:
             self.logger.info('\t\t' + str(joint))
         if len(joints) > 1 and self.jntMng.AreJointsChained(joints):
             if self.jntMng.AreJointsChained(selJoints):
-                chainJoints = self.jntMng.GetJointChain(selJoints)
+                chainJoints = self.jntMng.GetCompleteJointChain(selJoints)
                 if (len(chainJoints) == len(selJoints)):
                     if selJoints[0] == joints[0] or selJoints[-1] == joints[-1]:
                         pm.menuItem(self.remove_mi, e=1, en=1)
@@ -108,14 +108,13 @@ class LS_Joint_Hierarchy_UI:
         if not self.nameMng.AreAllValidCharacters(newName):
             return ''
         jointNames = []
-        for limbJoint in self.jntMng.GetLimbJoints(self.limb):
+        for limbJoint in pm.listConnections(self.limb.joints):
             jointNames.append(limbJoint.pfrsName.get())
         if newName in jointNames:
             self.logger.error('**** Joint name not unique to limb *****')
             return ''
         joint.pfrsName.set(newName)
-        group = pm.listConnections(joint.group)[0]
-        self.grpMng.UpdateGroupName(group)
+        self.parent.RenameJoint(joint)
         self.parent.PopulateJoints()
         return ''
 

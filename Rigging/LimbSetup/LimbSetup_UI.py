@@ -15,6 +15,7 @@ class LimbSetup_UI:
         self.grpMng = parent.grpMng
         self.ctrMng = parent.ctrMng
         self.nameMng = parent.nameMng
+        self.bhvMng = parent.bhvMng
         self.parent = parent
         self.logger = parent.logger
 
@@ -56,19 +57,16 @@ class LimbSetup_UI:
     def Setup_Editable(self):
         self.logger.info('Rigging > Limb Setup SETUP')
         self.limbMng.RebuildLimbDict()
-        # for limb in self.limbMng.GetAllLimbs():
-            # for joint in self.jntMng.GetLimbJoints(limb):
-                # pm.disconnectAttr(joint.tempLimb)
-                # pm.connectAttr(limb.tempJoints, joint.tempLimb)
         self.Populate()
         if not self.scriptJob:
-            self.scriptJob = pm.scriptJob( e=("SelectionChanged",self.sceneHier_ui.SelectSceneHierJoints), pro=True)
+            self.scriptJob = pm.scriptJob( e=("SelectionChanged",
+                    self.sceneHier_ui.SelectSceneHierJoints), pro=True)
             print ('STARTING LimbSetup selection detection script...')
 
     def Teardown_Editable(self):
         self.logger.info('Rigging > Limb Setup TEARDOWN\n')
         self.KillScripts()
-        self.parent.parent.RebuildLimbs()
+        self.bhvMng.RebuildLimbs()
     
     def KillScripts(self):
         if self.scriptJob:
@@ -80,7 +78,7 @@ class LimbSetup_UI:
     
     def AddLimb(self, ignore): # Limb Hier UI > RMB > Add
         self.logger.info('\tLimbHier > ADD Limb')
-        limb = self.AddLimbByJoints(self.jointsToCreateLimb)
+        limb = self.bhvMng.AddLimbByJoints(self.jointsToCreateLimb)
         self.parent.AddLimb(limb) # BHV Limb Mng add
         self.ClearJointsToAdd()
         pm.select(d=1)
@@ -88,61 +86,34 @@ class LimbSetup_UI:
         self.PopulateJoints()
         self.limbHier_ui.Populate()
     
-    def AddLimbByJoints(self, joints): # Scene hier UI > RMB > Autobuild
-        self.logger.debug('\tLimbSetup_UI > AddLimbByJoints')
-        limb = None
-        if (len(joints) < 2):
-            limb = self.limbMng.Add()
-            if joints:
-                self.jntMng.Add(limb, joints[0])
-                # self._AddJoint(limb, joints[0])
-        # CHAIN LIMB
-        if not limb and self.jntMng.AreJointsChained(joints):
-            limb = self.limbMng.Add()
-            # Reverse = prevent groups from adding to joint display layer
-            for joint in self.jntMng.GetJointChain(joints)[::-1]:
-                self.jntMng.Add(limb, joint)
-            self.jntMng.ReindexJoints(limb)
-
-        # BRANCH LIMB
-        if not limb and self.jntMng.AreJointsSiblings(joints):
-            limb = self.limbMng.Add()
-            for joint in joints:
-                self.jntMng.Add(limb, joint)
-            self.jntMng.ReindexJoints(limb)
-        return limb
-
-    # def _AddJoint(self, limb, joint):
-    #     if self.jntMng.Teardown_Editable(limb, joint):
-    #         group = self.grpMng.AddJointGroup(limb, joint)
-    #         self.ctrMng.Add(group, 'Circle_Wire') # Fix later
-
     def RemoveLimb(self, limb):
         self.logger.debug('\tLimbSetup_UI > RemoveLimb')
         self.UpdateJointFrame()
         self.parent.RemoveLimb(limb)
 
-    def RenameLimbs(self, limb):
-        self.logger.debug('\tLimbSetup_UI > RenameLimbs')
+    def RenameLimb(self, limb):
+        self.logger.debug('\tLimbSetup_UI > RenameLimb')
         groups = pm.listConnections(limb.bhvIKPVGroup)
         groups += pm.listConnections(limb.bhvLookAtGroup)
         groups += pm.listConnections(limb.bhvEmptyGroup)
         groups += pm.listConnections(limb.bhvFKIKSwitchGroup)
         for group in groups:
             self.grpMng.UpdateGroupName(group)
-        # for joint in pm.listConnections(limb.infJoints):
         for joint in pm.listConnections(limb.joints):
-            self.jntMng.UpdateJointName(joint)
-            group = pm.listConnections(joint.group)[0]
-            self.grpMng.UpdateGroupName(group)
+            self.RenameJoint(joint)
         self.Populate()
+
+    def RenameJoint(self, joint):
+        self.jntMng.UpdateJointName(joint)
+        group = pm.listConnections(joint.group)[0]
+        self.grpMng.UpdateGroupName(group)
 
     def FlipSides(self):
         self.logger.debug('\tLimbSetup_UI > FlipSides')
         self.Populate()
 
     def LimbSelected(self, limb):
-        self.logger.debug('\tLimbSetup_UI > RenameLimbs')
+        self.logger.debug('\tLimbSetup_UI > RenameLimb')
         self.limb = limb
         self.jntHier_ui.SetLimb(limb)
         self.UpdateJointFrame(limb)
@@ -166,7 +137,7 @@ class LimbSetup_UI:
             if len(joints) == 1 or self.jntMng.AreJointsSiblings(joints):
                 self.jointsToCreateLimb = joints
             elif self.jntMng.AreJointsChained(joints):
-                jointChain = self.jntMng.GetJointChain(joints)
+                jointChain = self.jntMng.GetCompleteJointChain(joints)
                 for joint in jointChain:
                     if self.jntMng.HasLimb(joint):
                         self.limbHier_ui.SetAddEnabled(0)
@@ -185,17 +156,15 @@ class LimbSetup_UI:
                     self.jointsToAddToLimb = joints
                     self.jntHier_ui.SetAddEnabled(1)
                 elif self.jntMng.AreJointsChained(allJoints):
-                    jointChain = self.jntMng.GetJointChain(allJoints)
-                    for joint in jointChain:
-                        # if self.jntMng.HasTempLimb(joint) and \
-                        #     (self.jntMng.GetTempLimb(joint) != self.limb):
-                        #     return 
-                        if self.jntMng.HasLimb(joint) and \
-                            (self.jntMng.GetLimb(joint) != self.limb):
-                            return 
-                    # t = [j for j in jointChain if not self.jntMng.HasTempLimb(j)]
-                    t = [j for j in jointChain if not self.jntMng.HasLimb(j)]
-                    self.jointsToAddToLimb = t
+                    temp = []
+                    for joint in self.jntMng.GetCompleteJointChain(allJoints):
+                        if joint.hasAttr('limb'):
+                            jointLimb = pm.listConnections(joint.limb)
+                            if jointLimb[0] != self.limb:
+                                return 
+                        else:
+                            temp.append(joint)
+                    self.jointsToAddToLimb = temp
                     self.jntHier_ui.SetAddEnabled(1)
     
     def ClearJointsToAdd(self):

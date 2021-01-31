@@ -53,7 +53,7 @@ class Behavior_UI:
         self.limbProp_ui.Depopulate()
         self.grpHier_ui.SetLimb(None)
         self.grpProp_ui.Depopulate()
-        self.parent.parent.RebuildLimbs()
+        self.bhvMng.RebuildLimbs()
 
 #=========== LIMBS ====================================
 

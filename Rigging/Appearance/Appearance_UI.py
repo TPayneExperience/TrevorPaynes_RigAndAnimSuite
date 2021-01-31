@@ -54,7 +54,7 @@ class Appearance_UI:
     
     def Teardown_Editable(self):
         self.logger.info('Rigging > Appearance TEARDOWN\n')
-        self.parent.parent.RebuildLimbs()
+        self.bhvMng.RebuildLimbs()
 
 #=========== LIMBS ====================================
 

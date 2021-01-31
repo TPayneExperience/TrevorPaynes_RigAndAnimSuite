@@ -122,10 +122,10 @@ class BHV_Group_Manager:
         self.logger.debug('\tGrpMng > AddFKIKSwitchGroup')
         group = self._AddGroup()
         group.groupType.set(3)
-        pm.addAttr(group, ln='FKVisTargets', dt='string') # for easy Test Connections
-        pm.addAttr(group, ln='IKVisTargets', dt='string')
-        pm.addAttr(group, ln='bindSource', dt='string') # For FKIK to link to eachother
-        pm.addAttr(group, ln='bindTargets', dt='string')
+        # pm.addAttr(group, ln='FKVisTargets', dt='string') # for easy Test Connections
+        # pm.addAttr(group, ln='IKVisTargets', dt='string')
+        # pm.addAttr(group, ln='bindSource', dt='string') # For FKIK to link to eachother
+        # pm.addAttr(group, ln='bindTargets', dt='string')
         pm.addAttr(group, ln='limb', dt='string')
         pm.connectAttr(limb.bhvFKIKSwitchGroup, group.limb)
         pm.parent(group, limb)

@@ -33,21 +33,11 @@ class Joint_Manager:
         self._joints = {} # jointID: jointNode
         self.rigRoot = rigRoot
         pm.addAttr(rigRoot, ln='nextJointID', at='short', dv=1)
-        # pm.addAttr(rigRoot, ln='joints', dt='string')
 
         pm.select(d=1)
         self.jntGroup = pm.group(name='Skeleton', em=1, p=rigRoot)
         self.skelLayer = pm.createDisplayLayer(n='Skel Joints', e=True)
         self.skelLayer.displayType.set(2)
-
-    # def SetRig(self, rigRoot):
-    #     self.rigRoot = rigRoot
-    #     self._joints = {} # jointID: jointNode
-    #     for rootLimbID in self.limbMng.GetRootLimbIDs():
-    #         for limbID in self.limbMng.GetLimbCreationOrder(rootLimbID):
-    #             for joint in self.GetLimbJoints(limbID):
-    #                 self._joints[joint.ID.get()] = joint
-        # Missing: Get Skeleton group, get skeleton layer
 
 #============= ACCESSORS + MUTATORS ============================
 
@@ -65,9 +55,9 @@ class Joint_Manager:
             return False
         return bool(pm.listConnections(joint.limb))
 
-    def GetLimb(self, joint):
-        self.logger.debug('\tJntMng > GetLimb')
-        return pm.listConnections(joint.limb)[0]
+    # def GetLimb(self, joint):
+    #     self.logger.debug('\tJntMng > GetLimb')
+    #     return pm.listConnections(joint.limb)[0]
 
     # def GetLimbJoints(self, limb, includeNonInf=True):
     def GetLimbJoints(self, limb):
@@ -164,56 +154,13 @@ class Joint_Manager:
                 self.grpMng.Remove(group)
         pm.delete(joint)
         
-#============= NON INF JOINT HANDLING ============================
-
-    # def _ConnectLimbToJoint(self, limb, joint):
-    #     pm.connectAttr(limb.infJoints, joint.limb)
-        # self._SetupNonInfJoint(limb)
-
-    # def _DisconnectLimbJoint(self, joint):
-    #     limb = pm.listConnections(joint.limb)[0]
-    #     nonInfJoints = pm.listConnections(limb.nonInfJoint)
-    #     if nonInfJoints:
-    #         nonInfJoint = nonInfJoints[0]
-    #         pm.disconnectAttr(nonInfJoint.limb)
-    #         pm.connectAttr(limb.infJoints, nonInfJoint.limb)
-        # self._SetupNonInfJoint(limb)
-
-    # def Setup_NonInfJoint(self, limb):
-    #     joint = self.GetLimbJoints(limb)[-1]
-    #     pm.disconnectAttr(joint.limb)
-    #     pm.connectAttr(limb.nonInfJoint, joint.limb)
-
-    # def Teardown_NonInfJoint(self, limb):
-    #     joint = self.GetLimbJoints(limb)[-1]
-    #     pm.disconnectAttr(joint.limb)
-    #     pm.connectAttr(limb.infJoints, joint.limb)
-
 #============= FUNCTIONALITY ============================
 
     def ReindexJoints(self, limb):
         self.logger.debug('\tJntMng > ReindexJoints')
-        temp = {} # longName : joint
-        # for joint in pm.listConnections(limb.infJoints):
-        for joint in pm.listConnections(limb.joints):
-            temp[joint.longName()] = joint
-        i = 0
-        for key in sorted(list(temp.keys())):
-            temp[key].limbIndex.set(i)
-            i += 1
-
-    # def Teardown_Editable(self, joint): # for Limb Setup
-    #     pass
-        # group = pm.listConnections(joint.group)[0]
-        # pm.disconnectAttr(group.limb)
-        # pm.disconnectAttr(joint.tempLimb)
-        # pm.connectAttr(limb.tempJoints, joint.tempLimb)
-        # self.ReindexJoints(limb)
-    
-    # def Setup_Editable(self, joint):
-    #     # group = pm.listConnections(joint.group)[0]
-    #     # pm.disconnectAttr(group.limb)
-    #     self.UpdateJointName(joint)
+        joints = sorted(pm.listConnections(limb.joints))
+        for i in range(len(joints)):
+            joints[i].limbIndex.set(i)
     
     def UpdateAllJointNames(self): # if prefix changed
         self.logger.debug('\tJntMng > UpdateAllJointNames')
@@ -227,7 +174,7 @@ class Joint_Manager:
 
     def UpdateJointName(self, joint):
         self.logger.debug('\tJntMng > UpdateJointName')
-        limb = self.GetLimb(joint)
+        limb = pm.listConnections(joint.limb)[0]
         name = self.nameMng.GetName(limb.pfrsName.get(),
                                     joint.pfrsName.get(),
                                     self.limbMng.GetLimbSide(limb), 
@@ -248,67 +195,56 @@ class Joint_Manager:
     
     def AreJointsChained(self, joints):
         self.logger.debug('\tJntMng > AreJointsChained')
-        bestChain = self.GetJointChain(joints)
-        return all([j in bestChain for j in joints])
-    
-    def GetJointChain(self, joints):
-        '''returns child most to parent most joint list'''
-        self.logger.debug('\tJntMng > GetJointChain')
-        if len(joints) == 1:
-            return joints
-        temp = {} # longName : node
-        for joint in joints:
-            temp[joint.longName()] = joint
-        rootParent = temp[min(list(temp.keys()))]
-        child = temp[max(list(temp.keys()))]
-        jointChain = [child]
-        parent = child
-        for i in range(999):
-            parent = pm.listRelatives(parent, p=1)
+        jointsCopy = sorted(joints)
+        child = jointsCopy[-1]
+        jointsCopy.remove(child)
+        while (jointsCopy):
+            parent = pm.listRelatives(child, p=1)
             if not parent:
-                break
+                return False
             parent = parent[0]
+            if not pm.objectType(parent, isa='joint'):
+                msg = '*** Only Joints Allowed in Skeleton hierarchy'
+                self.logger.error(msg)
+                return False
+            if parent in jointsCopy:
+                jointsCopy.remove(parent)
+            child = parent
+        return True
+
+    def GetCompleteJointChain(self, joints):
+        '''returns child most to parent most joint list'''
+        self.logger.debug('\tJntMng > GetCompleteJointChain')
+        jointsCopy = sorted(joints)
+        child = jointsCopy[-1]
+        jointChain = [child]
+        while(jointsCopy):
+            jointsCopy.remove(child)
+            parent = pm.listRelatives(child, p=1)
             jointChain.append(parent)
-            if parent == rootParent:
-                break
+            child = parent
         return jointChain
 
-    # def UpdateLimbParentJoint(self, childLimb):
-    #     '''Updates limb parent group enum to closest to root group'''
-    #     self.logger.debug('\tJntMng > UpdateLimbParentJoint')
-    #     # childLimb = self.limbMng.GetLimb(limbID)
-    #     parents = pm.listConnections(childLimb.parentLimb)
-
-    #     # If NO PARENT or parent EMPTY, set and return
-    #     if not parents:
-    #         pm.addAttr(childLimb.parentJoint, e=1, en='None')
-    #         return
-    #     parentLimb = parents[0]
-    #     parentBhvType = parentLimb.bhvType.get()
-    #     if parentBhvType == 7:
-    #         pm.addAttr(childLimb.parentJoint, e=1, en='Empty')
-    #         return
-        
-    #     # Default to closest joint
-    #     distances = {} # dist : joint
-    #     names = []
-    #     # joints = self.jngMng.GetLimbJoints(parentLimb)
-    #     rootGroup = self.grpMng.GetLimbGroups(childLimb)[0]
-    #     sourcePos = pm.xform(rootGroup, q=1, t=1, ws=1)
-    #     parentJoints = self.GetLimbJoints(parentLimb)
-    #     for joint in parentJoints:
-    #         # Create distance dict
-    #         targetPos = pm.xform(joint, q=1, t=1, ws=1)
-    #         dist = 0
-    #         for i in range(3):
-    #             dist += (sourcePos[i]-targetPos[i])**2
-    #         distances[dist] = joint
-    #         names.append(joint.pfrsName.get())
-    #     pm.addAttr(childLimb.parentJoint, e=1, en=':'.join(names))
-    #     # Set Closest Group Index
-    #     closestDist = sorted(list(distances.keys()))[0]
-    #     index = parentJoints.index(distances[closestDist])
-    #     childLimb.parentJoint.set(index)
+        # # OLD ALGO
+        # if len(joints) == 1:
+        #     return joints
+        # temp = {} # longName : node
+        # for joint in joints:
+        #     temp[joint.longName()] = joint
+        # names = sorted(temp.keys())
+        # rootParent = temp[names[0]]
+        # child = temp[names[-1]]
+        # jointChain = [child]
+        # parent = child
+        # for i in range(999):
+        #     parent = pm.listRelatives(parent, p=1)
+        #     if not parent:
+        #         break
+        #     parent = parent[0]
+        #     jointChain.append(parent)
+        #     if parent == rootParent:
+        #         break
+        # return jointChain
 
 
     # def DuplicateLimb(self, sourceLimbID, targetLimbID):
