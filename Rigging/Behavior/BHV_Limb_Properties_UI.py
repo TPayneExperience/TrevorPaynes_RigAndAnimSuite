@@ -14,7 +14,6 @@ class BHV_Limb_Properties_UI:
         self.targetJnt_at = None
         self.cstType_at = None
         self.rkfType_at = None
-        # self.fkikJoint_at = None
 
         self.jntLimbs = {} # limbName : limb
         self.jntLimbOrder = [] # limbs
@@ -168,9 +167,6 @@ class BHV_Limb_Properties_UI:
         if self.targetJnt_at:
             pm.deleteUI(self.targetJnt_at)
             self.targetJnt_at = None
-        # if self.fkikJoint_at:
-        #     pm.deleteUI(self.fkikJoint_at)
-        #     self.fkikJoint_at = None
         if bhvType not in self.bhvMng.targetIndexes:
             return
 
@@ -208,22 +204,9 @@ class BHV_Limb_Properties_UI:
                                                         at=self.limb.bhvTargetJoint,
                                                         p=self.targetProp_cl,
                                                         cc=self.LogTargetJoint)
-        # # FKIK
-        # if bhvType in self.bhvMng.fkikTypeIndexes: # FKIK
-        #     fkikGroup = pm.listConnections(self.limb.bhvFKIKSwitchGroup)[0]
-        #     self.fkikJoint_at = pm.attrEnumOptionMenu(  l='FKIK Joint',
-        #                                                 at=fkikGroup.targetJoint, 
-        #                                                 p=self.targetProp_cl,
-        #                                                 cc=self.UpdateFKIKSwitchJoint)
 
     def LogTargetJoint(self, targetJointStr):
         msg = '\tLimbIKCst > SET TARGET JOINT to '
         msg += '"%s"' % targetJointStr
         self.logger.info(msg)
-
-    # def UpdateFKIKSwitchJoint(self, jointStr):
-    #     msg = '\tLimbIKCst > FKIK JOINT to "%s"' % jointStr
-    #     self.logger.info(msg)
-    #     self.bhvMng.UpdateFKIKSwitchJoint(self.limb)
-        
 

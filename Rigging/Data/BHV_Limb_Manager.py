@@ -137,12 +137,15 @@ class BHV_Limb_Manager:
         pm.disconnectAttr(sourceLimb.bhvTargetLimb)
         pm.connectAttr(targetLimb.bhvSourceLimb, sourceLimb.bhvTargetLimb)
         # If only one target, set and return
-        if len(targetJoints) < 2:
-            if targetLimb.bhvType.get() == 7: # Empty
-                self._SetTargetJointEnum(sourceLimb, 'Empty')
-            else:
-                jointName = targetJoints[0].pfrsName.get()
-                self._SetTargetJointEnum(sourceLimb, jointName)
+        # if len(targetJoints) < 2:
+        #     if targetLimb.bhvType.get() == 7: # Empty
+        #         self._SetTargetJointEnum(sourceLimb, 'Empty')
+        #     else:
+        #         jointName = targetJoints[0].pfrsName.get()
+        #         self._SetTargetJointEnum(sourceLimb, jointName)
+        #     return
+        if targetLimb.bhvType.get() == 7: # Empty
+            self._SetTargetJointEnum(sourceLimb, 'Empty')
             return
         targetJointNames = [j.pfrsName.get() for j in targetJoints]
         names = ':'.join(targetJointNames)
@@ -228,6 +231,40 @@ class BHV_Limb_Manager:
 
 #============= REBUILD ============================
 
+    def RebuildLimbs(self):
+        allLimbs = self.limbMng.GetAllLimbs()
+        self.logger.info('--- REBUILDING LIMBS START ---')
+        self.logger.info('Rebuilding LIMB TYPES for:')
+        for limb in allLimbs:
+            if limb.rebuildLimbType.get():
+                self.logger.info('\t%s' % limb.pfrsName.get())
+                self.RebuildLimbType(limb)
+        self.logger.info('Rebuilding BEHAVIOR TYPES for:')
+        for limb in allLimbs:
+            if limb.rebuildBhvType.get():
+                self.logger.info('\t%s' % limb.pfrsName.get())
+                self.RebuildBhvType(limb)
+        self.logger.info('Rebuilding LIMB GROUPS for:')
+        for limb in allLimbs:
+            if limb.rebuildLimbGroup.get():
+                self.logger.info('\t%s' % limb.pfrsName.get())
+                self.RebuildLimbGroup(limb)
+        self.logger.info('Rebuilding BEHAVIOR DEPENDENCIES for:')
+        for limb in allLimbs:
+            if limb.rebuildBhvDep.get():
+                self.logger.info('\t%s' % limb.pfrsName.get())
+                self.RebuildBhvDep(limb)
+        self.logger.info('Rebuilding APPEARANCE DEPENDENCIES for:')
+        for limb in allLimbs:
+            if limb.rebuildAppDep.get():
+                pass
+        self.logger.info('Rebuilding SKIN INFLUENCES for:')
+        for limb in allLimbs:
+            if limb.rebuildSkinInf.get():
+                pass
+        msg = '--- REBUILDING LIMBS END ---\n'
+        self.logger.info(msg)
+
     def RebuildLimbType(self, limb):
         '''Set limbType if invalid'''
         self.logger.debug('\tBhvMng > RebuildLimbType')
@@ -307,7 +344,8 @@ class BHV_Limb_Manager:
             if not pm.listConnections(limb.bhvFKIKSwitchGroup):
                 group = self.grpMng.AddFKIKSwitchGroup(limb)
                 self.grpMng.UpdateGroupName(group)
-            self.UpdateFKIKSwitchJoint(limb)
+            self.PopulateFKIKSwitchParentJoint(limb)
+            self.UpdateFKIKSwitchParentJoint(limb)
         if bhvType in self.emptyLimbIndexes:
             if not pm.listConnections(limb.bhvEmptyGroup):
                 group = self.grpMng.AddEmptyGroup(limb)
@@ -381,17 +419,23 @@ class BHV_Limb_Manager:
             if limb == sourceLimb:
                 continue
             if limb.bhvType.get() in bhvFilter:
-                for targetGroup in self.GetJointGroups(limb):
-                    targetPos = pm.xform(targetGroup, q=1, t=1, ws=1)
+                joints = pm.listConnections(limb.joints)
+                if not joints:
+                    joints = pm.listConnections(limb.bhvEmptyGroup)
+                for joint in joints:
+                    targetPos = pm.xform(joint, q=1, t=1, ws=1)
                     dist = 0
                     for i in range(3):
                         dist += (sourcePos[i]-targetPos[i])**2
                     distances[dist] = limb
+
         if not distances:
             return None
         # Get Closest limb
         dist = sorted(list(distances.keys()))[0]
         return distances[dist]
+
+
 
 #============= SETUP BHV ============================
     # EMPTY Created by Limb Setup UI > Teardown Tab
@@ -410,7 +454,8 @@ class BHV_Limb_Manager:
             self.RebuildBhvDep(limb)
         # FKIK
         if bhvType in self.fkikTypeIndexes:
-            self.UpdateFKIKSwitchJoint(limb)
+            self.PopulateFKIKSwitchParentJoint(limb)
+            self.UpdateFKIKSwitchParentJoint(limb)
         # RFK
         if bhvType in self.rfkTypeIndexes:
             joints = self.jntMng.GetLimbJoints(limb)
@@ -428,7 +473,6 @@ class BHV_Limb_Manager:
                 sourceLimb.rebuildBhvDep.set(1)
             pm.disconnectAttr(limb.bhvSourceLimb)
         
-
 # ============= GROUP VISIBILITY ============================
 
     def Setup_LimbGroupVisibility(self, limb):
@@ -497,11 +541,19 @@ class BHV_Limb_Manager:
         pm.xform(group, t=pos)
         pm.parent(group, limb)
 
-    def UpdateFKIKSwitchJoint(self, limb):
-        self.logger.debug('\tBhvMng > UpdateFKIKSwitchJoint')
-        # index = limb.targetJoint.get()
-        # joint = self.jntMng.GetLimbJoints(limb)[index]
-        # group = pm.listConnections(limb.bhvFKIKSwitchGroup)[0]
+    def PopulateFKIKSwitchParentJoint(self, limb):
+        joints = self.jntMng.GetLimbJoints(limb)
+        names = [j.pfrsName.get() for j in joints]
+        pm.addAttr(limb.bhvFKIKSwitchParentJoint, e=1, en=names)
+
+    def UpdateFKIKSwitchParentJoint(self, limb):
+        self.logger.debug('\tBhvMng > UpdateFKIKSwitchParentJoint')
+        index = limb.bhvFKIKSwitchParentJoint.get()
+        joint = self.jntMng.GetLimbJoints(limb)[index]
+        group = pm.listConnections(limb.bhvFKIKSwitchGroup)[0]
+        pm.parent(group, joint)
+        pm.xform(group, t=(0,0,0), ro=(0,0,0), s=(1,1,1))
+        pm.parent(group, limb)
 
     def UpdateRFKConnections(self, limb):
         self.logger.debug('\tBhvMng > UpdateRFKConnections')
@@ -518,7 +570,7 @@ class BHV_Limb_Manager:
             pm.connectAttr(groups[i].joint, joint.bhvRFKGroup)
             pos = pm.xform(joint, q=1, t=1, ws=1)
             rot = pm.xform(joint, q=1, ro=1, ws=1)
-            pm.xform(groups[i], t=pos, ro=rot, s=[1,1,1], ws=1)
+            pm.xform(groups[i], t=pos, ro=rot, s=(1,1,1), ws=1)
             self.grpMng.UpdateGroupName(groups[i])
         pm.parent(groups[0], groups[2], groups[1])
         pm.parent(groups[1], limb)
@@ -538,20 +590,6 @@ class BHV_Limb_Manager:
                 continue
             if childLimb[0] != parentLimb[0]:
                 limbParents[childLimb[0]] = parentLimb[0]
-        # limbParents = {} # childLimb : parentLimb
-        # for childLimb in self.limbMng.GetAllLimbs():
-        #     joints = self.jntMng.GetLimbJoints(childLimb)
-        #     if not joints:
-        #         continue
-        #     limbParents[childLimb] = None
-        #     childJoint = joints[0]
-        #     parentJoint = pm.listRelatives(childJoint, parent=1)
-        #     if not parentJoint:
-        #         continue
-        #     if not pm.hasAttr(parentJoint[0], 'limb'):
-        #         continue
-        #     parentLimb = pm.listConnections(parentJoint[0].limb)
-        #     limbParents[childLimb] = parentLimb
         return limbParents
 
     def ParentLimbsBySkeleton(self):
@@ -559,40 +597,6 @@ class BHV_Limb_Manager:
         for child, parent in limbParents.items():
             self.limbMng.Reparent(child, parent)
             self.UpdateLimbParentJoint(child)
-
-    def RebuildLimbs(self):
-        allLimbs = self.limbMng.GetAllLimbs()
-        self.logger.info('--- REBUILDING LIMBS START ---')
-        self.logger.info('Rebuilding LIMB TYPES for:')
-        for limb in allLimbs:
-            if limb.rebuildLimbType.get():
-                self.logger.info('\t%s' % limb.pfrsName.get())
-                self.RebuildLimbType(limb)
-        self.logger.info('Rebuilding BEHAVIOR TYPES for:')
-        for limb in allLimbs:
-            if limb.rebuildBhvType.get():
-                self.logger.info('\t%s' % limb.pfrsName.get())
-                self.RebuildBhvType(limb)
-        self.logger.info('Rebuilding LIMB GROUPS for:')
-        for limb in allLimbs:
-            if limb.rebuildLimbGroup.get():
-                self.logger.info('\t%s' % limb.pfrsName.get())
-                self.RebuildLimbGroup(limb)
-        self.logger.info('Rebuilding BEHAVIOR DEPENDENCIES for:')
-        for limb in allLimbs:
-            if limb.rebuildBhvDep.get():
-                self.logger.info('\t%s' % limb.pfrsName.get())
-                self.RebuildBhvDep(limb)
-        self.logger.info('Rebuilding APPEARANCE DEPENDENCIES for:')
-        for limb in allLimbs:
-            if limb.rebuildAppDep.get():
-                pass
-        self.logger.info('Rebuilding SKIN INFLUENCES for:')
-        for limb in allLimbs:
-            if limb.rebuildSkinInf.get():
-                pass
-        msg = '--- REBUILDING LIMBS END ---\n'
-        self.logger.info(msg)
 
     def AddLimbByJoints(self, joints):
         self.logger.debug('\tBhvMng > AddLimbByJoints')
@@ -649,13 +653,10 @@ class BHV_Limb_Manager:
             for joint in newLimbJoints:
                 # self.jntMng.Setup_Editable(limb, joint)
                 self.jntMng.UpdateJointName(joint)
+        self.ParentLimbsBySkeleton()
     
     def AutoBuildByName(self):
         self.logger.debug('\tBhvMng > AutoBuildByName')
-        
-        # VERY INFLEXIBLE! NEED TO BUILD UI FOR BETTER USER
-        # CUSTOMIZATION LATER, like the rig setup ui
-
         # GROUP JOINTS AND VALIDATE NAMES
         allJoints = pm.ls(type='joint')
         limbJoints = self.jntMng.GetAllJoints()
@@ -696,31 +697,20 @@ class BHV_Limb_Manager:
             return
 
         # ADD LIMBS
-        # limbs = []
         for limbName, joints in newLimbs.items():
             limb = self.AddLimbByJoints(joints)
             self.AddLimb(limb)
             tempJoint = joints[0]
             limbName, side, l = tempJoint.shortName().split('_')
-            # side = tempJoint.shortName().split('_')[1]
             for joint in joints:
                 splitName = joint.shortName().split('_')
                 joint.pfrsName.set(splitName[-1])
-            # limbs.append(limb)
             if side.upper() == 'L':
                 limb.side.set(1)
             elif side.upper() == 'R':
                 limb.side.set(2)
             self.limbMng.Rename(limb, limbName)
-                
-        # for limb in limbs:
-        #     tempJoints = self.jntMng.GetLimbJoints(limb)
-        #     tempJoint = tempJoints[0]
-            # for joint in tempJoints:
-            # for joint in joints:
-                # self.jntMng.Setup_Editable(limb, joint)
-                # self.jntMng.UpdateJointName(joint)
-            # self.jntMng.ReindexJoints(limb)
+        self.ParentLimbsBySkeleton()
 
     def GetLongestJointChain(self, startJoint):
         self.logger.debug('\tBhvMng > GetLongestJointChain')

@@ -158,9 +158,12 @@ class Joint_Manager:
 
     def ReindexJoints(self, limb):
         self.logger.debug('\tJntMng > ReindexJoints')
-        joints = sorted(pm.listConnections(limb.joints))
-        for i in range(len(joints)):
-            joints[i].limbIndex.set(i)
+        temp = {} # LongName : joint
+        for joint in pm.listConnections(limb.joints):
+            temp[joint.longName()] = joint
+        names = sorted(temp.keys())
+        for i in range(len(names)):
+            temp[names[i]].limbIndex.set(i)
     
     def UpdateAllJointNames(self): # if prefix changed
         self.logger.debug('\tJntMng > UpdateAllJointNames')

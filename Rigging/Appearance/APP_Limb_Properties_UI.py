@@ -12,6 +12,7 @@ class APP_Limb_Properties_UI:
 
         self.ctrAxis_at = None
         self.ikpvCtrJoint_at = None
+        self.fkikJoint_at = None
         self.limb = None
         self.limbs = {} # name : limb
         self.limbOrder = []
@@ -57,6 +58,8 @@ class APP_Limb_Properties_UI:
                                                         cc=self.SetTargetFKIK)
                 self.targetType = pm.attrEnumOptionMenu(at='perspShape.filmFit')
                 self.ctrDist_cg = pm.attrControlGrp( l='Control Distance', a='persp.translateX')
+                self.fkikJoint_at = pm.attrControlGrp(l='Lock + Hide Scale',
+                                                a='perspShape.shakeEnabled')
 
 
 #=========== FUNCTIONALITY ==============================================
@@ -121,6 +124,17 @@ class APP_Limb_Properties_UI:
         pm.attrControlGrp(self.lockScale, e=1, a=self.limb.appLockHideScale,
                                         cc=pm.Callback(self.LogLockScale, 1))
         
+        # FKIK SWITCH 
+        if self.fkikJoint_at:
+            pm.deleteUI(self.fkikJoint_at)
+            self.fkikJoint_at = None
+        if bhvType in self.bhvMng.fkikTypeIndexes: # FKIK
+            self.fkikJoint_at = pm.attrEnumOptionMenu(  l='FKIK Switch Parent Joint',
+                                                        at=limb.bhvFKIKSwitchParentJoint, 
+                                                        p=self.appLimbProp_cl,
+                                                        cc=self.UpdateFKIKSwitchParentJoint)
+
+
         isFK = (bhvType in self.bhvMng.fkTypeIndexes)
         pm.optionMenu(self.fkikTargetLimb_om, e=1, en=isFK)
         self.Populate()
@@ -148,6 +162,12 @@ class APP_Limb_Properties_UI:
         name = '%s_%s_%s' % (prefix, parent.pfrsName.get(), side)
         index = self.limbOrder.index(name) + 2 # start index 1 + (none = 1)
         pm.optionMenu(self.fkikTargetLimb_om, e=1, sl=index)
+
+    def UpdateFKIKSwitchParentJoint(self, jointStr):
+        msg = '\tApp_LimbProp > FKIK SwitchParentJOINT to "%s"' % jointStr
+        self.logger.info(msg)
+        self.bhvMng.UpdateFKIKSwitchParentJoint(self.limb)
+        
 
     # def SetControlType(self, ctrType):
     #     msg = '\tLimbProp > SET CONTROL TYPE to "%s"' % ctrType

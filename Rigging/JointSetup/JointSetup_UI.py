@@ -93,6 +93,7 @@ class JointSetup_UI:
     def Teardown_Editable(self):
         self.logger.info('Rigging > Joint Setup TEARDOWN\n')
         self.KillScripts()
+        self.PrintJointTree()
         self.bhvMng.RebuildLimbs()
     
     def KillScripts(self):
@@ -100,3 +101,27 @@ class JointSetup_UI:
             pm.scriptJob( kill=self.scriptJob, f=True)
             self.scriptJob = None
             print ('KILLING JointSetup selection detection script...\n')
+
+    def PrintJointTree(self):
+        self.logger.info('\tJS > PrintJointTree\n')
+        self.logger.debug('=========== JOINT HIERARCHY ===========')
+        self.logger.debug('')
+        jointParents = {} # childName : ParentName
+        for child in pm.ls(type='joint'):
+            parent = pm.listRelatives(child, p=1, type='joint')
+            if not parent:
+                continue
+            jointParents[child] = parent[0]
+        children = set(jointParents.keys())
+        parents = set(jointParents.values())
+        for parent in list(parents - children):
+            self._PrintJointChildren(parent, '')
+        self.logger.debug('')
+        self.logger.debug('=========== END ===========\n')
+    
+    def _PrintJointChildren(self, parent, indent):
+        self.logger.debug('%s%s' % (indent, parent))
+        if not pm.objectType(parent, isa='joint'):
+            self.logger.warning('>>> NOT A JOINT! <<<')
+        for child in pm.listRelatives(parent, c=1):
+            self._PrintJointChildren(child, indent + '\t')

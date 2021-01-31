@@ -43,9 +43,9 @@ class LS_Scene_Hierarchy_UI:
     def _Setup(self):
         self.widget = pm.treeView(adr=0, arp=0, sc=self.Selection, scc=self.SelectionChanged)
         with pm.popupMenu():
-            self.buildHier_mi = pm.menuItem(l='Auto Build by HIERARCHY', 
+            self.buildHier_mi = pm.menuItem(l='Autobuild by JOINT HIERARCHY', 
                                             c=self.AutoBuildByHierarchy)
-            self.buildNames_mi = pm.menuItem(l='Auto Build by NAMES', 
+            self.buildNames_mi = pm.menuItem(l='Autobuild by JOINT NAMES (limbName_side(L/M/R)_jointName)', 
                                             c=self.AutoBuildByName)
 
 #=========== FUNCTIONALITY ====================================
@@ -83,7 +83,6 @@ class LS_Scene_Hierarchy_UI:
     def AutoBuildByHierarchy(self, ignore):
         self.logger.info('\tLS_SceneHier > Auto Build by Hierarchy')
         self.bhvMng.AutoBuildByHierarchy()
-        self.bhvMng.ParentLimbsBySkeleton()
         self.parent.Populate()
         self.parent.UpdateSceneFrame()
         self.logger.info('\tComplete')
@@ -92,7 +91,6 @@ class LS_Scene_Hierarchy_UI:
         '''Auto builds limb/joint hier by name LIMB_SIDE[M/R/L]_JOINT'''
         self.logger.info('\tLS_SceneHier > Auto Build by Name')
         self.bhvMng.AutoBuildByName()
-        self.bhvMng.ParentLimbsBySkeleton()
         self.parent.Populate()
         self.parent.UpdateSceneFrame()
         self.logger.info('\tComplete')

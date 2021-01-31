@@ -96,7 +96,6 @@ class APP_Control_Manager:
         pm.editDisplayLayerMembers(self.ctrLayer, ctr, nr=1)
         pm.connectAttr(group.control, ctr.group)
         pm.parent(ctr, group)
-        # pm.xform(ctr, t=(0,0,0), ro=(0,0,0), s=(1,1,1))
 
         self._ctrs[ctrID] = ctr
         return ctr
@@ -119,7 +118,9 @@ class APP_Control_Manager:
 
     def AddFKIKControl(self, group):
         index = self.rigRoot.appFKIKCtrShape.get()
-        self._Add(group, index)
+        control = self._Add(group, index)
+        for attr in ['.tx', '.ty', '.tz']:
+            pm.setAttr(control+attr, l=1, k=0, cb=0)
 
     def AddRKFControl(self, group):
         index = self.rigRoot.appRFKCtrShape.get()
