@@ -63,7 +63,7 @@ class BHV_Group_Properties_UI:
 #========== UPDATE UI ===============================
 
     def LogCstWeight(self, ignore, value):
-        self.logger.info('\tGroupProp > Weight SET to %f' + value)
+        self.logger.info('\tGroupProp > Weight SET to %f' % value)
 
     def Depopulate(self):
         self.logger.debug('\tBhv_GroupProp > Depopulate')

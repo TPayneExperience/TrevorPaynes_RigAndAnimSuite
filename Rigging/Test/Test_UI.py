@@ -25,10 +25,13 @@ class Test_UI:
         self.Setup_Controls()
         self.Setup_Internal()
         self.Setup_External()
+        self.Setup_Internal_MayaControllers()
+        self.Setup_External_MayaControllers()
         pm.select(d=1)
 
     def Teardown_Editable(self):
         self.logger.info('Rigging > Test TEARDOWN\n')
+        self.Teardown_MayaControllers()
         self.Teardown_Controls()
         self.Remove_Constraints()
         self.Teardown_Groups()
@@ -104,6 +107,44 @@ class Test_UI:
             elif (bhvType == 10):
                 self.Setup_External_RelativeFK(limb)
 
+    def Setup_Internal_MayaControllers(self):
+        for limb in self.limbMng.GetAllLimbs():
+            jointGroups = self.bhvMng.GetJointGroups(limb)
+            bhvType = limb.bhvType.get()
+            if bhvType in self.bhvMng.omitFirstJointTypes:
+                jointGroups = jointGroups[1:]
+            if bhvType in self.bhvMng.omitLastJointTypes:
+                jointGroups = jointGroups[:-1]
+            controls = []
+            for group in jointGroups:
+                controls += pm.listConnections(group.control)
+            for group in self.bhvMng.GetLimbGroups(limb):
+                controls += pm.listConnections(group.control)
+            pm.controller(controls, g=1)
+
+    def Setup_External_MayaControllers(self):
+        for limb in self.limbMng.GetAllLimbs():
+            parent = pm.listConnections(limb.parentLimb)
+            if not parent:
+                continue
+            parent = parent[0]
+            index = limb.parentJoint.get()
+            parentGroups = self.bhvMng.GetJointGroups(parent)
+            parentGroup = parentGroups[index]
+            parentControl = pm.listConnections(parentGroup.control)
+            jointGroups = self.bhvMng.GetJointGroups(limb)
+            bhvType = limb.bhvType.get()
+            if bhvType in self.bhvMng.omitFirstJointTypes:
+                jointGroups = jointGroups[1:]
+            if bhvType in self.bhvMng.omitLastJointTypes:
+                jointGroups = jointGroups[:-1]
+            controls = []
+            for group in jointGroups:
+                controls += pm.listConnections(group.control)
+            for group in self.bhvMng.GetLimbGroups(limb):
+                controls += pm.listConnections(group.control)
+            pm.controller(controls, parentControl, p=1)
+
 #=========== TEARDOWN FUNCTIONALITY ====================================
     
     def Teardown_Controls(self):
@@ -151,7 +192,11 @@ class Test_UI:
         for joint in self.jntMng.GetAllJoints():
             group = pm.listConnections(joint.group)[0]
             pm.parent(group, joint)
-                
+           
+    def Teardown_MayaControllers(self):
+        ctrs = pm.ls(type='controller')
+        pm.delete(ctrs)
+     
 #=========== FK ====================================
     
     # RELATIVE FK

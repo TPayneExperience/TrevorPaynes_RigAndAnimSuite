@@ -9,6 +9,7 @@ class LS_Limb_Hierarchy_UI:
         self.jntMng = parent.jntMng
         self.grpMng = parent.grpMng
         self.ctrMng = parent.ctrMng
+        self.bhvMng = parent.bhvMng
         self.nameMng = parent.nameMng
         self.logger = parent.logger
 
@@ -18,7 +19,9 @@ class LS_Limb_Hierarchy_UI:
         self.logger.debug('\tLS_LimbHier > Populate')
         pm.treeView(self.widget, e=1, removeAll=1)
         temp = {} # pfrsName : [limbs]
-        for limb in self.limbMng.GetAllLimbs():
+        allLimbs = self.limbMng.GetAllLimbs()
+        pm.menuItem(self.removeAll_mi, e=1, en=bool(allLimbs))
+        for limb in allLimbs:
             limbID = limb.ID.get()
             limbName = limb.pfrsName.get()
             if limbName not in temp:
@@ -50,10 +53,12 @@ class LS_Limb_Hierarchy_UI:
                                         scc=self.SelectionChanged,
                                         enk=1)
         with pm.popupMenu():
-            self.add_mi = pm.menuItem(l='Add Limb', c=self.parent.AddLimb)
+            self.add_mi = pm.menuItem(l='Add Limb', c=self.Add)
             self.flipSides_mi = pm.menuItem(l='Flip Sides', en=0, c=self.FlipSides)
             pm.menuItem(divider=1)
             self.remove_mi = pm.menuItem(l='Remove Limb', en=0, c=self.Remove)
+            pm.menuItem(divider=1)
+            self.removeAll_mi = pm.menuItem(l='Remove ALL Limbs', c=self.RemoveAll)
 
 #=========== FUNCTIONALITY ====================================
 
@@ -79,10 +84,8 @@ class LS_Limb_Hierarchy_UI:
             self.logger.info('\tLimbHier > DESELECTED limb')
 
     def Remove(self, ignore):
-        self.logger.debug('\tLS_LimbHier > Remove')
+        self.logger.info('\tLS_LimbHier > Remove')
         limbIDStrs = pm.treeView(self.widget, q=1, selectItem=1)
-        if not limbIDStrs:
-            return
         if (pm.confirmDialog(   title='Remove Limb', 
                                 icon='warning', 
                                 message='Remove limb?', 
@@ -92,29 +95,49 @@ class LS_Limb_Hierarchy_UI:
                                 dismissString='No') == 'No'):
             return
         limb = self.limbMng.GetLimb(int(limbIDStrs[0]))
-        name = limb.pfrsName.get()
-        self.logger.info('\tLimbHier > REMOVE Limb "%s"' % name)
-        # for joint in self.jntMng.GetLimbTempJoints(limb):
-        for joint in self.jntMng.GetLimbJoints(limb):
-            self.jntMng.RemoveTemp(joint)
+        self.bhvMng.RemoveLimb(limb)
+        self.parent.RemoveLimb()
+        # name = limb.pfrsName.get()
+        # self.logger.info('\tLimbHier > REMOVE Limb "%s"' % name)
+        # # for joint in self.jntMng.GetLimbTempJoints(limb):
+        # for joint in self.jntMng.GetLimbJoints(limb):
+        #     self.jntMng.RemoveTemp(joint)
 
-        limbGroups = pm.listConnections(limb.bhvIKPVGroup)
-        limbGroups += pm.listConnections(limb.bhvLookAtGroup)
-        limbGroups += pm.listConnections(limb.bhvEmptyGroup)
-        limbGroups += pm.listConnections(limb.bhvFKIKSwitchGroup)
-        for group in limbGroups:
-            ctr = pm.listConnections(group.control)[0]
-            self.ctrMng.Remove(ctr)
-            self.grpMng.Remove(group)
-        pm.delete(limbGroups)
+        # limbGroups = pm.listConnections(limb.bhvIKPVGroup)
+        # limbGroups += pm.listConnections(limb.bhvLookAtGroup)
+        # limbGroups += pm.listConnections(limb.bhvEmptyGroup)
+        # limbGroups += pm.listConnections(limb.bhvFKIKSwitchGroup)
+        # for group in limbGroups:
+        #     ctr = pm.listConnections(group.control)[0]
+        #     self.ctrMng.Remove(ctr)
+        #     self.grpMng.Remove(group)
+        # pm.delete(limbGroups)
         
-        mirror = pm.listConnections(limb.mirrorLimb)
-        self.parent.RemoveLimb(limb)
-        self.limbMng.Remove(limb)
-        if mirror:
-            self.jntMng.UpdateLimbJointNames(mirror[0])
-        self.parent.Populate()
-        self.parent.UpdateSceneFrame()
+        # mirror = pm.listConnections(limb.mirrorLimb)
+        # self.limbMng.Remove(limb)
+        # if mirror:
+        #     self.jntMng.UpdateLimbJointNames(mirror[0])
+        # self.parent.UpdateJointFrame()
+        # self.parent.Populate()
+        # self.parent.UpdateSceneFrame()
+
+    def RemoveAll(self, ignore):
+        self.logger.info('\tLS_LimbHier > Remove ALL')
+        if (pm.confirmDialog(   title='Remove ALL Limbs', 
+                                icon='warning', 
+                                message='Remove ALL limbs?', 
+                                button=['Yes','No'], 
+                                defaultButton='Yes', 
+                                cancelButton='No', 
+                                dismissString='No') == 'No'):
+            return
+        for limb in self.limbMng.GetAllLimbs():
+            self.bhvMng.RemoveLimb(limb)
+        self.parent.RemoveLimb()
+
+    def Add(self, ignore):
+        self.logger.info('\tLS_LimbHier > Add Limb')
+        self.parent.AddLimb()
 
     def Rename(self, limbIDStr, newName):
         self.logger.debug('\tLS_LimbHier > Rename')
@@ -154,7 +177,7 @@ class LS_Limb_Hierarchy_UI:
         return ''
 
     def FlipSides(self, ignore):
-        self.logger.info('\tLimbHier > Flip Sides')
+        self.logger.info('\tLS_LimbHier > Flip Sides')
         limbIDStrs = pm.treeView(self.widget, q=1, selectItem=1)
         sourceLimb = self.limbMng.GetLimb(int(limbIDStrs[0]))
         mirrorLimb = pm.listConnections(sourceLimb.mirrorLimb)[0]

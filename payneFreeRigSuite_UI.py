@@ -96,6 +96,8 @@ class PayneFreeRigSuite_UI():
         pm.addAttr(self.rigRoot, ln='prefix', dt='string')
         self.rigRoot.prefix.set(prefix)
 
+        # When Joints/limbs added/removed
+        pm.addAttr(self.rigRoot, ln='rebuildSkinInf', at='bool', h=self.hideAttrs)
         # MESH LAYER
         self.meshLayer = pm.createDisplayLayer(n='Rig Mesh', e=True)
         pm.setAttr(self.meshLayer + '.displayType', 2)
@@ -129,6 +131,7 @@ class PayneFreeRigSuite_UI():
                     self.ctrMng = self.rig_ui.ctrMng
                 with pm.horizontalLayout() as self.skinning_l:
                     self.skin_ui = skin_ui.Skinning_UI(self)
+                    self.skinMng = self.skin_ui.skinMng
                 with pm.horizontalLayout() as self.animation_l:
                     with pm.tabLayout() as self.mdTab:
                         with pm.horizontalLayout():
@@ -167,7 +170,29 @@ class PayneFreeRigSuite_UI():
                 pm.menuItem(l='disabled')
 
             with pm.menu('Help'):
-                pm.menuItem(l='Tutorials...', en=0)
+                with pm.subMenuItem(l='Tutorials'):
+                    pm.menuItem(l='QUICK START', d=1, en=0)
+                    pm.menuItem(l='Rigging')
+                    pm.menuItem(l='Skinning')
+                    pm.menuItem(l='Animating')
+
+                    pm.menuItem(l='RIGGING', d=1, en=0)
+                    pm.menuItem(l='New / Edit Rig Setup')
+                    pm.menuItem(l='Joint Setup')
+                    pm.menuItem(l='Limb Setup')
+                    pm.menuItem(l='Behaviors')
+                    pm.menuItem(l='Appearance')
+                    pm.menuItem(l='Duplicate Limbs')
+                    pm.menuItem(l='Mirror Limbs')
+
+                    pm.menuItem(l='SKINNING', d=1, en=0)
+                    pm.menuItem(l='Mesh Setup')
+                    pm.menuItem(l='Paint Weights')
+                    pm.menuItem(l='Quick Weights')
+
+                    pm.menuItem(l='ANIMATING', d=1, en=0)
+                    pm.menuItem(l='Poses')
+                    
                 pm.menuItem(divider=1)
                 pm.menuItem(l='Submit Feedback...', en=0)
                 pm.menuItem(l='Share...', en=0)
@@ -175,13 +200,13 @@ class PayneFreeRigSuite_UI():
 
 #=========== LIMBS ====================================
 
-    def AddLimb(self, limb):
-        for mesh in self.skin_ui.meshMng.GetAllMeshes():
-            self.skin_ui.skinMng.AddLimbAttrs(mesh, limb)
+    # def AddLimb(self, limb):
+    #     for mesh in self.skin_ui.meshMng.GetAllMeshes():
+    #         self.skin_ui.skinMng.AddLimbAttrs(mesh, limb)
 
-    def RemoveLimb(self, limb):
-        for mesh in self.skin_ui.meshMng.GetAllMeshes():
-            self.skin_ui.skinMng.RemoveLimbAttrs(mesh, limb)
+    # def RemoveLimb(self, limb):
+    #     for mesh in self.skin_ui.meshMng.GetAllMeshes():
+    #         self.skin_ui.skinMng.RemoveLimbAttrs(mesh, limb)
 
     # def UpdateLimb(self, limb):
     #     pass

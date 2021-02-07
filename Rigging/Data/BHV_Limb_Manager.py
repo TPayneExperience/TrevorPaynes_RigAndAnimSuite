@@ -31,13 +31,14 @@ class BHV_Limb_Manager:
         # BHV Options
         self.emptyLimbIndexes = (7,)
         self.oneJntLimbIndexes = (6, 4, 3)
-        self.twoJntChainLimbIndexes = (0, 6, 8, 5, 9, 3)
+        self.twoJntChainLimbIndexes = (11, 6, 12, 5)
         self.threeJntChainLimbIndexes = (0, 6, 8, 10, 1, 5, 2, 9, 3)
+        self.branchLimbIndexes = (6, 3)
+        
         self.omitLastJointTypes = (0, 2, 5, 9, 10)
         self.omitFirstJointTypes = (8,)
-        self.branchLimbIndexes = (6, 3)
 
-        self.fkTypeIndexes = (0, 2, 6, 8, 9)
+        self.fkTypeIndexes = (0, 2, 6, 8, 9, 11, 12)
         self.ikPVTypeIndexes = (1, 2)
         self.ikChainTypeIndexes = (5, 9)
         self.rfkTypeIndexes = (10,)
@@ -54,7 +55,7 @@ class BHV_Limb_Manager:
         self.cstTargetTypeIndexes = (0, 1, 2, 4, 5, 6, 8, 9)
         self.ctrTypeIndexes = (0, 1, 2, 4, 6, 7, 8, 9, 10) # For APP > Limb hier
 
-        self.bhvTypes = (   'FK - Chain', # DON'T CHANGE ORDER!
+        self.bhvTypes = (   'FK - Chain (3+ Joints)', # DON'T CHANGE ORDER!
 
                             'IK - Pole Vector',
                             'FK + IK Pole Vector',
@@ -64,9 +65,13 @@ class BHV_Limb_Manager:
 
                             'FK - Branch',
                             'Empty',
-                            'FK - Reverse Chain',
+                            'FK - Reverse Chain (3+ Joints)',
                             'FK + IK Chain', 
-                            'FK - Relative')
+                            'FK - Relative',
+
+                            'FK - Chain (2 Joints)',
+                            'FK - Reverse Chain (2 Joints)'
+                            )
 
 #============= ACCESSORS ============================
 
@@ -87,10 +92,10 @@ class BHV_Limb_Manager:
     def GetLimbGroups(self, limb):
         groups = []
         bhvType = limb.bhvType.get()
-        # Distance
+        # IK PV
         if bhvType in self.ikPVTypeIndexes:
             groups += pm.listConnections(limb.bhvIKPVGroup)
-        # Distance
+        # Look At
         if bhvType in self.lookAtTypeIndexes:
             groups += pm.listConnections(limb.bhvLookAtGroup)
         # FKIK
@@ -216,9 +221,16 @@ class BHV_Limb_Manager:
         # pm.addAttr(limb, ln='bhvIKSourceLimb', dt='string') # IK handles parent connection
         # pm.addAttr(limb, ln='bhvIKTargetLimb', dt='string') # IK handles parent connection
     
+        self.Setup_LimbGroupVisibility(limb)
+
     def RemoveLimb(self, limb):
         self.logger.debug('\tBhvMng > RemoveLimb')
         # Main Limb manager should actually delete the limb
+        # name = limb.pfrsName.get()
+        # for joint in self.jntMng.GetLimbTempJoints(limb):
+        for joint in self.jntMng.GetLimbJoints(limb):
+            self.jntMng.RemoveTemp(joint)
+
         groups = pm.listConnections(limb.bhvIKPVGroup)
         groups += pm.listConnections(limb.bhvLookAtGroup)
         groups += pm.listConnections(limb.bhvEmptyGroup)
@@ -227,7 +239,14 @@ class BHV_Limb_Manager:
         groups += pm.listConnections(limb.bhvRFKBottomGroup)
         groups += pm.listConnections(limb.bhvRFKTopGroup)
         for group in groups:
+            ctr = pm.listConnections(group.control)[0]
+            self.ctrMng.Remove(ctr)
             self.grpMng.Remove(group)
+        pm.delete(groups)
+        mirror = pm.listConnections(limb.mirrorLimb)
+        self.limbMng.Remove(limb)
+        if mirror:
+            self.jntMng.UpdateLimbJointNames(mirror[0])
 
 #============= REBUILD ============================
 
@@ -258,10 +277,10 @@ class BHV_Limb_Manager:
         for limb in allLimbs:
             if limb.rebuildAppDep.get():
                 pass
-        self.logger.info('Rebuilding SKIN INFLUENCES for:')
-        for limb in allLimbs:
-            if limb.rebuildSkinInf.get():
-                pass
+        # self.logger.info('Rebuilding SKIN INFLUENCES for:')
+        # for limb in allLimbs:
+        #     if limb.rebuildSkinInf.get():
+        #         pass
         msg = '--- REBUILDING LIMBS END ---\n'
         self.logger.info(msg)
 
@@ -298,7 +317,7 @@ class BHV_Limb_Manager:
             limb.rebuildBhvType.set(1)
             limb.rebuildBhvDep.set(1)
             limb.rebuildAppDep.set(1)
-            limb.rebuildSkinInf.set(1)
+            # limb.rebuildSkinInf.set(1)
         limb.rebuildLimbType.set(0)
 
     def RebuildBhvType(self, limb):
@@ -452,6 +471,9 @@ class BHV_Limb_Manager:
         # IK CHAIN
         if bhvType in self.ikChainTypeIndexes:
             self.RebuildBhvDep(limb)
+        # CONSTRAINT
+        if bhvType in self.cstTypeIndexes:
+            self.RebuildBhvDep(limb)
         # FKIK
         if bhvType in self.fkikTypeIndexes:
             self.PopulateFKIKSwitchParentJoint(limb)
@@ -604,6 +626,7 @@ class BHV_Limb_Manager:
         for joint in joints:
             self.jntMng.Add(limb, joint)
         self.jntMng.ReindexJoints(limb)
+        self.AddLimb(limb)
         return limb
 
     def AutoBuildByHierarchy(self):
@@ -647,9 +670,9 @@ class BHV_Limb_Manager:
         for parent, children in disconnectJoints.items():
             pm.parent(children, parent)
         for newLimbJoints in newLimbJointSets:
-            limb = self.AddLimbByJoints(newLimbJoints)
+            self.AddLimbByJoints(newLimbJoints)
             # if limb:
-            self.AddLimb(limb)
+            # self.AddLimb(limb)
             for joint in newLimbJoints:
                 # self.jntMng.Setup_Editable(limb, joint)
                 self.jntMng.UpdateJointName(joint)
@@ -678,7 +701,7 @@ class BHV_Limb_Manager:
 
         # VALIDATE LIMBS
         for limbName, joints in newLimbs.items():
-            newLimbs[limbName] = sorted(joints)
+            newLimbs[limbName] = self.jntMng.SortJoints(joints)
             if self.jntMng.AreJointsSiblings(joints):
                 continue
             if self.jntMng.AreJointsChained(joints):
@@ -699,7 +722,7 @@ class BHV_Limb_Manager:
         # ADD LIMBS
         for limbName, joints in newLimbs.items():
             limb = self.AddLimbByJoints(joints)
-            self.AddLimb(limb)
+            # self.AddLimb(limb)
             tempJoint = joints[0]
             limbName, side, l = tempJoint.shortName().split('_')
             for joint in joints:

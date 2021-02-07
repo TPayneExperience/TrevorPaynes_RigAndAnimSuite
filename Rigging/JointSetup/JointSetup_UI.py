@@ -107,21 +107,30 @@ class JointSetup_UI:
         self.logger.debug('=========== JOINT HIERARCHY ===========')
         self.logger.debug('')
         jointParents = {} # childName : ParentName
+        invalidParents = [] # parentName
         for child in pm.ls(type='joint'):
-            parent = pm.listRelatives(child, p=1, type='joint')
+            parent = pm.listRelatives(child, p=1)
             if not parent:
                 continue
+            if not pm.objectType(parent, isa='joint'):
+                invalidParents.append(parent[0])
             jointParents[child] = parent[0]
         children = set(jointParents.keys())
         parents = set(jointParents.values())
-        for parent in list(parents - children):
-            self._PrintJointChildren(parent, '')
+        rootParents = list(parents - children)
+        for parent in rootParents:
+            self._PrintJointChildren(parent, '', invalidParents)
         self.logger.debug('')
         self.logger.debug('=========== END ===========\n')
+        if invalidParents:
+            msg = 'Please parent joints only to EACHOTHER or the WORLD.'
+            msg += '\nNon-Joints:'
+            for parent in invalidParents:
+                msg += '\n\t%s' % parent
+            pm.confirmDialog(t='Joint Parenting Error', m=msg, icon='error', b='Ok')
+            self.logger.warning(msg)
     
-    def _PrintJointChildren(self, parent, indent):
+    def _PrintJointChildren(self, parent, indent, invalidParents):
         self.logger.debug('%s%s' % (indent, parent))
-        if not pm.objectType(parent, isa='joint'):
-            self.logger.warning('>>> NOT A JOINT! <<<')
         for child in pm.listRelatives(parent, c=1):
-            self._PrintJointChildren(child, indent + '\t')
+            self._PrintJointChildren(child, indent + '\t', invalidParents)

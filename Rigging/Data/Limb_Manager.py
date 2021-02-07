@@ -111,17 +111,18 @@ class Limb_Manager:
         pm.addAttr(limb, ln='rebuildLimbGroup', at='bool', h=self.hideAttrs)
         pm.addAttr(limb, ln='rebuildBhvDep', at='bool', h=self.hideAttrs)
         pm.addAttr(limb, ln='rebuildAppDep', at='bool', h=self.hideAttrs)
-        pm.addAttr(limb, ln='rebuildSkinInf', at='bool', h=self.hideAttrs)
+        # pm.addAttr(limb, ln='rebuildSkinInf', at='bool', h=self.hideAttrs)
         limb.rebuildLimbType.set(1)
         limb.rebuildBhvType.set(1)
         limb.rebuildLimbGroup.set(1)
         limb.rebuildBhvDep.set(1)
         limb.rebuildAppDep.set(1)
-        limb.rebuildSkinInf.set(1)
+        # limb.rebuildSkinInf.set(1)
 
         pm.connectAttr(self.rigRoot.limbs, limb.rigRoot)
         self.UpdateLimbName(limb)
         self._limbs[limbID] = limb
+        self.rigRoot.rebuildSkinInf.set(1)
         return limb
 
     def Remove(self, limb): # Should be called after joints deleted
@@ -131,6 +132,7 @@ class Limb_Manager:
         del(self._limbs[limb.ID.get()])
         pm.select(d=1)
         pm.delete(limb)
+        self.rigRoot.rebuildSkinInf.set(1)
 
     def Reparent(self, child, parent):
         self.logger.debug('\tLimbMng > Reparent')

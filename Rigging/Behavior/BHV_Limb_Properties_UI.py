@@ -43,7 +43,7 @@ class BHV_Limb_Properties_UI:
         pm.optionMenu(self.bhvType_om, e=1, sl=index)
 
         self.PopulateBhvFrame(bhvType)
-        self.PopulateTargetFrame(bhvType)
+        self.PopulateTargetFrame()
         # self.PopulateControlFrame(bhvType)
 
         # self.UpdateBhvFrame()
@@ -78,15 +78,12 @@ class BHV_Limb_Properties_UI:
         
         self.bhvMng.SetBhvType(self.limb, newBhvIndex)
         self.PopulateBhvFrame(newBhvIndex)
-        self.PopulateTargetFrame(newBhvIndex)
+        self.PopulateTargetFrame()
         # self.PopulateControlFrame(newBhvIndex)
         # self.Populate()
         # self.PopulateTargetLimbs()
         # self.UpdateUI()
         self.parent.SetBhvType(self.limb) 
-
-        # else:
-        #     self.SetLimb(self.limb.ID.get())
 
 #=========== CONSTRAINT ==============================================
 
@@ -161,24 +158,22 @@ class BHV_Limb_Properties_UI:
         self.logger.info(msg)
         self.bhvMng.UpdateRFKConnections(self.limb)
 
-    def PopulateTargetFrame(self, bhvType):
+    def PopulateTargetFrame(self):
         self.logger.debug('\tBhv_LimbProp > PopulateTargetFrame')
         pm.frameLayout(self.targetLayout, e=1, en=0)
         if self.targetJnt_at:
             pm.deleteUI(self.targetJnt_at)
             self.targetJnt_at = None
-        if bhvType not in self.bhvMng.targetIndexes:
-            return
 
         # POPULATE TARGET LIMBS
-        pm.optionMenu(self.targetLimb_om, e=1, dai=1)
         bhvType = self.limb.bhvType.get()
-        if bhvType in self.bhvMng.cstTypes:
+        if bhvType in self.bhvMng.cstTypeIndexes:
             bhvFilter = self.bhvMng.cstTargetTypeIndexes
         elif bhvType in self.bhvMng.ikTypeIndexes:
             bhvFilter = self.bhvMng.ikTargetableIndexes
         else:
             return
+        pm.optionMenu(self.targetLimb_om, e=1, dai=1)
         pm.frameLayout(self.targetLayout, e=1, en=1)
         self.targetLimbs = {}
         self.targetLimbOrder = []
@@ -191,7 +186,6 @@ class BHV_Limb_Properties_UI:
                     self.targetLimbOrder.append(limb)
 
         # SELECT CURRENT LIMB TARGET
-        # targetLimbs = pm.listConnections(self.limb.bhvIKTargetLimb)
         targetLimbs = pm.listConnections(self.limb.bhvTargetLimb)
         if targetLimbs:
             targetLimb = targetLimbs[0]

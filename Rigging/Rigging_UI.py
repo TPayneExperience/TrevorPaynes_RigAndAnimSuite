@@ -158,13 +158,13 @@ class Rigging_UI:
 
 #=========== FUNCTIONALITY ====================================
 
-    def AddLimb(self, limb): # Limb Setup > Add
-        self.bhvMng.AddLimb(limb)
-        self.bhvMng.Setup_LimbGroupVisibility(limb)
-        self.parent.AddLimb(limb)
+    # def AddLimb(self, limb): # Limb Setup > Add
+    #     self.bhvMng.AddLimb(limb)
+    #     self.bhvMng.Setup_LimbGroupVisibility(limb)
+        # self.parent.AddLimb(limb)
 
-    def RemoveLimb(self, limb): # Limb Setup > Remove
-        self.parent.RemoveLimb(limb)
+    # def RemoveLimb(self, limb): # Limb Setup > Remove
+    #     self.parent.RemoveLimb(limb)
     
     # def UpdateLimb(self, limb): # Limb Setup Tab > Teardown
     #     bhvs = self.bhvMng.GetBhvOptions(limb)

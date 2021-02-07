@@ -63,7 +63,7 @@ class Joint_Manager:
     def GetLimbJoints(self, limb):
         '''Order joints by internal joint index. child to root parent'''
         self.logger.debug('\tJntMng > GetLimbJoints')
-        orderedJoints = []
+        # orderedJoints = []
         temp = {}
         # joints = pm.listConnections(limb.infJoints)
         # if includeNonInf:
@@ -71,9 +71,10 @@ class Joint_Manager:
         # for joint in joints:
         for joint in pm.listConnections(limb.joints):
             temp[joint.limbIndex.get()] = joint
-        for index in sorted(list(temp.keys())):
-            orderedJoints.append(temp[index])
-        return orderedJoints
+        # for index in sorted(list(temp.keys())):
+        #     orderedJoints.append(temp[index])
+        # return orderedJoints
+        return [temp[i] for i in range(len(temp))]
 
     def GetJointCount(self): # for Skel tool label
         self.logger.debug('\tJntMng > GetJointCount')
@@ -158,12 +159,16 @@ class Joint_Manager:
 
     def ReindexJoints(self, limb):
         self.logger.debug('\tJntMng > ReindexJoints')
-        temp = {} # LongName : joint
-        for joint in pm.listConnections(limb.joints):
-            temp[joint.longName()] = joint
-        names = sorted(temp.keys())
-        for i in range(len(names)):
-            temp[names[i]].limbIndex.set(i)
+        joints = pm.listConnections(limb.joints)
+        joints = self.SortJoints(joints)
+        for i in range(len(joints)):
+            joints[i].limbIndex.set(i)
+        # temp = {} # LongName : joint
+        # for joint in pm.listConnections(limb.joints):
+        #     temp[joint.longName()] = joint
+        # names = sorted(temp.keys())
+        # for i in range(len(names)):
+        #     temp[names[i]].limbIndex.set(i)
     
     def UpdateAllJointNames(self): # if prefix changed
         self.logger.debug('\tJntMng > UpdateAllJointNames')
@@ -198,7 +203,7 @@ class Joint_Manager:
     
     def AreJointsChained(self, joints):
         self.logger.debug('\tJntMng > AreJointsChained')
-        jointsCopy = sorted(joints)
+        jointsCopy = self.SortJoints(joints)
         child = jointsCopy[-1]
         jointsCopy.remove(child)
         while (jointsCopy):
@@ -218,14 +223,13 @@ class Joint_Manager:
     def GetCompleteJointChain(self, joints):
         '''returns child most to parent most joint list'''
         self.logger.debug('\tJntMng > GetCompleteJointChain')
-        jointsCopy = sorted(joints)
-        child = jointsCopy[-1]
-        jointChain = [child]
-        while(jointsCopy):
-            jointsCopy.remove(child)
-            parent = pm.listRelatives(child, p=1)
+        sortedJoints = self.SortJoints(joints)
+        parent = sortedJoints[-1]
+        rootParent = sortedJoints[0]
+        jointChain = [parent]
+        while(parent != rootParent):
+            parent = pm.listRelatives(parent, p=1, type='joint')[0]
             jointChain.append(parent)
-            child = parent
         return jointChain
 
         # # OLD ALGO
@@ -249,6 +253,16 @@ class Joint_Manager:
         #         break
         # return jointChain
 
+    def SortJoints(self, joints):
+        '''Returns root parent to bottom most child'''
+        temp = {} # LongName : joint
+        for joint in joints:
+            temp[joint.longName()] = joint
+        names = sorted(temp.keys())
+        orderedJoints = []
+        for i in range(len(names)):
+            orderedJoints.append(temp[names[i]])
+        return orderedJoints
 
     # def DuplicateLimb(self, sourceLimbID, targetLimbID):
     #     self._limbJoints[targetLimbID] = []
