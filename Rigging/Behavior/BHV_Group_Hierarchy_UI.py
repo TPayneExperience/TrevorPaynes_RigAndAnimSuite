@@ -25,8 +25,8 @@ class BHV_Group_Hierarchy_UI:
         if bhvType not in bhvFilter:
             return
         groups = self.bhvMng.GetJointGroups(self.limb)
-        if bhvType in self.bhvMng.omitFirstJointTypes:
-            groups = groups[1:]
+        if bhvType in self.bhvMng.reverseTypeIndexes:
+            groups = groups[::-1]
         if bhvType in self.bhvMng.omitLastJointTypes:
             groups = groups[:-1]
         for group in groups:

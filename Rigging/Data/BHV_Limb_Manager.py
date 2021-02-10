@@ -36,7 +36,7 @@ class BHV_Limb_Manager:
         self.branchLimbIndexes = (6, 3)
         
         self.omitLastJointTypes = (0, 2, 5, 9, 10)
-        self.omitFirstJointTypes = (8,)
+        self.reverseTypeIndexes = (8,12)
 
         self.fkTypeIndexes = (0, 2, 6, 8, 9, 11, 12)
         self.ikPVTypeIndexes = (1, 2)
@@ -109,7 +109,8 @@ class BHV_Limb_Manager:
         return groups
 
     def GetJointGroups(self, limb):
-        if limb.bhvType.get() in self.emptyLimbIndexes:
+        bhvType = limb.bhvType.get()
+        if bhvType in self.emptyLimbIndexes:
             return pm.listConnections(limb.bhvEmptyGroup)
         groups = []
         for joint in self.jntMng.GetLimbJoints(limb):
@@ -501,13 +502,13 @@ class BHV_Limb_Manager:
         self.logger.debug('\tBhvMng > Setup_LimbGroupVisibility')
         bhvType = limb.bhvType.get()
         if bhvType in self.fkTypeIndexes:
-            jointGroups = self.GetJointGroups(limb)
-            for group in jointGroups:
+            groups = self.GetJointGroups(limb)
+            for group in groups:
                 group.v.set(1)
-            if bhvType in self.omitFirstJointTypes:
-                jointGroups[0].v.set(0)
+            if bhvType in self.reverseTypeIndexes:
+                groups = groups[::-1]
             if bhvType in self.omitLastJointTypes:
-                jointGroups[-1].v.set(0)
+                groups[-1].v.set(0)
         for group in self.GetLimbGroups(limb):
             group.v.set(1)
 

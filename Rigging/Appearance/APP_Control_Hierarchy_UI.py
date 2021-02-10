@@ -32,8 +32,8 @@ class APP_Control_Hierarchy_UI:
         groups = []
         if bhvType in self.bhvMng.fkTypeIndexes:
             groups += self.bhvMng.GetJointGroups(self.limb)
-            if bhvType in self.bhvMng.omitFirstJointTypes:
-                groups = groups[1:]
+            if bhvType in self.bhvMng.reverseTypeIndexes:
+                groups = groups[::-1]
             if bhvType in self.bhvMng.omitLastJointTypes:
                 groups = groups[:-1]
         groups += self.bhvMng.GetLimbGroups(self.limb)

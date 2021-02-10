@@ -59,21 +59,12 @@ class Joint_Manager:
     #     self.logger.debug('\tJntMng > GetLimb')
     #     return pm.listConnections(joint.limb)[0]
 
-    # def GetLimbJoints(self, limb, includeNonInf=True):
     def GetLimbJoints(self, limb):
         '''Order joints by internal joint index. child to root parent'''
         self.logger.debug('\tJntMng > GetLimbJoints')
-        # orderedJoints = []
         temp = {}
-        # joints = pm.listConnections(limb.infJoints)
-        # if includeNonInf:
-        #     joints += pm.listConnections(limb.nonInfJoint)
-        # for joint in joints:
         for joint in pm.listConnections(limb.joints):
             temp[joint.limbIndex.get()] = joint
-        # for index in sorted(list(temp.keys())):
-        #     orderedJoints.append(temp[index])
-        # return orderedJoints
         return [temp[i] for i in range(len(temp))]
 
     def GetJointCount(self): # for Skel tool label
@@ -163,12 +154,6 @@ class Joint_Manager:
         joints = self.SortJoints(joints)
         for i in range(len(joints)):
             joints[i].limbIndex.set(i)
-        # temp = {} # LongName : joint
-        # for joint in pm.listConnections(limb.joints):
-        #     temp[joint.longName()] = joint
-        # names = sorted(temp.keys())
-        # for i in range(len(names)):
-        #     temp[names[i]].limbIndex.set(i)
     
     def UpdateAllJointNames(self): # if prefix changed
         self.logger.debug('\tJntMng > UpdateAllJointNames')

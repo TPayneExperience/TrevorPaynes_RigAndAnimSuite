@@ -109,14 +109,14 @@ class Test_UI:
 
     def Setup_Internal_MayaControllers(self):
         for limb in self.limbMng.GetAllLimbs():
-            jointGroups = self.bhvMng.GetJointGroups(limb)
+            groups = self.bhvMng.GetJointGroups(limb)
             bhvType = limb.bhvType.get()
-            if bhvType in self.bhvMng.omitFirstJointTypes:
-                jointGroups = jointGroups[1:]
+            if bhvType in self.bhvMng.reverseTypeIndexes:
+                groups = groups[::-1]
             if bhvType in self.bhvMng.omitLastJointTypes:
-                jointGroups = jointGroups[:-1]
+                groups = groups[:-1]
             controls = []
-            for group in jointGroups:
+            for group in groups:
                 controls += pm.listConnections(group.control)
             for group in self.bhvMng.GetLimbGroups(limb):
                 controls += pm.listConnections(group.control)
@@ -134,8 +134,8 @@ class Test_UI:
             parentControl = pm.listConnections(parentGroup.control)
             jointGroups = self.bhvMng.GetJointGroups(limb)
             bhvType = limb.bhvType.get()
-            if bhvType in self.bhvMng.omitFirstJointTypes:
-                jointGroups = jointGroups[1:]
+            if bhvType in self.bhvMng.reverseTypeIndexes:
+                jointGroups = jointGroups[::-1]
             if bhvType in self.bhvMng.omitLastJointTypes:
                 jointGroups = jointGroups[:-1]
             controls = []
@@ -320,10 +320,11 @@ class Test_UI:
     def Setup_Internal_FKChain(self, limb):
         self.logger.debug('\tTest_UI > Setup_Internal_FKChain')
         groups = self.bhvMng.GetJointGroups(limb)
-        for i in range(len(groups)-1, 0, -1):
-            childGroup = groups[i]
-            parentCtr = pm.listConnections(groups[i-1].control)[0]
-            # parentCtr = self.ctrMng.GetGroupControl(groups[i-1])[0]
+        if limb.bhvType.get() in self.bhvMng.reverseTypeIndexes:
+            groups = groups[::-1]
+        for i in range(len(groups)-1):
+            childGroup = groups[i+1]
+            parentCtr = pm.listConnections(groups[i].control)[0]
             pm.parent(childGroup, parentCtr)
         self.Bind_FK_Joints(limb)
         
