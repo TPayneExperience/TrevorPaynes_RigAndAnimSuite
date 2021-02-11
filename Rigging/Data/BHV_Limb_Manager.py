@@ -246,17 +246,14 @@ class BHV_Limb_Manager:
     #     if mirror:
     #         self.jntMng.UpdateLimbJointNames(mirror[0])
 
-    def AddEmptyLimb(self):
-        self.logger.debug('\tBhvMng > AddEmptyLimb')
+    def _AddLimb(self):
         limb = self.limbMng.Add()
         bhvTypes = ':'.join(self.bhvTypes)
 
         pm.addAttr(limb, ln='bhvType', at='enum', en=bhvTypes,
                                     h=self.hideAttrs)
 
-        pm.addAttr(limb, ln='bhvEmptyGroup', dt='string', h=self.hideAttrs)
-
-        # # FKIK
+        # VISABILITY SOURCE / TARGET
         pm.addAttr(limb, ln='appVisSourceLimb', dt='string', h=self.hideAttrs)
         pm.addAttr(limb, ln='appVisTargetLimbs', dt='string', h=self.hideAttrs)
         pm.addAttr(limb, ln='appVisSourceType', at='enum', en='FK:IK', 
@@ -269,13 +266,21 @@ class BHV_Limb_Manager:
         pm.addAttr(limb, ln='appLockHidePos', at='bool', h=self.hideAttrs)
         pm.addAttr(limb, ln='appLockHideRot', at='bool', h=self.hideAttrs)
         pm.addAttr(limb, ln='appLockHideScale', at='bool', h=self.hideAttrs)
-        # Connect to FKIK switch of another limb
+        return limb
 
+    def AddEmptyLimb(self):
+        self.logger.debug('\tBhvMng > AddEmptyLimb')
+        # Connect to FKIK switch of another limb
+        limb = self._AddLimb()
+        pm.addAttr(limb, ln='bhvEmptyGroup', dt='string', h=self.hideAttrs)
+        limb.bhvType.set(self.emptyLimbIndexes[0])
+        group = self.grpMng.AddEmptyGroup(limb)
+        self.grpMng.UpdateGroupName(group)
         return limb
 
     def AddJointLimb(self, joints):
         self.logger.debug('\tBhvMng > AddJointLimb')
-        limb = self.AddEmptyLimb()
+        limb = self._AddLimb()
         for joint in joints:
             self.jntMng.Add(limb, joint)
         self.jntMng.ReindexJoints(limb)
@@ -298,36 +303,38 @@ class BHV_Limb_Manager:
         pm.addAttr(limb, ln='bhvDistance', at='float', min=0, dv=1) # IKPV, LookAt
         
         # Connect to FKIK switch of another limb
-
+        limb.rebuildLimbType.set(1)
         self.Setup_LimbGroupVisibility(limb)
         return limb
+
+    def _RemoveLimb(self, limb):
+        mirror = pm.listConnections(limb.mirrorLimb)
+        self.limbMng.Remove(limb)
+        if mirror and mirror[0].bhvType.get() not in self.emptyLimbIndexes:
+            self.jntMng.UpdateLimbJointNames(mirror[0])
 
     def RemoveEmptyLimb(self, limb):
         group = pm.listConnections(limb.bhvEmptyGroup)[0]
         ctr = pm.listConnections(group.control)[0]
         self.ctrMng.Remove(ctr)
         self.grpMng.Remove(group)
-        pm.delete(group)
-        mirror = pm.listConnections(limb.mirrorLimb)
-        self.limbMng.Remove(limb)
-        if mirror and mirror[0].bhvType.get() not in self.emptyLimbIndexes:
-            self.jntMng.UpdateLimbJointNames(mirror[0])
+        self._RemoveLimb(limb)
 
     def RemoveJointLimb(self, limb):
         for joint in self.jntMng.GetLimbJoints(limb):
             self.jntMng.RemoveTemp(joint)
         groups = pm.listConnections(limb.bhvIKPVGroup)
         groups += pm.listConnections(limb.bhvLookAtGroup)
-        groups += pm.listConnections(limb.bhvFKIKSwitchGroup)
-        groups += pm.listConnections(limb.bhvRFKCenterGroup)
-        groups += pm.listConnections(limb.bhvRFKBottomGroup)
-        groups += pm.listConnections(limb.bhvRFKTopGroup)
+        # groups += pm.listConnections(limb.bhvFKIKSwitchGroup)
+        # groups += pm.listConnections(limb.bhvRFKCenterGroup)
+        # groups += pm.listConnections(limb.bhvRFKBottomGroup)
+        # groups += pm.listConnections(limb.bhvRFKTopGroup)
         for group in groups:
             ctr = pm.listConnections(group.control)[0]
             self.ctrMng.Remove(ctr)
             self.grpMng.Remove(group)
-        pm.delete(groups)
-        self.RemoveEmptyLimb(limb)
+        # pm.delete(groups)
+        self._RemoveLimb(limb)
 
 
 #============= REBUILD ============================
@@ -372,11 +379,7 @@ class BHV_Limb_Manager:
         limbType = limb.limbType.get()
         limbTypeChanged = False
         joints = pm.listConnections(limb.joints)
-        if not joints:
-            if limb.limbType.get() != 0:
-                limb.limbType.set(0) # empty
-                limbTypeChanged = True
-        elif (len(joints) == 1):
+        if (len(joints) == 1):
             if limb.limbType.get() != 1:
                 limb.limbType.set(1) # 1 joint
                 limbTypeChanged = True
@@ -409,10 +412,7 @@ class BHV_Limb_Manager:
         limbType = limb.limbType.get()
         bhvType = limb.bhvType.get()
         
-        if (limbType == 0): # Empty
-            if (bhvType != self.emptyLimbIndexes):
-                self.SetBhvType(limb, self.emptyLimbIndexes[0])
-        elif (limbType == 1): # One
+        if (limbType == 1): # One
             if bhvType not in self.oneJntLimbIndexes:
                 self.SetBhvType(limb, self.oneJntLimbIndexes[0])
         elif (limbType == 4): # 2 chain
@@ -447,10 +447,10 @@ class BHV_Limb_Manager:
         #         self.grpMng.UpdateGroupName(group)
         #     self.PopulateFKIKSwitchParentJoint(limb)
         #     self.UpdateFKIKSwitchParentJoint(limb)
-        if bhvType in self.emptyLimbIndexes:
-            if not pm.listConnections(limb.bhvEmptyGroup):
-                group = self.grpMng.AddEmptyGroup(limb)
-                self.grpMng.UpdateGroupName(group)
+        # if bhvType in self.emptyLimbIndexes:
+        #     if not pm.listConnections(limb.bhvEmptyGroup):
+        #         group = self.grpMng.AddEmptyGroup(limb)
+        #         self.grpMng.UpdateGroupName(group)
         if bhvType in self.rfkTypeIndexes:
             if not pm.listConnections(limb.bhvRFKCenterGroup):
                 self.grpMng.AddRFKGroups(limb)

@@ -22,6 +22,8 @@ class LS_Limb_Hierarchy_UI:
         allLimbs = self.limbMng.GetAllLimbs()
         pm.menuItem(self.removeAll_mi, e=1, en=bool(allLimbs))
         for limb in allLimbs:
+            if limb.bhvType.get() in self.bhvMng.emptyLimbIndexes:
+                continue
             limbID = limb.ID.get()
             limbName = limb.pfrsName.get()
             if limbName not in temp:
@@ -53,7 +55,7 @@ class LS_Limb_Hierarchy_UI:
                                         scc=self.SelectionChanged,
                                         enk=1)
         with pm.popupMenu():
-            self.add_mi = pm.menuItem(l='Add Limb', c=self.Add)
+            self.add_mi = pm.menuItem(l='Add Limb', en=0, c=self.Add)
             self.flipSides_mi = pm.menuItem(l='Flip Sides', en=0, c=self.FlipSides)
             pm.menuItem(divider=1)
             self.remove_mi = pm.menuItem(l='Remove Limb', en=0, c=self.Remove)

@@ -21,6 +21,7 @@ class Behavior_UI:
         self.bhvMng = parent.bhvMng
         self.grpMng = parent.grpMng
         self.ctrMng = parent.ctrMng
+        self.nameMng = parent.nameMng
         self.logger = parent.logger
         
         self._Setup()

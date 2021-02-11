@@ -8,6 +8,7 @@ class BHV_Limb_Hierarchy_UI:
         self.jntMng = parent.jntMng
         self.bhvMng = parent.bhvMng
         self.grpMng = parent.grpMng
+        self.nameMng = parent.nameMng
         self.logger = parent.logger
 
         self._Setup()
@@ -46,8 +47,9 @@ class BHV_Limb_Hierarchy_UI:
         msg = '- MMB + Drag + Drop to reparent'
         msg += '\n- Items with the circle can be parented to'
         self.widget = pm.treeView(ams=0, nb=1, ann=msg)
-        pm.treeView(self.widget, e=1, scc=self.SelectionChanged)
-        pm.treeView(self.widget, e=1, dad=self.Reparent)
+        pm.treeView(self.widget, e=1, scc=self.SelectionChanged,
+                                        editLabelCommand=self.Rename,
+                                        dad=self.Reparent)
         with pm.popupMenu():
             pm.menuItem(l='Load Skeleton Hierarchy', c=self.LoadSkelHier)
             pm.menuItem(l='Load Default Hierarchy', c=self.LoadDefaultHier)
@@ -55,7 +57,8 @@ class BHV_Limb_Hierarchy_UI:
             pm.menuItem(l='Save as Default Hierarchy', c=self.SaveAsDefaultHier)
             pm.menuItem(divider=1)
             pm.menuItem(l='Add Empty Limb', c=self.AddEmptyLimb)
-            self.remove_mi = pm.menuItem(l='Remove Empty Limb', c=self.RemoveEmptyLimb)
+            self.remove_mi = pm.menuItem(l='Remove Empty Limb', 
+                                        en=0, c=self.RemoveEmptyLimb)
 
 #=========== FUNCTIONS ====================================
 
@@ -93,6 +96,29 @@ class BHV_Limb_Hierarchy_UI:
         self.limbMng.Reparent(child, parent)
         self.bhvMng.UpdateLimbParentJoint(child)
     
+    def Rename(self, limbIDStr, newName):
+        self.logger.debug('\tBhv_LimbHier > Rename')
+        limb = self.limbMng.GetLimb(int(limbIDStr))
+        if limb.bhvType.get() not in self.bhvMng.emptyLimbIndexes:
+            return ''
+        oldName = limb.pfrsName.get()
+        msg = '\tLimbHier > RENAMING "%s" to "%s"' % (oldName, newName)
+        self.logger.info(msg)
+
+        if not self.nameMng.IsValidCharacterLength(newName):
+            return ''
+        if not self.nameMng.DoesNotStartWithNumber(newName):
+            return ''
+        if not self.nameMng.AreAllValidCharacters(newName):
+            return ''
+        if not self.limbMng.Rename(limb, newName):
+            msg = '**** Two limbs MAX may have same name'
+            self.logger.error(msg)
+        group = pm.listConnections(limb.bhvEmptyGroup)[0]
+        self.grpMng.UpdateGroupName(group)
+        self.Populate()
+        return ''
+
 #=========== RMB ====================================
 
     def AddEmptyLimb(self, ignore):

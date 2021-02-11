@@ -53,6 +53,8 @@ class LS_Joint_Hierarchy_UI:
         selJoints = [self.jntMng.GetJoint(int(ID)) for ID in jntStrs]
         # joints = self.jntMng.GetLimbTempJoints(self.limb)
         joints = self.jntMng.GetLimbJoints(self.limb)
+        if len(joints) == len(selJoints):
+            return
         self.logger.info('\tJointHier > SELECTED joints:')
         for joint in selJoints:
             self.logger.info('\t\t' + str(joint))

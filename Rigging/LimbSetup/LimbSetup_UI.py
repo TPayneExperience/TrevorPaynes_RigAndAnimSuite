@@ -97,7 +97,7 @@ class LimbSetup_UI:
         self.logger.debug('\tLimbSetup_UI > RenameLimb')
         groups = pm.listConnections(limb.bhvIKPVGroup)
         groups += pm.listConnections(limb.bhvLookAtGroup)
-        groups += pm.listConnections(limb.bhvEmptyGroup)
+        # groups += pm.listConnections(limb.bhvEmptyGroup)
         # groups += pm.listConnections(limb.bhvFKIKSwitchGroup)
         for group in groups:
             self.grpMng.UpdateGroupName(group)
