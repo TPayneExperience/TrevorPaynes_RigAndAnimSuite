@@ -53,12 +53,16 @@ class BHV_Limb_Hierarchy_UI:
             pm.menuItem(l='Load Default Hierarchy', c=self.LoadDefaultHier)
             pm.menuItem(divider=1)
             pm.menuItem(l='Save as Default Hierarchy', c=self.SaveAsDefaultHier)
+            pm.menuItem(divider=1)
+            pm.menuItem(l='Add Empty Limb', c=self.AddEmptyLimb)
+            self.remove_mi = pm.menuItem(l='Remove Empty Limb', c=self.RemoveEmptyLimb)
 
 #=========== FUNCTIONS ====================================
 
     def SelectionChanged(self):
         self.logger.debug('\tBhv_LimbHier > SelectionChanged')
         limbIDStrs = pm.treeView(self.widget, q=1, selectItem=1)
+        pm.menuItem(self.remove_mi, e=1, en=bool(limbIDStrs))
         if limbIDStrs:
             limb = self.limbMng.GetLimb(int(limbIDStrs[0]))
             msg = '\tLimbHier > SELECTED limb "%s"'% limb.pfrsName.get()
@@ -68,7 +72,6 @@ class BHV_Limb_Hierarchy_UI:
             self.logger.info('\tLimbHier > DESELECTED limb')
             self.parent.LimbSelected(None)
 
-    
     def Reparent(self, limbIDsStr, oldParents, i2, newParentIDStr, i3, i4, i5):
         self.logger.debug('\tBhv_LimbHier > Reparent')
         if oldParents[0] == newParentIDStr:
@@ -80,10 +83,10 @@ class BHV_Limb_Hierarchy_UI:
             msg = '\tLimbHier > REPARENTING '
             msg += '"%s" to "%s"' % (name, parent.pfrsName.get())
             self.logger.info(msg)
-            parentBhvType = parent.bhvType.get()
-            if parentBhvType not in self.bhvMng.parentableIndexes:
-                self.Populate()
-                return
+            # parentBhvType = parent.bhvType.get()
+            # if parentBhvType not in self.bhvMng.parentableIndexes:
+            #     self.Populate()
+            #     return
         else:
             parent = None
             self.logger.info('\tLimbHier > REPARENTING "%s" to world' % name)
@@ -91,6 +94,16 @@ class BHV_Limb_Hierarchy_UI:
         self.bhvMng.UpdateLimbParentJoint(child)
     
 #=========== RMB ====================================
+
+    def AddEmptyLimb(self, ignore):
+        self.bhvMng.AddEmptyLimb()
+        self.Populate()
+
+    def RemoveEmptyLimb(self, ignore):
+        limbIDStrs = pm.treeView(self.widget, q=1, selectItem=1)
+        limb = self.limbMng.GetLimb(int(limbIDStrs[0]))
+        self.bhvMng.RemoveEmptyLimb(limb)
+        self.Populate()
 
     def LoadSkelHier(self, ignore):
         self.logger.info('\tLimbHier > LOAD SKELETON hierarchy')

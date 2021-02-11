@@ -12,7 +12,7 @@ class APP_Limb_Properties_UI:
 
         self.ctrAxis_at = None
         self.ikpvCtrJoint_at = None
-        self.fkikJoint_at = None
+        # self.fkikJoint_at = None
         self.limb = None
         self.limbs = {} # name : limb
         self.limbOrder = []
@@ -20,25 +20,36 @@ class APP_Limb_Properties_UI:
         self._Setup()
     
     def Populate(self):
-        '''Called when Bhvs tab clicked, 
-        populates Constraint Target Limbs option menu
-        '''
+        '''When limb selected, populate vis targets'''
         self.logger.debug('\tApp_LimbProp > Populate')
-        pm.optionMenu(self.fkikTargetLimb_om, e=1, dai=1)
+        pm.optionMenu(self.visSourceLimb_om, e=1, dai=1)
         self.limbs = {} # name : limb
         self.limbOrder = []
-        pm.menuItem(l='None', p=self.fkikTargetLimb_om)
+        # POPULATE COMBO BOX
+        pm.menuItem(l='None', p=self.visSourceLimb_om)
         for rootLimb in self.limbMng.GetRootLimbs():
             prefix = self.limbMng.GetLimbPrefix(rootLimb)
             for limb in self.limbMng.GetLimbCreationOrder(rootLimb):
-                if (limb.bhvType.get() in self.bhvMng.fkikTypeIndexes):
-                    if limb == self.limb:
-                        continue
-                    side = self.limbMng.GetLimbSide(limb)
-                    name = '%s_%s_%s' % (prefix, limb.pfrsName.get(), side)
-                    pm.menuItem(l=name, p=self.fkikTargetLimb_om)
-                    self.limbs[name] = limb
-                    self.limbOrder.append(name)
+                if limb == self.limb:
+                    continue
+                side = self.limbMng.GetLimbSide(limb)
+                name = '%s_%s_%s' % (prefix, limb.pfrsName.get(), side)
+                pm.menuItem(l=name, p=self.visSourceLimb_om)
+                self.limbs[name] = limb
+                self.limbOrder.append(name)
+
+        # LOAD SOURCE LIMB
+        pm.attrEnumOptionMenu(self.targetType, e=1, en=0)
+        parent = pm.listConnections(self.limb.appVisSourceLimb)
+        if not parent:
+            pm.optionMenu(self.visSourceLimb_om, e=1, sl=1)
+            return
+        parent = parent[0]
+        prefix = self.limbMng.GetLimbPrefix(parent)
+        side = self.limbMng.GetLimbSide(parent)
+        name = '%s_%s_%s' % (prefix, parent.pfrsName.get(), side)
+        index = self.limbOrder.index(name) + 2 # start index 1 + (none = 1)
+        pm.optionMenu(self.visSourceLimb_om, e=1, sl=index)
 
     def Depopulate(self):
         pm.frameLayout(self.prop_l, e=1, en=0)
@@ -54,12 +65,12 @@ class APP_Limb_Properties_UI:
                                                 a='perspShape.shakeEnabled')
                 self.lockScale = pm.attrControlGrp(l='Lock + Hide Scale',
                                                 a='perspShape.shakeEnabled')
-                self.fkikTargetLimb_om = pm.optionMenu( l='Target FKIK Limb',
-                                                        cc=self.SetTargetFKIK)
+                self.visSourceLimb_om = pm.optionMenu( l='Visibilty Source Limb',
+                                                        cc=self.SetVisSourceLimb)
                 self.targetType = pm.attrEnumOptionMenu(at='perspShape.filmFit')
                 self.ctrDist_cg = pm.attrControlGrp( l='Control Distance', a='persp.translateX')
-                self.fkikJoint_at = pm.attrControlGrp(l='Lock + Hide Scale',
-                                                a='perspShape.shakeEnabled')
+                # self.fkikJoint_at = pm.attrControlGrp(l='Lock + Hide Scale',
+                #                                 a='perspShape.shakeEnabled')
 
 
 #=========== FUNCTIONALITY ==============================================
@@ -92,7 +103,9 @@ class APP_Limb_Properties_UI:
         if self.ctrAxis_at:
             pm.deleteUI(self.ctrAxis_at)
             self.ctrAxis_at = None
-        if bhvType in self.bhvMng.distanceIndexes:
+        bhvFilter = self.bhvMng.ikPVTypeIndexes
+        bhvFilter += self.bhvMng.lookAtTypeIndexes
+        if bhvType in bhvFilter:
             pm.attrControlGrp(  self.ctrDist_cg, e=1, en=1, 
                                 a=self.limb.bhvDistance,
                                 cc=pm.Callback(self.UpdateDistGroupPos, 1))
@@ -106,9 +119,9 @@ class APP_Limb_Properties_UI:
         # TARGET TYPE
         pm.deleteUI(self.targetType)
         self.targetType = pm.attrEnumOptionMenu(l='FK or IK?',
-                                                at=self.limb.appTargetFKIKType,
+                                                at=self.limb.appVisSourceType,
                                                 p=self.appLimbProp_cl,
-                                                cc=self.LogSelectFKIK)
+                                                cc=self.LogSelectFKorIK)
         if self.ikpvCtrJoint_at:
             pm.deleteUI(self.ikpvCtrJoint_at)
             self.ikpvCtrJoint_at = None
@@ -125,48 +138,33 @@ class APP_Limb_Properties_UI:
                                         cc=pm.Callback(self.LogLockScale, 1))
         
         # FKIK SWITCH 
-        if self.fkikJoint_at:
-            pm.deleteUI(self.fkikJoint_at)
-            self.fkikJoint_at = None
-        if bhvType in self.bhvMng.fkikTypeIndexes: # FKIK
-            self.fkikJoint_at = pm.attrEnumOptionMenu(  l='FKIK Switch Parent Joint',
-                                                        at=limb.bhvFKIKSwitchParentJoint, 
-                                                        p=self.appLimbProp_cl,
-                                                        cc=self.UpdateFKIKSwitchParentJoint)
+        # if self.fkikJoint_at:
+        #     pm.deleteUI(self.fkikJoint_at)
+        #     self.fkikJoint_at = None
+        # if bhvType in self.bhvMng.fkikTypeIndexes: # FKIK
+        #     self.fkikJoint_at = pm.attrEnumOptionMenu(  l='FKIK Switch Parent Joint',
+        #                                                 at=limb.bhvFKIKSwitchParentJoint, 
+        #                                                 p=self.appLimbProp_cl,
+        #                                                 cc=self.UpdateFKIKSwitchParentJoint)
 
 
         isFK = (bhvType in self.bhvMng.fkTypeIndexes)
-        pm.optionMenu(self.fkikTargetLimb_om, e=1, en=isFK)
+        pm.optionMenu(self.visSourceLimb_om, e=1, en=isFK)
         self.Populate()
-        self.PopulateFKIKVisParent()
         
-
-    def SetTargetFKIK(self, limbName):
-        self.logger.info('\tLimbProp > SET FKIK Vis Parent to ' + limbName)
-        pm.disconnectAttr(self.limb.appFKIKVisParent)
+    def SetVisSourceLimb(self, limbName):
+        self.logger.info('\tLimbProp > SetVisSourceLimb to ' + limbName)
+        pm.disconnectAttr(self.limb.appVisSourceLimb)
         if limbName == 'None':
             return
         limb = self.limbs[limbName]
-        pm.connectAttr(limb.appFKIKVisChildren, self.limb.appFKIKVisParent)
+        pm.connectAttr(limb.appVisTargetLimbs, self.limb.appVisSourceLimb)
                 
-    def PopulateFKIKVisParent(self):
-        self.logger.debug('\tApp_LimbProp > PopulateFKIKVisParent')
-        pm.attrEnumOptionMenu(self.targetType, e=1, en=0)
-        parent = pm.listConnections(self.limb.appFKIKVisParent)
-        if not parent:
-            pm.optionMenu(self.fkikTargetLimb_om, e=1, sl=1)
-            return
-        parent = parent[0]
-        prefix = self.limbMng.GetLimbPrefix(parent)
-        side = self.limbMng.GetLimbSide(parent)
-        name = '%s_%s_%s' % (prefix, parent.pfrsName.get(), side)
-        index = self.limbOrder.index(name) + 2 # start index 1 + (none = 1)
-        pm.optionMenu(self.fkikTargetLimb_om, e=1, sl=index)
 
-    def UpdateFKIKSwitchParentJoint(self, jointStr):
-        msg = '\tApp_LimbProp > FKIK SwitchParentJOINT to "%s"' % jointStr
-        self.logger.info(msg)
-        self.bhvMng.UpdateFKIKSwitchParentJoint(self.limb)
+    # def UpdateFKIKSwitchParentJoint(self, jointStr):
+    #     msg = '\tApp_LimbProp > FKIK SwitchParentJOINT to "%s"' % jointStr
+    #     self.logger.info(msg)
+    #     self.bhvMng.UpdateFKIKSwitchParentJoint(self.limb)
         
 
     # def SetControlType(self, ctrType):
@@ -180,8 +178,8 @@ class APP_Limb_Properties_UI:
 
 #=========== CONTROL DISTANCE ==============================================
 
-    def LogSelectFKIK(self, fkikType):
-        msg = '\tLimbProp > SELECT FKIK TYPE to "%s"' % fkikType
+    def LogSelectFKorIK(self, fkOrIk):
+        msg = '\tLimbProp > LogSelectFKorIK to "%s"' % fkOrIk
         self.logger.info(msg)
 
     def UpdateDistGroupPos(self, ignore):

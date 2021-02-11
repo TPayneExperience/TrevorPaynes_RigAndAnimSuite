@@ -32,33 +32,33 @@ class BHV_Limb_Manager:
         self.emptyLimbIndexes = (7,)
         self.oneJntLimbIndexes = (6, 4, 3)
         self.twoJntChainLimbIndexes = (11, 6, 12, 5)
-        self.threeJntChainLimbIndexes = (0, 6, 8, 10, 1, 5, 2, 9, 3)
+        self.threeJntChainLimbIndexes = (0, 6, 8, 10, 1, 5, 3) # (0, 6, 8, 10, 1, 5, 2, 9, 3)
         self.branchLimbIndexes = (6, 3)
         
-        self.omitLastJointTypes = (0, 2, 5, 9, 10)
+        self.omitLastJointTypes = (0, 5, 10) # (0, 2, 5, 9, 10)
         self.reverseTypeIndexes = (8,12)
 
-        self.fkTypeIndexes = (0, 2, 6, 8, 9, 11, 12)
-        self.ikPVTypeIndexes = (1, 2)
-        self.ikChainTypeIndexes = (5, 9)
+        self.fkTypeIndexes = (0, 6, 8, 11, 12)# (0, 2, 6, 8, 9, 11, 12)
+        self.ikPVTypeIndexes = (1,) # (1, 2)
+        self.ikChainTypeIndexes = (5,) # (5, 9)
         self.rfkTypeIndexes = (10,)
-        self.fkikTypeIndexes = (2, 9)
+        # self.fkikTypeIndexes = (2, 9)
         self.cstTypeIndexes = (3,)
         self.lookAtTypeIndexes = (4,)
 
-        self.distanceIndexes = (1, 2, 4)
-        self.targetIndexes = (1, 2, 3, 5, 9)
-        self.parentableIndexes = (0, 2, 6, 7, 8, 9, 10)
+        # self.distanceIndexes = (1, 4) # (1, 2, 4)
+        # self.targetIndexes = (1, 3, 5) # (1, 2, 3, 5, 9)
+        # self.parentableIndexes = (0, 6, 7, 8, 10) # (0, 2, 6, 7, 8, 9, 10)
 
         self.ikTargetableIndexes = (0, 6, 7, 8)
-        self.ikTypeIndexes = (1, 2, 5, 9)
-        self.cstTargetTypeIndexes = (0, 1, 2, 4, 5, 6, 8, 9)
-        self.ctrTypeIndexes = (0, 1, 2, 4, 6, 7, 8, 9, 10) # For APP > Limb hier
+        self.ikTypeIndexes = (1, 5) # (1, 2, 5, 9)
+        self.cstTargetTypeIndexes = (0, 1, 4, 5, 6, 8) # (0, 1, 2, 4, 5, 6, 8, 9)
+        self.ctrTypeIndexes = (0, 1, 4, 6, 7, 8, 10) # (0, 1, 2, 4, 6, 7, 8, 9, 10) # For APP > Limb hier
 
         self.bhvTypes = (   'FK - Chain (3+ Joints)', # DON'T CHANGE ORDER!
 
                             'IK - Pole Vector',
-                            'FK + IK Pole Vector',
+                            'DEPRICATED - FKIK PV',
                             'Constraint',
                             'Look At',
                             'IK - Chain',
@@ -66,7 +66,7 @@ class BHV_Limb_Manager:
                             'FK - Branch',
                             'Empty',
                             'FK - Reverse Chain (3+ Joints)',
-                            'FK + IK Chain', 
+                            'DEPRICATED - FKIK Chain', 
                             'FK - Relative',
 
                             'FK - Chain (2 Joints)',
@@ -98,9 +98,9 @@ class BHV_Limb_Manager:
         # Look At
         if bhvType in self.lookAtTypeIndexes:
             groups += pm.listConnections(limb.bhvLookAtGroup)
-        # FKIK
-        if bhvType in self.fkikTypeIndexes:
-            groups += pm.listConnections(limb.bhvFKIKSwitchGroup)
+        # # FKIK
+        # if bhvType in self.fkikTypeIndexes:
+        #     groups += pm.listConnections(limb.bhvFKIKSwitchGroup)
         # RFK
         if bhvType in self.rfkTypeIndexes:
             groups += pm.listConnections(limb.bhvRFKBottomGroup)
@@ -167,39 +167,127 @@ class BHV_Limb_Manager:
 
 #============= ADD / REMOVE LIMB  ============================
 
-    def AddLimb(self, limb):
-        self.logger.debug('\tBhvMng > AddLimb')
+    # def _AddLimb(self, limb):
+    #     self.logger.debug('\tBhvMng > _AddLimb')
+    #     bhvTypes = ':'.join(self.bhvTypes)
+    #     bhvCstTypes = ':'.join(self.cstTypes)
+    #     # ctrTypes = ':'.join(self.ctrMng.GetControlTypes())
+    #     axes = ':'.join(self.axesNames)
+
+    #     pm.addAttr(limb, ln='bhvType', at='enum', en=bhvTypes,
+    #                                 h=self.hideAttrs)
+
+    #     # LookAt, IKPV
+    #     pm.addAttr(limb, ln='bhvIKPVGroup', dt='string', h=self.hideAttrs)
+    #     pm.addAttr(limb, ln='bhvLookAtGroup', dt='string', h=self.hideAttrs)
+    #     pm.addAttr(limb, ln='bhvEmptyGroup', dt='string', h=self.hideAttrs)
+
+    #     # FKIK
+    #     pm.addAttr(limb, ln='bhvFKIKSwitchGroup', dt='string', h=self.hideAttrs) 
+    #     pm.addAttr(limb, ln='bhvFKIKSwitchParentJoint', at='enum', en='None', h=self.hideAttrs)
+    #     pm.addAttr(limb, ln='bhvFKIK_FKJoint', dt='string', h=self.hideAttrs)
+    #     pm.addAttr(limb, ln='bhvFKIK_IKJoint', dt='string', h=self.hideAttrs)
+    #     pm.addAttr(limb, ln='appVisSourceLimb', dt='string', h=self.hideAttrs)
+    #     pm.addAttr(limb, ln='appVisTargetLimbs', dt='string', h=self.hideAttrs)
+    #     pm.addAttr(limb, ln='appVisSourceType', at='enum', en='FK:IK', 
+    #                                                     h=self.hideAttrs)
+
+    #     # Relative FK
+    #     pm.addAttr(limb, ln='bhvRFKCenterGroup', dt='string', h=self.hideAttrs)
+    #     pm.addAttr(limb, ln='bhvRFKBottomGroup', dt='string', h=self.hideAttrs)
+    #     pm.addAttr(limb, ln='bhvRFKTopGroup', dt='string', h=self.hideAttrs) 
+    #     pm.addAttr(limb, ln='bhvRFKCenterJoint', at='enum', en='None', h=self.hideAttrs)
+        
+    #     # IK PV + CST
+    #     pm.addAttr(limb, ln='bhvSourceLimb', dt='string', h=self.hideAttrs) 
+    #     pm.addAttr(limb, ln='bhvTargetLimb', dt='string', h=self.hideAttrs) 
+    #     pm.addAttr(limb, ln='bhvTargetJoint', at='enum', en='None', h=self.hideAttrs)
+    #     pm.addAttr(limb, ln='bhvIKPVCtrJoint', at='enum', en='None', h=self.hideAttrs)
+    #     pm.addAttr(limb, ln='bhvCstType', at='enum', en=bhvCstTypes, h=self.hideAttrs)
+
+    #     # IK PV + Look At
+    #     pm.addAttr(limb, ln='bhvAxis', at='enum', en=axes, dv=4) # IKPV, LookAt
+    #     pm.addAttr(limb, ln='bhvDistance', at='float', min=0, dv=1) # IKPV, LookAt
+    #     # pm.addAttr(limb, ln='bhvDistanceJoint', dt='string') # for easy Test Connections
+        
+    #     # APP
+    #     pm.addAttr(limb, ln='appLockHidePos', at='bool', h=self.hideAttrs)
+    #     pm.addAttr(limb, ln='appLockHideRot', at='bool', h=self.hideAttrs)
+    #     pm.addAttr(limb, ln='appLockHideScale', at='bool', h=self.hideAttrs)
+    #     # Connect to FKIK switch of another limb
+
+    #     # pm.addAttr(limb, ln='bhvCstSourceLimb', dt='string') # Ignore, only for connections
+    #     # pm.addAttr(limb, ln='bhvCstTargetLimb', dt='string') # for connecting to target
+    #     # pm.addAttr(limb, ln='bhvCstTargetJnt', at='enum', en='None')
+    #     # pm.addAttr(limb, ln='bhvIKSourceLimb', dt='string') # IK handles parent connection
+    #     # pm.addAttr(limb, ln='bhvIKTargetLimb', dt='string') # IK handles parent connection
+    
+    #     self.Setup_LimbGroupVisibility(limb)
+
+    # def _RemoveLimb(self, limb):
+    #     self.logger.debug('\tBhvMng > _RemoveLimb')
+    #     for joint in self.jntMng.GetLimbJoints(limb):
+    #         self.jntMng.RemoveTemp(joint)
+
+    #     groups = pm.listConnections(limb.bhvIKPVGroup)
+    #     groups += pm.listConnections(limb.bhvLookAtGroup)
+    #     groups += pm.listConnections(limb.bhvEmptyGroup)
+    #     groups += pm.listConnections(limb.bhvFKIKSwitchGroup)
+    #     groups += pm.listConnections(limb.bhvRFKCenterGroup)
+    #     groups += pm.listConnections(limb.bhvRFKBottomGroup)
+    #     groups += pm.listConnections(limb.bhvRFKTopGroup)
+    #     for group in groups:
+    #         ctr = pm.listConnections(group.control)[0]
+    #         self.ctrMng.Remove(ctr)
+    #         self.grpMng.Remove(group)
+    #     pm.delete(groups)
+    #     mirror = pm.listConnections(limb.mirrorLimb)
+    #     self.limbMng.Remove(limb)
+    #     if mirror:
+    #         self.jntMng.UpdateLimbJointNames(mirror[0])
+
+    def AddEmptyLimb(self):
+        self.logger.debug('\tBhvMng > AddEmptyLimb')
+        limb = self.limbMng.Add()
         bhvTypes = ':'.join(self.bhvTypes)
-        bhvCstTypes = ':'.join(self.cstTypes)
-        # ctrTypes = ':'.join(self.ctrMng.GetControlTypes())
-        axes = ':'.join(self.axesNames)
 
         pm.addAttr(limb, ln='bhvType', at='enum', en=bhvTypes,
                                     h=self.hideAttrs)
 
+        pm.addAttr(limb, ln='bhvEmptyGroup', dt='string', h=self.hideAttrs)
+
+        # # FKIK
+        pm.addAttr(limb, ln='appVisSourceLimb', dt='string', h=self.hideAttrs)
+        pm.addAttr(limb, ln='appVisTargetLimbs', dt='string', h=self.hideAttrs)
+        pm.addAttr(limb, ln='appVisSourceType', at='enum', en='FK:IK', 
+                                                        h=self.hideAttrs)
+
+        # IK PV + CST
+        pm.addAttr(limb, ln='bhvSourceLimb', dt='string', h=self.hideAttrs) 
+
+        # APP
+        pm.addAttr(limb, ln='appLockHidePos', at='bool', h=self.hideAttrs)
+        pm.addAttr(limb, ln='appLockHideRot', at='bool', h=self.hideAttrs)
+        pm.addAttr(limb, ln='appLockHideScale', at='bool', h=self.hideAttrs)
+        # Connect to FKIK switch of another limb
+
+        return limb
+
+    def AddJointLimb(self, joints):
+        self.logger.debug('\tBhvMng > AddJointLimb')
+        limb = self.AddEmptyLimb()
+        for joint in joints:
+            self.jntMng.Add(limb, joint)
+        self.jntMng.ReindexJoints(limb)
+        
+        bhvCstTypes = ':'.join(self.cstTypes)
+        axes = ':'.join(self.axesNames)
+
         # LookAt, IKPV
         pm.addAttr(limb, ln='bhvIKPVGroup', dt='string', h=self.hideAttrs)
         pm.addAttr(limb, ln='bhvLookAtGroup', dt='string', h=self.hideAttrs)
-        pm.addAttr(limb, ln='bhvEmptyGroup', dt='string', h=self.hideAttrs)
 
-        # FKIK
-        pm.addAttr(limb, ln='bhvFKIKSwitchGroup', dt='string', h=self.hideAttrs) 
-        pm.addAttr(limb, ln='bhvFKIKSwitchParentJoint', at='enum', en='None', h=self.hideAttrs)
-        pm.addAttr(limb, ln='bhvFKIK_FKJoint', dt='string', h=self.hideAttrs)
-        pm.addAttr(limb, ln='bhvFKIK_IKJoint', dt='string', h=self.hideAttrs)
-        pm.addAttr(limb, ln='appFKIKVisParent', dt='string', h=self.hideAttrs)
-        pm.addAttr(limb, ln='appFKIKVisChildren', dt='string', h=self.hideAttrs)
-        pm.addAttr(limb, ln='appTargetFKIKType', at='enum', en='FK:IK', 
-                                                        h=self.hideAttrs)
-
-        # Relative FK
-        pm.addAttr(limb, ln='bhvRFKCenterGroup', dt='string', h=self.hideAttrs)
-        pm.addAttr(limb, ln='bhvRFKBottomGroup', dt='string', h=self.hideAttrs)
-        pm.addAttr(limb, ln='bhvRFKTopGroup', dt='string', h=self.hideAttrs) 
-        pm.addAttr(limb, ln='bhvRFKCenterJoint', at='enum', en='None', h=self.hideAttrs)
-        
-        # IK PV + CST
-        pm.addAttr(limb, ln='bhvSourceLimb', dt='string', h=self.hideAttrs) 
+        # IK PV + CST 
         pm.addAttr(limb, ln='bhvTargetLimb', dt='string', h=self.hideAttrs) 
         pm.addAttr(limb, ln='bhvTargetJoint', at='enum', en='None', h=self.hideAttrs)
         pm.addAttr(limb, ln='bhvIKPVCtrJoint', at='enum', en='None', h=self.hideAttrs)
@@ -208,33 +296,28 @@ class BHV_Limb_Manager:
         # IK PV + Look At
         pm.addAttr(limb, ln='bhvAxis', at='enum', en=axes, dv=4) # IKPV, LookAt
         pm.addAttr(limb, ln='bhvDistance', at='float', min=0, dv=1) # IKPV, LookAt
-        pm.addAttr(limb, ln='bhvDistanceJoint', dt='string') # for easy Test Connections
         
-        # APP
-        pm.addAttr(limb, ln='appLockHidePos', at='bool', h=self.hideAttrs)
-        pm.addAttr(limb, ln='appLockHideRot', at='bool', h=self.hideAttrs)
-        pm.addAttr(limb, ln='appLockHideScale', at='bool', h=self.hideAttrs)
         # Connect to FKIK switch of another limb
 
-        # pm.addAttr(limb, ln='bhvCstSourceLimb', dt='string') # Ignore, only for connections
-        # pm.addAttr(limb, ln='bhvCstTargetLimb', dt='string') # for connecting to target
-        # pm.addAttr(limb, ln='bhvCstTargetJnt', at='enum', en='None')
-        # pm.addAttr(limb, ln='bhvIKSourceLimb', dt='string') # IK handles parent connection
-        # pm.addAttr(limb, ln='bhvIKTargetLimb', dt='string') # IK handles parent connection
-    
         self.Setup_LimbGroupVisibility(limb)
+        return limb
 
-    def RemoveLimb(self, limb):
-        self.logger.debug('\tBhvMng > RemoveLimb')
-        # Main Limb manager should actually delete the limb
-        # name = limb.pfrsName.get()
-        # for joint in self.jntMng.GetLimbTempJoints(limb):
+    def RemoveEmptyLimb(self, limb):
+        group = pm.listConnections(limb.bhvEmptyGroup)[0]
+        ctr = pm.listConnections(group.control)[0]
+        self.ctrMng.Remove(ctr)
+        self.grpMng.Remove(group)
+        pm.delete(group)
+        mirror = pm.listConnections(limb.mirrorLimb)
+        self.limbMng.Remove(limb)
+        if mirror and mirror[0].bhvType.get() not in self.emptyLimbIndexes:
+            self.jntMng.UpdateLimbJointNames(mirror[0])
+
+    def RemoveJointLimb(self, limb):
         for joint in self.jntMng.GetLimbJoints(limb):
             self.jntMng.RemoveTemp(joint)
-
         groups = pm.listConnections(limb.bhvIKPVGroup)
         groups += pm.listConnections(limb.bhvLookAtGroup)
-        groups += pm.listConnections(limb.bhvEmptyGroup)
         groups += pm.listConnections(limb.bhvFKIKSwitchGroup)
         groups += pm.listConnections(limb.bhvRFKCenterGroup)
         groups += pm.listConnections(limb.bhvRFKBottomGroup)
@@ -244,10 +327,8 @@ class BHV_Limb_Manager:
             self.ctrMng.Remove(ctr)
             self.grpMng.Remove(group)
         pm.delete(groups)
-        mirror = pm.listConnections(limb.mirrorLimb)
-        self.limbMng.Remove(limb)
-        if mirror:
-            self.jntMng.UpdateLimbJointNames(mirror[0])
+        self.RemoveEmptyLimb(limb)
+
 
 #============= REBUILD ============================
 
@@ -360,12 +441,12 @@ class BHV_Limb_Manager:
                 group = self.grpMng.AddLookAtGroup(limb)
                 self.grpMng.UpdateGroupName(group)
             self.UpdateDistGroupPos(limb)
-        if bhvType in self.fkikTypeIndexes:
-            if not pm.listConnections(limb.bhvFKIKSwitchGroup):
-                group = self.grpMng.AddFKIKSwitchGroup(limb)
-                self.grpMng.UpdateGroupName(group)
-            self.PopulateFKIKSwitchParentJoint(limb)
-            self.UpdateFKIKSwitchParentJoint(limb)
+        # if bhvType in self.fkikTypeIndexes:
+        #     if not pm.listConnections(limb.bhvFKIKSwitchGroup):
+        #         group = self.grpMng.AddFKIKSwitchGroup(limb)
+        #         self.grpMng.UpdateGroupName(group)
+        #     self.PopulateFKIKSwitchParentJoint(limb)
+        #     self.UpdateFKIKSwitchParentJoint(limb)
         if bhvType in self.emptyLimbIndexes:
             if not pm.listConnections(limb.bhvEmptyGroup):
                 group = self.grpMng.AddEmptyGroup(limb)
@@ -475,10 +556,10 @@ class BHV_Limb_Manager:
         # CONSTRAINT
         if bhvType in self.cstTypeIndexes:
             self.RebuildBhvDep(limb)
-        # FKIK
-        if bhvType in self.fkikTypeIndexes:
-            self.PopulateFKIKSwitchParentJoint(limb)
-            self.UpdateFKIKSwitchParentJoint(limb)
+        # # FKIK
+        # if bhvType in self.fkikTypeIndexes:
+        #     self.PopulateFKIKSwitchParentJoint(limb)
+        #     self.UpdateFKIKSwitchParentJoint(limb)
         # RFK
         if bhvType in self.rfkTypeIndexes:
             joints = self.jntMng.GetLimbJoints(limb)
@@ -564,19 +645,19 @@ class BHV_Limb_Manager:
         pm.xform(group, t=pos)
         pm.parent(group, limb)
 
-    def PopulateFKIKSwitchParentJoint(self, limb):
-        joints = self.jntMng.GetLimbJoints(limb)
-        names = [j.pfrsName.get() for j in joints]
-        pm.addAttr(limb.bhvFKIKSwitchParentJoint, e=1, en=names)
+    # def PopulateFKIKSwitchParentJoint(self, limb):
+    #     joints = self.jntMng.GetLimbJoints(limb)
+    #     names = [j.pfrsName.get() for j in joints]
+    #     pm.addAttr(limb.bhvFKIKSwitchParentJoint, e=1, en=names)
 
-    def UpdateFKIKSwitchParentJoint(self, limb):
-        self.logger.debug('\tBhvMng > UpdateFKIKSwitchParentJoint')
-        index = limb.bhvFKIKSwitchParentJoint.get()
-        joint = self.jntMng.GetLimbJoints(limb)[index]
-        group = pm.listConnections(limb.bhvFKIKSwitchGroup)[0]
-        pm.parent(group, joint)
-        pm.xform(group, t=(0,0,0), ro=(0,0,0), s=(1,1,1))
-        pm.parent(group, limb)
+    # def UpdateFKIKSwitchParentJoint(self, limb):
+    #     self.logger.debug('\tBhvMng > UpdateFKIKSwitchParentJoint')
+    #     index = limb.bhvFKIKSwitchParentJoint.get()
+    #     joint = self.jntMng.GetLimbJoints(limb)[index]
+    #     group = pm.listConnections(limb.bhvFKIKSwitchGroup)[0]
+    #     pm.parent(group, joint)
+    #     pm.xform(group, t=(0,0,0), ro=(0,0,0), s=(1,1,1))
+    #     pm.parent(group, limb)
 
     def UpdateRFKConnections(self, limb):
         self.logger.debug('\tBhvMng > UpdateRFKConnections')
@@ -621,14 +702,6 @@ class BHV_Limb_Manager:
             self.limbMng.Reparent(child, parent)
             self.UpdateLimbParentJoint(child)
 
-    def AddLimbByJoints(self, joints):
-        self.logger.debug('\tBhvMng > AddLimbByJoints')
-        limb = self.limbMng.Add()
-        for joint in joints:
-            self.jntMng.Add(limb, joint)
-        self.jntMng.ReindexJoints(limb)
-        self.AddLimb(limb)
-        return limb
 
     def AutoBuildByHierarchy(self):
         self.logger.debug('\tBhvMng > AutoBuildByHierarchy')
@@ -671,7 +744,7 @@ class BHV_Limb_Manager:
         for parent, children in disconnectJoints.items():
             pm.parent(children, parent)
         for newLimbJoints in newLimbJointSets:
-            self.AddLimbByJoints(newLimbJoints)
+            self.AddJointLimb(newLimbJoints)
             # if limb:
             # self.AddLimb(limb)
             for joint in newLimbJoints:
@@ -722,7 +795,7 @@ class BHV_Limb_Manager:
 
         # ADD LIMBS
         for limbName, joints in newLimbs.items():
-            limb = self.AddLimbByJoints(joints)
+            limb = self.AddJointLimb(joints)
             # self.AddLimb(limb)
             tempJoint = joints[0]
             limbName, side, l = tempJoint.shortName().split('_')

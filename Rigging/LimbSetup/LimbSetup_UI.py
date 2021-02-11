@@ -76,19 +76,17 @@ class LimbSetup_UI:
 
 #=========== LIMB FUNCTIONALITY ====================================
     
-    def AddLimb(self): # Limb Hier UI > RMB > Add
-        self.logger.info('\tLimbSetup_UI > ADD Limb')
-        limb = self.bhvMng.AddLimbByJoints(self.jointsToCreateLimb)
-        # self.parent.AddLimb(limb) # BHV Limb Mng add
-        # self.bhvMng.AddLimb(limb)
+    def AddJointLimb(self): # Limb Hier UI > RMB > Add
+        self.logger.info('\tLimbSetup_UI > AddJointLimb')
+        limb = self.bhvMng.AddJointLimb(self.jointsToCreateLimb)
         self.ClearJointsToAdd()
         pm.select(d=1)
         self.jntHier_ui.SetLimb(limb)
         self.PopulateJoints()
         self.limbHier_ui.Populate()
     
-    def RemoveLimb(self):
-        self.logger.debug('\tLimbSetup_UI > RemoveLimb')
+    def RemoveJointLimb(self):
+        self.logger.debug('\tLimbSetup_UI > RemoveJointLimb')
         self.UpdateJointFrame()
         self.Populate()
         self.UpdateSceneFrame()
@@ -100,7 +98,7 @@ class LimbSetup_UI:
         groups = pm.listConnections(limb.bhvIKPVGroup)
         groups += pm.listConnections(limb.bhvLookAtGroup)
         groups += pm.listConnections(limb.bhvEmptyGroup)
-        groups += pm.listConnections(limb.bhvFKIKSwitchGroup)
+        # groups += pm.listConnections(limb.bhvFKIKSwitchGroup)
         for group in groups:
             self.grpMng.UpdateGroupName(group)
         for joint in pm.listConnections(limb.joints):
@@ -134,6 +132,8 @@ class LimbSetup_UI:
     def SetJointsToAdd(self, joints):
         self.logger.debug('\tLimbSetup_UI > SetJointsToAdd')
         self.ClearJointsToAdd()
+        self.limbHier_ui
+        self.limbHier_ui.SetAddEnabled(bool(joints))
         if not joints:
             return
         self.logger.debug('\tJOINTS TO ADD:')
@@ -179,7 +179,6 @@ class LimbSetup_UI:
         self.jointsToAddToLimb = []
         self.jointsToCreateLimb = []
         self.jntHier_ui.SetAddEnabled(0)
-        self.limbHier_ui.SetAddEnabled(1)
 
     def UpdateSceneFrame(self):
         self.logger.debug('\tLimbSetup_UI > UpdateSceneFrame')

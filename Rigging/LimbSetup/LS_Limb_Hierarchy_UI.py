@@ -95,8 +95,8 @@ class LS_Limb_Hierarchy_UI:
                                 dismissString='No') == 'No'):
             return
         limb = self.limbMng.GetLimb(int(limbIDStrs[0]))
-        self.bhvMng.RemoveLimb(limb)
-        self.parent.RemoveLimb()
+        self.bhvMng.RemoveJointLimb(limb)
+        self.parent.RemoveJointLimb()
         # name = limb.pfrsName.get()
         # self.logger.info('\tLimbHier > REMOVE Limb "%s"' % name)
         # # for joint in self.jntMng.GetLimbTempJoints(limb):
@@ -132,12 +132,12 @@ class LS_Limb_Hierarchy_UI:
                                 dismissString='No') == 'No'):
             return
         for limb in self.limbMng.GetAllLimbs():
-            self.bhvMng.RemoveLimb(limb)
-        self.parent.RemoveLimb()
+            self.bhvMng.RemoveJointLimb(limb)
+        self.parent.RemoveJointLimb()
 
     def Add(self, ignore):
         self.logger.info('\tLS_LimbHier > Add Limb')
-        self.parent.AddLimb()
+        self.parent.AddJointLimb()
 
     def Rename(self, limbIDStr, newName):
         self.logger.debug('\tLS_LimbHier > Rename')
@@ -185,8 +185,6 @@ class LS_Limb_Hierarchy_UI:
         self.jntMng.UpdateLimbJointNames(sourceLimb)
         self.jntMng.UpdateLimbJointNames(mirrorLimb)
         self.parent.FlipSides()
-
-
 
 
 

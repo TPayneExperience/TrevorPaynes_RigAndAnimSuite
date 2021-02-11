@@ -192,7 +192,6 @@ class BHV_Limb_Properties_UI:
             if targetLimb in self.targetLimbOrder:
                 index = self.targetLimbOrder.index(targetLimb) + 1
                 pm.optionMenu(self.targetLimb_om, e=1, sl=index)
-        # if bhvType not in self.bhvMng.fkikTypeIndexes:
         if bhvType in self.bhvMng.ikPVTypeIndexes + self.bhvMng.cstTypeIndexes:
             self.targetJnt_at = pm.attrEnumOptionMenu(  l='Target Joint',
                                                         at=self.limb.bhvTargetJoint,

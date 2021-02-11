@@ -12,7 +12,7 @@ class BHV_Group_Manager:
 
                             'Joint', # FK, CST, IK Chain
                             'IKPV',
-                            'FKIKSwitch',
+                            'DEPRICATED - FKIKSwitch',
                             'LookAt',
                             'RFK_B',
 
@@ -116,17 +116,17 @@ class BHV_Group_Manager:
         self.ctrMng.AddLookAtControl(group)
         return group
 
-    # FKIK Switch
-    # Called from Behaviors > Set Bhv()
-    def AddFKIKSwitchGroup(self, limb):
-        self.logger.debug('\tGrpMng > AddFKIKSwitchGroup')
-        group = self._AddGroup()
-        group.groupType.set(3)
-        pm.addAttr(group, ln='limb', dt='string')
-        pm.connectAttr(limb.bhvFKIKSwitchGroup, group.limb)
-        pm.parent(group, limb)
-        self.ctrMng.AddFKIKControl(group)
-        return group
+    # # FKIK Switch
+    # # Called from Behaviors > Set Bhv()
+    # def AddFKIKSwitchGroup(self, limb):
+    #     self.logger.debug('\tGrpMng > AddFKIKSwitchGroup')
+    #     group = self._AddGroup()
+    #     group.groupType.set(3)
+    #     pm.addAttr(group, ln='limb', dt='string')
+    #     pm.connectAttr(limb.bhvFKIKSwitchGroup, group.limb)
+    #     pm.parent(group, limb)
+    #     self.ctrMng.AddFKIKControl(group)
+    #     return group
 
     def AddRFKGroups(self, limb):
         self.logger.debug('\tGrpMng > AddRFKGroups')

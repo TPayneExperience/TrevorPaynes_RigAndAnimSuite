@@ -8,10 +8,6 @@ class APP_Control_Manager:
         self.logger = parent.logger
 
         self._ctrs = {} # ctrID : ctr
-        # self.ctrTypes = (   'PFRSCTR_Square_Wire', # Empty
-        #                     'PFRSCTR_Circle_Wire', # Joint
-        #                     'PFRSCTR_Diamond_Wire', # Distance
-        #                     'PFRSCTR_Pin_Wire') # FKIK
         self._ctrTemplates = {} # CtrType/Name : ControlTemplate
         self.ctrTypesStr = '' # 'ctr1:ctr2...'
         self.hideAttrs = False
@@ -41,15 +37,15 @@ class APP_Control_Manager:
                             en=self.ctrTypesStr, h=self.hideAttrs)
         pm.addAttr(rigRoot, ln='appLookAtCtrShape', at='enum', 
                             en=self.ctrTypesStr, h=self.hideAttrs)
-        pm.addAttr(rigRoot, ln='appFKIKCtrShape', at='enum', 
-                            en=self.ctrTypesStr, h=self.hideAttrs)
+        # pm.addAttr(rigRoot, ln='appFKIKCtrShape', at='enum', 
+        #                     en=self.ctrTypesStr, h=self.hideAttrs)
         pm.addAttr(rigRoot, ln='appRFKCtrShape', at='enum', 
                             en=self.ctrTypesStr, h=self.hideAttrs)
         rigRoot.appEmptyCtrShape.set(names.index('Square_Wire'))
         rigRoot.appJointCtrShape.set(names.index('Sphere_Poly'))
         rigRoot.appIKPVCtrShape.set(names.index('Diamond_Wire'))
         rigRoot.appLookAtCtrShape.set(names.index('Circle_Wire'))
-        rigRoot.appFKIKCtrShape.set(names.index('Pin_Wire'))
+        # rigRoot.appFKIKCtrShape.set(names.index('Pin_Wire'))
         rigRoot.appRFKCtrShape.set(names.index('Cylinder_Poly'))
         self.ctrLayer = pm.createDisplayLayer(n='Controls', e=True)
         self.SetLayerState(True, True)
@@ -116,11 +112,11 @@ class APP_Control_Manager:
         index = self.rigRoot.appLookAtCtrShape.get()
         self._Add(group, index)
 
-    def AddFKIKControl(self, group):
-        index = self.rigRoot.appFKIKCtrShape.get()
-        control = self._Add(group, index)
-        for attr in ['.tx', '.ty', '.tz']:
-            pm.setAttr(control+attr, l=1, k=0, cb=0)
+    # def AddFKIKControl(self, group):
+    #     index = self.rigRoot.appFKIKCtrShape.get()
+    #     control = self._Add(group, index)
+    #     for attr in ['.tx', '.ty', '.tz']:
+    #         pm.setAttr(control+attr, l=1, k=0, cb=0)
 
     def AddRKFControl(self, group):
         index = self.rigRoot.appRFKCtrShape.get()
@@ -141,8 +137,8 @@ class APP_Control_Manager:
             index = self.rigRoot.appJointCtrShape.get()
         elif groupType == 2:
             index = self.rigRoot.appIKPVCtrShape.get()
-        elif groupType == 3:
-            index = self.rigRoot.appFKIKCtrShape.get()
+        # elif groupType == 3:
+        #     index = self.rigRoot.appFKIKCtrShape.get()
         elif groupType == 4:
             index = self.rigRoot.appLookAtCtrShape.get()
         elif groupType in (5, 6, 7):

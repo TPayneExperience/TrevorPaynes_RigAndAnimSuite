@@ -34,7 +34,7 @@
         <item>
          <widget class="QTabWidget" name="tabWidget">
           <property name="currentIndex">
-           <number>1</number>
+           <number>3</number>
           </property>
           <widget class="QWidget" name="tab">
            <attribute name="title">
@@ -52,11 +52,11 @@
                  <bool>true</bool>
                 </property>
                 <property name="currentIndex">
-                 <number>3</number>
+                 <number>2</number>
                 </property>
                 <widget class="QWidget" name="tab_16">
                  <attribute name="title">
-                  <string>Joint Setup</string>
+                  <string>Joint Setup (RigOnly)</string>
                  </attribute>
                  <layout class="QHBoxLayout" name="horizontalLayout_19">
                   <item>
@@ -181,7 +181,7 @@
                 </widget>
                 <widget class="QWidget" name="tab_11">
                  <attribute name="title">
-                  <string>Limb Setup</string>
+                  <string>Limb Setup (RigOnly)</string>
                  </attribute>
                  <layout class="QHBoxLayout" name="horizontalLayout_4">
                   <item>
@@ -545,7 +545,7 @@
                            <item>
                             <widget class="QLabel" name="label_28">
                              <property name="text">
-                              <string>RMB: Show/Hide Prefix, for cross rig Parenting [or color code?], Also Reset to default hier, Set As Default for easy reverting, Reset to Default</string>
+                              <string>RMB: Load Default Hier, Save to Default Hier, Load Skel Hier. (ANIM MODE: Add Empty Limb)</string>
                              </property>
                              <property name="wordWrap">
                               <bool>true</bool>
@@ -1499,7 +1499,7 @@
           </widget>
           <widget class="QWidget" name="tab_2">
            <attribute name="title">
-            <string>Skinning (Rig Mode Only)</string>
+            <string>Skinning (RigOnly)</string>
            </attribute>
            <layout class="QVBoxLayout" name="verticalLayout_105">
             <item>
@@ -3865,7 +3865,7 @@
                <bool>true</bool>
               </property>
               <property name="currentIndex">
-               <number>1</number>
+               <number>0</number>
               </property>
               <widget class="QWidget" name="tab_4">
                <attribute name="title">
@@ -4015,8 +4015,8 @@
                            <rect>
                             <x>0</x>
                             <y>0</y>
-                            <width>114</width>
-                            <height>134</height>
+                            <width>191</width>
+                            <height>143</height>
                            </rect>
                           </property>
                           <layout class="QVBoxLayout" name="verticalLayout_14">

@@ -12,9 +12,6 @@ class APP_Control_Hierarchy_UI:
         self.logger = parent.logger
 
         self.limb = None
-        # self.ctrSuffixes = ['FK',
-        #                     'FKIKS',
-        #                     'LKAT']
 
         self._Setup()
 

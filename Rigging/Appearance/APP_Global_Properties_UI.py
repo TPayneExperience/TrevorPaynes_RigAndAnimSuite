@@ -42,7 +42,7 @@ class APP_Global_Properties_UI:
         pm.deleteUI(self.joint_at)
         pm.deleteUI(self.ikpv_at)
         pm.deleteUI(self.lookAt_at)
-        pm.deleteUI(self.fkik_at)
+        # pm.deleteUI(self.fkik_at)
         pm.deleteUI(self.rfk_at)
         self.empty_at = pm.attrEnumOptionMenu(  l='Empty',
                                                 p=self.prop_cl,
@@ -60,10 +60,10 @@ class APP_Global_Properties_UI:
                                                 p=self.prop_cl,
                                                 cc=self.UpdateLookAtShapes,
                                                 at=rigRoot.appLookAtCtrShape)
-        self.fkik_at = pm.attrEnumOptionMenu(   l='FKIK Switch',
-                                                p=self.prop_cl,
-                                                cc=self.UpdateFKIKShapes,
-                                                at=rigRoot.appFKIKCtrShape)
+        # self.fkik_at = pm.attrEnumOptionMenu(   l='FKIK Switch',
+        #                                         p=self.prop_cl,
+        #                                         cc=self.UpdateFKIKShapes,
+        #                                         at=rigRoot.appFKIKCtrShape)
         self.rfk_at = pm.attrEnumOptionMenu(    l='Relative FK',
                                                 p=self.prop_cl,
                                                 cc=self.UpdateRFKShapes,
@@ -78,7 +78,7 @@ class APP_Global_Properties_UI:
                 self.joint_at = pm.attrEnumOptionMenu(at='perspShape.filmFit')
                 self.ikpv_at = pm.attrEnumOptionMenu(at='perspShape.filmFit')
                 self.lookAt_at = pm.attrEnumOptionMenu(at='perspShape.filmFit')
-                self.fkik_at = pm.attrEnumOptionMenu(at='perspShape.filmFit')
+                # self.fkik_at = pm.attrEnumOptionMenu(at='perspShape.filmFit')
                 self.rfk_at = pm.attrEnumOptionMenu(at='perspShape.filmFit')
 
 #=========== FUNCTIONALITY ==============================================
@@ -99,9 +99,9 @@ class APP_Global_Properties_UI:
         self.logger.info('\tApp_GlobalProp > UpdateLookAtShapes')
         self._UpdateShapes(4, shape)
 
-    def UpdateFKIKShapes(self, shape):
-        self.logger.deinfobug('\tApp_GlobalProp > UpdateFKIKShapes')
-        self._UpdateShapes(3, shape)
+    # def UpdateFKIKShapes(self, shape):
+    #     self.logger.deinfobug('\tApp_GlobalProp > UpdateFKIKShapes')
+    #     self._UpdateShapes(3, shape)
 
     def UpdateRFKShapes(self, shape):
         self.logger.info('\tApp_GlobalProp > UpdateRFKShapes')

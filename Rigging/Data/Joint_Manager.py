@@ -85,8 +85,8 @@ class Joint_Manager:
             pm.addAttr(joint, ln='pfrsName', dt='string')
             pm.addAttr(joint, ln='group', dt='string')
             pm.addAttr(joint, ln='bhvRFKGroup', dt='string')
-            pm.addAttr(joint, ln='bhvDistanceJoint', dt='string')
-            pm.addAttr(joint, ln='bhvFKIKSwitchSource', dt='string')
+            # pm.addAttr(joint, ln='bhvDistanceJoint', dt='string')
+            # pm.addAttr(joint, ln='bhvFKIKSwitchSource', dt='string')
             # SKIN ATTRS
             pm.addAttr(joint, ln='skinAnimStart', at='float')
             pm.addAttr(joint, ln='skinAnimEnd', at='float')

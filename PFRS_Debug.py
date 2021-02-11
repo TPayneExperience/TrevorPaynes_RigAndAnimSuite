@@ -93,7 +93,7 @@ class PFRS_Debug:
         # pm.tabLayout(self.rig_ui.tab, e=1, sti=2) # Select Limb setup tab
         # # joints = pm.ls('Pelvis_Root_M')
         # # joints += pm.ls('Spine_M_S01')
-        # # limb = self.bhvMng.AddLimbByJoints(joints)
+        # # limb = self.bhvMng.AddJointLimb(joints)
         # # self.rig_ui.AddLimb(limb)
         # # pm.tabLayout(self.tab, e=1, sti=2) # Select SKINNING tab
         # mesh1 = pm.ls('pSphereShape1')[0]
