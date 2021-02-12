@@ -128,24 +128,24 @@ class BHV_Group_Manager:
     #     self.ctrMng.AddFKIKControl(group)
     #     return group
 
-    def AddRFKGroups(self, limb):
-        self.logger.debug('\tGrpMng > AddRFKGroups')
-        groups = []
-        for i in range(3):
-            groups.append(self._AddGroup())
-            pm.addAttr(groups[i], ln='joint', dt='string')
-            pm.addAttr(groups[i], ln='limb', dt='string')
-            groups[i].groupType.set(4)
-            self.ctrMng.AddRKFControl(groups[i])
-        pm.connectAttr(limb.bhvRFKBottomGroup, groups[0].limb)
-        pm.connectAttr(limb.bhvRFKCenterGroup, groups[1].limb)
-        pm.connectAttr(limb.bhvRFKTopGroup, groups[2].limb)
-        groups[0].groupType.set(5)
-        groups[1].groupType.set(6)
-        groups[2].groupType.set(7)
-        pm.parent(groups[0], groups[2], groups[1])
-        pm.parent(groups[1], limb)
-        return groups
+    # def AddRFKGroups(self, limb):
+    #     self.logger.debug('\tGrpMng > AddRFKGroups')
+    #     groups = []
+    #     for i in range(3):
+    #         groups.append(self._AddGroup())
+    #         pm.addAttr(groups[i], ln='joint', dt='string')
+    #         pm.addAttr(groups[i], ln='limb', dt='string')
+    #         groups[i].groupType.set(4)
+    #         self.ctrMng.AddRKFControl(groups[i])
+    #     pm.connectAttr(limb.bhvRFKBottomGroup, groups[0].limb)
+    #     pm.connectAttr(limb.bhvRFKCenterGroup, groups[1].limb)
+    #     pm.connectAttr(limb.bhvRFKTopGroup, groups[2].limb)
+    #     groups[0].groupType.set(5)
+    #     groups[1].groupType.set(6)
+    #     groups[2].groupType.set(7)
+    #     pm.parent(groups[0], groups[2], groups[1])
+    #     pm.parent(groups[1], limb)
+    #     return groups
 
     def Remove(self, group):
         self.logger.debug('\tGrpMng > Remove')

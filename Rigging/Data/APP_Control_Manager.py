@@ -39,14 +39,14 @@ class APP_Control_Manager:
                             en=self.ctrTypesStr, h=self.hideAttrs)
         # pm.addAttr(rigRoot, ln='appFKIKCtrShape', at='enum', 
         #                     en=self.ctrTypesStr, h=self.hideAttrs)
-        pm.addAttr(rigRoot, ln='appRFKCtrShape', at='enum', 
-                            en=self.ctrTypesStr, h=self.hideAttrs)
+        # pm.addAttr(rigRoot, ln='appRFKCtrShape', at='enum', 
+        #                     en=self.ctrTypesStr, h=self.hideAttrs)
         rigRoot.appEmptyCtrShape.set(names.index('Square_Wire'))
         rigRoot.appJointCtrShape.set(names.index('Sphere_Poly'))
         rigRoot.appIKPVCtrShape.set(names.index('Diamond_Wire'))
         rigRoot.appLookAtCtrShape.set(names.index('Circle_Wire'))
         # rigRoot.appFKIKCtrShape.set(names.index('Pin_Wire'))
-        rigRoot.appRFKCtrShape.set(names.index('Cylinder_Poly'))
+        # rigRoot.appRFKCtrShape.set(names.index('Cylinder_Poly'))
         self.ctrLayer = pm.createDisplayLayer(n='Controls', e=True)
         self.SetLayerState(True, True)
     
@@ -88,6 +88,7 @@ class APP_Control_Manager:
         ctr = pm.duplicate(sourceShape, ic=1)[0]
         pm.addAttr(ctr, ln='ID', at='long', dv=ctrID)
         pm.addAttr(ctr, ln='group', dt='string')
+        pm.setAttr(ctr + '.v', k=0, cb=0)
 
         pm.editDisplayLayerMembers(self.ctrLayer, ctr, nr=1)
         pm.connectAttr(group.control, ctr.group)
@@ -118,9 +119,9 @@ class APP_Control_Manager:
     #     for attr in ['.tx', '.ty', '.tz']:
     #         pm.setAttr(control+attr, l=1, k=0, cb=0)
 
-    def AddRKFControl(self, group):
-        index = self.rigRoot.appRFKCtrShape.get()
-        self._Add(group, index)
+    # def AddRKFControl(self, group):
+    #     index = self.rigRoot.appRFKCtrShape.get()
+    #     self._Add(group, index)
 
     def Remove(self, control):
         self.logger.debug('\tCtrMng > Remove')
@@ -141,8 +142,8 @@ class APP_Control_Manager:
         #     index = self.rigRoot.appFKIKCtrShape.get()
         elif groupType == 4:
             index = self.rigRoot.appLookAtCtrShape.get()
-        elif groupType in (5, 6, 7):
-            index = self.rigRoot.appRFKCtrShape.get()
+        # elif groupType in (5, 6, 7):
+        #     index = self.rigRoot.appRFKCtrShape.get()
         shapeNames = list(self._ctrTemplates.keys())
         return shapeNames[index]
 

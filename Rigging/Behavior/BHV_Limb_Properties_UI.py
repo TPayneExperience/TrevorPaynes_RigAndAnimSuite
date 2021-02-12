@@ -186,7 +186,7 @@ class BHV_Limb_Properties_UI:
                     self.targetLimbOrder.append(limb)
 
         # SELECT CURRENT LIMB TARGET
-        targetLimbs = pm.listConnections(self.limb.bhvTargetLimb)
+        targetLimbs = pm.listConnections(self.limb.bhvCstIkParentLimb)
         if targetLimbs:
             targetLimb = targetLimbs[0]
             if targetLimb in self.targetLimbOrder:

@@ -43,7 +43,7 @@ class APP_Global_Properties_UI:
         pm.deleteUI(self.ikpv_at)
         pm.deleteUI(self.lookAt_at)
         # pm.deleteUI(self.fkik_at)
-        pm.deleteUI(self.rfk_at)
+        # pm.deleteUI(self.rfk_at)
         self.empty_at = pm.attrEnumOptionMenu(  l='Empty',
                                                 p=self.prop_cl,
                                                 cc=self.UpdateEmptyShapes,
@@ -64,10 +64,10 @@ class APP_Global_Properties_UI:
         #                                         p=self.prop_cl,
         #                                         cc=self.UpdateFKIKShapes,
         #                                         at=rigRoot.appFKIKCtrShape)
-        self.rfk_at = pm.attrEnumOptionMenu(    l='Relative FK',
-                                                p=self.prop_cl,
-                                                cc=self.UpdateRFKShapes,
-                                                at=rigRoot.appRFKCtrShape)
+        # self.rfk_at = pm.attrEnumOptionMenu(    l='Relative FK',
+        #                                         p=self.prop_cl,
+        #                                         cc=self.UpdateRFKShapes,
+        #                                         at=rigRoot.appRFKCtrShape)
 
 #=========== SETUP UI ==============================================
 
@@ -79,7 +79,7 @@ class APP_Global_Properties_UI:
                 self.ikpv_at = pm.attrEnumOptionMenu(at='perspShape.filmFit')
                 self.lookAt_at = pm.attrEnumOptionMenu(at='perspShape.filmFit')
                 # self.fkik_at = pm.attrEnumOptionMenu(at='perspShape.filmFit')
-                self.rfk_at = pm.attrEnumOptionMenu(at='perspShape.filmFit')
+                # self.rfk_at = pm.attrEnumOptionMenu(at='perspShape.filmFit')
 
 #=========== FUNCTIONALITY ==============================================
 

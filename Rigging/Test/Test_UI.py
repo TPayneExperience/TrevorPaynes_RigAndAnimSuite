@@ -22,17 +22,29 @@ class Test_UI:
     def Setup_Editable(self):
         self.logger.info('Rigging > Test SETUP')
         self.Setup_Groups()
-        self.Setup_Controls()
-        self.Setup_Internal()
-        self.Setup_External()
-        self.Setup_Internal_MayaControllers()
-        self.Setup_External_MayaControllers()
+        enabledLimbs = []
+        for limb in self.limbMng.GetAllLimbs():
+            if self._SkipLimb(limb):
+                self.bhvMng.Teardown_LimbGroupVisibility(limb)
+            else:
+                enabledLimbs.append(limb)
+        self.Setup_Controls(enabledLimbs)
+        self.Setup_Internal(enabledLimbs)
+        self.Setup_External(enabledLimbs)
+        self.Setup_Internal_MayaControllers(enabledLimbs)
+        self.Setup_External_MayaControllers(enabledLimbs)
         pm.select(d=1)
 
     def Teardown_Editable(self):
         self.logger.info('Rigging > Test TEARDOWN\n')
+        enabledLimbs = []
+        for limb in self.limbMng.GetAllLimbs():
+            if self._SkipLimb(limb):
+                self.bhvMng.Setup_LimbGroupVisibility(limb)
+            else:
+                enabledLimbs.append(limb)
         self.Teardown_MayaControllers()
-        self.Teardown_Controls()
+        self.Teardown_Controls(enabledLimbs)
         self.Remove_Constraints()
         self.Teardown_Groups()
 
@@ -48,28 +60,43 @@ class Test_UI:
                 limb = pm.listConnections(joint.limb)[0]
                 pm.parent(group, limb)
 
-    def Setup_Controls(self):
+    def Setup_Controls(self, limbs):
         self.logger.debug('\tTest_UI > Setup_Controls')
         for control in self.ctrMng.GetAllControls():
             group = pm.listConnections(control.group)[0]
-            groupType = group.groupType.get()
-            if groupType == 2: # Distance
-                for attr in ['.tx', '.ty', '.tz']:
-                    pm.setAttr(control + attr, l=0, k=1, cb=1)
-            # if groupType != 3: # Not FKIK
             pm.makeIdentity(control, a=1, t=1, r=1, s=1)
             pos = pm.xform(group, q=1, t=1)
             pm.move(pos[0], pos[1], pos[2], 
                         control.scalePivot, 
                         control.rotatePivot, 
                         a=1)
-            if groupType in (2, 4): # IK PV / LookAt
-                for attr in ['.rx', '.ry', '.rz', '.sx', '.sy', '.sz']:
+        for limb in limbs:
+            attrs = []
+            if limb.appLockHideJointPos.get():
+                attrs += ['.tx', '.ty', '.tz']
+            if limb.appLockHideJointRot.get():
+                attrs += ['.rx', '.ry', '.rz']
+            if limb.appLockHideJointScale.get():
+                attrs += ['.sx', '.sy', '.sz']
+            for group in self.bhvMng.GetJointGroups(limb):
+                control = pm.listConnections(group.control)[0]
+                for attr in attrs:
+                    pm.setAttr(control + attr, l=1, k=0, cb=0)
+            attrs = []
+            if limb.appLockHideLimbPos.get():
+                attrs += ['.tx', '.ty', '.tz']
+            if limb.appLockHideLimbRot.get():
+                attrs += ['.rx', '.ry', '.rz']
+            if limb.appLockHideLimbScale.get():
+                attrs += ['.sx', '.sy', '.sz']
+            for group in self.bhvMng.GetLimbGroups(limb):
+                control = pm.listConnections(group.control)[0]
+                for attr in attrs:
                     pm.setAttr(control + attr, l=1, k=0, cb=0)
             
-    def Setup_Internal(self):
+    def Setup_Internal(self, limbs):
         self.logger.debug('\tTest_UI > Setup_Internal')
-        for limb in self.limbMng.GetAllLimbs():
+        for limb in limbs:
             bhvType = limb.bhvType.get()
             if bhvType in [0, 8]: # fk chain + reverse
                 self.Setup_Internal_FKChain(limb)
@@ -88,9 +115,9 @@ class Test_UI:
             elif (bhvType == 10):
                 self.Setup_Internal_RelativeFK(limb)
 
-    def Setup_External(self):
+    def Setup_External(self, limbs):
         self.logger.debug('\tTest_UI > Setup_External')
-        for limb in self.limbMng.GetAllLimbs():
+        for limb in limbs:
             bhvType = limb.bhvType.get()
             if bhvType in [0,8]: # fk chain + reverse
                 self.Setup_External_FKChain(limb)
@@ -107,8 +134,8 @@ class Test_UI:
             elif (bhvType == 10):
                 self.Setup_External_RelativeFK(limb)
 
-    def Setup_Internal_MayaControllers(self):
-        for limb in self.limbMng.GetAllLimbs():
+    def Setup_Internal_MayaControllers(self, limbs):
+        for limb in limbs:
             groups = self.bhvMng.GetJointGroups(limb)
             bhvType = limb.bhvType.get()
             if bhvType in self.bhvMng.reverseTypeIndexes:
@@ -122,8 +149,8 @@ class Test_UI:
                 controls += pm.listConnections(group.control)
             pm.controller(controls, g=1)
 
-    def Setup_External_MayaControllers(self):
-        for limb in self.limbMng.GetAllLimbs():
+    def Setup_External_MayaControllers(self, limbs):
+        for limb in limbs:
             parent = pm.listConnections(limb.parentLimb)
             if not parent:
                 continue
@@ -145,20 +172,51 @@ class Test_UI:
                 controls += pm.listConnections(group.control)
             pm.controller(controls, parentControl, p=1)
 
+    def _SkipLimb(self, limb):
+        # if limb has vis parent
+        parent = pm.listConnections(limb.appVisParentLimb)
+        if parent:
+            parent = parent[0]
+            parentBhvType = parent.bhvType.get()
+            visBhvType = limb.appVisParentBhvType.get()
+            # FK / Empty
+            if visBhvType == 0: 
+                bhvFilter = self.bhvMng.emptyLimbIndexes
+                bhvFilter += self.bhvMng.fkTypeIndexes
+                if parentBhvType not in bhvFilter:
+                    return True
+            # IK
+            elif visBhvType == 1:
+                if parentBhvType not in self.bhvMng.ikTypeIndexes:
+                    return True
+            # Look At
+            elif visBhvType == 2:
+                if parentBhvType not in self.bhvMng.lookAtTypeIndexes:
+                    return True
+            # Constraint
+            elif visBhvType == 3:
+                if parentBhvType not in self.bhvMng.cstTargetTypeIndexes:
+                    return True
+            # RFK
+            elif visBhvType == 4:
+                if parentBhvType not in self.bhvMng.rfkTypeIndexes:
+                    return True
+        return False
+
 #=========== TEARDOWN FUNCTIONALITY ====================================
     
-    def Teardown_Controls(self):
+    def Teardown_Controls(self, limbs):
         self.logger.debug('\tTest_UI > Teardown_Controls')
-        for control in self.ctrMng.GetAllControls():
-            group = pm.listConnections(control.group)[0]
-            groupType = group.groupType.get()
-            if groupType in (2, 4): # Distance
-                for attr in ['.rx', '.ry', '.rz', '.sx', '.sy', '.sz']:
+        for limb in limbs:
+            attrs = ['.tx', '.ty', '.tz']
+            attrs += ['.rx', '.ry', '.rz']
+            attrs += ['.sx', '.sy', '.sz']
+            groups = self.bhvMng.GetJointGroups(limb)
+            groups += self.bhvMng.GetLimbGroups(limb)
+            for group in groups:
+                control = pm.listConnections(group.control)[0]
+                for attr in attrs:
                     pm.setAttr(control + attr, l=0, k=1, cb=1)
-            pm.xform(control, t=[0,0,0], ro=[0,0,0], s=[1,1,1])
-            if groupType in (2, 4): # Distance
-                for attr in ['.tx', '.ty', '.tz']:
-                    pm.setAttr(control + attr, l=1, k=0, cb=0)
         pm.refresh() # Forces IK Handles to re-evaluate
     
     def Remove_Constraints(self):
@@ -191,7 +249,9 @@ class Test_UI:
         self.logger.debug('\tTest_UI > Teardown_Groups')
         for joint in self.jntMng.GetAllJoints():
             group = pm.listConnections(joint.group)[0]
-            pm.parent(group, joint)
+            parent = pm.listRelatives(group, p=1)
+            if parent and parent[0] != joint:
+                pm.parent(group, joint)
            
     def Teardown_MayaControllers(self):
         ctrs = pm.ls(type='controller')
@@ -367,7 +427,7 @@ class Test_UI:
     def Setup_Internal_Constraint(self, limb):
         self.logger.debug('\tTest_UI > Setup_Internal_Constraint')
         # targetLimbs = pm.listConnections(limb.bhvCstTargetLimb)
-        targetLimbs = pm.listConnections(limb.bhvTargetLimb)
+        targetLimbs = pm.listConnections(limb.bhvCstIkParentLimb)
         if not targetLimbs:
             msg = 'ERROR: Constraint Limb "%s" missing TARGET limb' % limb
             msg += '\n(Please set target limb in BEHAVIOR Tab)'
@@ -432,13 +492,14 @@ class Test_UI:
 
     def Setup_External_IKChain(self, limb):
         self.logger.debug('\tTest_UI > Setup_External_IKChain')
-        targetLimb = pm.listConnections(limb.bhvTargetLimb)
+        targetLimb = pm.listConnections(limb.bhvCstIkParentLimb)
         if not targetLimb:
             msg = 'IK Chain Limb "%s" missing TARGET limb' % limb
             pm.confirmDialog(t='IK CHAIN Error', m=msg, icon='warning', b='Ok')
             return
         targetGroups = self.bhvMng.GetJointGroups(targetLimb[0])
-        for sourceGroup in self.bhvMng.GetJointGroups(limb): # Skip First
+        sourceGroups = self.bhvMng.GetJointGroups(limb)
+        for sourceGroup in sourceGroups[1:]: # Skip First
             index = sourceGroup.targetJoint.get()
             targetGroup = targetGroups[index]
             targetControl = pm.listConnections(targetGroup.control)[0]
@@ -461,7 +522,7 @@ class Test_UI:
     def Setup_External_IKPoleVector(self, limb):
         self.logger.debug('\tTest_UI > Setup_External_IKPoleVector')
         # PARENT IK HANDLE TO TARGET CONTROL 
-        targetLimb = pm.listConnections(limb.bhvTargetLimb)
+        targetLimb = pm.listConnections(limb.bhvCstIkParentLimb)
         if not targetLimb:
             msg = 'IK Pole Vector Limb "%s" missing TARGET limb' % limb
             pm.confirmDialog(t='IK POLE VECTOR Error', m=msg, icon='error', b='Ok')
@@ -488,7 +549,7 @@ class Test_UI:
             parentControl = pm.listConnections(parentGroup.control)[0]
             pm.parent(distGroup, parentControl)
         else:
-            pm.parent(distGroup, self.grpMng.bhvGroup)
+            pm.parent(distGroup, limb)
 
 #=========== FK IK ====================================
     
@@ -585,7 +646,7 @@ class Test_UI:
 
     #     # PARENT IK
     #     # targetLimb = pm.listConnections(limb.bhvIKTargetLimb)
-    #     targetLimb = pm.listConnections(limb.bhvTargetLimb)
+    #     targetLimb = pm.listConnections(limb.bhvCstIkParentLimb)
     #     if not targetLimb:
     #         msg = 'FK / IK Pole Vector Limb "%s" missing TARGET limb' % limb
     #         pm.confirmDialog(t='IK POLE VECTOR Error', m=msg, icon='error', b='Ok')
