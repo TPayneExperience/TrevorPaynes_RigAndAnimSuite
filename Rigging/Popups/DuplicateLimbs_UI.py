@@ -23,7 +23,7 @@ class DuplicateLimbs_UI:
             for limbID in self.limbMng.GetLimbCreationOrder(rootLimbID):
                 limb = self.limbMng.GetLimb(limbID)
                 name = limb.pfrsName.get()
-                parentID = limb.parentLimbID.get()
+                parentID = limb.limbParentID.get()
                 pm.treeView(self.limbs_tv, e=1, addItem=(limbID, str(parentID)))
                 pm.treeView(self.limbs_tv, e=1, displayLabel=(limbID, name))
         

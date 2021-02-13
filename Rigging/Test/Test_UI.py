@@ -72,22 +72,22 @@ class Test_UI:
                         a=1)
         for limb in limbs:
             attrs = []
-            if limb.appLockHideJointPos.get():
+            if not limb.channelBoxJointCtrPos.get():
                 attrs += ['.tx', '.ty', '.tz']
-            if limb.appLockHideJointRot.get():
+            if not limb.channelBoxJointCtrRot.get():
                 attrs += ['.rx', '.ry', '.rz']
-            if limb.appLockHideJointScale.get():
+            if not limb.channelBoxJointCtrScale.get():
                 attrs += ['.sx', '.sy', '.sz']
             for group in self.bhvMng.GetJointGroups(limb):
                 control = pm.listConnections(group.control)[0]
                 for attr in attrs:
                     pm.setAttr(control + attr, l=1, k=0, cb=0)
             attrs = []
-            if limb.appLockHideLimbPos.get():
+            if not limb.channelBoxLimbCtrPos.get():
                 attrs += ['.tx', '.ty', '.tz']
-            if limb.appLockHideLimbRot.get():
+            if not limb.channelBoxLimbCtrRot.get():
                 attrs += ['.rx', '.ry', '.rz']
-            if limb.appLockHideLimbScale.get():
+            if not limb.channelBoxLimbCtrScale.get():
                 attrs += ['.sx', '.sy', '.sz']
             for group in self.bhvMng.GetLimbGroups(limb):
                 control = pm.listConnections(group.control)[0]
@@ -151,11 +151,11 @@ class Test_UI:
 
     def Setup_External_MayaControllers(self, limbs):
         for limb in limbs:
-            parent = pm.listConnections(limb.parentLimb)
+            parent = pm.listConnections(limb.limbParent)
             if not parent:
                 continue
             parent = parent[0]
-            index = limb.parentJoint.get()
+            index = limb.limbParentJoint.get()
             parentGroups = self.bhvMng.GetJointGroups(parent)
             parentGroup = parentGroups[index]
             parentControl = pm.listConnections(parentGroup.control)
@@ -174,11 +174,11 @@ class Test_UI:
 
     def _SkipLimb(self, limb):
         # if limb has vis parent
-        parent = pm.listConnections(limb.appVisParentLimb)
+        parent = pm.listConnections(limb.visParent)
         if parent:
             parent = parent[0]
             parentBhvType = parent.bhvType.get()
-            visBhvType = limb.appVisParentBhvType.get()
+            visBhvType = limb.visParentBhvType.get()
             # FK / Empty
             if visBhvType == 0: 
                 bhvFilter = self.bhvMng.emptyLimbIndexes
@@ -228,13 +228,14 @@ class Test_UI:
         pm.delete(pm.ls(type='scaleConstraint'))
         pm.delete(pm.ls(type='aimConstraint'))
         # pm.delete(pm.ls(type='plusMinusAverage')) # Delete FKIK extra nodes
+        pm.delete(pm.ls(type='multiplyDivide')) # Delete FKIK extra nodes
         for limb in self.limbMng.GetAllLimbs(): 
             bhvType = limb.bhvType.get()
             # if bhvType in self.bhvMng.fkikTypeIndexes:
             #     self.Teardown_FKIK(limb)
-            if bhvType in self.bhvMng.rfkTypeIndexes:
-                self.Teardown_RelativeFK(limb)
-            elif bhvType in self.bhvMng.cstTypeIndexes:
+            # if bhvType in self.bhvMng.rfkTypeIndexes:
+            #     self.Teardown_RelativeFK(limb)
+            if bhvType in self.bhvMng.cstTypeIndexes:
                 self.Teardown_Constraint(limb)
             if bhvType in self.bhvMng.fkTypeIndexes:
                 joints = self.jntMng.GetLimbJoints(limb)
@@ -262,99 +263,126 @@ class Test_UI:
     # RELATIVE FK - RFK
     def Setup_Internal_RelativeFK(self, limb):
         self.logger.debug('\tTest_UI > Setup_Internal_RelativeFK')
-        groups = self.bhvMng.GetLimbGroups(limb)
-        bottomGroup = groups[0]
-        centerGroup = groups[1]
-        topGroup = groups[2]
-        topControl = pm.listConnections(topGroup.control)[0]
-        centerControl = pm.listConnections(centerGroup.control)[0]
-        bottomControl = pm.listConnections(bottomGroup.control)[0]
-        index = limb.bhvRFKCenterJoint.get() + 1
-
-        # FK IK JOINT CREATION
-        joints = self.jntMng.GetLimbJoints(limb)
-        dupJoints = pm.duplicate(joints, po=1, rc=1)
-        fkJoints = dupJoints[index:]
-        ikJoints = dupJoints[:index]
-        ikJoints += pm.duplicate(joints[index], po=1, rc=1)
-
-        # JOINT PARENTING
-        pm.parent(ikJoints, w=1)
-        pm.parent(fkJoints[0], w=1)
-        for i in range(len(ikJoints)-1):
-            child = ikJoints[i]
-            parent = ikJoints[i+1]
-            pm.parent(child, parent)
-        pm.parent(ikJoints[-1], fkJoints[0])
-
-        # RENAME JOINTS
-        pfrsName = limb.pfrsName.get()
-        ikJoints = ikJoints[::-1]
-        for joint in ikJoints:
-            pm.rename(joint, pfrsName+'_IK#')
-        for joint in fkJoints:
-            pm.rename(joint, pfrsName+'_FK#')
-
-        # MOVE CONTROL PIVOTS TO CENTER
-        pos = pm.xform(centerControl, q=1, t=1, ws=1)
-        attr1 = str(topControl) + '.scalePivot'
-        attr2 = str(topControl) + '.rotatePivot'
-        pm.move(pos[0], pos[1], pos[2], attr1, attr2, rpr=1, ws=1)
-        attr1 = str(bottomControl) + '.scalePivot'
-        attr2 = str(bottomControl) + '.rotatePivot'
-        pm.move(pos[0], pos[1], pos[2], attr1, attr2, rpr=1, ws=1)
-
-        # CREATE + PARENT IK HANDLES
-        ikHandleGroup = pm.group(em=1, w=1)
-        pm.xform(ikHandleGroup, t=pos)
-        ikHandles = [ikHandleGroup]
-        for i in range(len(ikJoints)-1):
-            startJoint = ikJoints[i]
-            endJoint = ikJoints[i+1]
-            ikHandles.append(pm.ikHandle(sj=startJoint, ee=endJoint)[0])
-        for i in range(len(ikHandles)-1):
-            child = ikHandles[i+1]
-            parent = ikHandles[i]
-            pm.parent(child, parent)
-
-        # CREATE + CONNECT SCALING NODES
-        fkMult = pm.createNode('multiplyDivide')
-        ikMult = pm.createNode('multiplyDivide')
-        pm.connectAttr(topControl.rotate, fkMult.input1)
-        pm.connectAttr(bottomControl.rotate, ikMult.input1)
-        fkScale = 1.0/max(len(fkJoints)-2, 1)
-        ikScale = 1.0/max(len(ikJoints)-2, 1)
-        fkMult.input2.set(fkScale, fkScale, fkScale)
-        ikMult.input2.set(ikScale, ikScale, ikScale)
-        for fkJoint in fkJoints[:-1]:
-            pm.connectAttr(fkMult.output, fkJoint.rotate)
-        for ikHandle in ikHandles:
-            pm.connectAttr(ikMult.output, ikHandle.rotate)
-            
-        # PARENT CST ORIGINAL JOINTS
-        for i in range(len(fkJoints)):
-            pm.parentConstraint(fkJoints[i], joints[index+i])
-        ikJoints = ikJoints[::-1]   # UnReverse
-        ikJoints = ikJoints[:-1]    # Remove extra parent
-        for i in range(len(ikJoints)):
-            pm.parentConstraint(ikJoints[i], joints[i])
+        # Con
         
-        # CLEANUP
-        pm.parent(topGroup, bottomGroup, centerControl)
-        pm.parent(ikHandleGroup, fkJoints[0], centerControl)
-        pm.connectAttr(limb.bhvFKIK_FKJoint, fkJoints[0].limb)
-        ikHandleGroup.v.set(0)
-        fkJoints[0].v.set(0)
+        groups = self.bhvMng.GetJointGroups(limb)
+        if limb.bhvType.get() in self.bhvMng.reverseTypeIndexes:
+            groups = groups[::-1]
+        controls = []
+        for i in range(len(groups)-1):
+            childGroup = groups[i+1]
+            parentCtr = pm.listConnections(groups[i].control)[0]
+            pm.parent(childGroup, parentCtr)
+            controls.append(parentCtr)
+        self.Bind_FK_Joints(limb)
+        
+        # Connect root control to rotate children
+        rootCtr = controls[0]
+        multNode = pm.createNode('multiplyDivide')
+        pm.connectAttr(rootCtr.rotate, multNode.input1)
+        scalar = 1.0/max(len(controls)-2, 1)
+        multNode.input2.set(scalar, scalar, scalar)
+        for childControl in controls[1:]:
+            pm.connectAttr(multNode.output, childControl.rotate)
+
+        # groups = self.bhvMng.GetLimbGroups(limb)
+        # bottomGroup = groups[0]
+        # centerGroup = groups[1]
+        # topGroup = groups[2]
+        # topControl = pm.listConnections(topGroup.control)[0]
+        # centerControl = pm.listConnections(centerGroup.control)[0]
+        # bottomControl = pm.listConnections(bottomGroup.control)[0]
+        # index = limb.bhvRFKCenterJoint.get() + 1
+
+        # # FK IK JOINT CREATION
+        # joints = self.jntMng.GetLimbJoints(limb)
+        # dupJoints = pm.duplicate(joints, po=1, rc=1)
+        # fkJoints = dupJoints[index:]
+        # ikJoints = dupJoints[:index]
+        # ikJoints += pm.duplicate(joints[index], po=1, rc=1)
+
+        # # JOINT PARENTING
+        # pm.parent(ikJoints, w=1)
+        # pm.parent(fkJoints[0], w=1)
+        # for i in range(len(ikJoints)-1):
+        #     child = ikJoints[i]
+        #     parent = ikJoints[i+1]
+        #     pm.parent(child, parent)
+        # pm.parent(ikJoints[-1], fkJoints[0])
+
+        # # RENAME JOINTS
+        # pfrsName = limb.pfrsName.get()
+        # ikJoints = ikJoints[::-1]
+        # for joint in ikJoints:
+        #     pm.rename(joint, pfrsName+'_IK#')
+        # for joint in fkJoints:
+        #     pm.rename(joint, pfrsName+'_FK#')
+
+        # # MOVE CONTROL PIVOTS TO CENTER
+        # pos = pm.xform(centerControl, q=1, t=1, ws=1)
+        # attr1 = str(topControl) + '.scalePivot'
+        # attr2 = str(topControl) + '.rotatePivot'
+        # pm.move(pos[0], pos[1], pos[2], attr1, attr2, rpr=1, ws=1)
+        # attr1 = str(bottomControl) + '.scalePivot'
+        # attr2 = str(bottomControl) + '.rotatePivot'
+        # pm.move(pos[0], pos[1], pos[2], attr1, attr2, rpr=1, ws=1)
+
+        # # CREATE + PARENT IK HANDLES
+        # ikHandleGroup = pm.group(em=1, w=1)
+        # pm.xform(ikHandleGroup, t=pos)
+        # ikHandles = [ikHandleGroup]
+        # for i in range(len(ikJoints)-1):
+        #     startJoint = ikJoints[i]
+        #     endJoint = ikJoints[i+1]
+        #     ikHandles.append(pm.ikHandle(sj=startJoint, ee=endJoint)[0])
+        # for i in range(len(ikHandles)-1):
+        #     child = ikHandles[i+1]
+        #     parent = ikHandles[i]
+        #     pm.parent(child, parent)
+
+        # # CREATE + CONNECT SCALING NODES
+        # fkMult = pm.createNode('multiplyDivide')
+        # ikMult = pm.createNode('multiplyDivide')
+        # pm.connectAttr(topControl.rotate, fkMult.input1)
+        # pm.connectAttr(bottomControl.rotate, ikMult.input1)
+        # fkScale = 1.0/max(len(fkJoints)-2, 1)
+        # ikScale = 1.0/max(len(ikJoints)-2, 1)
+        # fkMult.input2.set(fkScale, fkScale, fkScale)
+        # ikMult.input2.set(ikScale, ikScale, ikScale)
+        # for fkJoint in fkJoints[:-1]:
+        #     pm.connectAttr(fkMult.output, fkJoint.rotate)
+        # for ikHandle in ikHandles:
+        #     pm.connectAttr(ikMult.output, ikHandle.rotate)
+            
+        # # PARENT CST ORIGINAL JOINTS
+        # for i in range(len(fkJoints)):
+        #     pm.parentConstraint(fkJoints[i], joints[index+i])
+        # ikJoints = ikJoints[::-1]   # UnReverse
+        # ikJoints = ikJoints[:-1]    # Remove extra parent
+        # for i in range(len(ikJoints)):
+        #     pm.parentConstraint(ikJoints[i], joints[i])
+        
+        # # CLEANUP
+        # pm.parent(topGroup, bottomGroup, centerControl)
+        # pm.parent(ikHandleGroup, fkJoints[0], centerControl)
+        # pm.connectAttr(limb.bhvFKIK_FKJoint, fkJoints[0].limb)
+        # ikHandleGroup.v.set(0)
+        # fkJoints[0].v.set(0)
 
     def Setup_External_RelativeFK(self, limb):
         self.logger.debug('\tTest_UI > Setup_External_RelativeFK')
+        groups = self.bhvMng.GetJointGroups(limb)
+        if limb.bhvType.get() in self.bhvMng.reverseTypeIndexes:
+            groups = groups[::-1]
+        self.ParentConstrainGroup(limb, groups[0])
         # Parent fk joint to parent target joint
-        fkJoint = pm.listConnections(limb.bhvFKIK_FKJoint)[0]
-        self.ParentConstrainGroup(limb, fkJoint)
+        # fkJoint = pm.listConnections(limb.bhvFKIK_FKJoint)[0]
+        # self.ParentConstrainGroup(limb, fkJoint)
 
     def Teardown_RelativeFK(self, limb):
         self.logger.debug('\tTest_UI > Teardown_RelativeFK')
-        pm.delete(pm.listConnections(limb.bhvFKIK_FKJoint))
+        # pm.listConnections(childControl.rotate)
+        # pm.delete(pm.listConnections(limb.bhvFKIK_FKJoint))
         # groups = self.bhvMng.GetLimbGroups(limb)
         # bottomGroup = groups[0]
         # centerGroup = groups[1]
@@ -398,7 +426,7 @@ class Test_UI:
         # parent = self.limbMng.GetLimbParent(limb)
         # if parent:
         #     childGroup = self.grpMng.GetLimbGroups(limb)[0]
-        #     index = limb.parentJoint.get()
+        #     index = limb.limbParentJoint.get()
         #     parentGroup = self.grpMng.GetLimbGroups(parent)[index]
         #     parentControl = pm.listConnections(parentGroup.control)[0]
         #     for childGroup in self.grpMng.GetLimbGroups(limb):
@@ -427,7 +455,7 @@ class Test_UI:
     def Setup_Internal_Constraint(self, limb):
         self.logger.debug('\tTest_UI > Setup_Internal_Constraint')
         # targetLimbs = pm.listConnections(limb.bhvCstTargetLimb)
-        targetLimbs = pm.listConnections(limb.bhvCstIkParentLimb)
+        targetLimbs = pm.listConnections(limb.bhvParent)
         if not targetLimbs:
             msg = 'ERROR: Constraint Limb "%s" missing TARGET limb' % limb
             msg += '\n(Please set target limb in BEHAVIOR Tab)'
@@ -439,11 +467,11 @@ class Test_UI:
             msg += '\n(Please PARENT limb to another limb in BEHAVIOR Tab)'
             pm.confirmDialog(t='Constraint Error', m=msg, icon='warning', b='Ok')
             return
-        sourceIndex = limb.parentJoint.get()
+        sourceIndex = limb.limbParentJoint.get()
         sourceJoint = self.jntMng.GetLimbJoints(parentLimb)[sourceIndex]
         targetLimb = targetLimbs[0]
         # targetIndex = limb.bhvCstTargetJnt.get()
-        targetIndex = limb.bhvTargetJoint.get()
+        targetIndex = limb.bhvParentJoint.get()
         targetJoint = self.jntMng.GetLimbJoints(targetLimb)[targetIndex]
         if sourceJoint == targetJoint:
             msg = 'Constraint Limb "%s" group parent and' % limb
@@ -492,7 +520,7 @@ class Test_UI:
 
     def Setup_External_IKChain(self, limb):
         self.logger.debug('\tTest_UI > Setup_External_IKChain')
-        targetLimb = pm.listConnections(limb.bhvCstIkParentLimb)
+        targetLimb = pm.listConnections(limb.bhvParent)
         if not targetLimb:
             msg = 'IK Chain Limb "%s" missing TARGET limb' % limb
             pm.confirmDialog(t='IK CHAIN Error', m=msg, icon='warning', b='Ok')
@@ -522,7 +550,7 @@ class Test_UI:
     def Setup_External_IKPoleVector(self, limb):
         self.logger.debug('\tTest_UI > Setup_External_IKPoleVector')
         # PARENT IK HANDLE TO TARGET CONTROL 
-        targetLimb = pm.listConnections(limb.bhvCstIkParentLimb)
+        targetLimb = pm.listConnections(limb.bhvParent)
         if not targetLimb:
             msg = 'IK Pole Vector Limb "%s" missing TARGET limb' % limb
             pm.confirmDialog(t='IK POLE VECTOR Error', m=msg, icon='error', b='Ok')
@@ -532,7 +560,7 @@ class Test_UI:
         if not groups:
             return
         distGroup = groups[0]
-        index = limb.bhvTargetJoint.get()
+        index = limb.bhvParentJoint.get()
         targetGroup = self.bhvMng.GetJointGroups(targetLimb)[index]
         targetControl = pm.listConnections(targetGroup.control)[0]
 
@@ -544,7 +572,7 @@ class Test_UI:
         # PARENT IKPV Control
         parent = self.limbMng.GetLimbParent(limb)
         if parent:
-            index = limb.parentJoint.get()
+            index = limb.limbParentJoint.get()
             parentGroup = self.bhvMng.GetJointGroups(parent)[index]
             parentControl = pm.listConnections(parentGroup.control)[0]
             pm.parent(distGroup, parentControl)
@@ -646,7 +674,7 @@ class Test_UI:
 
     #     # PARENT IK
     #     # targetLimb = pm.listConnections(limb.bhvIKTargetLimb)
-    #     targetLimb = pm.listConnections(limb.bhvCstIkParentLimb)
+    #     targetLimb = pm.listConnections(limb.bhvParent)
     #     if not targetLimb:
     #         msg = 'FK / IK Pole Vector Limb "%s" missing TARGET limb' % limb
     #         pm.confirmDialog(t='IK POLE VECTOR Error', m=msg, icon='error', b='Ok')
@@ -656,7 +684,7 @@ class Test_UI:
     #     # IK PV
     #     if limb.bhvType.get() in self.bhvMng.ikPVTypeIndexes:
     #         ikGroup = pm.listConnections(limb.bhvIKPVGroup)[0]
-    #         index = limb.bhvTargetJoint.get()
+    #         index = limb.bhvParentJoint.get()
     #         targetGroup = self.bhvMng.GetJointGroups(targetLimb)[index]
     #         targetControl = pm.listConnections(targetGroup.control)[0]
 
@@ -682,7 +710,7 @@ class Test_UI:
     #     fkGroup = pm.listConnections(joints[0].group)[0]
     #     parent = self.limbMng.GetLimbParent(limb)
     #     if parent:
-    #         index = limb.parentJoint.get()
+    #         index = limb.limbParentJoint.get()
     #         parentGroup = self.bhvMng.GetJointGroups(parent)[index]
     #         # parentCtrs = self.ctrMng.GetGroupControl(parentGroup)
     #         parentCtrs = pm.listConnections(parentGroup.control)[0]
@@ -733,7 +761,7 @@ class Test_UI:
         # parent = self.limbMng.GetLimbParent(limb)
         # if parent:
         #     childGroup = self.grpMng.GetLimbGroups(limb)[0]
-        #     index = limb.parentJoint.get()
+        #     index = limb.limbParentJoint.get()
         #     parentGroup = self.grpMng.GetLimbGroups(parent)[index]
         #     parentCtrs = pm.listConnections(parentGroup.control)[0]
         #     if parentCtrs:
@@ -755,7 +783,7 @@ class Test_UI:
             group = pm.listConnections(limb.bhvEmptyGroup)[0]
             parentJoint = pm.listConnections(group.control)[0]
         else:
-            index = limb.parentJoint.get()
+            index = limb.limbParentJoint.get()
             parentJoint = self.jntMng.GetLimbJoints(parent)[index]
         pm.parentConstraint(parentJoint, childGroup, mo=1)   
 

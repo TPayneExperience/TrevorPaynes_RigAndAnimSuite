@@ -45,7 +45,7 @@ class Limb_Manager:
     
     def GetLimbParent(self, limb):
         self.logger.debug('\tLimbMng > GetLimbParent')
-        parent = pm.listConnections(limb.parentLimb)
+        parent = pm.listConnections(limb.limbParent)
         if parent:
             return parent[0]
         return None
@@ -90,13 +90,13 @@ class Limb_Manager:
         pm.addAttr(limb, ln='side', at='enum', enumName=limbSides,
                                         h=self.hideAttrs)
         pm.addAttr(limb, ln='mirrorLimb', at='long', h=self.hideAttrs)
-        pm.addAttr(limb, ln='parentLimb', dt='string', h=self.hideAttrs)
-        pm.addAttr(limb, ln='parentJoint', at='enum', en='None', 
+        pm.addAttr(limb, ln='limbParent', dt='string', h=self.hideAttrs)
+        pm.addAttr(limb, ln='limbParentJoint', at='enum', en='None', 
                                         h=self.hideAttrs)
-        pm.addAttr(limb, ln='childrenLimbs', dt='string', h=self.hideAttrs)
-        pm.addAttr(limb, ln='defaultParentLimb', dt='string', 
+        pm.addAttr(limb, ln='limbChildren', dt='string', h=self.hideAttrs)
+        pm.addAttr(limb, ln='defaultLimbParent', dt='string', 
                                         h=self.hideAttrs)
-        pm.addAttr(limb, ln='defaultChildrenLimbs', dt='string', 
+        pm.addAttr(limb, ln='defaultLimbChildren', dt='string', 
                                         h=self.hideAttrs)
         # pm.addAttr(limb, ln='parentJntIndex', at='enum', enumName='None')
         # pm.addAttr(limb, ln='parentCtrID', at='long')
@@ -139,9 +139,9 @@ class Limb_Manager:
         msg = '\t\tReparenting "%s"' % child.pfrsName.get()
         msg += ' to "%s"' % parent.pfrsName.get()
         self.logger.debug(msg)
-        pm.disconnectAttr(child.parentLimb)
+        pm.disconnectAttr(child.limbParent)
         if parent:
-            pm.connectAttr(parent.childrenLimbs, child.parentLimb)
+            pm.connectAttr(parent.limbChildren, child.limbParent)
 
     def Rename(self, sourceLimb, newName): # list should repopulate after call
         self.logger.debug('\tLimbMng > Rename')
@@ -211,7 +211,7 @@ class Limb_Manager:
         self.logger.debug('\tLimbMng > GetRootLimbs')
         rootLimbs = []
         for limb in list(self._limbs.values()):
-            if not pm.listConnections(limb.parentLimb):
+            if not pm.listConnections(limb.limbParent):
                 rootLimbs.append(limb)
         return rootLimbs
 
@@ -223,7 +223,7 @@ class Limb_Manager:
         while(parents):
             children = []
             for parent in parents:
-                children += sorted(pm.listConnections(parent.childrenLimbs))
+                children += sorted(pm.listConnections(parent.limbChildren))
             parents = children[:]
             orderedLimbs += children[:]
         return orderedLimbs

@@ -42,7 +42,7 @@ class APP_Limb_Properties_UI:
         pm.attrEnumOptionMenu(self.visParentBhvType, e=1, en=0)
         if not self.limb:
             return
-        parent = pm.listConnections(self.limb.appVisParentLimb)
+        parent = pm.listConnections(self.limb.visParent)
         if not parent:
             pm.optionMenu(self.visParentLimb_om, e=1, sl=1)
             return
@@ -67,7 +67,7 @@ class APP_Limb_Properties_UI:
                 self.visParentBhvType = pm.attrEnumOptionMenu(at='perspShape.filmFit')
                 # self.fkikJoint_at = pm.attrControlGrp(l='Lock + Hide Scale',
                 #                                 a='perspShape.shakeEnabled')
-        with pm.frameLayout('Lock + Hide Controls', bv=1, en=0) as self.lockHide_l:
+        with pm.frameLayout('Channel Box Controls', bv=1, en=0) as self.lockHide_l:
             with pm.columnLayout(co=('left', -100)) as self.appLimbLockHide_cl:
                 msg = 'FK = Joint FK, Empty'
                 self.jointPos = pm.attrControlGrp(l='FK Translate', ann=msg,
@@ -122,7 +122,7 @@ class APP_Limb_Properties_UI:
         bhvType = self.limb.bhvType.get()
         pm.deleteUI(self.visParentBhvType)
         self.visParentBhvType = pm.attrEnumOptionMenu(l='Vis Parent Bhv Type',
-                                                at=self.limb.appVisParentBhvType,
+                                                at=self.limb.visParentBhvType,
                                                 p=self.appLimbProp_cl,
                                                 cc=self.LogSetVisParentBhvType)
         if self.ikpvCtrJoint_at:
@@ -135,17 +135,17 @@ class APP_Limb_Properties_UI:
                                                     cc=self.UpdateDistGroupPos)
     
     def PopulateLockHide(self):
-        pm.attrControlGrp(self.jointPos, e=1, a=self.limb.appLockHideJointPos,
+        pm.attrControlGrp(self.jointPos, e=1, a=self.limb.channelBoxJointCtrPos,
                                         cc=pm.Callback(self.LogJointPos, 1))
-        pm.attrControlGrp(self.jointRot, e=1, a=self.limb.appLockHideJointRot,
+        pm.attrControlGrp(self.jointRot, e=1, a=self.limb.channelBoxJointCtrRot,
                                         cc=pm.Callback(self.LogJointRot, 1))
-        pm.attrControlGrp(self.jointScale, e=1, a=self.limb.appLockHideJointScale,
+        pm.attrControlGrp(self.jointScale, e=1, a=self.limb.channelBoxJointCtrScale,
                                         cc=pm.Callback(self.LogJointScale, 1))
-        pm.attrControlGrp(self.limbPos, e=1, a=self.limb.appLockHideLimbPos,
+        pm.attrControlGrp(self.limbPos, e=1, a=self.limb.channelBoxLimbCtrPos,
                                         cc=pm.Callback(self.LogLimbPos, 1))
-        pm.attrControlGrp(self.limbRot, e=1, a=self.limb.appLockHideLimbRot,
+        pm.attrControlGrp(self.limbRot, e=1, a=self.limb.channelBoxLimbCtrRot,
                                         cc=pm.Callback(self.LogLimbRot, 1))
-        pm.attrControlGrp(self.limbScale, e=1, a=self.limb.appLockHideLimbScale,
+        pm.attrControlGrp(self.limbScale, e=1, a=self.limb.channelBoxLimbCtrScale,
                                         cc=pm.Callback(self.LogLimbScale, 1))
         
         # isFK = (bhvType in self.bhvMng.fkTypeIndexes)
@@ -153,12 +153,12 @@ class APP_Limb_Properties_UI:
         
     def SetVisParentLimb(self, limbName):
         self.logger.info('\tLimbProp > SetVisParentLimb to ' + limbName)
-        pm.disconnectAttr(self.limb.appVisParentLimb)
+        pm.disconnectAttr(self.limb.visParent)
         if limbName == 'None':
             self.UpdateVisParentBhvTypeEnable()
             return
         limb = self.limbs[limbName]
-        pm.connectAttr(limb.appVisChildrenLimbs, self.limb.appVisParentLimb)
+        pm.connectAttr(limb.visChildren, self.limb.visParent)
         self.UpdateVisParentBhvTypeEnable()
                 
     # def UpdateFKIKSwitchParentJoint(self, jointStr):
@@ -183,33 +183,33 @@ class APP_Limb_Properties_UI:
         self.logger.info(msg)
 
     def LogJointPos(self, ignore):
-        value = str(self.limb.appLockHideJointPos.get())
-        msg = '\tLimbProp > SET LOCK JOINT POS to "%s"' % value
+        value = str(self.limb.channelBoxJointCtrPos.get())
+        msg = '\tLimbProp > SET ChannelBox JOINT POS to "%s"' % value
         self.logger.info(msg)
 
     def LogJointRot(self, ignore):
-        value = str(self.limb.appLockHideJointRot.get())
-        msg = '\tLimbProp > SET LOCK JOINT ROT to "%s"' % value
+        value = str(self.limb.channelBoxJointCtrRot.get())
+        msg = '\tLimbProp > SET ChannelBox JOINT ROT to "%s"' % value
         self.logger.info(msg)
 
     def LogJointScale(self, ignore):
-        value = str(self.limb.appLockHideJointScale.get())
-        msg = '\tLimbProp > SET LOCK JOINT SCALE to "%s"' % value
+        value = str(self.limb.channelBoxJointCtrScale.get())
+        msg = '\tLimbProp > SET ChannelBox JOINT SCALE to "%s"' % value
         self.logger.info(msg)
 
     def LogLimbPos(self, ignore):
-        value = str(self.limb.appLockHideLimbPos.get())
-        msg = '\tLimbProp > SET LOCK LIMB POS to "%s"' % value
+        value = str(self.limb.channelBoxLimbCtrPos.get())
+        msg = '\tLimbProp > SET ChannelBox LIMB POS to "%s"' % value
         self.logger.info(msg)
 
     def LogLimbRot(self, ignore):
-        value = str(self.limb.appLockHideLimbRot.get())
-        msg = '\tLimbProp > SET LOCK LIMB ROT to "%s"' % value
+        value = str(self.limb.channelBoxLimbCtrRot.get())
+        msg = '\tLimbProp > SET ChannelBox LIMB ROT to "%s"' % value
         self.logger.info(msg)
 
     def LogLimbScale(self, ignore):
-        value = str(self.limb.appLockHideLimbScale.get())
-        msg = '\tLimbProp > SET LOCK LIMB SCALE to "%s"' % value
+        value = str(self.limb.channelBoxLimbCtrScale.get())
+        msg = '\tLimbProp > SET ChannelBox LIMB SCALE to "%s"' % value
         self.logger.info(msg)
 
 
@@ -231,7 +231,7 @@ class APP_Limb_Properties_UI:
 
     def UpdateVisParentBhvTypeEnable(self):
         self.logger.debug('\tApp_LimbProp > UpdateVisParentBhvTypeEnable')
-        enable = bool(pm.listConnections(self.limb.appVisParentLimb))
+        enable = bool(pm.listConnections(self.limb.visParent))
         pm.attrEnumOptionMenu(self.visParentBhvType, e=1, en=enable)
 
 

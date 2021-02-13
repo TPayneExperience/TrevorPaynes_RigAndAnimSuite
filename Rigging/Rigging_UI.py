@@ -210,8 +210,8 @@ class Rigging_UI:
     #                 tChildID = self.limbMng.DuplicateLimb(sChildID)
     #                 sChild = self.limbMng.GetLimb(sChildID)
     #                 tChild = self.limbMng.GetLimb(tChildID)
-    #                 tParentID = sourceToTargetIDs[sChild.parentLimbID.get()]
-    #                 tChild.parentLimbID.set(tParentID)
+    #                 tParentID = sourceToTargetIDs[sChild.limbParentID.get()]
+    #                 tChild.limbParentID.set(tParentID)
     #                 sourceToTargetIDs[sChildID] = tChildID
     #         return sourceToTargetIDs
 

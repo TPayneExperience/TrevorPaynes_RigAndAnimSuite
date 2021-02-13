@@ -31,8 +31,8 @@ class SaveLoad_Skeleton():
             if limb.mirrorLimbID.get() in limbIDs:
                 limbData['mirrorLimbID'] = limb.mirrorLimbID.get()
             limbData['parentLimbID'] = -1
-            if limb.parentLimbID.get() in limbIDs:
-                limbData['parentLimbID'] = limb.parentLimbID.get()
+            if limb.limbParentID.get() in limbIDs:
+                limbData['parentLimbID'] = limb.limbParentID.get()
 
             # JOINTS
             for joint in [self.jntMng.GetJoint(ID) for ID in jointIDs]:
@@ -74,7 +74,7 @@ class SaveLoad_Skeleton():
             limb.typeIndex.set(limbData['typeIndex'])
             limb.side.set(limbData['side'])
             limb.mirrorLimbID.set(oldToNewLimbIDs[limbData['mirrorLimbID']])
-            limb.parentLimbID.set(oldToNewLimbIDs[limbData['parentLimbID']])
+            limb.limbParentID.set(oldToNewLimbIDs[limbData['parentLimbID']])
             limb.parentJntIndex.set(limbData['parentJntIndex'])
             limb.parentCtrID.set(limbData['parentCtrID'])
             limb.bhvIndex.set(limbData['bhvIndex'])

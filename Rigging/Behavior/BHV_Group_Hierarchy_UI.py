@@ -22,6 +22,7 @@ class BHV_Group_Hierarchy_UI:
         bhvFilter = self.bhvMng.fkTypeIndexes
         bhvFilter += self.bhvMng.cstTypeIndexes
         bhvFilter += self.bhvMng.ikChainTypeIndexes
+        bhvFilter += self.bhvMng.rfkTypeIndexes
         if bhvType not in bhvFilter:
             return
         groups = self.bhvMng.GetJointGroups(self.limb)
@@ -29,6 +30,8 @@ class BHV_Group_Hierarchy_UI:
             groups = groups[::-1]
         if bhvType in self.bhvMng.omitLastJointTypes:
             groups = groups[:-1]
+        if bhvType in self.bhvMng.rfkTypeIndexes:
+            groups = [groups[0]]
         for group in groups:
             groupID = group.ID.get()
             name = group.shortName()

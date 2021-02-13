@@ -140,20 +140,20 @@ class BHV_Limb_Hierarchy_UI:
     def LoadDefaultHier(self, ignore):
         self.logger.info('\tLimbHier > LOAD DEFAULT hierarchy')
         for limb in self.limbMng.GetAllLimbs():
-            pm.disconnectAttr(limb.parentLimb)
-            parents = pm.listConnections(limb.defaultParentLimb)
+            pm.disconnectAttr(limb.limbParent)
+            parents = pm.listConnections(limb.defaultLimbParent)
             if parents:
-                pm.connectAttr(parents[0].childrenLimbs, limb.parentLimb)
+                pm.connectAttr(parents[0].limbChildren, limb.limbParent)
         self.Populate()
     
     def SaveAsDefaultHier(self, ignore):
         self.logger.info('\tLimbHier > SAVE DEFAULT hierarchy')
         for limb in self.limbMng.GetAllLimbs():
-            pm.disconnectAttr(limb.defaultParentLimb)
-            parents = pm.listConnections(limb.parentLimb)
+            pm.disconnectAttr(limb.defaultLimbParent)
+            parents = pm.listConnections(limb.limbParent)
             if parents:
-                pm.connectAttr(parents[0].defaultChildrenLimbs, 
-                                limb.defaultParentLimb)
+                pm.connectAttr(parents[0].defaultLimbChildren, 
+                                limb.defaultLimbParent)
 
     
     

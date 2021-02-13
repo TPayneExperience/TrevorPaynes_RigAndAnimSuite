@@ -7,47 +7,53 @@ class PFRS_Debug:
         self.parent.NewRig('PFX', 
                     range(5), 
                     True)
-                    
-        # # ========== LEG TEST ===============================
-        # self.parent.logger.info('DEBUG TESTS > Leg + Foot')
-        # path = r'D:/Assets/Programming/Python/Maya/ModularAutoRigger'
-        # path += r'/TEST_OUTPUT/TEST_LegFoot_01.ma'
-        # pm.importFile(path)
-        # self.parent.UpdateEnableUI()
-        # self.parent.Setup_Editable()
-        # pm.tabLayout(self.parent.rig_ui.tab, e=1, sti=2) # Select Limb setup tab
-        # self.parent.rig_ui.limbSetup_ui.sceneHier_ui.AutoBuildByName(0)
-        # pm.tabLayout(self.parent.rig_ui.tab, e=1, sti=3) # Select Limb setup tab
-        #  # -------------------------------------------------
 
-        # # ========== RELATIVE FK ==========================
-        # self.parent.logger.info('DEBUG TESTS > Relative FK')
-        # path = r'D:/Assets/Programming/Python/Maya/ModularAutoRigger'
-        # path += r'/TEST_OUTPUT/TEST_Spine_01.ma'
-        # pm.importFile(path)
-        # self.parent.UpdateEnableUI()
-        # self.parent.Setup_Editable()
-        # pm.tabLayout(self.parent.rig_ui.tab, e=1, sti=2) # Select Limb setup tab
-        # self.parent.rig_ui.limbSetup_ui.sceneHier_ui.AutoBuildByName(0)
-        # spine = pm.ls('PFX_Spine_Limb_M_NODE', type='transform')[0]
-        # self.parent.bhvMng.SetBhvType(spine, 10) # Relative FK
-        # # root = pm.ls('PFX_Root_Limb_M_NODE', type='transform')[0]
-        # # self.parent.limbMng.Reparent(spine, -1)
-        # # self.parent.limbMng.Reparent(root, spine)
-        # pm.tabLayout(self.parent.rig_ui.tab, e=1, sti=3) # Select Limb setup tab
-        # # -------------------------------------------------
+        # self.LegTest()
+        # self.RfkTest()
+        self.SimpleChainTest()
+        # self.LimbTypesTest()
+        # self.ArmTest()
+        # self.SkeletonTest()
 
-        # # ========== SIMPLE CHAIN AUTO BUILD ==========================
-        # self.parent.logger.info('DEBUG TESTS > Limb Types')
-        # path = r'D:/Assets/Programming/Python/Maya/ModularAutoRigger'
-        # path += r'/TEST_OUTPUT/TEST_SimpleChain_01.ma'
-        # pm.importFile(path)
-        # self.parent.UpdateEnableUI()
-        # self.parent.Setup_Editable()
-        # pm.tabLayout(self.parent.rig_ui.tab, e=1, sti=2)
-        # # -------------------------------------------------
+# ================= TESTS =============================
 
-        # ========== LIMB TYPES ==========================
+    def LegTest(self):
+        self.parent.logger.info('DEBUG TESTS > Leg + Foot')
+        path = r'D:/Assets/Programming/Python/Maya/ModularAutoRigger'
+        path += r'/TEST_OUTPUT/TEST_LegFoot_01.ma'
+        pm.importFile(path)
+        self.parent.UpdateEnableUI()
+        self.parent.Setup_Editable()
+        pm.tabLayout(self.parent.rig_ui.tab, e=1, sti=2) # Select Limb setup tab
+        self.parent.rig_ui.limbSetup_ui.sceneHier_ui.AutoBuildByName(0)
+        pm.tabLayout(self.parent.rig_ui.tab, e=1, sti=3) # Select Limb setup tab
+
+    def RfkTest(self):
+        self.parent.logger.info('DEBUG TESTS > Relative FK')
+        path = r'D:/Assets/Programming/Python/Maya/ModularAutoRigger'
+        path += r'/TEST_OUTPUT/TEST_Spine_01.ma'
+        pm.importFile(path)
+        self.parent.UpdateEnableUI()
+        self.parent.Setup_Editable()
+        pm.tabLayout(self.parent.rig_ui.tab, e=1, sti=2) # Select Limb setup tab
+        self.parent.rig_ui.limbSetup_ui.sceneHier_ui.AutoBuildByName(0)
+        spine = pm.ls('PFX_Spine_Limb_M_NODE', type='transform')[0]
+        self.parent.bhvMng.SetBhvType(spine, 10) # Relative FK
+        # root = pm.ls('PFX_Root_Limb_M_NODE', type='transform')[0]
+        # self.parent.limbMng.Reparent(spine, -1)
+        # self.parent.limbMng.Reparent(root, spine)
+        pm.tabLayout(self.parent.rig_ui.tab, e=1, sti=3) # Select Limb setup tab
+
+    def SimpleChainTest(self):
+        self.parent.logger.info('DEBUG TESTS > Limb Types')
+        path = r'D:/Assets/Programming/Python/Maya/ModularAutoRigger'
+        path += r'/TEST_OUTPUT/TEST_SimpleChain_01.ma'
+        pm.importFile(path)
+        self.parent.UpdateEnableUI()
+        self.parent.Setup_Editable()
+        pm.tabLayout(self.parent.rig_ui.tab, e=1, sti=2)
+
+    def LimbTypesTest(self):
         self.parent.logger.info('DEBUG TESTS > Limb Types')
         path = r'D:/Assets/Programming/Python/Maya/ModularAutoRigger'
         path += r'/TEST_OUTPUT/TEST_LimbTypes_01.ma'
@@ -57,37 +63,34 @@ class PFRS_Debug:
         pm.tabLayout(self.parent.rig_ui.tab, e=1, sti=2) # Select Limb setup tab
         # self.parent.rig_ui.limbSetup_ui.sceneHier_ui.AutoBuildByName(0)
         # pm.tabLayout(self.parent.rig_ui.tab, e=1, sti=3) # Select Limb setup tab
-        # -------------------------------------------------
 
+    def ArmTest(self):
+        self.parent.logger.info('DEBUG TESTS > Arm Skin')
+        path = r'D:/Assets/Programming/Python/Maya/ModularAutoRigger'
+        path += r'/TEST_OUTPUT/temp_joints2.ma'
+        pm.importFile(path)
+        self.UpdateEnableUI()
+        self.Setup_Editable()
+        pm.tabLayout(self.rig_ui.tab, e=1, sti=2) # Select Limb setup tab
+        self.rig_ui.limbSetup_ui.sceneHier_ui.AutoBuildByName(0)
+        pm.tabLayout(self.tab, e=1, sti=2) # Select SKINNING tab
+        # mesh1 = pm.ls('pCylinderShape1')[0]
+        # mesh2 = pm.ls('pCylinderShape2')[0]
+        # mesh3 = pm.ls('pCylinderShape3')[0]
 
-        # # ========== ARM SKIN TEST ===============================
-        # self.parent.logger.info('DEBUG TESTS > Arm Skin')
-        # path = r'D:/Assets/Programming/Python/Maya/ModularAutoRigger'
-        # path += r'/TEST_OUTPUT/temp_joints2.ma'
-        # pm.importFile(path)
-        # self.UpdateEnableUI()
-        # self.Setup_Editable()
-        # pm.tabLayout(self.rig_ui.tab, e=1, sti=2) # Select Limb setup tab
-        # self.rig_ui.limbSetup_ui.sceneHier_ui.AutoBuildByName(0)
-        # pm.tabLayout(self.tab, e=1, sti=2) # Select SKINNING tab
-        # # mesh1 = pm.ls('pCylinderShape1')[0]
-        # # mesh2 = pm.ls('pCylinderShape2')[0]
-        # # mesh3 = pm.ls('pCylinderShape3')[0]
+        for mesh in [mesh1, mesh2, mesh3]:
+            self.skin_ui.meshMng.AddMesh(mesh)
+            self.skin_ui.skinMng.AddSkinAttrs(mesh)
+            for limb in self.limbMng.GetAllLimbs():
+                self.skin_ui.skinMng.SetDefaultLimbJointWeights(mesh, limb)
 
-        # for mesh in [mesh1, mesh2, mesh3]:
-        #     self.skin_ui.meshMng.AddMesh(mesh)
-        #     self.skin_ui.skinMng.AddSkinAttrs(mesh)
-        #     for limb in self.limbMng.GetAllLimbs():
-        #         self.skin_ui.skinMng.SetDefaultLimbJointWeights(mesh, limb)
+        pm.tabLayout(self.skin_ui.tab, e=1, sti=3) # Select PAINT WEIGHTS tab
 
-        # pm.tabLayout(self.skin_ui.tab, e=1, sti=3) # Select PAINT WEIGHTS tab
-        # # -------------------------------------------------
-
-        # # ========== SKEL RIGGING TEST ===============================
-        # self.parent.logger.info('DEBUG TESTS > Full Skeleton')
-        # path = r'D:/Assets/Programming/Python/Maya/ModularAutoRigger'
-        # path += r'/TEST_OUTPUT/temp_joints.ma'
-        # pm.importFile(path)
+    def SkeletonTest(self):
+        self.parent.logger.info('DEBUG TESTS > Full Skeleton')
+        path = r'D:/Assets/Programming/Python/Maya/ModularAutoRigger'
+        path += r'/TEST_OUTPUT/temp_joints.ma'
+        pm.importFile(path)
         # self.UpdateEnableUI()
         # self.Setup_Editable()
         # pm.tabLayout(self.rig_ui.tab, e=1, sti=2) # Select Limb setup tab
@@ -102,5 +105,5 @@ class PFRS_Debug:
         # self.skin_ui.meshMng.AddMesh(mesh2)
         # self.skin_ui.skinMng.AddSkinAttrs(mesh1)
         # self.skin_ui.skinMng.AddSkinAttrs(mesh2)
-        # # pm.tabLayout(self.skin_ui.tab, e=1, sti=3) # Select PAINT WEIGHTS tab
-        # # -------------------------------------------------
+        # pm.tabLayout(self.skin_ui.tab, e=1, sti=3) # Select PAINT WEIGHTS tab
+

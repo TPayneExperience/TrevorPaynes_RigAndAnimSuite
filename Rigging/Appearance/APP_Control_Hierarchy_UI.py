@@ -27,12 +27,16 @@ class APP_Control_Hierarchy_UI:
             return
         bhvType = self.limb.bhvType.get()
         groups = []
-        if bhvType in self.bhvMng.fkTypeIndexes:
+        bhvFilter = self.bhvMng.fkTypeIndexes
+        bhvFilter += self.bhvMng.rfkTypeIndexes
+        if bhvType in bhvFilter:
             groups += self.bhvMng.GetJointGroups(self.limb)
             if bhvType in self.bhvMng.reverseTypeIndexes:
                 groups = groups[::-1]
             if bhvType in self.bhvMng.omitLastJointTypes:
                 groups = groups[:-1]
+            if bhvType in self.bhvMng.rfkTypeIndexes:
+                groups = [groups[0]]
         groups += self.bhvMng.GetLimbGroups(self.limb)
         for group in groups:
             control = pm.listConnections(group.control)[0]

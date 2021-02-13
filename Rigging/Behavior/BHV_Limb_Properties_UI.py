@@ -13,7 +13,7 @@ class BHV_Limb_Properties_UI:
         self.limb = None
         self.targetJnt_at = None
         self.cstType_at = None
-        self.rkfType_at = None
+        # self.rkfType_at = None
 
         self.jntLimbs = {} # limbName : limb
         self.jntLimbOrder = [] # limbs
@@ -123,7 +123,7 @@ class BHV_Limb_Properties_UI:
         self.grpParent_at = pm.attrEnumOptionMenu(  self.grpParent_at, 
                                                     l='Parent Joint', 
                                                     p=self.bhvLimbProp_cl,
-                                                    at=self.limb.parentJoint,
+                                                    at=self.limb.limbParentJoint,
                                                     cc=self.LogGroupParent)
         if self.cstType_at:
             pm.deleteUI(self.cstType_at)
@@ -133,14 +133,14 @@ class BHV_Limb_Properties_UI:
                                                     at=self.limb.bhvCstType,
                                                     p=self.targetProp_cl,
                                                     cc=self.LogCstType)
-        if self.rkfType_at:
-            pm.deleteUI(self.rkfType_at)
-            self.rkfType_at = None
-        if bhvType in self.bhvMng.rfkTypeIndexes:
-            self.rkfType_at = pm.attrEnumOptionMenu(l='Relative FK Center Joint',
-                                                    at=self.limb.bhvRFKCenterJoint,
-                                                    p=self.bhvLimbProp_cl,
-                                                    cc=self.UpdateRFKTargetJoint)
+        # if self.rkfType_at:
+        #     pm.deleteUI(self.rkfType_at)
+        #     self.rkfType_at = None
+        # if bhvType in self.bhvMng.rfkTypeIndexes:
+        #     self.rkfType_at = pm.attrEnumOptionMenu(l='Relative FK Center Joint',
+        #                                             at=self.limb.bhvRFKCenterJoint,
+        #                                             p=self.bhvLimbProp_cl,
+        #                                             cc=self.UpdateRFKTargetJoint)
 
     def LogGroupParent(self, jointName):
         msg = '\tLimbProp > SET GROUP PARENT to '
@@ -152,11 +152,11 @@ class BHV_Limb_Properties_UI:
         msg += '"%s"' % cstTypeStr
         self.logger.info(msg)
 
-    def UpdateRFKTargetJoint(self, targetJointStr):
-        msg = '\tLimbIKCst > SET Relative FK CENTER joint to '
-        msg += '"%s"' % targetJointStr
-        self.logger.info(msg)
-        self.bhvMng.UpdateRFKConnections(self.limb)
+    # def UpdateRFKTargetJoint(self, targetJointStr):
+    #     msg = '\tLimbIKCst > SET Relative FK CENTER joint to '
+    #     msg += '"%s"' % targetJointStr
+    #     self.logger.info(msg)
+    #     self.bhvMng.UpdateRFKConnections(self.limb)
 
     def PopulateTargetFrame(self):
         self.logger.debug('\tBhv_LimbProp > PopulateTargetFrame')
@@ -186,7 +186,7 @@ class BHV_Limb_Properties_UI:
                     self.targetLimbOrder.append(limb)
 
         # SELECT CURRENT LIMB TARGET
-        targetLimbs = pm.listConnections(self.limb.bhvCstIkParentLimb)
+        targetLimbs = pm.listConnections(self.limb.bhvParent)
         if targetLimbs:
             targetLimb = targetLimbs[0]
             if targetLimb in self.targetLimbOrder:
@@ -194,7 +194,7 @@ class BHV_Limb_Properties_UI:
                 pm.optionMenu(self.targetLimb_om, e=1, sl=index)
         if bhvType in self.bhvMng.ikPVTypeIndexes + self.bhvMng.cstTypeIndexes:
             self.targetJnt_at = pm.attrEnumOptionMenu(  l='Target Joint',
-                                                        at=self.limb.bhvTargetJoint,
+                                                        at=self.limb.bhvParentJoint,
                                                         p=self.targetProp_cl,
                                                         cc=self.LogTargetJoint)
 
