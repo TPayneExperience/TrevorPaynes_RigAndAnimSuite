@@ -12,7 +12,6 @@ class APP_Limb_Properties_UI:
 
         self.ctrAxis_at = None
         self.ikpvCtrJoint_at = None
-        # self.fkikJoint_at = None
         self.limb = None
         self.limbs = {} # name : limb
         self.limbOrder = []
@@ -22,6 +21,7 @@ class APP_Limb_Properties_UI:
     def Populate(self):
         '''When limb selected, populate vis targets'''
         self.logger.debug('\tApp_LimbProp > Populate')
+        pm.frameLayout(self.prop_l, e=1, en=0)
         pm.optionMenu(self.visParentLimb_om, e=1, dai=1)
         self.limbs = {} # name : limb
         self.limbOrder = []
@@ -53,8 +53,8 @@ class APP_Limb_Properties_UI:
         index = self.limbOrder.index(name) + 2 # start index 1 + (none = 1)
         pm.optionMenu(self.visParentLimb_om, e=1, sl=index)
 
-    def Depopulate(self):
-        pm.frameLayout(self.prop_l, e=1, en=0)
+    # def Depopulate(self):
+    #     pm.frameLayout(self.prop_l, e=1, en=0)
 
 #=========== SETUP UI ==============================================
 
@@ -65,8 +65,6 @@ class APP_Limb_Properties_UI:
                 self.visParentLimb_om = pm.optionMenu( l='Vis Parent Limb',
                                                         cc=self.SetVisParentLimb)
                 self.visParentBhvType = pm.attrEnumOptionMenu(at='perspShape.filmFit')
-                # self.fkikJoint_at = pm.attrControlGrp(l='Lock + Hide Scale',
-                #                                 a='perspShape.shakeEnabled')
         with pm.frameLayout('Channel Box Controls', bv=1, en=0) as self.lockHide_l:
             with pm.columnLayout(co=('left', -100)) as self.appLimbLockHide_cl:
                 msg = 'FK = Joint FK, Empty'

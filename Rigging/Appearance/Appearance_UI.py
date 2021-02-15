@@ -47,7 +47,8 @@ class Appearance_UI:
     def Setup_Editable(self):
         self.logger.info('Rigging > Appearance SETUP')
         self.limbHier_ui.Populate()
-        self.limbProp_ui.Populate()
+        self.limbProp_ui.SetLimb(None)
+        # self.limbProp_ui.Populate()
         self.globalProp_ui.Populate()
         self.ctrHier_ui.Depopulate()
         # pm.frameLayout(self.prop_l, e=1, en=0)

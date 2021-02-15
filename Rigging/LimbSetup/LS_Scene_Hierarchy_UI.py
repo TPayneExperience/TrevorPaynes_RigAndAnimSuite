@@ -41,14 +41,20 @@ class LS_Scene_Hierarchy_UI:
 #=========== SETUP ====================================
 
     def _Setup(self):
-        self.widget = pm.treeView(adr=0, arp=0, sc=self.Selection, scc=self.SelectionChanged)
+        self.widget = pm.treeView(adr=0, arp=0, sc=self.Selection, 
+                                        scc=self.SelectionChanged,
+                                        elc=self.IgnoreRename)
         with pm.popupMenu():
             self.buildHier_mi = pm.menuItem(l='Autobuild by JOINT HIERARCHY', 
                                             c=self.AutoBuildByHierarchy)
-            self.buildNames_mi = pm.menuItem(l='Autobuild by JOINT NAMES (limbName_side(L/M/R)_jointName)', 
+            self.buildNames_mi = pm.menuItem(l='Autobuild by JOINT NAMES: [limb]_[L/M/R]_[joint]', 
                                             c=self.AutoBuildByName)
 
 #=========== FUNCTIONALITY ====================================
+
+    def IgnoreRename(self, idStr, newName):
+        self.logger.debug('\tApp_LimbHier > IgnoreRename')
+        return ''
 
     def GetSelectedJoints(self):
         self.logger.debug('\tLS_SceneHier > GetSelectedJoints')

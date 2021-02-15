@@ -1,6 +1,8 @@
 
 import pymel.core as pm
 
+import Common.Utilities as util
+reload(util)
 
 class APP_Control_Manager:
     def __init__(self, parent):
@@ -9,7 +11,6 @@ class APP_Control_Manager:
 
         self._ctrs = {} # ctrID : ctr
         self._ctrTemplates = {} # CtrType/Name : ControlTemplate
-        self.ctrTypesStr = '' # 'ctr1:ctr2...'
         self.hideAttrs = False
     
     def NewRig(self, rigRoot):
@@ -25,28 +26,21 @@ class APP_Control_Manager:
         pm.parent(tempControls, self.ctrTemplatesParent)
         for control in tempControls:
             self._ctrTemplates[control.shortName()] = control
-        names = list(self._ctrTemplates.keys())
-        names = [name[8:] for name in names]
-        self.ctrTypesStr = ':'.join(names)
+        names = self.GetControlNames()
+        ctrTypesStr = ':'.join(names)
         pm.addAttr(rigRoot, ln='nextCtrID', at='long')
         pm.addAttr(rigRoot, ln='appEmptyCtrShape', at='enum', 
-                            en=self.ctrTypesStr, h=self.hideAttrs)
+                            en=ctrTypesStr, h=self.hideAttrs)
         pm.addAttr(rigRoot, ln='appJointCtrShape', at='enum', 
-                            en=self.ctrTypesStr, h=self.hideAttrs)
+                            en=ctrTypesStr, h=self.hideAttrs)
         pm.addAttr(rigRoot, ln='appIKPVCtrShape', at='enum', 
-                            en=self.ctrTypesStr, h=self.hideAttrs)
+                            en=ctrTypesStr, h=self.hideAttrs)
         pm.addAttr(rigRoot, ln='appLookAtCtrShape', at='enum', 
-                            en=self.ctrTypesStr, h=self.hideAttrs)
-        # pm.addAttr(rigRoot, ln='appFKIKCtrShape', at='enum', 
-        #                     en=self.ctrTypesStr, h=self.hideAttrs)
-        # pm.addAttr(rigRoot, ln='appRFKCtrShape', at='enum', 
-        #                     en=self.ctrTypesStr, h=self.hideAttrs)
+                            en=ctrTypesStr, h=self.hideAttrs)
         rigRoot.appEmptyCtrShape.set(names.index('Square_Wire'))
         rigRoot.appJointCtrShape.set(names.index('Sphere_Poly'))
         rigRoot.appIKPVCtrShape.set(names.index('Diamond_Wire'))
         rigRoot.appLookAtCtrShape.set(names.index('Circle_Wire'))
-        # rigRoot.appFKIKCtrShape.set(names.index('Pin_Wire'))
-        # rigRoot.appRFKCtrShape.set(names.index('Cylinder_Poly'))
         self.ctrLayer = pm.createDisplayLayer(n='Controls', e=True)
         self.SetLayerState(True, True)
     
@@ -76,6 +70,10 @@ class APP_Control_Manager:
         self.logger.debug('\tCtrMng > NewRig')
         return list(self._ctrs.values())
 
+    def GetControlNames(self):
+        names = list(self._ctrTemplates.keys())
+        return [name[8:] for name in names]
+
 #============= FUNCTIONALITY ============================
 
     def _Add(self, group, index):
@@ -88,7 +86,7 @@ class APP_Control_Manager:
         ctr = pm.duplicate(sourceShape, ic=1)[0]
         pm.addAttr(ctr, ln='ID', at='long', dv=ctrID)
         pm.addAttr(ctr, ln='group', dt='string')
-        pm.setAttr(ctr + '.v', k=0, cb=0)
+        util.ChannelBoxAttrs(ctr, 1, 1, 1)
 
         pm.editDisplayLayerMembers(self.ctrLayer, ctr, nr=1)
         pm.connectAttr(group.control, ctr.group)
@@ -113,20 +111,9 @@ class APP_Control_Manager:
         index = self.rigRoot.appLookAtCtrShape.get()
         self._Add(group, index)
 
-    # def AddFKIKControl(self, group):
-    #     index = self.rigRoot.appFKIKCtrShape.get()
-    #     control = self._Add(group, index)
-    #     for attr in ['.tx', '.ty', '.tz']:
-    #         pm.setAttr(control+attr, l=1, k=0, cb=0)
-
-    # def AddRKFControl(self, group):
-    #     index = self.rigRoot.appRFKCtrShape.get()
-    #     self._Add(group, index)
-
     def Remove(self, control):
         self.logger.debug('\tCtrMng > Remove')
         del(self._ctrs[control.ID.get()])
-
 
 #============= SHAPE ============================
 

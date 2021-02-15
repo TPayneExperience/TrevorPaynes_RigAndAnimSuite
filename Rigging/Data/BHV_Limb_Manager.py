@@ -11,7 +11,7 @@ class BHV_Limb_Manager:
         self.ctrMng = parent.ctrMng
         self.logger = parent.logger
 
-        self.cstTypes = ('Parent', 'Point', 'Orient', 'Scale')
+        self.cstTypes = ('Orient', 'Parent', 'Point',  'Scale')
         self.hideAttrs = False
 
         # For Distance
@@ -53,8 +53,8 @@ class BHV_Limb_Manager:
         self.ikChainTypeIndexes = (5,)
 
         self.ikTargetableIndexes = (0, 6, 7, 8)
-        self.cstTargetTypeIndexes = (0, 1, 4, 5, 6, 8)
-        self.ctrTypeIndexes = (0, 1, 4, 6, 7, 8, 10) # For APP > Limb hier
+        # self.cstTargetableIndexes = (0, 1, 4, 5, 6, 8)
+        # self.ctrTypeIndexes = (0, 1, 4, 6, 7, 8, 10) # For APP > Limb hier
 
         self.bhvTypes = (   'FK - Chain (3+ Joints)', # DON'T CHANGE ORDER!
 
@@ -168,85 +168,6 @@ class BHV_Limb_Manager:
 
 #============= ADD / REMOVE LIMB  ============================
 
-    # def _AddLimb(self, limb):
-    #     self.logger.debug('\tBhvMng > _AddLimb')
-    #     bhvTypes = ':'.join(self.bhvTypes)
-    #     bhvCstTypes = ':'.join(self.cstTypes)
-    #     # ctrTypes = ':'.join(self.ctrMng.GetControlTypes())
-    #     axes = ':'.join(self.axesNames)
-
-    #     pm.addAttr(limb, ln='bhvType', at='enum', en=bhvTypes,
-    #                                 h=self.hideAttrs)
-
-    #     # LookAt, IKPV
-    #     pm.addAttr(limb, ln='bhvIKPVGroup', dt='string', h=self.hideAttrs)
-    #     pm.addAttr(limb, ln='bhvLookAtGroup', dt='string', h=self.hideAttrs)
-    #     pm.addAttr(limb, ln='bhvEmptyGroup', dt='string', h=self.hideAttrs)
-
-    #     # FKIK
-    #     pm.addAttr(limb, ln='bhvFKIKSwitchGroup', dt='string', h=self.hideAttrs) 
-    #     pm.addAttr(limb, ln='bhvFKIKSwitchParentJoint', at='enum', en='None', h=self.hideAttrs)
-    #     pm.addAttr(limb, ln='bhvFKIK_FKJoint', dt='string', h=self.hideAttrs)
-    #     pm.addAttr(limb, ln='bhvFKIK_IKJoint', dt='string', h=self.hideAttrs)
-    #     pm.addAttr(limb, ln='visParent', dt='string', h=self.hideAttrs)
-    #     pm.addAttr(limb, ln='visChildren', dt='string', h=self.hideAttrs)
-    #     pm.addAttr(limb, ln='visParentBhvType', at='enum', en='FK:IK', 
-    #                                                     h=self.hideAttrs)
-
-    #     # Relative FK
-    #     pm.addAttr(limb, ln='bhvRFKCenterGroup', dt='string', h=self.hideAttrs)
-    #     pm.addAttr(limb, ln='bhvRFKBottomGroup', dt='string', h=self.hideAttrs)
-    #     pm.addAttr(limb, ln='bhvRFKTopGroup', dt='string', h=self.hideAttrs) 
-    #     pm.addAttr(limb, ln='bhvRFKCenterJoint', at='enum', en='None', h=self.hideAttrs)
-        
-    #     # IK PV + CST
-    #     pm.addAttr(limb, ln='bhvChildren', dt='string', h=self.hideAttrs) 
-    #     pm.addAttr(limb, ln='bhvParent', dt='string', h=self.hideAttrs) 
-    #     pm.addAttr(limb, ln='bhvParentJoint', at='enum', en='None', h=self.hideAttrs)
-    #     pm.addAttr(limb, ln='bhvIKPVCtrJoint', at='enum', en='None', h=self.hideAttrs)
-    #     pm.addAttr(limb, ln='bhvCstType', at='enum', en=bhvCstTypes, h=self.hideAttrs)
-
-    #     # IK PV + Look At
-    #     pm.addAttr(limb, ln='bhvAxis', at='enum', en=axes, dv=4) # IKPV, LookAt
-    #     pm.addAttr(limb, ln='bhvDistance', at='float', min=0, dv=1) # IKPV, LookAt
-    #     # pm.addAttr(limb, ln='bhvDistanceJoint', dt='string') # for easy Test Connections
-        
-    #     # APP
-    #     pm.addAttr(limb, ln='channelBoxJointCtrPos', at='bool', h=self.hideAttrs)
-    #     pm.addAttr(limb, ln='channelBoxJointCtrRot', at='bool', h=self.hideAttrs)
-    #     pm.addAttr(limb, ln='channelBoxJointCtrScale', at='bool', h=self.hideAttrs)
-    #     # Connect to FKIK switch of another limb
-
-    #     # pm.addAttr(limb, ln='bhvCstSourceLimb', dt='string') # Ignore, only for connections
-    #     # pm.addAttr(limb, ln='bhvCstTargetLimb', dt='string') # for connecting to target
-    #     # pm.addAttr(limb, ln='bhvCstTargetJnt', at='enum', en='None')
-    #     # pm.addAttr(limb, ln='bhvIKSourceLimb', dt='string') # IK handles parent connection
-    #     # pm.addAttr(limb, ln='bhvIKTargetLimb', dt='string') # IK handles parent connection
-    
-    #     self.Setup_LimbGroupVisibility(limb)
-
-    # def _RemoveLimb(self, limb):
-    #     self.logger.debug('\tBhvMng > _RemoveLimb')
-    #     for joint in self.jntMng.GetLimbJoints(limb):
-    #         self.jntMng.RemoveTemp(joint)
-
-    #     groups = pm.listConnections(limb.bhvIKPVGroup)
-    #     groups += pm.listConnections(limb.bhvLookAtGroup)
-    #     groups += pm.listConnections(limb.bhvEmptyGroup)
-    #     groups += pm.listConnections(limb.bhvFKIKSwitchGroup)
-    #     groups += pm.listConnections(limb.bhvRFKCenterGroup)
-    #     groups += pm.listConnections(limb.bhvRFKBottomGroup)
-    #     groups += pm.listConnections(limb.bhvRFKTopGroup)
-    #     for group in groups:
-    #         ctr = pm.listConnections(group.control)[0]
-    #         self.ctrMng.Remove(ctr)
-    #         self.grpMng.Remove(group)
-    #     pm.delete(groups)
-    #     mirror = pm.listConnections(limb.mirrorLimb)
-    #     self.limbMng.Remove(limb)
-    #     if mirror:
-    #         self.jntMng.UpdateLimbJointNames(mirror[0])
-
     def _AddLimb(self):
         limb = self.limbMng.Add()
         bhvTypes = ':'.join(self.bhvTypes)
@@ -306,6 +227,18 @@ class BHV_Limb_Manager:
         pm.addAttr(limb, ln='bhvParentJoint', at='enum', en='None', h=self.hideAttrs)
         pm.addAttr(limb, ln='bhvIKPVCtrJoint', at='enum', en='None', h=self.hideAttrs)
         pm.addAttr(limb, ln='bhvCstType', at='enum', en=bhvCstTypes, h=self.hideAttrs)
+        pm.addAttr(limb, ln='cstPosX', at='bool', h=self.hideAttrs)
+        pm.addAttr(limb, ln='cstPosY', at='bool', h=self.hideAttrs)
+        pm.addAttr(limb, ln='cstPosZ', at='bool', h=self.hideAttrs)
+        pm.addAttr(limb, ln='cstRotX', at='bool', h=self.hideAttrs)
+        pm.addAttr(limb, ln='cstRotY', at='bool', h=self.hideAttrs)
+        pm.addAttr(limb, ln='cstRotZ', at='bool', h=self.hideAttrs)
+        limb.cstPosX.set(1)
+        limb.cstPosY.set(1)
+        limb.cstPosZ.set(1)
+        limb.cstRotX.set(1)
+        limb.cstRotY.set(1)
+        limb.cstRotZ.set(1)
 
         # IK PV + Look At
         pm.addAttr(limb, ln='bhvAxis', at='enum', en=axes, dv=4) # IKPV, LookAt
@@ -475,14 +408,17 @@ class BHV_Limb_Manager:
         # Get Closest limb
         targetLimb = None
         if bhvType in self.cstTypeIndexes:
-            targetLimb = self._GetClosestLimb(sourceLimb, 
-                                        self.cstTargetTypeIndexes)
-            if targetLimb:
+            limbs = self._GetClosestLimbs(sourceLimb)
+            if limbs:
+                targetLimb = limbs[0]
                 self.SetCstTargetLimb(sourceLimb, targetLimb)
         if bhvType in self.ikTypeIndexes: 
-            targetLimb = self._GetClosestLimb(sourceLimb, 
-                                        self.ikTargetableIndexes)
-            if targetLimb:
+            limbs = []
+            for limb in self._GetClosestLimbs(sourceLimb):
+                if limb.bhvType.get() in self.ikTargetableIndexes:
+                    limbs.append(limb)
+            if limbs:
+                targetLimb = limbs[0]
                 self.SetIKTargetLimb(sourceLimb, targetLimb)
         if not targetLimb:
             return
@@ -519,31 +455,22 @@ class BHV_Limb_Manager:
         joint = distances[targetDist][0]
         return targetJoints.index(joint)
 
-    def _GetClosestLimb(self, sourceLimb, bhvFilter):
-        self.logger.debug('\tBhvMng > _GetClosestLimb')
-        distances = {} # dist : group
+    def _GetClosestLimbs(self, sourceLimb):
+        self.logger.debug('\tBhvMng > _GetClosestLimbs')
+        distLimbs = {} # dist : limb
         sourceJoint = self.jntMng.GetLimbJoints(sourceLimb)[-1]
         sourcePos = pm.xform(sourceJoint, q=1, t=1, ws=1)
         # Create distance dictionary to groups
         for limb in self.limbMng.GetAllLimbs():
             if limb == sourceLimb:
                 continue
-            if limb.bhvType.get() in bhvFilter:
-                joints = pm.listConnections(limb.joints)
-                if not joints:
-                    joints = pm.listConnections(limb.bhvEmptyGroup)
-                for joint in joints:
-                    targetPos = pm.xform(joint, q=1, t=1, ws=1)
-                    dist = 0
-                    for i in range(3):
-                        dist += (sourcePos[i]-targetPos[i])**2
-                    distances[dist] = limb
-
-        if not distances:
-            return None
-        # Get Closest limb
-        dist = sorted(list(distances.keys()))[0]
-        return distances[dist]
+            for joint in self.jntMng.GetLimbJoints(limb):
+                targetPos = pm.xform(joint, q=1, t=1, ws=1)
+                dist = 0
+                for i in range(3):
+                    dist += (sourcePos[i]-targetPos[i])**2
+                distLimbs[dist] = limb
+        return [distLimbs[d] for d in sorted(distLimbs.keys())]
 
 #============= SETUP / TEARDOWN BHV ============================
     # EMPTY Created by Limb Setup UI > Teardown Tab
@@ -618,7 +545,7 @@ class BHV_Limb_Manager:
 
     def UpdateLimbParentJoint(self, childLimb):
         '''Updates limb parent group enum to closest to root group'''
-        self.logger.debug('\tJntMng > UpdateLimbParentJoint')
+        self.logger.debug('\tBhvMng > UpdateLimbParentJoint')
         parents = pm.listConnections(childLimb.limbParent)
 
         # If NO PARENT or parent EMPTY, set and return
@@ -658,40 +585,6 @@ class BHV_Limb_Manager:
         pos = [p*dist for p in pos]
         pm.xform(group, t=pos)
         pm.parent(group, limb)
-
-    # def PopulateFKIKSwitchParentJoint(self, limb):
-    #     joints = self.jntMng.GetLimbJoints(limb)
-    #     names = [j.pfrsName.get() for j in joints]
-    #     pm.addAttr(limb.bhvFKIKSwitchParentJoint, e=1, en=names)
-
-    # def UpdateFKIKSwitchParentJoint(self, limb):
-    #     self.logger.debug('\tBhvMng > UpdateFKIKSwitchParentJoint')
-    #     index = limb.bhvFKIKSwitchParentJoint.get()
-    #     joint = self.jntMng.GetLimbJoints(limb)[index]
-    #     group = pm.listConnections(limb.bhvFKIKSwitchGroup)[0]
-    #     pm.parent(group, joint)
-    #     pm.xform(group, t=(0,0,0), ro=(0,0,0), s=(1,1,1))
-    #     pm.parent(group, limb)
-
-    # def UpdateRFKConnections(self, limb):
-    #     self.logger.debug('\tBhvMng > UpdateRFKConnections')
-    #     joints = self.jntMng.GetLimbJoints(limb)
-    #     index = limb.bhvRFKCenterJoint.get() + 1
-    #     groups = pm.listConnections(limb.bhvRFKBottomGroup)
-    #     groups += pm.listConnections(limb.bhvRFKCenterGroup)
-    #     groups += pm.listConnections(limb.bhvRFKTopGroup)
-    #     pm.parent(groups, w=1)
-    #     for i in range(3):
-    #         pm.disconnectAttr(groups[i].joint)
-    #     for i in range(3):
-    #         joint = joints[index-1+i]
-    #         pm.connectAttr(groups[i].joint, joint.bhvRFKGroup)
-    #         pos = pm.xform(joint, q=1, t=1, ws=1)
-    #         rot = pm.xform(joint, q=1, ro=1, ws=1)
-    #         pm.xform(groups[i], t=pos, ro=rot, s=(1,1,1), ws=1)
-    #         self.grpMng.UpdateGroupName(groups[i])
-    #     pm.parent(groups[0], groups[2], groups[1])
-    #     pm.parent(groups[1], limb)
 
     def GetDefaultLimbHier(self):
         self.logger.debug('\tBhvMng > GetDefaultLimbHier')

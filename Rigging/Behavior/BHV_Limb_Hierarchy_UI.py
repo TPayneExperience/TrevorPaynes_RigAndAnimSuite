@@ -37,28 +37,29 @@ class BHV_Limb_Hierarchy_UI:
                             lbc=(limbID, 0.3, 0.1, 0.1))
                 else:
                     pm.treeView(self.widget, e=1, bvf=(limbID, 1, 0))
-                # if limb.bhvType.get() in self.bhvMng.parentableIndexes:
-                #     pm.treeView(self.widget, e=1, ornament=(limbID, 1, 0, 3))
-                # self.bhvMng.UpdateLimbParentJoint(limb)
+                if limb.bhvType.get() in self.bhvMng.emptyLimbIndexes:
+                    pm.treeView(self.widget, e=1, ornament=(limbID, 1, 0, 3))
 
 #=========== SETUP ====================================
 
     def _Setup(self):
         msg = '- MMB + Drag + Drop to reparent'
-        msg += '\n- Items with the circle can be parented to'
+        msg += '\n- Red Dots indicate Empty Limbs'
+        msg += '\n- Double Click to rename Empty Limbs'
         self.widget = pm.treeView(ams=0, nb=1, ann=msg)
         pm.treeView(self.widget, e=1, scc=self.SelectionChanged,
-                                        editLabelCommand=self.Rename,
+                                        elc=self.Rename,
                                         dad=self.Reparent)
         with pm.popupMenu():
-            pm.menuItem(l='Load Skeleton Hierarchy', c=self.LoadSkelHier)
-            pm.menuItem(l='Load Default Hierarchy', c=self.LoadDefaultHier)
-            pm.menuItem(divider=1)
-            pm.menuItem(l='Save as Default Hierarchy', c=self.SaveAsDefaultHier)
-            pm.menuItem(divider=1)
             pm.menuItem(l='Add Empty Limb', c=self.AddEmptyLimb)
             self.remove_mi = pm.menuItem(l='Remove Empty Limb', 
                                         en=0, c=self.RemoveEmptyLimb)
+            pm.menuItem(d=1)
+            pm.menuItem(l='Load Skeleton Hierarchy', c=self.LoadSkelHier)
+            pm.menuItem(l='Load Default Hierarchy', c=self.LoadDefaultHier)
+            pm.menuItem(d=1)
+            pm.menuItem(l='Save as Default Hierarchy', c=self.SaveAsDefaultHier)
+
 
 #=========== FUNCTIONS ====================================
 
@@ -86,10 +87,6 @@ class BHV_Limb_Hierarchy_UI:
             msg = '\tLimbHier > REPARENTING '
             msg += '"%s" to "%s"' % (name, parent.pfrsName.get())
             self.logger.info(msg)
-            # parentBhvType = parent.bhvType.get()
-            # if parentBhvType not in self.bhvMng.parentableIndexes:
-            #     self.Populate()
-            #     return
         else:
             parent = None
             self.logger.info('\tLimbHier > REPARENTING "%s" to world' % name)

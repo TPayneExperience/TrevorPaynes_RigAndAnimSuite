@@ -1,6 +1,9 @@
 
 import pymel.core as pm
 
+import Common.Utilities as util
+reload(util)
+
 class Limb_Manager:
     def __init__(self, parent):
 
@@ -80,8 +83,8 @@ class Limb_Manager:
 
         # limb = pm.createNode('network', name=pfrsName)
         limb = pm.group(name=pfrsName, em=1, p=self.limbGroup)
-        for attr in ['tx', 'ty', 'tz', 'rx', 'ry', 'rz', 'sx', 'sy', 'sz', 'v']:
-            pm.setAttr(limb + '.' + attr, l=1, k=0, cb=0)
+        util.ChannelBoxAttrs(limb)
+        pm.addAttr(limb, ln='rigRoot', dt='string', h=self.hideAttrs)
         pm.addAttr(limb, ln='ID', at='long', dv=limbID, h=self.hideAttrs)
         pm.addAttr(limb, ln='pfrsName', dt='string', h=self.hideAttrs)
         limb.pfrsName.set(pfrsName)
@@ -89,22 +92,18 @@ class Limb_Manager:
                                         h=self.hideAttrs)
         pm.addAttr(limb, ln='side', at='enum', enumName=limbSides,
                                         h=self.hideAttrs)
-        pm.addAttr(limb, ln='mirrorLimb', at='long', h=self.hideAttrs)
+        pm.addAttr(limb, ln='joints', dt='string', h=self.hideAttrs)
+
         pm.addAttr(limb, ln='limbParent', dt='string', h=self.hideAttrs)
         pm.addAttr(limb, ln='limbParentJoint', at='enum', en='None', 
                                         h=self.hideAttrs)
         pm.addAttr(limb, ln='limbChildren', dt='string', h=self.hideAttrs)
+        
         pm.addAttr(limb, ln='defaultLimbParent', dt='string', 
                                         h=self.hideAttrs)
         pm.addAttr(limb, ln='defaultLimbChildren', dt='string', 
                                         h=self.hideAttrs)
-        # pm.addAttr(limb, ln='parentJntIndex', at='enum', enumName='None')
-        # pm.addAttr(limb, ln='parentCtrID', at='long')
-        # pm.addAttr(limb, ln='infJoints', dt='string', h=self.hideAttrs)
-        # pm.addAttr(limb, ln='nonInfJoint', dt='string', h=self.hideAttrs) # Only for 3+ chain
-        # pm.addAttr(limb, ln='tempJoints', dt='string', h=self.hideAttrs) # limb setup
-        pm.addAttr(limb, ln='joints', dt='string', h=self.hideAttrs)
-        pm.addAttr(limb, ln='rigRoot', dt='string', h=self.hideAttrs)
+        pm.addAttr(limb, ln='mirrorLimb', at='long', h=self.hideAttrs)
 
         pm.addAttr(limb, ln='rebuildLimbType', at='bool', h=self.hideAttrs)
         pm.addAttr(limb, ln='rebuildBhvType', at='bool', h=self.hideAttrs)
@@ -136,9 +135,6 @@ class Limb_Manager:
 
     def Reparent(self, child, parent):
         self.logger.debug('\tLimbMng > Reparent')
-        msg = '\t\tReparenting "%s"' % child.pfrsName.get()
-        msg += ' to "%s"' % parent.pfrsName.get()
-        self.logger.debug(msg)
         pm.disconnectAttr(child.limbParent)
         if parent:
             pm.connectAttr(parent.limbChildren, child.limbParent)

@@ -12,7 +12,7 @@ class BHV_Limb_Properties_UI:
 
         self.limb = None
         self.targetJnt_at = None
-        self.cstType_at = None
+        self.cstLayout = None
         # self.rkfType_at = None
 
         self.jntLimbs = {} # limbName : limb
@@ -42,8 +42,8 @@ class BHV_Limb_Properties_UI:
         index = bhvTypes.index(bhvTypeStr) + 1
         pm.optionMenu(self.bhvType_om, e=1, sl=index)
 
-        self.PopulateBhvFrame(bhvType)
-        self.PopulateTargetFrame()
+        self.PopulateLimbProperties(bhvType)
+        self.PopulateBhvProperties()
         # self.PopulateControlFrame(bhvType)
 
         # self.UpdateBhvFrame()
@@ -54,14 +54,14 @@ class BHV_Limb_Properties_UI:
 
     def _Setup(self):
         '''Create frame layouts here because we have limb + cst frames'''
-        with pm.frameLayout('Limb BEHAVIOR Properties', bv=1, en=0) as self.limbLayout:
+        with pm.frameLayout('Limb Properties', bv=1, en=0) as self.limbLayout:
             with pm.columnLayout(adj=1) as self.bhvLimbProp_cl:
                 self.bhvType_om = pm.optionMenu(l='Bhv Type', 
                                                 cc=pm.Callback(self.SetBhvType))
                 self.grpParent_at = pm.attrEnumOptionMenu(  l='Parent Joint', 
                                                             at='perspShape.filmFit')
 
-        with pm.frameLayout('Limb IK / Constraint Target', bv=1, en=0) as self.targetLayout:
+        with pm.frameLayout('Behavior Properties', bv=1, en=0) as self.targetLayout:
             with pm.columnLayout(adj=1) as self.targetProp_cl:
                 self.targetLimb_om = pm.optionMenu( l='Target Limb', 
                                                     cc=self.SetTargetLimb)
@@ -77,8 +77,8 @@ class BHV_Limb_Properties_UI:
         self.logger.info('\t\t%s >>> %s' % (old, bhvTypeStr))
         
         self.bhvMng.SetBhvType(self.limb, newBhvIndex)
-        self.PopulateBhvFrame(newBhvIndex)
-        self.PopulateTargetFrame()
+        self.PopulateLimbProperties(newBhvIndex)
+        self.PopulateBhvProperties()
         # self.PopulateControlFrame(newBhvIndex)
         # self.Populate()
         # self.PopulateTargetLimbs()
@@ -117,58 +117,23 @@ class BHV_Limb_Properties_UI:
         pm.frameLayout(self.targetLayout, e=1, en=0)
         # pm.frameLayout(self.ctrLayout, e=1, en=0)
 
-    def PopulateBhvFrame(self, bhvType):
-        self.logger.debug('\tBhv_LimbProp > PopulateBhvFrame')
+    def PopulateLimbProperties(self, bhvType):
+        self.logger.debug('\tBhv_LimbProp > PopulateLimbProperties')
         pm.deleteUI(self.grpParent_at)
         self.grpParent_at = pm.attrEnumOptionMenu(  self.grpParent_at, 
                                                     l='Parent Joint', 
                                                     p=self.bhvLimbProp_cl,
                                                     at=self.limb.limbParentJoint,
                                                     cc=self.LogGroupParent)
-        if self.cstType_at:
-            pm.deleteUI(self.cstType_at)
-            self.cstType_at = None
-        if bhvType in self.bhvMng.cstTypeIndexes:
-            self.cstType_at = pm.attrEnumOptionMenu(l='Constraint Type',
-                                                    at=self.limb.bhvCstType,
-                                                    p=self.targetProp_cl,
-                                                    cc=self.LogCstType)
-        # if self.rkfType_at:
-        #     pm.deleteUI(self.rkfType_at)
-        #     self.rkfType_at = None
-        # if bhvType in self.bhvMng.rfkTypeIndexes:
-        #     self.rkfType_at = pm.attrEnumOptionMenu(l='Relative FK Center Joint',
-        #                                             at=self.limb.bhvRFKCenterJoint,
-        #                                             p=self.bhvLimbProp_cl,
-        #                                             cc=self.UpdateRFKTargetJoint)
-
-    def LogGroupParent(self, jointName):
-        msg = '\tLimbProp > SET GROUP PARENT to '
-        msg += '"%s"' % jointName
-        self.logger.info(msg)
     
-    def LogCstType(self, cstTypeStr):
-        msg = '\tLimbIKCst > SET CONSTRAINT to '
-        msg += '"%s"' % cstTypeStr
-        self.logger.info(msg)
-
-    # def UpdateRFKTargetJoint(self, targetJointStr):
-    #     msg = '\tLimbIKCst > SET Relative FK CENTER joint to '
-    #     msg += '"%s"' % targetJointStr
-    #     self.logger.info(msg)
-    #     self.bhvMng.UpdateRFKConnections(self.limb)
-
-    def PopulateTargetFrame(self):
-        self.logger.debug('\tBhv_LimbProp > PopulateTargetFrame')
+    def PopulateBhvProperties(self):
+        self.logger.debug('\tBhv_LimbProp > PopulateBhvProperties')
         pm.frameLayout(self.targetLayout, e=1, en=0)
-        if self.targetJnt_at:
-            pm.deleteUI(self.targetJnt_at)
-            self.targetJnt_at = None
 
         # POPULATE TARGET LIMBS
         bhvType = self.limb.bhvType.get()
         if bhvType in self.bhvMng.cstTypeIndexes:
-            bhvFilter = self.bhvMng.cstTargetTypeIndexes
+            bhvFilter = range(len(self.bhvMng.bhvTypes))
         elif bhvType in self.bhvMng.ikTypeIndexes:
             bhvFilter = self.bhvMng.ikTargetableIndexes
         else:
@@ -185,18 +150,71 @@ class BHV_Limb_Properties_UI:
                     self.targetLimbs[name] = limb
                     self.targetLimbOrder.append(limb)
 
-        # SELECT CURRENT LIMB TARGET
+        # SELECT TARGET LIMB
         targetLimbs = pm.listConnections(self.limb.bhvParent)
         if targetLimbs:
             targetLimb = targetLimbs[0]
             if targetLimb in self.targetLimbOrder:
                 index = self.targetLimbOrder.index(targetLimb) + 1
                 pm.optionMenu(self.targetLimb_om, e=1, sl=index)
+        if self.targetJnt_at:
+            pm.deleteUI(self.targetJnt_at)
+            self.targetJnt_at = None
         if bhvType in self.bhvMng.ikPVTypeIndexes + self.bhvMng.cstTypeIndexes:
             self.targetJnt_at = pm.attrEnumOptionMenu(  l='Target Joint',
                                                         at=self.limb.bhvParentJoint,
                                                         p=self.targetProp_cl,
                                                         cc=self.LogTargetJoint)
+        if self.cstLayout:
+            pm.deleteUI(self.cstLayout)
+            self.cstLayout = None
+        if bhvType in self.bhvMng.cstTypeIndexes:
+            with pm.columnLayout(adj=1, p=self.targetProp_cl) as self.cstLayout:
+                pm.attrEnumOptionMenu(l='Constraint Type',
+                                    at=self.limb.bhvCstType,
+                                    cc=self.LogCstType)
+                with pm.rowLayout(  nc=4,
+                                    cal=(1, 'right'), 
+                                    cat=[(1, 'both', 0), 
+                                        (2, 'both', 0), 
+                                        (3, 'both', 0), 
+                                        (4, 'both', 0)]):
+                    pm.text('Constraint Pos Axes')
+                    with pm.columnLayout(co=('left', -140)):
+                        pm.attrControlGrp(l='X', a=self.limb.cstPosX)
+                    with pm.columnLayout(co=('left', -140)):
+                        pm.attrControlGrp(l='Y', a=self.limb.cstPosY)
+                    with pm.columnLayout(co=('left', -140)):
+                        pm.attrControlGrp(l='Z', a=self.limb.cstPosZ)
+                with pm.rowLayout(  nc=4,
+                                    cal=(1, 'right'), 
+                                    cat=[(1, 'both', 0), 
+                                        (2, 'both', 0), 
+                                        (3, 'both', 0), 
+                                        (4, 'both', 0)]):
+                    pm.text('Constraint Rot Axes')
+                    with pm.columnLayout(co=('left', -140)):
+                        pm.attrControlGrp(l='X', a=self.limb.cstRotX)
+                    with pm.columnLayout(co=('left', -140)):
+                        pm.attrControlGrp(l='Y', a=self.limb.cstRotY)
+                    with pm.columnLayout(co=('left', -140)):
+                        pm.attrControlGrp(l='Z', a=self.limb.cstRotZ)
+
+    def LogGroupParent(self, jointName):
+        msg = '\tLimbProp > SET GROUP PARENT to '
+        msg += '"%s"' % jointName
+        self.logger.info(msg)
+    
+    def LogCstType(self, cstTypeStr):
+        msg = '\tLimbIKCst > SET CONSTRAINT to '
+        msg += '"%s"' % cstTypeStr
+        self.logger.info(msg)
+
+    # def UpdateRFKTargetJoint(self, targetJointStr):
+    #     msg = '\tLimbIKCst > SET Relative FK CENTER joint to '
+    #     msg += '"%s"' % targetJointStr
+    #     self.logger.info(msg)
+    #     self.bhvMng.UpdateRFKConnections(self.limb)
 
     def LogTargetJoint(self, targetJointStr):
         msg = '\tLimbIKCst > SET TARGET JOINT to '

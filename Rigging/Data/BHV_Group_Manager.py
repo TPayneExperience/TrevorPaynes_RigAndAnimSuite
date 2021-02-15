@@ -1,6 +1,9 @@
 
 import pymel.core as pm
 
+import Common.Utilities as util
+reload(util)
+
 class BHV_Group_Manager:
     def __init__(self, parent):
         self.limbMng = parent.limbMng
@@ -57,11 +60,9 @@ class BHV_Group_Manager:
         group = pm.group(em=1, w=1)
         pm.addAttr(group, ln='ID', at='long', dv=groupID)
         pm.addAttr(group, ln='control', dt='string')
-        # pm.addAttr(group, ln='FKIKVisSource', dt='string')
         pm.addAttr(group, ln='groupType', at='enum', en=groupTypes) # IKPV, LookAt
-        for attr in ['.sx', '.sy', '.sz']:
-            pm.setAttr(group + attr, l=1, k=0, cb=0)
-        pm.setAttr(group + '.v', k=0, cb=0)
+        util.ChannelBoxAttrs(group, 1, 1, 0, 1)
+
         self._groups[groupID] = group
         return group
 
@@ -85,6 +86,7 @@ class BHV_Group_Manager:
         pm.addAttr(group, ln='targetJoint', at='enum', en='None') # IK Chain
         pm.addAttr(group, ln='joint', dt='string')
         pm.addAttr(group, ln='weight', at='float', min=0, max=1) # Cst
+        group.weight.set(0.5)
         pm.connectAttr(joint.group, group.joint)
         
         self.ctrMng.AddJointControl(group)
@@ -115,37 +117,6 @@ class BHV_Group_Manager:
         pm.parent(group, limb)
         self.ctrMng.AddLookAtControl(group)
         return group
-
-    # # FKIK Switch
-    # # Called from Behaviors > Set Bhv()
-    # def AddFKIKSwitchGroup(self, limb):
-    #     self.logger.debug('\tGrpMng > AddFKIKSwitchGroup')
-    #     group = self._AddGroup()
-    #     group.groupType.set(3)
-    #     pm.addAttr(group, ln='limb', dt='string')
-    #     pm.connectAttr(limb.bhvFKIKSwitchGroup, group.limb)
-    #     pm.parent(group, limb)
-    #     self.ctrMng.AddFKIKControl(group)
-    #     return group
-
-    # def AddRFKGroups(self, limb):
-    #     self.logger.debug('\tGrpMng > AddRFKGroups')
-    #     groups = []
-    #     for i in range(3):
-    #         groups.append(self._AddGroup())
-    #         pm.addAttr(groups[i], ln='joint', dt='string')
-    #         pm.addAttr(groups[i], ln='limb', dt='string')
-    #         groups[i].groupType.set(4)
-    #         self.ctrMng.AddRKFControl(groups[i])
-    #     pm.connectAttr(limb.bhvRFKBottomGroup, groups[0].limb)
-    #     pm.connectAttr(limb.bhvRFKCenterGroup, groups[1].limb)
-    #     pm.connectAttr(limb.bhvRFKTopGroup, groups[2].limb)
-    #     groups[0].groupType.set(5)
-    #     groups[1].groupType.set(6)
-    #     groups[2].groupType.set(7)
-    #     pm.parent(groups[0], groups[2], groups[1])
-    #     pm.parent(groups[1], limb)
-    #     return groups
 
     def Remove(self, group):
         self.logger.debug('\tGrpMng > Remove')

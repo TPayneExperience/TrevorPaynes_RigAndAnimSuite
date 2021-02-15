@@ -29,6 +29,7 @@ class APP_Control_Hierarchy_UI:
         groups = []
         bhvFilter = self.bhvMng.fkTypeIndexes
         bhvFilter += self.bhvMng.rfkTypeIndexes
+        bhvFilter += self.bhvMng.emptyLimbIndexes
         if bhvType in bhvFilter:
             groups += self.bhvMng.GetJointGroups(self.limb)
             if bhvType in self.bhvMng.reverseTypeIndexes:
@@ -51,10 +52,14 @@ class APP_Control_Hierarchy_UI:
 #=========== SETUP ====================================
 
     def _Setup(self):
-        self.widget = pm.treeView(  arp=0, adr=0, ams=0, 
+        self.widget = pm.treeView(  arp=0, adr=0, ams=0, elc=self.IgnoreRename,
                                     scc=self.SelectionChanged)
 
 #=========== FUNCTIONALITY ====================================
+
+    def IgnoreRename(self, idStr, newName):
+        self.logger.debug('\tApp_CtrHier > IgnoreRename')
+        return ''
 
     def SelectionChanged(self):
         self.logger.debug('\tApp_ControlHier > SelectionChanged')

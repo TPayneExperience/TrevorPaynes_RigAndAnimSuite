@@ -42,8 +42,6 @@ class APP_Global_Properties_UI:
         pm.deleteUI(self.joint_at)
         pm.deleteUI(self.ikpv_at)
         pm.deleteUI(self.lookAt_at)
-        # pm.deleteUI(self.fkik_at)
-        # pm.deleteUI(self.rfk_at)
         self.empty_at = pm.attrEnumOptionMenu(  l='Empty',
                                                 p=self.prop_cl,
                                                 cc=self.UpdateEmptyShapes,
@@ -60,14 +58,6 @@ class APP_Global_Properties_UI:
                                                 p=self.prop_cl,
                                                 cc=self.UpdateLookAtShapes,
                                                 at=rigRoot.appLookAtCtrShape)
-        # self.fkik_at = pm.attrEnumOptionMenu(   l='FKIK Switch',
-        #                                         p=self.prop_cl,
-        #                                         cc=self.UpdateFKIKShapes,
-        #                                         at=rigRoot.appFKIKCtrShape)
-        # self.rfk_at = pm.attrEnumOptionMenu(    l='Relative FK',
-        #                                         p=self.prop_cl,
-        #                                         cc=self.UpdateRFKShapes,
-        #                                         at=rigRoot.appRFKCtrShape)
 
 #=========== SETUP UI ==============================================
 
@@ -78,8 +68,6 @@ class APP_Global_Properties_UI:
                 self.joint_at = pm.attrEnumOptionMenu(at='perspShape.filmFit')
                 self.ikpv_at = pm.attrEnumOptionMenu(at='perspShape.filmFit')
                 self.lookAt_at = pm.attrEnumOptionMenu(at='perspShape.filmFit')
-                # self.fkik_at = pm.attrEnumOptionMenu(at='perspShape.filmFit')
-                # self.rfk_at = pm.attrEnumOptionMenu(at='perspShape.filmFit')
 
 #=========== FUNCTIONALITY ==============================================
 
@@ -99,21 +87,12 @@ class APP_Global_Properties_UI:
         self.logger.info('\tApp_GlobalProp > UpdateLookAtShapes')
         self._UpdateShapes(4, shape)
 
-    # def UpdateFKIKShapes(self, shape):
-    #     self.logger.deinfobug('\tApp_GlobalProp > UpdateFKIKShapes')
-    #     self._UpdateShapes(3, shape)
-
-    def UpdateRFKShapes(self, shape):
-        self.logger.info('\tApp_GlobalProp > UpdateRFKShapes')
-        self._UpdateShapes(5, shape)
-        self._UpdateShapes(6, shape)
-        self._UpdateShapes(7, shape)
-
     def _UpdateShapes(self, groupType, shape):
-        shapeName = 'PFRSCTR_' + shape
+        names = self.ctrMng.GetControlNames()
+        index = names.index(shape)
         for group in self.grpMng.GetAllGroups():
             if group.groupType.get() != groupType:
                 continue
-            self.ctrMng.SetShape(group, shapeName)
+            self.ctrMng.SetShape(group, index)
 
 

@@ -23,6 +23,7 @@ class BHV_Group_Hierarchy_UI:
         bhvFilter += self.bhvMng.cstTypeIndexes
         bhvFilter += self.bhvMng.ikChainTypeIndexes
         bhvFilter += self.bhvMng.rfkTypeIndexes
+        bhvFilter += self.bhvMng.emptyLimbIndexes
         if bhvType not in bhvFilter:
             return
         groups = self.bhvMng.GetJointGroups(self.limb)
@@ -44,10 +45,14 @@ class BHV_Group_Hierarchy_UI:
 # #=========== SETUP ====================================
 
     def _Setup(self):
-        self.widget = pm.treeView(allowReparenting=0, adr=0, ams=0)
+        self.widget = pm.treeView(arp=0, adr=0, ams=0, elc=self.IgnoreRename)
         pm.treeView(self.widget, e=1, scc=self.SelectionChanged)
     
 #=========== FUNCTIONALITY ====================================
+
+    def IgnoreRename(self, idStr, newName):
+        self.logger.debug('\tBhv_GroupHier > IgnoreRename')
+        return ''
 
     def SetLimb(self, limb):
         self.logger.debug('\tBhv_GroupHier > SetLimb')

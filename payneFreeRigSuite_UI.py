@@ -36,6 +36,7 @@ class PayneFreeRigSuite_UI():
 
         self.fileMng = fm.File_Manager()
         self.jsonMng = js.Json_Manager()
+        self.utils = None
         self.nameMng = nm.Name_Manager(self)
         self.rigRoot = None
         self.hideAttrs = False
@@ -129,11 +130,11 @@ class PayneFreeRigSuite_UI():
                     self.jntMng = self.rig_ui.jntMng
                     self.bhvMng = self.rig_ui.bhvMng
                     self.ctrMng = self.rig_ui.ctrMng
-                with pm.horizontalLayout() as self.skinning_l:
+                with pm.horizontalLayout(en=0) as self.skinning_l:
                     self.skin_ui = skin_ui.Skinning_UI(self)
                     self.skinMng = self.skin_ui.skinMng
-                with pm.horizontalLayout() as self.animation_l:
-                    with pm.tabLayout() as self.mdTab:
+                with pm.horizontalLayout(en=0) as self.animation_l:
+                    with pm.tabLayout() as self.animTab:
                         with pm.horizontalLayout():
                             pm.button('test', label='Three')
         pm.tabLayout(self.tab, e=1, 
@@ -149,49 +150,53 @@ class PayneFreeRigSuite_UI():
     def _Setup_MenuBar(self):
         with self.win:
             with pm.menu('File'):
-                pm.menuItem(l='New Rig...', c=self.NewRig_Dialog)
-                pm.menuItem(l='Edit Rig...', c=self.EditRig_Dialog)
+                pm.menuItem(l='New Rig...', en=0, c=self.NewRig_Dialog)
+                pm.menuItem(l='Edit Rig...', en=0, c=self.EditRig_Dialog)
                 pm.menuItem(divider=1)
-                pm.menuItem(l='Quit', command=(''))
+                pm.menuItem(l='Quit', en=0)
                 
             with pm.menu('Rigging'):
                 with pm.subMenuItem(l='Mirror'):
-                    pm.menuItem(l='X')#c=lambda x: self.limbs_ui.Mirror_Dialog('X'))
-                    pm.menuItem(l='Y')
-                    pm.menuItem(l='Z')
-                pm.menuItem(l='Duplicate') # , c=self.limbs_ui.Duplicate_Dialog)
+                    pm.menuItem(l='X', en=0)#c=lambda x: self.limbs_ui.Mirror_Dialog('X'))
+                    pm.menuItem(l='Y', en=0)
+                    pm.menuItem(l='Z', en=0)
+                pm.menuItem(l='Duplicate', en=0) # , c=self.limbs_ui.Duplicate_Dialog)
                 pm.menuItem(divider=1)
-                pm.menuItem(l='Load Template...')
-                pm.menuItem(l='Save Template...')
+                pm.menuItem(l='Load Template...', en=0)
+                pm.menuItem(l='Save Template...', en=0)
                 pm.menuItem(divider=1)
-                pm.menuItem(l='Clean Up Unused Controls') # Deletes Unused Ctrs + Groups
+                pm.menuItem(l='Clean Up Unused Controls', en=0) # Deletes Unused Ctrs + Groups
 
-            with pm.menu('Skinning'):
+            with pm.menu('Skinning', en=0):
+                pm.menuItem(l='disabled')
+
+            with pm.menu('Animation', en=0):
                 pm.menuItem(l='disabled')
 
             with pm.menu('Help'):
                 with pm.subMenuItem(l='Tutorials'):
-                    pm.menuItem(l='QUICK START', d=1, en=0)
-                    pm.menuItem(l='Rigging')
-                    pm.menuItem(l='Skinning')
-                    pm.menuItem(l='Animating')
+                    pm.menuItem(l='QUICK START', d=1)
+                    pm.menuItem(l='For Artists', en=0)
+                    pm.menuItem(l='Rigging', en=0)
+                    pm.menuItem(l='Skinning', en=0)
+                    pm.menuItem(l='Animating', en=0)
 
-                    pm.menuItem(l='RIGGING', d=1, en=0)
-                    pm.menuItem(l='New / Edit Rig Setup')
-                    pm.menuItem(l='Joint Setup')
-                    pm.menuItem(l='Limb Setup')
-                    pm.menuItem(l='Behaviors')
-                    pm.menuItem(l='Appearance')
-                    pm.menuItem(l='Duplicate Limbs')
-                    pm.menuItem(l='Mirror Limbs')
+                    pm.menuItem(l='RIGGING', d=1)
+                    pm.menuItem(l='New / Edit Rig Setup', en=0)
+                    pm.menuItem(l='Joint Setup', en=0)
+                    pm.menuItem(l='Limb Setup', en=0)
+                    pm.menuItem(l='Behaviors', en=0)
+                    pm.menuItem(l='Appearance', en=0)
+                    pm.menuItem(l='Duplicate Limbs', en=0)
+                    pm.menuItem(l='Mirror Limbs', en=0)
 
-                    pm.menuItem(l='SKINNING', d=1, en=0)
-                    pm.menuItem(l='Mesh Setup')
-                    pm.menuItem(l='Paint Weights')
-                    pm.menuItem(l='Quick Weights')
+                    pm.menuItem(l='SKINNING', d=1)
+                    pm.menuItem(l='Mesh Setup', en=0)
+                    pm.menuItem(l='Paint Weights', en=0)
+                    pm.menuItem(l='Quick Weights', en=0)
 
-                    pm.menuItem(l='ANIMATING', d=1, en=0)
-                    pm.menuItem(l='Poses')
+                    pm.menuItem(l='ANIMATING', d=1)
+                    pm.menuItem(l='Poses', en=0)
                     
                 pm.menuItem(divider=1)
                 pm.menuItem(l='Submit Feedback...', en=0)
