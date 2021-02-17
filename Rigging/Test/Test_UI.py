@@ -47,6 +47,7 @@ class Test_UI:
             else:
                 enabledLimbs.append(limb)
         self.Teardown_MayaControllers()
+        pm.delete(pm.ls(type='multiplyDivide')) # Delete RFK extra nodes
         self.Teardown_Controls(enabledLimbs)
         self.Remove_Constraints()
         self.Teardown_Groups()
@@ -56,7 +57,6 @@ class Test_UI:
     def Setup_Groups(self):
         self.logger.debug('\tTest_UI > Setup_Groups')
         for group in self.grpMng.GetAllGroups():
-            util.ChannelBoxAttrs(group, 1, 1)
             if group.groupType.get() == 1: # joint
                 joint = pm.listConnections(group.joint)[0]
                 limb = pm.listConnections(joint.limb)[0]
@@ -79,7 +79,6 @@ class Test_UI:
             for group in self.bhvMng.GetJointGroups(limb):
                 control = pm.listConnections(group.control)[0]
                 util.ChannelBoxAttrs(control, pos, rot, scale)
-            attrs = []
             pos = limb.channelBoxLimbCtrPos.get()
             rot = limb.channelBoxLimbCtrRot.get()
             scale = limb.channelBoxLimbCtrScale.get()
@@ -91,40 +90,38 @@ class Test_UI:
         self.logger.debug('\tTest_UI > Setup_Internal')
         for limb in limbs:
             bhvType = limb.bhvType.get()
-            if bhvType in [0, 8]: # fk chain + reverse
+            if bhvType in self.bhvMng.fkChainTypeIndexes:
                 self.Setup_Internal_FKChain(limb)
-            elif (bhvType == 1):
+            elif bhvType in self.bhvMng.ikPVTypeIndexes:
                 self.Setup_Internal_IKPoleVector(limb)
-            # elif (bhvType in self.bhvMng.fkikTypeIndexes):
-            #     self.Setup_Internal_FKIK(limb)
-            elif (bhvType == 3):
+            elif bhvType in self.bhvMng.cstTypeIndexes:
                 self.Setup_Internal_Constraint(limb)
-            elif (bhvType == 4):
+            elif bhvType in self.bhvMng.lookAtTypeIndexes:
                 self.Setup_Internal_LookAt(limb)
-            elif (bhvType == 5):
+            elif bhvType in self.bhvMng.ikChainTypeIndexes:
                 self.Setup_Internal_IKChain(limb)
-            elif (bhvType == 6):
+            elif bhvType in self.bhvMng.fkBranchTypeIndexes:
                 self.Setup_Internal_FKBranch(limb)
-            elif (bhvType == 10):
+            elif bhvType in self.bhvMng.rfkTypeIndexes:
                 self.Setup_Internal_RelativeFK(limb)
 
     def Setup_External(self, limbs):
         self.logger.debug('\tTest_UI > Setup_External')
         for limb in limbs:
             bhvType = limb.bhvType.get()
-            if bhvType in [0,8]: # fk chain + reverse
+            if bhvType in self.bhvMng.fkChainTypeIndexes:
                 self.Setup_External_FKChain(limb)
-            elif (bhvType == 1):
+            elif bhvType in self.bhvMng.ikPVTypeIndexes:
                 self.Setup_External_IKPoleVector(limb)
-            # elif (bhvType in self.bhvMng.fkikTypeIndexes):
-            #     self.Setup_External_FKIK(limb)
-            elif (bhvType == 5):
+            elif bhvType in self.bhvMng.ikChainTypeIndexes:
                 self.Setup_External_IKChain(limb)
-            elif (bhvType == 6):
+            elif bhvType in self.bhvMng.fkBranchTypeIndexes:
                 self.Setup_External_FKBranch(limb)
-            elif bhvType in [4, 7]: # LookAt, Empty
+            elif bhvType in self.bhvMng.lookAtTypeIndexes:
                 self.Setup_External_SingleControl(limb)
-            elif (bhvType == 10):
+            elif bhvType in self.bhvMng.emptyLimbIndexes:
+                self.Setup_External_SingleControl(limb)
+            elif bhvType in self.bhvMng.rfkTypeIndexes:
                 self.Setup_External_RelativeFK(limb)
 
     def Setup_Internal_MayaControllers(self, limbs):
@@ -201,11 +198,12 @@ class Test_UI:
     def Teardown_Controls(self, limbs):
         self.logger.debug('\tTest_UI > Teardown_Controls')
         for limb in limbs:
+            self.logger.debug('\t\tLimb = ' + limb.pfrsName.get())
             groups = self.bhvMng.GetJointGroups(limb)
             groups += self.bhvMng.GetLimbGroups(limb)
             for group in groups:
                 control = pm.listConnections(group.control)[0]
-                util.ChannelBoxAttrs(control, t=1, r=1, s=1)
+                util.ChannelBoxAttrs(control, 1, 1, 1, 1)
                 util.ResetAttrs(control)
         pm.refresh() # Forces IK Handles to re-evaluate
     
@@ -217,7 +215,6 @@ class Test_UI:
         pm.delete(pm.ls(type='orientConstraint'))
         pm.delete(pm.ls(type='scaleConstraint'))
         pm.delete(pm.ls(type='aimConstraint'))
-        pm.delete(pm.ls(type='multiplyDivide')) # Delete FKIK extra nodes
         for limb in self.limbMng.GetAllLimbs(): 
             bhvType = limb.bhvType.get()
             if bhvType in self.bhvMng.cstTypeIndexes:
@@ -277,7 +274,6 @@ class Test_UI:
             groups = groups[::-1]
         self.ParentConstrainGroup(limb, groups[0])
 
-
     # FK CHAIN / REVERSE CHAIN
     def Setup_Internal_FKChain(self, limb):
         self.logger.debug('\tTest_UI > Setup_Internal_FKChain')
@@ -317,18 +313,11 @@ class Test_UI:
         self.logger.debug('\tTest_UI > Bind_FK_Joints')
         joints = self.jntMng.GetLimbJoints(limb)
         bhvType = limb.bhvType.get()
-        if (bhvType != 6) and (len(joints) >= 3): # Ignore last joint
-            lastJoint = joints[-1]
-            group = pm.listConnections(lastJoint.group)[0]
-            control = pm.listConnections(group.control)[0]
-            shape = pm.listRelatives(control, c=1, s=1)[0]
-            shape.v.set(0)
+        if bhvType in self.bhvMng.omitLastJointTypes:
             joints = joints[:-1]
         for joint in joints:
-            # group = pm.listConnections(joint.bhvFKGroup)[0]
             group = pm.listConnections(joint.group)[0]
             ctr = pm.listConnections(group.control)[0]
-            # ctr = self.ctrMng.GetGroupControl(group)
             pm.parentConstraint(ctr, joint, mo=1)
 
 #=========== CONSTRAINT ====================================

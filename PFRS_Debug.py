@@ -11,7 +11,7 @@ class PFRS_Debug:
         # self.LegTest()
         # self.RfkTest()
         # self.SimpleChainTest()
-        # self.LimbTypesTest()
+        self.LimbTypesTest()
         # self.ArmTest()
         # self.SkeletonTest()
 

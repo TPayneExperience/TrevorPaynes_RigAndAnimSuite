@@ -37,14 +37,16 @@ class BHV_Limb_Manager:
         self.emptyLimbIndexes = (7,)
         self.oneJntLimbIndexes = (6, 4, 3)
         self.twoJntChainLimbIndexes = (11, 6, 12, 5)
-        self.threeJntChainLimbIndexes = (0, 6, 8, 10, 1, 5, 3)
+        self.threeJntChainLimbIndexes = (0, 6, 8, 10, 9, 1, 5, 3)
         self.branchLimbIndexes = (6, 3)
         
         self.omitLastJointTypes = (0, 5, 10)
-        self.reverseTypeIndexes = (8,12)
+        self.reverseTypeIndexes = (8, 12, 9)
 
         self.fkTypeIndexes = (0, 6, 8, 11, 12) 
-        self.rfkTypeIndexes = (10,)
+        self.fkBranchTypeIndexes = (6,)
+        self.fkChainTypeIndexes = (0, 8, 10, 11)
+        self.rfkTypeIndexes = (10, 9)
         self.cstTypeIndexes = (3,)
         self.lookAtTypeIndexes = (4,)
         self.ikTypeIndexes = (1, 5)
@@ -67,7 +69,7 @@ class BHV_Limb_Manager:
                             'FK - Branch',
                             'Empty',
                             'FK - Reverse Chain (3+ Joints)',
-                            'DEPRICATED - FKIK Chain', 
+                            'FK - Reverse Relative', 
                             'FK - Relative',
 
                             'FK - Chain (2 Joints)',
@@ -91,6 +93,7 @@ class BHV_Limb_Manager:
             return [self.bhvTypes[i] for i in self.branchLimbIndexes]
 
     def GetLimbGroups(self, limb):
+        self.logger.debug('\tBhvMng > GetLimbGroups')
         groups = []
         bhvType = limb.bhvType.get()
         # IK PV
@@ -99,17 +102,10 @@ class BHV_Limb_Manager:
         # Look At
         if bhvType in self.lookAtTypeIndexes:
             groups += pm.listConnections(limb.bhvLookAtGroup)
-        # # FKIK
-        # if bhvType in self.fkikTypeIndexes:
-        #     groups += pm.listConnections(limb.bhvFKIKSwitchGroup)
-        # RFK
-        # if bhvType in self.rfkTypeIndexes:
-        #     groups += pm.listConnections(limb.bhvRFKBottomGroup)
-        #     groups += pm.listConnections(limb.bhvRFKCenterGroup)
-        #     groups += pm.listConnections(limb.bhvRFKTopGroup)
         return groups
 
     def GetJointGroups(self, limb):
+        self.logger.debug('\tBhvMng > GetJointGroups')
         bhvType = limb.bhvType.get()
         if bhvType in self.emptyLimbIndexes:
             return pm.listConnections(limb.bhvEmptyGroup)
