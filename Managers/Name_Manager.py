@@ -3,7 +3,7 @@ import re
 
 import pymel.core as pm
 
-class Name_Manager():
+class Name_Manager:
     def __init__(self, parent):
         self.logger = parent.logger
 

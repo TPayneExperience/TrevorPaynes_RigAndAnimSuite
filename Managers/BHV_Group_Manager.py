@@ -9,6 +9,7 @@ class BHV_Group_Manager:
         self.limbMng = parent.limbMng
         self.nameMng = parent.nameMng
         self.ctrMng = parent.ctrMng
+        self.jntMng = parent.jntMng
         self.logger = parent.logger
 
         self.grpTypes = (   'Empty', # DO NOT CHANGE ORDER
@@ -16,11 +17,11 @@ class BHV_Group_Manager:
                             'Joint', # FK, CST, IK Chain
                             'IKPV',
                             'DEPRICATED - FKIKSwitch',
-                            'LookAt',
-                            'RFK_B',
+                            'LookAt')#,
+                            # 'RFK_B',
 
-                            'RFK_M',
-                            'RFK_T')
+                            # 'RFK_M',
+                            # 'RFK_T')
         self.hideAttrs = False
 
         self._groups = {} # grpID : grpData
@@ -79,7 +80,7 @@ class BHV_Group_Manager:
 
     # FK, CST, IK Chain
     # Called from Limb Setup > AutoBuild OR RMB > Add Limb
-    def AddJointGroup(self, joint): 
+    def AddJointGroup(self, limb, joint): 
         self.logger.debug('\tGrpMng > AddJointGroup')
         group = self._AddGroup()
         group.groupType.set(1)
@@ -87,6 +88,8 @@ class BHV_Group_Manager:
         pm.addAttr(group, ln='joint', dt='string')
         pm.addAttr(group, ln='weight', at='float', min=0, max=1) # Cst
         group.weight.set(0.5)
+
+        self.jntMng.Add(limb, joint)
         pm.connectAttr(joint.group, group.joint)
         
         self.ctrMng.AddJointControl(group)
@@ -94,8 +97,6 @@ class BHV_Group_Manager:
         pm.xform(group, t=(0,0,0), ro=(0,0,0), s=(1,1,1))
         return group
 
-    # IK PV, LookAt
-    # Called from Behaviors > Set Bhv()
     def AddIKPVGroup(self, limb):
         self.logger.debug('\tGrpMng > AddIKPVGroup')
         group = self._AddGroup()
@@ -106,8 +107,6 @@ class BHV_Group_Manager:
         self.ctrMng.AddIKPVControl(group)
         return group
 
-    # IK PV, LookAt
-    # Called from Behaviors > Set Bhv()
     def AddLookAtGroup(self, limb):
         self.logger.debug('\tGrpMng > AddLookAtGroup')
         group = self._AddGroup()
@@ -120,6 +119,8 @@ class BHV_Group_Manager:
 
     def Remove(self, group):
         self.logger.debug('\tGrpMng > Remove')
+        control = pm.listConnections(group.control)[0]
+        self.ctrMng.Remove(control)
         del(self._groups[group.ID.get()])
         pm.delete(group)
 

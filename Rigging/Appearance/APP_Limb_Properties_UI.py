@@ -18,44 +18,6 @@ class APP_Limb_Properties_UI:
 
         self._Setup()
     
-    def Populate(self):
-        '''When limb selected, populate vis targets'''
-        self.logger.debug('\tApp_LimbProp > Populate')
-        pm.frameLayout(self.prop_l, e=1, en=0)
-        pm.optionMenu(self.visParentLimb_om, e=1, dai=1)
-        self.limbs = {} # name : limb
-        self.limbOrder = []
-        # POPULATE COMBO BOX
-        pm.menuItem(l='None', p=self.visParentLimb_om)
-        for rootLimb in self.limbMng.GetRootLimbs():
-            prefix = self.limbMng.GetLimbPrefix(rootLimb)
-            for limb in self.limbMng.GetLimbCreationOrder(rootLimb):
-                if limb == self.limb:
-                    continue
-                side = self.limbMng.GetLimbSide(limb)
-                name = '%s_%s_%s' % (prefix, limb.pfrsName.get(), side)
-                pm.menuItem(l=name, p=self.visParentLimb_om)
-                self.limbs[name] = limb
-                self.limbOrder.append(name)
-
-        # LOAD SOURCE LIMB
-        pm.attrEnumOptionMenu(self.visParentBhvType, e=1, en=0)
-        if not self.limb:
-            return
-        parent = pm.listConnections(self.limb.visParent)
-        if not parent:
-            pm.optionMenu(self.visParentLimb_om, e=1, sl=1)
-            return
-        parent = parent[0]
-        prefix = self.limbMng.GetLimbPrefix(parent)
-        side = self.limbMng.GetLimbSide(parent)
-        name = '%s_%s_%s' % (prefix, parent.pfrsName.get(), side)
-        index = self.limbOrder.index(name) + 2 # start index 1 + (none = 1)
-        pm.optionMenu(self.visParentLimb_om, e=1, sl=index)
-
-    # def Depopulate(self):
-    #     pm.frameLayout(self.prop_l, e=1, en=0)
-
 #=========== SETUP UI ==============================================
 
     def _Setup(self):
@@ -92,13 +54,52 @@ class APP_Limb_Properties_UI:
         pm.frameLayout(self.lockHide_l, e=1, en=bool(limb))
         if not limb:
             return
-        self.PopulateControlDist()
-        self.PopulateVisParent()
-        self.PopulateLockHide()
-        self.Populate()
+        self.PopulateLimbProperties()
+        self.PopulateChannelBoxControls()
         self.UpdateVisParentBhvTypeEnable()
 
+    def PopulateLimbProperties(self):
+        self.logger.debug('\tApp_LimbProp > PopulateLimbProperties')
+        self.PopulateControlDist()
+        self.PopulateVisParentCB()
+        self.PopulateVisParentBhvType()
+        self.PopulateIKPVJoint()
+
+    def PopulateVisParentCB(self):
+        self.logger.debug('\tApp_LimbProp > PopulateVisParentCB')
+        pm.optionMenu(self.visParentLimb_om, e=1, dai=1)
+        self.limbs = {} # name : limb
+        self.limbOrder = []
+        # POPULATE VIS PARENT COMBO BOX
+        pm.menuItem(l='None', p=self.visParentLimb_om)
+        for rootLimb in self.limbMng.GetRootLimbs():
+            prefix = self.limbMng.GetLimbPrefix(rootLimb)
+            for limb in self.limbMng.GetLimbCreationOrder(rootLimb):
+                if limb == self.limb:
+                    continue
+                side = self.limbMng.GetLimbSide(limb)
+                name = '%s_%s_%s' % (prefix, limb.pfrsName.get(), side)
+                pm.menuItem(l=name, p=self.visParentLimb_om)
+                self.limbs[name] = limb
+                self.limbOrder.append(name)
+
+        # LOAD SOURCE LIMB
+        pm.attrEnumOptionMenu(self.visParentBhvType, e=1, en=0)
+        if not self.limb:
+            return
+        parent = pm.listConnections(self.limb.visParent)
+        if not parent:
+            pm.optionMenu(self.visParentLimb_om, e=1, sl=1)
+            return
+        parent = parent[0]
+        prefix = self.limbMng.GetLimbPrefix(parent)
+        side = self.limbMng.GetLimbSide(parent)
+        name = '%s_%s_%s' % (prefix, parent.pfrsName.get(), side)
+        index = self.limbOrder.index(name) + 2 # start index 1 + (none = 1)
+        pm.optionMenu(self.visParentLimb_om, e=1, sl=index)
+
     def PopulateControlDist(self):
+        self.logger.debug('\tApp_LimbProp > PopulateControlDist')
         bhvType = self.limb.bhvType.get()
         if self.ctrAxis_at:
             pm.deleteUI(self.ctrAxis_at)
@@ -116,13 +117,18 @@ class APP_Limb_Properties_UI:
         else:
             pm.attrControlGrp(self.ctrDist_cg, e=1, en=0)
 
-    def PopulateVisParent(self):
-        bhvType = self.limb.bhvType.get()
+    def PopulateVisParentBhvType(self):
+        self.logger.debug('\tApp_LimbProp > PopulateVisParentBhvType')
         pm.deleteUI(self.visParentBhvType)
         self.visParentBhvType = pm.attrEnumOptionMenu(l='Vis Parent Bhv Type',
                                                 at=self.limb.visParentBhvType,
                                                 p=self.appLimbProp_cl,
                                                 cc=self.LogSetVisParentBhvType)
+    
+    # REMOVE LATER
+    def PopulateIKPVJoint(self):
+        self.logger.debug('\tApp_LimbProp > PopulateIKPVJoint')
+        bhvType = self.limb.bhvType.get()
         if self.ikpvCtrJoint_at:
             pm.deleteUI(self.ikpvCtrJoint_at)
             self.ikpvCtrJoint_at = None
@@ -132,7 +138,8 @@ class APP_Limb_Properties_UI:
                                                     p=self.appLimbProp_cl,
                                                     cc=self.UpdateDistGroupPos)
     
-    def PopulateLockHide(self):
+    def PopulateChannelBoxControls(self):
+        self.logger.debug('\tApp_LimbProp > PopulateChannelBoxControls')
         pm.attrControlGrp(self.jointPos, e=1, a=self.limb.channelBoxJointCtrPos,
                                         cc=pm.Callback(self.LogJointPos, 1))
         pm.attrControlGrp(self.jointRot, e=1, a=self.limb.channelBoxJointCtrRot,
@@ -146,9 +153,6 @@ class APP_Limb_Properties_UI:
         pm.attrControlGrp(self.limbScale, e=1, a=self.limb.channelBoxLimbCtrScale,
                                         cc=pm.Callback(self.LogLimbScale, 1))
         
-        # isFK = (bhvType in self.bhvMng.fkTypeIndexes)
-        # pm.optionMenu(self.visParentLimb_om, e=1, en=isFK)
-        
     def SetVisParentLimb(self, limbName):
         self.logger.info('\tLimbProp > SetVisParentLimb to ' + limbName)
         pm.disconnectAttr(self.limb.visParent)
@@ -159,20 +163,6 @@ class APP_Limb_Properties_UI:
         pm.connectAttr(limb.visChildren, self.limb.visParent)
         self.UpdateVisParentBhvTypeEnable()
                 
-    # def UpdateFKIKSwitchParentJoint(self, jointStr):
-    #     msg = '\tApp_LimbProp > FKIK SwitchParentJOINT to "%s"' % jointStr
-    #     self.logger.info(msg)
-    #     self.bhvMng.UpdateFKIKSwitchParentJoint(self.limb)
-        
-
-    # def SetControlType(self, ctrType):
-    #     msg = '\tLimbProp > SET CONTROL TYPE to "%s"' % ctrType
-    #     self.logger.info(msg)
-    #     for group in self.grpMng.GetLimbGroups(self.limb):
-    #         control = pm.listConnections(group.control)[0]
-    #         self.ctrMng.SetType(control, ctrType)
-    #     self.parent.ControlTypeChanged()
-
 
 #=========== LOGGING ==============================================
 

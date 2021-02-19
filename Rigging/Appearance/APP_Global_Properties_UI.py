@@ -10,31 +10,6 @@ class APP_Global_Properties_UI:
 
         self._Setup()
     
-    # def Populate(self):
-    #     '''Called when Bhvs tab clicked, 
-    #     populates Constraint Target Limbs option menu
-    #     '''
-    #     self.logger.debug('\tApp_LimbProp > Populate')
-    #     pm.optionMenu(self.fkikTargetLimb_om, e=1, dai=1)
-    #     self.limbs = {} # name : limb
-    #     self.limbOrder = []
-    #     pm.menuItem(l='None', p=self.fkikTargetLimb_om)
-    #     for rootLimb in self.limbMng.GetRootLimbs():
-    #         prefix = self.limbMng.GetLimbPrefix(rootLimb)
-    #         for limb in self.limbMng.GetLimbCreationOrder(rootLimb):
-    #             if (limb.bhvType.get() in self.bhvMng.fkikTypeIndexes):
-    #                 if limb == self.limb:
-    #                     continue
-    #                 side = self.limbMng.GetLimbSide(limb)
-    #                 name = '%s_%s_%s' % (prefix, limb.pfrsName.get(), side)
-    #                 pm.menuItem(l=name, p=self.fkikTargetLimb_om)
-    #                 self.limbs[name] = limb
-    #                 self.limbOrder.append(name)
-
-    # def Depopulate(self):
-    #     pm.frameLayout(self.prop_l, e=1, en=0)
-    #     pm.frameLayout(self.ctrLayout, e=1, en=0)
-
     def Populate(self):
         self.logger.debug('\tApp_GlobalProp > Populate')
         rigRoot = self.ctrMng.rigRoot

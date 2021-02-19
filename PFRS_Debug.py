@@ -1,4 +1,6 @@
 
+import os
+
 import pymel.core as pm
 
 class PFRS_Debug:
@@ -7,6 +9,11 @@ class PFRS_Debug:
         self.parent.NewRig('PFX', 
                     range(5), 
                     True)
+
+        if not os.path.isfile(__file__.replace('.pyc', '.py')):
+            print '>>>>>>>>>>>>>> AUTO DEBUG OFF <<<<<<<<<<<<<'
+            return
+        print '>>>>>>>>>>>>>> AUTO DEBUG ON <<<<<<<<<<<<<'
 
         # self.LegTest()
         # self.RfkTest()
@@ -20,7 +27,7 @@ class PFRS_Debug:
     def LegTest(self):
         self.parent.logger.info('DEBUG TESTS > Leg + Foot')
         path = r'D:/Assets/Programming/Python/Maya/ModularAutoRigger'
-        path += r'/TEST_OUTPUT/TEST_LegFoot_01.ma'
+        path += r'/TESTING_FILES/TEST_LegFoot_01.ma'
         pm.importFile(path)
         self.parent.UpdateEnableUI()
         self.parent.Setup_Editable()
@@ -31,7 +38,7 @@ class PFRS_Debug:
     def RfkTest(self):
         self.parent.logger.info('DEBUG TESTS > Relative FK')
         path = r'D:/Assets/Programming/Python/Maya/ModularAutoRigger'
-        path += r'/TEST_OUTPUT/TEST_Spine_01.ma'
+        path += r'/TESTING_FILES/TEST_Spine_01.ma'
         pm.importFile(path)
         self.parent.UpdateEnableUI()
         self.parent.Setup_Editable()
@@ -47,7 +54,7 @@ class PFRS_Debug:
     def SimpleChainTest(self):
         self.parent.logger.info('DEBUG TESTS > Limb Types')
         path = r'D:/Assets/Programming/Python/Maya/ModularAutoRigger'
-        path += r'/TEST_OUTPUT/TEST_SimpleChain_01.ma'
+        path += r'/TESTING_FILES/TEST_SimpleChain_01.ma'
         pm.importFile(path)
         self.parent.UpdateEnableUI()
         self.parent.Setup_Editable()
@@ -56,7 +63,7 @@ class PFRS_Debug:
     def LimbTypesTest(self):
         self.parent.logger.info('DEBUG TESTS > Limb Types')
         path = r'D:/Assets/Programming/Python/Maya/ModularAutoRigger'
-        path += r'/TEST_OUTPUT/TEST_LimbTypes_01.ma'
+        path += r'/TESTING_FILES/TEST_LimbTypes_01.ma'
         pm.importFile(path)
         self.parent.UpdateEnableUI()
         self.parent.Setup_Editable()
@@ -67,7 +74,7 @@ class PFRS_Debug:
     def ArmTest(self):
         self.parent.logger.info('DEBUG TESTS > Arm Skin')
         path = r'D:/Assets/Programming/Python/Maya/ModularAutoRigger'
-        path += r'/TEST_OUTPUT/temp_joints2.ma'
+        path += r'/TESTING_FILES/temp_joints2.ma'
         pm.importFile(path)
         self.UpdateEnableUI()
         self.Setup_Editable()
@@ -89,7 +96,7 @@ class PFRS_Debug:
     def SkeletonTest(self):
         self.parent.logger.info('DEBUG TESTS > Full Skeleton')
         path = r'D:/Assets/Programming/Python/Maya/ModularAutoRigger'
-        path += r'/TEST_OUTPUT/temp_joints.ma'
+        path += r'/TESTING_FILES/temp_joints.ma'
         pm.importFile(path)
         # self.UpdateEnableUI()
         # self.Setup_Editable()

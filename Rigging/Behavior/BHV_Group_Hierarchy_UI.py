@@ -19,7 +19,8 @@ class BHV_Group_Hierarchy_UI:
         if not self.limb:
             return
         bhvType = self.limb.bhvType.get()
-        bhvFilter = self.bhvMng.fkTypeIndexes
+        bhvFilter = self.bhvMng.fkBranchTypeIndexes
+        bhvFilter += self.bhvMng.fkChainTypeIndexes
         bhvFilter += self.bhvMng.cstTypeIndexes
         bhvFilter += self.bhvMng.ikChainTypeIndexes
         bhvFilter += self.bhvMng.rfkTypeIndexes

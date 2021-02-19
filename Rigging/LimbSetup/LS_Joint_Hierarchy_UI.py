@@ -82,7 +82,7 @@ class LS_Joint_Hierarchy_UI:
         for joint in self.parent.jointsToAddToLimb:
             # self.jntMng.Teardown_Editable(self.limb, joint)
             self.logger.info('\t\t' + str(joint))
-            self.jntMng.Add(self.limb, joint)
+            self.grpMng.Add(self.limb, joint)
         self.jntMng.ReindexJoints(self.limb)
         self.limb.rebuildLimbType.set(1)
         self.parent.ClearJointsToAdd()

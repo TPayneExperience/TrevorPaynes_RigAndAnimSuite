@@ -16,7 +16,6 @@ class Limb_Manager:
                             'ThreePlus_JointChain', 
                             'Branch',
                             'Two_JointChain')
-                            # 'Empty_Animation') # only Anim mode can add/remove
         self.limbSides = ('M', 'L', 'R', '-')
         self.hideAttrs = False
 

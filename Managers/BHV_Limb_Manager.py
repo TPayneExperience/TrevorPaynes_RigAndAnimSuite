@@ -43,37 +43,36 @@ class BHV_Limb_Manager:
         self.omitLastJointTypes = (0, 5, 10)
         self.reverseTypeIndexes = (8, 12, 9)
 
-        self.fkTypeIndexes = (0, 6, 8, 11, 12) 
         self.fkBranchTypeIndexes = (6,)
-        self.fkChainTypeIndexes = (0, 8, 10, 11)
+        self.fkChainTypeIndexes = (0, 8, 11, 12)
         self.rfkTypeIndexes = (10, 9)
         self.cstTypeIndexes = (3,)
         self.lookAtTypeIndexes = (4,)
-        self.ikTypeIndexes = (1, 5)
 
         self.ikPVTypeIndexes = (1,)
         self.ikChainTypeIndexes = (5,)
 
         self.ikTargetableIndexes = (0, 6, 7, 8)
-        # self.cstTargetableIndexes = (0, 1, 4, 5, 6, 8)
-        # self.ctrTypeIndexes = (0, 1, 4, 6, 7, 8, 10) # For APP > Limb hier
 
-        self.bhvTypes = (   'FK - Chain (3+ Joints)', # DON'T CHANGE ORDER!
+        self.rotLockOverride = (9, 10)
+        self.posLockOverride = (1, 4)
 
-                            'IK - Pole Vector',
-                            'DEPRICATED - FKIK PV',
-                            'Constraint',
-                            'Look At',
-                            'IK - Chain',
+        self.bhvTypes = (   'FK - Chain (3+ Joints)', # 0
 
-                            'FK - Branch',
-                            'Empty',
-                            'FK - Reverse Chain (3+ Joints)',
-                            'FK - Reverse Relative', 
-                            'FK - Relative',
+                            'IK - Pole Vector',     # 1
+                            'DEPRICATED - FKIK PV', # 2
+                            'Constraint',           # 3
+                            'Look At',              # 4
+                            'IK - Chain',           # 5
 
-                            'FK - Chain (2 Joints)',
-                            'FK - Reverse Chain (2 Joints)'
+                            'FK - Branch',          # 6
+                            'Empty',                # 7
+                            'FK - Reverse Chain (3+ Joints)', # 8
+                            'FK - Reverse Relative',# 9
+                            'FK - Relative',        # 10
+
+                            'FK - Chain (2 Joints)',# 11
+                            'FK - Reverse Chain (2 Joints)' # 12
                             )
 
 #============= ACCESSORS ============================
@@ -139,14 +138,6 @@ class BHV_Limb_Manager:
         targetJoints = self.jntMng.GetLimbJoints(targetLimb)
         pm.disconnectAttr(sourceLimb.bhvParent)
         pm.connectAttr(targetLimb.bhvChildren, sourceLimb.bhvParent)
-        # If only one target, set and return
-        # if len(targetJoints) < 2:
-        #     if targetLimb.bhvType.get() == 7: # Empty
-        #         self._SetTargetJointEnum(sourceLimb, 'Empty')
-        #     else:
-        #         jointName = targetJoints[0].pfrsName.get()
-        #         self._SetTargetJointEnum(sourceLimb, jointName)
-        #     return
         if targetLimb.bhvType.get() == 7: # Empty
             self._SetTargetJointEnum(sourceLimb, 'Empty')
             return
@@ -208,7 +199,7 @@ class BHV_Limb_Manager:
         self.logger.debug('\tBhvMng > AddJointLimb')
         limb = self._AddLimb()
         for joint in joints:
-            self.jntMng.Add(limb, joint)
+            self.grpMng.AddJointGroup(limb, joint)
         self.jntMng.ReindexJoints(limb)
         
         bhvCstTypes = ':'.join(self.cstTypes)
@@ -379,25 +370,14 @@ class BHV_Limb_Manager:
                 group = self.grpMng.AddLookAtGroup(limb)
                 self.grpMng.UpdateGroupName(group)
             self.UpdateDistGroupPos(limb)
-        # if bhvType in self.fkikTypeIndexes:
-        #     if not pm.listConnections(limb.bhvFKIKSwitchGroup):
-        #         group = self.grpMng.AddFKIKSwitchGroup(limb)
-        #         self.grpMng.UpdateGroupName(group)
-        #     self.PopulateFKIKSwitchParentJoint(limb)
-        #     self.UpdateFKIKSwitchParentJoint(limb)
-        # if bhvType in self.emptyLimbIndexes:
-        #     if not pm.listConnections(limb.bhvEmptyGroup):
-        #         group = self.grpMng.AddEmptyGroup(limb)
-        #         self.grpMng.UpdateGroupName(group)
-        # if bhvType in self.rfkTypeIndexes:
-        #     if not pm.listConnections(limb.bhvRFKCenterGroup):
-        #         self.grpMng.AddRFKGroups(limb)
 
     def RebuildBhvDep(self, sourceLimb):
         '''Set IK / Cst targets to closest limbs / joints'''
         self.logger.debug('\tBhvMng > RebuildBhvDep')
         bhvType = sourceLimb.bhvType.get()
-        if bhvType not in self.cstTypeIndexes + self.ikTypeIndexes:
+        ikBhvFilter = self.ikChainTypeIndexes
+        ikBhvFilter += self.ikPVTypeIndexes
+        if bhvType not in (self.cstTypeIndexes + ikBhvFilter):
             sourceLimb.rebuildBhvDep.set(0)
             return
         
@@ -408,7 +388,8 @@ class BHV_Limb_Manager:
             if limbs:
                 targetLimb = limbs[0]
                 self.SetCstTargetLimb(sourceLimb, targetLimb)
-        if bhvType in self.ikTypeIndexes: 
+        
+        if bhvType in ikBhvFilter: 
             limbs = []
             for limb in self._GetClosestLimbs(sourceLimb):
                 if limb.bhvType.get() in self.ikTargetableIndexes:
@@ -486,18 +467,6 @@ class BHV_Limb_Manager:
         # CONSTRAINT
         if bhvType in self.cstTypeIndexes:
             self.RebuildBhvDep(limb)
-        # # FKIK
-        # if bhvType in self.fkikTypeIndexes:
-        #     self.PopulateFKIKSwitchParentJoint(limb)
-        #     self.UpdateFKIKSwitchParentJoint(limb)
-        # RFK
-        # if bhvType in self.rfkTypeIndexes:
-        #     joints = self.jntMng.GetLimbJoints(limb)
-        #     names = [j.pfrsName.get() for j in joints[1:-1]]
-        #     pm.addAttr(limb.bhvRFKCenterJoint, e=1, en=':'.join(names))
-        #     index = len(joints) / 2
-        #     limb.bhvRFKCenterJoint.set(index-1)
-        #     self.UpdateRFKConnections(limb)
 
     def Teardown_Behavior(self, limb):
         self.logger.debug('\tBhvMng > Teardown_Behavior')
@@ -512,7 +481,9 @@ class BHV_Limb_Manager:
     def Setup_LimbGroupVisibility(self, limb):
         self.logger.debug('\tBhvMng > Setup_LimbGroupVisibility')
         bhvType = limb.bhvType.get()
-        if bhvType in self.fkTypeIndexes:
+        bhvFilter = self.fkChainTypeIndexes
+        bhvFilter += self.fkBranchTypeIndexes
+        if bhvType in bhvFilter:
             groups = self.GetJointGroups(limb)
             for group in groups:
                 group.v.set(1)

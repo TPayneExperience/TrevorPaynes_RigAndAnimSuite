@@ -3,12 +3,12 @@ import pymel.core as pm
 
 import MeshSetup.MeshSetup_UI as mesh_ui
 reload(mesh_ui)
-import Data.Mesh_Manager as meshMng
-reload(meshMng)
+# import Managers.Mesh_Manager as meshMng
+# reload(meshMng)
+# import Managers.Skin_Manager as skinMng
+# reload(skinMng)
 import PaintWeights.PaintWeights_UI as paint_ui
 reload(paint_ui)
-import Data.Skin_Manager as skinMng
-reload(skinMng)
 
 
 class Skinning_UI:
@@ -20,8 +20,11 @@ class Skinning_UI:
         self.nameMng = parent.nameMng
         self.logger = parent.logger
 
-        self.meshMng = meshMng.Mesh_Manager()
-        self.skinMng = skinMng.Skin_Mananger(self)
+        self.meshMng = parent.meshMng
+        self.skinMng = parent.skinMng
+
+        # self.meshMng = meshMng.Mesh_Manager()
+        # self.skinMng = skinMng.Skin_Mananger(self)
 
         self._Setup()
 

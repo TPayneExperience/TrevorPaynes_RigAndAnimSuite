@@ -1,17 +1,6 @@
 
 import pymel.core as pm
 
-import Data.Joint_Manager as jm
-reload(jm)
-import Data.Limb_Manager as lm
-reload(lm)
-import Data.BHV_Limb_Manager as bhv
-reload(bhv)
-import Data.BHV_Group_Manager as grp
-reload(grp)
-import Data.APP_Control_Manager as ctr
-reload(ctr)
-
 import Data.SaveLoad_Skeleton as saveLoadSkel
 reload(saveLoadSkel)
 
@@ -47,11 +36,13 @@ class Rigging_UI:
 
         # NEED A BETTER PLACE FOR THIS
         
-        self.limbMng = lm.Limb_Manager(self)
-        self.ctrMng = ctr.APP_Control_Manager(self)
-        self.grpMng = grp.BHV_Group_Manager(self)
-        self.jntMng = jm.Joint_Manager(self)
-        self.bhvMng = bhv.BHV_Limb_Manager(self)
+        self.limbMng = parent.limbMng
+        self.ctrMng = parent.ctrMng
+        self.grpMng = parent.grpMng
+        self.jntMng = parent.jntMng
+        self.bhvMng = parent.bhvMng
+        self.rigMng = parent.rigMng
+
         self.saveLoadSkel = saveLoadSkel.SaveLoad_Skeleton(self)
 
         self.saveDialog = save_ui.SaveTemplate_UI(self)
@@ -104,7 +95,6 @@ class Rigging_UI:
     
     def Setup_SubTab(self):
         self.logger.debug('\tRigging_UI > Setup_SubTab')
-        oldIndex = self.rigRoot.riggingTab.get()
         newIndex = pm.tabLayout(self.tab, q=1, selectTabIndex=1)-1
         self.rigRoot.riggingTab.set(newIndex)
         if (newIndex == 0):

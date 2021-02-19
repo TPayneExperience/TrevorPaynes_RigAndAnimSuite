@@ -13,12 +13,28 @@ reload(skin_ui)
 import RigSetup.RigSetup_UI as rs_ui
 reload(rs_ui)
 
-import Common.File_Manager as fm
+import Managers.File_Manager as fm
 reload(fm)
-import Common.Json_Manager as js
+import Managers.Json_Manager as js
 reload(js)
-import RigSetup.Name_Manager as nm
+import Managers.Name_Manager as nm
 reload(nm)
+import Managers.Joint_Manager as jm
+reload(jm)
+import Managers.Limb_Manager as lm
+reload(lm)
+import Managers.BHV_Limb_Manager as bhv
+reload(bhv)
+import Managers.BHV_Group_Manager as grp
+reload(grp)
+import Managers.APP_Control_Manager as ctr
+reload(ctr)
+import Managers.Rig_Manager as rigMng
+reload(rigMng)
+import Managers.Mesh_Manager as meshMng
+reload(meshMng)
+import Managers.Skin_Manager as skinMng
+reload(skinMng)
 
 import PFRS_Debug as debug
 reload(debug)
@@ -36,8 +52,20 @@ class PayneFreeRigSuite_UI():
 
         self.fileMng = fm.File_Manager()
         self.jsonMng = js.Json_Manager()
-        self.utils = None
+
+        # RIGGING
         self.nameMng = nm.Name_Manager(self)
+        self.limbMng = lm.Limb_Manager(self)
+        self.ctrMng = ctr.APP_Control_Manager(self)
+        self.jntMng = jm.Joint_Manager(self)
+        self.grpMng = grp.BHV_Group_Manager(self)
+        self.bhvMng = bhv.BHV_Limb_Manager(self)
+        self.rigMng = rigMng.Rig_Manager(self)
+
+        # SKINNING
+        self.meshMng = meshMng.Mesh_Manager()
+        self.skinMng = skinMng.Skin_Mananger(self)
+
         self.rigRoot = None
         self.hideAttrs = False
         # self.hideAttrs = True
@@ -55,19 +83,6 @@ class PayneFreeRigSuite_UI():
         self.ctrMng.hideAttrs = self.hideAttrs
 
         debug.PFRS_Debug(self)
-        # self.Populate()
-
-    # def Populate(self):
-    #     pass
-        # folder = os.path.join(os.path.dirname(__file__), 'TEST_OUTPUT')
-        # self.pfrs.limbSetup.fileMng.SetOutputFile(os.path.join(folder, 'temp.json'))
-        # self.pfrs.limbSetup.fileMng.SetMeshPath(os.path.join(folder, 'temp.ma'))
-        
-
-        # self.NewRig()
-
-    # def NewRig(self):
-        # self.pfrs.NewRig('somePrefix', [0,1,2,3,4], True)
 
     def NewRig(self, prefix, nameOrder, showPrefix):
         msg = '\tPFRS_UI > NewRig'
@@ -75,9 +90,6 @@ class PayneFreeRigSuite_UI():
         msg += '\t\tNameOrder = ' + str(nameOrder)
         msg += '\t\tShowPrefix = ' + str(showPrefix)
         self.logger.debug(msg)
-        # prefix = 'somePrefix'
-        # nameOrder = range(5)
-        # showPrefix = True
         pm.flushUndo()
         pm.newFile(newFile=1, force=1)
         self.rigRoot = pm.group(name='temp', em=True)
@@ -203,19 +215,6 @@ class PayneFreeRigSuite_UI():
                 pm.menuItem(l='Share...', en=0)
                 pm.menuItem(l='Open Log', c=self.OpenLog)
 
-#=========== LIMBS ====================================
-
-    # def AddLimb(self, limb):
-    #     for mesh in self.skin_ui.meshMng.GetAllMeshes():
-    #         self.skin_ui.skinMng.AddLimbAttrs(mesh, limb)
-
-    # def RemoveLimb(self, limb):
-    #     for mesh in self.skin_ui.meshMng.GetAllMeshes():
-    #         self.skin_ui.skinMng.RemoveLimbAttrs(mesh, limb)
-
-    # def UpdateLimb(self, limb):
-    #     pass
-    
 #=========== TAB SWITCHING ====================================
 
     def Setup_Editable(self):
@@ -224,7 +223,6 @@ class PayneFreeRigSuite_UI():
         if (index == 0):
             self.rig_ui.Setup_Editable()
         elif (index == 1):
-            # self.skin_ui.skinMng.Setup_Skins()
             self.skin_ui.Setup_Editable()
         
     def Teardown_Editable(self, nextIndex):

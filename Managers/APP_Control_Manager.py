@@ -50,13 +50,6 @@ class APP_Control_Manager:
         self.logger.debug('\tCtrMng > GetControl')
         return self._ctrs[ctrID]
 
-    # def GetGroupControl(self, group):
-    #     return pm.listConnections(group.control)
-
-    # def GetControlTypes(self):
-    #     self.logger.debug('\tCtrMng > GetControlTypes')
-    #     return list(self._ctrTemplates.keys())
-
     def SetLayerState(self, isVisible, isReference):
         self.logger.debug('\tCtrMng > SetLayerState')
         # Maya Bug: Layer Editor won't refresh buttons
@@ -125,12 +118,8 @@ class APP_Control_Manager:
             index = self.rigRoot.appJointCtrShape.get()
         elif groupType == 2:
             index = self.rigRoot.appIKPVCtrShape.get()
-        # elif groupType == 3:
-        #     index = self.rigRoot.appFKIKCtrShape.get()
         elif groupType == 4:
             index = self.rigRoot.appLookAtCtrShape.get()
-        # elif groupType in (5, 6, 7):
-        #     index = self.rigRoot.appRFKCtrShape.get()
         shapeNames = list(self._ctrTemplates.keys())
         return shapeNames[index]
 
@@ -142,6 +131,7 @@ class APP_Control_Manager:
         pm.parent(newCtr, control)
         pm.xform(newCtr, t=(0,0,0), ro=(0,0,0), s=(1,1,1))
         pm.parent(newCtr, group)
+        newCtr.ID.set(control.ID.get())
         self._ctrs[newCtr.ID.get()] = newCtr
         self.Remove(control)
         pm.delete(control)

@@ -132,9 +132,11 @@ class BHV_Limb_Properties_UI:
 
         # POPULATE TARGET LIMBS
         bhvType = self.limb.bhvType.get()
+        ikFilter = self.bhvMng.ikChainTypeIndexes
+        ikFilter += self.bhvMng.ikPVTypeIndexes
         if bhvType in self.bhvMng.cstTypeIndexes:
             bhvFilter = range(len(self.bhvMng.bhvTypes))
-        elif bhvType in self.bhvMng.ikTypeIndexes:
+        elif bhvType in ikFilter:
             bhvFilter = self.bhvMng.ikTargetableIndexes
         else:
             return
@@ -209,12 +211,6 @@ class BHV_Limb_Properties_UI:
         msg = '\tLimbIKCst > SET CONSTRAINT to '
         msg += '"%s"' % cstTypeStr
         self.logger.info(msg)
-
-    # def UpdateRFKTargetJoint(self, targetJointStr):
-    #     msg = '\tLimbIKCst > SET Relative FK CENTER joint to '
-    #     msg += '"%s"' % targetJointStr
-    #     self.logger.info(msg)
-    #     self.bhvMng.UpdateRFKConnections(self.limb)
 
     def LogTargetJoint(self, targetJointStr):
         msg = '\tLimbIKCst > SET TARGET JOINT to '

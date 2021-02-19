@@ -27,7 +27,8 @@ class APP_Control_Hierarchy_UI:
             return
         bhvType = self.limb.bhvType.get()
         groups = []
-        bhvFilter = self.bhvMng.fkTypeIndexes
+        bhvFilter = self.bhvMng.fkChainTypeIndexes
+        bhvFilter += self.bhvMng.fkBranchTypeIndexes
         bhvFilter += self.bhvMng.rfkTypeIndexes
         bhvFilter += self.bhvMng.emptyLimbIndexes
         if bhvType in bhvFilter:
