@@ -4,6 +4,9 @@ import pymel.core as pm
 import Common.Utilities as util
 reload(util)
 
+import Data.Rig_Data as rigData
+reload(rigData)
+
 class BHV_Group_Manager:
     def __init__(self, parent):
         self.limbMng = parent.limbMng
@@ -12,12 +15,12 @@ class BHV_Group_Manager:
         self.jntMng = parent.jntMng
         self.logger = parent.logger
 
-        self.grpTypes = (   'Empty', # DO NOT CHANGE ORDER
+        # self.grpTypes = (   'Empty', # DO NOT CHANGE ORDER
 
-                            'Joint', # FK, CST, IK Chain
-                            'IKPV',
-                            'DEPRICATED - FKIKSwitch',
-                            'LookAt')#,
+        #                     'Joint', # FK, CST, IK Chain
+        #                     'IKPV',
+        #                     'DEPRICATED - FKIKSwitch',
+        #                     'LookAt')#,
                             # 'RFK_B',
 
                             # 'RFK_M',
@@ -36,7 +39,7 @@ class BHV_Group_Manager:
 
         pm.select(d=1)
         # self.bhvGroup = pm.group(name='BehaviorGroups', em=1, p=rigRoot)
-        pm.addAttr(rigRoot, ln='behaviors', dt='string')
+        # pm.addAttr(rigRoot, ln='behaviors', dt='string')
         pm.addAttr(rigRoot, ln='nextGroupID', at='long')
 
 
@@ -56,7 +59,8 @@ class BHV_Group_Manager:
         groupID = self.rigRoot.nextGroupID.get()
         self.rigRoot.nextGroupID.set(groupID + 1)
         
-        groupTypes = ':'.join(self.grpTypes)
+        # groupTypes = ':'.join(self.grpTypes)
+        groupTypes = ':'.join(rigData.GROUP_TYPES)
 
         group = pm.group(em=1, w=1)
         pm.addAttr(group, ln='ID', at='long', dv=groupID)
@@ -131,7 +135,8 @@ class BHV_Group_Manager:
         self.logger.debug('\tGrpMng > UpdateGroupName')
         '''Updates limb + joint GROUP + CONTROL renaming'''
         index = group.groupType.get()
-        groupType = self.grpTypes[index]
+        # groupType = self.grpTypes[index]
+        groupType = rigData.GROUP_TYPES[index]
         if index == 1: # Joint
             joint = pm.listConnections(group.joint)[0]
             pfrsName = joint.pfrsName.get()
@@ -141,13 +146,15 @@ class BHV_Group_Manager:
             pfrsName = limb.pfrsName.get()
         groupName = self.nameMng.GetName(pfrsName,
                                     groupType,
-                                    self.limbMng.GetLimbSide(limb), 
+                                    # self.limbMng.GetLimbSide(limb), 
+                                    rigData.LIMB_SIDES[limb.side.get()],
                                     'GRP')
         group.rename(groupName)
         control = pm.listConnections(group.control)[0]
         controlName = self.nameMng.GetName(pfrsName,
                                     groupType,
-                                    self.limbMng.GetLimbSide(limb), 
+                                    # self.limbMng.GetLimbSide(limb), 
+                                    rigData.LIMB_SIDES[limb.side.get()],
                                     'CTR')
         control.rename(controlName)
 

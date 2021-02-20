@@ -18,20 +18,6 @@ class PW_Meshes_Hierarchy_UI:
             pm.treeView(self.widget, e=1, ai=(meshID, ''))
             pm.treeView(self.widget, e=1, dl=(meshID, name))
             self._meshes[meshID] = mesh
-#         for limb in limbCreationOrder[::-1]:
-#             limbID = limb.ID.get()
-#             name = '%s_%s' % (prefix, limb.pfrsName.get())
-#             parent = limbParents[limb]
-#             parentID = ''
-#             if parent:
-#                 parentID = str(parent.ID.get())
-#             pm.treeView(self.widget, e=1, ai=(limbID, parentID))
-#             pm.treeView(self.widget, e=1, dl=(limbID, name))
-#             side = self.limbMng.GetLimbSide(limb)
-#             if (side == 'L' or side == 'R'):
-#                 pm.treeView(self.widget, e=1, bti=(limbID, 1, side))
-#             else:
-#                 pm.treeView(self.widget, e=1, bvf=(limbID, 1, 0))
     
 #=========== SETUP ====================================
 

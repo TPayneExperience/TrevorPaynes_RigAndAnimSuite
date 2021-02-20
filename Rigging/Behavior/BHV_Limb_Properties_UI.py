@@ -1,6 +1,9 @@
 
 import pymel.core as pm
 
+import Data.Rig_Data as rigData
+reload(rigData)
+
 class BHV_Limb_Properties_UI:
     def __init__(self, parent):
         self.parent = parent
@@ -38,7 +41,8 @@ class BHV_Limb_Properties_UI:
 
         # Convert bhv type enum on limb to select the proper index
         bhvType = self.limb.bhvType.get()
-        bhvTypeStr = self.bhvMng.bhvTypes[bhvType]
+        # bhvTypeStr = self.bhvMng.bhvTypes[bhvType]
+        bhvTypeStr = rigData.BHV_TYPES[bhvType]
         index = bhvTypes.index(bhvTypeStr) + 1
         pm.optionMenu(self.bhvType_om, e=1, sl=index)
 
@@ -71,8 +75,10 @@ class BHV_Limb_Properties_UI:
     def SetBhvType(self): # Mostly UI
         self.logger.debug('\tBhv_LimbProp > SetBhvType')
         bhvTypeStr = pm.optionMenu(self.bhvType_om, q=1, v=1)
-        newBhvIndex = self.bhvMng.bhvTypes.index(bhvTypeStr)
-        old = self.bhvMng.bhvTypes[self.limb.bhvType.get()]
+        # newBhvIndex = self.bhvMng.bhvTypes.index(bhvTypeStr)
+        # old = self.bhvMng.bhvTypes[self.limb.bhvType.get()]
+        newBhvIndex = rigData.BHV_TYPES.index(bhvTypeStr)
+        old = rigData.BHV_TYPES[self.limb.bhvType.get()]
         self.logger.info('\tLimbProp > SET BEHAVIOR:')
         self.logger.info('\t\t%s >>> %s' % (old, bhvTypeStr))
         
@@ -93,7 +99,7 @@ class BHV_Limb_Properties_UI:
         msg = '\tLimbIKCst > SET TARGET LIMB to "%s"' % targetLimb.pfrsName.get()
         self.logger.info(msg)
         bhvType = self.limb.bhvType.get()
-        isCst = (bhvType in self.bhvMng.cstTypeIndexes) 
+        isCst = (bhvType in rigData.CST_BHV_INDEXES) 
         # pm.frameLayout(self.targetLayout, e=1, en=isCst)
         if isCst:
             self.bhvMng.SetCstTargetLimb(self.limb, targetLimb)
@@ -107,7 +113,8 @@ class BHV_Limb_Properties_UI:
     def GetLimbName(self, limb):
         self.logger.debug('\tBhv_LimbProp > GetLimbName')
         prefix = self.limbMng.GetLimbPrefix(limb)
-        side = self.limbMng.GetLimbSide(limb)
+        # side = self.limbMng.GetLimbSide(limb)
+        side = rigData.LIMB_SIDES[limb.side.get()]
         return '%s_%s_%s' % (prefix, limb.pfrsName.get(), side)
 
     def Depopulate(self):
@@ -132,12 +139,13 @@ class BHV_Limb_Properties_UI:
 
         # POPULATE TARGET LIMBS
         bhvType = self.limb.bhvType.get()
-        ikFilter = self.bhvMng.ikChainTypeIndexes
-        ikFilter += self.bhvMng.ikPVTypeIndexes
-        if bhvType in self.bhvMng.cstTypeIndexes:
-            bhvFilter = range(len(self.bhvMng.bhvTypes))
+        ikFilter = rigData.IK_CHAIN_BHV_INDEXES
+        ikFilter += rigData.IK_PV_BHV_INDEXES
+        if bhvType in rigData.CST_BHV_INDEXES:
+            # bhvFilter = range(len(self.bhvMng.bhvTypes))
+            bhvFilter = range(len(rigData.BHV_TYPES))
         elif bhvType in ikFilter:
-            bhvFilter = self.bhvMng.ikTargetableIndexes
+            bhvFilter = rigData.IK_TARGETABLE_BHV_INDEXES
         else:
             return
         pm.optionMenu(self.targetLimb_om, e=1, dai=1)
@@ -162,7 +170,7 @@ class BHV_Limb_Properties_UI:
         if self.targetJnt_at:
             pm.deleteUI(self.targetJnt_at)
             self.targetJnt_at = None
-        if bhvType in self.bhvMng.ikPVTypeIndexes + self.bhvMng.cstTypeIndexes:
+        if bhvType in rigData.IK_PV_BHV_INDEXES + rigData.CST_BHV_INDEXES:
             self.targetJnt_at = pm.attrEnumOptionMenu(  l='Target Joint',
                                                         at=self.limb.bhvParentJoint,
                                                         p=self.targetProp_cl,
@@ -170,7 +178,7 @@ class BHV_Limb_Properties_UI:
         if self.cstLayout:
             pm.deleteUI(self.cstLayout)
             self.cstLayout = None
-        if bhvType in self.bhvMng.cstTypeIndexes:
+        if bhvType in rigData.CST_BHV_INDEXES:
             with pm.columnLayout(adj=1, p=self.targetProp_cl) as self.cstLayout:
                 pm.attrEnumOptionMenu(l='Constraint Type',
                                     at=self.limb.bhvCstType,

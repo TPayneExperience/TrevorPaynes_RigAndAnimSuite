@@ -1,6 +1,9 @@
 
 import pymel.core as pm
 
+import Data.Rig_Data as rigData
+reload(rigData)
+
 class BHV_Group_Hierarchy_UI:
     def __init__(self, parent):
         self.parent = parent
@@ -19,20 +22,22 @@ class BHV_Group_Hierarchy_UI:
         if not self.limb:
             return
         bhvType = self.limb.bhvType.get()
-        bhvFilter = self.bhvMng.fkBranchTypeIndexes
-        bhvFilter += self.bhvMng.fkChainTypeIndexes
-        bhvFilter += self.bhvMng.cstTypeIndexes
-        bhvFilter += self.bhvMng.ikChainTypeIndexes
-        bhvFilter += self.bhvMng.rfkTypeIndexes
-        bhvFilter += self.bhvMng.emptyLimbIndexes
+        bhvFilter = rigData.FK_BRANCH_BHV_INDEXES
+        bhvFilter += rigData.FK_CHAIN_BHV_INDEXES
+        bhvFilter += rigData.CST_BHV_INDEXES
+        bhvFilter += rigData.IK_CHAIN_BHV_INDEXES
+        bhvFilter += rigData.RFK_BHV_INDEXES
+        # bhvFilter += self.bhvMng.emptyLimbIndexes
+        bhvFilter += rigData.EMPTY_BHV_INDEXES
         if bhvType not in bhvFilter:
             return
         groups = self.bhvMng.GetJointGroups(self.limb)
-        if bhvType in self.bhvMng.reverseTypeIndexes:
+        if bhvType in rigData.REVERSE_BHV_INDEXES:
             groups = groups[::-1]
-        if bhvType in self.bhvMng.omitLastJointTypes:
+        # if bhvType in self.bhvMng.omitLastJointTypes:
+        if bhvType in rigData.OMIT_LAST_JOINT_BHV_INDEXES:
             groups = groups[:-1]
-        if bhvType in self.bhvMng.rfkTypeIndexes:
+        if bhvType in rigData.RFK_BHV_INDEXES:
             groups = [groups[0]]
         for group in groups:
             groupID = group.ID.get()

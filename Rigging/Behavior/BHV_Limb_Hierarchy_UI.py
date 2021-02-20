@@ -1,6 +1,9 @@
 
 import pymel.core as pm
 
+import Data.Rig_Data as rigData
+reload(rigData)
+
 class BHV_Limb_Hierarchy_UI:
     def __init__(self, parent):
         self.parent = parent
@@ -28,7 +31,8 @@ class BHV_Limb_Hierarchy_UI:
                     parentID = parent.ID.get()
                 pm.treeView(self.widget, e=1, ai=(limbID, parentID))
                 pm.treeView(self.widget, e=1, dl=(limbID, name))
-                side = self.limbMng.GetLimbSide(limb)
+                # side = self.limbMng.GetLimbSide(limb)
+                side = rigData.LIMB_SIDES[limb.side.get()]
                 if (side == 'L'):
                     pm.treeView(self.widget, e=1, bti=(limbID, 1, side),
                             lbc=(limbID, 0.1, 0.1, 0.3))
@@ -37,7 +41,8 @@ class BHV_Limb_Hierarchy_UI:
                             lbc=(limbID, 0.3, 0.1, 0.1))
                 else:
                     pm.treeView(self.widget, e=1, bvf=(limbID, 1, 0))
-                if limb.bhvType.get() in self.bhvMng.emptyLimbIndexes:
+                # if limb.bhvType.get() in self.bhvMng.emptyLimbIndexes:
+                if limb.bhvType.get() in rigData.EMPTY_BHV_INDEXES:
                     pm.treeView(self.widget, e=1, ornament=(limbID, 1, 0, 3))
 
 #=========== SETUP ====================================
@@ -96,7 +101,8 @@ class BHV_Limb_Hierarchy_UI:
     def Rename(self, limbIDStr, newName):
         self.logger.debug('\tBhv_LimbHier > Rename')
         limb = self.limbMng.GetLimb(int(limbIDStr))
-        if limb.bhvType.get() not in self.bhvMng.emptyLimbIndexes:
+        # if limb.bhvType.get() not in self.bhvMng.emptyLimbIndexes:
+        if limb.bhvType.get() not in rigData.EMPTY_BHV_INDEXES:
             return ''
         oldName = limb.pfrsName.get()
         msg = '\tLimbHier > RENAMING "%s" to "%s"' % (oldName, newName)

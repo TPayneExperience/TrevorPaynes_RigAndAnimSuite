@@ -1,6 +1,8 @@
 
 import pymel.core as pm
 
+import Data.Rig_Data as rigData
+reload(rigData)
 
 class APP_Limb_Hierarchy_UI:
     def __init__(self, parent):
@@ -26,7 +28,8 @@ class APP_Limb_Hierarchy_UI:
                     parentID = parent.ID.get()
                 pm.treeView(self.widget, e=1, ai=(limbID, parentID))
                 pm.treeView(self.widget, e=1, dl=(limbID, name))
-                side = self.limbMng.GetLimbSide(limb)
+                # side = self.limbMng.GetLimbSide(limb)
+                side = rigData.LIMB_SIDES[limb.side.get()]
                 if (side == 'L'):
                     pm.treeView(self.widget, e=1, bti=(limbID, 1, side),
                             lbc=(limbID, 0.1, 0.1, 0.3))

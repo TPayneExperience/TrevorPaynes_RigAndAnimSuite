@@ -1,6 +1,9 @@
 
 import pymel.core as pm
 
+import Data.Rig_Data as rigData
+reload(rigData)
+
 class APP_Limb_Properties_UI:
     def __init__(self, parent):
         self.parent = parent
@@ -77,7 +80,8 @@ class APP_Limb_Properties_UI:
             for limb in self.limbMng.GetLimbCreationOrder(rootLimb):
                 if limb == self.limb:
                     continue
-                side = self.limbMng.GetLimbSide(limb)
+                # side = self.limbMng.GetLimbSide(limb)
+                side = rigData.LIMB_SIDES[limb.side.get()]
                 name = '%s_%s_%s' % (prefix, limb.pfrsName.get(), side)
                 pm.menuItem(l=name, p=self.visParentLimb_om)
                 self.limbs[name] = limb
@@ -93,7 +97,8 @@ class APP_Limb_Properties_UI:
             return
         parent = parent[0]
         prefix = self.limbMng.GetLimbPrefix(parent)
-        side = self.limbMng.GetLimbSide(parent)
+        # side = self.limbMng.GetLimbSide(parent)
+        side = rigData.LIMB_SIDES[parent.side.get()]
         name = '%s_%s_%s' % (prefix, parent.pfrsName.get(), side)
         index = self.limbOrder.index(name) + 2 # start index 1 + (none = 1)
         pm.optionMenu(self.visParentLimb_om, e=1, sl=index)
@@ -104,8 +109,8 @@ class APP_Limb_Properties_UI:
         if self.ctrAxis_at:
             pm.deleteUI(self.ctrAxis_at)
             self.ctrAxis_at = None
-        bhvFilter = self.bhvMng.ikPVTypeIndexes
-        bhvFilter += self.bhvMng.lookAtTypeIndexes
+        bhvFilter = rigData.IK_PV_BHV_INDEXES
+        bhvFilter += rigData.LOOK_AT_BHV_INDEXES
         if bhvType in bhvFilter:
             pm.attrControlGrp(  self.ctrDist_cg, e=1, en=1, 
                                 a=self.limb.bhvDistance,
@@ -132,7 +137,7 @@ class APP_Limb_Properties_UI:
         if self.ikpvCtrJoint_at:
             pm.deleteUI(self.ikpvCtrJoint_at)
             self.ikpvCtrJoint_at = None
-        if bhvType in self.bhvMng.ikPVTypeIndexes:
+        if bhvType in rigData.IK_PV_BHV_INDEXES:
             self.ikpvCtrJoint_at = pm.attrEnumOptionMenu(l='IK PV Control Joint',
                                                     at=self.limb.bhvIKPVCtrJoint,
                                                     p=self.appLimbProp_cl,
@@ -207,7 +212,8 @@ class APP_Limb_Properties_UI:
     def UpdateDistGroupPos(self, ignore):
         self.logger.debug('\tApp_LimbProp > UpdateDistGroupPos')
         dist = str(self.limb.bhvDistance.get())
-        axis = self.bhvMng.axesNames[self.limb.bhvAxis.get()]
+        # axis = self.bhvMng.axesNames[self.limb.bhvAxis.get()]
+        axis = rigData.AXES_NAMES[self.limb.bhvAxis.get()]
         msg1 = '\tLimbProp > SET CONTROL DISTANCE to "%s"' % dist
         msg2 = '\tLimbProp > SET CONTROL AXIS to "%s"' % axis
         self.logger.info(msg1)

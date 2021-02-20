@@ -1,6 +1,10 @@
 
-import pymel.core as pm
 from random import random, shuffle
+
+import pymel.core as pm
+
+import Data.Rig_Data as rigData
+reload(rigData)
 
 class Joint_Manager:
     def __init__(self, parent):
@@ -11,18 +15,18 @@ class Joint_Manager:
         # self.mirrorXform = {'X': (-1,1,1),
         #                     'Y': (1,-1,1),
         #                     'Z': (1,1,-1)}
-        self.jointColors = ((1, 0, 0), # Red
-                            (0, 1, 0), # Green
-                            (0, 0, 1), # Blue
-                            (1, 1, 0), # Yellow
-                            (0, 1, 1), # Cyan
-                            (1, 0, 1),# Magenta
-                            (1, 0.5, 0), # 
-                            (0, 1, 0.5), # 
-                            (0.5, 0, 1),# 
-                            (0.5, 1, 0), # 
-                            (0, 0.5, 1), # 
-                            (1, 0, 0.5)) 
+        # self.jointColors = ((1, 0, 0), # Red
+        #                     (0, 1, 0), # Green
+        #                     (0, 0, 1), # Blue
+        #                     (1, 1, 0), # Yellow
+        #                     (0, 1, 1), # Cyan
+        #                     (1, 0, 1),# Magenta
+        #                     (1, 0.5, 0), # 
+        #                     (0, 1, 0.5), # 
+        #                     (0.5, 0, 1),# 
+        #                     (0.5, 1, 0), # 
+        #                     (0, 0.5, 1), # 
+        #                     (1, 0, 0.5)) 
         self.colorIndex = 0
         self.hideAttrs = False
 
@@ -70,8 +74,10 @@ class Joint_Manager:
     def Add(self, limb, joint):
         self.logger.debug('\tJntMng > Add')
         if (not joint.hasAttr('pfrsName')):
-            colors = list(self.jointColors[self.colorIndex])
-            self.colorIndex = (self.colorIndex + 1) % len(self.jointColors)
+        #     colors = list(self.jointColors[self.colorIndex])
+        #     self.colorIndex = (self.colorIndex + 1) % len(self.jointColors)
+            colors = list(rigData.JOINT_COLORS[self.colorIndex])
+            self.colorIndex = (self.colorIndex + 1) % len(rigData.JOINT_COLORS)
             shuffle(colors)
             pm.addAttr(joint, ln='ID', at='short')
             pm.addAttr(joint, ln='limb', dt='string')
@@ -151,7 +157,8 @@ class Joint_Manager:
         limb = pm.listConnections(joint.limb)[0]
         name = self.nameMng.GetName(limb.pfrsName.get(),
                                     joint.pfrsName.get(),
-                                    self.limbMng.GetLimbSide(limb), 
+                                    # self.limbMng.GetLimbSide(limb), 
+                                    rigData.LIMB_SIDES[limb.side.get()],
                                     'JNT')
         joint.rename(name)
 

@@ -39,7 +39,7 @@ class BHV_Group_Properties_UI:
                                             at=self.group.weight)
 
         # IK CHAIN
-        elif bhvType in self.bhvMng.ikChainTypeIndexes: 
+        elif bhvType in rigData.IK_CHAIN_BHV_INDEXES: 
             self.parentSub_at = pm.attrEnumOptionMenu(  l='Target Joint',
                                                 at=self.group.targetJoint, 
                                                 p=self.bhvGroupProp_cl)

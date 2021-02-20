@@ -1,6 +1,9 @@
 
 import pymel.core as pm
 
+import Data.Rig_Data as rigData
+reload(rigData)
+
 import Common.Utilities as util
 reload(util)
 
@@ -10,13 +13,13 @@ class Limb_Manager:
         self.nameMng = parent.nameMng
         self.logger = parent.logger
 
-        self.limbTypes = (  'Empty_Rigging',
+        # self.limbTypes = (  'Empty_Rigging',
         
-                            'One_Joint',
-                            'ThreePlus_JointChain', 
-                            'Branch',
-                            'Two_JointChain')
-        self.limbSides = ('M', 'L', 'R', '-')
+        #                     'One_Joint',
+        #                     'ThreePlus_JointChain', 
+        #                     'Branch',
+        #                     'Two_JointChain')
+        # self.limbSides = ('M', 'L', 'R', '-')
         self.hideAttrs = False
 
     def NewRig(self, rigRoot):
@@ -41,9 +44,10 @@ class Limb_Manager:
         self.logger.debug('\tLimbMng > GetLimb')
         return self._limbs[limbID]
     
-    def GetLimbSide(self, limb): # Name Manager + button labels
-        self.logger.debug('\tLimbMng > GetLimbSide')
-        return self.limbSides[limb.side.get()]
+    # def GetLimbSide(self, limb): # Name Manager + button labels
+    #     self.logger.debug('\tLimbMng > GetLimbSide')
+    #     # return self.limbSides[limb.side.get()]
+    #     return rigData.LIMB_SIDES[limb.side.get()]
     
     def GetLimbParent(self, limb):
         self.logger.debug('\tLimbMng > GetLimbParent')
@@ -76,9 +80,11 @@ class Limb_Manager:
         self.rigRoot.nextLimbID.set(limbID + 1)
         
         pfrsName = 'Limb%03d' % limbID
-        limbTypes = ':'.join(self.limbTypes)
-        limbSides = ':'.join(self.limbSides)
+        # limbTypes = ':'.join(self.limbTypes)
+        # limbSides = ':'.join(self.limbSides)
         # ctrTypes = ':'.join(self.ctrTypes)
+        limbTypes = ':'.join(rigData.LIMB_TYPES)
+        limbSides = ':'.join(rigData.LIMB_SIDES)
 
         # limb = pm.createNode('network', name=pfrsName)
         limb = pm.group(name=pfrsName, em=1, p=self.limbGroup)
@@ -171,13 +177,6 @@ class Limb_Manager:
         pm.disconnectAttr(sourceLimb.mirrorLimb)
         self.UpdateLimbName(mirrorLimb)
 
-    # def UpdateLimbType(self, limb):
-    #     joints = pm.listConnections(limb.joints)
-    #     if (len(joints) == 0):
-    #         limb.limbType.set(0)
-    #     elif (len(joints) == 1):
-    #         limb.limbType.set(1)
-
     def FlipSides(self, limb1):
         self.logger.debug('\tLimbMng > FlipSides')
         limb2 = pm.listConnections(limb1.mirrorLimb)[0]
@@ -228,28 +227,7 @@ class Limb_Manager:
         pfrsName = limb.pfrsName.get()
         limbName = self.nameMng.GetName(pfrsName,
                                     'Limb',
-                                    self.GetLimbSide(limb), 
+                                    # self.GetLimbSide(limb), 
+                                    rigData.LIMB_SIDES[limb.side.get()],
                                     'NODE')
         limb.rename(limbName)
-
-    # def DuplicateLimb(self, source):
-    #     targetID = self.rigRoot.nextLimbID.get()
-    #     self.rigRoot.nextLimbID.set(targetID + 1)
-    #     target = pm.duplicate(source)[0]
-    #     target.ID.set(targetID)
-    #     sourceName = source.pfrsName.get()
-    #     for i in range(2,9999):
-    #         name = '%s_%d' % (sourceName, i)
-    #         if self.IsNameUnique(name):
-    #             break
-    #     target.pfrsName.set(name)
-    #     self._limbs[targetID] = target
-    #     return target.ID.get()
-
-    # def SetMirrorLimb(self, source, target):
-    #     source.mirrorLimbID.set(targetID)
-    #     target.mirrorLimbID.set(sourceID)
-    #     target.pfrsName.set(source.pfrsName.get())
-    #     source.side.set(1)
-    #     target.side.set(2)
-    #     return targetID

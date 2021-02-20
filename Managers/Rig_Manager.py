@@ -3,6 +3,9 @@ import pymel.core as pm
 
 import Common.Utilities as util
 reload(util)
+import Data.Rig_Data as rigData
+reload(rigData)
+
 
 class Rig_Manager:
     def __init__(self, parent):
@@ -70,7 +73,7 @@ class Rig_Manager:
             pos = limb.channelBoxJointCtrPos.get()
             rot = limb.channelBoxJointCtrRot.get()
             scale = limb.channelBoxJointCtrScale.get()
-            if limb.bhvType.get() in self.bhvMng.rotLockOverride:
+            if limb.bhvType.get() in rigData.ROT_LOCK_OVERRIDE_BHV_INDEXES:
                 rot = 1
             for group in self.bhvMng.GetJointGroups(limb):
                 control = pm.listConnections(group.control)[0]
@@ -78,7 +81,7 @@ class Rig_Manager:
             pos = limb.channelBoxLimbCtrPos.get()
             rot = limb.channelBoxLimbCtrRot.get()
             scale = limb.channelBoxLimbCtrScale.get()
-            if limb.bhvType.get() in self.bhvMng.posLockOverride:
+            if limb.bhvType.get() in rigData.POS_LOCK_OVERRIDE_BHV_INDEXES:
                 pos = 1
             for group in self.bhvMng.GetLimbGroups(limb):
                 control = pm.listConnections(group.control)[0]
@@ -88,47 +91,49 @@ class Rig_Manager:
         self.logger.debug('\tTest_UI > Setup_Internal')
         for limb in limbs:
             bhvType = limb.bhvType.get()
-            if bhvType in self.bhvMng.fkChainTypeIndexes:
+            if bhvType in rigData.FK_CHAIN_BHV_INDEXES:
                 self.Setup_Internal_FKChain(limb)
-            elif bhvType in self.bhvMng.ikPVTypeIndexes:
+            elif bhvType in rigData.IK_PV_BHV_INDEXES:
                 self.Setup_Internal_IKPoleVector(limb)
-            elif bhvType in self.bhvMng.cstTypeIndexes:
+            elif bhvType in rigData.CST_BHV_INDEXES:
                 self.Setup_Internal_Constraint(limb)
-            elif bhvType in self.bhvMng.lookAtTypeIndexes:
+            elif bhvType in rigData.LOOK_AT_BHV_INDEXES:
                 self.Setup_Internal_LookAt(limb)
-            elif bhvType in self.bhvMng.ikChainTypeIndexes:
+            elif bhvType in rigData.IK_CHAIN_BHV_INDEXES:
                 self.Setup_Internal_IKChain(limb)
-            elif bhvType in self.bhvMng.fkBranchTypeIndexes:
+            elif bhvType in rigData.FK_BRANCH_BHV_INDEXES:
                 self.Setup_Internal_FKBranch(limb)
-            elif bhvType in self.bhvMng.rfkTypeIndexes:
+            elif bhvType in rigData.RFK_BHV_INDEXES:
                 self.Setup_Internal_RelativeFK(limb)
 
     def Setup_External(self, limbs):
         self.logger.debug('\tTest_UI > Setup_External')
         for limb in limbs:
             bhvType = limb.bhvType.get()
-            if bhvType in self.bhvMng.fkChainTypeIndexes:
+            if bhvType in rigData.FK_CHAIN_BHV_INDEXES:
                 self.Setup_External_FKChain(limb)
-            elif bhvType in self.bhvMng.ikPVTypeIndexes:
+            elif bhvType in rigData.IK_PV_BHV_INDEXES:
                 self.Setup_External_IKPoleVector(limb)
-            elif bhvType in self.bhvMng.ikChainTypeIndexes:
+            elif bhvType in rigData.IK_CHAIN_BHV_INDEXES:
                 self.Setup_External_IKChain(limb)
-            elif bhvType in self.bhvMng.fkBranchTypeIndexes:
+            elif bhvType in rigData.FK_BRANCH_BHV_INDEXES:
                 self.Setup_External_FKBranch(limb)
-            elif bhvType in self.bhvMng.lookAtTypeIndexes:
+            elif bhvType in rigData.LOOK_AT_BHV_INDEXES:
                 self.Setup_External_SingleControl(limb)
-            elif bhvType in self.bhvMng.emptyLimbIndexes:
+            # elif bhvType in self.bhvMng.emptyLimbIndexes:
+            elif bhvType in rigData.EMPTY_BHV_INDEXES:
                 self.Setup_External_SingleControl(limb)
-            elif bhvType in self.bhvMng.rfkTypeIndexes:
+            elif bhvType in rigData.RFK_BHV_INDEXES:
                 self.Setup_External_RelativeFK(limb)
 
     def Setup_Internal_MayaControllers(self, limbs):
         for limb in limbs:
             groups = self.bhvMng.GetJointGroups(limb)
             bhvType = limb.bhvType.get()
-            if bhvType in self.bhvMng.reverseTypeIndexes:
+            if bhvType in rigData.REVERSE_BHV_INDEXES:
                 groups = groups[::-1]
-            if bhvType in self.bhvMng.omitLastJointTypes:
+            # if bhvType in self.bhvMng.omitLastJointTypes:
+            if bhvType in rigData.OMIT_LAST_JOINT_BHV_INDEXES:
                 groups = groups[:-1]
             controls = []
             for group in groups:
@@ -149,9 +154,10 @@ class Rig_Manager:
             parentControl = pm.listConnections(parentGroup.control)
             jointGroups = self.bhvMng.GetJointGroups(limb)
             bhvType = limb.bhvType.get()
-            if bhvType in self.bhvMng.reverseTypeIndexes:
+            if bhvType in rigData.REVERSE_BHV_INDEXES:
                 jointGroups = jointGroups[::-1]
-            if bhvType in self.bhvMng.omitLastJointTypes:
+            # if bhvType in self.bhvMng.omitLastJointTypes:
+            if bhvType in rigData.OMIT_LAST_JOINT_BHV_INDEXES:
                 jointGroups = jointGroups[:-1]
             controls = []
             for group in jointGroups:
@@ -169,28 +175,29 @@ class Rig_Manager:
             visBhvType = limb.visParentBhvType.get()
             # FK / Empty
             if visBhvType == 0: 
-                bhvFilter = self.bhvMng.emptyLimbIndexes
-                bhvFilter += self.bhvMng.fkBranchTypeIndexes
-                bhvFilter += self.bhvMng.fkChainTypeIndexes
+                # bhvFilter = self.bhvMng.emptyLimbIndexes
+                bhvFilter = rigData.EMPTY_BHV_INDEXES
+                bhvFilter += rigData.FK_BRANCH_BHV_INDEXES
+                bhvFilter += rigData.FK_CHAIN_BHV_INDEXES
                 if parentBhvType not in bhvFilter:
                     return True
             # IK
             elif visBhvType == 1:
-                ikFilter = self.bhvMng.ikPVTypeIndexes
-                ikFilter += self.bhvMng.ikChainTypeIndexes
+                ikFilter = rigData.IK_PV_BHV_INDEXES
+                ikFilter += rigData.IK_CHAIN_BHV_INDEXES
                 if parentBhvType not in ikFilter:
                     return True
             # Look At
             elif visBhvType == 2:
-                if parentBhvType not in self.bhvMng.lookAtTypeIndexes:
+                if parentBhvType not in rigData.LOOK_AT_BHV_INDEXES:
                     return True
             # Constraint
             elif visBhvType == 3:
-                if parentBhvType not in self.bhvMng.cstTypeIndexes:
+                if parentBhvType not in rigData.CST_BHV_INDEXES:
                     return True
             # RFK
             elif visBhvType == 4:
-                if parentBhvType not in self.bhvMng.rfkTypeIndexes:
+                if parentBhvType not in rigData.RFK_BHV_INDEXES:
                     return True
         return False
 
@@ -218,10 +225,10 @@ class Rig_Manager:
         pm.delete(pm.ls(type='aimConstraint'))
         for limb in self.limbMng.GetAllLimbs(): 
             bhvType = limb.bhvType.get()
-            if bhvType in self.bhvMng.cstTypeIndexes:
+            if bhvType in rigData.CST_BHV_INDEXES:
                 self.Teardown_Constraint(limb)
-            bhvFilter = self.bhvMng.fkChainTypeIndexes
-            bhvFilter += self.bhvMng.fkBranchTypeIndexes
+            bhvFilter = rigData.FK_CHAIN_BHV_INDEXES
+            bhvFilter += rigData.FK_BRANCH_BHV_INDEXES
             if bhvType in bhvFilter:
                 joints = self.jntMng.GetLimbJoints(limb)
                 if len(joints) >= 3: # Ignore last joint
@@ -251,7 +258,7 @@ class Rig_Manager:
         # Con
         
         groups = self.bhvMng.GetJointGroups(limb)
-        if limb.bhvType.get() in self.bhvMng.reverseTypeIndexes:
+        if limb.bhvType.get() in rigData.REVERSE_BHV_INDEXES:
             groups = groups[::-1]
         controls = []
         for i in range(len(groups)-1):
@@ -273,7 +280,7 @@ class Rig_Manager:
     def Setup_External_RelativeFK(self, limb):
         self.logger.debug('\tTest_UI > Setup_External_RelativeFK')
         groups = self.bhvMng.GetJointGroups(limb)
-        if limb.bhvType.get() in self.bhvMng.reverseTypeIndexes:
+        if limb.bhvType.get() in rigData.REVERSE_BHV_INDEXES:
             groups = groups[::-1]
         self.ParentConstrainGroup(limb, groups[0])
 
@@ -281,7 +288,7 @@ class Rig_Manager:
     def Setup_Internal_FKChain(self, limb):
         self.logger.debug('\tTest_UI > Setup_Internal_FKChain')
         groups = self.bhvMng.GetJointGroups(limb)
-        if limb.bhvType.get() in self.bhvMng.reverseTypeIndexes:
+        if limb.bhvType.get() in rigData.REVERSE_BHV_INDEXES:
             groups = groups[::-1]
         for i in range(len(groups)-1):
             childGroup = groups[i+1]
@@ -316,7 +323,8 @@ class Rig_Manager:
         self.logger.debug('\tTest_UI > Bind_FK_Joints')
         joints = self.jntMng.GetLimbJoints(limb)
         bhvType = limb.bhvType.get()
-        if bhvType in self.bhvMng.omitLastJointTypes:
+        # if bhvType in self.bhvMng.omitLastJointTypes:
+        if bhvType in rigData.OMIT_LAST_JOINT_BHV_INDEXES:
             joints = joints[:-1]
         for joint in joints:
             group = pm.listConnections(joint.group)[0]
@@ -493,7 +501,8 @@ class Rig_Manager:
         parent = self.limbMng.GetLimbParent(limb)
         if not parent:
             return 
-        if parent.bhvType.get() in self.bhvMng.emptyLimbIndexes:
+        # if parent.bhvType.get() in self.bhvMng.emptyLimbIndexes:
+        if parent.bhvType.get() in rigData.EMPTY_BHV_INDEXES:
             group = pm.listConnections(limb.bhvEmptyGroup)[0]
             parentJoint = pm.listConnections(group.control)[0]
         else:

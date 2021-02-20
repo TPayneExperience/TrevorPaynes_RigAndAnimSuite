@@ -110,18 +110,18 @@ class APP_Control_Manager:
 
 #============= SHAPE ============================
 
-    def GetShapeName(self, group):
-        groupType = group.groupType.get()
-        if groupType == 0:
-            index = self.rigRoot.appEmptyCtrShape.get()
-        elif groupType == 1:
-            index = self.rigRoot.appJointCtrShape.get()
-        elif groupType == 2:
-            index = self.rigRoot.appIKPVCtrShape.get()
-        elif groupType == 4:
-            index = self.rigRoot.appLookAtCtrShape.get()
-        shapeNames = list(self._ctrTemplates.keys())
-        return shapeNames[index]
+    # def GetShapeName(self, group):
+    #     groupType = group.groupType.get()
+    #     if groupType == 0:
+    #         index = self.rigRoot.appEmptyCtrShape.get()
+    #     elif groupType == 1:
+    #         index = self.rigRoot.appJointCtrShape.get()
+    #     elif groupType == 2:
+    #         index = self.rigRoot.appIKPVCtrShape.get()
+    #     elif groupType == 4:
+    #         index = self.rigRoot.appLookAtCtrShape.get()
+    #     shapeNames = list(self._ctrTemplates.keys())
+    #     return shapeNames[index]
 
     def SetShape(self, group, shapeIndex):
         self.logger.debug('\tCtrMng > SetShape')

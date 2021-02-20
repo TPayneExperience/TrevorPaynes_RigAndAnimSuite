@@ -3,6 +3,9 @@
 
 import pymel.core as pm
 
+import Data.Rig_Data as rigData
+reload(rigData)
+
 class Skin_Mananger:
     def __init__(self, parent):
         self.limbMng = parent.limbMng
@@ -38,7 +41,8 @@ class Skin_Mananger:
         joints = []
         for rootLimb in self.limbMng.GetRootLimbs():
             for limb in self.limbMng.GetLimbCreationOrder(rootLimb):
-                if limb.bhvType.get() in self.bhvMng.omitLastJointTypes:
+                # if limb.bhvType.get() in self.bhvMng.omitLastJointTypes:
+                if limb.bhvType.get() in rigData.OMIT_LAST_JOINT_BHV_INDEXES:
                     joints += self.jntMng.GetLimbJoints(limb)[:-1]
                 else:
                     joints += self.jntMng.GetLimbJoints(limb)
@@ -108,7 +112,8 @@ class Skin_Mananger:
 
     def SkinTestLimbAnim(self, limb):
         joints = self.jntMng.GetLimbJoints(limb)
-        if limb.bhvType.get() in self.bhvMng.omitLastJointTypes:
+        # if limb.bhvType.get() in self.bhvMng.omitLastJointTypes:
+        if limb.bhvType.get() in rigData.OMIT_LAST_JOINT_BHV_INDEXES:
             joints = joints[:-1]
         start = joints[0].skinAnimStart.get()
         end = joints[-1].skinAnimEnd.get()
@@ -171,7 +176,8 @@ class Skin_Mananger:
     def SetDefaultLimbJointWeights(self, mesh, limb):
         # set limb mask to all vert influenced by child joints
         joints = self.jntMng.GetLimbJoints(limb)
-        if limb.bhvType.get() in self.bhvMng.omitLastJointTypes:
+        # if limb.bhvType.get() in self.bhvMng.omitLastJointTypes:
+        if limb.bhvType.get() in rigData.OMIT_LAST_JOINT_BHV_INDEXES:
             joints = joints[:-1]
         jointPos = {} # joint : pos
         jointValues = {} # joint : [jointValueList1, jointValueList2...]

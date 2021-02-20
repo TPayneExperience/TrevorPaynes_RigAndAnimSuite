@@ -1,6 +1,9 @@
 
 import pymel.core as pm
 
+import Data.Rig_Data as rigData
+reload(rigData)
+
 
 class LS_Limb_Hierarchy_UI:
     def __init__(self, parent):
@@ -22,7 +25,8 @@ class LS_Limb_Hierarchy_UI:
         allLimbs = self.limbMng.GetAllLimbs()
         pm.menuItem(self.removeAll_mi, e=1, en=bool(allLimbs))
         for limb in allLimbs:
-            if limb.bhvType.get() in self.bhvMng.emptyLimbIndexes:
+            # if limb.bhvType.get() in self.bhvMng.emptyLimbIndexes:
+            if limb.bhvType.get() in rigData.EMPTY_BHV_INDEXES:
                 continue
             limbID = limb.ID.get()
             limbName = limb.pfrsName.get()
@@ -34,7 +38,8 @@ class LS_Limb_Hierarchy_UI:
                 limbID = limb.ID.get()
                 pm.treeView(self.widget, e=1, ai=(limbID, ''))
                 pm.treeView(self.widget, e=1, dl=(limbID, limbName))
-                side = self.limbMng.GetLimbSide(limb)
+                # side = self.limbMng.GetLimbSide(limb)
+                side = rigData.LIMB_SIDES[limb.side.get()]
                 if (side == 'L'):
                     pm.treeView(self.widget, e=1, bti=(limbID, 1, side),
                             lbc=(limbID, 0.1, 0.1, 0.3))
