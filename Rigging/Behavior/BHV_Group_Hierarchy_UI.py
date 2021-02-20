@@ -31,7 +31,7 @@ class BHV_Group_Hierarchy_UI:
         bhvFilter += rigData.EMPTY_BHV_INDEXES
         if bhvType not in bhvFilter:
             return
-        groups = self.bhvMng.GetJointGroups(self.limb)
+        groups = self.grpMng.GetJointGroups(self.limb)
         if bhvType in rigData.REVERSE_BHV_INDEXES:
             groups = groups[::-1]
         # if bhvType in self.bhvMng.omitLastJointTypes:

@@ -6,7 +6,7 @@ import pymel.core as pm
 import Data.Rig_Data as rigData
 reload(rigData)
 
-class BHV_Limb_Manager:
+class RIG_Behaviors:
     def __init__ (self, parent):
         self.limbMng = parent.limbMng
         self.jntMng = parent.jntMng
@@ -14,85 +14,11 @@ class BHV_Limb_Manager:
         self.ctrMng = parent.ctrMng
         self.logger = parent.logger
 
-        # self.cstTypes = ('Orient', 'Parent', 'Point',  'Scale')
-        self.hideAttrs = False
-
-        # For Distance
-        # self.axesXforms =   ((1,0,0),
-        #                     (-1,0,0),
-        #                     (0,1,0),
-        #                     (0,-1,0),
-        #                     (0,0,1),
-        #                     (0,0,-1))
-        # self.axesNames =    ('X',
-        #                     '-X',
-        #                     'Y',
-        #                     '-Y',
-        #                     'Z',
-        #                     '-Z')
-        # self.visBhvTypes = ('FK / Empty',
-        #                     'IK',
-        #                     'Look At',
-        #                     'Constraint',
-        #                     'RFK')
-
-        # BHV Options
-        # self.emptyLimbIndexes = (7,)
-        # self.oneJntLimbIndexes = (6, 4, 3)
-        # self.twoJntChainLimbIndexes = (11, 6, 12, 5)
-        # self.threeJntChainLimbIndexes = (0, 6, 8, 10, 9, 1, 5, 3)
-        # self.branchLimbIndexes = (6, 3)
-        
-        # self.omitLastJointTypes = (0, 5, 10)
-        # self.reverseTypeIndexes = (8, 12, 9)
-
-        # self.fkBranchTypeIndexes = (6,)
-        # self.fkChainTypeIndexes = (0, 8, 11, 12)
-        # self.rfkTypeIndexes = (10, 9)
-        # rigData.CST_BHV_INDEXES = (3,)
-        # rigData.LOOK_AT_BHV_INDEXES = (4,)
-
-        # rigData.IK_PV_BHV_INDEXES = (1,)
-        # rigData.IK_CHAIN_BHV_INDEXES = (5,)
-
-        # rigData.IK_TARGETABLE_BHV_INDEXES = (0, 2, 6, 7, 8)
-
-        # self.rotLockOverride = (9, 10)
-        # self.posLockOverride = (1, 4)
-
-        # self.bhvTypes = (   'FK - Chain (3+ Joints)', # 0
-
-        #                     'IK - Pole Vector',     # 1
-        #                     'Empty - Anim',         # 2
-        #                     'Constraint',           # 3
-        #                     'Look At',              # 4
-        #                     'IK - Chain',           # 5
-
-        #                     'FK - Branch',          # 6
-        #                     'Empty - Rig',          # 7
-        #                     'FK - Reverse Chain (3+ Joints)', # 8
-        #                     'FK - Reverse Relative',# 9
-        #                     'FK - Relative',        # 10
-
-        #                     'FK - Chain (2 Joints)',# 11
-        #                     'FK - Reverse Chain (2 Joints)' # 12
-        #                     )
-
 #============= ACCESSORS ============================
 
     def GetBhvOptions(self, limb):
         self.logger.debug('\tBhvMng > GetBhvOptions')
         limbType = limb.limbType.get()
-        # if limbType == 0: # Empty
-        #     return [self.bhvTypes[i] for i in self.emptyLimbIndexes]
-        # elif limbType == 1: # One Joint
-        #     return [self.bhvTypes[i] for i in self.oneJntLimbIndexes]
-        # elif limbType == 4: # 2 Chain
-        #     return [self.bhvTypes[i] for i in self.twoJntChainLimbIndexes]
-        # elif limbType == 2: # 3+ Chain
-        #     return [self.bhvTypes[i] for i in self.threeJntChainLimbIndexes]
-        # elif limbType == 3: # Branch
-        #     return [self.bhvTypes[i] for i in self.branchLimbIndexes]
         if limbType == 0: # Empty
             return [rigData.BHV_TYPES[i] for i in rigData.EMPTY_BHV_INDEXES]
         elif limbType == 1: # One Joint
@@ -104,28 +30,6 @@ class BHV_Limb_Manager:
         elif limbType == 3: # Branch
             return [rigData.BHV_TYPES[i] for i in rigData.TWO_JOINT_BRANCH_BHV_INDEXES]
 
-    def GetLimbGroups(self, limb):
-        self.logger.debug('\tBhvMng > GetLimbGroups')
-        groups = []
-        bhvType = limb.bhvType.get()
-        # IK PV
-        if bhvType in rigData.IK_PV_BHV_INDEXES:
-            groups += pm.listConnections(limb.bhvIKPVGroup)
-        # Look At
-        if bhvType in rigData.LOOK_AT_BHV_INDEXES:
-            groups += pm.listConnections(limb.bhvLookAtGroup)
-        return groups
-
-    def GetJointGroups(self, limb):
-        self.logger.debug('\tBhvMng > GetJointGroups')
-        bhvType = limb.bhvType.get()
-        # if bhvType in self.emptyLimbIndexes:
-        if bhvType in rigData.EMPTY_BHV_INDEXES:
-            return pm.listConnections(limb.bhvEmptyGroup)
-        groups = []
-        for joint in self.jntMng.GetLimbJoints(limb):
-            groups += pm.listConnections(joint.group)
-        return groups
     
 #============= SET BHV ============================
 
@@ -162,7 +66,7 @@ class BHV_Limb_Manager:
     def _SetTargetJointEnum(self, limb, enumStr):
         self.logger.debug('\tBhvMng > _SetTargetJointEnum')
         if limb.bhvType.get() in rigData.IK_CHAIN_BHV_INDEXES:
-            for group in self.GetJointGroups(limb):
+            for group in self.grpMng.GetJointGroups(limb):
                 pm.addAttr(group.targetJoint, e=1, en=enumStr)
         else:
             pm.addAttr(limb.bhvParentJoint, e=1, en=enumStr)
@@ -177,24 +81,24 @@ class BHV_Limb_Manager:
         visBhvTypes = ':'.join(rigData.VIS_BHV_TYPES)
 
         pm.addAttr(limb, ln='bhvType', at='enum', en=bhvTypes,
-                                    h=self.hideAttrs)
+                                    h=rigData.HIDE_ATTRS)
 
         # VISABILITY SOURCE / TARGET
-        pm.addAttr(limb, ln='visParent', dt='string', h=self.hideAttrs)
-        pm.addAttr(limb, ln='visChildren', dt='string', h=self.hideAttrs)
+        pm.addAttr(limb, ln='visParent', dt='string', h=rigData.HIDE_ATTRS)
+        pm.addAttr(limb, ln='visChildren', dt='string', h=rigData.HIDE_ATTRS)
         pm.addAttr(limb, ln='visParentBhvType', at='enum', en=visBhvTypes, 
-                                                        h=self.hideAttrs)
+                                                        h=rigData.HIDE_ATTRS)
 
         # IK PV + CST
-        pm.addAttr(limb, ln='bhvChildren', dt='string', h=self.hideAttrs) 
+        pm.addAttr(limb, ln='bhvChildren', dt='string', h=rigData.HIDE_ATTRS) 
 
         # APP
-        pm.addAttr(limb, ln='channelBoxJointCtrPos', at='bool', h=self.hideAttrs)
-        pm.addAttr(limb, ln='channelBoxJointCtrRot', at='bool', h=self.hideAttrs)
-        pm.addAttr(limb, ln='channelBoxJointCtrScale', at='bool', h=self.hideAttrs)
-        pm.addAttr(limb, ln='channelBoxLimbCtrPos', at='bool', h=self.hideAttrs)
-        pm.addAttr(limb, ln='channelBoxLimbCtrRot', at='bool', h=self.hideAttrs)
-        pm.addAttr(limb, ln='channelBoxLimbCtrScale', at='bool', h=self.hideAttrs)
+        pm.addAttr(limb, ln='channelBoxJointCtrPos', at='bool', h=rigData.HIDE_ATTRS)
+        pm.addAttr(limb, ln='channelBoxJointCtrRot', at='bool', h=rigData.HIDE_ATTRS)
+        pm.addAttr(limb, ln='channelBoxJointCtrScale', at='bool', h=rigData.HIDE_ATTRS)
+        pm.addAttr(limb, ln='channelBoxLimbCtrPos', at='bool', h=rigData.HIDE_ATTRS)
+        pm.addAttr(limb, ln='channelBoxLimbCtrRot', at='bool', h=rigData.HIDE_ATTRS)
+        pm.addAttr(limb, ln='channelBoxLimbCtrScale', at='bool', h=rigData.HIDE_ATTRS)
         
         limb.channelBoxJointCtrRot.set(1)
         limb.channelBoxLimbCtrPos.set(1)
@@ -204,7 +108,7 @@ class BHV_Limb_Manager:
     def AddEmptyLimb(self):
         self.logger.debug('\tBhvMng > AddEmptyLimb')
         limb = self._AddLimb()
-        pm.addAttr(limb, ln='bhvEmptyGroup', dt='string', h=self.hideAttrs)
+        pm.addAttr(limb, ln='bhvEmptyGroup', dt='string', h=rigData.HIDE_ATTRS)
         # limb.bhvType.set(self.emptyLimbIndexes[0])
         limb.bhvType.set(rigData.EMPTY_BHV_INDEXES[0])
         group = self.grpMng.AddEmptyGroup(limb)
@@ -224,20 +128,20 @@ class BHV_Limb_Manager:
         axes = ':'.join(rigData.AXES_NAMES)
 
         # LookAt, IKPV
-        pm.addAttr(limb, ln='bhvIKPVGroup', dt='string', h=self.hideAttrs)
-        pm.addAttr(limb, ln='bhvLookAtGroup', dt='string', h=self.hideAttrs)
+        pm.addAttr(limb, ln='bhvIKPVGroup', dt='string', h=rigData.HIDE_ATTRS)
+        pm.addAttr(limb, ln='bhvLookAtGroup', dt='string', h=rigData.HIDE_ATTRS)
 
         # IK PV + CST 
-        pm.addAttr(limb, ln='bhvParent', dt='string', h=self.hideAttrs) 
-        pm.addAttr(limb, ln='bhvParentJoint', at='enum', en='None', h=self.hideAttrs)
-        pm.addAttr(limb, ln='bhvIKPVCtrJoint', at='enum', en='None', h=self.hideAttrs)
-        pm.addAttr(limb, ln='bhvCstType', at='enum', en=bhvCstTypes, h=self.hideAttrs)
-        pm.addAttr(limb, ln='cstPosX', at='bool', h=self.hideAttrs)
-        pm.addAttr(limb, ln='cstPosY', at='bool', h=self.hideAttrs)
-        pm.addAttr(limb, ln='cstPosZ', at='bool', h=self.hideAttrs)
-        pm.addAttr(limb, ln='cstRotX', at='bool', h=self.hideAttrs)
-        pm.addAttr(limb, ln='cstRotY', at='bool', h=self.hideAttrs)
-        pm.addAttr(limb, ln='cstRotZ', at='bool', h=self.hideAttrs)
+        pm.addAttr(limb, ln='bhvParent', dt='string', h=rigData.HIDE_ATTRS) 
+        pm.addAttr(limb, ln='bhvParentJoint', at='enum', en='None', h=rigData.HIDE_ATTRS)
+        pm.addAttr(limb, ln='bhvIKPVCtrJoint', at='enum', en='None', h=rigData.HIDE_ATTRS)
+        pm.addAttr(limb, ln='bhvCstType', at='enum', en=bhvCstTypes, h=rigData.HIDE_ATTRS)
+        pm.addAttr(limb, ln='cstPosX', at='bool', h=rigData.HIDE_ATTRS)
+        pm.addAttr(limb, ln='cstPosY', at='bool', h=rigData.HIDE_ATTRS)
+        pm.addAttr(limb, ln='cstPosZ', at='bool', h=rigData.HIDE_ATTRS)
+        pm.addAttr(limb, ln='cstRotX', at='bool', h=rigData.HIDE_ATTRS)
+        pm.addAttr(limb, ln='cstRotY', at='bool', h=rigData.HIDE_ATTRS)
+        pm.addAttr(limb, ln='cstRotZ', at='bool', h=rigData.HIDE_ATTRS)
         limb.cstPosX.set(1)
         limb.cstPosY.set(1)
         limb.cstPosZ.set(1)
@@ -504,7 +408,7 @@ class BHV_Limb_Manager:
         bhvFilter = rigData.FK_CHAIN_BHV_INDEXES
         bhvFilter += rigData.FK_BRANCH_BHV_INDEXES
         if bhvType in bhvFilter:
-            groups = self.GetJointGroups(limb)
+            groups = self.grpMng.GetJointGroups(limb)
             for group in groups:
                 group.v.set(1)
             if bhvType in rigData.REVERSE_BHV_INDEXES:
@@ -513,20 +417,20 @@ class BHV_Limb_Manager:
             if bhvType in rigData.OMIT_LAST_JOINT_BHV_INDEXES:
                 groups[-1].v.set(0)
         if bhvType in rigData.RFK_BHV_INDEXES:
-            groups = self.GetJointGroups(limb)
+            groups = self.grpMng.GetJointGroups(limb)
             for group in groups:
                 group.v.set(0)
             if bhvType in rigData.REVERSE_BHV_INDEXES:
                 groups = groups[::-1]
             groups[0].v.set(1)
-        for group in self.GetLimbGroups(limb):
+        for group in self.grpMng.GetLimbGroups(limb):
             group.v.set(1)
 
     def Teardown_LimbGroupVisibility(self, limb):
         self.logger.debug('\tBhvMng > Teardown_LimbGroupVisibility')
-        for group in self.GetJointGroups(limb):
+        for group in self.grpMng.GetJointGroups(limb):
             group.v.set(0)
-        for group in self.GetLimbGroups(limb):
+        for group in self.grpMng.GetLimbGroups(limb):
             group.v.set(0)
 
 # ============= MISC ============================
@@ -550,7 +454,7 @@ class BHV_Limb_Manager:
         names = [j.pfrsName.get() for j in parentJoints]
         namesStr = ':'.join(names)
         pm.addAttr(childLimb.limbParentJoint, e=1, en=namesStr)
-        rootGroup = self.GetJointGroups(childLimb)[0]
+        rootGroup = self.grpMng.GetJointGroups(childLimb)[0]
         sourcePos = pm.xform(rootGroup, q=1, t=1, ws=1)
         index = self._GetClosestJointIndex(sourcePos, parentLimb)
         childLimb.limbParentJoint.set(index)
@@ -567,7 +471,7 @@ class BHV_Limb_Manager:
         joints = self.jntMng.GetLimbJoints(limb)
         index = limb.bhvIKPVCtrJoint.get()
         joint = joints[index]
-        group = self.GetLimbGroups(limb)[0]
+        group = self.grpMng.GetLimbGroups(limb)[0]
         pm.parent(group, joint)
         # pos = self.axesXforms[limb.bhvAxis.get()]
         pos = rigData.AXES_XFORMS[limb.bhvAxis.get()]

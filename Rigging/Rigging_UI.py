@@ -8,7 +8,7 @@ import JointSetup.JointSetup_UI as js_ui
 reload(js_ui)
 import LimbSetup.LimbSetup_UI as ls_ui
 reload(ls_ui)
-import Behavior.Behavior_UI as bhv_ui
+import Behavior.RIG_Behaviors_UI as bhv_ui
 reload(bhv_ui)
 import Appearance.Appearance_UI as app_ui
 reload(app_ui)
@@ -73,7 +73,7 @@ class Rigging_UI:
             with pm.horizontalLayout() as self.limbSetupTab:
                 self.limbSetup_ui = ls_ui.LimbSetup_UI(self)
             with pm.horizontalLayout() as self.bhvTab:
-                self.bhv_ui = bhv_ui.Behavior_UI(self)
+                self.bhv_ui = bhv_ui.RIG_Behaviors_UI(self)
             with pm.horizontalLayout() as self.appTab:
                 self.app_ui = app_ui.Appearance_UI(self)
             with pm.horizontalLayout() as self.testTab:

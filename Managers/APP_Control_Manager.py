@@ -3,6 +3,8 @@ import pymel.core as pm
 
 import Common.Utilities as util
 reload(util)
+import Data.Rig_Data as rigData
+reload(rigData)
 
 class APP_Control_Manager:
     def __init__(self, parent):
@@ -11,7 +13,6 @@ class APP_Control_Manager:
 
         self._ctrs = {} # ctrID : ctr
         self._ctrTemplates = {} # CtrType/Name : ControlTemplate
-        self.hideAttrs = False
     
     def NewRig(self, rigRoot):
         self.logger.debug('\tCtrMng > NewRig')
@@ -30,13 +31,13 @@ class APP_Control_Manager:
         ctrTypesStr = ':'.join(names)
         pm.addAttr(rigRoot, ln='nextCtrID', at='long')
         pm.addAttr(rigRoot, ln='appEmptyCtrShape', at='enum', 
-                            en=ctrTypesStr, h=self.hideAttrs)
+                            en=ctrTypesStr, h=rigData.HIDE_ATTRS)
         pm.addAttr(rigRoot, ln='appJointCtrShape', at='enum', 
-                            en=ctrTypesStr, h=self.hideAttrs)
+                            en=ctrTypesStr, h=rigData.HIDE_ATTRS)
         pm.addAttr(rigRoot, ln='appIKPVCtrShape', at='enum', 
-                            en=ctrTypesStr, h=self.hideAttrs)
+                            en=ctrTypesStr, h=rigData.HIDE_ATTRS)
         pm.addAttr(rigRoot, ln='appLookAtCtrShape', at='enum', 
-                            en=ctrTypesStr, h=self.hideAttrs)
+                            en=ctrTypesStr, h=rigData.HIDE_ATTRS)
         rigRoot.appEmptyCtrShape.set(names.index('Square_Wire'))
         rigRoot.appJointCtrShape.set(names.index('Sphere_Poly'))
         rigRoot.appIKPVCtrShape.set(names.index('Diamond_Wire'))

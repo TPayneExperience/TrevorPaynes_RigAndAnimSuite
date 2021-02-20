@@ -15,18 +15,6 @@ class BHV_Group_Manager:
         self.jntMng = parent.jntMng
         self.logger = parent.logger
 
-        # self.grpTypes = (   'Empty', # DO NOT CHANGE ORDER
-
-        #                     'Joint', # FK, CST, IK Chain
-        #                     'IKPV',
-        #                     'DEPRICATED - FKIKSwitch',
-        #                     'LookAt')#,
-                            # 'RFK_B',
-
-                            # 'RFK_M',
-                            # 'RFK_T')
-        self.hideAttrs = False
-
         self._groups = {} # grpID : grpData
         # self.bhvGroup = None
         self.rigRoot = None
@@ -53,6 +41,29 @@ class BHV_Group_Manager:
         self.logger.debug('\tGrpMng > GetAllGroups')
         return list(self._groups.values())
 
+    def GetLimbGroups(self, limb):
+        self.logger.debug('\tBhvMng > GetLimbGroups')
+        groups = []
+        bhvType = limb.bhvType.get()
+        # IK PV
+        if bhvType in rigData.IK_PV_BHV_INDEXES:
+            groups += pm.listConnections(limb.bhvIKPVGroup)
+        # Look At
+        if bhvType in rigData.LOOK_AT_BHV_INDEXES:
+            groups += pm.listConnections(limb.bhvLookAtGroup)
+        return groups
+
+    def GetJointGroups(self, limb):
+        self.logger.debug('\tBhvMng > GetJointGroups')
+        bhvType = limb.bhvType.get()
+        # if bhvType in self.emptyLimbIndexes:
+        if bhvType in rigData.EMPTY_BHV_INDEXES:
+            return pm.listConnections(limb.bhvEmptyGroup)
+        groups = []
+        for joint in self.jntMng.GetLimbJoints(limb):
+            groups += pm.listConnections(joint.group)
+        return groups
+        
 #============= ADD + REMOVE ============================
 
     def _AddGroup(self):

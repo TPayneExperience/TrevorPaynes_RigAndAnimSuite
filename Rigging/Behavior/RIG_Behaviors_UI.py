@@ -13,7 +13,7 @@ import BHV_Group_Properties_UI as bhvProp_UI
 reload(bhvProp_UI)
 
 
-class Behavior_UI:
+class RIG_Behaviors_UI:
     def __init__(self, parent):
         self.parent = parent
         self.limbMng = parent.limbMng
@@ -59,7 +59,7 @@ class Behavior_UI:
 #=========== LIMBS ====================================
 
     def LimbSelected(self, limb):
-        self.logger.debug('\tBehavior_UI > LimbSelected')
+        self.logger.debug('\tRIG_Behaviors_UI > LimbSelected')
         if limb:
             joints = self.jntMng.GetLimbJoints(limb)
             pm.select(joints)
@@ -68,12 +68,12 @@ class Behavior_UI:
         self.grpProp_ui.Depopulate()
 
     def GroupSelected(self, group):
-        self.logger.debug('\tBehavior_UI > GroupSelected')
+        self.logger.debug('\tRIG_Behaviors_UI > GroupSelected')
         pm.select(group)
         self.limbProp_ui.Depopulate()
         self.grpProp_ui.SetGroup(group)
 
     def SetBhvType(self, limb):
-        self.logger.debug('\tBehavior_UI > SetBhvType')
+        self.logger.debug('\tRIG_Behaviors_UI > SetBhvType')
         self.grpHier_ui.Populate()
 

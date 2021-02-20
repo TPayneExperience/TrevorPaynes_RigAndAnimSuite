@@ -75,7 +75,7 @@ class Rig_Manager:
             scale = limb.channelBoxJointCtrScale.get()
             if limb.bhvType.get() in rigData.ROT_LOCK_OVERRIDE_BHV_INDEXES:
                 rot = 1
-            for group in self.bhvMng.GetJointGroups(limb):
+            for group in self.grpMng.GetJointGroups(limb):
                 control = pm.listConnections(group.control)[0]
                 util.ChannelBoxAttrs(control, pos, rot, scale)
             pos = limb.channelBoxLimbCtrPos.get()
@@ -83,7 +83,7 @@ class Rig_Manager:
             scale = limb.channelBoxLimbCtrScale.get()
             if limb.bhvType.get() in rigData.POS_LOCK_OVERRIDE_BHV_INDEXES:
                 pos = 1
-            for group in self.bhvMng.GetLimbGroups(limb):
+            for group in self.grpMng.GetLimbGroups(limb):
                 control = pm.listConnections(group.control)[0]
                 util.ChannelBoxAttrs(control, pos, rot, scale)
             
@@ -128,7 +128,7 @@ class Rig_Manager:
 
     def Setup_Internal_MayaControllers(self, limbs):
         for limb in limbs:
-            groups = self.bhvMng.GetJointGroups(limb)
+            groups = self.grpMng.GetJointGroups(limb)
             bhvType = limb.bhvType.get()
             if bhvType in rigData.REVERSE_BHV_INDEXES:
                 groups = groups[::-1]
@@ -138,7 +138,7 @@ class Rig_Manager:
             controls = []
             for group in groups:
                 controls += pm.listConnections(group.control)
-            for group in self.bhvMng.GetLimbGroups(limb):
+            for group in self.grpMng.GetLimbGroups(limb):
                 controls += pm.listConnections(group.control)
             pm.controller(controls, g=1)
 
@@ -149,10 +149,10 @@ class Rig_Manager:
                 continue
             parent = parent[0]
             index = limb.limbParentJoint.get()
-            parentGroups = self.bhvMng.GetJointGroups(parent)
+            parentGroups = self.grpMng.GetJointGroups(parent)
             parentGroup = parentGroups[index]
             parentControl = pm.listConnections(parentGroup.control)
-            jointGroups = self.bhvMng.GetJointGroups(limb)
+            jointGroups = self.grpMng.GetJointGroups(limb)
             bhvType = limb.bhvType.get()
             if bhvType in rigData.REVERSE_BHV_INDEXES:
                 jointGroups = jointGroups[::-1]
@@ -162,7 +162,7 @@ class Rig_Manager:
             controls = []
             for group in jointGroups:
                 controls += pm.listConnections(group.control)
-            for group in self.bhvMng.GetLimbGroups(limb):
+            for group in self.grpMng.GetLimbGroups(limb):
                 controls += pm.listConnections(group.control)
             pm.controller(controls, parentControl, p=1)
 
@@ -207,8 +207,8 @@ class Rig_Manager:
         self.logger.debug('\tTest_UI > Teardown_Controls')
         for limb in limbs:
             self.logger.debug('\t\tLimb = ' + limb.pfrsName.get())
-            groups = self.bhvMng.GetJointGroups(limb)
-            groups += self.bhvMng.GetLimbGroups(limb)
+            groups = self.grpMng.GetJointGroups(limb)
+            groups += self.grpMng.GetLimbGroups(limb)
             for group in groups:
                 control = pm.listConnections(group.control)[0]
                 util.ChannelBoxAttrs(control, 1, 1, 1, 1)
@@ -257,7 +257,7 @@ class Rig_Manager:
         self.logger.debug('\tTest_UI > Setup_Internal_RelativeFK')
         # Con
         
-        groups = self.bhvMng.GetJointGroups(limb)
+        groups = self.grpMng.GetJointGroups(limb)
         if limb.bhvType.get() in rigData.REVERSE_BHV_INDEXES:
             groups = groups[::-1]
         controls = []
@@ -279,7 +279,7 @@ class Rig_Manager:
 
     def Setup_External_RelativeFK(self, limb):
         self.logger.debug('\tTest_UI > Setup_External_RelativeFK')
-        groups = self.bhvMng.GetJointGroups(limb)
+        groups = self.grpMng.GetJointGroups(limb)
         if limb.bhvType.get() in rigData.REVERSE_BHV_INDEXES:
             groups = groups[::-1]
         self.ParentConstrainGroup(limb, groups[0])
@@ -287,7 +287,7 @@ class Rig_Manager:
     # FK CHAIN / REVERSE CHAIN
     def Setup_Internal_FKChain(self, limb):
         self.logger.debug('\tTest_UI > Setup_Internal_FKChain')
-        groups = self.bhvMng.GetJointGroups(limb)
+        groups = self.grpMng.GetJointGroups(limb)
         if limb.bhvType.get() in rigData.REVERSE_BHV_INDEXES:
             groups = groups[::-1]
         for i in range(len(groups)-1):
@@ -298,7 +298,7 @@ class Rig_Manager:
         
     def Setup_External_FKChain(self, limb):
         self.logger.debug('\tTest_UI > Setup_External_FKChain')
-        childGroup = self.bhvMng.GetJointGroups(limb)[0]
+        childGroup = self.grpMng.GetJointGroups(limb)[0]
         self.ParentConstrainGroup(limb, childGroup)
 
     # FK BRANCH
@@ -308,7 +308,7 @@ class Rig_Manager:
         
     def Setup_External_FKBranch(self, limb):
         self.logger.debug('\tTest_UI > Setup_External_FKBranch')
-        for childGroup in self.bhvMng.GetJointGroups(limb):
+        for childGroup in self.grpMng.GetJointGroups(limb):
             self.ParentConstrainGroup(limb, childGroup)
         # parent = self.limbMng.GetLimbParent(limb)
         # if parent:
@@ -367,7 +367,7 @@ class Rig_Manager:
         skipRotY = not limb.cstRotY.get()
         skipRotZ = not limb.cstRotZ.get()
         
-        for group in self.bhvMng.GetJointGroups(limb):
+        for group in self.grpMng.GetJointGroups(limb):
             joint = pm.listConnections(group.joint)[0]
             cstType = limb.bhvCstType.get()
             weight = group.weight.get()
@@ -427,8 +427,8 @@ class Rig_Manager:
             msg = 'IK Chain Limb "%s" missing TARGET limb' % limb
             pm.confirmDialog(t='IK CHAIN Error', m=msg, icon='warning', b='Ok')
             return
-        targetGroups = self.bhvMng.GetJointGroups(targetLimb[0])
-        sourceGroups = self.bhvMng.GetJointGroups(limb)
+        targetGroups = self.grpMng.GetJointGroups(targetLimb[0])
+        sourceGroups = self.grpMng.GetJointGroups(limb)
         for sourceGroup in sourceGroups[1:]: # Skip First
             index = sourceGroup.targetJoint.get()
             targetGroup = targetGroups[index]
@@ -463,7 +463,7 @@ class Rig_Manager:
             return
         distGroup = groups[0]
         index = limb.bhvParentJoint.get()
-        targetGroup = self.bhvMng.GetJointGroups(targetLimb)[index]
+        targetGroup = self.grpMng.GetJointGroups(targetLimb)[index]
         targetControl = pm.listConnections(targetGroup.control)[0]
 
         joints = self.jntMng.GetLimbJoints(limb)
@@ -475,7 +475,7 @@ class Rig_Manager:
         parent = self.limbMng.GetLimbParent(limb)
         if parent:
             index = limb.limbParentJoint.get()
-            parentGroup = self.bhvMng.GetJointGroups(parent)[index]
+            parentGroup = self.grpMng.GetJointGroups(parent)[index]
             parentControl = pm.listConnections(parentGroup.control)[0]
             pm.parent(distGroup, parentControl)
         else:
@@ -486,13 +486,13 @@ class Rig_Manager:
     # IK PV, LookAt
     def Setup_External_SingleControl(self, limb):
         self.logger.debug('\tTest_UI > Setup_External_SingleControl')
-        childGroup = self.bhvMng.GetLimbGroups(limb)[0]
+        childGroup = self.grpMng.GetLimbGroups(limb)[0]
         self.ParentConstrainGroup(limb, childGroup)
 
     def Setup_Internal_LookAt(self, limb):
         self.logger.debug('\tTest_UI > Setup_Internal_LookAt')
         joint = self.jntMng.GetLimbJoints(limb)[0]
-        group = self.bhvMng.GetLimbGroups(limb)[0]
+        group = self.grpMng.GetLimbGroups(limb)[0]
         control = pm.listConnections(group.control)[0]
         pm.aimConstraint(control, joint, mo=1)
 

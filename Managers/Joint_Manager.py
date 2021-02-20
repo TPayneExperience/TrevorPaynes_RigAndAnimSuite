@@ -12,24 +12,8 @@ class Joint_Manager:
         self.nameMng = parent.nameMng
         self.logger = parent.logger
 
-        # self.mirrorXform = {'X': (-1,1,1),
-        #                     'Y': (1,-1,1),
-        #                     'Z': (1,1,-1)}
-        # self.jointColors = ((1, 0, 0), # Red
-        #                     (0, 1, 0), # Green
-        #                     (0, 0, 1), # Blue
-        #                     (1, 1, 0), # Yellow
-        #                     (0, 1, 1), # Cyan
-        #                     (1, 0, 1),# Magenta
-        #                     (1, 0.5, 0), # 
-        #                     (0, 1, 0.5), # 
-        #                     (0.5, 0, 1),# 
-        #                     (0.5, 1, 0), # 
-        #                     (0, 0.5, 1), # 
-        #                     (1, 0, 0.5)) 
         self.colorIndex = 0
-        self.hideAttrs = False
-
+        
     def NewRig(self, rigRoot):
         self.logger.debug('\tJntMng > NewRig')
         self._joints = {} # jointID: jointNode

@@ -1,10 +1,8 @@
-import logging
-import os
-import platform
-import subprocess
-import time
 
 import pymel.core as pm
+
+import Data.Rig_Data as rigData
+reload(rigData)
 
 import Rigging.Rigging_UI as rig_ui
 reload(rig_ui)
@@ -13,75 +11,40 @@ reload(skin_ui)
 import RigSetup.RigSetup_UI as rs_ui
 reload(rs_ui)
 
-import Managers.File_Manager as fm
-reload(fm)
-import Managers.Json_Manager as js
-reload(js)
-import Managers.Name_Manager as nm
-reload(nm)
-import Managers.Joint_Manager as jm
-reload(jm)
-import Managers.Limb_Manager as lm
-reload(lm)
-import Managers.BHV_Limb_Manager as bhv
-reload(bhv)
-import Managers.BHV_Group_Manager as grp
-reload(grp)
-import Managers.APP_Control_Manager as ctr
-reload(ctr)
-import Managers.Rig_Manager as rigMng
-reload(rigMng)
-import Managers.Mesh_Manager as meshMng
-reload(meshMng)
-import Managers.Skin_Manager as skinMng
-reload(skinMng)
 
 import PFRS_Debug as debug
 reload(debug)
 
-__author__ = 'Trevor Payne'
-__version__ = '0.1'
-LICENSE = 'INDIE'
-SUITE = 'Rig'
+import payneFreeRigSuite as pfrs
+reload(pfrs)
 
-class PayneFreeRigSuite_UI():
+class PayneFreeRigSuite_UI:
     def __init__(self):
-        # self.loggingMode = logging.INFO
-        self.loggingMode = logging.DEBUG
-        self.StartLogger()
+        self.pfrs = pfrs.PayneFreeRigSuite()
 
-        self.fileMng = fm.File_Manager()
-        self.jsonMng = js.Json_Manager()
+        self.fileMng = self.pfrs.fileMng
+        self.jsonMng = self.pfrs.jsonMng
 
-        # RIGGING
-        self.nameMng = nm.Name_Manager(self)
-        self.limbMng = lm.Limb_Manager(self)
-        self.ctrMng = ctr.APP_Control_Manager(self)
-        self.jntMng = jm.Joint_Manager(self)
-        self.grpMng = grp.BHV_Group_Manager(self)
-        self.bhvMng = bhv.BHV_Limb_Manager(self)
-        self.rigMng = rigMng.Rig_Manager(self)
+        self.nameMng = self.pfrs.nameMng
+        self.limbMng = self.pfrs.limbMng
+        self.ctrMng = self.pfrs.ctrMng
+        self.jntMng = self.pfrs.jntMng
+        self.grpMng = self.pfrs.grpMng
+        self.bhvMng = self.pfrs.bhvMng
+        self.rigMng = self.pfrs.rigMng
 
         # SKINNING
-        self.meshMng = meshMng.Mesh_Manager()
-        self.skinMng = skinMng.Skin_Mananger(self)
+        self.meshMng = self.pfrs.meshMng
+        self.skinMng = self.pfrs.skinMng
 
-        self.rigRoot = None
-        self.hideAttrs = False
-        # self.hideAttrs = True
-        
+        self.logger = self.pfrs.logger
+
         # UI
-        self.rigSetupUI = rs_ui.RigSetup_UI(self.nameMng,
-                                            self.fileMng,
-                                            self)
+        # self.rigSetupUI = rs_ui.RigSetup_UI(self.nameMng,
+        #                                     self.fileMng,
+        #                                     self)
         self._Setup()
         
-        self.limbMng.hideAttrs = self.hideAttrs
-        self.grpMng.hideAttrs = self.hideAttrs
-        self.jntMng.hideAttrs = self.hideAttrs
-        self.bhvMng.hideAttrs = self.hideAttrs
-        self.ctrMng.hideAttrs = self.hideAttrs
-
         debug.PFRS_Debug(self)
 
     def NewRig(self, prefix, nameOrder, showPrefix):
@@ -110,7 +73,7 @@ class PayneFreeRigSuite_UI():
         self.rigRoot.prefix.set(prefix)
 
         # When Joints/limbs added/removed
-        pm.addAttr(self.rigRoot, ln='rebuildSkinInf', at='bool', h=self.hideAttrs)
+        pm.addAttr(self.rigRoot, ln='rebuildSkinInf', at='bool', h=rigData.HIDE_ATTRS)
         # MESH LAYER
         self.meshLayer = pm.createDisplayLayer(n='Rig Mesh', e=True)
         pm.setAttr(self.meshLayer + '.displayType', 2)
@@ -131,7 +94,9 @@ class PayneFreeRigSuite_UI():
 #=========== SETUP ====================================
 
     def _Setup(self):
-        name = '%s - Payne Free %s Suite - v%s' % (LICENSE, SUITE, __version__)
+        name = rigData.LICENSE
+        name += ' - Payne Free %s Suite' % rigData.SUITE
+        name += ' - v%s' %  rigData.__version__
         name += ' - by Trevor Payne'
         with pm.window(mb=True,mbv=True, t=name, w=500, h=500) as self.win:
             with pm.tabLayout(e=0, cc=self.TabChanged) as self.tab:
@@ -213,7 +178,7 @@ class PayneFreeRigSuite_UI():
                 pm.menuItem(divider=1)
                 pm.menuItem(l='Submit Feedback...', en=0)
                 pm.menuItem(l='Share...', en=0)
-                pm.menuItem(l='Open Log', c=self.OpenLog)
+                pm.menuItem(l='Open Log', c=self.pfrs.OpenLog)
 
 #=========== TAB SWITCHING ====================================
 
@@ -250,14 +215,15 @@ class PayneFreeRigSuite_UI():
     def closeEvent(self):
         self.rig_ui.jntSetup_ui.KillScripts()
         self.rig_ui.limbSetup_ui.KillScripts()
-        self.EndLogger()
+        self.pfrs.EndLogger()
 
     def UpdateEnableUI(self):
         pm.tabLayout(self.tab, e=1, en=bool(self.rigRoot))
 
     def NewRig_Dialog(self, ignore):
-        self.rigSetupUI.NewRig_Dialog()
-        self.UpdateEnableUI()
+        pass
+        # self.rigSetupUI.NewRig_Dialog()
+        # self.UpdateEnableUI()
 
     def EditRig_Dialog(self, ignore):
         pass
@@ -312,54 +278,4 @@ class PayneFreeRigSuite_UI():
         # if (filePath):
         #     self.pfrs.fileMng.SetOutputFile(filePath)
         #     self.pfrs.saveLoadRig.Save()
-
-#=========== LOGGER ====================================
-
-    def OpenLog(self, ignore):
-        if platform.system() == 'Darwin':       # macOS
-            subprocess.call(('open', self.logFile))
-        elif platform.system() == 'Windows':    # Windows
-            os.startfile(self.logFile)
-        else:                                   # linux variants
-            subprocess.call(('xdg-open', self.logFile))
-
-    def StartLogger(self):
-        self.logger = logging.getLogger(__name__)
-        if not self.logger.handlers:
-            path = os.path.join(os.path.dirname(__file__), 'Logs')
-            t = time.localtime()
-            fileName = '%02d-%02d-%02d_PFRS.log' % (t[0] %100, t[1], t[2])
-            self.logFile = os.path.join(path, fileName)
-            hdlr = logging.FileHandler(self.logFile)
-            formatter = logging.Formatter('%(asctime)s %(levelname)s | %(message)s', 
-                                                        '%H:%M:%S')
-            hdlr.setFormatter(formatter)
-            self.logger.addHandler(hdlr) 
-        else:
-            handler = self.logger.handlers[0]
-            self.logFile = handler.baseFilename
-        self.logger.setLevel(self.loggingMode)
-        startTxt = '\n'
-        startTxt += '='*40
-        startTxt += '\n'
-        startTxt += '-'*15
-        startTxt += ' START '
-        startTxt += '-'*15
-        startTxt += '\n'
-        self.logger.info(startTxt)
-        # self.logger.debug('DEBUG') # logger's level is logging.INFO = Ignored
-        # self.logger.info('INFO')
-        # self.logger.warning('WARNING')
-        # self.logger.error('ERROR')
-        # self.logger.critical('CRITICAL')
-    
-    def EndLogger(self):
-        endTxt = '\n\n'
-        endTxt += '-'*15
-        endTxt += ' END '
-        endTxt += '-'*15
-        endTxt += '\n'
-        endTxt += '='*40
-        endTxt += '\n\n'
-        self.logger.info(endTxt)
 

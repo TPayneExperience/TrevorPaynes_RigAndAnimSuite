@@ -13,15 +13,6 @@ class Limb_Manager:
         self.nameMng = parent.nameMng
         self.logger = parent.logger
 
-        # self.limbTypes = (  'Empty_Rigging',
-        
-        #                     'One_Joint',
-        #                     'ThreePlus_JointChain', 
-        #                     'Branch',
-        #                     'Two_JointChain')
-        # self.limbSides = ('M', 'L', 'R', '-')
-        self.hideAttrs = False
-
     def NewRig(self, rigRoot):
         self.logger.debug('\tLimbMng > NewRig')
         self.rigRoot = rigRoot
@@ -89,33 +80,33 @@ class Limb_Manager:
         # limb = pm.createNode('network', name=pfrsName)
         limb = pm.group(name=pfrsName, em=1, p=self.limbGroup)
         util.ChannelBoxAttrs(limb)
-        pm.addAttr(limb, ln='rigRoot', dt='string', h=self.hideAttrs)
-        pm.addAttr(limb, ln='ID', at='long', dv=limbID, h=self.hideAttrs)
-        pm.addAttr(limb, ln='pfrsName', dt='string', h=self.hideAttrs)
+        pm.addAttr(limb, ln='rigRoot', dt='string', h=rigData.HIDE_ATTRS)
+        pm.addAttr(limb, ln='ID', at='long', dv=limbID, h=rigData.HIDE_ATTRS)
+        pm.addAttr(limb, ln='pfrsName', dt='string', h=rigData.HIDE_ATTRS)
         limb.pfrsName.set(pfrsName)
         pm.addAttr(limb, ln='limbType', at='enum', enumName=limbTypes,
-                                        h=self.hideAttrs)
+                                        h=rigData.HIDE_ATTRS)
         pm.addAttr(limb, ln='side', at='enum', enumName=limbSides,
-                                        h=self.hideAttrs)
-        pm.addAttr(limb, ln='joints', dt='string', h=self.hideAttrs)
+                                        h=rigData.HIDE_ATTRS)
+        pm.addAttr(limb, ln='joints', dt='string', h=rigData.HIDE_ATTRS)
 
-        pm.addAttr(limb, ln='limbParent', dt='string', h=self.hideAttrs)
+        pm.addAttr(limb, ln='limbParent', dt='string', h=rigData.HIDE_ATTRS)
         pm.addAttr(limb, ln='limbParentJoint', at='enum', en='None', 
-                                        h=self.hideAttrs)
-        pm.addAttr(limb, ln='limbChildren', dt='string', h=self.hideAttrs)
+                                        h=rigData.HIDE_ATTRS)
+        pm.addAttr(limb, ln='limbChildren', dt='string', h=rigData.HIDE_ATTRS)
         
         pm.addAttr(limb, ln='defaultLimbParent', dt='string', 
-                                        h=self.hideAttrs)
+                                        h=rigData.HIDE_ATTRS)
         pm.addAttr(limb, ln='defaultLimbChildren', dt='string', 
-                                        h=self.hideAttrs)
-        pm.addAttr(limb, ln='mirrorLimb', at='long', h=self.hideAttrs)
+                                        h=rigData.HIDE_ATTRS)
+        pm.addAttr(limb, ln='mirrorLimb', at='long', h=rigData.HIDE_ATTRS)
 
-        pm.addAttr(limb, ln='rebuildLimbType', at='bool', h=self.hideAttrs)
-        pm.addAttr(limb, ln='rebuildBhvType', at='bool', h=self.hideAttrs)
-        pm.addAttr(limb, ln='rebuildLimbGroup', at='bool', h=self.hideAttrs)
-        pm.addAttr(limb, ln='rebuildBhvDep', at='bool', h=self.hideAttrs)
-        pm.addAttr(limb, ln='rebuildAppDep', at='bool', h=self.hideAttrs)
-        # pm.addAttr(limb, ln='rebuildSkinInf', at='bool', h=self.hideAttrs)
+        pm.addAttr(limb, ln='rebuildLimbType', at='bool', h=rigData.HIDE_ATTRS)
+        pm.addAttr(limb, ln='rebuildBhvType', at='bool', h=rigData.HIDE_ATTRS)
+        pm.addAttr(limb, ln='rebuildLimbGroup', at='bool', h=rigData.HIDE_ATTRS)
+        pm.addAttr(limb, ln='rebuildBhvDep', at='bool', h=rigData.HIDE_ATTRS)
+        pm.addAttr(limb, ln='rebuildAppDep', at='bool', h=rigData.HIDE_ATTRS)
+        # pm.addAttr(limb, ln='rebuildSkinInf', at='bool', h=rigData.HIDE_ATTRS)
         # limb.rebuildLimbType.set(1)
         # limb.rebuildBhvType.set(1)
         # limb.rebuildLimbGroup.set(1)

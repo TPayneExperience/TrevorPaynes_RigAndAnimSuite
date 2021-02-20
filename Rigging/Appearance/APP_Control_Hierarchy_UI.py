@@ -36,7 +36,7 @@ class APP_Control_Hierarchy_UI:
         # bhvFilter += self.bhvMng.emptyLimbIndexes
         bhvFilter += rigData.EMPTY_BHV_INDEXES
         if bhvType in bhvFilter:
-            groups += self.bhvMng.GetJointGroups(self.limb)
+            groups += self.grpMng.GetJointGroups(self.limb)
             if bhvType in rigData.REVERSE_BHV_INDEXES:
                 groups = groups[::-1]
             # if bhvType in self.bhvMng.omitLastJointTypes:
@@ -44,7 +44,7 @@ class APP_Control_Hierarchy_UI:
                 groups = groups[:-1]
             if bhvType in rigData.RFK_BHV_INDEXES:
                 groups = [groups[0]]
-        groups += self.bhvMng.GetLimbGroups(self.limb)
+        groups += self.grpMng.GetLimbGroups(self.limb)
         for group in groups:
             control = pm.listConnections(group.control)[0]
             controlID = control.ID.get()

@@ -1,7 +1,18 @@
 
-CST_TYPES = ('Orient', 'Parent', 'Point',  'Scale')
+# ============= GLOBALS =============
+HIDE_ATTRS = False
+# HIDE_ATTRS = True
+__author__ = 'Trevor Payne'
+__version__ = '0.1'
 
-# BEHAVIORS 
+LICENSES = ('Free', 'Personal', 'Professional')
+SUITES = ('RIG', 'ANIM', 'RIG & ANIM')
+LICENSE = LICENSES[0]
+SUITE = SUITES[2]
+
+
+# ============= BEHAVIORS =============
+CST_TYPES = ('Orient', 'Parent', 'Point',  'Scale')
 BHV_TYPES = (   'FK - Chain (3+ Joints)', # 0
 
                 'IK - Pole Vector',     # 1
@@ -54,9 +65,7 @@ VIS_BHV_TYPES = (   'FK / Empty',
                     'RFK')
 
 
-
-
-# LIMBS
+# ============= LIMBS =============
 LIMB_TYPES = (  'Empty - Rigging',
         
                 '1 Joint BRANCH',
@@ -65,7 +74,7 @@ LIMB_TYPES = (  'Empty - Rigging',
                 '2 Joint CHAIN')
 LIMB_SIDES = ('M', 'L', 'R', '-')
 
-# JOINTS
+# ============= JOINTS =============
 JOINT_COLORS = ((1, 0, 0), # Red
                 (0, 1, 0), # Green
                 (0, 0, 1), # Blue
@@ -82,7 +91,7 @@ JOINT_COLORS = ((1, 0, 0), # Red
 #                     'Y': (1,-1,1),
 #                     'Z': (1,1,-1)}
 
-# GROUPS
+# ============= GROUPS =============
 GROUP_TYPES = ( 'Empty', # DO NOT CHANGE ORDER
 
                 'Joint', # FK, CST, IK Chain
