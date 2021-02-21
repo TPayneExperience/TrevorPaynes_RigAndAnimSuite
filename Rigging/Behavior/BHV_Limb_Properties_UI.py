@@ -9,7 +9,7 @@ class BHV_Limb_Properties_UI:
         self.parent = parent
         self.limbMng = parent.limbMng
         self.jntMng = parent.jntMng
-        self.bhvMng = parent.bhvMng
+        self.rigBHV = parent.rigBHV
         self.grpMng = parent.grpMng
         self.logger = parent.logger
 
@@ -35,13 +35,13 @@ class BHV_Limb_Properties_UI:
 
         # Add only bhv options relevant to that limb
         pm.optionMenu(self.bhvType_om, e=1, dai=1)
-        bhvTypes = self.bhvMng.GetBhvOptions(self.limb)
+        bhvTypes = self.rigBHV.GetBhvOptions(self.limb)
         for bhvType in bhvTypes:
             pm.menuItem(l=bhvType, p=self.bhvType_om)
 
         # Convert bhv type enum on limb to select the proper index
         bhvType = self.limb.bhvType.get()
-        # bhvTypeStr = self.bhvMng.bhvTypes[bhvType]
+        # bhvTypeStr = self.rigBHV.bhvTypes[bhvType]
         bhvTypeStr = rigData.BHV_TYPES[bhvType]
         index = bhvTypes.index(bhvTypeStr) + 1
         pm.optionMenu(self.bhvType_om, e=1, sl=index)
@@ -75,14 +75,14 @@ class BHV_Limb_Properties_UI:
     def SetBhvType(self): # Mostly UI
         self.logger.debug('\tBhv_LimbProp > SetBhvType')
         bhvTypeStr = pm.optionMenu(self.bhvType_om, q=1, v=1)
-        # newBhvIndex = self.bhvMng.bhvTypes.index(bhvTypeStr)
-        # old = self.bhvMng.bhvTypes[self.limb.bhvType.get()]
+        # newBhvIndex = self.rigBHV.bhvTypes.index(bhvTypeStr)
+        # old = self.rigBHV.bhvTypes[self.limb.bhvType.get()]
         newBhvIndex = rigData.BHV_TYPES.index(bhvTypeStr)
         old = rigData.BHV_TYPES[self.limb.bhvType.get()]
         self.logger.info('\tLimbProp > SET BEHAVIOR:')
         self.logger.info('\t\t%s >>> %s' % (old, bhvTypeStr))
         
-        self.bhvMng.SetBhvType(self.limb, newBhvIndex)
+        self.rigBHV.SetBhvType(self.limb, newBhvIndex)
         self.PopulateLimbProperties(newBhvIndex)
         self.PopulateBhvProperties()
         # self.PopulateControlFrame(newBhvIndex)
@@ -102,9 +102,9 @@ class BHV_Limb_Properties_UI:
         isCst = (bhvType in rigData.CST_BHV_INDEXES) 
         # pm.frameLayout(self.targetLayout, e=1, en=isCst)
         if isCst:
-            self.bhvMng.SetCstTargetLimb(self.limb, targetLimb)
+            self.rigBHV.SetCstTargetLimb(self.limb, targetLimb)
         else:
-            self.bhvMng.SetIKTargetLimb(self.limb, targetLimb)
+            self.rigBHV.SetIKTargetLimb(self.limb, targetLimb)
         # self.UpdateUI()
 
 
@@ -142,7 +142,7 @@ class BHV_Limb_Properties_UI:
         ikFilter = rigData.IK_CHAIN_BHV_INDEXES
         ikFilter += rigData.IK_PV_BHV_INDEXES
         if bhvType in rigData.CST_BHV_INDEXES:
-            # bhvFilter = range(len(self.bhvMng.bhvTypes))
+            # bhvFilter = range(len(self.rigBHV.bhvTypes))
             bhvFilter = range(len(rigData.BHV_TYPES))
         elif bhvType in ikFilter:
             bhvFilter = rigData.IK_TARGETABLE_BHV_INDEXES

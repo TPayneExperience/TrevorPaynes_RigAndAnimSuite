@@ -1,6 +1,8 @@
 
 import pymel.core as pm
 
+import Common.Utilities as util
+reload(util)
 
 import BHV_Limb_Hierarchy_UI as limbHier_UI
 reload(limbHier_UI)
@@ -18,16 +20,13 @@ class RIG_Behaviors_UI:
         self.parent = parent
         self.limbMng = parent.limbMng
         self.jntMng = parent.jntMng
-        self.bhvMng = parent.bhvMng
+        self.rigBHV = parent.rigBHV
         self.grpMng = parent.grpMng
         self.ctrMng = parent.ctrMng
         self.nameMng = parent.nameMng
         self.logger = parent.logger
         
         self._Setup()
-
-    def NewRig(self, rigRoot):
-        pass
 
 #=========== SETUP ====================================
 
@@ -54,14 +53,14 @@ class RIG_Behaviors_UI:
         self.limbProp_ui.Depopulate()
         self.grpHier_ui.SetLimb(None)
         self.grpProp_ui.Depopulate()
-        self.bhvMng.RebuildLimbs()
+        self.rigBHV.RebuildLimbs()
 
 #=========== LIMBS ====================================
 
     def LimbSelected(self, limb):
         self.logger.debug('\tRIG_Behaviors_UI > LimbSelected')
         if limb:
-            joints = self.jntMng.GetLimbJoints(limb)
+            joints = util.GetSortedLimbJoints(limb)
             pm.select(joints)
         self.limbProp_ui.SetLimb(limb)
         self.grpHier_ui.SetLimb(limb)

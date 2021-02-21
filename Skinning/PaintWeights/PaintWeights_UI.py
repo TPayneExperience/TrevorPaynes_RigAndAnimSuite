@@ -3,6 +3,9 @@
 import pymel.core as pm
 # from maya import mel
 
+import Common.Utilities as util
+reload(util)
+
 import PW_Meshes_Hierarchy_UI as mesh_ui
 reload(mesh_ui)
 import PW_Limb_Hierarchy_UI as limb_UI
@@ -19,7 +22,7 @@ class PaintWeights_UI:
         self.parent = parent
         self.limbMng = parent.limbMng
         self.jntMng = parent.jntMng
-        self.bhvMng = parent.bhvMng
+        self.rigBHV = parent.rigBHV
         self.meshMng = parent.meshMng
         self.skinMng = parent.skinMng
         self.logger = parent.logger
@@ -29,10 +32,6 @@ class PaintWeights_UI:
         self.joint = None
 
         self._Setup()
-
-    def NewRig(self, rigRoot):
-        self.rigRoot = rigRoot
-
 
 #=========== SETUP ====================================
 
@@ -81,7 +80,7 @@ class PaintWeights_UI:
     def JointSelected(self, joint):
         self.joint = joint
         if joint:
-            joints = self.jntMng.GetLimbJoints(self.limb)
+            joints = util.GetSortedLimbJoints(self.limb)
             if self.limb.limbType.get() == 2:
                 joints = joints[:-1]
             otherJoints = [j for j in joints if j != self.joint]

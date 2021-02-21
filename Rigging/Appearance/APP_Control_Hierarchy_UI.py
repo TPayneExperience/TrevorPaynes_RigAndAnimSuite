@@ -8,7 +8,7 @@ class APP_Control_Hierarchy_UI:
     def __init__(self, parent):
         self.parent = parent
         self.limbMng = parent.limbMng
-        self.bhvMng = parent.bhvMng
+        self.rigBHV = parent.rigBHV
         self.grpMng = parent.grpMng
         self.ctrMng = parent.ctrMng
         self.nameMng = parent.nameMng
@@ -33,13 +33,13 @@ class APP_Control_Hierarchy_UI:
         bhvFilter = rigData.FK_CHAIN_BHV_INDEXES
         bhvFilter += rigData.FK_BRANCH_BHV_INDEXES
         bhvFilter += rigData.RFK_BHV_INDEXES
-        # bhvFilter += self.bhvMng.emptyLimbIndexes
+        # bhvFilter += self.rigBHV.emptyLimbIndexes
         bhvFilter += rigData.EMPTY_BHV_INDEXES
         if bhvType in bhvFilter:
             groups += self.grpMng.GetJointGroups(self.limb)
             if bhvType in rigData.REVERSE_BHV_INDEXES:
                 groups = groups[::-1]
-            # if bhvType in self.bhvMng.omitLastJointTypes:
+            # if bhvType in self.rigBHV.omitLastJointTypes:
             if bhvType in rigData.OMIT_LAST_JOINT_BHV_INDEXES:
                 groups = groups[:-1]
             if bhvType in rigData.RFK_BHV_INDEXES:

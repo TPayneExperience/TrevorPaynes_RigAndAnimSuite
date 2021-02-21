@@ -5,20 +5,18 @@ import pymel.core as pm
 
 import Data.Rig_Data as rigData
 reload(rigData)
+import Common.Utilities as util
+reload(util)
 
 class Skin_Mananger:
     def __init__(self, parent):
         self.limbMng = parent.limbMng
         self.jntMng = parent.jntMng
-        self.bhvMng = parent.bhvMng
         self.meshMng = parent.meshMng
         self.logger = parent.logger
 
         self._skinTestAnimLayer = 'Skin_Test_Anim'
     
-    def NewRig(self, rigRoot):
-        pass
-
 
 #============= SETUP / TEARDOWNS ============================
 
@@ -26,7 +24,7 @@ class Skin_Mananger:
         joints = []
         for rootLimb in self.limbMng.GetRootLimbs():
             for limb in self.limbMng.GetLimbCreationOrder(rootLimb):
-                joints += self.jntMng.GetLimbJoints(limb, False)
+                joints += util.GetSortedLimbJoints(limb)
         for mesh in self.meshMng.GetAllMeshes():
             pm.skinCluster(joints, mesh)
 
@@ -41,11 +39,10 @@ class Skin_Mananger:
         joints = []
         for rootLimb in self.limbMng.GetRootLimbs():
             for limb in self.limbMng.GetLimbCreationOrder(rootLimb):
-                # if limb.bhvType.get() in self.bhvMng.omitLastJointTypes:
                 if limb.bhvType.get() in rigData.OMIT_LAST_JOINT_BHV_INDEXES:
-                    joints += self.jntMng.GetLimbJoints(limb)[:-1]
+                    joints += util.GetSortedLimbJoints(limb)[:-1]
                 else:
-                    joints += self.jntMng.GetLimbJoints(limb)
+                    joints += util.GetSortedLimbJoints(limb)
         pm.select(joints)
         pm.animLayer(self._skinTestAnimLayer, aso=1, s=1)
         pm.select(d=1)
@@ -67,14 +64,6 @@ class Skin_Mananger:
         pm.currentTime(1)
         pm.playbackOptions(min=1, max=120)
         pm.delete(self._skinTestAnimLayer)
-
-    # def Setup_JointColors(self):
-    #     for limb in self.limbMng.GetAllLimbs():
-    #         if limb.limbType.get() == 0:
-    #             continue
-    #         for joint in self.jntMng.GetLimbJoints(limb, False):
-    #             values = [0.5 + (random()*0.5) for i in range(3)]
-    #             joint.jointColor.set(values)
 
 #============= PAINT DISPLAY ============================
 
@@ -111,8 +100,7 @@ class Skin_Mananger:
 #============= LIMB / JOINT ANIM (TIMELINE) ============================
 
     def SkinTestLimbAnim(self, limb):
-        joints = self.jntMng.GetLimbJoints(limb)
-        # if limb.bhvType.get() in self.bhvMng.omitLastJointTypes:
+        joints = util.GetSortedLimbJoints(limb)
         if limb.bhvType.get() in rigData.OMIT_LAST_JOINT_BHV_INDEXES:
             joints = joints[:-1]
         start = joints[0].skinAnimStart.get()
@@ -146,14 +134,14 @@ class Skin_Mananger:
                 self.SetDefaultLimbSurfaceMask(mesh, limb)
             else:
                 self.Flood(mesh, attr, 0.3) # FIX LATER
-        for joint in self.jntMng.GetLimbJoints(limb):
+        for joint in util.GetSortedLimbJoints(limb):
             self.AddJointAttr(mesh, joint)
 
     def RemoveLimbAttrs(self, mesh, limb):
         attr = 'L' + str(limb.ID.get())
         if not mesh.hasAttr(attr):
             mesh.deleteAttr(attr)
-        for joint in self.jntMng.GetLimbJoints(limb):
+        for joint in util.GetSortedLimbJoints(limb):
             self.RemoveJointAttr(mesh, joint)
 
     def AddJointAttr(self, mesh, joint):
@@ -175,8 +163,7 @@ class Skin_Mananger:
 
     def SetDefaultLimbJointWeights(self, mesh, limb):
         # set limb mask to all vert influenced by child joints
-        joints = self.jntMng.GetLimbJoints(limb)
-        # if limb.bhvType.get() in self.bhvMng.omitLastJointTypes:
+        joints = util.GetSortedLimbJoints(limb)
         if limb.bhvType.get() in rigData.OMIT_LAST_JOINT_BHV_INDEXES:
             joints = joints[:-1]
         jointPos = {} # joint : pos
@@ -214,7 +201,7 @@ class Skin_Mananger:
         as limb mask'''
         # ONLY USE IF LIMBTYPE = Chain
         # From the end joint of the limb
-        joints = self.jntMng.GetLimbJoints(limb)
+        joints = util.GetSortedLimbJoints(limb)
         startJoint = joints[0]
         endJoint = joints[-1]
         sp = pm.xform(startJoint, q=1, t=1, ws=1)

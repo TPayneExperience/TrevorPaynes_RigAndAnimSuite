@@ -1,6 +1,9 @@
 
 import pymel.core as pm
 
+import Data.Rig_Data as rigData
+reload(rigData)
+
 class APP_Global_Properties_UI:
     def __init__(self, parent):
         self.parent = parent
@@ -8,11 +11,13 @@ class APP_Global_Properties_UI:
         self.ctrMng = parent.ctrMng
         self.logger = parent.logger
 
+        self.root = parent.root
+
         self._Setup()
     
     def Populate(self):
         self.logger.debug('\tApp_GlobalProp > Populate')
-        rigRoot = self.ctrMng.rigRoot
+        root = self.ctrMng.root
         pm.deleteUI(self.empty_at)
         pm.deleteUI(self.joint_at)
         pm.deleteUI(self.ikpv_at)
@@ -20,19 +25,19 @@ class APP_Global_Properties_UI:
         self.empty_at = pm.attrEnumOptionMenu(  l='Empty',
                                                 p=self.prop_cl,
                                                 cc=self.UpdateEmptyShapes,
-                                                at=rigRoot.appEmptyCtrShape)
+                                                at=root.appEmptyCtrShape)
         self.joint_at = pm.attrEnumOptionMenu(  l='FK',
                                                 p=self.prop_cl,
                                                 cc=self.UpdateJointShapes,
-                                                at=rigRoot.appJointCtrShape)
+                                                at=root.appJointCtrShape)
         self.ikpv_at = pm.attrEnumOptionMenu(   l='IKPV',
                                                 p=self.prop_cl,
                                                 cc=self.UpdateIKPVShapes,
-                                                at=rigRoot.appIKPVCtrShape)
+                                                at=root.appIKPVCtrShape)
         self.lookAt_at = pm.attrEnumOptionMenu( l='LookAt',
                                                 p=self.prop_cl,
                                                 cc=self.UpdateLookAtShapes,
-                                                at=rigRoot.appLookAtCtrShape)
+                                                at=root.appLookAtCtrShape)
 
 #=========== SETUP UI ==============================================
 
@@ -48,26 +53,31 @@ class APP_Global_Properties_UI:
 
     def UpdateEmptyShapes(self, shape):
         self.logger.info('\tApp_GlobalProp > UpdateEmptyShapes')
-        self._UpdateShapes(0, shape)
+        index = self.root.appEmptyCtrShape.get()
+        for limb in pm.listConnections(self.root.emptyLimbs):
+            group = pm.listConnections(limb.bhvEmptyGroup)[0]
+            self.ctrMng.SetShape(group, index)
 
     def UpdateJointShapes(self, shape):
         self.logger.info('\tApp_GlobalProp > UpdateJointShapes')
-        self._UpdateShapes(1, shape)
+        index = self.root.appJointCtrShape.get()
+        for limb in pm.listConnections(self.root.jointLimbs):
+            for joint in pm.listConnections(limb.joints):
+                group = pm.listConnections(joint.group)[0]
+                self.ctrMng.SetShape(group, index)
 
     def UpdateIKPVShapes(self, shape):
         self.logger.info('\tApp_GlobalProp > UpdateIKPVShapes')
-        self._UpdateShapes(2, shape)
+        index = self.root.appJointCtrShape.get()
+        for limb in pm.listConnections(self.root.jointLimbs):
+            group = pm.listConnections(limb.bhvIKPVGroup)[0]
+            self.ctrMng.SetShape(group, index)
 
     def UpdateLookAtShapes(self, shape):
         self.logger.info('\tApp_GlobalProp > UpdateLookAtShapes')
-        self._UpdateShapes(4, shape)
-
-    def _UpdateShapes(self, groupType, shape):
-        names = self.ctrMng.GetControlNames()
-        index = names.index(shape)
-        for group in self.grpMng.GetAllGroups():
-            if group.groupType.get() != groupType:
-                continue
+        index = self.root.appJointCtrShape.get()
+        for limb in pm.listConnections(self.root.jointLimbs):
+            group = pm.listConnections(limb.bhvLookAtGroup)[0]
             self.ctrMng.SetShape(group, index)
 
 

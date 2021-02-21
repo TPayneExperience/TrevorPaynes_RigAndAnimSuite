@@ -9,133 +9,170 @@ reload(util)
 
 class Limb_Manager:
     def __init__(self, parent):
-
         self.nameMng = parent.nameMng
+        self.grpMng = parent.grpMng
+        self.jntMng = parent.jntMng
         self.logger = parent.logger
 
-    def NewRig(self, rigRoot):
-        self.logger.debug('\tLimbMng > NewRig')
-        self.rigRoot = rigRoot
-        self._limbs = {} # limbID : limbNode
-        pm.addAttr(rigRoot, ln='nextLimbID', at='short', dv=1)
-        pm.addAttr(rigRoot, ln='limbs', dt='string')
-        self.limbGroup = pm.group(name='LIMBS', em=1, p=rigRoot)
+#============= ROOT ============================
 
-    def SetRig(self, rigRoot):
-        self.logger.debug('\tLimbMng > SetRig')
-        # MISSING: for multiple rigs in scene, remap limb IDs, only for anim though
-        self.rigRoot = rigRoot
-        self._limbs = {} # limbID : limbNode
-        for limb in pm.listConnections(self.rigRoot.limbs):
-            self._limbs[limb.ID.get()] = limb
-        
-#============= ACCESSORS + MUTATORS ============================
+    def NewRoot(self, root):
+        self.logger.debug('\tLimbMng > NewRoot')
+        self.limbGroup = pm.group(name='LIMBS', em=1, p=root)
 
-    def GetLimb(self, limbID):
-        self.logger.debug('\tLimbMng > GetLimb')
-        return self._limbs[limbID]
-    
-    # def GetLimbSide(self, limb): # Name Manager + button labels
-    #     self.logger.debug('\tLimbMng > GetLimbSide')
-    #     # return self.limbSides[limb.side.get()]
-    #     return rigData.LIMB_SIDES[limb.side.get()]
-    
-    def GetLimbParent(self, limb):
-        self.logger.debug('\tLimbMng > GetLimbParent')
-        parent = pm.listConnections(limb.limbParent)
-        if parent:
-            return parent[0]
-        return None
+    def SetRoot(self, root):
+        self.logger.debug('\tLimbMng > SetRoot')
+        for child in pm.listRelatives(root, c=1, type='transform'):
+            if child.shortName() == 'LIMBS':
+                self.jntGroup = child
+                break
 
-    # def GetLimbMirror(self, limb):
-    #     return pm.listConnections(limb.mirrorLimb)
+#============= ADD LIMB ============================
 
-    def GetLimbPrefix(self, limb):
-        self.logger.debug('\tLimbMng > GetLimbPrefix')
-        rigRoot = pm.listConnections(limb.rigRoot)[0]
-        return rigRoot.prefix.get()
-
-    def GetAllLimbs(self): # used for bhv limb selection comboboxes
-        self.logger.debug('\tLimbMng > GetAllLimbs')
-        return list(self._limbs.values())
-
-#============= FUNCTIONS ============================
-
-    def Add(self):
-        '''
-        ID's are used for the TreeView UI items ONLY,
-        most all data tracked through storage and connections.
-        '''
-        self.logger.debug('\tLimbMng > Add')
-        limbID = self.rigRoot.nextLimbID.get()
-        self.rigRoot.nextLimbID.set(limbID + 1)
-        
+    def _AddLimb(self, root):
+        self.logger.debug('\tLimbMng > AddLimb')
+        limbID = root.nextLimbID.get()
+        root.nextLimbID.set(limbID + 1)
+        hide = rigData.HIDE_ATTRS
         pfrsName = 'Limb%03d' % limbID
-        # limbTypes = ':'.join(self.limbTypes)
-        # limbSides = ':'.join(self.limbSides)
-        # ctrTypes = ':'.join(self.ctrTypes)
         limbTypes = ':'.join(rigData.LIMB_TYPES)
         limbSides = ':'.join(rigData.LIMB_SIDES)
+        bhvTypes = ':'.join(rigData.BHV_TYPES)
+        visBhvTypes = ':'.join(rigData.VIS_BHV_TYPES)
 
-        # limb = pm.createNode('network', name=pfrsName)
         limb = pm.group(name=pfrsName, em=1, p=self.limbGroup)
         util.ChannelBoxAttrs(limb)
-        pm.addAttr(limb, ln='rigRoot', dt='string', h=rigData.HIDE_ATTRS)
-        pm.addAttr(limb, ln='ID', at='long', dv=limbID, h=rigData.HIDE_ATTRS)
-        pm.addAttr(limb, ln='pfrsName', dt='string', h=rigData.HIDE_ATTRS)
+        pm.addAttr(limb, ln='rigRoot', dt='string', h=hide)
+        pm.addAttr(limb, ln='ID', at='long', dv=limbID, h=hide)
+        pm.addAttr(limb, ln='pfrsName', dt='string', h=hide)
         limb.pfrsName.set(pfrsName)
-        pm.addAttr(limb, ln='limbType', at='enum', enumName=limbTypes,
-                                        h=rigData.HIDE_ATTRS)
-        pm.addAttr(limb, ln='side', at='enum', enumName=limbSides,
-                                        h=rigData.HIDE_ATTRS)
-        pm.addAttr(limb, ln='joints', dt='string', h=rigData.HIDE_ATTRS)
+        pm.addAttr(limb, ln='limbType', at='enum', en=limbTypes,
+                                        h=hide)
+        pm.addAttr(limb, ln='side', at='enum', en=limbSides,
+                                        h=hide)
+        pm.addAttr(limb, ln='joints', dt='string', h=hide)
 
-        pm.addAttr(limb, ln='limbParent', dt='string', h=rigData.HIDE_ATTRS)
+        # LIMB PARENTING
+        pm.addAttr(limb, ln='limbParent', dt='string', h=hide)
         pm.addAttr(limb, ln='limbParentJoint', at='enum', en='None', 
-                                        h=rigData.HIDE_ATTRS)
-        pm.addAttr(limb, ln='limbChildren', dt='string', h=rigData.HIDE_ATTRS)
+                                        h=hide)
+        pm.addAttr(limb, ln='limbChildren', dt='string', h=hide)
         
         pm.addAttr(limb, ln='defaultLimbParent', dt='string', 
-                                        h=rigData.HIDE_ATTRS)
+                                        h=hide)
         pm.addAttr(limb, ln='defaultLimbChildren', dt='string', 
-                                        h=rigData.HIDE_ATTRS)
-        pm.addAttr(limb, ln='mirrorLimb', at='long', h=rigData.HIDE_ATTRS)
+                                        h=hide)
+        pm.addAttr(limb, ln='mirrorLimb', at='long', h=hide)
 
-        pm.addAttr(limb, ln='rebuildLimbType', at='bool', h=rigData.HIDE_ATTRS)
-        pm.addAttr(limb, ln='rebuildBhvType', at='bool', h=rigData.HIDE_ATTRS)
-        pm.addAttr(limb, ln='rebuildLimbGroup', at='bool', h=rigData.HIDE_ATTRS)
-        pm.addAttr(limb, ln='rebuildBhvDep', at='bool', h=rigData.HIDE_ATTRS)
-        pm.addAttr(limb, ln='rebuildAppDep', at='bool', h=rigData.HIDE_ATTRS)
-        # pm.addAttr(limb, ln='rebuildSkinInf', at='bool', h=rigData.HIDE_ATTRS)
-        # limb.rebuildLimbType.set(1)
-        # limb.rebuildBhvType.set(1)
-        # limb.rebuildLimbGroup.set(1)
-        # limb.rebuildBhvDep.set(1)
-        # limb.rebuildAppDep.set(1)
-        # limb.rebuildSkinInf.set(1)
+        # BEHAVIORS
+        pm.addAttr(limb, ln='bhvType', at='enum', en=bhvTypes, h=hide)
+        pm.addAttr(limb, ln='rebuildLimbType', at='bool', dv=1, h=hide)
+        pm.addAttr(limb, ln='rebuildBhvType', at='bool', h=hide)
+        pm.addAttr(limb, ln='rebuildBhvDep', at='bool', h=hide)
+        pm.addAttr(limb, ln='rebuildAppDep', at='bool', h=hide)
+        # pm.addAttr(limb, ln='rebuildSkinInf', at='bool', h=hide)
+        
+        # VIS PARENTING
+        pm.addAttr(limb, ln='visParent', dt='string', h=hide)
+        pm.addAttr(limb, ln='visChildren', dt='string', h=hide)
+        pm.addAttr(limb, ln='visParentBhvType', at='enum', en=visBhvTypes, 
+                                                        h=hide)
 
-        pm.connectAttr(self.rigRoot.limbs, limb.rigRoot)
-        self.UpdateLimbName(limb)
-        self._limbs[limbID] = limb
-        self.rigRoot.rebuildSkinInf.set(1)
+        # IK PV + CST
+        pm.addAttr(limb, ln='bhvChildren', dt='string', h=hide) 
+
+        # CHANNEL BOX
+        pm.addAttr(limb, ln='channelBoxJointCtrPos', at='bool', h=hide)
+        pm.addAttr(limb, ln='channelBoxJointCtrRot', at='bool', dv=1, h=hide)
+        pm.addAttr(limb, ln='channelBoxJointCtrScale', at='bool', h=hide)
+        pm.addAttr(limb, ln='channelBoxLimbCtrPos', at='bool', dv=1, h=hide)
+        pm.addAttr(limb, ln='channelBoxLimbCtrRot', at='bool', h=hide)
+        pm.addAttr(limb, ln='channelBoxLimbCtrScale', at='bool', h=hide)
+        
         return limb
 
-    def Remove(self, limb): # Should be called after joints deleted
+    def AddEmptyRigLimb(self, root):
+        self.logger.debug('\tLimbMng > AddEmptyRigLimb')
+        limb = self._AddLimb(root)
+        pm.addAttr(limb, ln='bhvEmptyGroup', dt='string', h=rigData.HIDE_ATTRS)
+        limb.bhvType.set(rigData.EMPTY_BHV_INDEXES[0])
+        self.grpMng.AddEmptyGroup(limb)
+        self.UpdateLimbName(limb)
+        pm.connectAttr(root.emptyLimbs, limb.rigRoot)
+        return limb
+
+    def AddJointLimb(self, root, joints):
+        self.logger.debug('\tLimbMng > AddJointLimb')
+        limb = self._AddLimb(root)
+        for joint in joints:
+            self.jntMng.AddJoint(limb, joint)
+        self.jntMng.ReindexJoints(limb)
+        
+        bhvCstTypes = ':'.join(rigData.CST_TYPES)
+        axes = ':'.join(rigData.AXES_NAMES)
+        hide = rigData.HIDE_ATTRS
+
+        # LookAt, IKPV
+        pm.addAttr(limb, ln='bhvIKPVGroup', dt='string', h=hide)
+        pm.addAttr(limb, ln='bhvLookAtGroup', dt='string', h=hide)
+
+        # IK PV + CST 
+        pm.addAttr(limb, ln='bhvParent', dt='string', h=hide) 
+        pm.addAttr(limb, ln='bhvParentJoint', at='enum', en='None', h=hide)
+        pm.addAttr(limb, ln='bhvIKPVCtrJoint', at='enum', en='None', h=hide)
+        pm.addAttr(limb, ln='bhvCstType', at='enum', en=bhvCstTypes, h=hide)
+        pm.addAttr(limb, ln='cstPosX', at='bool', dv=1, h=hide)
+        pm.addAttr(limb, ln='cstPosY', at='bool', dv=1, h=hide)
+        pm.addAttr(limb, ln='cstPosZ', at='bool', dv=1, h=hide)
+        pm.addAttr(limb, ln='cstRotX', at='bool', dv=1, h=hide)
+        pm.addAttr(limb, ln='cstRotY', at='bool', dv=1, h=hide)
+        pm.addAttr(limb, ln='cstRotZ', at='bool', dv=1, h=hide)
+
+        # IK PV + Look At
+        pm.addAttr(limb, ln='bhvAxis', at='enum', en=axes, dv=4) # IKPV, LookAt
+        pm.addAttr(limb, ln='bhvDistance', at='float', min=0, dv=1) # IKPV, LookAt
+        
+        self.grpMng.AddIKPVGroup(limb)
+        self.grpMng.AddLookAtGroup(limb)
+
+        self.UpdateLimbName(limb)
+        pm.connectAttr(root.jointLimbs, limb.rigRoot)
+        root.rebuildSkinInf.set(1)
+        return limb
+
+#============= REMOVE LIMB ============================
+
+    def _RemoveLimb(self, limb): # Should be called after joints deleted
         self.logger.debug('\tLimbMng > Remove')
         if pm.listConnections(limb.mirrorLimb):
             self._BreakMirror(limb)
         del(self._limbs[limb.ID.get()])
         pm.select(d=1)
         pm.delete(limb)
-        self.rigRoot.rebuildSkinInf.set(1)
 
-    def Reparent(self, child, parent):
-        self.logger.debug('\tLimbMng > Reparent')
+    def RemoveEmptyLimb(self, limb):
+        group = pm.listConnections(limb.bhvEmptyGroup)[0]
+        self.grpMng.Remove(group)
+        self._RemoveLimb(limb)
+
+    def RemoveJointLimb(self, limb):
+        root = pm.listConnections(limb.rigRoot)[0]
+        root.rebuildSkinInf.set(1)
+        for joint in pm.listConnections(limb.joints):
+            self.jntMng.RemoveJoint(joint)
+        for group in self.grpMng.GetLimbGroups(limb):
+            self.grpMng.Remove(group)
+        self._RemoveLimb(limb)
+
+#============= MISC ============================
+
+    def ReparentLimb(self, child, parent):
+        self.logger.debug('\tLimbMng > ReparentLimb')
         pm.disconnectAttr(child.limbParent)
         if parent:
             pm.connectAttr(parent.limbChildren, child.limbParent)
 
-    def Rename(self, sourceLimb, newName): # list should repopulate after call
+    def RenameLimb(self, sourceLimb, newName): # list should repopulate after call
         self.logger.debug('\tLimbMng > Rename')
         names = [limb.pfrsName.get() for limb in self._limbs.values()]
         if (names.count(newName) >= 2): # Only 2 can have same name
@@ -179,16 +216,33 @@ class Limb_Manager:
 
 #============= PARENTS / TREE MANIPULATION ============================
 
+    def GetDefaultLimbHier(self):
+        self.logger.debug('\tBhvMng > GetDefaultLimbHier')
+        limbParents = {} # childLimb : parentLimb
+        for childJoint in self.jntMng.GetAllJoints():
+            childLimb = pm.listConnections(childJoint.limb)
+            if not childLimb or childLimb[0] in limbParents:
+                continue
+            parentJoint = pm.listRelatives(childJoint, p=1, type='joint')
+            if not parentJoint or not parentJoint[0].hasAttr('limb'):
+                continue
+            parentLimb = pm.listConnections(parentJoint[0].limb)
+            if not parentLimb:
+                continue
+            if childLimb[0] != parentLimb[0]:
+                limbParents[childLimb[0]] = parentLimb[0]
+        return limbParents
+
     def RebuildLimbDict(self):
         self.logger.debug('\tLimbMng > RebuildLimbDict')
         self._limbs = {}
         for limb in pm.listRelatives(self.limbGroup, c=1):
             limbID = limb.ID.get()
             if limbID in self._limbs:
-                nextID = self.rigRoot.nextLimbID.get()
+                nextID = self.root.nextLimbID.get()
                 maxID = max(list(self._limbs.keys())) + 1
                 limbID = max(nextID, maxID)
-                self.rigRoot.nextLimbID.set(limbID + 1)
+                self.root.nextLimbID.set(limbID + 1)
                 limb.ID.set(limbID)
             self._limbs[limbID] = limb
 
@@ -222,3 +276,14 @@ class Limb_Manager:
                                     rigData.LIMB_SIDES[limb.side.get()],
                                     'NODE')
         limb.rename(limbName)
+        for joint in pm.listConnections(limb.joints):
+            self.jntMng.UpdateJointName(joint)
+        for group in self.grpMng.GetLimbGroups(limb):
+            self.grpMng.UpdateGroupName(group)
+
+    def ParentLimbsBySkeleton(self):
+        limbParents = self.GetDefaultLimbHier()
+        for child, parent in limbParents.items():
+            self.ReparentLimb(child, parent)
+            self.jntMng.UpdateLimbParentJoint(child)
+

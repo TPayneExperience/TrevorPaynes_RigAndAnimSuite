@@ -5,6 +5,8 @@ import platform
 import subprocess
 import time
 
+import pymel.core as pm
+
 import Managers.File_Manager as fm
 reload(fm)
 import Managers.Json_Manager as js
@@ -15,11 +17,9 @@ import Managers.Joint_Manager as jm
 reload(jm)
 import Managers.Limb_Manager as lm
 reload(lm)
-import Rigging.Behavior.RIG_Behaviors as bhv
-reload(bhv)
-import Managers.BHV_Group_Manager as grp
+import Managers.Group_Manager as grp
 reload(grp)
-import Managers.APP_Control_Manager as ctr
+import Managers.Control_Manager as ctr
 reload(ctr)
 import Managers.Rig_Manager as rigMng
 reload(rigMng)
@@ -27,6 +27,15 @@ import Managers.Mesh_Manager as meshMng
 reload(meshMng)
 import Managers.Skin_Manager as skinMng
 reload(skinMng)
+import Managers.Root_Manager as rootMng
+reload(rootMng)
+
+import Rigging.Behavior.RIG_Behaviors as rigBHV
+reload(rigBHV)
+import Rigging.LimbSetup.RIG_LimbSetup as rigLS
+reload(rigLS)
+import Rigging.JointSetup.RIG_JointSetup as rigJS
+reload(rigJS)
 
 class PayneFreeRigSuite:
     def __init__(self):
@@ -34,21 +43,41 @@ class PayneFreeRigSuite:
         self.loggingMode = logging.DEBUG
         self.StartLogger()
 
+        # MANAGERS
         self.fileMng = fm.File_Manager()
         self.jsonMng = js.Json_Manager()
+        self.nameMng = nm.Name_Manager(self)
+        self.ctrMng = ctr.Control_Manager(self)
+        self.grpMng = grp.Group_Manager(self)
+        self.jntMng = jm.Joint_Manager(self)
+        self.limbMng = lm.Limb_Manager(self)
+        self.rigMng = rigMng.Rig_Manager(self)
+        self.meshMng = meshMng.Mesh_Manager(self)
+        self.skinMng = skinMng.Skin_Mananger(self) # REMOVE LATER
+        self.rootMng = rootMng.Root_Manager(self)
 
         # RIGGING
-        self.nameMng = nm.Name_Manager(self)
-        self.limbMng = lm.Limb_Manager(self)
-        self.ctrMng = ctr.APP_Control_Manager(self)
-        self.jntMng = jm.Joint_Manager(self)
-        self.grpMng = grp.BHV_Group_Manager(self)
-        self.bhvMng = bhv.RIG_Behaviors(self)
-        self.rigMng = rigMng.Rig_Manager(self)
+        self.rigJS = rigJS.RIG_JointSetup(self)
+        self.rigLS = rigLS.RIG_LimbSetup(self)
+        self.rigBHV = rigBHV.RIG_Behaviors(self)
 
-        # SKINNING
-        self.meshMng = meshMng.Mesh_Manager()
-        self.skinMng = skinMng.Skin_Mananger(self)
+#============= ROOT ============================
+
+    def NewRoot(self, prefix, nameOrder, showPrefix):
+        self.root = self.rootMng.AddRoot(prefix, nameOrder, showPrefix)
+        self.nameMng.SetRoot(self.root)
+        self.limbMng.NewRoot(self.root)
+        # self.grpMng.SetRoot(self.root)
+        # self.ctrMng.NewRoot(self.root)
+        self.jntMng.NewRoot(self.root)
+        self.meshMng.NewRoot(self.root)
+
+    def NewScene(self):
+        pm.flushUndo()
+        pm.newFile(newFile=1, force=1)
+        self.ctrMng.NewScene()
+        self.jntMng.NewScene()
+        self.meshMng.NewScene()
 
 #=========== LOGGER ====================================
    

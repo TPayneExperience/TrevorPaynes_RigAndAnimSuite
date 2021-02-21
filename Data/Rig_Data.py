@@ -36,7 +36,7 @@ TWO_JOINT_CHAIN_BHV_INDEXES = (11, 6, 12, 5)
 THREE_JOINT_CHAIN_BHV_INDEXES = (0, 6, 8, 10, 9, 1, 5, 3)
 TWO_JOINT_BRANCH_BHV_INDEXES = (6, 3)
 
-OMIT_LAST_JOINT_BHV_INDEXES = (0, 5, 10)
+OMIT_LAST_JOINT_BHV_INDEXES = (0, 8) # (0, 5, 10)
 REVERSE_BHV_INDEXES = (8, 12, 9)
 
 FK_BRANCH_BHV_INDEXES = (6,)
@@ -99,7 +99,8 @@ GROUP_TYPES = ( 'Empty', # DO NOT CHANGE ORDER
                 'DEPRICATED - FKIKSwitch',
                 'LookAt')
 
-
+# ============= CONTROLS =============
+CONTROL_TEMPLATES = {} # Filled by ctrMng.NewScene()
 
 
 

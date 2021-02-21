@@ -9,7 +9,7 @@ class BHV_Limb_Hierarchy_UI:
         self.parent = parent
         self.limbMng = parent.limbMng
         self.jntMng = parent.jntMng
-        self.bhvMng = parent.bhvMng
+        self.rigBHV = parent.rigBHV
         self.grpMng = parent.grpMng
         self.nameMng = parent.nameMng
         self.logger = parent.logger
@@ -41,7 +41,7 @@ class BHV_Limb_Hierarchy_UI:
                             lbc=(limbID, 0.3, 0.1, 0.1))
                 else:
                     pm.treeView(self.widget, e=1, bvf=(limbID, 1, 0))
-                # if limb.bhvType.get() in self.bhvMng.emptyLimbIndexes:
+                # if limb.bhvType.get() in self.rigBHV.emptyLimbIndexes:
                 if limb.bhvType.get() in rigData.EMPTY_BHV_INDEXES:
                     pm.treeView(self.widget, e=1, ornament=(limbID, 1, 0, 3))
 
@@ -53,11 +53,11 @@ class BHV_Limb_Hierarchy_UI:
         msg += '\n- Double Click to rename Empty Limbs'
         self.widget = pm.treeView(ams=0, nb=1, ann=msg)
         pm.treeView(self.widget, e=1, scc=self.SelectionChanged,
-                                        elc=self.Rename,
-                                        dad=self.Reparent)
+                                        elc=self.RenameLimb,
+                                        dad=self.ReparentLimb)
         with pm.popupMenu():
-            pm.menuItem(l='Add Empty Limb', c=self.AddEmptyLimb)
-            self.remove_mi = pm.menuItem(l='Remove Empty Limb', 
+            pm.menuItem(l='Add Empty Limb', c=self.AddEmptyRigLimb)
+            self.remove_mi = pm.menuItem(l='Remove Empty Rig Limb', 
                                         en=0, c=self.RemoveEmptyLimb)
             pm.menuItem(d=1)
             pm.menuItem(l='Load Skeleton Hierarchy', c=self.LoadSkelHier)
@@ -81,8 +81,8 @@ class BHV_Limb_Hierarchy_UI:
             self.logger.info('\tLimbHier > DESELECTED limb')
             self.parent.LimbSelected(None)
 
-    def Reparent(self, limbIDsStr, oldParents, i2, newParentIDStr, i3, i4, i5):
-        self.logger.debug('\tBhv_LimbHier > Reparent')
+    def ReparentLimb(self, limbIDsStr, oldParents, i2, newParentIDStr, i3, i4, i5):
+        self.logger.debug('\tBhv_LimbHier > ReparentLimb')
         if oldParents[0] == newParentIDStr:
             return
         child = self.limbMng.GetLimb(int(limbIDsStr[0]))
@@ -95,13 +95,13 @@ class BHV_Limb_Hierarchy_UI:
         else:
             parent = None
             self.logger.info('\tLimbHier > REPARENTING "%s" to world' % name)
-        self.limbMng.Reparent(child, parent)
-        self.bhvMng.UpdateLimbParentJoint(child)
+        self.limbMng.ReparentLimb(child, parent)
+        self.jntMng.UpdateLimbParentJoint(child)
     
-    def Rename(self, limbIDStr, newName):
-        self.logger.debug('\tBhv_LimbHier > Rename')
+    def RenameLimb(self, limbIDStr, newName):
+        self.logger.debug('\tBhv_LimbHier > RenameLimb')
         limb = self.limbMng.GetLimb(int(limbIDStr))
-        # if limb.bhvType.get() not in self.bhvMng.emptyLimbIndexes:
+        # if limb.bhvType.get() not in self.rigBHV.emptyLimbIndexes:
         if limb.bhvType.get() not in rigData.EMPTY_BHV_INDEXES:
             return ''
         oldName = limb.pfrsName.get()
@@ -114,7 +114,7 @@ class BHV_Limb_Hierarchy_UI:
             return ''
         if not self.nameMng.AreAllValidCharacters(newName):
             return ''
-        if not self.limbMng.Rename(limb, newName):
+        if not self.limbMng.RenameLimb(limb, newName):
             msg = '**** Two limbs MAX may have same name'
             self.logger.error(msg)
         group = pm.listConnections(limb.bhvEmptyGroup)[0]
@@ -124,25 +124,27 @@ class BHV_Limb_Hierarchy_UI:
 
 #=========== RMB ====================================
 
-    def AddEmptyLimb(self, ignore):
-        self.bhvMng.AddEmptyLimb()
+    def AddEmptyRigLimb(self, ignore):
+        self.rigBHV.AddEmptyRigLimb()
         self.Populate()
 
     def RemoveEmptyLimb(self, ignore):
         limbIDStrs = pm.treeView(self.widget, q=1, selectItem=1)
         limb = self.limbMng.GetLimb(int(limbIDStrs[0]))
-        self.bhvMng.RemoveEmptyLimb(limb)
+        self.rigBHV.RemoveEmptyLimb(limb)
         self.Populate()
 
     def LoadSkelHier(self, ignore):
         self.logger.info('\tLimbHier > LOAD SKELETON hierarchy')
-        self.bhvMng.ParentLimbsBySkeleton()
+        self.limbMng.ParentLimbsBySkeleton()
         # self.parent.UpdateLimbUI()
         self.Populate()
     
     def LoadDefaultHier(self, ignore):
         self.logger.info('\tLimbHier > LOAD DEFAULT hierarchy')
-        for limb in self.limbMng.GetAllLimbs():
+        limbs = pm.listConnections(self.limbMng.root.jointLimbs)
+        limbs += pm.listConnections(self.limbMng.root.emptyLimbs)
+        for limb in limbs:
             pm.disconnectAttr(limb.limbParent)
             parents = pm.listConnections(limb.defaultLimbParent)
             if parents:
@@ -151,7 +153,9 @@ class BHV_Limb_Hierarchy_UI:
     
     def SaveAsDefaultHier(self, ignore):
         self.logger.info('\tLimbHier > SAVE DEFAULT hierarchy')
-        for limb in self.limbMng.GetAllLimbs():
+        limbs = pm.listConnections(self.limbMng.root.jointLimbs)
+        limbs += pm.listConnections(self.limbMng.root.emptyLimbs)
+        for limb in limbs:
             pm.disconnectAttr(limb.defaultLimbParent)
             parents = pm.listConnections(limb.limbParent)
             if parents:

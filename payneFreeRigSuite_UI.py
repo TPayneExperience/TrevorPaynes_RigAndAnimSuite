@@ -30,7 +30,7 @@ class PayneFreeRigSuite_UI:
         self.ctrMng = self.pfrs.ctrMng
         self.jntMng = self.pfrs.jntMng
         self.grpMng = self.pfrs.grpMng
-        self.bhvMng = self.pfrs.bhvMng
+        self.rigBHV = self.pfrs.rigBHV
         self.rigMng = self.pfrs.rigMng
 
         # SKINNING
@@ -47,49 +47,6 @@ class PayneFreeRigSuite_UI:
         
         debug.PFRS_Debug(self)
 
-    def NewRig(self, prefix, nameOrder, showPrefix):
-        msg = '\tPFRS_UI > NewRig'
-        msg += '\t\tPrefix = ' + prefix
-        msg += '\t\tNameOrder = ' + str(nameOrder)
-        msg += '\t\tShowPrefix = ' + str(showPrefix)
-        self.logger.debug(msg)
-        pm.flushUndo()
-        pm.newFile(newFile=1, force=1)
-        self.rigRoot = pm.group(name='temp', em=True)
-
-        # NAMING
-        pm.addAttr(self.rigRoot, ln='prefixIndex', at='short', dv=nameOrder[0])
-        pm.addAttr(self.rigRoot, ln='limbIndex', at='short', dv=nameOrder[1])
-        pm.addAttr(self.rigRoot, ln='jointIndex', at='short', dv=nameOrder[2])
-        pm.addAttr(self.rigRoot, ln='sideIndex', at='short', dv=nameOrder[3])
-        pm.addAttr(self.rigRoot, ln='typeIndex', at='short', dv=nameOrder[4])
-        pm.addAttr(self.rigRoot, ln='showPrefix', at='bool', dv=showPrefix)
-        pm.addAttr(self.rigRoot, ln='mainTab', at='enum', en='Rig:Skin:Anim')
-        pm.addAttr(self.rigRoot, ln='riggingTab', at='enum',
-                                    en='Joint:Limbs:Behaviors:Appearance:Test')
-        pm.addAttr(self.rigRoot, ln='skinningTab', at='enum', 
-                                    en='Mesh:QuickWeights:PaintWeights:Test')
-        pm.addAttr(self.rigRoot, ln='prefix', dt='string')
-        self.rigRoot.prefix.set(prefix)
-
-        # When Joints/limbs added/removed
-        pm.addAttr(self.rigRoot, ln='rebuildSkinInf', at='bool', h=rigData.HIDE_ATTRS)
-        # MESH LAYER
-        self.meshLayer = pm.createDisplayLayer(n='Rig Mesh', e=True)
-        pm.setAttr(self.meshLayer + '.displayType', 2)
-        pm.select(d=True)
-        self.meshGroup = pm.group(name='Mesh_GRP', em=True, p=self.rigRoot)
-        self.UpdatePrefix()
-        self.nameMng.NewRig(self.rigRoot)
-        self.rig_ui.NewRig(self.rigRoot)
-        self.skin_ui.NewRig(self.rigRoot)
-        
-
-    def UpdatePrefix(self):
-        self.rigRoot.rename('%s_ROOT' % self.rigRoot.prefix.get())
-
-    def SetRig(self, rigRoot):
-        self.rigRoot = rigRoot
 
 #=========== SETUP ====================================
 
@@ -105,7 +62,7 @@ class PayneFreeRigSuite_UI:
                     self.limbMng = self.rig_ui.limbMng
                     self.grpMng = self.rig_ui.grpMng
                     self.jntMng = self.rig_ui.jntMng
-                    self.bhvMng = self.rig_ui.bhvMng
+                    self.rigBHV = self.rig_ui.rigBHV
                     self.ctrMng = self.rig_ui.ctrMng
                 with pm.horizontalLayout(en=0) as self.skinning_l:
                     self.skin_ui = skin_ui.Skinning_UI(self)
@@ -184,7 +141,7 @@ class PayneFreeRigSuite_UI:
 
     def Setup_Editable(self):
         self.logger.debug('\tPFRS_UI > SETUP_Editable')
-        index = self.rigRoot.mainTab.get()
+        index = self.pfrs.root.mainTab.get()
         if (index == 0):
             self.rig_ui.Setup_Editable()
         elif (index == 1):
@@ -192,18 +149,18 @@ class PayneFreeRigSuite_UI:
         
     def Teardown_Editable(self, nextIndex):
         self.logger.debug('\tPFRS_UI > TEARDOWN_Editable')
-        lastIndex = self.rigRoot.mainTab.get()
+        lastIndex = self.pfrs.root.mainTab.get()
         if (lastIndex == 0): 
             self.rig_ui.Teardown_Editable()
         elif (lastIndex == 1): 
-            index = self.rigRoot.skinningTab.get()
+            index = self.pfrs.root.skinningTab.get()
             self.skin_ui.Teardown_Editable(index)
             # self.skin_ui.skinMng.Teardown_Skins()
         
     def TabChanged(self):
         nextIndex = pm.tabLayout(self.tab, q=1, selectTabIndex=1)-1
         self.Teardown_Editable(nextIndex)
-        self.rigRoot.mainTab.set(nextIndex)
+        self.pfrs.root.mainTab.set(nextIndex)
         self.Setup_Editable()
     
 #=========== FUNCTIONALITY ====================================
@@ -218,7 +175,7 @@ class PayneFreeRigSuite_UI:
         self.pfrs.EndLogger()
 
     def UpdateEnableUI(self):
-        pm.tabLayout(self.tab, e=1, en=bool(self.rigRoot))
+        pm.tabLayout(self.tab, e=1, en=bool(self.pfrs.root))
 
     def NewRig_Dialog(self, ignore):
         pass

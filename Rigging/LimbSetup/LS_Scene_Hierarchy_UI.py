@@ -5,9 +5,10 @@ import pymel.core as pm
 class LS_Scene_Hierarchy_UI:
     def __init__(self, parent):
         self.parent = parent
+        self.rigLS = parent.rigLS
         self.limbMng = parent.limbMng
         self.jntMng = parent.jntMng
-        self.bhvMng = parent.bhvMng
+        self.rigBHV = parent.rigBHV
         self.logger = parent.logger
 
         self.selectableJoints = []
@@ -88,7 +89,7 @@ class LS_Scene_Hierarchy_UI:
 
     def AutoBuildByHierarchy(self, ignore):
         self.logger.info('\tLS_SceneHier > Auto Build by Hierarchy')
-        self.bhvMng.AutoBuildByHierarchy()
+        self.rigLS.AutoBuildByHierarchy()
         self.parent.Populate()
         self.parent.UpdateSceneFrame()
         self.logger.info('\tComplete')
@@ -96,7 +97,7 @@ class LS_Scene_Hierarchy_UI:
     def AutoBuildByName(self, ignore):
         '''Auto builds limb/joint hier by name LIMB_SIDE[M/R/L]_JOINT'''
         self.logger.info('\tLS_SceneHier > Auto Build by Name')
-        self.bhvMng.AutoBuildByName()
+        self.rigLS.AutoBuildByName()
         self.parent.Populate()
         self.parent.UpdateSceneFrame()
         self.logger.info('\tComplete')

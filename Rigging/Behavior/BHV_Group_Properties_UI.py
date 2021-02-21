@@ -1,12 +1,15 @@
 
 import pymel.core as pm
 
+import Data.Rig_Data as rigData
+reload(rigData)
+
 class BHV_Group_Properties_UI:
     def __init__(self, parent):
         self.parent = parent
         self.limbMng = parent.limbMng
         self.jntMng = parent.jntMng
-        self.bhvMng = parent.bhvMng
+        self.rigBHV = parent.rigBHV
         self.grpMng = parent.grpMng
         self.logger = parent.logger
 

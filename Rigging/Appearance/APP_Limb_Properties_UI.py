@@ -9,7 +9,7 @@ class APP_Limb_Properties_UI:
         self.parent = parent
         self.limbMng = parent.limbMng
         self.grpMng = parent.grpMng
-        self.bhvMng = parent.bhvMng
+        self.rigBHV = parent.rigBHV
         self.ctrMng = parent.ctrMng
         self.logger = parent.logger
 
@@ -212,13 +212,13 @@ class APP_Limb_Properties_UI:
     def UpdateDistGroupPos(self, ignore):
         self.logger.debug('\tApp_LimbProp > UpdateDistGroupPos')
         dist = str(self.limb.bhvDistance.get())
-        # axis = self.bhvMng.axesNames[self.limb.bhvAxis.get()]
+        # axis = self.rigBHV.axesNames[self.limb.bhvAxis.get()]
         axis = rigData.AXES_NAMES[self.limb.bhvAxis.get()]
         msg1 = '\tLimbProp > SET CONTROL DISTANCE to "%s"' % dist
         msg2 = '\tLimbProp > SET CONTROL AXIS to "%s"' % axis
         self.logger.info(msg1)
         self.logger.info(msg2)
-        self.bhvMng.UpdateDistGroupPos(self.limb)
+        self.grpMng.UpdateDistGroupPos(self.limb)
 
     def UpdateIKPVCtrJointParent(self, ignore):
         self.logger.debug('\tApp_LimbProp > UpdateIKPVCtrJointParent')

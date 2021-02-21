@@ -16,7 +16,7 @@ class Skinning_UI:
         self.parent = parent
         self.limbMng = parent.limbMng
         self.jntMng = parent.jntMng
-        self.bhvMng = parent.bhvMng
+        self.rigBHV = parent.rigBHV
         self.nameMng = parent.nameMng
         self.logger = parent.logger
 
@@ -28,10 +28,8 @@ class Skinning_UI:
 
         self._Setup()
 
-    def NewRig(self, rigRoot):
-        # pm.addAttr(rigRoot, ln='lastRiggingTabIndex', at='short')
-        self.rigRoot = rigRoot
-        self.meshMng.NewRig(rigRoot)
+    def SetRoot(self, root):
+        self.root = root
 
 #=========== SETUP ====================================
 
@@ -47,7 +45,7 @@ class Skinning_UI:
                 pm.button('test', label='TEST')
             # with pm.horizontalLayout() as self.appTab:
             #     self.app_ui = app_ui.Appearance_UI( self.limbMng,
-            #                                         self.bhvMng,
+            #                                         self.rigBHV,
             #                                         self.grpMng,
             #                                         self.ctrMng,
             #                                         self.nameMng,
@@ -55,7 +53,7 @@ class Skinning_UI:
             # with pm.horizontalLayout() as self.testTab:
             #     self.test_ui = test_ui.Test_UI( self.limbMng,
             #                                     self.jntMng,
-            #                                     self.bhvMng,
+            #                                     self.rigBHV,
             #                                     self.grpMng,
             #                                     self.ctrMng)
         pm.tabLayout(  self.tab, 
@@ -69,7 +67,7 @@ class Skinning_UI:
 
     def Setup_Editable(self):
         self.logger.info('Rigging > Skinning SETUP')
-        index = self.rigRoot.skinningTab.get()
+        index = self.root.skinningTab.get()
         if (index == 0):
             self.meshSetup_ui.Setup_Editable()
         # elif (index == 1):
@@ -90,7 +88,7 @@ class Skinning_UI:
         #     self.ctrMng.SetLayerState(True, False)
         
     def Teardown_Editable(self, nextIndex):
-        lastIndex = self.rigRoot.skinningTab.get()
+        lastIndex = self.root.skinningTab.get()
         if (lastIndex == 0): 
             self.meshSetup_ui.Teardown_Editable()
         # elif (lastIndex == 1): 
@@ -122,5 +120,5 @@ class Skinning_UI:
     def TabChanged(self):
         nextIndex = pm.tabLayout(self.tab, q=1, selectTabIndex=1)-1
         self.Teardown_Editable(nextIndex)
-        self.rigRoot.skinningTab.set(nextIndex)
+        self.root.skinningTab.set(nextIndex)
         self.Setup_Editable()

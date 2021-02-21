@@ -1,6 +1,9 @@
 
 import pymel.core as pm
 
+import Common.Utilities as util
+reload(util)
+
 class LS_Joint_Hierarchy_UI:
     def __init__(self, parent):
         self.parent = parent
@@ -9,6 +12,7 @@ class LS_Joint_Hierarchy_UI:
         self.grpMng = parent.grpMng
         self.nameMng = parent.nameMng
         self.logger = parent.logger
+        self.rigLS = parent.rigLS
 
         self.limb = None
 
@@ -19,7 +23,7 @@ class LS_Joint_Hierarchy_UI:
         self.Depopulate()
         if not self.limb:
             return
-        for joint in self.jntMng.GetLimbJoints(self.limb):
+        for joint in util.GetSortedLimbJoints(self.limb):
             jointID = joint.ID.get()
             name = joint.pfrsName.get()
             pm.treeView(self.widget, e=1, addItem=(jointID, ''))
@@ -52,15 +56,15 @@ class LS_Joint_Hierarchy_UI:
             return
         selJoints = [self.jntMng.GetJoint(int(ID)) for ID in jntStrs]
         # joints = self.jntMng.GetLimbTempJoints(self.limb)
-        joints = self.jntMng.GetLimbJoints(self.limb)
+        joints = util.GetSortedLimbJoints(self.limb)
         if len(joints) == len(selJoints):
             return
         self.logger.info('\tJointHier > SELECTED joints:')
         for joint in selJoints:
             self.logger.info('\t\t' + str(joint))
-        if len(joints) > 1 and self.jntMng.AreJointsChained(joints):
-            if self.jntMng.AreJointsChained(selJoints):
-                chainJoints = self.jntMng.GetCompleteJointChain(selJoints)
+        if len(joints) > 1 and self.rigLS.AreJointsChained(joints):
+            if self.rigLS.AreJointsChained(selJoints):
+                chainJoints = self.rigLS.GetCompleteJointChain(selJoints)
                 if (len(chainJoints) == len(selJoints)):
                     if selJoints[0] == joints[0] or selJoints[-1] == joints[-1]:
                         pm.menuItem(self.remove_mi, e=1, en=1)
@@ -94,7 +98,7 @@ class LS_Joint_Hierarchy_UI:
         joints = [self.jntMng.GetJoint(ID) for ID in jointIDs]
         for joint in joints:
             self.logger.info('\t\t' + str(joint))
-            self.jntMng.RemoveTemp(joint)
+            self.jntMng.RemoveJoint(joint)
         self.limb.rebuildLimbType.set(1)
         self.parent.PopulateJoints()
 
@@ -116,7 +120,7 @@ class LS_Joint_Hierarchy_UI:
             self.logger.error('**** Joint name not unique to limb *****')
             return ''
         joint.pfrsName.set(newName)
-        self.parent.RenameJoint(joint)
+        self.jntMng.UpdateJointName(joint)
         self.parent.PopulateJoints()
         return ''
 

@@ -15,3 +15,15 @@ def ResetAttrs(xform):
         pm.setAttr(xform + attr, 0)
     for attr in ('.sx', '.sy', '.sz'):
         pm.setAttr(xform + attr, 1)
+
+def GetSortedLimbJoints(limb):
+    temp = {}
+    for joint in pm.listConnections(limb.joints):
+        temp[joint.jointIndex.get()] = joint
+    return [temp[i] for i in sorted(temp.keys())]
+
+def GetSortedJoints(joints):
+    temp = {} # LongName : joint
+    for joint in joints:
+        temp[joint.longName()] = joint
+    return [temp[i] for i in sorted(temp.keys())]

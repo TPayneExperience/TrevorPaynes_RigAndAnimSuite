@@ -33,7 +33,7 @@ class RigSetup_UI:
                                     self.nameOrder, 
                                     self.showPrefix)
 
-    def EditRig_Dialog(self, prefix, showPrefix, order, rigRoot):
+    def EditRig_Dialog(self, prefix, showPrefix, order, root):
         self.startPrefix = prefix
         self.startShowPrefix = showPrefix
         self.startNameOrder = order
@@ -45,15 +45,15 @@ class RigSetup_UI:
         namesUpdated = any((isPrefixSame, isShowPrefixSame, isNameOrderSame))
         if result == 'save':
             if (isPrefixSame):
-                rigRoot.prefix.set(self.prefix)
+                root.prefix.set(self.prefix)
             if (isShowPrefixSame):
-                rigRoot.showPrefix.set(self.showPrefix)
+                root.showPrefix.set(self.showPrefix)
             if (isNameOrderSame):
-                rigRoot.prefixIndex.set(self.nameOrder[0])
-                rigRoot.limbIndex.set(self.nameOrder[1])
-                rigRoot.jointIndex.set(self.nameOrder[2])
-                rigRoot.sideIndex.set(self.nameOrder[3])
-                rigRoot.typeIndex.set(self.nameOrder[4])
+                root.prefixIndex.set(self.nameOrder[0])
+                root.limbIndex.set(self.nameOrder[1])
+                root.jointIndex.set(self.nameOrder[2])
+                root.sideIndex.set(self.nameOrder[3])
+                root.typeIndex.set(self.nameOrder[4])
             if namesUpdated:
                 self.parent.UpdateNaming()
     

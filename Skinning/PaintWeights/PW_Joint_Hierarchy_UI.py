@@ -1,6 +1,9 @@
 
 import pymel.core as pm
 
+import Common.Utilities as util
+reload(util)
+
 class PW_Joint_Hierarchy_UI:
     def __init__(self, parent):
         self.parent = parent
@@ -19,7 +22,7 @@ class PW_Joint_Hierarchy_UI:
             return
         if self.limb.limbType.get() == 1: # Skip one joint limbs
             return 
-        for joint in self.jntMng.GetLimbJoints(self.limb):
+        for joint in util.GetSortedLimbJoints(self.limb):
             jointID = joint.ID.get()
             name = joint.pfrsName.get()
             pm.treeView(self.widget, e=1, ai=(jointID, ''))

@@ -8,6 +8,9 @@ reload(limbHier_UI)
 import LS_Joint_Hierarchy_UI as jointHier_UI
 reload(jointHier_UI)
 
+import Common.Utilities as util
+reload(util)
+
 class LimbSetup_UI:
     def __init__(self, parent):
         self.limbMng = parent.limbMng
@@ -15,9 +18,9 @@ class LimbSetup_UI:
         self.grpMng = parent.grpMng
         self.ctrMng = parent.ctrMng
         self.nameMng = parent.nameMng
-        self.bhvMng = parent.bhvMng
-        self.parent = parent
+        self.rigBHV = parent.rigBHV
         self.logger = parent.logger
+        self.rigLS = parent.pfrs.rigLS
 
         self.scriptJob = None
         self.jointsToCreateLimb = []
@@ -66,7 +69,7 @@ class LimbSetup_UI:
     def Teardown_Editable(self):
         self.logger.info('Rigging > Limb Setup TEARDOWN\n')
         self.KillScripts()
-        self.bhvMng.RebuildLimbs()
+        self.rigBHV.RebuildLimbs()
     
     def KillScripts(self):
         if self.scriptJob:
@@ -78,7 +81,7 @@ class LimbSetup_UI:
     
     def AddJointLimb(self): # Limb Hier UI > RMB > Add
         self.logger.info('\tLimbSetup_UI > AddJointLimb')
-        limb = self.bhvMng.AddJointLimb(self.jointsToCreateLimb)
+        limb = self.limbMng.AddJointLimb(self.jointsToCreateLimb)
         self.ClearJointsToAdd()
         pm.select(d=1)
         self.jntHier_ui.SetLimb(limb)
@@ -90,37 +93,18 @@ class LimbSetup_UI:
         self.UpdateJointFrame()
         self.Populate()
         self.UpdateSceneFrame()
-        # self.UpdateJointFrame()
-        # self.parent.RemoveLimb(limb)
-
-    def RenameLimb(self, limb):
-        self.logger.debug('\tLimbSetup_UI > RenameLimb')
-        groups = pm.listConnections(limb.bhvIKPVGroup)
-        groups += pm.listConnections(limb.bhvLookAtGroup)
-        # groups += pm.listConnections(limb.bhvEmptyGroup)
-        # groups += pm.listConnections(limb.bhvFKIKSwitchGroup)
-        for group in groups:
-            self.grpMng.UpdateGroupName(group)
-        for joint in pm.listConnections(limb.joints):
-            self.RenameJoint(joint)
-        self.Populate()
-
-    def RenameJoint(self, joint):
-        self.jntMng.UpdateJointName(joint)
-        group = pm.listConnections(joint.group)[0]
-        self.grpMng.UpdateGroupName(group)
 
     def FlipSides(self):
         self.logger.debug('\tLimbSetup_UI > FlipSides')
         self.Populate()
 
     def LimbSelected(self, limb):
-        self.logger.debug('\tLimbSetup_UI > RenameLimb')
+        self.logger.debug('\tLimbSetup_UI > LimbSelected')
         self.limb = limb
         self.jntHier_ui.SetLimb(limb)
         self.UpdateJointFrame(limb)
         if limb:
-            joints = self.jntMng.GetLimbJoints(limb)
+            joints = util.GetSortedLimbJoints(limb)
             self.SelectSceneJoints(joints)
 
     def GetSelectedSceneJoints(self):
@@ -140,10 +124,10 @@ class LimbSetup_UI:
         for joint in joints:
             self.logger.debug('\t\t%s' % joint)
         # Set Limb Hier RMB > Add Limb
-        if self.jntMng.AreJointsSiblings(joints):
+        if self.rigLS.AreJointsSiblings(joints):
             self.jointsToCreateLimb = joints
-        elif self.jntMng.AreJointsChained(joints):
-            jointChain = self.jntMng.GetCompleteJointChain(joints)
+        elif self.rigLS.AreJointsChained(joints):
+            jointChain = self.rigLS.GetCompleteJointChain(joints)
             haveLimbs = [self.jntMng.HasLimb(j) for j in jointChain]
             if any(haveLimbs):
                 self.limbHier_ui.SetAddEnabled(0)
@@ -157,14 +141,14 @@ class LimbSetup_UI:
         if not self.limb:
             return
         # limbJoints = self.jntMng.GetLimbTempJoints(self.limb)
-        limbJoints = self.jntMng.GetLimbJoints(self.limb)
+        limbJoints = util.GetSortedLimbJoints(self.limb)
         allJoints = joints + limbJoints
-        if len(limbJoints) == 0 or self.jntMng.AreJointsSiblings(allJoints):
+        if len(limbJoints) == 0 or self.rigLS.AreJointsSiblings(allJoints):
             self.jointsToAddToLimb = joints
             self.jntHier_ui.SetAddEnabled(1)
-        elif self.jntMng.AreJointsChained(allJoints):
+        elif self.rigLS.AreJointsChained(allJoints):
             temp = []
-            for joint in self.jntMng.GetCompleteJointChain(allJoints):
+            for joint in self.rigLS.GetCompleteJointChain(allJoints):
                 if joint.hasAttr('limb'):
                     jointLimb = pm.listConnections(joint.limb)
                     if jointLimb[0] != self.limb:
@@ -183,7 +167,9 @@ class LimbSetup_UI:
     def UpdateSceneFrame(self):
         self.logger.debug('\tLimbSetup_UI > UpdateSceneFrame')
         sceneCount = len(pm.ls(type='joint'))
-        limbJntCount = self.jntMng.GetJointCount()
+        limbJntCount = 0
+        for limb in pm.listConnections(self.limbMng.root.jointLimbs):
+            limbJntCount += len(pm.listConnections(limb.joints))
         txt = 'Scene Joints (%d of %d used)' % (limbJntCount, sceneCount)
         pm.frameLayout(self.sceneHier_fl, e=1, l=txt)
 

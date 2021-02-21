@@ -7,17 +7,17 @@ class Name_Manager:
     def __init__(self, parent):
         self.logger = parent.logger
 
-    def NewRig(self, rigRoot):
-        self.rigRoot = rigRoot
+    def SetRoot(self, root):
+        self.root = root
 
     def GetName(self, limbName, secondName, side, objType):
         self.logger.debug('\tNameMng > GetName')
-        temp = {self.rigRoot.limbIndex.get() : limbName,
-                self.rigRoot.jointIndex.get() : secondName,
-                self.rigRoot.sideIndex.get() : side,
-                self.rigRoot.typeIndex.get() : objType}
-        if self.rigRoot.showPrefix.get():
-            temp[self.rigRoot.prefixIndex.get()] = self.rigRoot.prefix.get()
+        temp = {self.root.limbIndex.get() : limbName,
+                self.root.jointIndex.get() : secondName,
+                self.root.sideIndex.get() : side,
+                self.root.typeIndex.get() : objType}
+        if self.root.showPrefix.get():
+            temp[self.root.prefixIndex.get()] = self.root.prefix.get()
         partNames = [temp[i] for i in sorted(list(temp.keys()))]
         return '_'.join(partNames)
     

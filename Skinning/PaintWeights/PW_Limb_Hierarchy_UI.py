@@ -7,10 +7,10 @@ reload(rigData)
 class PW_Limb_Hierarchy_UI:
     def __init__(self, parent):
         self.parent = parent
-        self.bhvMng = parent.bhvMng
+        self.rigBHV = parent.rigBHV
         self.limbMng = parent.limbMng
         self.jntMng = parent.jntMng
-        # self.bhvMng = bhvMng
+        # self.rigBHV = rigBHV
         self.logger = parent.logger
 
         self._Setup()
@@ -18,7 +18,7 @@ class PW_Limb_Hierarchy_UI:
     def Populate(self):
         pm.treeView(self.widget, e=1, removeAll=1)
         # SKEL HIER
-        limbParents = self.bhvMng.GetDefaultLimbHier()
+        limbParents = self.limbMng.GetDefaultLimbHier()
         tempParents = limbParents.copy()
         if not tempParents:
             return
@@ -31,7 +31,7 @@ class PW_Limb_Hierarchy_UI:
                 if child not in parents:
                     limbCreationOrder.append(child)
                     del(tempParents[child])
-        prefix = self.parent.parent.rigRoot.prefix.get()
+        prefix = self.parent.parent.root.prefix.get()
         for limb in limbCreationOrder[::-1]:
             limbID = limb.ID.get()
             name = '%s_%s' % (prefix, limb.pfrsName.get())

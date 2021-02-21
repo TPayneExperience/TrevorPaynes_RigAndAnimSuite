@@ -8,7 +8,7 @@ class APP_Limb_Hierarchy_UI:
     def __init__(self, parent):
         self.parent = parent
         self.limbMng = parent.limbMng
-        self.bhvMng = parent.bhvMng
+        self.rigBHV = parent.rigBHV
         self.logger = parent.logger
 
         self._Setup()

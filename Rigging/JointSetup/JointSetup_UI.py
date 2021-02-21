@@ -5,7 +5,7 @@ class JointSetup_UI:
     def __init__(self, parent):
         self.parent = parent
         self.jntMng = parent.jntMng
-        self.bhvMng = parent.bhvMng
+        self.rigBHV = parent.rigBHV
         self.logger = parent.logger
 
         self.scriptJob = None
@@ -66,7 +66,7 @@ class JointSetup_UI:
     def RemoveJoint(self, ignore):
         self.logger.debug('\tJointSetup_UI > RemoveJoint')
         for joint in pm.ls(sl=1, type='joint'):
-            self.jntMng.RemovePerm(joint)
+            self.jntMng.DeleteJoint(joint)
     
     def UpdateButtons(self):
         self.logger.debug('\tJointSetup_UI > UpdateButtons')
@@ -94,7 +94,7 @@ class JointSetup_UI:
         self.logger.info('Rigging > Joint Setup TEARDOWN\n')
         self.KillScripts()
         self.PrintJointTree()
-        self.bhvMng.RebuildLimbs()
+        self.rigBHV.RebuildLimbs()
     
     def KillScripts(self):
         if self.scriptJob:

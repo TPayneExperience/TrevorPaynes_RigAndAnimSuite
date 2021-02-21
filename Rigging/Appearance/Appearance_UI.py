@@ -18,16 +18,13 @@ class Appearance_UI:
 
         self.parent = parent
         self.limbMng = parent.limbMng
-        self.bhvMng = parent.bhvMng
+        self.rigBHV = parent.rigBHV
         self.grpMng = parent.grpMng
         self.ctrMng = parent.ctrMng
         self.nameMng = parent.nameMng
         self.logger = parent.logger
 
         self._Setup()
-
-    def NewRig(self, rigRoot):
-        pass
 
 #=========== SETUP ====================================
 
@@ -55,7 +52,7 @@ class Appearance_UI:
     
     def Teardown_Editable(self):
         self.logger.info('Rigging > Appearance TEARDOWN\n')
-        self.bhvMng.RebuildLimbs()
+        self.rigBHV.RebuildLimbs()
 
 #=========== LIMBS ====================================
 

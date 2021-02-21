@@ -32,6 +32,7 @@ class Rigging_UI:
         self.nameMng = parent.nameMng
         self.fileMng = parent.fileMng
         self.jsonMng = parent.jsonMng
+        self.pfrs = parent.pfrs
         self.logger = parent.logger
 
         # NEED A BETTER PLACE FOR THIS
@@ -40,29 +41,19 @@ class Rigging_UI:
         self.ctrMng = parent.ctrMng
         self.grpMng = parent.grpMng
         self.jntMng = parent.jntMng
-        self.bhvMng = parent.bhvMng
+        self.rigBHV = parent.rigBHV
         self.rigMng = parent.rigMng
 
-        self.saveLoadSkel = saveLoadSkel.SaveLoad_Skeleton(self)
+        # self.saveLoadSkel = saveLoadSkel.SaveLoad_Skeleton(self)
 
-        self.saveDialog = save_ui.SaveTemplate_UI(self)
-        self.loadDialog = load_ui.LoadTemplate_UI()
-        self.dupDialog = dup_ui.DuplicateLimbs_UI(self)
-        self.mirDialog = mir_ui.MirrorLimbs_UI(self)
+        # self.saveDialog = save_ui.SaveTemplate_UI(self)
+        # self.loadDialog = load_ui.LoadTemplate_UI()
+        # self.dupDialog = dup_ui.DuplicateLimbs_UI(self)
+        # self.mirDialog = mir_ui.MirrorLimbs_UI(self)
 
         self.lastTab = 1
-        self.rigRoot = None
 
         self._Setup()
-    
-    def NewRig(self, rigRoot):
-        self.logger.debug('\tRigging_UI > NewRig')
-        # pm.addAttr(rigRoot, ln='lastRiggingTabIndex', at='short')
-        self.rigRoot = rigRoot
-        self.limbMng.NewRig(rigRoot)
-        self.jntMng.NewRig(rigRoot)
-        self.grpMng.NewRig(rigRoot)
-        self.ctrMng.NewRig(rigRoot)
 
 #=========== SETUP ====================================
 
@@ -96,7 +87,7 @@ class Rigging_UI:
     def Setup_SubTab(self):
         self.logger.debug('\tRigging_UI > Setup_SubTab')
         newIndex = pm.tabLayout(self.tab, q=1, selectTabIndex=1)-1
-        self.rigRoot.riggingTab.set(newIndex)
+        self.pfrs.root.riggingTab.set(newIndex)
         if (newIndex == 0):
             self.jntSetup_ui.Setup_Editable()
         elif (newIndex == 1):
@@ -117,7 +108,7 @@ class Rigging_UI:
     
     def Teardown_SubTab(self):
         self.logger.debug('\tRigging_UI > Teardown_SubTab')
-        lastIndex = self.rigRoot.riggingTab.get()
+        lastIndex = self.pfrs.root.riggingTab.get()
         if (lastIndex == 0): 
             self.jntSetup_ui.Teardown_Editable()
         elif (lastIndex == 1): 
@@ -131,7 +122,7 @@ class Rigging_UI:
 
     def UpdateControlVis(self):
         self.logger.debug('\tRigging_UI > UpdateControlVis')
-        index = self.rigRoot.riggingTab.get()
+        index = self.pfrs.root.riggingTab.get()
         if index in [0, 1]:
             self.ctrMng.SetLayerState(False, True)
         elif index == 2:
@@ -149,17 +140,17 @@ class Rigging_UI:
 #=========== FUNCTIONALITY ====================================
 
     # def AddLimb(self, limb): # Limb Setup > Add
-    #     self.bhvMng.AddLimb(limb)
-    #     self.bhvMng.Setup_LimbGroupVisibility(limb)
+    #     self.rigBHV.AddLimb(limb)
+    #     self.rigBHV.Setup_LimbGroupVisibility(limb)
         # self.parent.AddLimb(limb)
 
     # def RemoveLimb(self, limb): # Limb Setup > Remove
     #     self.parent.RemoveLimb(limb)
     
     # def UpdateLimb(self, limb): # Limb Setup Tab > Teardown
-    #     bhvs = self.bhvMng.GetBhvOptions(limb)
-    #     bhvIndex = self.bhvMng.GetBhvIndex(bhvs[0])
-        # self.bhvMng.SetBhvType(limb, bhvIndex)
+    #     bhvs = self.rigBHV.GetBhvOptions(limb)
+    #     bhvIndex = self.rigBHV.GetBhvIndex(bhvs[0])
+        # self.rigBHV.SetBhvType(limb, bhvIndex)
         # self.parent.UpdateLimb(limb)
 
 #=========== DIALOGS ====================================

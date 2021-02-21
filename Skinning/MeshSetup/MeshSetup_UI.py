@@ -3,7 +3,7 @@ import pymel.core as pm
 class MeshSetup_UI:
     def __init__(self, parent):
         self.parent = parent
-        self.bhvMng = parent.bhvMng
+        self.rigBHV = parent.rigBHV
         self.meshMng = parent.meshMng
         self.skinMng = parent.skinMng
 
@@ -59,7 +59,7 @@ class MeshSetup_UI:
 
     def Teardown_Editable(self):
         print ('mesh, teardown')
-        self.bhvMng.RebuildLimbs()
+        self.rigBHV.RebuildLimbs()
     
 #=========== ACCESSORS ====================================
 
