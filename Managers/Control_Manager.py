@@ -12,6 +12,7 @@ class Control_Manager:
     def __init__(self, parent):
         self.nameMng = parent.nameMng
         self.logger = parent.logger
+        self.pfrs = parent
 
 #============= SCENE ============================
 
@@ -34,7 +35,7 @@ class Control_Manager:
         temp = pm.ls('Controls', type='displayLayer')
         if temp:
             self.ctrLayer = temp[0]
-        temp = pm.ls('CTR_TEMPLATES', type='transform')
+        temp = pm.ls('CTR_TEMPLATES', tr=1)
         if temp:
             ctrShapesParent = temp[0]
             rigData.CONTROL_TEMPLATES = {}
@@ -52,10 +53,10 @@ class Control_Manager:
 
 #============= FUNCTIONALITY ============================
 
-    def _Add(self, root, group, index):
+    def _Add(self, group, index):
         self.logger.debug('\tCtrMng > _Add')
-        ctrID = root.nextCtrID.get()
-        root.nextCtrID.set(ctrID + 1)
+        ctrID = self.pfrs.root.nextCtrID.get()
+        self.pfrs.root.nextCtrID.set(ctrID + 1)
         
         shapeName = rigData.CONTROL_TEMPLATES.keys()[index]
         sourceShape = rigData.CONTROL_TEMPLATES[shapeName]
@@ -68,29 +69,29 @@ class Control_Manager:
         pm.connectAttr(group.control, ctr.group)
         pm.parent(ctr, group)
 
-    def AddEmptyControl(self, root, group):
-        index = root.appEmptyCtrShape.get()
-        self._Add(root, group, index)
+    def AddEmptyControl(self, group):
+        index = self.pfrs.root.appEmptyCtrShape.get()
+        self._Add(group, index)
 
-    def AddJointControl(self, root, group):
-        index = root.appJointCtrShape.get()
-        self._Add(root, group, index)
+    def AddJointControl(self, group):
+        index = self.pfrs.root.appJointCtrShape.get()
+        self._Add(group, index)
 
-    def AddIKPVControl(self, root, group):
-        index = root.appIKPVCtrShape.get()
-        self._Add(root, group, index)
+    def AddIKPVControl(self, group):
+        index = self.pfrs.root.appIKPVCtrShape.get()
+        self._Add(group, index)
 
-    def AddLookAtControl(self, root, group):
-        index = root.appLookAtCtrShape.get()
-        self._Add(root, group, index)
+    def AddLookAtControl(self, group):
+        index = self.pfrs.root.appLookAtCtrShape.get()
+        self._Add(group, index)
 
 #============= SHAPE ============================
 
-    def SetShape(self, root, group, shapeIndex):
+    def SetShape(self, group, shapeIndex):
         self.logger.debug('\tCtrMng > SetShape')
         control = pm.listConnections(group.control)[0]
         pm.disconnectAttr(group.control)
-        newCtr = self._Add(root, group, shapeIndex)
+        newCtr = self._Add(group, shapeIndex)
         pm.parent(newCtr, control)
         pm.xform(newCtr, t=(0,0,0), ro=(0,0,0), s=(1,1,1))
         pm.parent(newCtr, group)

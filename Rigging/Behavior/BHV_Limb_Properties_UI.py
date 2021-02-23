@@ -12,6 +12,7 @@ class BHV_Limb_Properties_UI:
         self.rigBHV = parent.rigBHV
         self.grpMng = parent.grpMng
         self.logger = parent.logger
+        self.pfrs = parent.pfrs
 
         self.limb = None
         self.targetJnt_at = None
@@ -110,13 +111,6 @@ class BHV_Limb_Properties_UI:
 
 #=========== UI UPDATES ==============================================
 
-    def GetLimbName(self, limb):
-        self.logger.debug('\tBhv_LimbProp > GetLimbName')
-        prefix = self.limbMng.GetLimbPrefix(limb)
-        # side = self.limbMng.GetLimbSide(limb)
-        side = rigData.LIMB_SIDES[limb.side.get()]
-        return '%s_%s_%s' % (prefix, limb.pfrsName.get(), side)
-
     def Depopulate(self):
         self.logger.debug('\tBhv_LimbProp > Depopulate')
         # self.limb = None
@@ -152,10 +146,11 @@ class BHV_Limb_Properties_UI:
         pm.frameLayout(self.targetLayout, e=1, en=1)
         self.targetLimbs = {}
         self.targetLimbOrder = []
-        for rootLimb in self.limbMng.GetRootLimbs():
+        for rootLimb in self.limbMng.GetRootLimbs(self.pfrs.root):
             for limb in self.limbMng.GetLimbCreationOrder(rootLimb):
                 if (limb.bhvType.get() in bhvFilter):
-                    name = self.GetLimbName(limb)
+                    side = rigData.LIMB_SIDES[limb.side.get()]
+                    name = '%s_%s' % (limb.pfrsName.get(), side)
                     pm.menuItem(l=name, p=self.targetLimb_om)
                     self.targetLimbs[name] = limb
                     self.targetLimbOrder.append(limb)

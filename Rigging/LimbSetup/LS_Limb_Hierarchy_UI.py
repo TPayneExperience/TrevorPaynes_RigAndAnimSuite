@@ -16,15 +16,19 @@ class LS_Limb_Hierarchy_UI:
         self.nameMng = parent.nameMng
         self.logger = parent.logger
 
+        self._limbs = {} # ID : limb
+
         self._Setup()
 
     def Populate(self):
         self.logger.debug('\tLS_LimbHier > Populate')
         pm.treeView(self.widget, e=1, removeAll=1)
         temp = {} # pfrsName : [limbs]
+        self._limbs = {}
         allLimbs = pm.listConnections(self.limbMng.root.jointLimbs)
         pm.menuItem(self.removeAll_mi, e=1, en=bool(allLimbs))
         for limb in allLimbs:
+            self._limbs[str(limb.ID.get())] = limb
             limbName = limb.pfrsName.get()
             if limbName not in temp:
                 temp[limbName] = []
@@ -75,7 +79,7 @@ class LS_Limb_Hierarchy_UI:
         limbIDStrs = pm.treeView(self.widget, q=1, selectItem=1)
         if limbIDStrs:
             pm.menuItem(self.remove_mi, e=1, en=1)
-            limb = self.limbMng.GetLimb(int(limbIDStrs[0]))
+            limb = self._limbs[limbIDStrs[0]]
             name = limb.pfrsName.get()
             self.logger.info('\tLimbHier > SELECTED limb "%s"' % name)
             if pm.listConnections(limb.mirrorLimb):
@@ -96,7 +100,7 @@ class LS_Limb_Hierarchy_UI:
                                 cancelButton='No', 
                                 dismissString='No') == 'No'):
             return
-        limb = self.limbMng.GetLimb(int(limbIDStrs[0]))
+        limb = self._limbs[limbIDStrs[0]]
         self.limbMng.RemoveJointLimb(limb)
         self.parent.RemoveJointLimb()
 
@@ -120,7 +124,7 @@ class LS_Limb_Hierarchy_UI:
 
     def RenameLimb(self, limbIDStr, newName):
         self.logger.debug('\tLS_LimbHier > RenameLimb')
-        limb = self.limbMng.GetLimb(int(limbIDStr))
+        limb = self._limbs[limbIDStr]
         oldName = limb.pfrsName.get()
         msg = '\tLimbHier > RENAMING "%s" to "%s"' % (oldName, newName)
         self.logger.info(msg)
@@ -142,7 +146,7 @@ class LS_Limb_Hierarchy_UI:
     def FlipSides(self, ignore):
         self.logger.info('\tLS_LimbHier > Flip Sides')
         limbIDStrs = pm.treeView(self.widget, q=1, selectItem=1)
-        sourceLimb = self.limbMng.GetLimb(int(limbIDStrs[0]))
+        sourceLimb = self._limbs[limbIDStrs[0]]
         mirrorLimb = pm.listConnections(sourceLimb.mirrorLimb)[0]
         self.limbMng.FlipSides(sourceLimb)
         for joint in pm.listConnections(sourceLimb.joints):

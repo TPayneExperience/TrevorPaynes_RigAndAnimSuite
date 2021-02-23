@@ -14,6 +14,7 @@ class Skin_Mananger:
         self.jntMng = parent.jntMng
         self.meshMng = parent.meshMng
         self.logger = parent.logger
+        self.pfrs = parent
 
         self._skinTestAnimLayer = 'Skin_Test_Anim'
     
@@ -22,14 +23,14 @@ class Skin_Mananger:
 
     def Setup_Skins(self):
         joints = []
-        for rootLimb in self.limbMng.GetRootLimbs():
+        for rootLimb in self.limbMng.GetRootLimbs(self.pfrs.root):
             for limb in self.limbMng.GetLimbCreationOrder(rootLimb):
                 joints += util.GetSortedLimbJoints(limb)
-        for mesh in self.meshMng.GetAllMeshes():
+        for mesh in pm.listConnections(self.pfrs.root.meshes):
             pm.skinCluster(joints, mesh)
 
     def Teardown_Skins(self):
-        for mesh in self.meshMng.GetAllMeshes():
+        for mesh in pm.listConnections(self.pfrs.root.meshes):
             skinCsts = pm.listConnections(mesh, type='skinCluster')
             if skinCsts:
                 skinCst = skinCsts[0]
@@ -37,7 +38,7 @@ class Skin_Mananger:
         
     def Setup_JointAnim(self):
         joints = []
-        for rootLimb in self.limbMng.GetRootLimbs():
+        for rootLimb in self.limbMng.GetRootLimbs(self.pfrs.root):
             for limb in self.limbMng.GetLimbCreationOrder(rootLimb):
                 if limb.bhvType.get() in rigData.OMIT_LAST_JOINT_BHV_INDEXES:
                     joints += util.GetSortedLimbJoints(limb)[:-1]
@@ -90,11 +91,12 @@ class Skin_Mananger:
     # dead joints before export
     def GetUsedInfJoints(self, mesh):
         joints = []
-        for joint in self.jntMng.GetAllJoints():
-            attr = 'J' + str(joint.ID.get())
-            array = mesh.getAttr(attr)
-            if any(array):
-                joints.append(joint)
+        for limb in pm.listConnections(self.pfrs.root.jointLimbs):
+            for joint in pm.listConnections(limb.joints):
+                attr = 'J' + str(joint.ID.get())
+                array = mesh.getAttr(attr)
+                if any(array):
+                    joints.append(joint)
         return joints
 
 #============= LIMB / JOINT ANIM (TIMELINE) ============================
@@ -117,12 +119,12 @@ class Skin_Mananger:
 #============= ADD / REMOVE ATTRS ============================
 
     def AddSkinAttrs(self, mesh):
-        for rootLimb in self.limbMng.GetRootLimbs():
+        for rootLimb in self.limbMng.GetRootLimbs(self.pfrs.root):
             for limb in self.limbMng.GetLimbCreationOrder(rootLimb):
                 self.AddLimbAttrs(mesh, limb)
 
     def RemoveSkinAttrs(self, mesh): # FINALIZE MESHES
-        for rootLimb in self.limbMng.GetRootLimbs():
+        for rootLimb in self.limbMng.GetRootLimbs(self.pfrs.root):
             for limb in self.limbMng.GetLimbCreationOrder(rootLimb):
                 self.RemoveLimbAttrs(mesh, limb)
 

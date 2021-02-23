@@ -15,23 +15,23 @@ class LS_Joint_Hierarchy_UI:
         self.rigLS = parent.rigLS
 
         self.limb = None
+        self.joints = {} # ID : Joint
 
         self._Setup()
 
     def Populate(self):
         self.logger.debug('\tLS_JointHier > Populate')
-        self.Depopulate()
+        pm.treeView(self.widget, e=1, removeAll=1)
+        self.joints = {}
         if not self.limb:
             return
         for joint in util.GetSortedLimbJoints(self.limb):
             jointID = joint.ID.get()
+            self.joints[jointID] = joint
             name = joint.pfrsName.get()
             pm.treeView(self.widget, e=1, addItem=(jointID, ''))
             pm.treeView(self.widget, e=1, displayLabel=(jointID, name))
     
-    def Depopulate(self):
-        pm.treeView(self.widget, e=1, removeAll=1)
-
 #=========== SETUP ====================================
 
     def _Setup(self):
@@ -50,13 +50,9 @@ class LS_Joint_Hierarchy_UI:
         '''
         self.logger.debug('\tLS_JointHier > JointHierSelectionChanged')
         pm.menuItem(self.remove_mi, e=1, en=0)
-        jntStrs = pm.treeView(self.widget, q=1, selectItem=1)
-        if not jntStrs:
-            self.logger.info('\tJointHier > DESELECTED joints')
-            return
-        selJoints = [self.jntMng.GetJoint(int(ID)) for ID in jntStrs]
-        # joints = self.jntMng.GetLimbTempJoints(self.limb)
-        joints = util.GetSortedLimbJoints(self.limb)
+        jointIDs = [int(ID) for ID in pm.treeView(self.widget, q=1, si=1)]
+        selJoints = [self.joints[ID] for ID in jointIDs]
+        joints = self.joints.values()
         if len(joints) == len(selJoints):
             return
         self.logger.info('\tJointHier > SELECTED joints:')
@@ -95,7 +91,7 @@ class LS_Joint_Hierarchy_UI:
     def Remove(self):
         self.logger.info('\tJointHier > REMOVING Joints:')
         jointIDs = [int(ID) for ID in pm.treeView(self.widget, q=1, si=1)]
-        joints = [self.jntMng.GetJoint(ID) for ID in jointIDs]
+        joints = [self.joints[ID] for ID in jointIDs]
         for joint in joints:
             self.logger.info('\t\t' + str(joint))
             self.jntMng.RemoveJoint(joint)
@@ -104,7 +100,7 @@ class LS_Joint_Hierarchy_UI:
 
     def Rename(self, jointIDStr, newName):
         self.logger.info('\tJointHier > RENAMING Joint: ')
-        joint = self.jntMng.GetJoint(int(jointIDStr))
+        joint = self.joints[int(jointIDStr)]
         msg = '\t\t%s >>> %s' %(joint.pfrsName.get(), newName)
         self.logger.info(msg)
         if not self.nameMng.IsValidCharacterLength(newName):

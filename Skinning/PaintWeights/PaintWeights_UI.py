@@ -26,6 +26,7 @@ class PaintWeights_UI:
         self.meshMng = parent.meshMng
         self.skinMng = parent.skinMng
         self.logger = parent.logger
+        self.pfrs = parent.pfrs
 
         self.curMesh = None
         self.limb = None

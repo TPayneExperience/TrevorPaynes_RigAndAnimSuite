@@ -13,6 +13,13 @@ class Root_Manager:
         self.logger = parent.logger
         self._roots = {} # {ID : root}
 
+#============= ACCESSORS ============================
+
+    def GetSceneRoots(self):
+        return [r for r in pm.ls(tr=1) if r.hasAttr('jointLimbs')]
+
+#============= ADD / REMOVE? ============================
+
     def AddRoot(self, prefix, nameOrder, showPrefix):
         msg = '\tRootMng > AddRoot'
         msg += '\n\t\tPrefix = ' + prefix
@@ -25,6 +32,19 @@ class Root_Manager:
             rootID = max(self._roots.keys()) + 1
         root = pm.group(name='temp', em=True)
         pm.addAttr(root, ln='ID', at='long', dv=rootID, h=hide)
+
+        # ROOT CONNECTIONS
+        pm.addAttr(root, ln='jointLimbs', dt='string')
+        pm.addAttr(root, ln='emptyLimbs', dt='string')
+        pm.addAttr(root, ln='meshes', dt='string')
+
+        # IDS
+        pm.addAttr(root, ln='nextLimbID', at='short', dv=1)
+        pm.addAttr(root, ln='nextJointID', at='short', dv=1)
+        pm.addAttr(root, ln='nextGroupID', at='long')
+        pm.addAttr(root, ln='nextCtrID', at='long')
+        pm.addAttr(root, ln='nextMeshID', at='short', dv=1)
+
         # NAMING
         pm.addAttr(root, ln='prefixIndex', at='short', dv=nameOrder[0])
         pm.addAttr(root, ln='limbIndex', at='short', dv=nameOrder[1])
@@ -42,18 +62,6 @@ class Root_Manager:
 
         # When Joints/limbs added/removed
         pm.addAttr(root, ln='rebuildSkinInf', at='bool', h=hide)
-
-        # IDS
-        pm.addAttr(root, ln='nextLimbID', at='short', dv=1)
-        pm.addAttr(root, ln='nextJointID', at='short', dv=1)
-        pm.addAttr(root, ln='nextGroupID', at='long')
-        pm.addAttr(root, ln='nextCtrID', at='long')
-        pm.addAttr(root, ln='nextMeshID', at='short', dv=1)
-
-        # ROOT CONNECTIONS
-        pm.addAttr(root, ln='emptyLimbs', dt='string')
-        pm.addAttr(root, ln='jointLimbs', dt='string')
-        pm.addAttr(root, ln='meshes', dt='string')
 
         # CONTROLS
         names = rigData.CONTROL_TEMPLATES.keys()

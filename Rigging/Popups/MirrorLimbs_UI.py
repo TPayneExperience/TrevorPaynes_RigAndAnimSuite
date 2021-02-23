@@ -108,7 +108,7 @@ class MirrorLimbs_UI:
 #         self._Setup_Connections()
 
 #     def Populate(self):
-#         limbIDs = self.limbMng.GetRootLimbs()
+#         limbIDs = self.limbMng.GetRootLimbs(self.pfrs.root)
 #         while(limbIDs):
 #             limbID = limbIDs[0]
 #             del(limbIDs[0])

@@ -14,6 +14,7 @@ class Joint_Manager:
         self.nameMng = parent.nameMng
         self.grpMng = parent.grpMng
         self.logger = parent.logger
+        self.pfrs = parent
 
         self.colorIndex = 0
         
@@ -37,20 +38,21 @@ class Joint_Manager:
 
 #============= ROOT ============================
 
-    def NewRoot(self, root):
+    def NewRoot(self):
         self.logger.debug('\tJntMng > NewRoot')
-        pm.select(d=1)
+        root = self.pfrs.root
         self.jntGroup = pm.group(name='JOINTS', em=1, p=root)
 
-    def SetRoot(self, root):
+    def LoadRoot(self):
+        root = self.pfrs.root
         for child in pm.listRelatives(root, c=1, type='transform'):
             if child.shortName() == 'JOINTS':
                 self.jntGroup = child
                 break
 
-#============= ADD + REMOVE ============================
+#============= INIT, ADD, REMOVE, DELETE ============================
 
-    def InitJoint(self, root, joint):
+    def InitJoint(self, joint):
         self.logger.debug('\tJntMng > InitJoint')
         colors = list(rigData.JOINT_COLORS[self.colorIndex])
         self.colorIndex = (self.colorIndex + 1) % len(rigData.JOINT_COLORS)
@@ -73,13 +75,13 @@ class Joint_Manager:
         pm.addAttr(joint, ln='jointColorB', at='float', 
                             p='jointColor', dv=colors[2])
 
-        jointID = root.nextJointID.get()
-        root.nextJointID.set(jointID + 1)
+        jointID = self.pfrs.root.nextJointID.get()
+        self.pfrs.root.nextJointID.set(jointID + 1)
         joint.ID.set(jointID)
         joint.pfrsName.set('Joint%03d' % (jointID))
         pm.editDisplayLayerMembers(self.jointLayer, joint, nr=1)
 
-        self.grpMng.AddJointGroup(root, joint)
+        self.grpMng.AddJointGroup(joint)
 
     def AddJoint(self, limb, joint):
         self.logger.debug('\tJntMng > Add')

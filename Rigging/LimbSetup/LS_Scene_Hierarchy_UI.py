@@ -21,9 +21,11 @@ class LS_Scene_Hierarchy_UI:
         self.selectableJoints = []
         pm.treeView(self.widget, e=1, removeAll=1)
         self.allJoints = {} # longName : joint
-        limbJoints = list(self.jntMng.GetAllJoints())
+        limbJoints = []
         for joint in pm.ls(type='joint'):
             self.allJoints[joint.longName()] = joint
+            if pm.listConnections(joint.limb):
+                limbJoints.append(joint)
         for longName in sorted(list(self.allJoints.keys())):
             joint = self.allJoints[longName]
             parent = pm.listRelatives(joint, parent=1)

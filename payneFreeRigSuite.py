@@ -39,6 +39,8 @@ reload(rigJS)
 
 class PayneFreeRigSuite:
     def __init__(self):
+        self.root = None
+
         # self.loggingMode = logging.INFO
         self.loggingMode = logging.DEBUG
         self.StartLogger()
@@ -61,23 +63,41 @@ class PayneFreeRigSuite:
         self.rigLS = rigLS.RIG_LimbSetup(self)
         self.rigBHV = rigBHV.RIG_Behaviors(self)
 
+        # START UP
+        self.InitRoot()
+
 #============= ROOT ============================
+
+    def InitRoot(self):
+        roots = self.rootMng.GetSceneRoots()
+        if roots:
+            self.root = roots[0]
+            self.LoadScene()
+            self.LoadRoot()
+        else:
+            self.NewScene()
+            self.NewRoot('PFX', range(5), True)
 
     def NewRoot(self, prefix, nameOrder, showPrefix):
         self.root = self.rootMng.AddRoot(prefix, nameOrder, showPrefix)
-        self.nameMng.SetRoot(self.root)
-        self.limbMng.NewRoot(self.root)
-        # self.grpMng.SetRoot(self.root)
-        # self.ctrMng.NewRoot(self.root)
-        self.jntMng.NewRoot(self.root)
-        self.meshMng.NewRoot(self.root)
+        self.limbMng.NewRoot()
+        self.jntMng.NewRoot()
+        self.meshMng.NewRoot()
+
+    def LoadRoot(self):
+        self.limbMng.LoadRoot()
+        self.jntMng.LoadRoot()
+        self.meshMng.LoadRoot()
 
     def NewScene(self):
-        pm.flushUndo()
-        pm.newFile(newFile=1, force=1)
         self.ctrMng.NewScene()
         self.jntMng.NewScene()
         self.meshMng.NewScene()
+
+    def LoadScene(self):
+        self.ctrMng.LoadScene()
+        self.jntMng.LoadScene()
+        self.meshMng.LoadScene()
 
 #=========== LOGGER ====================================
    

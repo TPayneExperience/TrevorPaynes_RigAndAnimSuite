@@ -12,6 +12,7 @@ class Group_Manager:
         self.nameMng = parent.nameMng
         self.ctrMng = parent.ctrMng
         self.logger = parent.logger
+        self.pfrs = parent
 
 #============= ACCESSORS  ============================
 
@@ -39,9 +40,9 @@ class Group_Manager:
         
 #============= ADD + REMOVE ============================
 
-    def _AddGroup(self, root):
-        groupID = root.nextGroupID.get()
-        root.nextGroupID.set(groupID + 1)
+    def _AddGroup(self):
+        groupID = self.pfrs.root.nextGroupID.get()
+        self.pfrs.root.nextGroupID.set(groupID + 1)
         
         # groupTypes = ':'.join(self.grpTypes)
         groupTypes = ':'.join(rigData.GROUP_TYPES)
@@ -56,20 +57,20 @@ class Group_Manager:
 
     # EMPTY
     # Called from Rigging > SetupEditable_Limbs()
-    def AddEmptyGroup(self, root, limb):
+    def AddEmptyGroup(self, limb):
         self.logger.debug('\tGrpMng > AddEmptyGroup')
-        group = self._AddGroup(root)
+        group = self._AddGroup()
         pm.addAttr(group, ln='limb', dt='string')
         pm.connectAttr(limb.bhvEmptyGroup, group.limb)
-        self.ctrMng.AddEmptyControl(root, group)
+        self.ctrMng.AddEmptyControl(group)
         pm.parent(group, limb)
         return group
 
     # FK, CST, IK Chain
     # Called from Limb Setup > AutoBuild OR RMB > Add Limb
-    def AddJointGroup(self, root, joint): 
+    def AddJointGroup(self, joint): 
         self.logger.debug('\tGrpMng > AddJointGroup')
-        group = self._AddGroup(root)
+        group = self._AddGroup()
         group.groupType.set(1)
         pm.addAttr(group, ln='targetJoint', at='enum', en='None') # IK Chain
         pm.addAttr(group, ln='joint', dt='string')
@@ -77,29 +78,29 @@ class Group_Manager:
 
         pm.connectAttr(joint.group, group.joint)
         
-        self.ctrMng.AddJointControl(root, group)
+        self.ctrMng.AddJointControl(group)
         pm.parent(group, joint)
         pm.xform(group, t=(0,0,0), ro=(0,0,0), s=(1,1,1))
         return group
 
-    def AddIKPVGroup(self, root, limb):
+    def AddIKPVGroup(self, limb):
         self.logger.debug('\tGrpMng > AddIKPVGroup')
-        group = self._AddGroup(root)
+        group = self._AddGroup()
         group.groupType.set(2)
         pm.addAttr(group, ln='limb', dt='string')
         pm.connectAttr(limb.bhvIKPVGroup, group.limb)
         pm.parent(group, limb)
-        self.ctrMng.AddIKPVControl(root, group)
+        self.ctrMng.AddIKPVControl(group)
         return group
 
-    def AddLookAtGroup(self, root, limb):
+    def AddLookAtGroup(self, limb):
         self.logger.debug('\tGrpMng > AddLookAtGroup')
-        group = self._AddGroup(root)
+        group = self._AddGroup()
         group.groupType.set(4)
         pm.addAttr(group, ln='limb', dt='string')
         pm.connectAttr(limb.bhvLookAtGroup, group.limb)
         pm.parent(group, limb)
-        self.ctrMng.AddLookAtControl(root, group)
+        self.ctrMng.AddLookAtControl(group)
         return group
 
     def Remove(self, group):

@@ -13,25 +13,37 @@ class BHV_Limb_Hierarchy_UI:
         self.grpMng = parent.grpMng
         self.nameMng = parent.nameMng
         self.logger = parent.logger
+        self.pfrs = parent.pfrs
+        self.rootMng = self.pfrs.rootMng
+
+        self._limbs = {} # rootID_limbID : limb
 
         self._Setup()
 
-    def Populate(self):
+    def Populate(self): 
         self.logger.debug('\tBhv_LimbHier > Populate')
+        # SAME AS APP LIMB HIER
         pm.treeView(self.widget, e=1, removeAll=1)
-        self.limbMng.RebuildLimbDict()
-        for rootLimb in self.limbMng.GetRootLimbs()[::-1]:
-            prefix = pm.listConnections(rootLimb.rigRoot)[0].prefix.get()
+        curRoot = self.pfrs.root
+        self._limbs = {}
+        rootLimbs = []
+        for root in self.rootMng.GetSceneRoots():
+            rootLimbs += self.limbMng.GetRootLimbs(root)
+        for rootLimb in rootLimbs[::-1]:
             for limb in self.limbMng.GetLimbCreationOrder(rootLimb):
-                limbID = limb.ID.get()
+                root = pm.listConnections(limb.rigRoot)[0]
+                rootID = root.ID.get()
+                prefix = root.prefix.get()
+                enable = (root == curRoot)
+                limbID = '%d_%d' % (rootID, limb.ID.get())
+                self._limbs[limbID] = limb
                 name = '%s_%s' % (prefix, limb.pfrsName.get())
-                parent = self.limbMng.GetLimbParent(limb)
+                parent = pm.listConnections(limb.limbParent)
                 parentID = ''
                 if parent:
                     parentID = parent.ID.get()
                 pm.treeView(self.widget, e=1, ai=(limbID, parentID))
-                pm.treeView(self.widget, e=1, dl=(limbID, name))
-                # side = self.limbMng.GetLimbSide(limb)
+                pm.treeView(self.widget, e=1, dl=(limbID, name), en=enable)
                 side = rigData.LIMB_SIDES[limb.side.get()]
                 if (side == 'L'):
                     pm.treeView(self.widget, e=1, bti=(limbID, 1, side),
@@ -41,7 +53,7 @@ class BHV_Limb_Hierarchy_UI:
                             lbc=(limbID, 0.3, 0.1, 0.1))
                 else:
                     pm.treeView(self.widget, e=1, bvf=(limbID, 1, 0))
-                # if limb.bhvType.get() in self.rigBHV.emptyLimbIndexes:
+                # NOT IN APP HIER
                 if limb.bhvType.get() in rigData.EMPTY_BHV_INDEXES:
                     pm.treeView(self.widget, e=1, ornament=(limbID, 1, 0, 3))
 
@@ -73,7 +85,7 @@ class BHV_Limb_Hierarchy_UI:
         limbIDStrs = pm.treeView(self.widget, q=1, selectItem=1)
         pm.menuItem(self.remove_mi, e=1, en=bool(limbIDStrs))
         if limbIDStrs:
-            limb = self.limbMng.GetLimb(int(limbIDStrs[0]))
+            limb = self._limbs[limbIDStrs[0]]
             msg = '\tLimbHier > SELECTED limb "%s"'% limb.pfrsName.get()
             self.logger.info(msg)
             self.parent.LimbSelected(limb)
@@ -85,10 +97,10 @@ class BHV_Limb_Hierarchy_UI:
         self.logger.debug('\tBhv_LimbHier > ReparentLimb')
         if oldParents[0] == newParentIDStr:
             return
-        child = self.limbMng.GetLimb(int(limbIDsStr[0]))
+        child = self._limbs[limbIDsStr[0]]
         name = child.pfrsName.get()
         if newParentIDStr:
-            parent = self.limbMng.GetLimb(int(newParentIDStr))
+            parent = self._limbs[newParentIDStr]
             msg = '\tLimbHier > REPARENTING '
             msg += '"%s" to "%s"' % (name, parent.pfrsName.get())
             self.logger.info(msg)
@@ -100,7 +112,7 @@ class BHV_Limb_Hierarchy_UI:
     
     def RenameLimb(self, limbIDStr, newName):
         self.logger.debug('\tBhv_LimbHier > RenameLimb')
-        limb = self.limbMng.GetLimb(int(limbIDStr))
+        limb = self._limbs[limbIDStr]
         # if limb.bhvType.get() not in self.rigBHV.emptyLimbIndexes:
         if limb.bhvType.get() not in rigData.EMPTY_BHV_INDEXES:
             return ''
@@ -130,7 +142,7 @@ class BHV_Limb_Hierarchy_UI:
 
     def RemoveEmptyLimb(self, ignore):
         limbIDStrs = pm.treeView(self.widget, q=1, selectItem=1)
-        limb = self.limbMng.GetLimb(int(limbIDStrs[0]))
+        limb = self._limbs[limbIDStrs[0]]
         self.rigBHV.RemoveEmptyLimb(limb)
         self.Populate()
 

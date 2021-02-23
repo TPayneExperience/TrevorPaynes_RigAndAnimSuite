@@ -5,16 +5,17 @@ class Mesh_Manager:
     def __init__(self, parent):
         self._meshes = {} # meshID: meshNode
         self.logger = parent.logger
+        self.pfrs = parent
 
 #============= ROOT ============================
 
-    def NewRoot(self, root):
-        self.root = root
+    def NewRoot(self):
+        root = self.pfrs.root
         pm.select(d=True)
         self.meshGroup = pm.group(name='MESHES', em=True, p=root)
 
-    def SetRoot(self, root):
-        self.root = root
+    def LoadRoot(self):
+        root = self.pfrs.root
         self.meshGroup = None
         for child in pm.listRelatives(root, c=1):
             if child.shortName() == 'MESHES':
@@ -41,28 +42,19 @@ class Mesh_Manager:
 
 #============= ??? ============================
 
-    def GetMesh(self, meshID):
-        return self._meshes[meshID]
-    
-    def GetAllMeshes(self):
-        return list(self._meshes.values())
-    
-    def AddMesh(self, mesh):
-        if (not mesh.hasAttr('ID')):
-            pm.addAttr(mesh, ln='ID', at='short')
-            pm.addAttr(mesh, ln='root', dt='string')
+    def InitMesh(self, mesh):
+        pm.addAttr(mesh, ln='ID', at='short')
+        pm.addAttr(mesh, ln='root', dt='string')
 
-            meshID = self.root.nextMeshID.get()
-            self.root.nextMeshID.set(meshID + 1)
-            mesh.ID.set(meshID)
-            
-        pm.connectAttr(self.root.meshes, mesh.root)
-        if mesh.ID.get() not in self._meshes:
-            self._meshes[mesh.ID.get()] = mesh
+        meshID = self.pfrs.root.nextMeshID.get()
+        self.pfrs.root.nextMeshID.set(meshID + 1)
+        mesh.ID.set(meshID)
+
+    def AddMesh(self, mesh):
+        pm.connectAttr(self.pfrs.root.meshes, mesh.root)
 
     def RemoveMesh(self, mesh):
         pm.disconnectAttr(mesh.root)
-        del(self._meshes[mesh.ID.get()])
 
 
 

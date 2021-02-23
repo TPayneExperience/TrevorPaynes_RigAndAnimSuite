@@ -129,7 +129,7 @@ class PW_Brush_Properties_UI:
 
     def UpdateInfluenceCount(self): # Not sure when to call this...
         joints = set([])
-        for mesh in self.meshMng.GetAllMeshes():
+        for mesh in pm.listConnections(self.pfrs.root.meshes):
             joints = joints | set(self.skinMng.GetUsedInfJoints(mesh))
         inf = len(joints)
         pm.text(self.inf_txt, e=1, l='Total Influence Joints: %d' % inf)

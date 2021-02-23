@@ -23,6 +23,7 @@ class Appearance_UI:
         self.ctrMng = parent.ctrMng
         self.nameMng = parent.nameMng
         self.logger = parent.logger
+        self.pfrs = parent.pfrs
 
         self._Setup()
 

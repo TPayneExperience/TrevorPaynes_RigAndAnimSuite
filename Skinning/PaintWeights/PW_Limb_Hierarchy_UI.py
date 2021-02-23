@@ -13,10 +13,13 @@ class PW_Limb_Hierarchy_UI:
         # self.rigBHV = rigBHV
         self.logger = parent.logger
 
+        self._limbs = {} # ID : limb
+
         self._Setup()
         
     def Populate(self):
         pm.treeView(self.widget, e=1, removeAll=1)
+        self._limbs = {}
         # SKEL HIER
         limbParents = self.limbMng.GetDefaultLimbHier()
         tempParents = limbParents.copy()
@@ -34,6 +37,7 @@ class PW_Limb_Hierarchy_UI:
         prefix = self.parent.parent.root.prefix.get()
         for limb in limbCreationOrder[::-1]:
             limbID = limb.ID.get()
+            self._limbs[str(limbID)] = limb
             name = '%s_%s' % (prefix, limb.pfrsName.get())
             parent = limbParents[limb]
             parentID = ''
@@ -59,7 +63,7 @@ class PW_Limb_Hierarchy_UI:
     def SelectionChanged(self):
         limbIDStrs = pm.treeView(self.widget, q=1, selectItem=1)
         if limbIDStrs:
-            limb = self.limbMng.GetLimb(int(limbIDStrs[0]))
+            limb = self._limbs[limbIDStrs[0]]
             msg = '\tLimbHier > SELECTED limb "%s"'% limb.pfrsName.get()
             self.logger.info(msg)
             self.parent.LimbSelected(limb)

@@ -10,10 +10,8 @@ class PFRS_Debug:
         self.limbMng = parent.limbMng
         self.rigLS = parent.pfrs.rigLS
 
-        self.pfrs.NewScene()
-        self.pfrs.NewRoot('PFX', 
-                    range(5), 
-                    True)
+        # self.pfrs.NewScene()
+        # self.pfrs.NewRoot('PFX', range(5), True)
         folder = os.path.dirname(__file__)
         self.folder = os.path.join(folder,'TESTING_FILES')
         if not os.path.isfile(__file__.replace('.pyc', '.py')):
@@ -48,9 +46,9 @@ class PFRS_Debug:
         self.parent.Setup_Editable()
         pm.tabLayout(self.parent.rig_ui.tab, e=1, sti=2) # Select Limb setup tab
         self.rigLS.AutoBuildByName(0)
-        spine = pm.ls('PFX_Spine_Limb_M_NODE', type='transform')[0]
+        spine = pm.ls('PFX_Spine_Limb_M_NODE', tr=1)[0]
         self.parent.rigBHV.SetBhvType(spine, 10) # Relative FK
-        # root = pm.ls('PFX_Root_Limb_M_NODE', type='transform')[0]
+        # root = pm.ls('PFX_Root_Limb_M_NODE', tr=1)[0]
         # self.parent.limbMng.Reparent(spine, -1)
         # self.parent.limbMng.Reparent(root, spine)
         pm.tabLayout(self.parent.rig_ui.tab, e=1, sti=3) # Select Limb setup tab

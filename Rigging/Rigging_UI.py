@@ -71,8 +71,8 @@ class Rigging_UI:
                 self.test_ui = test_ui.Test_UI(self)
         pm.tabLayout(  self.tab, 
                     e=1, 
-                    tabLabel=(  (self.jntSetupTab,'Joint Setup'), 
-                                (self.limbSetupTab, 'Limb Setup'), 
+                    tabLabel=(  (self.jntSetupTab,'JOINT Setup'), 
+                                (self.limbSetupTab, 'Joint LIMB Setup'), 
                                 (self.bhvTab, 'Behaviors'), 
                                 (self.appTab, 'Appearance'), 
                                 (self.testTab, 'Test')))

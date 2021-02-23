@@ -19,6 +19,7 @@ class Skinning_UI:
         self.rigBHV = parent.rigBHV
         self.nameMng = parent.nameMng
         self.logger = parent.logger
+        self.pfrs = parent.pfrs
 
         self.meshMng = parent.meshMng
         self.skinMng = parent.skinMng
@@ -27,9 +28,6 @@ class Skinning_UI:
         # self.skinMng = skinMng.Skin_Mananger(self)
 
         self._Setup()
-
-    def SetRoot(self, root):
-        self.root = root
 
 #=========== SETUP ====================================
 

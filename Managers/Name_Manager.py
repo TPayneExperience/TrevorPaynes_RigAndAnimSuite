@@ -6,18 +6,16 @@ import pymel.core as pm
 class Name_Manager:
     def __init__(self, parent):
         self.logger = parent.logger
-
-    def SetRoot(self, root):
-        self.root = root
+        self.pfrs = parent
 
     def GetName(self, limbName, secondName, side, objType):
         self.logger.debug('\tNameMng > GetName')
-        temp = {self.root.limbIndex.get() : limbName,
-                self.root.jointIndex.get() : secondName,
-                self.root.sideIndex.get() : side,
-                self.root.typeIndex.get() : objType}
-        if self.root.showPrefix.get():
-            temp[self.root.prefixIndex.get()] = self.root.prefix.get()
+        temp = {self.pfrs.root.limbIndex.get() : limbName,
+                self.pfrs.root.jointIndex.get() : secondName,
+                self.pfrs.root.sideIndex.get() : side,
+                self.pfrs.root.typeIndex.get() : objType}
+        if self.pfrs.root.showPrefix.get():
+            temp[self.pfrs.root.prefixIndex.get()] = self.pfrs.root.prefix.get()
         partNames = [temp[i] for i in sorted(list(temp.keys()))]
         return '_'.join(partNames)
     

@@ -13,15 +13,18 @@ class Limb_Manager:
         self.grpMng = parent.grpMng
         self.jntMng = parent.jntMng
         self.logger = parent.logger
+        self.pfrs = parent
 
 #============= ROOT ============================
 
-    def NewRoot(self, root):
+    def NewRoot(self):
         self.logger.debug('\tLimbMng > NewRoot')
+        root = self.pfrs.root
         self.limbGroup = pm.group(name='LIMBS', em=1, p=root)
 
-    def SetRoot(self, root):
+    def LoadRoot(self):
         self.logger.debug('\tLimbMng > SetRoot')
+        root = self.pfrs.root
         for child in pm.listRelatives(root, c=1, type='transform'):
             if child.shortName() == 'LIMBS':
                 self.jntGroup = child
@@ -29,10 +32,10 @@ class Limb_Manager:
 
 #============= ADD LIMB ============================
 
-    def _AddLimb(self, root):
+    def _AddLimb(self):
         self.logger.debug('\tLimbMng > AddLimb')
-        limbID = root.nextLimbID.get()
-        root.nextLimbID.set(limbID + 1)
+        limbID = self.pfrs.root.nextLimbID.get()
+        self.pfrs.root.nextLimbID.set(limbID + 1)
         hide = rigData.HIDE_ATTRS
         pfrsName = 'Limb%03d' % limbID
         limbTypes = ':'.join(rigData.LIMB_TYPES)
@@ -91,19 +94,19 @@ class Limb_Manager:
         
         return limb
 
-    def AddEmptyRigLimb(self, root):
+    def AddEmptyRigLimb(self):
         self.logger.debug('\tLimbMng > AddEmptyRigLimb')
-        limb = self._AddLimb(root)
+        limb = self._AddLimb()
         pm.addAttr(limb, ln='bhvEmptyGroup', dt='string', h=rigData.HIDE_ATTRS)
         limb.bhvType.set(rigData.EMPTY_BHV_INDEXES[0])
         self.grpMng.AddEmptyGroup(limb)
         self.UpdateLimbName(limb)
-        pm.connectAttr(root.emptyLimbs, limb.rigRoot)
+        pm.connectAttr(self.pfrs.root.emptyLimbs, limb.rigRoot)
         return limb
 
-    def AddJointLimb(self, root, joints):
+    def AddJointLimb(self, joints):
         self.logger.debug('\tLimbMng > AddJointLimb')
-        limb = self._AddLimb(root)
+        limb = self._AddLimb()
         for joint in joints:
             self.jntMng.AddJoint(limb, joint)
         self.jntMng.ReindexJoints(limb)
@@ -136,8 +139,8 @@ class Limb_Manager:
         self.grpMng.AddLookAtGroup(limb)
 
         self.UpdateLimbName(limb)
-        pm.connectAttr(root.jointLimbs, limb.rigRoot)
-        root.rebuildSkinInf.set(1)
+        pm.connectAttr(self.pfrs.root.jointLimbs, limb.rigRoot)
+        self.pfrs.root.rebuildSkinInf.set(1)
         return limb
 
 #============= REMOVE LIMB ============================
@@ -146,7 +149,6 @@ class Limb_Manager:
         self.logger.debug('\tLimbMng > Remove')
         if pm.listConnections(limb.mirrorLimb):
             self._BreakMirror(limb)
-        del(self._limbs[limb.ID.get()])
         pm.select(d=1)
         pm.delete(limb)
 
@@ -174,13 +176,14 @@ class Limb_Manager:
 
     def RenameLimb(self, sourceLimb, newName): # list should repopulate after call
         self.logger.debug('\tLimbMng > Rename')
-        names = [limb.pfrsName.get() for limb in self._limbs.values()]
+        limbs =  pm.listConnections(self.pfrs.root.limbs)
+        names = [limb.pfrsName.get() for limb in limbs]
         if (names.count(newName) >= 2): # Only 2 can have same name
             return False
 
         # PAIR WITH MIRROR
         if (names.count(newName) == 1):
-            for mirrorLimb in list(self._limbs.values()):
+            for mirrorLimb in limbs:
                 if (mirrorLimb.pfrsName.get() == newName):
                     break
             if (sourceLimb == mirrorLimb): # prevent pairing with self
@@ -219,12 +222,10 @@ class Limb_Manager:
     def GetDefaultLimbHier(self):
         self.logger.debug('\tBhvMng > GetDefaultLimbHier')
         limbParents = {} # childLimb : parentLimb
-        for childJoint in self.jntMng.GetAllJoints():
-            childLimb = pm.listConnections(childJoint.limb)
-            if not childLimb or childLimb[0] in limbParents:
-                continue
+        for childLimb in pm.listConnections(self.pfrs.root.jointLimbs):
+            childJoint = util.GetSortedLimbJoints(childLimb)[0]
             parentJoint = pm.listRelatives(childJoint, p=1, type='joint')
-            if not parentJoint or not parentJoint[0].hasAttr('limb'):
+            if not parentJoint:
                 continue
             parentLimb = pm.listConnections(parentJoint[0].limb)
             if not parentLimb:
@@ -233,29 +234,16 @@ class Limb_Manager:
                 limbParents[childLimb[0]] = parentLimb[0]
         return limbParents
 
-    def RebuildLimbDict(self):
-        self.logger.debug('\tLimbMng > RebuildLimbDict')
-        self._limbs = {}
-        for limb in pm.listRelatives(self.limbGroup, c=1):
-            limbID = limb.ID.get()
-            if limbID in self._limbs:
-                nextID = self.root.nextLimbID.get()
-                maxID = max(list(self._limbs.keys())) + 1
-                limbID = max(nextID, maxID)
-                self.root.nextLimbID.set(limbID + 1)
-                limb.ID.set(limbID)
-            self._limbs[limbID] = limb
-
-    def GetRootLimbs(self):
+    def GetRootLimbs(self, root):
         self.logger.debug('\tLimbMng > GetRootLimbs')
         rootLimbs = []
-        for limb in list(self._limbs.values()):
+        for limb in pm.listConnections(root.limbs):
             if not pm.listConnections(limb.limbParent):
                 rootLimbs.append(limb)
         return rootLimbs
 
     def GetLimbCreationOrder(self, rootLimb):
-        '''Returns an ordered list of limb IDs FROM ROOT TO bottom most CHILD'''
+        '''Returns ordered list of limbs: ROOT TO bottom most CHILD'''
         self.logger.debug('\tLimbMng > GetLimbCreationOrder')
         orderedLimbs = [rootLimb]
         parents = [rootLimb]

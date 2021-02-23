@@ -5,6 +5,7 @@ class PW_Meshes_Hierarchy_UI:
     def __init__(self, parent):
         self.meshMng = parent.meshMng
         self.parent = parent
+        self.pfrs = parent.pfrs
 
         self._meshes = {} # MeshName : meshNode
 
@@ -12,7 +13,7 @@ class PW_Meshes_Hierarchy_UI:
         
     def Populate(self):
         pm.treeView(self.widget, e=1, removeAll=1)
-        for mesh in self.meshMng.GetAllMeshes():
+        for mesh in pm.listConnections(self.pfrs.root.meshes):
             meshID = mesh.ID.get()
             name = mesh.shortName()
             pm.treeView(self.widget, e=1, ai=(meshID, ''))

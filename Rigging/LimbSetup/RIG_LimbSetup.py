@@ -61,10 +61,12 @@ class RIG_LimbSetup:
     def AutoBuildByName(self):
         self.logger.debug('\tBhvMng > AutoBuildByName')
         # GROUP JOINTS AND VALIDATE NAMES
-        allJoints = pm.ls(type='joint')
-        limbJoints = self.jntMng.GetAllJoints()
+        freeJoints = []
+        for joint in pm.ls(type='joint'):
+            if not pm.listConnections(joint.limb):
+                freeJoints.append(joint)
         newLimbs = {} # limbName : jointList
-        for joint in list(set(allJoints) - set(limbJoints)):
+        for joint in freeJoints:
             splitName = joint.shortName().split('_')
             if len(splitName) != 3:
                 msg = 'Joints must be named as "LimbName_Side_JointName"'

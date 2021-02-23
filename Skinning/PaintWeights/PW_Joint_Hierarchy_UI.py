@@ -12,18 +12,21 @@ class PW_Joint_Hierarchy_UI:
         self.logger = parent.logger
 
         self.limb = None
+        self.joints = {} # ID : joint
 
         self._Setup()
     
     
     def Populate(self):
         self.Depopulate()
+        self.joints = {}
         if not self.limb:
             return
         if self.limb.limbType.get() == 1: # Skip one joint limbs
             return 
         for joint in util.GetSortedLimbJoints(self.limb):
             jointID = joint.ID.get()
+            self.joints[jointID] = joint
             name = joint.pfrsName.get()
             pm.treeView(self.widget, e=1, ai=(jointID, ''))
             pm.treeView(self.widget, e=1, dl=(jointID, name))
@@ -44,7 +47,7 @@ class PW_Joint_Hierarchy_UI:
         if not jntStrs:
             self.logger.info('\tJointHier > DESELECTED joint')
             return
-        joint = self.jntMng.GetJoint(int(jntStrs[0]))
+        joint = self.joints[int(jntStrs[0])]
         msg = '\tJointHier > SELECTED joint "%s"'% joint.pfrsName.get()
         self.logger.info(msg)
         self.parent.JointSelected(joint)

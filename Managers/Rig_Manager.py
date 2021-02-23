@@ -9,12 +9,12 @@ reload(rigData)
 
 class Rig_Manager:
     def __init__(self, parent):
-        self.parent = parent
         self.limbMng = parent.limbMng
         self.jntMng = parent.jntMng
         self.grpMng = parent.grpMng
         self.ctrMng = parent.ctrMng
         self.logger = parent.logger
+        self.pfrs = parent
 
 
     def Setup_Rig(self):
@@ -245,11 +245,12 @@ class Rig_Manager:
     
     def Teardown_Groups(self):
         self.logger.debug('\tTest_UI > Teardown_Groups')
-        for joint in self.jntMng.GetAllJoints():
-            group = pm.listConnections(joint.group)[0]
-            parent = pm.listRelatives(group, p=1)
-            if parent and parent[0] != joint:
-                pm.parent(group, joint)
+        for limb in pm.listConnections(self.pfrs.root.jointLimbs):
+            for joint in pm.listConnections(limb.joints):
+                group = pm.listConnections(joint.group)[0]
+                parent = pm.listRelatives(group, p=1)
+                if parent and parent[0] != joint:
+                    pm.parent(group, joint)
            
     def Teardown_MayaControllers(self):
         ctrs = pm.ls(type='controller')
@@ -315,14 +316,6 @@ class Rig_Manager:
         self.logger.debug('\tTest_UI > Setup_External_FKBranch')
         for childGroup in self.grpMng.GetJointGroups(limb):
             self.ParentConstrainGroup(limb, childGroup)
-        # parent = self.limbMng.GetLimbParent(limb)
-        # if parent:
-        #     childGroup = self.grpMng.GetLimbGroups(limb)[0]
-        #     index = limb.limbParentJoint.get()
-        #     parentGroup = self.grpMng.GetLimbGroups(parent)[index]
-        #     parentControl = pm.listConnections(parentGroup.control)[0]
-        #     for childGroup in self.grpMng.GetLimbGroups(limb):
-        #         pm.parent(childGroup, parentControl)
 
     def Bind_FK_Joints(self, limb):
         self.logger.debug('\tTest_UI > Bind_FK_Joints')
@@ -339,25 +332,22 @@ class Rig_Manager:
     
     def Setup_Internal_Constraint(self, limb):
         self.logger.debug('\tTest_UI > Setup_Internal_Constraint')
-        # targetLimbs = pm.listConnections(limb.bhvCstTargetLimb)
+        parentLimbs = pm.listConnections(limb.limbParent)
         targetLimbs = pm.listConnections(limb.bhvParent)
         if not targetLimbs:
             msg = 'ERROR: Constraint Limb "%s" missing TARGET limb' % limb
             msg += '\n(Please set target limb in BEHAVIOR Tab)'
             pm.confirmDialog(t='Constraint Error', m=msg, icon='warning', b='Ok')
             return
-        parentLimb = self.limbMng.GetLimbParent(limb)
-        if not parentLimb:
+        if not parentLimbs:
             msg = 'ERROR: Constraint Limb "%s" missing PARENT limb' % limb
             msg += '\n(Please PARENT limb to another limb in BEHAVIOR Tab)'
             pm.confirmDialog(t='Constraint Error', m=msg, icon='warning', b='Ok')
             return
         sourceIndex = limb.limbParentJoint.get()
-        sourceJoint = util.GetSortedLimbJoints(parentLimb)[sourceIndex]
-        targetLimb = targetLimbs[0]
-        # targetIndex = limb.bhvCstTargetJnt.get()
+        sourceJoint = util.GetSortedLimbJoints(parentLimbs[0])[sourceIndex]
         targetIndex = limb.bhvParentJoint.get()
-        targetJoint = util.GetSortedLimbJoints(targetLimb)[targetIndex]
+        targetJoint = util.GetSortedLimbJoints(targetLimbs[0])[targetIndex]
         if sourceJoint == targetJoint:
             msg = 'Constraint Limb "%s" group parent and' % limb
             msg += ' target constraint joint CANNOT be the same'
@@ -473,10 +463,10 @@ class Rig_Manager:
         pm.parent(handle, targetControl)
 
         # PARENT IKPV Control
-        parent = self.limbMng.GetLimbParent(limb)
+        parent = pm.listConnections(limb.limbParent)
         if parent:
             index = limb.limbParentJoint.get()
-            parentGroup = self.grpMng.GetJointGroups(parent)[index]
+            parentGroup = self.grpMng.GetJointGroups(parent[0])[index]
             parentControl = pm.listConnections(parentGroup.control)[0]
             pm.parent(distGroup, parentControl)
         else:
@@ -499,14 +489,14 @@ class Rig_Manager:
 
     def ParentConstrainGroup(self, limb, childGroup):
         self.logger.debug('\tTest_UI > ParentConstrainGroup')
-        parent = self.limbMng.GetLimbParent(limb)
-        if not parent:
+        parents = pm.listConnections(limb.limbParent)
+        if not parents:
             return 
-        if parent.bhvType.get() in rigData.EMPTY_BHV_INDEXES:
+        if parents[0].bhvType.get() in rigData.EMPTY_BHV_INDEXES:
             group = pm.listConnections(limb.bhvEmptyGroup)[0]
             parentJoint = pm.listConnections(group.control)[0]
         else:
             index = limb.limbParentJoint.get()
-            parentJoint = util.GetSortedLimbJoints(parent)[index]
+            parentJoint = util.GetSortedLimbJoints(parents[0])[index]
         pm.parentConstraint(parentJoint, childGroup, mo=1)   
 

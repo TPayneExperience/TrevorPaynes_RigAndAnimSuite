@@ -12,6 +12,7 @@ class APP_Limb_Properties_UI:
         self.rigBHV = parent.rigBHV
         self.ctrMng = parent.ctrMng
         self.logger = parent.logger
+        self.pfrs = parent.pfrs
 
         self.ctrAxis_at = None
         self.ikpvCtrJoint_at = None
@@ -75,14 +76,13 @@ class APP_Limb_Properties_UI:
         self.limbOrder = []
         # POPULATE VIS PARENT COMBO BOX
         pm.menuItem(l='None', p=self.visParentLimb_om)
-        for rootLimb in self.limbMng.GetRootLimbs():
-            prefix = self.limbMng.GetLimbPrefix(rootLimb)
+        for rootLimb in self.limbMng.GetRootLimbs(self.pfrs.root):
             for limb in self.limbMng.GetLimbCreationOrder(rootLimb):
                 if limb == self.limb:
                     continue
                 # side = self.limbMng.GetLimbSide(limb)
                 side = rigData.LIMB_SIDES[limb.side.get()]
-                name = '%s_%s_%s' % (prefix, limb.pfrsName.get(), side)
+                name = '%s_%s' % (limb.pfrsName.get(), side)
                 pm.menuItem(l=name, p=self.visParentLimb_om)
                 self.limbs[name] = limb
                 self.limbOrder.append(name)
@@ -96,10 +96,8 @@ class APP_Limb_Properties_UI:
             pm.optionMenu(self.visParentLimb_om, e=1, sl=1)
             return
         parent = parent[0]
-        prefix = self.limbMng.GetLimbPrefix(parent)
-        # side = self.limbMng.GetLimbSide(parent)
         side = rigData.LIMB_SIDES[parent.side.get()]
-        name = '%s_%s_%s' % (prefix, parent.pfrsName.get(), side)
+        name = '%s_%s' % (parent.pfrsName.get(), side)
         index = self.limbOrder.index(name) + 2 # start index 1 + (none = 1)
         pm.optionMenu(self.visParentLimb_om, e=1, sl=index)
 

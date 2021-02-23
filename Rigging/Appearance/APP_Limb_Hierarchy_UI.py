@@ -10,25 +10,36 @@ class APP_Limb_Hierarchy_UI:
         self.limbMng = parent.limbMng
         self.rigBHV = parent.rigBHV
         self.logger = parent.logger
+        self.pfrs = parent.pfrs
+        self.rootMng = self.pfrs.rootMng
+
+        self._limbs = {} # rootID_limbID : limb
 
         self._Setup()
 
     def Populate(self):
         self.logger.debug('\tApp_LimbHier > Populate')
         pm.treeView(self.widget, e=1, removeAll=1)
-        self.limbMng.RebuildLimbDict()
-        for rootLimb in self.limbMng.GetRootLimbs()[::-1]:
-            prefix = pm.listConnections(rootLimb.rigRoot)[0].prefix.get()
+        curRoot = self.pfrs.root
+        self._limbs = {}
+        rootLimbs = []
+        for root in self.rootMng.GetSceneRoots():
+            rootLimbs += self.limbMng.GetRootLimbs(root)
+        for rootLimb in rootLimbs[::-1]:
             for limb in self.limbMng.GetLimbCreationOrder(rootLimb):
-                limbID = limb.ID.get()
+                root = pm.listConnections(limb.rigRoot)[0]
+                rootID = root.ID.get()
+                prefix = root.prefix.get()
+                enable = (root == curRoot)
+                limbID = '%d_%d' % (rootID, limb.ID.get())
+                self._limbs[limbID] = limb
                 name = '%s_%s' % (prefix, limb.pfrsName.get())
-                parent = self.limbMng.GetLimbParent(limb)
+                parent = pm.listConnections(limb.limbParent)
                 parentID = ''
                 if parent:
                     parentID = parent.ID.get()
                 pm.treeView(self.widget, e=1, ai=(limbID, parentID))
-                pm.treeView(self.widget, e=1, dl=(limbID, name))
-                # side = self.limbMng.GetLimbSide(limb)
+                pm.treeView(self.widget, e=1, dl=(limbID, name), en=enable)
                 side = rigData.LIMB_SIDES[limb.side.get()]
                 if (side == 'L'):
                     pm.treeView(self.widget, e=1, bti=(limbID, 1, side),
@@ -55,7 +66,7 @@ class APP_Limb_Hierarchy_UI:
         self.logger.debug('\tApp_LimbHier > SelectionChanged')
         limbIDStrs = pm.treeView(self.widget, q=1, selectItem=1)
         if limbIDStrs:
-            limb = self.limbMng.GetLimb(int(limbIDStrs[0]))
+            limb = self._limbs[limbIDStrs[0]]
             msg = '\tLimbHier > SELECTED limb "%s"'% limb.pfrsName.get()
             self.logger.info(msg)
             self.parent.LimbSelected(limb)

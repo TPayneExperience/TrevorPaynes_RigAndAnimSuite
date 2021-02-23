@@ -6,13 +6,14 @@ class MeshSetup_UI:
         self.rigBHV = parent.rigBHV
         self.meshMng = parent.meshMng
         self.skinMng = parent.skinMng
+        self.pfrs = parent.pfrs
 
         self._Setup()
 
     def Populate(self):
         pm.treeView(self.availableMeshes_tv, e=1, removeAll=1)
         pm.treeView(self.skinnedMeshes_tv, e=1, removeAll=1)
-        skinnedMeshes = self.meshMng.GetAllMeshes()
+        skinnedMeshes = pm.listConnections(self.pfrs.root.meshes)
         self.allMeshes = {} # longName : meshNode
 
         for mesh in pm.ls(type='mesh'):
@@ -79,7 +80,7 @@ class MeshSetup_UI:
 
     def AvailableSelectionChanged(self):
         meshes = self.GetSelectedAvailable()
-        skinnedMeshes = self.meshMng.GetAllMeshes()
+        skinnedMeshes = pm.listConnections(self.pfrs.root.meshes)
         newMeshes = [mesh for mesh in meshes if mesh not in skinnedMeshes]
         hasNewMeshes = bool(newMeshes)
         pm.menuItem(self.add_mi, e=1, en=hasNewMeshes)
@@ -97,7 +98,7 @@ class MeshSetup_UI:
 
     def ReplaceMeshes(self, ignore):
         meshes = self.GetSelectedAvailable()
-        skinnedMeshes = self.meshMng.GetAllMeshes()
+        skinnedMeshes = pm.listConnections(self.pfrs.root.meshes)
         newMeshes = [m for m in meshes if m not in skinnedMeshes]
         oldMeshes = [m for m in skinnedMeshes if m not in meshes]
         for mesh in newMeshes:

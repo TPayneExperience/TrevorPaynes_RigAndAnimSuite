@@ -33,14 +33,13 @@ class LimbSetup_UI:
         self.logger.debug('\tLimbSetup_UI > Populate')
         self.sceneHier_ui.Populate()
         self.limbHier_ui.Populate()
-        self.jntHier_ui.Depopulate()
+        self.jntHier_ui.SetLimb(None)
         self.UpdateSceneFrame()
         self.UpdateJointFrame()
     
     def PopulateJoints(self):
         self.logger.debug('\tLimbSetup_UI > PopulateJoints')
         self.sceneHier_ui.Populate()
-        self.jntHier_ui.Populate()
         self.UpdateSceneFrame()
     
 #=========== SETUP ====================================
@@ -59,7 +58,6 @@ class LimbSetup_UI:
     
     def Setup_Editable(self):
         self.logger.info('Rigging > Limb Setup SETUP')
-        self.limbMng.RebuildLimbDict()
         self.Populate()
         if not self.scriptJob:
             self.scriptJob = pm.scriptJob( e=("SelectionChanged",
@@ -128,8 +126,7 @@ class LimbSetup_UI:
             self.jointsToCreateLimb = joints
         elif self.rigLS.AreJointsChained(joints):
             jointChain = self.rigLS.GetCompleteJointChain(joints)
-            haveLimbs = [self.jntMng.HasLimb(j) for j in jointChain]
-            if any(haveLimbs):
+            if any([pm.listConnections(j.limb) for j in jointChain]):
                 self.limbHier_ui.SetAddEnabled(0)
             else:
                 self.jointsToCreateLimb = jointChain
