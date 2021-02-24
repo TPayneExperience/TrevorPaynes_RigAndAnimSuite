@@ -42,14 +42,14 @@ class Skinning_UI:
             with pm.horizontalLayout() as self.testTab:
                 pm.button('test', label='TEST')
             # with pm.horizontalLayout() as self.appTab:
-            #     self.app_ui = app_ui.Appearance_UI( self.limbMng,
+            #     self.app_ui = app_ui.RIG_Appearance_UI( self.limbMng,
             #                                         self.rigBHV,
             #                                         self.grpMng,
             #                                         self.ctrMng,
             #                                         self.nameMng,
             #                                         self)
             # with pm.horizontalLayout() as self.testTab:
-            #     self.test_ui = test_ui.Test_UI( self.limbMng,
+            #     self.RIG_Test_UI = RIG_Test_UI.RIG_Test_UI( self.limbMng,
             #                                     self.jntMng,
             #                                     self.rigBHV,
             #                                     self.grpMng,
@@ -69,13 +69,13 @@ class Skinning_UI:
         if (index == 0):
             self.meshSetup_ui.Setup_Editable()
         # elif (index == 1):
-        #     self.limbSetup_ui.Setup_Editable()
+        #     self.RIG_LimbSetup_UI.Setup_Editable()
         elif (index == 2):
             self.paint_ui.Setup_Editable()
         # elif (index == 3):
         #     self.app_ui.Setup_Editable() 
         # elif (index == 4):
-        #     self.test_ui.Setup_Editable() 
+        #     self.RIG_Test_UI.Setup_Editable() 
 
         # # SET CONTROLS OFF / LOCKED / ON
         # if index in [0, 1]:
@@ -90,13 +90,13 @@ class Skinning_UI:
         if (lastIndex == 0): 
             self.meshSetup_ui.Teardown_Editable()
         # elif (lastIndex == 1): 
-        #     self.limbSetup_ui.Teardown_Editable()
+        #     self.RIG_LimbSetup_UI.Teardown_Editable()
         elif (lastIndex == 2):
             self.paint_ui.Teardown_Editable()
         # elif (lastIndex == 3):
         #     self.app_ui.Teardown_Editable() 
         # elif (lastIndex == 4):
-        #     self.test_ui.Teardown_Editable() 
+        #     self.RIG_Test_UI.Teardown_Editable() 
 
         # Skin Weights for all but Mesh Setup
         if lastIndex == 0 and nextIndex in [1, 2, 3]:

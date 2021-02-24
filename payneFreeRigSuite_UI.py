@@ -59,14 +59,8 @@ class PayneFreeRigSuite_UI:
             with pm.tabLayout(e=0, cc=self.TabChanged) as self.tab:
                 with pm.horizontalLayout() as self.rigging_l:
                     self.rig_ui = rig_ui.Rigging_UI(self)
-                    self.limbMng = self.rig_ui.limbMng
-                    self.grpMng = self.rig_ui.grpMng
-                    self.jntMng = self.rig_ui.jntMng
-                    self.rigBHV = self.rig_ui.rigBHV
-                    self.ctrMng = self.rig_ui.ctrMng
                 with pm.horizontalLayout(en=0) as self.skinning_l:
                     self.skin_ui = skin_ui.Skinning_UI(self)
-                    self.skinMng = self.skin_ui.skinMng
                 with pm.horizontalLayout(en=0) as self.animation_l:
                     with pm.tabLayout() as self.animTab:
                         with pm.horizontalLayout():
@@ -171,7 +165,7 @@ class PayneFreeRigSuite_UI:
 
     def closeEvent(self):
         self.rig_ui.jntSetup_ui.KillScripts()
-        self.rig_ui.limbSetup_ui.KillScripts()
+        # self.rig_ui.limbSetupTab.KillScripts()
         self.pfrs.EndLogger()
 
     def UpdateEnableUI(self):

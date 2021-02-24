@@ -4,7 +4,7 @@ import pymel.core as pm
 import Data.Rig_Data as rigData
 reload(rigData)
 
-class BHV_Group_Properties_UI:
+class RIG_BHV_Group_Properties_UI:
     def __init__(self, parent):
         self.parent = parent
         self.limbMng = parent.limbMng
@@ -15,7 +15,6 @@ class BHV_Group_Properties_UI:
 
         self.parentSub_at = None
         
-        self.limbs = {} # limbName : limb
         self.limbOrder = [] # limbs
 
         self._Setup()

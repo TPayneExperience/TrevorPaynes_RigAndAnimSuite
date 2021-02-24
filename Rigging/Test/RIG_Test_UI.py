@@ -4,7 +4,7 @@ import pymel.core as pm
 import Common.Utilities as util
 reload(util)
 
-class Test_UI:
+class RIG_Test_UI:
     def __init__(self, parent):
         self.parent = parent
         self.rigMng = parent.rigMng

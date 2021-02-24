@@ -1,7 +1,7 @@
 
 import pymel.core as pm
 
-class JointSetup_UI:
+class RIG_JointSetup_UI:
     def __init__(self, parent):
         self.parent = parent
         self.jntMng = parent.jntMng
@@ -36,7 +36,7 @@ class JointSetup_UI:
 #=========== FUNCTIONS ====================================
 
     def InsertParentMidJoint(self, ignore):
-        self.logger.debug('\tJointSetup_UI > InsertParentMidJoint')
+        self.logger.debug('\tRIG_JointSetup_UI > InsertParentMidJoint')
         joints = pm.ls(sl=1, type='joint')
         if not joints:
             return
@@ -54,7 +54,7 @@ class JointSetup_UI:
         pm.parent(oldJoint, newJoint)
 
     def InsertParentEndJoint(self, ignore):
-        self.logger.debug('\tJointSetup_UI > InsertParentEndJoint')
+        self.logger.debug('\tRIG_JointSetup_UI > InsertParentEndJoint')
         joints = pm.ls(sl=1, type='joint')
         if not joints:
             return
@@ -64,12 +64,12 @@ class JointSetup_UI:
         pm.parent(oldJoint, newJoint)
 
     def RemoveJoint(self, ignore):
-        self.logger.debug('\tJointSetup_UI > RemoveJoint')
+        self.logger.debug('\tRIG_JointSetup_UI > RemoveJoint')
         for joint in pm.ls(sl=1, type='joint'):
             self.jntMng.DeleteJoint(joint)
     
     def UpdateButtons(self):
-        self.logger.debug('\tJointSetup_UI > UpdateButtons')
+        self.logger.debug('\tRIG_JointSetup_UI > UpdateButtons')
         pm.button(self.insertMid_b, e=1, en=0)
         joints = pm.ls(sl=1, type='joint')
         jointSelected = bool(joints)
@@ -95,6 +95,7 @@ class JointSetup_UI:
         self.KillScripts()
         self.PrintJointTree()
         self.rigBHV.RebuildLimbs()
+        self.jntMng.InitSceneJoints()
     
     def KillScripts(self):
         if self.scriptJob:

@@ -19,13 +19,11 @@ class Limb_Manager:
 
     def NewRoot(self):
         self.logger.debug('\tLimbMng > NewRoot')
-        root = self.pfrs.root
-        self.limbGroup = pm.group(name='LIMBS', em=1, p=root)
+        self.limbGroup = pm.group(name='LIMBS', em=1, p=self.pfrs.root)
 
     def LoadRoot(self):
         self.logger.debug('\tLimbMng > SetRoot')
-        root = self.pfrs.root
-        for child in pm.listRelatives(root, c=1, type='transform'):
+        for child in pm.listRelatives(self.pfrs.root, c=1, type='transform'):
             if child.shortName() == 'LIMBS':
                 self.jntGroup = child
                 break
@@ -138,7 +136,6 @@ class Limb_Manager:
         self.grpMng.AddIKPVGroup(limb)
         self.grpMng.AddLookAtGroup(limb)
 
-        self.UpdateLimbName(limb)
         pm.connectAttr(self.pfrs.root.jointLimbs, limb.rigRoot)
         self.pfrs.root.rebuildSkinInf.set(1)
         return limb
@@ -176,7 +173,7 @@ class Limb_Manager:
 
     def RenameLimb(self, sourceLimb, newName): # list should repopulate after call
         self.logger.debug('\tLimbMng > Rename')
-        limbs =  pm.listConnections(self.pfrs.root.limbs)
+        limbs =  pm.listConnections(self.pfrs.root.jointLimbs)
         names = [limb.pfrsName.get() for limb in limbs]
         if (names.count(newName) >= 2): # Only 2 can have same name
             return False
@@ -231,13 +228,15 @@ class Limb_Manager:
             if not parentLimb:
                 continue
             if childLimb[0] != parentLimb[0]:
-                limbParents[childLimb[0]] = parentLimb[0]
+                limbParents[childLimb] = parentLimb[0]
         return limbParents
 
     def GetRootLimbs(self, root):
         self.logger.debug('\tLimbMng > GetRootLimbs')
         rootLimbs = []
-        for limb in pm.listConnections(root.limbs):
+        limbs = pm.listConnections(root.emptyLimbs)
+        limbs += pm.listConnections(root.jointLimbs)
+        for limb in limbs:
             if not pm.listConnections(limb.limbParent):
                 rootLimbs.append(limb)
         return rootLimbs

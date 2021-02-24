@@ -5,7 +5,7 @@ import Data.Rig_Data as rigData
 reload(rigData)
 
 
-class LS_Limb_Hierarchy_UI:
+class RIG_LS_Limb_Hierarchy_UI:
     def __init__(self, parent):
         self.parent = parent
         self.limbMng = parent.limbMng
@@ -15,6 +15,8 @@ class LS_Limb_Hierarchy_UI:
         self.rigBHV = parent.rigBHV
         self.nameMng = parent.nameMng
         self.logger = parent.logger
+        self.pfrs = parent.pfrs
+        self.rigLS = parent.pfrs.rigLS
 
         self._limbs = {} # ID : limb
 
@@ -25,7 +27,7 @@ class LS_Limb_Hierarchy_UI:
         pm.treeView(self.widget, e=1, removeAll=1)
         temp = {} # pfrsName : [limbs]
         self._limbs = {}
-        allLimbs = pm.listConnections(self.limbMng.root.jointLimbs)
+        allLimbs = pm.listConnections(self.pfrs.root.jointLimbs)
         pm.menuItem(self.removeAll_mi, e=1, en=bool(allLimbs))
         for limb in allLimbs:
             self._limbs[str(limb.ID.get())] = limb
@@ -101,7 +103,7 @@ class LS_Limb_Hierarchy_UI:
                                 dismissString='No') == 'No'):
             return
         limb = self._limbs[limbIDStrs[0]]
-        self.limbMng.RemoveJointLimb(limb)
+        self.rigLS.RemoveJointLimb(limb)
         self.parent.RemoveJointLimb()
 
     def RemoveAll(self, ignore):
@@ -114,8 +116,7 @@ class LS_Limb_Hierarchy_UI:
                                 cancelButton='No', 
                                 dismissString='No') == 'No'):
             return
-        for limb in pm.listConnections(self.limbMng.root.jointLimbs):
-            self.limbMng.RemoveJointLimb(limb)
+        self.rigLS.RemoveAllJointLimbs()
         self.parent.RemoveJointLimb()
 
     def Add(self, ignore):

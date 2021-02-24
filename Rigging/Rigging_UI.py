@@ -4,16 +4,16 @@ import pymel.core as pm
 import Data.SaveLoad_Skeleton as saveLoadSkel
 reload(saveLoadSkel)
 
-import JointSetup.JointSetup_UI as js_ui
+import JointSetup.RIG_JointSetup_UI as js_ui
 reload(js_ui)
-import LimbSetup.LimbSetup_UI as ls_ui
+import LimbSetup.RIG_LimbSetup_UI as ls_ui
 reload(ls_ui)
 import Behavior.RIG_Behaviors_UI as bhv_ui
 reload(bhv_ui)
-import Appearance.Appearance_UI as app_ui
+import Appearance.RIG_Appearance_UI as app_ui
 reload(app_ui)
-import Test.Test_UI as test_ui
-reload(test_ui)
+import Test.RIG_Test_UI as RIG_Test_UI
+reload(RIG_Test_UI)
 
 import Popups.MirrorLimbs_UI as mir_ui
 reload(mir_ui)
@@ -60,15 +60,15 @@ class Rigging_UI:
     def _Setup(self):
         with pm.tabLayout(cc=self.TabChanged) as self.tab:
             with pm.horizontalLayout() as self.jntSetupTab:
-                self.jntSetup_ui = js_ui.JointSetup_UI(self)
+                self.jntSetup_ui = js_ui.RIG_JointSetup_UI(self)
             with pm.horizontalLayout() as self.limbSetupTab:
-                self.limbSetup_ui = ls_ui.LimbSetup_UI(self)
+                self.RIG_LimbSetup_UI = ls_ui.RIG_LimbSetup_UI(self)
             with pm.horizontalLayout() as self.bhvTab:
                 self.bhv_ui = bhv_ui.RIG_Behaviors_UI(self)
             with pm.horizontalLayout() as self.appTab:
-                self.app_ui = app_ui.Appearance_UI(self)
+                self.app_ui = app_ui.RIG_Appearance_UI(self)
             with pm.horizontalLayout() as self.testTab:
-                self.test_ui = test_ui.Test_UI(self)
+                self.RIG_Test_UI = RIG_Test_UI.RIG_Test_UI(self)
         pm.tabLayout(  self.tab, 
                     e=1, 
                     tabLabel=(  (self.jntSetupTab,'JOINT Setup'), 
@@ -91,13 +91,13 @@ class Rigging_UI:
         if (newIndex == 0):
             self.jntSetup_ui.Setup_Editable()
         elif (newIndex == 1):
-            self.limbSetup_ui.Setup_Editable()
+            self.RIG_LimbSetup_UI.Setup_Editable()
         elif (newIndex == 2):
             self.bhv_ui.Setup_Editable()
         elif (newIndex == 3):
             self.app_ui.Setup_Editable() 
         elif (newIndex == 4):
-            self.test_ui.Setup_Editable() 
+            self.RIG_Test_UI.Setup_Editable() 
         
 
     def Teardown_Editable(self):
@@ -112,13 +112,13 @@ class Rigging_UI:
         if (lastIndex == 0): 
             self.jntSetup_ui.Teardown_Editable()
         elif (lastIndex == 1): 
-            self.limbSetup_ui.Teardown_Editable()
+            self.RIG_LimbSetup_UI.Teardown_Editable()
         elif (lastIndex == 2):
             self.bhv_ui.Teardown_Editable()
         elif (lastIndex == 3):
             self.app_ui.Teardown_Editable() 
         elif (lastIndex == 4):
-            self.test_ui.Teardown_Editable() 
+            self.RIG_Test_UI.Teardown_Editable() 
 
     def UpdateControlVis(self):
         self.logger.debug('\tRigging_UI > UpdateControlVis')

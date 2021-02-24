@@ -123,7 +123,6 @@ class Group_Manager:
                 group.v.set(1)
             if bhvType in rigData.REVERSE_BHV_INDEXES:
                 groups = groups[::-1]
-            # if bhvType in self.omitLastJointTypes:
             if bhvType in rigData.OMIT_LAST_JOINT_BHV_INDEXES:
                 groups[-1].v.set(0)
         if bhvType in rigData.RFK_BHV_INDEXES:

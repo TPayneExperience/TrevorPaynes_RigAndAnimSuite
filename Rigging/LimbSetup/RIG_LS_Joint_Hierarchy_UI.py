@@ -4,7 +4,7 @@ import pymel.core as pm
 import Common.Utilities as util
 reload(util)
 
-class LS_Joint_Hierarchy_UI:
+class RIG_LS_Joint_Hierarchy_UI:
     def __init__(self, parent):
         self.parent = parent
         self.limbMng = parent.limbMng
@@ -38,9 +38,10 @@ class LS_Joint_Hierarchy_UI:
         self.widget = pm.treeView(arp=0, scc=self.JointHierSelectionChanged)
         pm.treeView(self.widget, e=1, editLabelCommand=self.Rename)
         with pm.popupMenu():
-            self.add_mi = pm.menuItem('Add', c=pm.Callback(self.Add))
+            self.add_mi = pm.menuItem('Add Joint(s)', c=pm.Callback(self.AddJoints))
             pm.menuItem(divider=1)
-            self.remove_mi = pm.menuItem('Remove', en=0, c=pm.Callback(self.Remove))
+            self.remove_mi = pm.menuItem('Remove Joint(s)', en=0, 
+                                        c=pm.Callback(self.RemoveJoints))
     
 #=========== FUNCTIONALITY ====================================
 
@@ -73,50 +74,28 @@ class LS_Joint_Hierarchy_UI:
 
     def SetLimb(self, limb):
         self.logger.debug('\tLS_JointHier > SetLimb')
-        self.logger.debug('\t\t' + str(limb.pfrsName.get()))
         self.limb = limb
+        if not limb:
+            return
+        self.logger.debug('\t\t' + str(limb.pfrsName.get()))
         self.Populate()
 
-    def Add(self):
+    def AddJoints(self):
         self.logger.info('\tJointHier > ADDING Joints:')
-        for joint in self.parent.jointsToAddToLimb:
-            # self.jntMng.Teardown_Editable(self.limb, joint)
-            self.logger.info('\t\t' + str(joint))
-            self.grpMng.Add(self.limb, joint)
-        self.jntMng.ReindexJoints(self.limb)
-        self.limb.rebuildLimbType.set(1)
-        self.parent.ClearJointsToAdd()
+        self.rigLS.AddJoints(self.limb, self.parent.GetSelectedSceneJoints())
         self.parent.PopulateJoints()
 
-    def Remove(self):
+    def RemoveJoints(self):
         self.logger.info('\tJointHier > REMOVING Joints:')
         jointIDs = [int(ID) for ID in pm.treeView(self.widget, q=1, si=1)]
         joints = [self.joints[ID] for ID in jointIDs]
-        for joint in joints:
-            self.logger.info('\t\t' + str(joint))
-            self.jntMng.RemoveJoint(joint)
-        self.limb.rebuildLimbType.set(1)
+        self.rigLS.RemoveJoints(self.limb, joints)
         self.parent.PopulateJoints()
 
     def Rename(self, jointIDStr, newName):
         self.logger.info('\tJointHier > RENAMING Joint: ')
         joint = self.joints[int(jointIDStr)]
-        msg = '\t\t%s >>> %s' %(joint.pfrsName.get(), newName)
-        self.logger.info(msg)
-        if not self.nameMng.IsValidCharacterLength(newName):
-            return ''
-        if not self.nameMng.DoesNotStartWithNumber(newName):
-            return ''
-        if not self.nameMng.AreAllValidCharacters(newName):
-            return ''
-        jointNames = []
-        for limbJoint in pm.listConnections(self.limb.joints):
-            jointNames.append(limbJoint.pfrsName.get())
-        if newName in jointNames:
-            self.logger.error('**** Joint name not unique to limb *****')
-            return ''
-        joint.pfrsName.set(newName)
-        self.jntMng.UpdateJointName(joint)
+        self.rigLS.RenameJoint(joint, newName)
         self.parent.PopulateJoints()
         return ''
 

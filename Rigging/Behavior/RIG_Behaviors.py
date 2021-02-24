@@ -12,6 +12,7 @@ class RIG_Behaviors:
         self.grpMng = parent.grpMng
         self.jntMng = parent.jntMng
         self.limbMng = parent.limbMng
+        self.pfrs = parent
 
 #============= ACCESSORS ============================
 
@@ -76,13 +77,13 @@ class RIG_Behaviors:
 #============= REBUILD ============================
 
     def RebuildLimbs(self):
-        allLimbs = pm.listConnections(self.limbMng.root.jointLimbs)
+        allLimbs = pm.listConnections(self.pfrs.root.jointLimbs)
         self.logger.info('--- REBUILDING LIMBS START ---')
         self.logger.info('Rebuilding LIMB TYPES for:')
-        for limb in allLimbs:
-            if limb.rebuildLimbType.get():
-                self.logger.info('\t%s' % limb.pfrsName.get())
-                self.RebuildLimbType(limb)
+        # for limb in allLimbs:
+        #     if limb.rebuildLimbType.get():
+        #         self.logger.info('\t%s' % limb.pfrsName.get())
+        #         self.RebuildLimbType(limb)
         self.logger.info('Rebuilding BEHAVIOR TYPES for:')
         for limb in allLimbs:
             if limb.rebuildBhvType.get():
@@ -175,8 +176,8 @@ class RIG_Behaviors:
         sourceJoint = util.GetSortedLimbJoints(sourceLimb)[-1]
         sourcePos = pm.xform(sourceJoint, q=1, t=1, ws=1)
         # Create distance dictionary to groups
-        limbs = pm.listConnections(self.limbMng.root.jointLimbs)
-        limbs += pm.listConnections(self.limbMng.root.emptyLimbs)
+        limbs = pm.listConnections(self.pfrs.root.jointLimbs)
+        limbs += pm.listConnections(self.pfrs.root.emptyLimbs)
         for limb in limbs:
             if limb == sourceLimb:
                 continue

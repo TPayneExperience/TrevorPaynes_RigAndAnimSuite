@@ -14,21 +14,42 @@ class PFRS_Debug:
         # self.pfrs.NewRoot('PFX', range(5), True)
         folder = os.path.dirname(__file__)
         self.folder = os.path.join(folder,'TESTING_FILES')
+
+        self._Setup()# IN FINAL VERSION, MOVE THIS DOWN BELOW
+
         if not os.path.isfile(__file__.replace('.pyc', '.py')):
             print '>>>>>>>>>>>>>> AUTO DEBUG OFF <<<<<<<<<<<<<'
             return
         print '>>>>>>>>>>>>>> AUTO DEBUG ON <<<<<<<<<<<<<'
 
+        self.LimbTypesTest(1)
         # self.LegTest()
         # self.RfkTest()
         # self.SimpleChainTest()
-        self.LimbTypesTest()
         # self.ArmTest()
         # self.SkeletonTest()
 
+# ================= SETUP =============================
+
+    def _Setup(self):
+        with self.parent.win:
+            with pm.menu('Debug'):
+                pm.menuItem(l='Limb Types Test', c=self.LimbTypesTest)
+                pm.menuItem(l='Leg Test', c=self.LegTest)
+                pm.menuItem(l='RFK Test', c=self.RfkTest)
+                pm.menuItem(l='Simple Chain Test', c=self.SimpleChainTest)
+                pm.menuItem(l='Arm Test', c=self.ArmTest)
+                pm.menuItem(l='Skeleton Test', c=self.SkeletonTest)
+
 # ================= TESTS =============================
 
-    def LegTest(self):
+    def _NewScene(self):
+        pm.newFile(f=1)
+        pm.flushUndo()
+        self.pfrs.InitScene()
+
+    def LegTest(self, ignore):
+        self._NewScene()
         self.parent.logger.info('DEBUG TESTS > Leg + Foot')
         path = os.path.join(self.folder, 'TEST_LegFoot_01.ma')
         pm.importFile(path)
@@ -38,7 +59,8 @@ class PFRS_Debug:
         self.rigLS.AutoBuildByName(0)
         pm.tabLayout(self.parent.rig_ui.tab, e=1, sti=3) # Select Limb setup tab
 
-    def RfkTest(self):
+    def RfkTest(self, ignore):
+        self._NewScene()
         self.parent.logger.info('DEBUG TESTS > Relative FK')
         path = os.path.join(self.folder, 'TEST_Spine_01.ma')
         pm.importFile(path)
@@ -53,7 +75,8 @@ class PFRS_Debug:
         # self.parent.limbMng.Reparent(root, spine)
         pm.tabLayout(self.parent.rig_ui.tab, e=1, sti=3) # Select Limb setup tab
 
-    def SimpleChainTest(self):
+    def SimpleChainTest(self, ignore):
+        self._NewScene()
         self.parent.logger.info('DEBUG TESTS > Limb Types')
         path = os.path.join(self.folder, 'TEST_SimpleChain_01.ma')
         pm.importFile(path)
@@ -61,7 +84,8 @@ class PFRS_Debug:
         self.parent.Setup_Editable()
         pm.tabLayout(self.parent.rig_ui.tab, e=1, sti=2)
 
-    def LimbTypesTest(self):
+    def LimbTypesTest(self, ignore):
+        self._NewScene()
         self.parent.logger.info('DEBUG TESTS > Limb Types')
         path = os.path.join(self.folder, 'TEST_LimbTypes_01.ma')
         pm.importFile(path)
@@ -71,7 +95,8 @@ class PFRS_Debug:
         # self.rigLS.AutoBuildByName(0)
         # pm.tabLayout(self.parent.rig_ui.tab, e=1, sti=3) # Select Limb setup tab
 
-    def ArmTest(self):
+    def ArmTest(self, ignore):
+        self._NewScene()
         self.parent.logger.info('DEBUG TESTS > Arm Skin')
         path = os.path.join(self.folder, 'temp_joints2.ma')
         pm.importFile(path)
@@ -80,9 +105,9 @@ class PFRS_Debug:
         pm.tabLayout(self.rig_ui.tab, e=1, sti=2) # Select Limb setup tab
         self.rigLS.AutoBuildByName(0)
         pm.tabLayout(self.tab, e=1, sti=2) # Select SKINNING tab
-        # mesh1 = pm.ls('pCylinderShape1')[0]
-        # mesh2 = pm.ls('pCylinderShape2')[0]
-        # mesh3 = pm.ls('pCylinderShape3')[0]
+        mesh1 = pm.ls('pCylinderShape1')[0]
+        mesh2 = pm.ls('pCylinderShape2')[0]
+        mesh3 = pm.ls('pCylinderShape3')[0]
 
         for mesh in [mesh1, mesh2, mesh3]:
             self.skin_ui.meshMng.AddMesh(mesh)
@@ -92,7 +117,8 @@ class PFRS_Debug:
 
         pm.tabLayout(self.skin_ui.tab, e=1, sti=3) # Select PAINT WEIGHTS tab
 
-    def SkeletonTest(self):
+    def SkeletonTest(self, ignore):
+        self._NewScene()
         self.parent.logger.info('DEBUG TESTS > Full Skeleton')
         path = os.path.join(self.folder, 'temp_joints.ma')
         pm.importFile(path)

@@ -40,15 +40,20 @@ class Mesh_Manager:
             self.meshLayer.displayType.set(0)
         self.meshLayer.visibility.set(isVisible) # 0 = off, 1 = on
 
+    def InitSceneMeshes(self):
+        for mesh in pm.ls(type='mesh'):
+            if not mesh.hasAttr('ID'):
+                pm.addAttr(mesh, ln='ID', at='short')
+                pm.addAttr(mesh, ln='root', dt='string')
+                meshID = self.pfrs.root.nextMeshID.get()
+                self.pfrs.root.nextMeshID.set(meshID + 1)
+                mesh.ID.set(meshID)
+            parent = pm.listRelatives(mesh, p=1)
+            if not parent or parent[0] != self.meshGroup:
+                if 'PFRSCTR_' not in mesh.shortName():
+                    pm.parent(mesh, self.meshGroup) 
+
 #============= ??? ============================
-
-    def InitMesh(self, mesh):
-        pm.addAttr(mesh, ln='ID', at='short')
-        pm.addAttr(mesh, ln='root', dt='string')
-
-        meshID = self.pfrs.root.nextMeshID.get()
-        self.pfrs.root.nextMeshID.set(meshID + 1)
-        mesh.ID.set(meshID)
 
     def AddMesh(self, mesh):
         pm.connectAttr(self.pfrs.root.meshes, mesh.root)

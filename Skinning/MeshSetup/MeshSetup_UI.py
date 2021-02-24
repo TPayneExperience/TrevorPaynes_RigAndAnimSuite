@@ -17,6 +17,8 @@ class MeshSetup_UI:
         self.allMeshes = {} # longName : meshNode
 
         for mesh in pm.ls(type='mesh'):
+            if 'PFRSCTR_' in mesh.shortName():
+                continue
             longName = mesh.longName()
             self.allMeshes[longName] = mesh
             parent = pm.listRelatives(mesh, p=1)[0]
@@ -60,6 +62,7 @@ class MeshSetup_UI:
 
     def Teardown_Editable(self):
         print ('mesh, teardown')
+        self.meshMng.InitSceneMeshes()
         self.rigBHV.RebuildLimbs()
     
 #=========== ACCESSORS ====================================

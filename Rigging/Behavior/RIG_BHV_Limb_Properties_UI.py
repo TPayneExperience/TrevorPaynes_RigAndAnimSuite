@@ -4,7 +4,7 @@ import pymel.core as pm
 import Data.Rig_Data as rigData
 reload(rigData)
 
-class BHV_Limb_Properties_UI:
+class RIG_BHV_Limb_Properties_UI:
     def __init__(self, parent):
         self.parent = parent
         self.limbMng = parent.limbMng

@@ -4,7 +4,7 @@ import pymel.core as pm
 import Data.Rig_Data as rigData
 reload(rigData)
 
-class APP_Limb_Hierarchy_UI:
+class RIG_APP_Limb_Hierarchy_UI:
     def __init__(self, parent):
         self.parent = parent
         self.limbMng = parent.limbMng
@@ -14,6 +14,7 @@ class APP_Limb_Hierarchy_UI:
         self.rootMng = self.pfrs.rootMng
 
         self._limbs = {} # rootID_limbID : limb
+        self._validLimbs = []
 
         self._Setup()
 
@@ -22,6 +23,7 @@ class APP_Limb_Hierarchy_UI:
         pm.treeView(self.widget, e=1, removeAll=1)
         curRoot = self.pfrs.root
         self._limbs = {}
+        self._validLimbs = []
         rootLimbs = []
         for root in self.rootMng.GetSceneRoots():
             rootLimbs += self.limbMng.GetRootLimbs(root)
@@ -39,7 +41,9 @@ class APP_Limb_Hierarchy_UI:
                 if parent:
                     parentID = parent.ID.get()
                 pm.treeView(self.widget, e=1, ai=(limbID, parentID))
-                pm.treeView(self.widget, e=1, dl=(limbID, name), en=enable)
+                pm.treeView(self.widget, e=1, dl=(limbID, name), enl=enable)
+                if enable:
+                    self._validLimbs.append(limbID)
                 side = rigData.LIMB_SIDES[limb.side.get()]
                 if (side == 'L'):
                     pm.treeView(self.widget, e=1, bti=(limbID, 1, side),
@@ -62,17 +66,16 @@ class APP_Limb_Hierarchy_UI:
         self.logger.debug('\tApp_LimbHier > IgnoreRename')
         return ''
 
+    def ValidateSelection(self, limbIDStr, itemNum):
+        return limbIDStr in self._validLimbs
+
     def SelectionChanged(self):
         self.logger.debug('\tApp_LimbHier > SelectionChanged')
         limbIDStrs = pm.treeView(self.widget, q=1, selectItem=1)
-        if limbIDStrs:
-            limb = self._limbs[limbIDStrs[0]]
-            msg = '\tLimbHier > SELECTED limb "%s"'% limb.pfrsName.get()
-            self.logger.info(msg)
-            self.parent.LimbSelected(limb)
-        else:
-            self.logger.info('\tLimbHier > DESELECTED limb')
-            self.parent.LimbSelected(None)
+        limb = self._limbs[limbIDStrs[0]]
+        msg = '\tLimbHier > SELECTED limb "%s"'% limb.pfrsName.get()
+        self.logger.info(msg)
+        self.parent.LimbSelected(limb)
     
     
     

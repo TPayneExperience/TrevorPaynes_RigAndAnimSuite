@@ -64,11 +64,11 @@ class PayneFreeRigSuite:
         self.rigBHV = rigBHV.RIG_Behaviors(self)
 
         # START UP
-        self.InitRoot()
+        self.InitScene()
 
 #============= ROOT ============================
 
-    def InitRoot(self):
+    def InitScene(self):
         roots = self.rootMng.GetSceneRoots()
         if roots:
             self.root = roots[0]
@@ -77,6 +77,8 @@ class PayneFreeRigSuite:
         else:
             self.NewScene()
             self.NewRoot('PFX', range(5), True)
+        self.meshMng.InitSceneMeshes()
+        self.jntMng.InitSceneJoints()
 
     def NewRoot(self, prefix, nameOrder, showPrefix):
         self.root = self.rootMng.AddRoot(prefix, nameOrder, showPrefix)

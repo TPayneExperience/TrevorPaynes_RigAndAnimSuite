@@ -4,14 +4,14 @@ import pymel.core as pm
 import Common.Utilities as util
 reload(util)
 
-import BHV_Limb_Hierarchy_UI as limbHier_UI
+import RIG_BHV_Limb_Hierarchy_UI as limbHier_UI
 reload(limbHier_UI)
-import BHV_Group_Hierarchy_UI as groupHier_UI
+import RIG_BHV_Group_Hierarchy_UI as groupHier_UI
 reload(groupHier_UI)
 
-import BHV_Limb_Properties_UI as limbProp_UI
+import RIG_BHV_Limb_Properties_UI as limbProp_UI
 reload(limbProp_UI)
-import BHV_Group_Properties_UI as bhvProp_UI
+import RIG_BHV_Group_Properties_UI as bhvProp_UI
 reload(bhvProp_UI)
 
 
@@ -34,12 +34,12 @@ class RIG_Behaviors_UI:
     def _Setup(self):
         with pm.verticalLayout():
             with pm.frameLayout('Limb Hierarchy', bv=1):
-                self.limbHier_ui = limbHier_UI.BHV_Limb_Hierarchy_UI(self)
+                self.limbHier_ui = limbHier_UI.RIG_BHV_Limb_Hierarchy_UI(self)
             with pm.frameLayout('Behavior Groups / Control Pivots', bv=1):
-                self.grpHier_ui = groupHier_UI.BHV_Group_Hierarchy_UI(self)
+                self.grpHier_ui = groupHier_UI.RIG_BHV_Group_Hierarchy_UI(self)
         with pm.verticalLayout():
-            self.limbProp_ui = limbProp_UI.BHV_Limb_Properties_UI(self)
-            self.grpProp_ui = bhvProp_UI.BHV_Group_Properties_UI(self)
+            self.limbProp_ui = limbProp_UI.RIG_BHV_Limb_Properties_UI(self)
+            self.grpProp_ui = bhvProp_UI.RIG_BHV_Group_Properties_UI(self)
     
 #=========== SETUP + TEARDOWN ====================================
 

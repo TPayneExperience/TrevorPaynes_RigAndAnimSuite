@@ -20,8 +20,8 @@ class Rig_Manager:
     def Setup_Rig(self):
         self.logger.info('Rigging > Test SETUP')
         enabledLimbs = []
-        limbs = pm.listConnections(self.limbMng.root.jointLimbs)
-        limbs += pm.listConnections(self.limbMng.root.emptyLimbs)
+        limbs = pm.listConnections(self.pfrs.root.jointLimbs)
+        limbs += pm.listConnections(self.pfrs.root.emptyLimbs)
         for limb in limbs:
             if self._SkipLimb(limb):
                 self.grpMng.Teardown_LimbGroupVisibility(limb)
@@ -42,8 +42,8 @@ class Rig_Manager:
     def Teardown_Rig(self):
         self.logger.info('Rigging > Test TEARDOWN\n')
         enabledLimbs = []
-        limbs = pm.listConnections(self.limbMng.root.jointLimbs)
-        limbs += pm.listConnections(self.limbMng.root.emptyLimbs)
+        limbs = pm.listConnections(self.pfrs.root.jointLimbs)
+        limbs += pm.listConnections(self.pfrs.root.emptyLimbs)
         for limb in limbs:
             if self._SkipLimb(limb):
                 self.grpMng.Setup_LimbGroupVisibility(limb)
@@ -59,7 +59,7 @@ class Rig_Manager:
 #=========== SETUP FUNCTIONALITY ====================================
     
     def Setup_Groups(self, groups):
-        self.logger.debug('\tTest_UI > Setup_Groups')
+        self.logger.debug('\tRIG_Test_UI > Setup_Groups')
         for group in groups:
             if group.groupType.get() == 1: # joint
                 joint = pm.listConnections(group.joint)[0]
@@ -67,7 +67,7 @@ class Rig_Manager:
                 pm.parent(group, limb)
 
     def Setup_Controls(self, limbs, groups):
-        self.logger.debug('\tTest_UI > Setup_Controls')
+        self.logger.debug('\tRIG_Test_UI > Setup_Controls')
         for group in groups:
             control = pm.listConnections(group.control)[0]
             pm.makeIdentity(control, a=1, t=1, r=1, s=1)
@@ -96,7 +96,7 @@ class Rig_Manager:
                 util.ChannelBoxAttrs(control, pos, rot, scale)
             
     def Setup_Internal(self, limbs):
-        self.logger.debug('\tTest_UI > Setup_Internal')
+        self.logger.debug('\tRIG_Test_UI > Setup_Internal')
         for limb in limbs:
             bhvType = limb.bhvType.get()
             if bhvType in rigData.FK_CHAIN_BHV_INDEXES:
@@ -115,7 +115,7 @@ class Rig_Manager:
                 self.Setup_Internal_RelativeFK(limb)
 
     def Setup_External(self, limbs):
-        self.logger.debug('\tTest_UI > Setup_External')
+        self.logger.debug('\tRIG_Test_UI > Setup_External')
         for limb in limbs:
             bhvType = limb.bhvType.get()
             if bhvType in rigData.FK_CHAIN_BHV_INDEXES:
@@ -209,7 +209,7 @@ class Rig_Manager:
 #=========== TEARDOWN FUNCTIONALITY ====================================
     
     def Teardown_Controls(self, limbs):
-        self.logger.debug('\tTest_UI > Teardown_Controls')
+        self.logger.debug('\tRIG_Test_UI > Teardown_Controls')
         for limb in limbs:
             self.logger.debug('\t\tLimb = ' + limb.pfrsName.get())
             groups = self.grpMng.GetJointGroups(limb)
@@ -221,14 +221,14 @@ class Rig_Manager:
         pm.refresh() # Forces IK Handles to re-evaluate
     
     def Remove_Constraints(self):
-        self.logger.debug('\tTest_UI > Remove_Constraints')
+        self.logger.debug('\tRIG_Test_UI > Remove_Constraints')
         pm.delete(pm.ls(type='ikHandle'))
         pm.delete(pm.ls(type='parentConstraint'))
         pm.delete(pm.ls(type='pointConstraint'))
         pm.delete(pm.ls(type='orientConstraint'))
         pm.delete(pm.ls(type='scaleConstraint'))
         pm.delete(pm.ls(type='aimConstraint'))
-        for limb in pm.listConnections(self.limbMng.root.jointLimbs): 
+        for limb in pm.listConnections(self.pfrs.root.jointLimbs): 
             bhvType = limb.bhvType.get()
             if bhvType in rigData.CST_BHV_INDEXES:
                 self.Teardown_Constraint(limb)
@@ -244,7 +244,7 @@ class Rig_Manager:
                     shape.v.set(1)
     
     def Teardown_Groups(self):
-        self.logger.debug('\tTest_UI > Teardown_Groups')
+        self.logger.debug('\tRIG_Test_UI > Teardown_Groups')
         for limb in pm.listConnections(self.pfrs.root.jointLimbs):
             for joint in pm.listConnections(limb.joints):
                 group = pm.listConnections(joint.group)[0]
@@ -260,7 +260,7 @@ class Rig_Manager:
     
     # RELATIVE FK - RFK
     def Setup_Internal_RelativeFK(self, limb):
-        self.logger.debug('\tTest_UI > Setup_Internal_RelativeFK')
+        self.logger.debug('\tRIG_Test_UI > Setup_Internal_RelativeFK')
         # Con
         
         groups = self.grpMng.GetJointGroups(limb)
@@ -284,7 +284,7 @@ class Rig_Manager:
             pm.connectAttr(multNode.output, childControl.rotate)
 
     def Setup_External_RelativeFK(self, limb):
-        self.logger.debug('\tTest_UI > Setup_External_RelativeFK')
+        self.logger.debug('\tRIG_Test_UI > Setup_External_RelativeFK')
         groups = self.grpMng.GetJointGroups(limb)
         if limb.bhvType.get() in rigData.REVERSE_BHV_INDEXES:
             groups = groups[::-1]
@@ -292,7 +292,7 @@ class Rig_Manager:
 
     # FK CHAIN / REVERSE CHAIN
     def Setup_Internal_FKChain(self, limb):
-        self.logger.debug('\tTest_UI > Setup_Internal_FKChain')
+        self.logger.debug('\tRIG_Test_UI > Setup_Internal_FKChain')
         groups = self.grpMng.GetJointGroups(limb)
         if limb.bhvType.get() in rigData.REVERSE_BHV_INDEXES:
             groups = groups[::-1]
@@ -303,22 +303,22 @@ class Rig_Manager:
         self.Bind_FK_Joints(limb)
         
     def Setup_External_FKChain(self, limb):
-        self.logger.debug('\tTest_UI > Setup_External_FKChain')
+        self.logger.debug('\tRIG_Test_UI > Setup_External_FKChain')
         childGroup = self.grpMng.GetJointGroups(limb)[0]
         self.ParentConstrainGroup(limb, childGroup)
 
     # FK BRANCH
     def Setup_Internal_FKBranch(self, limb):
-        self.logger.debug('\tTest_UI > Setup_Internal_FKBranch')
+        self.logger.debug('\tRIG_Test_UI > Setup_Internal_FKBranch')
         self.Bind_FK_Joints(limb)
         
     def Setup_External_FKBranch(self, limb):
-        self.logger.debug('\tTest_UI > Setup_External_FKBranch')
+        self.logger.debug('\tRIG_Test_UI > Setup_External_FKBranch')
         for childGroup in self.grpMng.GetJointGroups(limb):
             self.ParentConstrainGroup(limb, childGroup)
 
     def Bind_FK_Joints(self, limb):
-        self.logger.debug('\tTest_UI > Bind_FK_Joints')
+        self.logger.debug('\tRIG_Test_UI > Bind_FK_Joints')
         joints = util.GetSortedLimbJoints(limb)
         bhvType = limb.bhvType.get()
         if bhvType in rigData.OMIT_LAST_JOINT_BHV_INDEXES:
@@ -331,7 +331,7 @@ class Rig_Manager:
 #=========== CONSTRAINT ====================================
     
     def Setup_Internal_Constraint(self, limb):
-        self.logger.debug('\tTest_UI > Setup_Internal_Constraint')
+        self.logger.debug('\tRIG_Test_UI > Setup_Internal_Constraint')
         parentLimbs = pm.listConnections(limb.limbParent)
         targetLimbs = pm.listConnections(limb.bhvParent)
         if not targetLimbs:
@@ -396,7 +396,7 @@ class Rig_Manager:
             
 
     def Teardown_Constraint(self, limb):
-        self.logger.debug('\tTest_UI > Teardown_Constraint')
+        self.logger.debug('\tRIG_Test_UI > Teardown_Constraint')
         for joint in util.GetSortedLimbJoints(limb):
             group = pm.listConnections(joint.group)[0]
             pos = pm.xform(group, q=1, t=1, ws=1)
@@ -407,7 +407,7 @@ class Rig_Manager:
 #=========== IK ====================================
     
     def Setup_Internal_IKChain(self, limb):
-        self.logger.debug('\tTest_UI > Setup_Internal_IKChain')
+        self.logger.debug('\tRIG_Test_UI > Setup_Internal_IKChain')
         joints = util.GetSortedLimbJoints(limb)
         for i in range(len(joints)-1):
             startJoint = joints[i]
@@ -415,7 +415,7 @@ class Rig_Manager:
             pm.ikHandle(sj=startJoint, ee=endJoint)
 
     def Setup_External_IKChain(self, limb):
-        self.logger.debug('\tTest_UI > Setup_External_IKChain')
+        self.logger.debug('\tRIG_Test_UI > Setup_External_IKChain')
         targetLimb = pm.listConnections(limb.bhvParent)
         if not targetLimb:
             msg = 'IK Chain Limb "%s" missing TARGET limb' % limb
@@ -434,7 +434,7 @@ class Rig_Manager:
             pm.parent(handle, targetControl)
 
     def Setup_Internal_IKPoleVector(self, limb):
-        self.logger.debug('\tTest_UI > Setup_Internal_IKPoleVector')
+        self.logger.debug('\tRIG_Test_UI > Setup_Internal_IKPoleVector')
         joints = util.GetSortedLimbJoints(limb)
         startJoint = joints[0]
         endJoint = joints[-1]
@@ -444,7 +444,7 @@ class Rig_Manager:
         pm.poleVectorConstraint(control, handle)
 
     def Setup_External_IKPoleVector(self, limb):
-        self.logger.debug('\tTest_UI > Setup_External_IKPoleVector')
+        self.logger.debug('\tRIG_Test_UI > Setup_External_IKPoleVector')
         # PARENT IK HANDLE TO TARGET CONTROL 
         targetLimb = pm.listConnections(limb.bhvParent)
         if not targetLimb:
@@ -476,19 +476,19 @@ class Rig_Manager:
     
     # IK PV, LookAt
     def Setup_External_SingleControl(self, limb):
-        self.logger.debug('\tTest_UI > Setup_External_SingleControl')
+        self.logger.debug('\tRIG_Test_UI > Setup_External_SingleControl')
         childGroup = self.grpMng.GetLimbGroups(limb)[0]
         self.ParentConstrainGroup(limb, childGroup)
 
     def Setup_Internal_LookAt(self, limb):
-        self.logger.debug('\tTest_UI > Setup_Internal_LookAt')
+        self.logger.debug('\tRIG_Test_UI > Setup_Internal_LookAt')
         joint = util.GetSortedLimbJoints(limb)[0]
         group = self.grpMng.GetLimbGroups(limb)[0]
         control = pm.listConnections(group.control)[0]
         pm.aimConstraint(control, joint, mo=1)
 
     def ParentConstrainGroup(self, limb, childGroup):
-        self.logger.debug('\tTest_UI > ParentConstrainGroup')
+        self.logger.debug('\tRIG_Test_UI > ParentConstrainGroup')
         parents = pm.listConnections(limb.limbParent)
         if not parents:
             return 

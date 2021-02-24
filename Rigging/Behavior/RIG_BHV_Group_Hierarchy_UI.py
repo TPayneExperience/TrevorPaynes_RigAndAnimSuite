@@ -4,7 +4,7 @@ import pymel.core as pm
 import Data.Rig_Data as rigData
 reload(rigData)
 
-class BHV_Group_Hierarchy_UI:
+class RIG_BHV_Group_Hierarchy_UI:
     def __init__(self, parent):
         self.parent = parent
         self.limbMng = parent.limbMng

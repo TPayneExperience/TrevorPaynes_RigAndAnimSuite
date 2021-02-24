@@ -36,6 +36,14 @@ class Joint_Manager:
             self.jointLayer.displayType.set(0)
         self.jointLayer.visibility.set(isVisible) # 0 = off, 1 = on
 
+    def InitSceneJoints(self):
+        for joint in pm.ls(type='joint'):
+            if not joint.hasAttr('ID'):
+                self.InitJoint(joint)
+            parent = pm.listRelatives(joint, p=1)
+            if not parent or pm.objectType(parent[0]) != 'joint':
+                pm.parent(joint, self.jntGroup)
+
 #============= ROOT ============================
 
     def NewRoot(self):

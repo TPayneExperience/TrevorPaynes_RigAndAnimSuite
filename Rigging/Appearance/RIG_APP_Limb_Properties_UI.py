@@ -4,7 +4,7 @@ import pymel.core as pm
 import Data.Rig_Data as rigData
 reload(rigData)
 
-class APP_Limb_Properties_UI:
+class RIG_APP_Limb_Properties_UI:
     def __init__(self, parent):
         self.parent = parent
         self.limbMng = parent.limbMng
@@ -17,7 +17,7 @@ class APP_Limb_Properties_UI:
         self.ctrAxis_at = None
         self.ikpvCtrJoint_at = None
         self.limb = None
-        self.limbs = {} # name : limb
+        self._limbs = {} # name : limb
         self.limbOrder = []
 
         self._Setup()
@@ -45,7 +45,7 @@ class APP_Limb_Properties_UI:
                                                 a='perspShape.shakeEnabled')
                 self.limbRot = pm.attrControlGrp(l='MISC Rotate', ann=msg,
                                                 a='perspShape.shakeEnabled')
-                self.limbScale = pm.attrControlGrp(l='MISC Scale', ann=msg,
+                self._limbscale = pm.attrControlGrp(l='MISC Scale', ann=msg,
                                                 a='perspShape.shakeEnabled')
 
 
@@ -72,7 +72,7 @@ class APP_Limb_Properties_UI:
     def PopulateVisParentCB(self):
         self.logger.debug('\tApp_LimbProp > PopulateVisParentCB')
         pm.optionMenu(self.visParentLimb_om, e=1, dai=1)
-        self.limbs = {} # name : limb
+        self._limbs = {} # name : limb
         self.limbOrder = []
         # POPULATE VIS PARENT COMBO BOX
         pm.menuItem(l='None', p=self.visParentLimb_om)
@@ -84,7 +84,7 @@ class APP_Limb_Properties_UI:
                 side = rigData.LIMB_SIDES[limb.side.get()]
                 name = '%s_%s' % (limb.pfrsName.get(), side)
                 pm.menuItem(l=name, p=self.visParentLimb_om)
-                self.limbs[name] = limb
+                self._limbs[name] = limb
                 self.limbOrder.append(name)
 
         # LOAD SOURCE LIMB
@@ -153,7 +153,7 @@ class APP_Limb_Properties_UI:
                                         cc=pm.Callback(self.LogLimbPos, 1))
         pm.attrControlGrp(self.limbRot, e=1, a=self.limb.channelBoxLimbCtrRot,
                                         cc=pm.Callback(self.LogLimbRot, 1))
-        pm.attrControlGrp(self.limbScale, e=1, a=self.limb.channelBoxLimbCtrScale,
+        pm.attrControlGrp(self._limbscale, e=1, a=self.limb.channelBoxLimbCtrScale,
                                         cc=pm.Callback(self.LogLimbScale, 1))
         
     def SetVisParentLimb(self, limbName):
@@ -162,7 +162,7 @@ class APP_Limb_Properties_UI:
         if limbName == 'None':
             self.UpdateVisParentBhvTypeEnable()
             return
-        limb = self.limbs[limbName]
+        limb = self._limbs[limbName]
         pm.connectAttr(limb.visChildren, self.limb.visParent)
         self.UpdateVisParentBhvTypeEnable()
                 

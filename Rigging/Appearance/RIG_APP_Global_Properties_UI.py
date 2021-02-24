@@ -4,14 +4,13 @@ import pymel.core as pm
 import Data.Rig_Data as rigData
 reload(rigData)
 
-class APP_Global_Properties_UI:
+class RIG_APP_Global_Properties_UI:
     def __init__(self, parent):
         self.parent = parent
         self.grpMng = parent.grpMng
         self.ctrMng = parent.ctrMng
         self.logger = parent.logger
-
-        self.root = parent.root
+        self.pfrs = parent.pfrs
 
         self._Setup()
     
@@ -53,30 +52,30 @@ class APP_Global_Properties_UI:
 
     def UpdateEmptyShapes(self, shape):
         self.logger.info('\tApp_GlobalProp > UpdateEmptyShapes')
-        index = self.root.appEmptyCtrShape.get()
-        for limb in pm.listConnections(self.root.emptyLimbs):
+        index = self.pfrs.root.appEmptyCtrShape.get()
+        for limb in pm.listConnections(self.pfrs.root.emptyLimbs):
             group = pm.listConnections(limb.bhvEmptyGroup)[0]
             self.ctrMng.SetShape(group, index)
 
     def UpdateJointShapes(self, shape):
         self.logger.info('\tApp_GlobalProp > UpdateJointShapes')
-        index = self.root.appJointCtrShape.get()
-        for limb in pm.listConnections(self.root.jointLimbs):
+        index = self.pfrs.root.appJointCtrShape.get()
+        for limb in pm.listConnections(self.pfrs.root.jointLimbs):
             for joint in pm.listConnections(limb.joints):
                 group = pm.listConnections(joint.group)[0]
                 self.ctrMng.SetShape(group, index)
 
     def UpdateIKPVShapes(self, shape):
         self.logger.info('\tApp_GlobalProp > UpdateIKPVShapes')
-        index = self.root.appJointCtrShape.get()
-        for limb in pm.listConnections(self.root.jointLimbs):
+        index = self.pfrs.root.appJointCtrShape.get()
+        for limb in pm.listConnections(self.pfrs.root.jointLimbs):
             group = pm.listConnections(limb.bhvIKPVGroup)[0]
             self.ctrMng.SetShape(group, index)
 
     def UpdateLookAtShapes(self, shape):
         self.logger.info('\tApp_GlobalProp > UpdateLookAtShapes')
-        index = self.root.appJointCtrShape.get()
-        for limb in pm.listConnections(self.root.jointLimbs):
+        index = self.pfrs.root.appJointCtrShape.get()
+        for limb in pm.listConnections(self.pfrs.root.jointLimbs):
             group = pm.listConnections(limb.bhvLookAtGroup)[0]
             self.ctrMng.SetShape(group, index)
 

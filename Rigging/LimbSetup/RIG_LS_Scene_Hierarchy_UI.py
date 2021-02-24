@@ -2,7 +2,7 @@
 import pymel.core as pm
 
 
-class LS_Scene_Hierarchy_UI:
+class RIG_LS_Scene_Hierarchy_UI:
     def __init__(self, parent):
         self.parent = parent
         self.rigLS = parent.rigLS

@@ -22,11 +22,13 @@ class Control_Manager:
         nodes = pm.importFile(path, returnNewNodes=1)
         ctrShapes = [n for n in nodes if pm.objectType(n) == 'transform']
         rigData.CONTROL_TEMPLATES = {}
-        for control in ctrShapes:
-            rigData.CONTROL_TEMPLATES[control.shortName()] = control
+        for ctr in ctrShapes:
+            rigData.CONTROL_TEMPLATES[ctr.shortName()] = ctr
         ctrShapesParent = pm.group(name='CONTROL_SHAPE_TEMPLATES', em=1)
         ctrShapesParent.v.set(0)
         pm.parent(ctrShapes, ctrShapesParent)
+        for ctr in ctrShapes:
+            ctr.rename('PFRSCTR_' + ctr.shortName())
 
         self.ctrLayer = pm.createDisplayLayer(n='Controls', e=True)
         self.SetLayerState(True, True)
