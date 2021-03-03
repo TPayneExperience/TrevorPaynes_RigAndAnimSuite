@@ -29,6 +29,8 @@ import Managers.Skin_Manager as skinMng
 reload(skinMng)
 import Managers.Root_Manager as rootMng
 reload(rootMng)
+import Managers.Preset_Manager as pstMng
+reload(pstMng)
 
 import Rigging.Behavior.RIG_Behaviors as rigBHV
 reload(rigBHV)
@@ -57,12 +59,13 @@ class PayneFreeRigSuite:
         self.meshMng = meshMng.Mesh_Manager(self)
         self.skinMng = skinMng.Skin_Mananger(self) # REMOVE LATER
         self.rootMng = rootMng.Root_Manager(self)
+        self.pstMng = pstMng.Preset_Manager(self)
 
         # RIGGING
         self.rigJS = rigJS.RIG_JointSetup(self)
         self.rigLS = rigLS.RIG_LimbSetup(self)
         self.rigBHV = rigBHV.RIG_Behaviors(self)
-
+        
         # START UP
         self.InitScene()
 

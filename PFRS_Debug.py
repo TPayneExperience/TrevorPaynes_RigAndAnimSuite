@@ -48,6 +48,17 @@ class PFRS_Debug:
         pm.flushUndo()
         self.pfrs.InitScene()
 
+    def LimbTypesTest(self, ignore):
+        self._NewScene()
+        self.parent.logger.info('DEBUG TESTS > Limb Types')
+        path = os.path.join(self.folder, 'TEST_LimbTypes_01.ma')
+        pm.importFile(path)
+        self.parent.UpdateEnableUI()
+        self.parent.Setup_Editable()
+        pm.tabLayout(self.parent.rig_ui.tab, e=1, sti=2) # Select Limb setup tab
+        self.rigLS.AutoBuildByName()
+        pm.tabLayout(self.parent.rig_ui.tab, e=1, sti=3) # Select Limb setup tab
+
     def LegTest(self, ignore):
         self._NewScene()
         self.parent.logger.info('DEBUG TESTS > Leg + Foot')
@@ -69,7 +80,7 @@ class PFRS_Debug:
         pm.tabLayout(self.parent.rig_ui.tab, e=1, sti=2) # Select Limb setup tab
         self.rigLS.AutoBuildByName(0)
         spine = pm.ls('PFX_Spine_Limb_M_NODE', tr=1)[0]
-        self.parent.rigBHV.SetBhvType(spine, 10) # Relative FK
+        self.limbMng.SetBhvType(spine, 10) # Relative FK
         # root = pm.ls('PFX_Root_Limb_M_NODE', tr=1)[0]
         # self.parent.limbMng.Reparent(spine, -1)
         # self.parent.limbMng.Reparent(root, spine)
@@ -83,17 +94,6 @@ class PFRS_Debug:
         self.parent.UpdateEnableUI()
         self.parent.Setup_Editable()
         pm.tabLayout(self.parent.rig_ui.tab, e=1, sti=2)
-
-    def LimbTypesTest(self, ignore):
-        self._NewScene()
-        self.parent.logger.info('DEBUG TESTS > Limb Types')
-        path = os.path.join(self.folder, 'TEST_LimbTypes_01.ma')
-        pm.importFile(path)
-        self.parent.UpdateEnableUI()
-        self.parent.Setup_Editable()
-        pm.tabLayout(self.parent.rig_ui.tab, e=1, sti=2) # Select Limb setup tab
-        # self.rigLS.AutoBuildByName(0)
-        # pm.tabLayout(self.parent.rig_ui.tab, e=1, sti=3) # Select Limb setup tab
 
     def ArmTest(self, ignore):
         self._NewScene()

@@ -3,6 +3,8 @@ import pymel.core as pm
 
 import Common.Utilities as util
 reload(util)
+import Data.Rig_Data as rigData
+reload(rigData)
 
 class RIG_LimbSetup:
     def __init__(self, parent):
@@ -55,9 +57,7 @@ class RIG_LimbSetup:
         for parent, children in disconnectJoints.items():
             pm.parent(children, parent)
         for newLimbJoints in newLimbJointSets:
-            self.limbMng.AddJointLimb(newLimbJoints)
-            for joint in newLimbJoints:
-                self.jntMng.UpdateJointName(joint)
+            self.AddJointLimb(newLimbJoints)
         self.limbMng.ParentLimbsBySkeleton()
     
     def AutoBuildByName(self):
@@ -110,7 +110,7 @@ class RIG_LimbSetup:
             for joint in joints:
                 splitName = joint.shortName().split('_')
                 joint.pfrsName.set(splitName[-1])
-            limb = self.limbMng.AddJointLimb(joints)
+            limb = self.AddJointLimb(joints)
             limb.pfrsName.set(limbName)
             if side.upper() == 'L':
                 limb.side.set(1)
@@ -125,39 +125,41 @@ class RIG_LimbSetup:
         '''Set limbType if invalid'''
         self.logger.debug('\trigLS > RebuildLimbType')
         limbType = limb.limbType.get()
-        limbTypeChanged = False
+        # limbTypeChanged = False
         joints = pm.listConnections(limb.joints)
         if (len(joints) == 1):
             if limb.limbType.get() != 1:
                 limb.limbType.set(1) # 1 joint
-                limbTypeChanged = True
+                # limbTypeChanged = True
         elif self.AreJointsSiblings(joints):
             if limbType != 3:
                 limb.limbType.set(3) # branch
-                limbTypeChanged = True
+                # limbTypeChanged = True
         elif self.AreJointsChained(joints):
             if (len(joints) == 2):
                 if (limbType != 4):
                     limb.limbType.set(4) # 2 joint chain
-                    limbTypeChanged = True
+                    # limbTypeChanged = True
             else:
                 self.jntMng.UpdateBhvParentJoint(limb)
                 if limbType != 2:
                     limb.limbType.set(2) # 3+ joint chain
-                    limbTypeChanged = True
+                    # limbTypeChanged = True
 
-        if limbTypeChanged:
-            limb.rebuildBhvType.set(1)
-            limb.rebuildBhvDep.set(1)
-            limb.rebuildAppDep.set(1)
+        # if limbTypeChanged:
+            # limb.rebuildBhvType.set(1)
+            # limb.rebuildBhvDep.set(1)
+            # limb.rebuildAppDep.set(1)
             # limb.rebuildSkinInf.set(1)
-        limb.rebuildLimbType.set(0)
+        # limb.rebuildLimbType.set(0)
 
 #============= LIMBS ============================
 
     def AddJointLimb(self, joints):
         limb = self.limbMng.AddJointLimb(joints)
         self.limbMng.UpdateLimbName(limb)
+        self.RebuildLimbType(limb)
+        self.limbMng.RebuildBhvType(limb)
         return limb
     
     def RemoveJointLimb(self, limb):
@@ -192,14 +194,17 @@ class RIG_LimbSetup:
         for joint in joints:
             self.logger.info('\t\t' + str(joint))
             self.jntMng.RemoveJoint(joint)
-        limb.rebuildLimbType.set(1)
+        self.RebuildLimbType(limb)
+        self.limbMng.RebuildBhvType(limb)
 
     def AddJoints(self, limb, joints):
         for joint in joints:
             self.logger.info('\t\t' + str(joint))
             self.jntMng.AddJoint(limb, joint)
         self.jntMng.ReindexJoints(limb)
-        limb.rebuildLimbType.set(1)
+        self.RebuildLimbType(limb)
+        self.limbMng.RebuildBhvType(limb)
+        # limb.rebuildLimbType.set(1)
 
 
 #============= RELATIONSHIP ============================

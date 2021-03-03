@@ -46,12 +46,13 @@ class Limb_Manager:
         pm.addAttr(limb, ln='rigRoot', dt='string', h=hide)
         pm.addAttr(limb, ln='ID', at='long', dv=limbID, h=hide)
         pm.addAttr(limb, ln='pfrsName', dt='string', h=hide)
-        limb.pfrsName.set(pfrsName)
         pm.addAttr(limb, ln='limbType', at='enum', en=limbTypes,
                                         h=hide)
         pm.addAttr(limb, ln='side', at='enum', en=limbSides,
                                         h=hide)
         pm.addAttr(limb, ln='joints', dt='string', h=hide)
+        pm.addAttr(limb, ln='enableLimb', at='bool', dv=1, h=hide)
+        limb.pfrsName.set(pfrsName)
 
         # LIMB PARENTING
         pm.addAttr(limb, ln='limbParent', dt='string', h=hide)
@@ -59,16 +60,12 @@ class Limb_Manager:
                                         h=hide)
         pm.addAttr(limb, ln='limbChildren', dt='string', h=hide)
         
-        pm.addAttr(limb, ln='defaultLimbParent', dt='string', 
-                                        h=hide)
-        pm.addAttr(limb, ln='defaultLimbChildren', dt='string', 
-                                        h=hide)
         pm.addAttr(limb, ln='mirrorLimb', at='long', h=hide)
 
         # BEHAVIORS
         pm.addAttr(limb, ln='bhvType', at='enum', en=bhvTypes, h=hide)
-        pm.addAttr(limb, ln='rebuildLimbType', at='bool', dv=1, h=hide)
-        pm.addAttr(limb, ln='rebuildBhvType', at='bool', h=hide)
+        # pm.addAttr(limb, ln='rebuildLimbType', at='bool', dv=1, h=hide)
+        # pm.addAttr(limb, ln='rebuildBhvType', at='bool', h=hide)
         pm.addAttr(limb, ln='rebuildBhvDep', at='bool', h=hide)
         pm.addAttr(limb, ln='rebuildAppDep', at='bool', h=hide)
         # pm.addAttr(limb, ln='rebuildSkinInf', at='bool', h=hide)
@@ -90,6 +87,8 @@ class Limb_Manager:
         pm.addAttr(limb, ln='channelBoxLimbCtrRot', at='bool', h=hide)
         pm.addAttr(limb, ln='channelBoxLimbCtrScale', at='bool', h=hide)
         
+        pm.addAttr(limb, ln='presets', dt='string', h=hide)
+
         return limb
 
     def AddEmptyRigLimb(self):
@@ -146,7 +145,9 @@ class Limb_Manager:
         self.logger.debug('\tLimbMng > Remove')
         if pm.listConnections(limb.mirrorLimb):
             self._BreakMirror(limb)
-        pm.select(d=1)
+        # pm.select(d=1)
+        limbPresets = pm.listConnections(limb.presets)
+        pm.delete(limbPresets)
         pm.delete(limb)
 
     def RemoveEmptyLimb(self, limb):
@@ -162,6 +163,77 @@ class Limb_Manager:
         for group in self.grpMng.GetLimbGroups(limb):
             self.grpMng.Remove(group)
         self._RemoveLimb(limb)
+
+#============= BEHAVIORS ============================
+
+    def RebuildBhvType(self, limb):
+        '''If bhvType invalid, default to FK'''
+        self.logger.debug('\tLimbMng > RebuildBhvType')
+        limbType = limb.limbType.get()
+        bhvType = limb.bhvType.get()
+        
+        if (limbType == 1): # One
+            if bhvType not in rigData.ONE_JOINT_BHV_INDEXES:
+                self.SetBhvType(limb, rigData.ONE_JOINT_BHV_INDEXES[0])
+        elif (limbType == 4): # 2 chain
+            if bhvType not in rigData.TWO_JOINT_CHAIN_BHV_INDEXES:
+                self.SetBhvType(limb, rigData.TWO_JOINT_CHAIN_BHV_INDEXES[0])
+        elif (limbType == 2): # 3+ chain
+            if bhvType not in rigData.THREE_JOINT_CHAIN_BHV_INDEXES:
+                self.SetBhvType(limb, rigData.THREE_JOINT_CHAIN_BHV_INDEXES[0])
+        elif (limbType == 3): # Branch
+            if bhvType not in rigData.TWO_JOINT_BRANCH_BHV_INDEXES:
+                self.SetBhvType(limb, rigData.TWO_JOINT_BRANCH_BHV_INDEXES[0])
+
+    def SetBhvType(self, limb, newBhvIndex):
+        self.logger.debug('\tLimbMng > SetBhvType')
+        self.grpMng.Teardown_LimbGroupVisibility(limb)
+        # self.Teardown_Behavior(limb)
+        limb.bhvType.set(newBhvIndex)
+        bhvFilter = rigData.IK_PV_BHV_INDEXES
+        bhvFilter += rigData.LOOK_AT_BHV_INDEXES
+        if newBhvIndex in bhvFilter:
+            self.grpMng.UpdateDistGroupPos(limb)
+        # self.Setup_Behavior(limb)
+        self.grpMng.Setup_LimbGroupVisibility(limb)
+
+    # def Setup_Behavior(self, limb):
+    #     self.logger.debug('\tLimbMng > Setup_Behavior')
+    #     bhvType = limb.bhvType.get()
+    #     bhvFilter = rigData.IK_PV_BHV_INDEXES
+    #     bhvFilter += rigData.IK_CHAIN_BHV_INDEXES
+    #     bhvFilter += rigData.CST_BHV_INDEXES
+    #     if bhvType in bhvFilter:
+    #         self.RebuildBhvDep(limb)
+
+    # def Teardown_Behavior(self, limb):
+    #     self.logger.debug('\tLimbMng > Teardown_Behavior')
+    #     bhvType = limb.bhvType.get()
+    #     if bhvType in rigData.IK_TARGETABLE_BHV_INDEXES:
+    #         for sourceLimb in pm.listConnections(limb.bhvChildren):
+    #             sourceLimb.rebuildBhvDep.set(1)
+    #         pm.disconnectAttr(limb.bhvChildren)
+      
+    def SetBhvParentLimb(self, sourceLimb, targetLimb):
+        self.logger.debug('\tLimbMng > SetBhvParentLimb')
+        pm.disconnectAttr(sourceLimb.bhvParent)
+        if not targetLimb:
+            return
+        pm.connectAttr(targetLimb.bhvChildren, sourceLimb.bhvParent)
+        if targetLimb.bhvType.get() == 7: # Empty
+            self._SetTargetJointEnum(sourceLimb, 'Empty')
+            return
+        joints = util.GetSortedLimbJoints(targetLimb)
+        names = [j.pfrsName.get() for j in joints]
+        self._SetTargetJointEnum(sourceLimb, ':'.join(names))
+
+    def _SetTargetJointEnum(self, limb, enumStr):
+        self.logger.debug('\tLimbMng > _SetTargetJointEnum')
+        if limb.bhvType.get() in rigData.IK_CHAIN_BHV_INDEXES:
+            for group in self.grpMng.GetJointGroups(limb):
+                pm.addAttr(group.targetJoint, e=1, en=enumStr)
+        else:
+            pm.addAttr(limb.bhvParentJoint, e=1, en=enumStr)
 
 #============= MISC ============================
 
@@ -213,11 +285,10 @@ class Limb_Manager:
         limb1.side.set(side2)
         limb2.side.set(side1)
 
-
 #============= PARENTS / TREE MANIPULATION ============================
 
     def GetDefaultLimbHier(self):
-        self.logger.debug('\tBhvMng > GetDefaultLimbHier')
+        self.logger.debug('\tLimbMng > GetDefaultLimbHier')
         limbParents = {} # childLimb : parentLimb
         for childLimb in pm.listConnections(self.pfrs.root.jointLimbs):
             childJoint = util.GetSortedLimbJoints(childLimb)[0]

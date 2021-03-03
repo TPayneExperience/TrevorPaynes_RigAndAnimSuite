@@ -77,3 +77,7 @@ class RIG_Behaviors_UI:
         self.logger.debug('\tRIG_Behaviors_UI > SetBhvType')
         self.grpHier_ui.Populate()
 
+    def SetEnableLimb(self, limb):
+        self.logger.debug('\tRIG_Behaviors_UI > SetEnableLimb')
+        self.limbHier_ui.SetEnableLimb(limb)
+

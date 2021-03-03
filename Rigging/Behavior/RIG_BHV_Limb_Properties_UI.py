@@ -61,6 +61,9 @@ class RIG_BHV_Limb_Properties_UI:
         '''Create frame layouts here because we have limb + cst frames'''
         with pm.frameLayout('Limb Properties', bv=1, en=0) as self.limbLayout:
             with pm.columnLayout(adj=1) as self.bhvLimbProp_cl:
+                with pm.columnLayout(co=('left', -100)) as self.appLimbLockHide_cl:
+                    self.enableLimb_cg = pm.attrControlGrp(l='Enable Limb',
+                                                    a='perspShape.shakeEnabled')
                 self.bhvType_om = pm.optionMenu(l='Bhv Type', 
                                                 cc=pm.Callback(self.SetBhvType))
                 self.grpParent_at = pm.attrEnumOptionMenu(  l='Parent Joint', 
@@ -69,7 +72,7 @@ class RIG_BHV_Limb_Properties_UI:
         with pm.frameLayout('Behavior Properties', bv=1, en=0) as self.targetLayout:
             with pm.columnLayout(adj=1) as self.targetProp_cl:
                 self.targetLimb_om = pm.optionMenu( l='Target Limb', 
-                                                    cc=self.SetTargetLimb)
+                                                    cc=self.SetBhvParentLimb)
 
 #=========== FUNCTIONALITY ==============================================
 
@@ -83,7 +86,7 @@ class RIG_BHV_Limb_Properties_UI:
         self.logger.info('\tLimbProp > SET BEHAVIOR:')
         self.logger.info('\t\t%s >>> %s' % (old, bhvTypeStr))
         
-        self.rigBHV.SetBhvType(self.limb, newBhvIndex)
+        self.limbMng.SetBhvType(self.limb, newBhvIndex)
         self.PopulateLimbProperties(newBhvIndex)
         self.PopulateBhvProperties()
         # self.PopulateControlFrame(newBhvIndex)
@@ -94,20 +97,12 @@ class RIG_BHV_Limb_Properties_UI:
 
 #=========== CONSTRAINT ==============================================
 
-    def SetTargetLimb(self, limbName): # Called by UI
-        self.logger.debug('\tBhv_LimbProp > SetTargetLimb')
+    def SetBhvParentLimb(self, limbName): # Called by UI
+        self.logger.debug('\tBhv_LimbProp > SetBhvParentLimb')
         targetLimb = self.targetLimbs[limbName]
         msg = '\tLimbIKCst > SET TARGET LIMB to "%s"' % targetLimb.pfrsName.get()
         self.logger.info(msg)
-        bhvType = self.limb.bhvType.get()
-        isCst = (bhvType in rigData.CST_BHV_INDEXES) 
-        # pm.frameLayout(self.targetLayout, e=1, en=isCst)
-        if isCst:
-            self.rigBHV.SetCstTargetLimb(self.limb, targetLimb)
-        else:
-            self.rigBHV.SetIKTargetLimb(self.limb, targetLimb)
-        # self.UpdateUI()
-
+        self.rigBHV.SetBhvParentLimb(self.limb, targetLimb)
 
 #=========== UI UPDATES ==============================================
 
@@ -120,6 +115,9 @@ class RIG_BHV_Limb_Properties_UI:
 
     def PopulateLimbProperties(self, bhvType):
         self.logger.debug('\tBhv_LimbProp > PopulateLimbProperties')
+        pm.attrControlGrp(  self.enableLimb_cg, e=1, 
+                                a=self.limb.enableLimb,
+                                cc=pm.Callback(self.SetEnableLimb, 1))
         pm.deleteUI(self.grpParent_at)
         self.grpParent_at = pm.attrEnumOptionMenu(  self.grpParent_at, 
                                                     l='Parent Joint', 
@@ -127,6 +125,10 @@ class RIG_BHV_Limb_Properties_UI:
                                                     at=self.limb.limbParentJoint,
                                                     cc=self.LogGroupParent)
     
+    def SetEnableLimb(self, ignore):
+        self.logger.debug('\tBhv_LimbProp > SetEnableLimb')
+        self.parent.SetEnableLimb(self.limb)
+
     def PopulateBhvProperties(self):
         self.logger.debug('\tBhv_LimbProp > PopulateBhvProperties')
         pm.frameLayout(self.targetLayout, e=1, en=0)
@@ -169,7 +171,7 @@ class RIG_BHV_Limb_Properties_UI:
             self.targetJnt_at = pm.attrEnumOptionMenu(  l='Target Joint',
                                                         at=self.limb.bhvParentJoint,
                                                         p=self.targetProp_cl,
-                                                        cc=self.LogTargetJoint)
+                                                        cc=self.LogBhvParentJoint)
         if self.cstLayout:
             pm.deleteUI(self.cstLayout)
             self.cstLayout = None
@@ -215,7 +217,7 @@ class RIG_BHV_Limb_Properties_UI:
         msg += '"%s"' % cstTypeStr
         self.logger.info(msg)
 
-    def LogTargetJoint(self, targetJointStr):
+    def LogBhvParentJoint(self, targetJointStr):
         msg = '\tLimbIKCst > SET TARGET JOINT to '
         msg += '"%s"' % targetJointStr
         self.logger.info(msg)

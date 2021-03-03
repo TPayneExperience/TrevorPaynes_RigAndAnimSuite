@@ -11,6 +11,9 @@ LICENSE = LICENSES[0]
 SUITE = SUITES[2]
 
 
+# ============= ROOT =============
+RIG_MODES = ('Setup Rig', 'Animate Rig')
+
 # ============= BEHAVIORS =============
 CST_TYPES = ('Orient', 'Parent', 'Point',  'Scale')
 BHV_TYPES = (   'FK - Chain (3+ Joints)', # 0

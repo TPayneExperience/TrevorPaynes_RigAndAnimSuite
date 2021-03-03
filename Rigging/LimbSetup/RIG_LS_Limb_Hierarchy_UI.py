@@ -57,7 +57,7 @@ class RIG_LS_Limb_Hierarchy_UI:
         tt += '\nTo set a limb as a MIRROR,'
         tt += '\nname BOTH LIMBS with the SAME NAME.'
         self.widget = pm.treeView(ams=0, adr=0, arp=0, ann=tt, nb=1, fb=1)
-        pm.treeView(self.widget, e=1,   editLabelCommand=self.RenameLimb,
+        pm.treeView(self.widget, e=1,   elc=self.RenameLimb,
                                         scc=self.SelectionChanged,
                                         enk=1)
         with pm.popupMenu():

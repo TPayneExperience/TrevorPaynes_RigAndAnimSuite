@@ -29,14 +29,12 @@ class RIG_BHV_Group_Hierarchy_UI:
         bhvFilter += rigData.CST_BHV_INDEXES
         bhvFilter += rigData.IK_CHAIN_BHV_INDEXES
         bhvFilter += rigData.RFK_BHV_INDEXES
-        # bhvFilter += self.rigBHV.emptyLimbIndexes
         bhvFilter += rigData.EMPTY_BHV_INDEXES
         if bhvType not in bhvFilter:
             return
         groups = self.grpMng.GetJointGroups(self.limb)
         if bhvType in rigData.REVERSE_BHV_INDEXES:
             groups = groups[::-1]
-        # if bhvType in self.rigBHV.omitLastJointTypes:
         if bhvType in rigData.OMIT_LAST_JOINT_BHV_INDEXES:
             groups = groups[:-1]
         if bhvType in rigData.RFK_BHV_INDEXES:
@@ -51,7 +49,7 @@ class RIG_BHV_Group_Hierarchy_UI:
     def Depopulate(self):
         pm.treeView(self.widget, e=1, removeAll=1)
 
-# #=========== SETUP ====================================
+#=========== SETUP ====================================
 
     def _Setup(self):
         self.widget = pm.treeView(arp=0, adr=0, ams=0, elc=self.IgnoreRename)

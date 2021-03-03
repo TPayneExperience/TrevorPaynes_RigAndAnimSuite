@@ -3,6 +3,9 @@ import pymel.core as pm
 
 import Data.Rig_Data as rigData
 reload(rigData)
+import Rigging.Popups.POPUP_EditPresets as editPst
+reload(editPst)
+
 
 class RIG_BHV_Limb_Hierarchy_UI:
     def __init__(self, parent):
@@ -15,9 +18,14 @@ class RIG_BHV_Limb_Hierarchy_UI:
         self.logger = parent.logger
         self.pfrs = parent.pfrs
         self.rootMng = self.pfrs.rootMng
+        self.pstMng = parent.pfrs.pstMng
 
         self._limbs = {} # rootID_limbID : limb
         self._validLimbs = []
+        self._presets = {} # preset_name : presetRoot
+        self._presetsUI = []
+        self._presetToDelete = None
+        self.rmb_ui = None
 
         self._Setup()
 
@@ -33,21 +41,33 @@ class RIG_BHV_Limb_Hierarchy_UI:
             rootLimbs += self.limbMng.GetRootLimbs(root)
         for rootLimb in rootLimbs[::-1]:
             for limb in self.limbMng.GetLimbCreationOrder(rootLimb):
+                self.logger.debug('\t\tlimb ' + str(limb))
                 root = pm.listConnections(limb.rigRoot)[0]
+                self.logger.debug('\t\troot ' + str(root))
                 rootID = root.ID.get()
                 prefix = root.prefix.get()
-                enable = (root == curRoot)
+                self.logger.debug('\t\tprefix ' + str(prefix))
                 limbID = '%d_%d' % (rootID, limb.ID.get())
+                self.logger.debug('\t\tlimbid ' + str(limbID))
+                if root.rigMode.get() == 0: # Setup Rig
+                    enable = limb.enableLimb.get()
+                    self._validLimbs.append(limbID)
+                elif root.rigMode.get() == 1: # Setup Rig
+                    enable = (root == curRoot)
+                    if enable:
+                        self._validLimbs.append(limbID)
                 self._limbs[limbID] = limb
                 name = '%s_%s' % (prefix, limb.pfrsName.get())
+                self.logger.debug('\t\tname ' + str(name))
                 parent = pm.listConnections(limb.limbParent)
                 parentID = ''
                 if parent:
-                    parentID = parent.ID.get()
-                pm.treeView(self.widget, e=1, ai=(limbID, parentID))
-                pm.treeView(self.widget, e=1, dl=(limbID, name), enl=enable)
-                if enable:
-                    self._validLimbs.append(limbID)
+                    parent = parent[0]
+                    parentRoot = pm.listConnections(parent.rigRoot)[0]
+                    parentRootID = parentRoot.ID.get()
+                    parentID = '%d_%d' % (parentRootID, parent.ID.get())
+                pm.treeView(self.widget, e=1, ai=(limbID, parentID), en=enable)
+                pm.treeView(self.widget, e=1, dl=(limbID, name))
                 side = rigData.LIMB_SIDES[limb.side.get()]
                 if (side == 'L'):
                     pm.treeView(self.widget, e=1, bti=(limbID, 1, side),
@@ -60,6 +80,8 @@ class RIG_BHV_Limb_Hierarchy_UI:
                 # NOT IN APP HIER
                 if limb.bhvType.get() in rigData.EMPTY_BHV_INDEXES:
                     pm.treeView(self.widget, e=1, ornament=(limbID, 1, 0, 3))
+                self.logger.debug('\t\t---- LIMB COMPLETE ----\n')
+        # self.PopulateRMB()
 
 #=========== SETUP ====================================
 
@@ -67,21 +89,19 @@ class RIG_BHV_Limb_Hierarchy_UI:
         msg = '- MMB + Drag + Drop to reparent'
         msg += '\n- Red Dots indicate Empty Limbs'
         msg += '\n- Double Click to rename Empty Limbs'
-        self.widget = pm.treeView(ams=0, nb=1, ann=msg)
+        self.widget = pm.treeView(nb=1, ann=msg, enk=1)
         pm.treeView(self.widget, e=1, scc=self.SelectionChanged,
                                         sc=self.ValidateSelection,
                                         elc=self.RenameLimb,
                                         dad=self.ReparentLimb)
-        with pm.popupMenu():
+        with pm.popupMenu() as self.rmb_ui:
             pm.menuItem(l='Add Empty Limb', c=self.AddEmptyRigLimb)
             self.remove_mi = pm.menuItem(l='Remove Empty Rig Limb', 
                                         en=0, c=self.RemoveEmptyLimb)
-            pm.menuItem(d=1)
-            pm.menuItem(l='Load Skeleton Hierarchy', c=self.LoadSkelHier)
-            pm.menuItem(l='Load Default Hierarchy', c=self.LoadDefaultHier)
-            pm.menuItem(d=1)
-            pm.menuItem(l='Save as Default Hierarchy', c=self.SaveAsDefaultHier)
-
+            pm.menuItem(l='PRESETS', d=1)
+            pm.menuItem(l='Save Preset', c=self.SavePreset)
+            pm.menuItem(l='Edit Presets', c=self.EditPresets)
+            pm.menuItem(l='APPLY PRESET', d=1)
 
 #=========== FUNCTIONS ====================================
 
@@ -89,7 +109,7 @@ class RIG_BHV_Limb_Hierarchy_UI:
         return limbIDStr in self._validLimbs
 
     def SelectionChanged(self):
-        self.logger.debug('\tBhv_LimbHier > SelectionChanged')
+        self.logger.info('\tBhv_LimbHier > SelectionChanged')
         limbIDStrs = pm.treeView(self.widget, q=1, selectItem=1)
         pm.menuItem(self.remove_mi, e=1, en=bool(limbIDStrs))
         limb = self._limbs[limbIDStrs[0]]
@@ -98,7 +118,7 @@ class RIG_BHV_Limb_Hierarchy_UI:
         self.parent.LimbSelected(limb)
 
     def ReparentLimb(self, limbIDsStr, oldParents, i2, newParentIDStr, i3, i4, i5):
-        self.logger.debug('\tBhv_LimbHier > ReparentLimb')
+        self.logger.info('\tBhv_LimbHier > ReparentLimb')
         if oldParents[0] == newParentIDStr:
             return
         child = self._limbs[limbIDsStr[0]]
@@ -115,7 +135,7 @@ class RIG_BHV_Limb_Hierarchy_UI:
         self.jntMng.UpdateLimbParentJoint(child)
     
     def RenameLimb(self, limbIDStr, newName):
-        self.logger.debug('\tBhv_LimbHier > RenameLimb')
+        self.logger.info('\tBhv_LimbHier > RenameLimb')
         limb = self._limbs[limbIDStr]
         # if limb.bhvType.get() not in self.rigBHV.emptyLimbIndexes:
         if limb.bhvType.get() not in rigData.EMPTY_BHV_INDEXES:
@@ -150,36 +170,86 @@ class RIG_BHV_Limb_Hierarchy_UI:
         self.rigBHV.RemoveEmptyLimb(limb)
         self.Populate()
 
-    def LoadSkelHier(self, ignore):
-        self.logger.info('\tLimbHier > LOAD SKELETON hierarchy')
-        self.limbMng.ParentLimbsBySkeleton()
-        # self.parent.UpdateLimbUI()
-        self.Populate()
-    
-    def LoadDefaultHier(self, ignore):
-        self.logger.info('\tLimbHier > LOAD DEFAULT hierarchy')
-        limbs = pm.listConnections(self.pfrs.root.jointLimbs)
-        limbs += pm.listConnections(self.pfrs.root.emptyLimbs)
-        for limb in limbs:
-            pm.disconnectAttr(limb.limbParent)
-            parents = pm.listConnections(limb.defaultLimbParent)
-            if parents:
-                pm.connectAttr(parents[0].limbChildren, limb.limbParent)
-        self.Populate()
-    
-    def SaveAsDefaultHier(self, ignore):
-        self.logger.info('\tLimbHier > SAVE DEFAULT hierarchy')
-        limbs = pm.listConnections(self.pfrs.root.jointLimbs)
-        limbs += pm.listConnections(self.pfrs.root.emptyLimbs)
-        for limb in limbs:
-            pm.disconnectAttr(limb.defaultLimbParent)
-            parents = pm.listConnections(limb.limbParent)
-            if parents:
-                pm.connectAttr(parents[0].defaultLimbChildren, 
-                                limb.defaultLimbParent)
+#=========== MISC ====================================
 
+    def SetEnableLimb(self, limb):
+        self.Populate()
+        # enabled = limb.enableLimb.get()
+        # limbID = '%d_%d' % (root.ID.get(), limb.ID.get())
+        # pm.treeView(self.widget, e=1, dl=(limbID, name), en=enable)
+
+#=========== PRESET ====================================
+
+    def EditPresets(self, ignore):
+        editPst.POPUP_EditPresets(self)
+        self.PopulateRMB()
+
+    def PopulateRMB(self):
+        self.logger.debug('\tBhv_LimbHier > PopulateRMB')
+        if self._presetsUI:
+            pm.deleteUI(self._presetsUI)
+            self._presetsUI = []
+        self._presets = {}
+        presets = sorted(pm.listConnections(self.pfrs.root.presets))
+        for preset in presets:
+            shortName = preset.shortName()
+            self._presets[shortName] = preset
+            presetName = preset.presetName.get()
+            item = pm.menuItem(l=presetName, p=self.rmb_ui, 
+                            c=pm.Callback(self.ApplyPreset, shortName))
+            self._presetsUI.append(item)
+
+    def SavePreset(self, ignore):
+        self.logger.info('\tBhv_LimbHier > SavePreset')
+        result = pm.promptDialog(
+                title='Save Preset',
+                message='New Preset Name:',
+                button=['OK', 'Cancel'],
+                defaultButton='OK',
+                cancelButton='Cancel',
+                dismissString='Cancel')
+        if result == 'Cancel':
+            return
+        limbIDStrs = pm.treeView(self.widget, q=1, selectItem=1)
+        limbs = [self._limbs[ID] for ID in limbIDStrs]
+        presetName = pm.promptDialog(query=True, text=True)
+        
+        self.pstMng.SavePreset(presetName, limbs)
+        self.PopulateRMB()
     
-    
+    def ApplyPreset(self, presetName):
+        self.logger.info('\tBhv_LimbHier > ApplyPreset')
+        preset = self._presets[presetName]
+        self.pstMng.ApplyPreset(preset)
+        self.Populate()
+
+    # def DeletePreset(self, presetName):
+    #     self.logger.info('\tBhv_LimbHier > DeletePreset')
+    #     msg = 'Delete Preset "%s"?' % presetName
+    #     result = pm.confirmDialog(   title='Delete Preset', 
+    #                                 icon='warning', 
+    #                                 message=msg, 
+    #                                 button=['Yes','No'], 
+    #                                 defaultButton='Yes', 
+    #                                 cancelButton='No', 
+    #                                 dismissString='No')
+    #     if result == 'No':
+    #         return
+    #     self.logger.debug('\t\tDeleting Preset "%s"' % presetName)
+        
+    #     self.logger.debug(self._presetsUI[presetName])
+    #     pm.deleteUI(self._presetsUI[presetName])
+    #     self.logger.debug('\t\t1')
+    #     del(self._presetsUI[presetName])
+    #     self.logger.debug('\t\t2')
+    #     self.logger.debug(self._deletePresetUI[presetName])
+    #     pm.deleteUI(self._deletePresetUI[presetName])
+    #     self.logger.debug('\t\t3')
+    #     del(self._deletePresetUI[presetName])
+    #     self.logger.debug('\t\t3')
+    #     # preset = self._presets[presetName]
+    #     # self.pstMng.DeletePreset(preset)
+    #     # self.PopulateRMB()
 
 
 

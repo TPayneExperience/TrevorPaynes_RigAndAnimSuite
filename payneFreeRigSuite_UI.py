@@ -1,4 +1,6 @@
 
+import webbrowser
+
 import pymel.core as pm
 
 import Data.Rig_Data as rigData
@@ -10,7 +12,6 @@ import Skinning.Skinning_UI as skin_ui
 reload(skin_ui)
 import RigSetup.RigSetup_UI as rs_ui
 reload(rs_ui)
-
 
 import PFRS_Debug as debug
 reload(debug)
@@ -131,6 +132,11 @@ class PayneFreeRigSuite_UI:
                 pm.menuItem(l='Share...', en=0)
                 pm.menuItem(l='Open Log', c=self.pfrs.OpenLog)
 
+            with pm.menu('Store'):
+                pm.menuItem(l='Free Version', c=self.OpenWebsite)
+                pm.menuItem(l='Personal Version', en=0)
+                pm.menuItem(l='Professional Version', en=0)
+
 #=========== TAB SWITCHING ====================================
 
     def Setup_Editable(self):
@@ -158,6 +164,9 @@ class PayneFreeRigSuite_UI:
         self.Setup_Editable()
     
 #=========== FUNCTIONALITY ====================================
+
+    def OpenWebsite(self, ignore):
+        webbrowser.open('https://youtu.be/yBLdQ1a4-JI?t=9')
 
     # def UpdateNaming(self):
     #     self.pfrs.UpdatePrefix()

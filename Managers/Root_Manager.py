@@ -30,13 +30,17 @@ class Root_Manager:
         rootID = 1
         if self._roots:
             rootID = max(self._roots.keys()) + 1
+        rigModes = ':'.join(rigData.RIG_MODES)
+        
         root = pm.group(name='temp', em=True)
         pm.addAttr(root, ln='ID', at='long', dv=rootID, h=hide)
+        pm.addAttr(root, ln='rigMode', at='enum', en=rigModes, h=hide)
 
         # ROOT CONNECTIONS
         pm.addAttr(root, ln='jointLimbs', dt='string')
         pm.addAttr(root, ln='emptyLimbs', dt='string')
         pm.addAttr(root, ln='meshes', dt='string')
+        pm.addAttr(root, ln='presets', dt='string')
 
         # IDS
         pm.addAttr(root, ln='nextLimbID', at='short', dv=1)
