@@ -16,24 +16,24 @@ class RIG_APP_Global_Properties_UI:
     
     def Populate(self):
         self.logger.debug('\tApp_GlobalProp > Populate')
-        root = self.ctrMng.root
+        root = self.pfrs.root
         pm.deleteUI(self.empty_at)
         pm.deleteUI(self.joint_at)
         pm.deleteUI(self.ikpv_at)
         pm.deleteUI(self.lookAt_at)
-        self.empty_at = pm.attrEnumOptionMenu(  l='Empty',
+        self.empty_at = pm.attrEnumOptionMenu(  l='  Empty\t\t',
                                                 p=self.prop_cl,
                                                 cc=self.UpdateEmptyShapes,
                                                 at=root.appEmptyCtrShape)
-        self.joint_at = pm.attrEnumOptionMenu(  l='FK',
+        self.joint_at = pm.attrEnumOptionMenu(  l='  FK\t\t',
                                                 p=self.prop_cl,
                                                 cc=self.UpdateJointShapes,
                                                 at=root.appJointCtrShape)
-        self.ikpv_at = pm.attrEnumOptionMenu(   l='IKPV',
+        self.ikpv_at = pm.attrEnumOptionMenu(   l='  IKPV\t\t',
                                                 p=self.prop_cl,
                                                 cc=self.UpdateIKPVShapes,
                                                 at=root.appIKPVCtrShape)
-        self.lookAt_at = pm.attrEnumOptionMenu( l='LookAt',
+        self.lookAt_at = pm.attrEnumOptionMenu( l='  Look At\t',
                                                 p=self.prop_cl,
                                                 cc=self.UpdateLookAtShapes,
                                                 at=root.appLookAtCtrShape)

@@ -65,46 +65,51 @@ class RIG_Behaviors:
         '''Set IK / Cst targets to closest limbs / joints'''
         self.logger.debug('\tBhvMng > RebuildBhvDep')
         bhvType = sourceLimb.bhvType.get()
-        ikBhvFilter = rigData.IK_CHAIN_BHV_INDEXES
-        ikBhvFilter += rigData.IK_PV_BHV_INDEXES
+        ikBhvFilter = rigData.IK_PV_BHV_INDEXES
+        # ikBhvFilter += rigData.IK_CHAIN_BHV_INDEXES
         if bhvType not in (rigData.CST_BHV_INDEXES + ikBhvFilter):
             sourceLimb.rebuildBhvDep.set(0)
             return
         
         # Get Closest limb
-        targetLimb = None
-        if bhvType in rigData.CST_BHV_INDEXES:
-            limbs = self._GetClosestLimbs(sourceLimb)
-            if limbs:
-                targetLimb = limbs[0]
-                self.limbMng.SetBhvParentLimb(sourceLimb, targetLimb)
-        
-        if bhvType in ikBhvFilter: 
-            limbs = []
-            for limb in self._GetClosestLimbs(sourceLimb):
-                if limb.bhvType.get() in rigData.IK_TARGETABLE_BHV_INDEXES:
-                    limbs.append(limb)
-            if limbs:
-                targetLimb = limbs[0]
-                self.limbMng.SetBhvParentLimb(sourceLimb, targetLimb)
-        if not targetLimb:
+        # targetLimb = None
+        limbs = self._GetClosestLimbs(sourceLimb)
+        if not limbs:
             return
+        targetLimb = limbs[0]
+        self.limbMng.SetBhvParentLimb(sourceLimb, targetLimb)
+        # if bhvType in rigData.CST_BHV_INDEXES:
+        #     limbs = self._GetClosestLimbs(sourceLimb)
+        #     if limbs:
+        #         targetLimb = limbs[0]
+        #         self.limbMng.SetBhvParentLimb(sourceLimb, targetLimb)
+        
+        # if bhvType in ikBhvFilter: 
+        #     limbs = []
+        #     for limb in self._GetClosestLimbs(sourceLimb):
+        #         if limb.bhvType.get() in rigData.IK_TARGETABLE_BHV_INDEXES:
+        #             limbs.append(limb)
+        #     if limbs:
+        #         targetLimb = limbs[0]
+        #         self.limbMng.SetBhvParentLimb(sourceLimb, targetLimb)
+        # if not targetLimb:
+        #     return
 
         sourceLimb.rebuildBhvDep.set(0)
         # IK PV + Constraint
-        if bhvType in (rigData.IK_PV_BHV_INDEXES + rigData.CST_BHV_INDEXES): 
-            sourceJoint = util.GetSortedLimbJoints(sourceLimb)[-1]
-            sourcePos = pm.xform(sourceJoint, q=1, t=1, ws=1)
-            index = self.jntMng.GetClosestJointIndex(sourcePos, targetLimb)
-            sourceLimb.bhvParentJoint.set(index)
+        # if bhvType in (rigData.IK_PV_BHV_INDEXES + rigData.CST_BHV_INDEXES): 
+        sourceJoint = util.GetSortedLimbJoints(sourceLimb)[-1]
+        sourcePos = pm.xform(sourceJoint, q=1, t=1, ws=1)
+        index = self.jntMng.GetClosestJointIndex(sourcePos, targetLimb)
+        sourceLimb.bhvParentJoint.set(index)
 
         # IK Chain
-        elif bhvType in rigData.IK_CHAIN_BHV_INDEXES: 
-            for sourceJoint in util.GetSortedLimbJoints(sourceLimb):
-                sourcePos = pm.xform(sourceJoint, q=1, t=1, ws=1)
-                index = self.jntMng.GetClosestJointIndex(sourcePos, targetLimb)
-                sourceGroup = pm.listConnections(sourceJoint.group)[0]
-                sourceGroup.targetJoint.set(index)
+        # elif bhvType in rigData.IK_CHAIN_BHV_INDEXES: 
+        #     for sourceJoint in util.GetSortedLimbJoints(sourceLimb):
+        #         sourcePos = pm.xform(sourceJoint, q=1, t=1, ws=1)
+        #         index = self.jntMng.GetClosestJointIndex(sourcePos, targetLimb)
+        #         sourceGroup = pm.listConnections(sourceJoint.group)[0]
+        #         sourceGroup.targetJoint.set(index)
 
     def _GetClosestLimbs(self, sourceLimb):
         self.logger.debug('\tBhvMng > _GetClosestLimbs')
@@ -124,7 +129,5 @@ class RIG_Behaviors:
                     dist += (sourcePos[i]-targetPos[i])**2
                 distLimbs[dist] = limb
         return [distLimbs[d] for d in sorted(distLimbs.keys())]
-
-#============= SETUP / TEARDOWN BHV ============================
 
 

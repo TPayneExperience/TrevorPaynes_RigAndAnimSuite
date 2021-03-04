@@ -22,7 +22,7 @@ BHV_TYPES = (   'FK - Chain (3+ Joints)', # 0
                 'Empty - Anim',         # 2
                 'Constraint',           # 3
                 'Look At',              # 4
-                'IK - Chain',           # 5
+                'DEPRICATED: IK - Chain',# 5
 
                 'FK - Branch',          # 6
                 'Empty - Rig',          # 7
@@ -35,8 +35,8 @@ BHV_TYPES = (   'FK - Chain (3+ Joints)', # 0
                 )
 EMPTY_BHV_INDEXES = (7,)
 ONE_JOINT_BHV_INDEXES = (6, 4, 3)
-TWO_JOINT_CHAIN_BHV_INDEXES = (11, 6, 12, 5)
-THREE_JOINT_CHAIN_BHV_INDEXES = (0, 6, 8, 10, 9, 1, 5, 3)
+TWO_JOINT_CHAIN_BHV_INDEXES = (11, 6, 12) # (11, 6, 12, 5)
+THREE_JOINT_CHAIN_BHV_INDEXES = (0, 6, 8, 10, 9, 1, 3) # (0, 6, 8, 10, 9, 1, 5, 3)
 TWO_JOINT_BRANCH_BHV_INDEXES = (6, 3)
 
 OMIT_LAST_JOINT_BHV_INDEXES = (0, 8) # (0, 5, 10)
@@ -48,7 +48,7 @@ RFK_BHV_INDEXES = (10, 9)
 CST_BHV_INDEXES = (3,)
 LOOK_AT_BHV_INDEXES = (4,)
 IK_PV_BHV_INDEXES = (1,)
-IK_CHAIN_BHV_INDEXES = (5,)
+# IK_CHAIN_BHV_INDEXES = (5,)
 
 IK_TARGETABLE_BHV_INDEXES = (0, 2, 6, 7, 8)
 ROT_LOCK_OVERRIDE_BHV_INDEXES = (9, 10)

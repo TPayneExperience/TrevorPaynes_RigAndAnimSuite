@@ -13,7 +13,7 @@ class RIG_BHV_Group_Properties_UI:
         self.grpMng = parent.grpMng
         self.logger = parent.logger
 
-        self.parentSub_at = None
+        # self.parentSub_at = None
         
         self.limbOrder = [] # limbs
 
@@ -27,9 +27,9 @@ class RIG_BHV_Group_Properties_UI:
             return
         pm.frameLayout(self.groupLayout, e=1, en=1)
         # DELETE OLD ATTRS
-        if self.parentSub_at:
-            pm.deleteUI(self.parentSub_at)
-            self.parentSub_at = None
+        # if self.parentSub_at:
+        #     pm.deleteUI(self.parentSub_at)
+        #     self.parentSub_at = None
         joint = pm.listConnections(group.joint)[0]
         limb = pm.listConnections(joint.limb)[0]
         bhvType = limb.bhvType.get()
@@ -41,10 +41,10 @@ class RIG_BHV_Group_Properties_UI:
                                             at=self.group.weight)
 
         # IK CHAIN
-        elif bhvType in rigData.IK_CHAIN_BHV_INDEXES: 
-            self.parentSub_at = pm.attrEnumOptionMenu(  l='Target Joint',
-                                                at=self.group.targetJoint, 
-                                                p=self.bhvGroupProp_cl)
+        # elif bhvType in rigData.IK_CHAIN_BHV_INDEXES: 
+        #     self.parentSub_at = pm.attrEnumOptionMenu(  l='Target Joint',
+        #                                         at=self.group.targetJoint, 
+        #                                         p=self.bhvGroupProp_cl)
 
 
 
@@ -71,9 +71,9 @@ class RIG_BHV_Group_Properties_UI:
         self.logger.debug('\tBhv_GroupProp > Depopulate')
         pm.frameLayout(self.groupLayout, e=1, en=0)
         self.group = None
-        if self.parentSub_at:
-            pm.deleteUI(self.parentSub_at)
-            self.parentSub_at = None      
+        # if self.parentSub_at:
+        #     pm.deleteUI(self.parentSub_at)
+        #     self.parentSub_at = None      
 
 
 

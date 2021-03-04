@@ -135,12 +135,12 @@ class RIG_BHV_Limb_Properties_UI:
 
         # POPULATE TARGET LIMBS
         bhvType = self.limb.bhvType.get()
-        ikFilter = rigData.IK_CHAIN_BHV_INDEXES
-        ikFilter += rigData.IK_PV_BHV_INDEXES
-        if bhvType in rigData.CST_BHV_INDEXES:
-            # bhvFilter = range(len(self.rigBHV.bhvTypes))
-            bhvFilter = range(len(rigData.BHV_TYPES))
-        elif bhvType in ikFilter:
+        ikFilter = rigData.IK_PV_BHV_INDEXES
+        # ikFilter += rigData.IK_CHAIN_BHV_INDEXES
+        # if bhvType in rigData.CST_BHV_INDEXES:
+            # bhvFilter = range(len(rigData.BHV_TYPES))
+        # elif bhvType in ikFilter:
+        if bhvType in rigData.CST_BHV_INDEXES + ikFilter:
             bhvFilter = rigData.IK_TARGETABLE_BHV_INDEXES
         else:
             return

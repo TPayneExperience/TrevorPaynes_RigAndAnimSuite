@@ -64,17 +64,14 @@ class Limb_Manager:
 
         # BEHAVIORS
         pm.addAttr(limb, ln='bhvType', at='enum', en=bhvTypes, h=hide)
-        # pm.addAttr(limb, ln='rebuildLimbType', at='bool', dv=1, h=hide)
-        # pm.addAttr(limb, ln='rebuildBhvType', at='bool', h=hide)
         pm.addAttr(limb, ln='rebuildBhvDep', at='bool', h=hide)
         pm.addAttr(limb, ln='rebuildAppDep', at='bool', h=hide)
-        # pm.addAttr(limb, ln='rebuildSkinInf', at='bool', h=hide)
-        
-        # VIS PARENTING
-        pm.addAttr(limb, ln='visParent', dt='string', h=hide)
-        pm.addAttr(limb, ln='visChildren', dt='string', h=hide)
-        pm.addAttr(limb, ln='visParentBhvType', at='enum', en=visBhvTypes, 
-                                                        h=hide)
+
+        # # VIS PARENTING
+        # pm.addAttr(limb, ln='visParent', dt='string', h=hide)
+        # pm.addAttr(limb, ln='visChildren', dt='string', h=hide)
+        # pm.addAttr(limb, ln='visParentBhvType', at='enum', en=visBhvTypes, 
+                                                        # h=hide)
 
         # IK PV + CST
         pm.addAttr(limb, ln='bhvChildren', dt='string', h=hide) 
@@ -221,19 +218,21 @@ class Limb_Manager:
             return
         pm.connectAttr(targetLimb.bhvChildren, sourceLimb.bhvParent)
         if targetLimb.bhvType.get() == 7: # Empty
-            self._SetTargetJointEnum(sourceLimb, 'Empty')
+            # self._SetTargetJointEnum(sourceLimb, 'Empty')
+            pm.addAttr(sourceLimb.bhvParentJoint, e=1, en='Empty')
             return
         joints = util.GetSortedLimbJoints(targetLimb)
         names = [j.pfrsName.get() for j in joints]
-        self._SetTargetJointEnum(sourceLimb, ':'.join(names))
+        # self._SetTargetJointEnum(sourceLimb, ':'.join(names))
+        pm.addAttr(sourceLimb.bhvParentJoint, e=1, en=':'.join(names))
 
-    def _SetTargetJointEnum(self, limb, enumStr):
-        self.logger.debug('\tLimbMng > _SetTargetJointEnum')
-        if limb.bhvType.get() in rigData.IK_CHAIN_BHV_INDEXES:
-            for group in self.grpMng.GetJointGroups(limb):
-                pm.addAttr(group.targetJoint, e=1, en=enumStr)
-        else:
-            pm.addAttr(limb.bhvParentJoint, e=1, en=enumStr)
+    # def _SetTargetJointEnum(self, limb, enumStr):
+    #     self.logger.debug('\tLimbMng > _SetTargetJointEnum')
+    #     # if limb.bhvType.get() in rigData.IK_CHAIN_BHV_INDEXES:
+    #     #     for group in self.grpMng.GetJointGroups(limb):
+    #     #         pm.addAttr(group.targetJoint, e=1, en=enumStr)
+    #     # else:
+    #         pm.addAttr(limb.bhvParentJoint, e=1, en=enumStr)
 
 #============= MISC ============================
 
@@ -242,6 +241,7 @@ class Limb_Manager:
         pm.disconnectAttr(child.limbParent)
         if parent:
             pm.connectAttr(parent.limbChildren, child.limbParent)
+        self.jntMng.UpdateLimbParentJoint(child)
 
     def RenameLimb(self, sourceLimb, newName): # list should repopulate after call
         self.logger.debug('\tLimbMng > Rename')
@@ -343,5 +343,5 @@ class Limb_Manager:
         limbParents = self.GetDefaultLimbHier()
         for child, parent in limbParents.items():
             self.ReparentLimb(child, parent)
-            self.jntMng.UpdateLimbParentJoint(child)
+            # self.jntMng.UpdateLimbParentJoint(child)
 

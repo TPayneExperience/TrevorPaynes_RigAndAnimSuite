@@ -7,7 +7,7 @@ reload(util)
 class RIG_Test_UI:
     def __init__(self, parent):
         self.parent = parent
-        self.rigMng = parent.rigMng
+        self.bldMng = parent.bldMng
         self.logger = parent.logger
 
         self._Setup()
@@ -20,8 +20,8 @@ class RIG_Test_UI:
     
     def Setup_Editable(self):
         self.logger.info('Rigging > Test Setup_Editable\n')
-        self.rigMng.Setup_Rig()
+        self.bldMng.Setup_Rig()
 
     def Teardown_Editable(self):
         self.logger.info('Rigging > Test Teardown_Editable\n')
-        self.rigMng.Teardown_Rig()
+        self.bldMng.Teardown_Rig()

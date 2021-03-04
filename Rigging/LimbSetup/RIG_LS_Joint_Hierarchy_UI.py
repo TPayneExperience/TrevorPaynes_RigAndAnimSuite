@@ -22,6 +22,7 @@ class RIG_LS_Joint_Hierarchy_UI:
     def Populate(self):
         self.logger.debug('\tLS_JointHier > Populate')
         pm.treeView(self.widget, e=1, removeAll=1)
+        pm.menuItem(self.remove_mi, e=1, en=0)
         self.joints = {}
         if not self.limb:
             return
@@ -35,13 +36,14 @@ class RIG_LS_Joint_Hierarchy_UI:
 #=========== SETUP ====================================
 
     def _Setup(self):
-        self.widget = pm.treeView(arp=0, scc=self.JointHierSelectionChanged)
-        pm.treeView(self.widget, e=1, editLabelCommand=self.Rename)
-        with pm.popupMenu():
-            self.add_mi = pm.menuItem('Add Joint(s)', c=pm.Callback(self.AddJoints))
-            pm.menuItem(divider=1)
-            self.remove_mi = pm.menuItem('Remove Joint(s)', en=0, 
-                                        c=pm.Callback(self.RemoveJoints))
+        with pm.frameLayout(l='---', bv=1) as self.jntHier_fl:
+            self.widget = pm.treeView(arp=0, scc=self.JointHierSelectionChanged)
+            pm.treeView(self.widget, e=1, editLabelCommand=self.Rename)
+            with pm.popupMenu():
+                self.add_mi = pm.menuItem('Add Joint(s)', c=pm.Callback(self.AddJoints))
+                pm.menuItem(divider=1)
+                self.remove_mi = pm.menuItem('Remove Joint(s)', en=0, 
+                                            c=pm.Callback(self.RemoveJoints))
     
 #=========== FUNCTIONALITY ====================================
 
@@ -51,7 +53,10 @@ class RIG_LS_Joint_Hierarchy_UI:
         '''
         self.logger.debug('\tLS_JointHier > JointHierSelectionChanged')
         pm.menuItem(self.remove_mi, e=1, en=0)
-        jointIDs = [int(ID) for ID in pm.treeView(self.widget, q=1, si=1)]
+        jointIDsStr = pm.treeView(self.widget, q=1, si=1)
+        if not jointIDsStr:
+            return
+        jointIDs = [int(ID) for ID in jointIDsStr]
         selJoints = [self.joints[ID] for ID in jointIDs]
         joints = self.joints.values()
         if len(joints) == len(selJoints):
@@ -74,9 +79,13 @@ class RIG_LS_Joint_Hierarchy_UI:
 
     def SetLimb(self, limb):
         self.logger.debug('\tLS_JointHier > SetLimb')
+        pm.frameLayout(self.jntHier_fl, e=1, en=0, l='---')
+        pm.treeView(self.widget, e=1, removeAll=1)
         self.limb = limb
         if not limb:
             return
+        txt = "%s's Joints" % limb.pfrsName.get()
+        pm.frameLayout(self.jntHier_fl, e=1, en=1, l=txt)
         self.logger.debug('\t\t' + str(limb.pfrsName.get()))
         self.Populate()
 

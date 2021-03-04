@@ -49,13 +49,6 @@ class RIG_BHV_Limb_Hierarchy_UI:
                 self.logger.debug('\t\tprefix ' + str(prefix))
                 limbID = '%d_%d' % (rootID, limb.ID.get())
                 self.logger.debug('\t\tlimbid ' + str(limbID))
-                if root.rigMode.get() == 0: # Setup Rig
-                    enable = limb.enableLimb.get()
-                    self._validLimbs.append(limbID)
-                elif root.rigMode.get() == 1: # Setup Rig
-                    enable = (root == curRoot)
-                    if enable:
-                        self._validLimbs.append(limbID)
                 self._limbs[limbID] = limb
                 name = '%s_%s' % (prefix, limb.pfrsName.get())
                 self.logger.debug('\t\tname ' + str(name))
@@ -66,7 +59,12 @@ class RIG_BHV_Limb_Hierarchy_UI:
                     parentRoot = pm.listConnections(parent.rigRoot)[0]
                     parentRootID = parentRoot.ID.get()
                     parentID = '%d_%d' % (parentRootID, parent.ID.get())
-                pm.treeView(self.widget, e=1, ai=(limbID, parentID), en=enable)
+                if root.rigMode.get() == 0: # Setup Rig
+                    enable = limb.enableLimb.get()
+                elif root.rigMode.get() == 1: # Animate Rig
+                    enable = (root == curRoot)
+                pm.treeView(self.widget, e=1, ai=(limbID, parentID))
+                pm.treeView(self.widget, e=1, enl=(limbID, enable))
                 pm.treeView(self.widget, e=1, dl=(limbID, name))
                 side = rigData.LIMB_SIDES[limb.side.get()]
                 if (side == 'L'):
@@ -106,7 +104,9 @@ class RIG_BHV_Limb_Hierarchy_UI:
 #=========== FUNCTIONS ====================================
 
     def ValidateSelection(self, limbIDStr, itemNum):
-        return limbIDStr in self._validLimbs
+        limb = self._limbs[limbIDStr]
+        root = pm.listConnections(limb.rigRoot)[0]
+        return self.pfrs.root == root
 
     def SelectionChanged(self):
         self.logger.info('\tBhv_LimbHier > SelectionChanged')
@@ -132,7 +132,7 @@ class RIG_BHV_Limb_Hierarchy_UI:
             parent = None
             self.logger.info('\tLimbHier > REPARENTING "%s" to world' % name)
         self.limbMng.ReparentLimb(child, parent)
-        self.jntMng.UpdateLimbParentJoint(child)
+        # self.jntMng.UpdateLimbParentJoint(child)
     
     def RenameLimb(self, limbIDStr, newName):
         self.logger.info('\tBhv_LimbHier > RenameLimb')
@@ -173,10 +173,10 @@ class RIG_BHV_Limb_Hierarchy_UI:
 #=========== MISC ====================================
 
     def SetEnableLimb(self, limb):
-        self.Populate()
-        # enabled = limb.enableLimb.get()
-        # limbID = '%d_%d' % (root.ID.get(), limb.ID.get())
-        # pm.treeView(self.widget, e=1, dl=(limbID, name), en=enable)
+        root = pm.listConnections(limb.rigRoot)[0]
+        enable = limb.enableLimb.get()
+        limbID = '%d_%d' % (root.ID.get(), limb.ID.get())
+        pm.treeView(self.widget, e=1, enl=(limbID, enable))
 
 #=========== PRESET ====================================
 

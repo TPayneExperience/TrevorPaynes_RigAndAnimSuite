@@ -32,7 +32,7 @@ class PayneFreeRigSuite_UI:
         self.jntMng = self.pfrs.jntMng
         self.grpMng = self.pfrs.grpMng
         self.rigBHV = self.pfrs.rigBHV
-        self.rigMng = self.pfrs.rigMng
+        self.bldMng = self.pfrs.bldMng
 
         # SKINNING
         self.meshMng = self.pfrs.meshMng

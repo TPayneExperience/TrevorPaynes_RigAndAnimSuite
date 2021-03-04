@@ -21,8 +21,8 @@ import Managers.Group_Manager as grp
 reload(grp)
 import Managers.Control_Manager as ctr
 reload(ctr)
-import Managers.Rig_Manager as rigMng
-reload(rigMng)
+import Managers.Build_Manager as bldMng
+reload(bldMng)
 import Managers.Mesh_Manager as meshMng
 reload(meshMng)
 import Managers.Skin_Manager as skinMng
@@ -55,7 +55,7 @@ class PayneFreeRigSuite:
         self.grpMng = grp.Group_Manager(self)
         self.jntMng = jm.Joint_Manager(self)
         self.limbMng = lm.Limb_Manager(self)
-        self.rigMng = rigMng.Rig_Manager(self)
+        self.bldMng = bldMng.Build_Manager(self)
         self.meshMng = meshMng.Mesh_Manager(self)
         self.skinMng = skinMng.Skin_Mananger(self) # REMOVE LATER
         self.rootMng = rootMng.Root_Manager(self)

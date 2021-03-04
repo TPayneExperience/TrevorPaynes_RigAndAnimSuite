@@ -42,7 +42,7 @@ class Rigging_UI:
         self.grpMng = parent.grpMng
         self.jntMng = parent.jntMng
         self.rigBHV = parent.rigBHV
-        self.rigMng = parent.rigMng
+        self.bldMng = parent.bldMng
 
         # self.saveLoadSkel = saveLoadSkel.SaveLoad_Skeleton(self)
 

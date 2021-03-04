@@ -31,14 +31,15 @@ class RIG_LimbSetup_UI:
 
     def Populate(self): # CALLED BY MAIN WINDOW
         self.logger.debug('\tRIG_LimbSetup_UI > Populate')
+        self.SetJointsToAdd(None)
         self.sceneHier_ui.Populate()
         self.limbHier_ui.Populate()
         self.jntHier_ui.SetLimb(None)
         self.UpdateSceneFrame()
-        self.UpdateJointFrame()
     
     def PopulateJoints(self):
         self.logger.debug('\tRIG_LimbSetup_UI > PopulateJoints')
+        self.SetJointsToAdd(None)
         self.sceneHier_ui.Populate()
         self.jntHier_ui.Populate()
         self.UpdateSceneFrame()
@@ -50,10 +51,8 @@ class RIG_LimbSetup_UI:
             with pm.frameLayout(l='---', bv=1) as self.sceneHier_fl:
                 self.sceneHier_ui = sceneHier_UI.RIG_LS_Scene_Hierarchy_UI(self)
         with pm.verticalLayout():
-            with pm.frameLayout('Limbs', bv=1):
-                self.limbHier_ui = limbHier_UI.RIG_LS_Limb_Hierarchy_UI(self)
-            with pm.frameLayout(l='---', bv=1) as self.jntHier_fl:
-                self.jntHier_ui = jointHier_UI.RIG_LS_Joint_Hierarchy_UI(self)
+            self.limbHier_ui = limbHier_UI.RIG_LS_Limb_Hierarchy_UI(self)
+            self.jntHier_ui = jointHier_UI.RIG_LS_Joint_Hierarchy_UI(self)
            
 #=========== TAB FUNCTIONALITY ====================================
     
@@ -70,15 +69,15 @@ class RIG_LimbSetup_UI:
     def AddJointLimb(self): # Limb Hier UI > RMB > Add
         self.logger.info('\tRIG_LimbSetup_UI > AddJointLimb')
         joints = self.GetSelectedSceneJoints()
-        limb = self.rigLS.AddJointLimb(joints)
-        pm.select(d=1)
-        self.jntHier_ui.SetLimb(limb)
-        self.PopulateJoints()
-        self.limbHier_ui.Populate()
+        self.rigLS.AddJointLimb(joints)
+        self.Populate()
+        # pm.select(d=1)
+        # self.jntHier_ui.SetLimb(limb)
+        # self.PopulateJoints()
+        # self.limbHier_ui.Populate()
     
     def RemoveJointLimb(self):
         self.logger.debug('\tRIG_LimbSetup_UI > RemoveJointLimb')
-        self.UpdateJointFrame()
         self.Populate()
         self.UpdateSceneFrame()
 
@@ -90,7 +89,6 @@ class RIG_LimbSetup_UI:
         self.logger.debug('\tRIG_LimbSetup_UI > LimbSelected')
         self.limb = limb
         self.jntHier_ui.SetLimb(limb)
-        self.UpdateJointFrame(limb)
         if limb:
             joints = util.GetSortedLimbJoints(limb)
             self.SelectSceneJoints(joints)
@@ -137,13 +135,6 @@ class RIG_LimbSetup_UI:
             limbJntCount += len(pm.listConnections(limb.joints))
         txt = 'Scene Joints (%d of %d used)' % (limbJntCount, sceneCount)
         pm.frameLayout(self.sceneHier_fl, e=1, l=txt)
-
-    def UpdateJointFrame(self, limb = None):
-        self.logger.debug('\tRIG_LimbSetup_UI > UpdateJointFrame')
-        pm.frameLayout(self.jntHier_fl, e=1, en=0, l='---')
-        if limb:
-            txt = "%s's Joints" % limb.pfrsName.get()
-            pm.frameLayout(self.jntHier_fl, e=1, en=1, l=txt)
 
     def SelectSceneJoints(self, joints):
         self.logger.debug('\tRIG_LimbSetup_UI > SelectSceneJoints')

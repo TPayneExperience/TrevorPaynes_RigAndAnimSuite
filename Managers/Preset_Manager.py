@@ -51,7 +51,7 @@ class Preset_Manager:
                 self.limbMng.ReparentLimb(limb, newLimbParent[0])
             else:
                 self.limbMng.ReparentLimb(limb, None)
-            self.jntMng.UpdateLimbParentJoint(limb)
+            # self.jntMng.UpdateLimbParentJoint(limb)
             newBhvParent = pm.listConnections(limbPreset.bhvParent)
             if newBhvParent:
                 self.limbMng.SetBhvParentLimb(limb, newBhvParent[0])

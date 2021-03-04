@@ -74,7 +74,7 @@ class RIG_JointSetup_UI:
         joints = pm.ls(sl=1, type='joint')
         jointSelected = bool(joints)
         if joints:
-            if pm.listRelatives(joints[0], p=1):
+            if pm.listRelatives(joints[0], p=1):    
                 pm.button(self.insertMid_b, e=1, en=1)
         pm.button(self.insertEnd_b, e=1, en=jointSelected)
         pm.button(self.remove_b, e=1, en=jointSelected)
@@ -113,9 +113,11 @@ class RIG_JointSetup_UI:
             parent = pm.listRelatives(child, p=1)
             if not parent:
                 continue
+            parent = parent[0]
             if not pm.objectType(parent, isa='joint'):
-                invalidParents.append(parent[0])
-            jointParents[child] = parent[0]
+                if parent.shortName() != 'JOINTS':
+                    invalidParents.append(parent)
+            jointParents[child] = parent
         children = set(jointParents.keys())
         parents = set(jointParents.values())
         rootParents = list(parents - children)

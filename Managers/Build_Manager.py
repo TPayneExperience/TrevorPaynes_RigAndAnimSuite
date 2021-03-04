@@ -7,7 +7,7 @@ import Data.Rig_Data as rigData
 reload(rigData)
 
 
-class Rig_Manager:
+class Build_Manager:
     def __init__(self, parent):
         self.limbMng = parent.limbMng
         self.jntMng = parent.jntMng
@@ -23,7 +23,7 @@ class Rig_Manager:
         limbs = pm.listConnections(self.pfrs.root.jointLimbs)
         limbs += pm.listConnections(self.pfrs.root.emptyLimbs)
         for limb in limbs:
-            if self._SkipLimb(limb):
+            if limb.enableLimb.get():
                 self.grpMng.Teardown_LimbGroupVisibility(limb)
             else:
                 enabledLimbs.append(limb)
@@ -45,7 +45,7 @@ class Rig_Manager:
         limbs = pm.listConnections(self.pfrs.root.jointLimbs)
         limbs += pm.listConnections(self.pfrs.root.emptyLimbs)
         for limb in limbs:
-            if self._SkipLimb(limb):
+            if limb.enableLimb.get():
                 self.grpMng.Setup_LimbGroupVisibility(limb)
             else:
                 enabledLimbs.append(limb)
@@ -107,8 +107,8 @@ class Rig_Manager:
                 self.Setup_Internal_Constraint(limb)
             elif bhvType in rigData.LOOK_AT_BHV_INDEXES:
                 self.Setup_Internal_LookAt(limb)
-            elif bhvType in rigData.IK_CHAIN_BHV_INDEXES:
-                self.Setup_Internal_IKChain(limb)
+            # elif bhvType in rigData.IK_CHAIN_BHV_INDEXES:
+            #     self.Setup_Internal_IKChain(limb)
             elif bhvType in rigData.FK_BRANCH_BHV_INDEXES:
                 self.Setup_Internal_FKBranch(limb)
             elif bhvType in rigData.RFK_BHV_INDEXES:
@@ -122,8 +122,8 @@ class Rig_Manager:
                 self.Setup_External_FKChain(limb)
             elif bhvType in rigData.IK_PV_BHV_INDEXES:
                 self.Setup_External_IKPoleVector(limb)
-            elif bhvType in rigData.IK_CHAIN_BHV_INDEXES:
-                self.Setup_External_IKChain(limb)
+            # elif bhvType in rigData.IK_CHAIN_BHV_INDEXES:
+            #     self.Setup_External_IKChain(limb)
             elif bhvType in rigData.FK_BRANCH_BHV_INDEXES:
                 self.Setup_External_FKBranch(limb)
             elif bhvType in rigData.LOOK_AT_BHV_INDEXES:
@@ -171,40 +171,40 @@ class Rig_Manager:
                 controls += pm.listConnections(group.control)
             pm.controller(controls, parentControl, p=1)
 
-    def _SkipLimb(self, limb):
-        # if limb has vis parent
-        parent = pm.listConnections(limb.visParent)
-        if not parent:
-            return False
-        parent = parent[0]
-        parentBhvType = parent.bhvType.get()
-        visBhvType = limb.visParentBhvType.get()
-        # FK / Empty
-        if visBhvType == 0: 
-            bhvFilter = rigData.EMPTY_BHV_INDEXES
-            bhvFilter += rigData.FK_BRANCH_BHV_INDEXES
-            bhvFilter += rigData.FK_CHAIN_BHV_INDEXES
-            if parentBhvType not in bhvFilter:
-                return True
-        # IK
-        elif visBhvType == 1:
-            ikFilter = rigData.IK_PV_BHV_INDEXES
-            ikFilter += rigData.IK_CHAIN_BHV_INDEXES
-            if parentBhvType not in ikFilter:
-                return True
-        # Look At
-        elif visBhvType == 2:
-            if parentBhvType not in rigData.LOOK_AT_BHV_INDEXES:
-                return True
-        # Constraint
-        elif visBhvType == 3:
-            if parentBhvType not in rigData.CST_BHV_INDEXES:
-                return True
-        # RFK
-        elif visBhvType == 4:
-            if parentBhvType not in rigData.RFK_BHV_INDEXES:
-                return True
-        return False
+    # def _SkipLimb(self, limb):
+    #     # if limb has vis parent
+    #     parent = pm.listConnections(limb.visParent)
+    #     if not parent:
+    #         return False
+    #     parent = parent[0]
+    #     parentBhvType = parent.bhvType.get()
+    #     visBhvType = limb.visParentBhvType.get()
+    #     # FK / Empty
+    #     if visBhvType == 0: 
+    #         bhvFilter = rigData.EMPTY_BHV_INDEXES
+    #         bhvFilter += rigData.FK_BRANCH_BHV_INDEXES
+    #         bhvFilter += rigData.FK_CHAIN_BHV_INDEXES
+    #         if parentBhvType not in bhvFilter:
+    #             return True
+    #     # IK
+    #     elif visBhvType == 1:
+    #         ikFilter = rigData.IK_PV_BHV_INDEXES
+    #         ikFilter += rigData.IK_CHAIN_BHV_INDEXES
+    #         if parentBhvType not in ikFilter:
+    #             return True
+    #     # Look At
+    #     elif visBhvType == 2:
+    #         if parentBhvType not in rigData.LOOK_AT_BHV_INDEXES:
+    #             return True
+    #     # Constraint
+    #     elif visBhvType == 3:
+    #         if parentBhvType not in rigData.CST_BHV_INDEXES:
+    #             return True
+    #     # RFK
+    #     elif visBhvType == 4:
+    #         if parentBhvType not in rigData.RFK_BHV_INDEXES:
+    #             return True
+    #     return False
 
 #=========== TEARDOWN FUNCTIONALITY ====================================
     

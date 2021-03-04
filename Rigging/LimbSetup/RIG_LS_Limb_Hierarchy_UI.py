@@ -25,6 +25,9 @@ class RIG_LS_Limb_Hierarchy_UI:
     def Populate(self):
         self.logger.debug('\tLS_LimbHier > Populate')
         pm.treeView(self.widget, e=1, removeAll=1)
+        pm.menuItem(self.add_mi, e=1, en=0)
+        pm.menuItem(self.flipSides_mi, e=1, en=0)
+        pm.menuItem(self.remove_mi, e=1, en=0)
         temp = {} # pfrsName : [limbs]
         self._limbs = {}
         allLimbs = pm.listConnections(self.pfrs.root.jointLimbs)
@@ -53,20 +56,21 @@ class RIG_LS_Limb_Hierarchy_UI:
 #=========== SETUP ====================================
 
     def _Setup(self):
-        tt = 'Double click to RENAME.'
-        tt += '\nTo set a limb as a MIRROR,'
-        tt += '\nname BOTH LIMBS with the SAME NAME.'
-        self.widget = pm.treeView(ams=0, adr=0, arp=0, ann=tt, nb=1, fb=1)
-        pm.treeView(self.widget, e=1,   elc=self.RenameLimb,
-                                        scc=self.SelectionChanged,
-                                        enk=1)
-        with pm.popupMenu():
-            self.add_mi = pm.menuItem(l='Add Limb', en=0, c=self.Add)
-            self.flipSides_mi = pm.menuItem(l='Flip Sides', en=0, c=self.FlipSides)
-            pm.menuItem(divider=1)
-            self.remove_mi = pm.menuItem(l='Remove Limb', en=0, c=self.Remove)
-            pm.menuItem(divider=1)
-            self.removeAll_mi = pm.menuItem(l='Remove ALL Limbs', c=self.RemoveAll)
+        with pm.frameLayout('Limbs', bv=1):
+            tt = 'Double click to RENAME.'
+            tt += '\nTo set a limb as a MIRROR,'
+            tt += '\nname BOTH LIMBS with the SAME NAME.'
+            self.widget = pm.treeView(ams=0, adr=0, arp=0, ann=tt, nb=1, fb=1)
+            pm.treeView(self.widget, e=1,   elc=self.RenameLimb,
+                                            scc=self.SelectionChanged,
+                                            enk=1)
+            with pm.popupMenu():
+                self.add_mi = pm.menuItem(l='Add Limb', en=0, c=self.Add)
+                self.flipSides_mi = pm.menuItem(l='Flip Sides', en=0, c=self.FlipSides)
+                pm.menuItem(divider=1)
+                self.remove_mi = pm.menuItem(l='Remove Limb', en=0, c=self.Remove)
+                pm.menuItem(divider=1)
+                self.removeAll_mi = pm.menuItem(l='Remove ALL Limbs', c=self.RemoveAll)
 
 #=========== FUNCTIONALITY ====================================
 

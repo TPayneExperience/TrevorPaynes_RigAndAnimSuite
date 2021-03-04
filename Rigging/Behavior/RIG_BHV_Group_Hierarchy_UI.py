@@ -27,7 +27,7 @@ class RIG_BHV_Group_Hierarchy_UI:
         bhvFilter = rigData.FK_BRANCH_BHV_INDEXES
         bhvFilter += rigData.FK_CHAIN_BHV_INDEXES
         bhvFilter += rigData.CST_BHV_INDEXES
-        bhvFilter += rigData.IK_CHAIN_BHV_INDEXES
+        # bhvFilter += rigData.IK_CHAIN_BHV_INDEXES
         bhvFilter += rigData.RFK_BHV_INDEXES
         bhvFilter += rigData.EMPTY_BHV_INDEXES
         if bhvType not in bhvFilter:
