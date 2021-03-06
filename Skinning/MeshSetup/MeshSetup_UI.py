@@ -63,7 +63,7 @@ class MeshSetup_UI:
     def Teardown_Editable(self):
         print ('mesh, teardown')
         self.meshMng.InitSceneMeshes()
-        self.rigBHV.RebuildLimbs()
+        # self.rigBHV.RebuildLimbs()
     
 #=========== ACCESSORS ====================================
 

@@ -50,7 +50,6 @@ LOOK_AT_BHV_INDEXES = (4,)
 IK_PV_BHV_INDEXES = (1,)
 # IK_CHAIN_BHV_INDEXES = (5,)
 
-IK_TARGETABLE_BHV_INDEXES = (0, 2, 6, 7, 8)
 ROT_LOCK_OVERRIDE_BHV_INDEXES = (9, 10)
 POS_LOCK_OVERRIDE_BHV_INDEXES = (9, 10)
 
@@ -61,11 +60,6 @@ AXES_XFORMS =   ((1,0,0),
                 (0,-1,0),
                 (0,0,1),
                 (0,0,-1))
-VIS_BHV_TYPES = (   'FK / Empty',
-                    'IK',
-                    'Look At',
-                    'Constraint',
-                    'RFK')
 
 
 # ============= LIMBS =============

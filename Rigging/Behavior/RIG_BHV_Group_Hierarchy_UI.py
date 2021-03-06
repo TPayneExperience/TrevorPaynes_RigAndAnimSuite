@@ -19,7 +19,7 @@ class RIG_BHV_Group_Hierarchy_UI:
 
     def Populate(self):
         self.logger.debug('\tBhv_GroupHier > Populate')
-        self.Depopulate()
+        pm.treeView(self.widget, e=1, removeAll=1)
         self.groups = {}
         if not self.limb:
             return
@@ -46,9 +46,6 @@ class RIG_BHV_Group_Hierarchy_UI:
             pm.treeView(self.widget, e=1, ai=(groupID, ''))
             pm.treeView(self.widget, e=1, dl=(groupID, name))
     
-    def Depopulate(self):
-        pm.treeView(self.widget, e=1, removeAll=1)
-
 #=========== SETUP ====================================
 
     def _Setup(self):

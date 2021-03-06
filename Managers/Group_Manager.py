@@ -17,7 +17,7 @@ class Group_Manager:
 #============= ACCESSORS  ============================
 
     def GetLimbGroups(self, limb):
-        self.logger.debug('\tBhvMng > GetLimbGroups')
+        self.logger.debug('\tGrpMng > GetLimbGroups')
         groups = []
         bhvType = limb.bhvType.get()
         # IK PV
@@ -29,7 +29,7 @@ class Group_Manager:
         return groups
 
     def GetJointGroups(self, limb):
-        self.logger.debug('\tBhvMng > GetJointGroups')
+        self.logger.debug('\tGrpMng > GetJointGroups')
         bhvType = limb.bhvType.get()
         if bhvType in rigData.EMPTY_BHV_INDEXES:
             return pm.listConnections(limb.bhvEmptyGroup)
@@ -52,6 +52,7 @@ class Group_Manager:
         pm.addAttr(group, ln='control', dt='string')
         pm.addAttr(group, ln='groupType', at='enum', en=groupTypes) # IKPV, LookAt
         util.ChannelBoxAttrs(group, 1, 1, 0, 1)
+        group.v.set(0)
 
         return group
 
@@ -64,6 +65,7 @@ class Group_Manager:
         pm.connectAttr(limb.bhvEmptyGroup, group.limb)
         self.ctrMng.AddEmptyControl(group)
         pm.parent(group, limb)
+        group.v.set(1)
         return group
 
     # FK, CST, IK Chain
@@ -91,6 +93,7 @@ class Group_Manager:
         pm.connectAttr(limb.bhvIKPVGroup, group.limb)
         pm.parent(group, limb)
         self.ctrMng.AddIKPVControl(group)
+        self.UpdateGroupName(group)
         return group
 
     def AddLookAtGroup(self, limb):
@@ -101,6 +104,7 @@ class Group_Manager:
         pm.connectAttr(limb.bhvLookAtGroup, group.limb)
         pm.parent(group, limb)
         self.ctrMng.AddLookAtControl(group)
+        self.UpdateGroupName(group)
         return group
 
     def Remove(self, group):
@@ -113,7 +117,7 @@ class Group_Manager:
 #============= GROUP VISIBILITY ============================
 
     def Setup_LimbGroupVisibility(self, limb):
-        self.logger.debug('\tBhvMng > Setup_LimbGroupVisibility')
+        self.logger.debug('\tGrpMng > Setup_LimbGroupVisibility')
         bhvType = limb.bhvType.get()
         bhvFilter = rigData.FK_CHAIN_BHV_INDEXES
         bhvFilter += rigData.FK_BRANCH_BHV_INDEXES
@@ -136,7 +140,7 @@ class Group_Manager:
             group.v.set(1)
 
     def Teardown_LimbGroupVisibility(self, limb):
-        self.logger.debug('\tBhvMng > Teardown_LimbGroupVisibility')
+        self.logger.debug('\tGrpMng > Teardown_LimbGroupVisibility')
         for group in self.GetJointGroups(limb):
             group.v.set(0)
         for group in self.GetLimbGroups(limb):
@@ -169,7 +173,7 @@ class Group_Manager:
         control.rename(controlName)
 
     def UpdateDistGroupPos(self, limb):
-        self.logger.debug('\tBhvMng > UpdateDistGroupPos')
+        self.logger.debug('\tGrpMng > UpdateDistGroupPos')
         joints = util.GetSortedLimbJoints(limb)
         index = limb.bhvIKPVCtrJoint.get()
         joint = joints[index]

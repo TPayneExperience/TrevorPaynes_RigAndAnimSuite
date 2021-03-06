@@ -45,16 +45,20 @@ class RIG_Behaviors_UI:
 
     def Setup_Editable(self):
         self.logger.info('Rigging > Behavior SETUP')
-        self.limbHier_ui.Populate()
-        self.limbProp_ui.Depopulate()
-        # self.limbProp_ui.Populate()
+        self.Populate()
     
     def Teardown_Editable(self):
         self.logger.info('Rigging > Behavior TEARDOWN\n')
-        self.limbProp_ui.Depopulate()
+        # self.limbProp_ui.SetLimb(None)
+        # self.grpHier_ui.SetLimb(None)
+        # self.grpProp_ui.SetGroup(None)
+
+    def Populate(self):
+        self.limbHier_ui.Populate()
+        self.limbProp_ui.SetLimb(None)
         self.grpHier_ui.SetLimb(None)
-        self.grpProp_ui.Depopulate()
-        self.rigBHV.RebuildLimbs()
+        self.grpProp_ui.SetGroup(None)
+
 
 #=========== LIMBS ====================================
 
@@ -65,12 +69,12 @@ class RIG_Behaviors_UI:
             pm.select(joints)
         self.limbProp_ui.SetLimb(limb)
         self.grpHier_ui.SetLimb(limb)
-        self.grpProp_ui.Depopulate()
+        self.grpProp_ui.SetGroup(None)
 
     def GroupSelected(self, group):
         self.logger.debug('\tRIG_Behaviors_UI > GroupSelected')
         pm.select(group)
-        self.limbProp_ui.Depopulate()
+        self.limbProp_ui.SetLimb(None)
         self.grpProp_ui.SetGroup(group)
 
     def SetBhvType(self, limb):

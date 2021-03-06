@@ -62,7 +62,7 @@ class RIG_LimbSetup_UI:
         
     def Teardown_Editable(self):
         self.logger.info('Rigging > Limb Setup TEARDOWN\n')
-        self.rigBHV.RebuildLimbs()
+        # self.rigBHV.RebuildLimbs()
     
 #=========== LIMB FUNCTIONALITY ====================================
     

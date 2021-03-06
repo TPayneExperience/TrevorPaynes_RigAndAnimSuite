@@ -18,14 +18,14 @@ class PFRS_Debug:
         self._Setup()# IN FINAL VERSION, MOVE THIS DOWN BELOW
 
         if not os.path.isfile(__file__.replace('.pyc', '.py')):
-            print '>>>>>>>>>>>>>> AUTO DEBUG OFF <<<<<<<<<<<<<'
+            print ('>>>>>>>>>>>>>> AUTO DEBUG OFF <<<<<<<<<<<<<')
             return
-        print '>>>>>>>>>>>>>> AUTO DEBUG ON <<<<<<<<<<<<<'
+        print ('>>>>>>>>>>>>>> AUTO DEBUG ON <<<<<<<<<<<<<')
 
-        self.LimbTypesTest(1)
+        # self.LimbTypesTest(1)
+        self.SimpleChainTest(1)
         # self.LegTest()
         # self.RfkTest()
-        # self.SimpleChainTest()
         # self.ArmTest()
         # self.SkeletonTest()
 
@@ -59,6 +59,17 @@ class PFRS_Debug:
         self.rigLS.AutoBuildByName()
         pm.tabLayout(self.parent.rig_ui.tab, e=1, sti=3) # Select Limb setup tab
 
+    def SimpleChainTest(self, ignore):
+        self._NewScene()
+        self.parent.logger.info('DEBUG TESTS > Limb Types')
+        path = os.path.join(self.folder, 'TEST_SimpleChain_01.ma')
+        pm.importFile(path)
+        self.parent.UpdateEnableUI()
+        self.parent.Setup_Editable()
+        pm.tabLayout(self.parent.rig_ui.tab, e=1, sti=2) # Select Limb setup tab
+        self.rigLS.AutoBuildByName()
+        pm.tabLayout(self.parent.rig_ui.tab, e=1, sti=3)
+
     def LegTest(self, ignore):
         self._NewScene()
         self.parent.logger.info('DEBUG TESTS > Leg + Foot')
@@ -85,15 +96,6 @@ class PFRS_Debug:
         # self.parent.limbMng.Reparent(spine, -1)
         # self.parent.limbMng.Reparent(root, spine)
         pm.tabLayout(self.parent.rig_ui.tab, e=1, sti=3) # Select Limb setup tab
-
-    def SimpleChainTest(self, ignore):
-        self._NewScene()
-        self.parent.logger.info('DEBUG TESTS > Limb Types')
-        path = os.path.join(self.folder, 'TEST_SimpleChain_01.ma')
-        pm.importFile(path)
-        self.parent.UpdateEnableUI()
-        self.parent.Setup_Editable()
-        pm.tabLayout(self.parent.rig_ui.tab, e=1, sti=2)
 
     def ArmTest(self, ignore):
         self._NewScene()

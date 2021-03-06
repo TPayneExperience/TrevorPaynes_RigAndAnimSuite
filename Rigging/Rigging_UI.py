@@ -98,11 +98,17 @@ class Rigging_UI:
             self.app_ui.Setup_Editable() 
         elif (newIndex == 4):
             self.RIG_Test_UI.Setup_Editable() 
+        limbs = pm.listConnections(self.pfrs.root.jointLimbs)
+        if newIndex in (0, 1):
+            for limb in limbs:
+                self.grpMng.Teardown_LimbGroupVisibility(limb)
+        elif newIndex in (2, 3, 4):
+            for limb in limbs:
+                self.grpMng.Setup_LimbGroupVisibility(limb)
         
 
     def Teardown_Editable(self):
         self.Teardown_SubTab()
-        # self.UpdateNonInfJoints()
         self.logger.info('Rigging TEARDOWN\n')
         self.logger.info('--------------------------------\n')
     
@@ -119,20 +125,18 @@ class Rigging_UI:
             self.app_ui.Teardown_Editable() 
         elif (lastIndex == 4):
             self.RIG_Test_UI.Teardown_Editable() 
+        self.limbMng.RebuildLimbs()
 
     def UpdateControlVis(self):
         self.logger.debug('\tRigging_UI > UpdateControlVis')
         index = self.pfrs.root.riggingTab.get()
-        if index in [0, 1]:
-            self.ctrMng.SetLayerState(False, True)
-        elif index == 2:
+        if index == 2:
             self.ctrMng.SetLayerState(True, True)
-        elif index in [3, 4]:
+        elif index in (3, 4):
             self.ctrMng.SetLayerState(True, False)
         
     def TabChanged(self):
         self.Teardown_SubTab()
-        # self.UpdateNonInfJoints()
         self.Setup_SubTab()
         self.UpdateControlVis()
 

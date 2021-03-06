@@ -26,7 +26,7 @@ class RIG_APP_Control_Hierarchy_UI:
     
     def Populate(self):
         self.logger.debug('\tApp_ControlHier > Populate')
-        self.Depopulate()
+        pm.treeView(self.widget, e=1, removeAll=1)
         self.controls = {}
         if not self.limb:
             return
@@ -53,8 +53,6 @@ class RIG_APP_Control_Hierarchy_UI:
             pm.treeView(self.widget, e=1, addItem=(controlID, ''))
             pm.treeView(self.widget, e=1, displayLabel=(controlID, name))
 
-    def Depopulate(self):
-        pm.treeView(self.widget, e=1, removeAll=1)
 
 #=========== SETUP ====================================
 

@@ -48,12 +48,12 @@ class RIG_Appearance_UI:
         self.limbProp_ui.SetLimb(None)
         # self.limbProp_ui.Populate()
         self.globalProp_ui.Populate()
-        self.ctrHier_ui.Depopulate()
+        self.ctrHier_ui.SetLimb(None)
         # pm.frameLayout(self.prop_l, e=1, en=0)
     
     def Teardown_Editable(self):
         self.logger.info('Rigging > Appearance TEARDOWN\n')
-        self.rigBHV.RebuildLimbs()
+        # self.rigBHV.RebuildLimbs()
 
 #=========== LIMBS ====================================
 

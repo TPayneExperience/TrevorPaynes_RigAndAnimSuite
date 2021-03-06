@@ -18,7 +18,7 @@ class PW_Joint_Hierarchy_UI:
     
     
     def Populate(self):
-        self.Depopulate()
+        pm.treeView(self.widget, e=1, removeAll=1)
         self.joints = {}
         if not self.limb:
             return
@@ -31,9 +31,6 @@ class PW_Joint_Hierarchy_UI:
             pm.treeView(self.widget, e=1, ai=(jointID, ''))
             pm.treeView(self.widget, e=1, dl=(jointID, name))
     
-    def Depopulate(self):
-        pm.treeView(self.widget, e=1, removeAll=1)
-
 #=========== SETUP ====================================
 
     def _Setup(self):

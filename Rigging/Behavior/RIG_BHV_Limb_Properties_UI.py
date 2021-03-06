@@ -28,9 +28,10 @@ class RIG_BHV_Limb_Properties_UI:
     
     def SetLimb(self, limb):
         self.logger.debug('\tBhv_LimbProp > SetLimb')
+        pm.frameLayout(self.limbLayout, e=1, en=0)
+        pm.frameLayout(self.targetLayout, e=1, en=0)
         self.limb = limb
         if not limb:
-            pm.frameLayout(self.limbLayout, e=1, en=0)
             return
         pm.frameLayout(self.limbLayout, e=1, en=1)
 
@@ -102,16 +103,9 @@ class RIG_BHV_Limb_Properties_UI:
         targetLimb = self.targetLimbs[limbName]
         msg = '\tLimbIKCst > SET TARGET LIMB to "%s"' % targetLimb.pfrsName.get()
         self.logger.info(msg)
-        self.rigBHV.SetBhvParentLimb(self.limb, targetLimb)
+        self.limbMng.SetBhvParentLimb(self.limb, targetLimb)
 
 #=========== UI UPDATES ==============================================
-
-    def Depopulate(self):
-        self.logger.debug('\tBhv_LimbProp > Depopulate')
-        # self.limb = None
-        pm.frameLayout(self.limbLayout, e=1, en=0)
-        pm.frameLayout(self.targetLayout, e=1, en=0)
-        # pm.frameLayout(self.ctrLayout, e=1, en=0)
 
     def PopulateLimbProperties(self, bhvType):
         self.logger.debug('\tBhv_LimbProp > PopulateLimbProperties')
@@ -132,32 +126,23 @@ class RIG_BHV_Limb_Properties_UI:
     def PopulateBhvProperties(self):
         self.logger.debug('\tBhv_LimbProp > PopulateBhvProperties')
         pm.frameLayout(self.targetLayout, e=1, en=0)
-
-        # POPULATE TARGET LIMBS
-        bhvType = self.limb.bhvType.get()
-        ikFilter = rigData.IK_PV_BHV_INDEXES
-        # ikFilter += rigData.IK_CHAIN_BHV_INDEXES
-        # if bhvType in rigData.CST_BHV_INDEXES:
-            # bhvFilter = range(len(rigData.BHV_TYPES))
-        # elif bhvType in ikFilter:
-        if bhvType in rigData.CST_BHV_INDEXES + ikFilter:
-            bhvFilter = rigData.IK_TARGETABLE_BHV_INDEXES
-        else:
-            return
         pm.optionMenu(self.targetLimb_om, e=1, dai=1)
         pm.frameLayout(self.targetLayout, e=1, en=1)
         self.targetLimbs = {}
         self.targetLimbOrder = []
         for rootLimb in self.limbMng.GetRootLimbs(self.pfrs.root):
             for limb in self.limbMng.GetLimbCreationOrder(rootLimb):
-                if (limb.bhvType.get() in bhvFilter):
-                    side = rigData.LIMB_SIDES[limb.side.get()]
-                    name = '%s_%s' % (limb.pfrsName.get(), side)
-                    pm.menuItem(l=name, p=self.targetLimb_om)
-                    self.targetLimbs[name] = limb
-                    self.targetLimbOrder.append(limb)
+                if limb == self.limb:
+                    continue
+                side = rigData.LIMB_SIDES[limb.side.get()]
+                name = '%s_%s' % (limb.pfrsName.get(), side)
+                pm.menuItem(l=name, p=self.targetLimb_om)
+                self.targetLimbs[name] = limb
+                self.targetLimbOrder.append(limb)
+        self._PopulateTargetLimbProperties()
+        self._PopulateConstraintProperties()
 
-        # SELECT TARGET LIMB
+    def _PopulateTargetLimbProperties(self):
         targetLimbs = pm.listConnections(self.limb.bhvParent)
         if targetLimbs:
             targetLimb = targetLimbs[0]
@@ -167,15 +152,19 @@ class RIG_BHV_Limb_Properties_UI:
         if self.targetJnt_at:
             pm.deleteUI(self.targetJnt_at)
             self.targetJnt_at = None
-        if bhvType in rigData.IK_PV_BHV_INDEXES + rigData.CST_BHV_INDEXES:
+        bhvFilter = rigData.IK_PV_BHV_INDEXES
+        bhvFilter += rigData.CST_BHV_INDEXES
+        if self.limb.bhvType.get() in bhvFilter:
             self.targetJnt_at = pm.attrEnumOptionMenu(  l='Target Joint',
                                                         at=self.limb.bhvParentJoint,
                                                         p=self.targetProp_cl,
                                                         cc=self.LogBhvParentJoint)
+        
+    def _PopulateConstraintProperties(self):
         if self.cstLayout:
             pm.deleteUI(self.cstLayout)
             self.cstLayout = None
-        if bhvType in rigData.CST_BHV_INDEXES:
+        if self.limb.bhvType.get() in rigData.CST_BHV_INDEXES:
             with pm.columnLayout(adj=1, p=self.targetProp_cl) as self.cstLayout:
                 pm.attrEnumOptionMenu(l='Constraint Type',
                                     at=self.limb.bhvCstType,

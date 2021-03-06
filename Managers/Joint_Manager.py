@@ -92,12 +92,18 @@ class Joint_Manager:
         self.grpMng.AddJointGroup(joint)
 
     def AddJoint(self, limb, joint):
-        self.logger.debug('\tJntMng > Add')
-        # Only add Joint if pfrs name not already on limb
+        self.logger.debug('\tJntMng > AddJoint')
+        if limb.limbType.get() != 0:
+            for child in pm.listConnections(limb.bhvChildren):
+                self.RebuildBhvParentJoint(child)
         pm.connectAttr(limb.joints, joint.limb)
 
     def RemoveJoint(self, joint):
         self.logger.debug('\tJntMng > RemoveJoint')
+        limb = pm.listConnections(joint.limb)
+        if limb.limbType.get() != 0:
+            for child in pm.listConnections(limb.bhvChildren):
+                self.RebuildBhvParentJoint(child)
         pm.disconnectAttr(joint.limb)
 
     def DeleteJoint(self, joint):
@@ -108,6 +114,8 @@ class Joint_Manager:
             pm.parent(children, parents[0])
         else:
             pm.parent(children, w=1)
+        if pm.listConnections(joint.limb):
+            self.RemoveJoint(joint)
         pm.delete(joint)
         
 #============= FUNCTIONALITY ============================
@@ -133,7 +141,7 @@ class Joint_Manager:
 
     def UpdateLimbParentJoint(self, childLimb):
         '''Updates limb parent group enum to closest to root group'''
-        self.logger.debug('\tBhvMng > UpdateLimbParentJoint')
+        self.logger.debug('\tJntMng > UpdateLimbParentJoint')
         parents = pm.listConnections(childLimb.limbParent)
 
         # If NO PARENT or parent EMPTY, set and return
@@ -162,7 +170,7 @@ class Joint_Manager:
         limb.bhvIKPVCtrJoint.set(1)
 
     def GetClosestJointIndex(self, sourcePos, targetLimb):
-        self.logger.debug('\tBhvMng > GetClosestJointIndex')
+        self.logger.debug('\tJntMng > GetClosestJointIndex')
         targetJoints = util.GetSortedLimbJoints(targetLimb)
         distances = {} # dist : [targetJoint1, joint2...]
         for targetJoint in targetJoints:
@@ -177,6 +185,13 @@ class Joint_Manager:
         joint = distances[targetDist][0]
         return targetJoints.index(joint)
 
+    def RebuildBhvParentJoint(self, sourceLimb):
+        targetLimb = pm.listConnections(sourceLimb.bhvParent)[0]
+        sourceLimb.rebuildBhvDep.set(0)
+        sourceJoint = util.GetSortedLimbJoints(sourceLimb)[-1]
+        sourcePos = pm.xform(sourceJoint, q=1, t=1, ws=1)
+        index = self.GetClosestJointIndex(sourcePos, targetLimb)
+        sourceLimb.bhvParentJoint.set(index)
 
 
 

@@ -96,12 +96,19 @@ class RIG_BHV_Limb_Hierarchy_UI:
             pm.menuItem(l='Add Empty Limb', c=self.AddEmptyRigLimb)
             self.remove_mi = pm.menuItem(l='Remove Empty Rig Limb', 
                                         en=0, c=self.RemoveEmptyLimb)
+            pm.menuItem(d=1)
+            pm.menuItem(l='Load Skeleton Hierarchy', c=self.LoadSkelHier)
             pm.menuItem(l='PRESETS', d=1)
             pm.menuItem(l='Save Preset', c=self.SavePreset)
             pm.menuItem(l='Edit Presets', c=self.EditPresets)
             pm.menuItem(l='APPLY PRESET', d=1)
 
 #=========== FUNCTIONS ====================================
+
+    def LoadSkelHier(self, ignore):
+        self.logger.info('\tLimbHier > LOAD SKELETON hierarchy')
+        self.limbMng.ParentLimbsBySkeleton()
+        self.parent.Populate()
 
     def ValidateSelection(self, limbIDStr, itemNum):
         limb = self._limbs[limbIDStr]
@@ -111,9 +118,13 @@ class RIG_BHV_Limb_Hierarchy_UI:
     def SelectionChanged(self):
         self.logger.info('\tBhv_LimbHier > SelectionChanged')
         limbIDStrs = pm.treeView(self.widget, q=1, selectItem=1)
+        if not limbIDStrs:
+            self.logger.info('\t\tDeselected Limbs')
+            self.parent.LimbSelected(None)
+            return
         pm.menuItem(self.remove_mi, e=1, en=bool(limbIDStrs))
         limb = self._limbs[limbIDStrs[0]]
-        msg = '\tLimbHier > SELECTED limb "%s"'% limb.pfrsName.get()
+        msg = '\t\tSELECTED limb "%s"'% limb.pfrsName.get()
         self.logger.info(msg)
         self.parent.LimbSelected(limb)
 
@@ -221,7 +232,7 @@ class RIG_BHV_Limb_Hierarchy_UI:
         self.logger.info('\tBhv_LimbHier > ApplyPreset')
         preset = self._presets[presetName]
         self.pstMng.ApplyPreset(preset)
-        self.Populate()
+        self.parent.Populate()
 
     # def DeletePreset(self, presetName):
     #     self.logger.info('\tBhv_LimbHier > DeletePreset')

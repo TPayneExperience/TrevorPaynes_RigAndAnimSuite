@@ -147,9 +147,7 @@ class RIG_LimbSetup:
                     # limbTypeChanged = True
 
         # if limbTypeChanged:
-            # limb.rebuildBhvType.set(1)
             # limb.rebuildBhvDep.set(1)
-            # limb.rebuildAppDep.set(1)
             # limb.rebuildSkinInf.set(1)
         # limb.rebuildLimbType.set(0)
 

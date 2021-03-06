@@ -94,7 +94,7 @@ class RIG_JointSetup_UI:
         self.logger.info('Rigging > Joint Setup TEARDOWN\n')
         self.KillScripts()
         self.PrintJointTree()
-        self.rigBHV.RebuildLimbs()
+        # self.rigBHV.RebuildLimbs()
         self.jntMng.InitSceneJoints()
     
     def KillScripts(self):
