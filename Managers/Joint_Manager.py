@@ -147,11 +147,13 @@ class Joint_Manager:
         # If NO PARENT or parent EMPTY, set and return
         if not parents:
             pm.addAttr(childLimb.limbParentJoint, e=1, en='None')
+            childLimb.limbParentJoint.set(0)
             return
         parentLimb = parents[0]
         parentBhvType = parentLimb.bhvType.get()
         if parentBhvType in rigData.EMPTY_BHV_INDEXES:
             pm.addAttr(childLimb.limbParentJoint, e=1, en='Empty')
+            childLimb.limbParentJoint.set(0)
             return
         parentJoints = util.GetSortedLimbJoints(parentLimb)
         names = [j.pfrsName.get() for j in parentJoints]

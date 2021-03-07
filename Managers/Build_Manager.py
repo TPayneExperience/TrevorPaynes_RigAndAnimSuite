@@ -131,7 +131,7 @@ class Build_Manager:
             elif bhvType in rigData.LOOK_AT_BHV_INDEXES:
                 self.Setup_External_SingleControl(limb)
             elif bhvType in rigData.EMPTY_BHV_INDEXES:
-                self.Setup_External_SingleControl(limb)
+                self.Setup_External_Empty(limb)
             elif bhvType in rigData.RFK_BHV_INDEXES:
                 self.Setup_External_RelativeFK(limb)
 
@@ -425,6 +425,12 @@ class Build_Manager:
         childGroup = self.grpMng.GetLimbGroups(limb)[0]
         self.ParentConstrainGroup(limb, childGroup)
 
+    # IK PV, LookAt
+    def Setup_External_Empty(self, limb):
+        self.logger.debug('\tBldMng > Setup_External_Empty')
+        group = pm.listConnections(limb.bhvEmptyGroup)[0]
+        self.ParentConstrainGroup(limb, group)
+
     def Setup_Internal_LookAt(self, limb):
         self.logger.debug('\tBldMng > Setup_Internal_LookAt')
         joint = util.GetSortedLimbJoints(limb)[0]
@@ -438,7 +444,7 @@ class Build_Manager:
         if not parents:
             return 
         if parents[0].bhvType.get() in rigData.EMPTY_BHV_INDEXES:
-            group = pm.listConnections(limb.bhvEmptyGroup)[0]
+            group = pm.listConnections(parents[0].bhvEmptyGroup)[0]
             parentJoint = pm.listConnections(group.control)[0]
         else:
             index = limb.limbParentJoint.get()

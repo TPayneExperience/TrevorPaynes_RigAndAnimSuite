@@ -25,8 +25,8 @@ class PFRS_Debug:
         # self.LimbTypesTest(1)
         # self.SimpleChainTest(1)
         # self.LegTest(1)
-        self.ArmTest(1)
-        # self.RfkTest()
+        # self.ArmTest(1)
+        self.SpineTest(1)
         # self.SkeletonTest()
 
 # ================= SETUP =============================
@@ -100,14 +100,15 @@ class PFRS_Debug:
         pm.importFile(path)
         self.parent.UpdateEnableUI()
         self.parent.Setup_Editable()
-        pm.tabLayout(self.parent.rig_ui.tab, e=1, sti=2) # Select Limb setup tab
-        self.rigLS.AutoBuildByName(0)
-        spine = pm.ls('PFX_Spine_Limb_M_NODE', tr=1)[0]
-        self.limbMng.SetBhvType(spine, 10) # Relative FK
-        # root = pm.ls('PFX_Root_Limb_M_NODE', tr=1)[0]
-        # self.parent.limbMng.Reparent(spine, -1)
-        # self.parent.limbMng.Reparent(root, spine)
-        pm.tabLayout(self.parent.rig_ui.tab, e=1, sti=3) # Select Limb setup tab
+        pm.tabLayout(self.parent.rig_ui.tab, e=1, sti=2)
+        self.rigLS.AutoBuildByName()
+        pm.tabLayout(self.parent.rig_ui.tab, e=1, sti=3)
+        # spine = pm.ls('PFX_Spine_Limb_M_NODE', tr=1)[0]
+        # self.limbMng.SetBhvType(spine, 10) # Relative FK
+        # # root = pm.ls('PFX_Root_Limb_M_NODE', tr=1)[0]
+        # # self.parent.limbMng.Reparent(spine, -1)
+        # # self.parent.limbMng.Reparent(root, spine)
+        # pm.tabLayout(self.parent.rig_ui.tab, e=1, sti=3) # Select Limb setup tab
 
     def SkeletonTest(self, ignore):
         self._NewScene()

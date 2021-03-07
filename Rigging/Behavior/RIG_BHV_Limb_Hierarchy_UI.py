@@ -172,13 +172,13 @@ class RIG_BHV_Limb_Hierarchy_UI:
 #=========== RMB ====================================
 
     def AddEmptyRigLimb(self, ignore):
-        self.rigBHV.AddEmptyRigLimb()
+        self.limbMng.AddEmptyRigLimb()
         self.Populate()
 
     def RemoveEmptyLimb(self, ignore):
         limbIDStrs = pm.treeView(self.widget, q=1, selectItem=1)
         limb = self._limbs[limbIDStrs[0]]
-        self.rigBHV.RemoveEmptyLimb(limb)
+        self.limbMng.RemoveEmptyLimb(limb)
         self.Populate()
 
 #=========== MISC ====================================
