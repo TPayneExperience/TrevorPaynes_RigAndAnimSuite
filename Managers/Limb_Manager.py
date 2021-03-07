@@ -41,7 +41,7 @@ class Limb_Manager:
         bhvTypes = ':'.join(rigData.BHV_TYPES)
 
         limb = pm.group(name=pfrsName, em=1, p=self.limbGroup)
-        util.ChannelBoxAttrs(limb)
+        util.ChannelBoxAttrs(limb, 0, 0, 0, 0)
         pm.addAttr(limb, ln='rigRoot', dt='string', h=hide)
         pm.addAttr(limb, ln='ID', at='long', dv=limbID, h=hide)
         pm.addAttr(limb, ln='pfrsName', dt='string', h=hide)
@@ -68,12 +68,12 @@ class Limb_Manager:
         pm.addAttr(limb, ln='bhvChildren', dt='string', h=hide) 
 
         # CHANNEL BOX
-        pm.addAttr(limb, ln='channelBoxJointCtrPos', at='bool', h=hide)
+        pm.addAttr(limb, ln='channelBoxJointCtrPos', at='bool', dv=1, h=hide)
         pm.addAttr(limb, ln='channelBoxJointCtrRot', at='bool', dv=1, h=hide)
-        pm.addAttr(limb, ln='channelBoxJointCtrScale', at='bool', h=hide)
+        pm.addAttr(limb, ln='channelBoxJointCtrScale', at='bool', dv=1, h=hide)
         pm.addAttr(limb, ln='channelBoxLimbCtrPos', at='bool', dv=1, h=hide)
-        pm.addAttr(limb, ln='channelBoxLimbCtrRot', at='bool', h=hide)
-        pm.addAttr(limb, ln='channelBoxLimbCtrScale', at='bool', h=hide)
+        pm.addAttr(limb, ln='channelBoxLimbCtrRot', at='bool', dv=1, h=hide)
+        pm.addAttr(limb, ln='channelBoxLimbCtrScale', at='bool', dv=1, h=hide)
         
         pm.addAttr(limb, ln='presets', dt='string', h=hide)
 
@@ -107,7 +107,6 @@ class Limb_Manager:
         # IK PV + CST 
         pm.addAttr(limb, ln='bhvParent', dt='string', h=hide) 
         pm.addAttr(limb, ln='bhvParentJoint', at='enum', en='None', h=hide)
-        pm.addAttr(limb, ln='bhvIKPVCtrJoint', at='enum', en='None', h=hide)
         pm.addAttr(limb, ln='bhvCstType', at='enum', en=bhvCstTypes, h=hide)
         pm.addAttr(limb, ln='cstPosX', at='bool', dv=1, h=hide)
         pm.addAttr(limb, ln='cstPosY', at='bool', dv=1, h=hide)
@@ -200,7 +199,7 @@ class Limb_Manager:
         
         targetLimb = limbs[0]
         self.SetBhvParentLimb(sourceLimb, targetLimb)
-        self.jntMng.RebuildBhvParentJoint(sourceLimb)
+        self.jntMng.AssignClosestBhvParentJoint(sourceLimb)
         # sourceLimb.rebuildBhvDep.set(0)
         # sourceJoint = util.GetSortedLimbJoints(sourceLimb)[-1]
         # sourcePos = pm.xform(sourceJoint, q=1, t=1, ws=1)
@@ -223,20 +222,33 @@ class Limb_Manager:
             self.RebuildBhvParent(limb)
         self.grpMng.Setup_LimbGroupVisibility(limb)
 
-    def SetBhvParentLimb(self, sourceLimb, targetLimb):
+    def SetBhvParentLimb(self, childLimb, parentLimb):
         self.logger.debug('\tLimbMng > SetBhvParentLimb')
-        pm.disconnectAttr(sourceLimb.bhvParent)
-        if not targetLimb:
+        pm.disconnectAttr(childLimb.bhvParent)
+        if not parentLimb:
             return
-        pm.connectAttr(targetLimb.bhvChildren, sourceLimb.bhvParent)
-        if targetLimb.bhvType.get() == 7: # Empty
-            pm.addAttr(sourceLimb.bhvParentJoint, e=1, en='Empty')
+        pm.connectAttr(parentLimb.bhvChildren, childLimb.bhvParent)
+        if self._IsLimbAChildOfParent(parentLimb, childLimb):
+            newParent = pm.listConnections(childLimb.limbParent)
+            if newParent:
+                self.ReparentLimb(parentLimb, newParent[0])
+            else:
+                self.ReparentLimb(parentLimb, None)
+        if parentLimb.bhvType.get() in rigData.EMPTY_BHV_INDEXES:
+            pm.addAttr(childLimb.bhvParentJoint, e=1, en='Empty')
             return
-        joints = util.GetSortedLimbJoints(targetLimb)
-        names = [j.pfrsName.get() for j in joints]
-        pm.addAttr(sourceLimb.bhvParentJoint, e=1, en=':'.join(names))
+        self.jntMng.AssignClosestBhvParentJoint(childLimb)
 
 #============= MISC ============================
+
+    def _IsLimbAChildOfParent(self, child, parent):
+        tempParent = child
+        while (tempParent != parent):
+            tempParent = pm.listConnections(tempParent.limbParent)
+            if not tempParent:
+                return False
+            tempParent = tempParent[0]
+        return True
 
     def ReparentLimb(self, child, parent):
         self.logger.debug('\tLimbMng > ReparentLimb')

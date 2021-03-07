@@ -95,7 +95,7 @@ class Joint_Manager:
         self.logger.debug('\tJntMng > AddJoint')
         if limb.limbType.get() != 0:
             for child in pm.listConnections(limb.bhvChildren):
-                self.RebuildBhvParentJoint(child)
+                self.AssignClosestBhvParentJoint(child)
         pm.connectAttr(limb.joints, joint.limb)
 
     def RemoveJoint(self, joint):
@@ -103,7 +103,7 @@ class Joint_Manager:
         limb = pm.listConnections(joint.limb)
         if limb.limbType.get() != 0:
             for child in pm.listConnections(limb.bhvChildren):
-                self.RebuildBhvParentJoint(child)
+                self.AssignClosestBhvParentJoint(child)
         pm.disconnectAttr(joint.limb)
 
     def DeleteJoint(self, joint):
@@ -162,13 +162,6 @@ class Joint_Manager:
         index = self.GetClosestJointIndex(sourcePos, parentLimb)
         childLimb.limbParentJoint.set(index)
 
-    def UpdateBhvParentJoint(self, limb):
-        joints = util.GetSortedLimbJoints(limb)
-        names = [j.pfrsName.get() for j in joints]
-        namesStr = ':'.join(names)
-        pm.addAttr(limb.bhvIKPVCtrJoint, e=1, en=namesStr)
-        limb.bhvIKPVCtrJoint.set(1)
-
     def GetClosestJointIndex(self, sourcePos, targetLimb):
         self.logger.debug('\tJntMng > GetClosestJointIndex')
         targetJoints = util.GetSortedLimbJoints(targetLimb)
@@ -185,13 +178,15 @@ class Joint_Manager:
         joint = distances[targetDist][0]
         return targetJoints.index(joint)
 
-    def RebuildBhvParentJoint(self, sourceLimb):
-        targetLimb = pm.listConnections(sourceLimb.bhvParent)[0]
-        sourceLimb.rebuildBhvDep.set(0)
-        sourceJoint = util.GetSortedLimbJoints(sourceLimb)[-1]
+    def AssignClosestBhvParentJoint(self, childLimb):
+        parentLimb = pm.listConnections(childLimb.bhvParent)[0]
+        parentJoints = util.GetSortedLimbJoints(parentLimb)
+        names = [j.pfrsName.get() for j in parentJoints]
+        pm.addAttr(childLimb.bhvParentJoint, e=1, en=':'.join(names))
+        sourceJoint = util.GetSortedLimbJoints(childLimb)[-1]
         sourcePos = pm.xform(sourceJoint, q=1, t=1, ws=1)
-        index = self.GetClosestJointIndex(sourcePos, targetLimb)
-        sourceLimb.bhvParentJoint.set(index)
+        index = self.GetClosestJointIndex(sourcePos, parentLimb)
+        childLimb.bhvParentJoint.set(index)
 
 
 

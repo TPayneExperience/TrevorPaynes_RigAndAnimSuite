@@ -80,21 +80,16 @@ class RIG_BHV_Limb_Properties_UI:
     def SetBhvType(self): # Mostly UI
         self.logger.debug('\tBhv_LimbProp > SetBhvType')
         bhvTypeStr = pm.optionMenu(self.bhvType_om, q=1, v=1)
-        # newBhvIndex = self.rigBHV.bhvTypes.index(bhvTypeStr)
-        # old = self.rigBHV.bhvTypes[self.limb.bhvType.get()]
         newBhvIndex = rigData.BHV_TYPES.index(bhvTypeStr)
         old = rigData.BHV_TYPES[self.limb.bhvType.get()]
         self.logger.info('\tLimbProp > SET BEHAVIOR:')
         self.logger.info('\t\t%s >>> %s' % (old, bhvTypeStr))
         
         self.limbMng.SetBhvType(self.limb, newBhvIndex)
-        self.PopulateLimbProperties(newBhvIndex)
-        self.PopulateBhvProperties()
-        # self.PopulateControlFrame(newBhvIndex)
-        # self.Populate()
-        # self.PopulateTargetLimbs()
-        # self.UpdateUI()
-        self.parent.SetBhvType(self.limb) 
+        # self.PopulateLimbProperties(newBhvIndex)
+        # self.PopulateBhvProperties()
+        # self.parent.SetBhvType(self.limb) 
+        self.parent.Populate()
 
 #=========== CONSTRAINT ==============================================
 
@@ -127,7 +122,6 @@ class RIG_BHV_Limb_Properties_UI:
         self.logger.debug('\tBhv_LimbProp > PopulateBhvProperties')
         pm.frameLayout(self.targetLayout, e=1, en=0)
         pm.optionMenu(self.targetLimb_om, e=1, dai=1)
-        pm.frameLayout(self.targetLayout, e=1, en=1)
         self.targetLimbs = {}
         self.targetLimbOrder = []
         for rootLimb in self.limbMng.GetRootLimbs(self.pfrs.root):
@@ -143,6 +137,11 @@ class RIG_BHV_Limb_Properties_UI:
         self._PopulateConstraintProperties()
 
     def _PopulateTargetLimbProperties(self):
+        bhvFilter = rigData.IK_PV_BHV_INDEXES
+        bhvFilter += rigData.CST_BHV_INDEXES
+        if self.limb.bhvType.get() not in bhvFilter:
+            return
+        pm.frameLayout(self.targetLayout, e=1, en=1)
         targetLimbs = pm.listConnections(self.limb.bhvParent)
         if targetLimbs:
             targetLimb = targetLimbs[0]
@@ -152,49 +151,47 @@ class RIG_BHV_Limb_Properties_UI:
         if self.targetJnt_at:
             pm.deleteUI(self.targetJnt_at)
             self.targetJnt_at = None
-        bhvFilter = rigData.IK_PV_BHV_INDEXES
-        bhvFilter += rigData.CST_BHV_INDEXES
-        if self.limb.bhvType.get() in bhvFilter:
-            self.targetJnt_at = pm.attrEnumOptionMenu(  l='Target Joint',
-                                                        at=self.limb.bhvParentJoint,
-                                                        p=self.targetProp_cl,
-                                                        cc=self.LogBhvParentJoint)
+        self.targetJnt_at = pm.attrEnumOptionMenu(  l='Target Joint',
+                                                    at=self.limb.bhvParentJoint,
+                                                    p=self.targetProp_cl,
+                                                    cc=self.LogBhvParentJoint)
         
     def _PopulateConstraintProperties(self):
         if self.cstLayout:
             pm.deleteUI(self.cstLayout)
             self.cstLayout = None
-        if self.limb.bhvType.get() in rigData.CST_BHV_INDEXES:
-            with pm.columnLayout(adj=1, p=self.targetProp_cl) as self.cstLayout:
-                pm.attrEnumOptionMenu(l='Constraint Type',
+        if self.limb.bhvType.get() not in rigData.CST_BHV_INDEXES:
+            return
+        with pm.columnLayout(adj=1, p=self.targetProp_cl) as self.cstLayout:
+            pm.attrEnumOptionMenu(  l='Constraint Type',
                                     at=self.limb.bhvCstType,
                                     cc=self.LogCstType)
-                with pm.rowLayout(  nc=4,
-                                    cal=(1, 'right'), 
-                                    cat=[(1, 'both', 0), 
-                                        (2, 'both', 0), 
-                                        (3, 'both', 0), 
-                                        (4, 'both', 0)]):
-                    pm.text('Constraint Pos Axes')
-                    with pm.columnLayout(co=('left', -140)):
-                        pm.attrControlGrp(l='X', a=self.limb.cstPosX)
-                    with pm.columnLayout(co=('left', -140)):
-                        pm.attrControlGrp(l='Y', a=self.limb.cstPosY)
-                    with pm.columnLayout(co=('left', -140)):
-                        pm.attrControlGrp(l='Z', a=self.limb.cstPosZ)
-                with pm.rowLayout(  nc=4,
-                                    cal=(1, 'right'), 
-                                    cat=[(1, 'both', 0), 
-                                        (2, 'both', 0), 
-                                        (3, 'both', 0), 
-                                        (4, 'both', 0)]):
-                    pm.text('Constraint Rot Axes')
-                    with pm.columnLayout(co=('left', -140)):
-                        pm.attrControlGrp(l='X', a=self.limb.cstRotX)
-                    with pm.columnLayout(co=('left', -140)):
-                        pm.attrControlGrp(l='Y', a=self.limb.cstRotY)
-                    with pm.columnLayout(co=('left', -140)):
-                        pm.attrControlGrp(l='Z', a=self.limb.cstRotZ)
+            with pm.rowLayout(  nc=4,
+                                cal=(1, 'right'), 
+                                cat=[(1, 'both', 0), 
+                                    (2, 'both', 0), 
+                                    (3, 'both', 0), 
+                                    (4, 'both', 0)]):
+                pm.text('Constraint Pos Axes')
+                with pm.columnLayout(co=('left', -140)):
+                    pm.attrControlGrp(l='X', a=self.limb.cstPosX)
+                with pm.columnLayout(co=('left', -140)):
+                    pm.attrControlGrp(l='Y', a=self.limb.cstPosY)
+                with pm.columnLayout(co=('left', -140)):
+                    pm.attrControlGrp(l='Z', a=self.limb.cstPosZ)
+            with pm.rowLayout(  nc=4,
+                                cal=(1, 'right'), 
+                                cat=[(1, 'both', 0), 
+                                    (2, 'both', 0), 
+                                    (3, 'both', 0), 
+                                    (4, 'both', 0)]):
+                pm.text('Constraint Rot Axes')
+                with pm.columnLayout(co=('left', -140)):
+                    pm.attrControlGrp(l='X', a=self.limb.cstRotX)
+                with pm.columnLayout(co=('left', -140)):
+                    pm.attrControlGrp(l='Y', a=self.limb.cstRotY)
+                with pm.columnLayout(co=('left', -140)):
+                    pm.attrControlGrp(l='Z', a=self.limb.cstRotZ)
 
     def LogGroupParent(self, jointName):
         msg = '\tLimbProp > SET GROUP PARENT to '

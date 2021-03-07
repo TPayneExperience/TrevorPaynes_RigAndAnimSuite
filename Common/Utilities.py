@@ -1,7 +1,7 @@
 
 import pymel.core as pm
 
-def ChannelBoxAttrs(xform, t=0, r=0, s=0, v=0):
+def ChannelBoxAttrs(xform, t, r, s, v):
     for attr in ('.tx', '.ty', '.tz'):
         pm.setAttr(xform + attr, l=(not t), k=t)
     for attr in ('.rx', '.ry', '.rz'):

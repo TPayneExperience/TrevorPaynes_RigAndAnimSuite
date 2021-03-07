@@ -49,11 +49,9 @@ class RIG_Behaviors_UI:
     
     def Teardown_Editable(self):
         self.logger.info('Rigging > Behavior TEARDOWN\n')
-        # self.limbProp_ui.SetLimb(None)
-        # self.grpHier_ui.SetLimb(None)
-        # self.grpProp_ui.SetGroup(None)
 
     def Populate(self):
+        self.logger.debug('\tRIG_Behaviors_UI > Populate')
         self.limbHier_ui.Populate()
         self.limbProp_ui.SetLimb(None)
         self.grpHier_ui.SetLimb(None)

@@ -87,6 +87,13 @@ class Rigging_UI:
     def Setup_SubTab(self):
         self.logger.debug('\tRigging_UI > Setup_SubTab')
         newIndex = pm.tabLayout(self.tab, q=1, selectTabIndex=1)-1
+        limbs = pm.listConnections(self.pfrs.root.jointLimbs)
+        if newIndex in (0, 1):
+            for limb in limbs:
+                self.grpMng.Teardown_LimbGroupVisibility(limb)
+        elif newIndex in (2, 3, 4):
+            for limb in limbs:
+                self.grpMng.Setup_LimbGroupVisibility(limb)
         self.pfrs.root.riggingTab.set(newIndex)
         if (newIndex == 0):
             self.jntSetup_ui.Setup_Editable()
@@ -98,13 +105,6 @@ class Rigging_UI:
             self.app_ui.Setup_Editable() 
         elif (newIndex == 4):
             self.RIG_Test_UI.Setup_Editable() 
-        limbs = pm.listConnections(self.pfrs.root.jointLimbs)
-        if newIndex in (0, 1):
-            for limb in limbs:
-                self.grpMng.Teardown_LimbGroupVisibility(limb)
-        elif newIndex in (2, 3, 4):
-            for limb in limbs:
-                self.grpMng.Setup_LimbGroupVisibility(limb)
         
 
     def Teardown_Editable(self):
@@ -140,22 +140,6 @@ class Rigging_UI:
         self.Setup_SubTab()
         self.UpdateControlVis()
 
-
-#=========== FUNCTIONALITY ====================================
-
-    # def AddLimb(self, limb): # Limb Setup > Add
-    #     self.rigBHV.AddLimb(limb)
-    #     self.rigBHV.Setup_LimbGroupVisibility(limb)
-        # self.parent.AddLimb(limb)
-
-    # def RemoveLimb(self, limb): # Limb Setup > Remove
-    #     self.parent.RemoveLimb(limb)
-    
-    # def UpdateLimb(self, limb): # Limb Setup Tab > Teardown
-    #     bhvs = self.rigBHV.GetBhvOptions(limb)
-    #     bhvIndex = self.rigBHV.GetBhvIndex(bhvs[0])
-        # self.rigBHV.SetBhvType(limb, bhvIndex)
-        # self.parent.UpdateLimb(limb)
 
 #=========== DIALOGS ====================================
 

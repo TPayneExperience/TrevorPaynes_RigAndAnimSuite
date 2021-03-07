@@ -234,35 +234,6 @@ class RIG_BHV_Limb_Hierarchy_UI:
         self.pstMng.ApplyPreset(preset)
         self.parent.Populate()
 
-    # def DeletePreset(self, presetName):
-    #     self.logger.info('\tBhv_LimbHier > DeletePreset')
-    #     msg = 'Delete Preset "%s"?' % presetName
-    #     result = pm.confirmDialog(   title='Delete Preset', 
-    #                                 icon='warning', 
-    #                                 message=msg, 
-    #                                 button=['Yes','No'], 
-    #                                 defaultButton='Yes', 
-    #                                 cancelButton='No', 
-    #                                 dismissString='No')
-    #     if result == 'No':
-    #         return
-    #     self.logger.debug('\t\tDeleting Preset "%s"' % presetName)
-        
-    #     self.logger.debug(self._presetsUI[presetName])
-    #     pm.deleteUI(self._presetsUI[presetName])
-    #     self.logger.debug('\t\t1')
-    #     del(self._presetsUI[presetName])
-    #     self.logger.debug('\t\t2')
-    #     self.logger.debug(self._deletePresetUI[presetName])
-    #     pm.deleteUI(self._deletePresetUI[presetName])
-    #     self.logger.debug('\t\t3')
-    #     del(self._deletePresetUI[presetName])
-    #     self.logger.debug('\t\t3')
-    #     # preset = self._presets[presetName]
-    #     # self.pstMng.DeletePreset(preset)
-    #     # self.PopulateRMB()
-
-
 
 
 

@@ -65,11 +65,12 @@ class Control_Manager:
         ctr = pm.duplicate(sourceShape, ic=1)[0]
         pm.addAttr(ctr, ln='ID', at='long', dv=ctrID)
         pm.addAttr(ctr, ln='group', dt='string')
-        util.ChannelBoxAttrs(ctr, 1, 1, 1)
+        util.ChannelBoxAttrs(ctr, 1, 1, 1, 0)
 
         pm.editDisplayLayerMembers(self.ctrLayer, ctr, nr=1)
         pm.connectAttr(group.control, ctr.group)
         pm.parent(ctr, group)
+        return ctr
 
     def AddEmptyControl(self, group):
         index = self.pfrs.root.appEmptyCtrShape.get()

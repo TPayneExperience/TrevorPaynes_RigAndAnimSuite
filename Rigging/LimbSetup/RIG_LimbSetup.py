@@ -125,31 +125,20 @@ class RIG_LimbSetup:
         '''Set limbType if invalid'''
         self.logger.debug('\trigLS > RebuildLimbType')
         limbType = limb.limbType.get()
-        # limbTypeChanged = False
         joints = pm.listConnections(limb.joints)
         if (len(joints) == 1):
             if limb.limbType.get() != 1:
                 limb.limbType.set(1) # 1 joint
-                # limbTypeChanged = True
         elif self.AreJointsSiblings(joints):
             if limbType != 3:
                 limb.limbType.set(3) # branch
-                # limbTypeChanged = True
         elif self.AreJointsChained(joints):
             if (len(joints) == 2):
                 if (limbType != 4):
                     limb.limbType.set(4) # 2 joint chain
-                    # limbTypeChanged = True
             else:
-                self.jntMng.UpdateBhvParentJoint(limb)
                 if limbType != 2:
                     limb.limbType.set(2) # 3+ joint chain
-                    # limbTypeChanged = True
-
-        # if limbTypeChanged:
-            # limb.rebuildBhvDep.set(1)
-            # limb.rebuildSkinInf.set(1)
-        # limb.rebuildLimbType.set(0)
 
 #============= LIMBS ============================
 

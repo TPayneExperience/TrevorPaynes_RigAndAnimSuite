@@ -34,16 +34,17 @@ class PFRS_Debug:
     def _Setup(self):
         with self.parent.win:
             with pm.menu('Debug'):
+                pm.menuItem(l='Simple Chain Test', c=self.SimpleChainTest)
                 pm.menuItem(l='Limb Types Test', c=self.LimbTypesTest)
                 pm.menuItem(l='Leg Test', c=self.LegTest)
                 pm.menuItem(l='RFK Test', c=self.RfkTest)
-                pm.menuItem(l='Simple Chain Test', c=self.SimpleChainTest)
                 pm.menuItem(l='Arm Test', c=self.ArmTest)
                 pm.menuItem(l='Skeleton Test', c=self.SkeletonTest)
 
 # ================= TESTS =============================
 
     def _NewScene(self):
+        pm.tabLayout(self.parent.rig_ui.tab, e=1, sti=1)
         pm.newFile(f=1)
         pm.flushUndo()
         self.pfrs.InitScene()

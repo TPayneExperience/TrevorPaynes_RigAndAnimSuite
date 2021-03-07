@@ -51,7 +51,7 @@ class Group_Manager:
         pm.addAttr(group, ln='ID', at='long', dv=groupID)
         pm.addAttr(group, ln='control', dt='string')
         pm.addAttr(group, ln='groupType', at='enum', en=groupTypes) # IKPV, LookAt
-        util.ChannelBoxAttrs(group, 1, 1, 0, 1)
+        # util.ChannelBoxAttrs(group, 1, 1, 1, 1)
         group.v.set(0)
 
         return group
@@ -175,8 +175,10 @@ class Group_Manager:
     def UpdateDistGroupPos(self, limb):
         self.logger.debug('\tGrpMng > UpdateDistGroupPos')
         joints = util.GetSortedLimbJoints(limb)
-        index = limb.bhvIKPVCtrJoint.get()
-        joint = joints[index]
+        if len(joints) == 1:
+            joint = joints[0]
+        else:
+            joint = joints[1]
         group = self.GetLimbGroups(limb)[0]
         pm.parent(group, joint)
         pos = rigData.AXES_XFORMS[limb.bhvAxis.get()]
