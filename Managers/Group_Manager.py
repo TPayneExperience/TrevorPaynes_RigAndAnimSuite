@@ -1,4 +1,6 @@
 
+import math
+
 import pymel.core as pm
 
 import Common.Utilities as util
@@ -172,20 +174,76 @@ class Group_Manager:
                                     'CTR')
         control.rename(controlName)
 
-    def UpdateDistGroupPos(self, limb):
-        self.logger.debug('\tGrpMng > UpdateDistGroupPos')
-        joints = util.GetSortedLimbJoints(limb)
-        if len(joints) == 1:
-            joint = joints[0]
-        else:
-            joint = joints[1]
-        group = self.GetLimbGroups(limb)[0]
+    def InitLookAtGroup(self, limb):
+        self.logger.debug('\tGrpMng > InitLookAtGroup')
+        joint = pm.listConnections(limb.joints)[0]
+        group = pm.listConnections(limb.bhvLookAtGroup)[0]
         pm.parent(group, joint)
-        pos = rigData.AXES_XFORMS[limb.bhvAxis.get()]
-        dist = limb.bhvDistance.get()
-        pos = [p*dist for p in pos]
-        pm.xform(group, t=pos)
+        util.ResetAttrs(group)
+        axisIndex = limb.bhvLookAtAxis.get()
+        pm.rotate(group, rigData.AXES_XFORMS[axisIndex], os=1, a=1)
         pm.parent(group, limb)
 
+    def InitIKPVGroup(self, limb):
+        self.logger.debug('\tGrpMng > InitIKPVGroup')
+        group = pm.listConnections(limb.bhvIKPVGroup)[0]
+        joints = util.GetSortedLimbJoints(limb)
+        j1 = joints[0]
+        j2 = joints[1]
+        j3 = joints[-1]
+        
+        # Get vectors
+        pos1 = pm.xform(j1, t=1, q=1, ws=1)
+        pos2 = pm.xform(j2, t=1, q=1, ws=1)
+        pos3 = pm.xform(j3, t=1, q=1, ws=1)
+        v12 = (pos2[0] - pos1[0], pos2[1] - pos1[1], pos2[2] - pos1[2])
+        v13 = (pos3[0] - pos1[0], pos3[1] - pos1[1], pos3[2] - pos1[2])
+
+        # Get Angle
+        dot = (v12[0]*v13[0] + v12[1]*v13[1] + v12[2]*v13[2])
+        mag12 = (v12[0]**2 + v12[1]**2 + v12[2]**2)**0.5
+        mag13 = (v13[0]**2 + v13[1]**2 + v13[2]**2)**0.5
+        magProd = mag12 * mag13
+        cosAngle = dot / magProd
+
+        # Get perp v13 point
+        scalar = (cosAngle*mag12)/ mag13
+        posP = (scalar*v13[0], scalar*v13[1], scalar*v13[2])
+        posPOffset = (posP[0]+pos1[0], posP[1]+pos1[1], posP[2]+pos1[2])
+
+        # pos/rot group
+        pm.xform(group, t=posPOffset, ws=1)
+        a = pm.aimConstraint(j2, group)
+        pm.delete(a)
+        pm.xform(group, t=pos2, ws=1)
+
+        # print('\n\npos1: ' + str(pos1))
+        # print('pos2: ' + str(pos2))
+        # print('pos3: ' + str(pos3))
+        # print('v12: ' + str(v12))
+        # print('v13: ' + str(v13))
+        # print('dot: ' + str(dot))
+        # print('mag12: ' + str(mag12))
+        # print('mag13: ' + str(mag13))
+        # print('magProd: ' + str(magProd))
+        # print('cosAngle: ' + str(cosAngle))
+        # print('Degrees: ' + str(math.degrees(math.acos(cosAngle))))
+        # print('adjMag: ' + str(scalar))
+        # print('posP: ' + str(posP))
+        # print('posPOffset: ' + str(posPOffset))
+
+    def UpdateLookAtCtr(self, limb):
+        self.logger.debug('\tGrpMng > UpdateLookAtCtr')
+        group = pm.listConnections(limb.bhvLookAtGroup)[0]
+        dist = limb.bhvLookAtDistance.get()
+        control = pm.listConnections(group.control)[0]
+        control.tx.set(dist)
+
+    def UpdateIKPVCtr(self, limb):
+        self.logger.debug('\tGrpMng > UpdateLookAtCtr')
+        group = pm.listConnections(limb.bhvIKPVGroup)[0]
+        dist = limb.bhvIKPVDistance.get()
+        control = pm.listConnections(group.control)[0]
+        control.tx.set(dist)
 
 

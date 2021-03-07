@@ -63,22 +63,23 @@ class RIG_APP_Limb_Properties_UI:
 
     def PopulateControlDist(self):
         self.logger.debug('\tApp_LimbProp > PopulateControlDist')
+        pm.attrControlGrp(self.ctrDist_cg, e=1, en=0)
         bhvType = self.limb.bhvType.get()
         if self.ctrAxis_at:
             pm.deleteUI(self.ctrAxis_at)
             self.ctrAxis_at = None
-        bhvFilter = rigData.IK_PV_BHV_INDEXES
-        bhvFilter += rigData.LOOK_AT_BHV_INDEXES
-        if bhvType in bhvFilter:
+        if bhvType in rigData.IK_PV_BHV_INDEXES:
             pm.attrControlGrp(  self.ctrDist_cg, e=1, en=1, 
-                                a=self.limb.bhvDistance,
-                                cc=pm.Callback(self.UpdateDistGroupPos, 1))
+                                a=self.limb.bhvIKPVDistance,
+                                cc=pm.Callback(self.UpdateIKPVCtr, 1))
+        if bhvType in rigData.LOOK_AT_BHV_INDEXES:
+            pm.attrControlGrp(  self.ctrDist_cg, e=1, en=1, 
+                                a=self.limb.bhvLookAtDistance,
+                                cc=pm.Callback(self.UpdateLookAtCtr, 1))
             self.ctrAxis_at = pm.attrEnumOptionMenu(l='Control Position Axis',
-                                                    at=self.limb.bhvAxis,
+                                                    at=self.limb.bhvLookAtAxis,
                                                     p=self.appLimbProp_cl,
-                                                    cc=self.UpdateDistGroupPos)
-        else:
-            pm.attrControlGrp(self.ctrDist_cg, e=1, en=0)
+                                                    cc=self.InitLookAtCtr)
 
     def PopulateChannelBoxControls(self):
         self.logger.debug('\tApp_LimbProp > PopulateChannelBoxControls')
@@ -136,15 +137,18 @@ class RIG_APP_Limb_Properties_UI:
 
 #=========== CONTROL DISTANCE ==============================================
 
-    def UpdateDistGroupPos(self, ignore):
-        self.logger.debug('\tApp_LimbProp > UpdateDistGroupPos')
-        dist = str(self.limb.bhvDistance.get())
-        axis = rigData.AXES_NAMES[self.limb.bhvAxis.get()]
-        msg1 = '\tLimbProp > SET CONTROL DISTANCE to "%s"' % dist
-        msg2 = '\tLimbProp > SET CONTROL AXIS to "%s"' % axis
-        self.logger.info(msg1)
-        self.logger.info(msg2)
-        self.grpMng.UpdateDistGroupPos(self.limb)
+    def UpdateIKPVCtr(self, ignore):
+        self.logger.debug('\tApp_LimbProp > UpdateLookAtCtr')
+        self.grpMng.UpdateIKPVCtr(self.limb)
+
+    def UpdateLookAtCtr(self, ignore):
+        self.logger.debug('\tApp_LimbProp > UpdateLookAtCtr')
+        self.grpMng.UpdateLookAtCtr(self.limb)
+
+    def InitLookAtCtr(self, ignore):
+        self.logger.debug('\tApp_LimbProp > InitLookAtCtr')
+        self.grpMng.InitLookAtGroup(self.limb)
+
 
 
 

@@ -67,6 +67,14 @@ class Build_Manager:
     def Setup_Controls(self, limbs, groups):
         self.logger.debug('\tBldMng > Setup_Controls')
         for group in groups:
+            if group.groupType.get() == 2: # Skip IKPV
+                limb = pm.listConnections(group.limb)[0]
+                self.grpMng.UpdateIKPVCtr(limb)
+                continue
+            if group.groupType.get() == 4: # Skip Look At
+                limb = pm.listConnections(group.limb)[0]
+                self.grpMng.UpdateLookAtCtr(limb)
+                continue
             control = pm.listConnections(group.control)[0]
             pm.makeIdentity(control, a=1, t=1, r=1, s=1)
             pos = pm.xform(group, q=1, t=1)
@@ -105,8 +113,6 @@ class Build_Manager:
                 self.Setup_Internal_Constraint(limb)
             elif bhvType in rigData.LOOK_AT_BHV_INDEXES:
                 self.Setup_Internal_LookAt(limb)
-            # elif bhvType in rigData.IK_CHAIN_BHV_INDEXES:
-            #     self.Setup_Internal_IKChain(limb)
             elif bhvType in rigData.FK_BRANCH_BHV_INDEXES:
                 self.Setup_Internal_FKBranch(limb)
             elif bhvType in rigData.RFK_BHV_INDEXES:
@@ -120,8 +126,6 @@ class Build_Manager:
                 self.Setup_External_FKChain(limb)
             elif bhvType in rigData.IK_PV_BHV_INDEXES:
                 self.Setup_External_IKPoleVector(limb)
-            # elif bhvType in rigData.IK_CHAIN_BHV_INDEXES:
-            #     self.Setup_External_IKChain(limb)
             elif bhvType in rigData.FK_BRANCH_BHV_INDEXES:
                 self.Setup_External_FKBranch(limb)
             elif bhvType in rigData.LOOK_AT_BHV_INDEXES:
@@ -374,33 +378,6 @@ class Build_Manager:
 
 #=========== IK ====================================
     
-    def Setup_Internal_IKChain(self, limb):
-        self.logger.debug('\tBldMng > Setup_Internal_IKChain')
-        joints = util.GetSortedLimbJoints(limb)
-        for i in range(len(joints)-1):
-            startJoint = joints[i]
-            endJoint = joints[i+1]
-            pm.ikHandle(sj=startJoint, ee=endJoint)
-
-    def Setup_External_IKChain(self, limb):
-        self.logger.debug('\tBldMng > Setup_External_IKChain')
-        targetLimb = pm.listConnections(limb.bhvParent)
-        if not targetLimb:
-            msg = 'IK Chain Limb "%s" missing TARGET limb' % limb
-            pm.confirmDialog(t='IK CHAIN Error', m=msg, icon='warning', b='Ok')
-            return
-        targetGroups = self.grpMng.GetJointGroups(targetLimb[0])
-        sourceGroups = self.grpMng.GetJointGroups(limb)
-        for sourceGroup in sourceGroups[1:]: # Skip First
-            index = sourceGroup.targetJoint.get()
-            targetGroup = targetGroups[index]
-            targetControl = pm.listConnections(targetGroup.control)[0]
-            childJoint = pm.listConnections(sourceGroup.joint)
-            parentJoint = pm.listRelatives(childJoint, p=1)[0]
-            handle = pm.listConnections(parentJoint.message)[0]
-            handle.v.set(0)
-            pm.parent(handle, targetControl)
-
     def Setup_Internal_IKPoleVector(self, limb):
         self.logger.debug('\tBldMng > Setup_Internal_IKPoleVector')
         joints = util.GetSortedLimbJoints(limb)

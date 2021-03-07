@@ -23,10 +23,10 @@ class PFRS_Debug:
         print ('>>>>>>>>>>>>>> AUTO DEBUG ON <<<<<<<<<<<<<')
 
         # self.LimbTypesTest(1)
-        self.SimpleChainTest(1)
-        # self.LegTest()
+        # self.SimpleChainTest(1)
+        # self.LegTest(1)
+        self.ArmTest(1)
         # self.RfkTest()
-        # self.ArmTest()
         # self.SkeletonTest()
 
 # ================= SETUP =============================
@@ -37,7 +37,7 @@ class PFRS_Debug:
                 pm.menuItem(l='Simple Chain Test', c=self.SimpleChainTest)
                 pm.menuItem(l='Limb Types Test', c=self.LimbTypesTest)
                 pm.menuItem(l='Leg Test', c=self.LegTest)
-                pm.menuItem(l='RFK Test', c=self.RfkTest)
+                pm.menuItem(l='Spine Test', c=self.SpineTest)
                 pm.menuItem(l='Arm Test', c=self.ArmTest)
                 pm.menuItem(l='Skeleton Test', c=self.SkeletonTest)
 
@@ -78,11 +78,22 @@ class PFRS_Debug:
         pm.importFile(path)
         self.parent.UpdateEnableUI()
         self.parent.Setup_Editable()
-        # pm.tabLayout(self.parent.rig_ui.tab, e=1, sti=2) # Select Limb setup tab
-        self.rigLS.AutoBuildByName(0)
-        pm.tabLayout(self.parent.rig_ui.tab, e=1, sti=3) # Select Limb setup tab
+        pm.tabLayout(self.parent.rig_ui.tab, e=1, sti=2) # LS
+        self.rigLS.AutoBuildByName()
+        pm.tabLayout(self.parent.rig_ui.tab, e=1, sti=3) # BHV
 
-    def RfkTest(self, ignore):
+    def ArmTest(self, ignore):
+        self._NewScene()
+        self.parent.logger.info('DEBUG TESTS > Arm Test')
+        path = os.path.join(self.folder, 'TEST_ArmFingers_01.ma')
+        pm.importFile(path)
+        self.parent.UpdateEnableUI()
+        self.parent.Setup_Editable()
+        pm.tabLayout(self.parent.rig_ui.tab, e=1, sti=2) 
+        self.rigLS.AutoBuildByName()
+        pm.tabLayout(self.parent.rig_ui.tab, e=1, sti=3)
+        
+    def SpineTest(self, ignore):
         self._NewScene()
         self.parent.logger.info('DEBUG TESTS > Relative FK')
         path = os.path.join(self.folder, 'TEST_Spine_01.ma')
@@ -97,28 +108,6 @@ class PFRS_Debug:
         # self.parent.limbMng.Reparent(spine, -1)
         # self.parent.limbMng.Reparent(root, spine)
         pm.tabLayout(self.parent.rig_ui.tab, e=1, sti=3) # Select Limb setup tab
-
-    def ArmTest(self, ignore):
-        self._NewScene()
-        self.parent.logger.info('DEBUG TESTS > Arm Skin')
-        path = os.path.join(self.folder, 'temp_joints2.ma')
-        pm.importFile(path)
-        self.UpdateEnableUI()
-        self.Setup_Editable()
-        pm.tabLayout(self.rig_ui.tab, e=1, sti=2) # Select Limb setup tab
-        self.rigLS.AutoBuildByName(0)
-        pm.tabLayout(self.tab, e=1, sti=2) # Select SKINNING tab
-        mesh1 = pm.ls('pCylinderShape1')[0]
-        mesh2 = pm.ls('pCylinderShape2')[0]
-        mesh3 = pm.ls('pCylinderShape3')[0]
-
-        for mesh in [mesh1, mesh2, mesh3]:
-            self.skin_ui.meshMng.AddMesh(mesh)
-            self.skin_ui.skinMng.AddSkinAttrs(mesh)
-            for limb in pm.listConnections(self.limbMng.root.jointLimbs):
-                self.skin_ui.skinMng.SetDefaultLimbJointWeights(mesh, limb)
-
-        pm.tabLayout(self.skin_ui.tab, e=1, sti=3) # Select PAINT WEIGHTS tab
 
     def SkeletonTest(self, ignore):
         self._NewScene()

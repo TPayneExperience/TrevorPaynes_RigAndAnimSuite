@@ -116,8 +116,9 @@ class Limb_Manager:
         pm.addAttr(limb, ln='cstRotZ', at='bool', dv=1, h=hide)
 
         # IK PV + Look At
-        pm.addAttr(limb, ln='bhvAxis', at='enum', en=axes, dv=4) # IKPV, LookAt
-        pm.addAttr(limb, ln='bhvDistance', at='float', min=0, dv=1) # IKPV, LookAt
+        pm.addAttr(limb, ln='bhvLookAtAxis', at='enum', en=axes) # IKPV, LookAt
+        pm.addAttr(limb, ln='bhvLookAtDistance', at='float', min=0, dv=1) # IKPV, LookAt
+        pm.addAttr(limb, ln='bhvIKPVDistance', at='float', min=0, dv=1) # IKPV, LookAt
         
         self.grpMng.AddIKPVGroup(limb)
         self.grpMng.AddLookAtGroup(limb)
@@ -212,10 +213,12 @@ class Limb_Manager:
         self.logger.debug('\tLimbMng > SetBhvType')
         self.grpMng.Teardown_LimbGroupVisibility(limb)
         limb.bhvType.set(newBhvIndex)
-        bhvFilter = rigData.IK_PV_BHV_INDEXES
-        bhvFilter += rigData.LOOK_AT_BHV_INDEXES
-        if newBhvIndex in bhvFilter:
-            self.grpMng.UpdateDistGroupPos(limb)
+        if newBhvIndex in rigData.IK_PV_BHV_INDEXES:
+            self.grpMng.InitIKPVGroup(limb)
+            self.grpMng.UpdateIKPVCtr(limb)
+        elif newBhvIndex in rigData.LOOK_AT_BHV_INDEXES:
+            self.grpMng.InitLookAtGroup(limb)
+            self.grpMng.UpdateLookAtCtr(limb)
         bhvFilter = rigData.IK_PV_BHV_INDEXES
         bhvFilter += rigData.CST_BHV_INDEXES
         if newBhvIndex in bhvFilter:
