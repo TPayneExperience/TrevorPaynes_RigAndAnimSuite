@@ -35,11 +35,11 @@ BHV_TYPES = (   'FK - Chain (3+ Joints)', # 0
                 )
 EMPTY_BHV_INDEXES = (7,)
 ONE_JOINT_BHV_INDEXES = (6, 4, 3)
-TWO_JOINT_CHAIN_BHV_INDEXES = (11, 6, 12) # (11, 6, 12, 5)
-THREE_JOINT_CHAIN_BHV_INDEXES = (0, 6, 8, 10, 9, 1, 3) # (0, 6, 8, 10, 9, 1, 5, 3)
+TWO_JOINT_CHAIN_BHV_INDEXES = (11, 6, 12)
+THREE_JOINT_CHAIN_BHV_INDEXES = (0, 8, 6, 10, 9, 1, 3)
 TWO_JOINT_BRANCH_BHV_INDEXES = (6, 3)
 
-OMIT_LAST_JOINT_BHV_INDEXES = (0, 8) # (0, 5, 10)
+OMIT_LAST_JOINT_BHV_INDEXES = (0, 8)
 REVERSE_BHV_INDEXES = (8, 12, 9)
 
 FK_BRANCH_BHV_INDEXES = (6,)
@@ -48,7 +48,6 @@ RFK_BHV_INDEXES = (10, 9)
 CST_BHV_INDEXES = (3,)
 LOOK_AT_BHV_INDEXES = (4,)
 IK_PV_BHV_INDEXES = (1,)
-# IK_CHAIN_BHV_INDEXES = (5,)
 
 ROT_LOCK_OVERRIDE_BHV_INDEXES = (9, 10)
 POS_LOCK_OVERRIDE_BHV_INDEXES = (9, 10)
@@ -60,12 +59,6 @@ AXES_XFORMS =   ((0,0,0),
                 (0,0,-90),
                 (0,-90,0),
                 (0,90,0))
-# AXES_XFORMS =   ((1,0,0),
-#                 (-1,0,0),
-#                 (0,1,0),
-#                 (0,-1,0),
-#                 (0,0,1),
-#                 (0,0,-1))
 
 
 # ============= LIMBS =============

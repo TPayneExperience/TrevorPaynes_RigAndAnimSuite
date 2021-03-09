@@ -69,7 +69,7 @@ class PayneFreeRigSuite:
         # START UP
         self.InitScene()
 
-#============= ROOT ============================
+#============= SCENE ============================
 
     def InitScene(self):
         roots = self.rootMng.GetSceneRoots()
@@ -83,6 +83,18 @@ class PayneFreeRigSuite:
         self.meshMng.InitSceneMeshes()
         self.jntMng.InitSceneJoints()
 
+    def NewScene(self):
+        self.ctrMng.NewScene()
+        self.jntMng.NewScene()
+        self.meshMng.NewScene()
+
+    def LoadScene(self):
+        self.ctrMng.LoadScene()
+        self.jntMng.LoadScene()
+        self.meshMng.LoadScene()
+
+#============= ROOT ============================
+
     def NewRoot(self, prefix, nameOrder, showPrefix):
         self.root = self.rootMng.AddRoot(prefix, nameOrder, showPrefix)
         self.limbMng.NewRoot()
@@ -94,15 +106,8 @@ class PayneFreeRigSuite:
         self.jntMng.LoadRoot()
         self.meshMng.LoadRoot()
 
-    def NewScene(self):
-        self.ctrMng.NewScene()
-        self.jntMng.NewScene()
-        self.meshMng.NewScene()
-
-    def LoadScene(self):
-        self.ctrMng.LoadScene()
-        self.jntMng.LoadScene()
-        self.meshMng.LoadScene()
+    def UpdateNames(self):
+        self.rootMng.UpdateRootName(self.root)
 
 #=========== LOGGER ====================================
    

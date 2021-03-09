@@ -19,15 +19,18 @@ class Build_Manager:
     def Setup_Rig(self):
         self.logger.info('BldMng > Test SETUP')
         enabledLimbs = []
-        limbs = pm.listConnections(self.pfrs.root.jointLimbs)
-        limbs += pm.listConnections(self.pfrs.root.emptyLimbs)
+        limbs = []
+        for rootLimb in self.limbMng.GetRootLimbs(self.pfrs.root):
+            limbs += self.limbMng.GetLimbCreationOrder(rootLimb)
         for limb in limbs:
             if limb.enableLimb.get():
                 enabledLimbs.append(limb)
             else:
                 self.grpMng.Teardown_LimbGroupVisibility(limb)
         groups = []
+        self.logger.debug('\tSetup Rig Limb Order:')
         for limb in enabledLimbs:
+            self.logger.debug('\t\t' + str(limb))
             groups += self.grpMng.GetJointGroups(limb)
             groups += self.grpMng.GetLimbGroups(limb)
         self.Setup_Groups(groups)
@@ -187,6 +190,11 @@ class Build_Manager:
                 control = pm.listConnections(group.control)[0]
                 util.ChannelBoxAttrs(control, 1, 1, 1, 1)
                 util.ResetAttrs(control)
+            if limb.bhvType.get() in rigData.IK_PV_BHV_INDEXES:
+                self.grpMng.UpdateIKPVCtr(limb)
+            if limb.bhvType.get() in rigData.LOOK_AT_BHV_INDEXES:
+                self.grpMng.UpdateLookAtCtr(limb)
+
         pm.refresh() # Forces IK Handles to re-evaluate
     
     def Remove_Constraints(self):
@@ -293,6 +301,8 @@ class Build_Manager:
         self.logger.debug('\tBldMng > Bind_FK_Joints')
         joints = util.GetSortedLimbJoints(limb)
         bhvType = limb.bhvType.get()
+        if bhvType in rigData.REVERSE_BHV_INDEXES:
+            joints = joints[::-1]
         if bhvType in rigData.OMIT_LAST_JOINT_BHV_INDEXES:
             joints = joints[:-1]
         for joint in joints:
@@ -443,11 +453,14 @@ class Build_Manager:
         parents = pm.listConnections(limb.limbParent)
         if not parents:
             return 
-        if parents[0].bhvType.get() in rigData.EMPTY_BHV_INDEXES:
-            group = pm.listConnections(parents[0].bhvEmptyGroup)[0]
-            parentJoint = pm.listConnections(group.control)[0]
+        parent = parents[0]
+        if parent.bhvType.get() in rigData.EMPTY_BHV_INDEXES:
+            group = pm.listConnections(parent.bhvEmptyGroup)[0]
+            parentControl = pm.listConnections(group.control)[0]
         else:
             index = limb.limbParentJoint.get()
-            parentJoint = util.GetSortedLimbJoints(parents[0])[index]
-        pm.parentConstraint(parentJoint, childGroup, mo=1)   
+            joint = util.GetSortedLimbJoints(parent)[index]
+            group = pm.listConnections(joint.group)[0]
+            parentControl = pm.listConnections(group.control)[0]
+        pm.parentConstraint(parentControl, childGroup, mo=1)
 

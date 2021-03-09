@@ -7,6 +7,7 @@ class RIG_JointSetup_UI:
         self.jntMng = parent.jntMng
         self.rigBHV = parent.rigBHV
         self.logger = parent.logger
+        self.rigJS = parent.pfrs.rigJS
 
         self.scriptJob = None
         self._Setup()
@@ -32,8 +33,13 @@ class RIG_JointSetup_UI:
                         self.remove_b = pm.button(  l='Remove Joint', 
                                                     c=self.RemoveJoint, 
                                                     ann=msg)
+                        self.aim_b = pm.button(l='Aim Selected At Target', c=self.AimJoint)
 
 #=========== FUNCTIONS ====================================
+
+    def AimJoint(self, ignore):
+        self.logger.debug('\tRIG_JointSetup_UI > AimJoint')
+        self.rigJS.AimSelection()
 
     def InsertParentMidJoint(self, ignore):
         self.logger.debug('\tRIG_JointSetup_UI > InsertParentMidJoint')
@@ -78,6 +84,9 @@ class RIG_JointSetup_UI:
                 pm.button(self.insertMid_b, e=1, en=1)
         pm.button(self.insertEnd_b, e=1, en=jointSelected)
         pm.button(self.remove_b, e=1, en=jointSelected)
+        sl = pm.ls(sl=1)
+        isTwoOrMore = (len(sl) >= 2)
+        pm.button(self.aim_b, e=1, en=isTwoOrMore)
 
 #=========== TAB FUNCTIONALITY ====================================
     

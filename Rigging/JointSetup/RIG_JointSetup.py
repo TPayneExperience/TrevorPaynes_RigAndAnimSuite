@@ -15,4 +15,10 @@ class RIG_JointSetup:
             return False
         return True
 
+    def AimSelection(self):
+        sl = pm.ls(sl=1)
+        target = sl[-1]
+        for source in sl[:-1]:
+            temp = pm.aimConstraint(target, source)
+            pm.delete(temp)
 

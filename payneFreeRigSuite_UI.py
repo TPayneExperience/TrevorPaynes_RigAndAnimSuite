@@ -6,18 +6,20 @@ import pymel.core as pm
 import Data.Rig_Data as rigData
 reload(rigData)
 
+import payneFreeRigSuite as pfrs
+reload(pfrs)
+
 import Rigging.Rigging_UI as rig_ui
 reload(rig_ui)
 import Skinning.Skinning_UI as skin_ui
 reload(skin_ui)
-import RigSetup.RigSetup_UI as rs_ui
-reload(rs_ui)
+# import RigSetup.RigSetup_UI as rs_ui
+# reload(rs_ui)
+import Rigging.Popups.POPUP_EditRoot as root_popup
+reload(root_popup)
 
 import PFRS_Debug as debug
 reload(debug)
-
-import payneFreeRigSuite as pfrs
-reload(pfrs)
 
 class PayneFreeRigSuite_UI:
     def __init__(self):
@@ -45,7 +47,7 @@ class PayneFreeRigSuite_UI:
         #                                     self.fileMng,
         #                                     self)
         self._Setup()
-        
+        self.Setup_Editable()
         debug.PFRS_Debug(self)
 
 
@@ -79,8 +81,8 @@ class PayneFreeRigSuite_UI:
     def _Setup_MenuBar(self):
         with self.win:
             with pm.menu('File'):
-                pm.menuItem(l='New Rig...', en=0, c=self.NewRig_Dialog)
-                pm.menuItem(l='Edit Rig...', en=0, c=self.EditRig_Dialog)
+                pm.menuItem(l='New Rig...', c=self.NewRig_Dialog)
+                pm.menuItem(l='Edit Rig...', c=self.EditRig_Dialog)
                 pm.menuItem(divider=1)
                 pm.menuItem(l='Quit', en=0)
                 
@@ -181,13 +183,18 @@ class PayneFreeRigSuite_UI:
         pm.tabLayout(self.tab, e=1, en=bool(self.pfrs.root))
 
     def NewRig_Dialog(self, ignore):
-        pass
-        # self.rigSetupUI.NewRig_Dialog()
-        # self.UpdateEnableUI()
+        roots = self.pfrs.rootMng.GetSceneRoots()
+        if roots:
+            pm.confirmDialog(
+                t='Rig Already Exists',
+                m='Rig Root already exists in scene.',
+                button=['Ok'])
+        else:
+            self.pfrs.InitScene()
 
     def EditRig_Dialog(self, ignore):
-        pass
-        # self.rigSetupUI.EditRig_Dialog()
+        self.rootPopup = root_popup.POPUP_EditRoot(self)
+        self.rootPopup.EditRoot_Dialog()
         # tempPrefix = self.pfrs.nameMng.GetPrefix()
         # tempMeshPath = self.pfrs.fileMng.GetMeshPath()
         # tempOutputPath = self.pfrs.fileMng.GetOutputFile()

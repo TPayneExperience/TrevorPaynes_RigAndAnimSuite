@@ -33,6 +33,7 @@ class RIG_BHV_Limb_Hierarchy_UI:
         self.logger.debug('\tBhv_LimbHier > Populate')
         # SAME AS APP LIMB HIER
         pm.treeView(self.widget, e=1, removeAll=1)
+        pm.menuItem(self.savePreset_mi, e=1, en=0)
         curRoot = self.pfrs.root
         self._limbs = {}
         self._validLimbs = []
@@ -94,12 +95,12 @@ class RIG_BHV_Limb_Hierarchy_UI:
                                         dad=self.ReparentLimb)
         with pm.popupMenu() as self.rmb_ui:
             pm.menuItem(l='Add Empty Limb', c=self.AddEmptyRigLimb)
-            self.remove_mi = pm.menuItem(l='Remove Empty Rig Limb', 
+            self.remove_mi = pm.menuItem(l='Remove Empty Limb', 
                                         en=0, c=self.RemoveEmptyLimb)
             pm.menuItem(d=1)
             pm.menuItem(l='Load Skeleton Hierarchy', c=self.LoadSkelHier)
             pm.menuItem(l='PRESETS', d=1)
-            pm.menuItem(l='Save Preset', c=self.SavePreset)
+            self.savePreset_mi = pm.menuItem(l='Save Preset', en=0, c=self.SavePreset)
             pm.menuItem(l='Edit Presets', c=self.EditPresets)
             pm.menuItem(l='APPLY PRESET', d=1)
 
@@ -117,11 +118,13 @@ class RIG_BHV_Limb_Hierarchy_UI:
 
     def SelectionChanged(self):
         self.logger.info('\tBhv_LimbHier > SelectionChanged')
+        pm.menuItem(self.savePreset_mi, e=1, en=0)
         limbIDStrs = pm.treeView(self.widget, q=1, selectItem=1)
         if not limbIDStrs:
             self.logger.info('\t\tDeselected Limbs')
             self.parent.LimbSelected(None)
             return
+        pm.menuItem(self.savePreset_mi, e=1, en=1)
         pm.menuItem(self.remove_mi, e=1, en=bool(limbIDStrs))
         limb = self._limbs[limbIDStrs[0]]
         msg = '\t\tSELECTED limb "%s"'% limb.pfrsName.get()
@@ -148,7 +151,6 @@ class RIG_BHV_Limb_Hierarchy_UI:
     def RenameLimb(self, limbIDStr, newName):
         self.logger.info('\tBhv_LimbHier > RenameLimb')
         limb = self._limbs[limbIDStr]
-        # if limb.bhvType.get() not in self.rigBHV.emptyLimbIndexes:
         if limb.bhvType.get() not in rigData.EMPTY_BHV_INDEXES:
             return ''
         oldName = limb.pfrsName.get()
@@ -156,10 +158,13 @@ class RIG_BHV_Limb_Hierarchy_UI:
         self.logger.info(msg)
 
         if not self.nameMng.IsValidCharacterLength(newName):
+            self.logger.error('**** Must be 2 or more characters')
             return ''
         if not self.nameMng.DoesNotStartWithNumber(newName):
+            self.logger.error('**** Cannot start with number OR _')
             return ''
         if not self.nameMng.AreAllValidCharacters(newName):
+            self.logger.error('**** May only contain A-Z, a-z, 0-9, _')
             return ''
         if not self.limbMng.RenameLimb(limb, newName):
             msg = '**** Two limbs MAX may have same name'
@@ -224,6 +229,7 @@ class RIG_BHV_Limb_Hierarchy_UI:
         limbIDStrs = pm.treeView(self.widget, q=1, selectItem=1)
         limbs = [self._limbs[ID] for ID in limbIDStrs]
         presetName = pm.promptDialog(query=True, text=True)
+        limbIDStrs = pm.treeView(self.widget, q=1, selectItem=1)
         
         self.pstMng.SavePreset(presetName, limbs)
         self.PopulateRMB()

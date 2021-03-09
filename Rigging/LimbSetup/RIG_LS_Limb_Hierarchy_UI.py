@@ -135,10 +135,13 @@ class RIG_LS_Limb_Hierarchy_UI:
         self.logger.info(msg)
 
         if not self.nameMng.IsValidCharacterLength(newName):
+            self.logger.error('**** Must be 2 or more characters')
             return ''
         if not self.nameMng.DoesNotStartWithNumber(newName):
+            self.logger.error('**** Cannot start with number OR _')
             return ''
         if not self.nameMng.AreAllValidCharacters(newName):
+            self.logger.error('**** May only contain A-Z, a-z, 0-9, _')
             return ''
 
         if self.limbMng.RenameLimb(limb, newName):

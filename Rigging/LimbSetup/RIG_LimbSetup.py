@@ -162,10 +162,13 @@ class RIG_LimbSetup:
         msg = '\t\t%s >>> %s' %(joint.pfrsName.get(), newName)
         self.logger.info(msg)
         if not self.nameMng.IsValidCharacterLength(newName):
+            self.logger.error('**** Must be 2 or more characters')
             return ''
         if not self.nameMng.DoesNotStartWithNumber(newName):
+            self.logger.error('**** Cannot start with number OR _')
             return ''
         if not self.nameMng.AreAllValidCharacters(newName):
+            self.logger.error('**** May only contain A-Z, a-z, 0-9, _')
             return ''
         limb = pm.listConnections(joint.limb)[0]
         names = []

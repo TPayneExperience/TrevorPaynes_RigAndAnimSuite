@@ -9,8 +9,8 @@ reload(rigData)
 
 class Root_Manager:
     def __init__(self, parent):
-        self.parent = parent
         self.logger = parent.logger
+        self.limbMng = parent.limbMng
         self._roots = {} # {ID : root}
 
 #============= ACCESSORS ============================
@@ -32,10 +32,26 @@ class Root_Manager:
             rootID = max(self._roots.keys()) + 1
         rigModes = ':'.join(rigData.RIG_MODES)
         
-        root = pm.group(name='temp', em=True)
+        root = pm.group(name='ROOT_tempName', em=True)
         pm.addAttr(root, ln='ID', at='long', dv=rootID, h=hide)
         pm.addAttr(root, ln='rigMode', at='enum', en=rigModes, h=hide)
+        
+        # NAMING
+        pm.addAttr(root, ln='prefix', dt='string')
+        pm.addAttr(root, ln='prefixIndex', at='short', dv=nameOrder[0])
+        pm.addAttr(root, ln='limbIndex', at='short', dv=nameOrder[1])
+        pm.addAttr(root, ln='jointIndex', at='short', dv=nameOrder[2])
+        pm.addAttr(root, ln='sideIndex', at='short', dv=nameOrder[3])
+        pm.addAttr(root, ln='typeIndex', at='short', dv=nameOrder[4])
+        pm.addAttr(root, ln='showPrefix', at='bool', dv=showPrefix)
+        pm.addAttr(root, ln='mainTab', at='enum', en='Rig:Skin:Anim')
+        pm.addAttr(root, ln='riggingTab', at='enum',
+                                    en='Joint:Limbs:Behaviors:Appearance:Test')
+        pm.addAttr(root, ln='skinningTab', at='enum', 
+                                    en='Mesh:QuickWeights:PaintWeights:Test')
+        root.prefix.set(prefix)
 
+        
         # ROOT CONNECTIONS
         pm.addAttr(root, ln='jointLimbs', dt='string')
         pm.addAttr(root, ln='emptyLimbs', dt='string')
@@ -48,21 +64,6 @@ class Root_Manager:
         pm.addAttr(root, ln='nextGroupID', at='long')
         pm.addAttr(root, ln='nextCtrID', at='long')
         pm.addAttr(root, ln='nextMeshID', at='short', dv=1)
-
-        # NAMING
-        pm.addAttr(root, ln='prefixIndex', at='short', dv=nameOrder[0])
-        pm.addAttr(root, ln='limbIndex', at='short', dv=nameOrder[1])
-        pm.addAttr(root, ln='jointIndex', at='short', dv=nameOrder[2])
-        pm.addAttr(root, ln='sideIndex', at='short', dv=nameOrder[3])
-        pm.addAttr(root, ln='typeIndex', at='short', dv=nameOrder[4])
-        pm.addAttr(root, ln='showPrefix', at='bool', dv=showPrefix)
-        pm.addAttr(root, ln='mainTab', at='enum', en='Rig:Skin:Anim')
-        pm.addAttr(root, ln='riggingTab', at='enum',
-                                    en='Joint:Limbs:Behaviors:Appearance:Test')
-        pm.addAttr(root, ln='skinningTab', at='enum', 
-                                    en='Mesh:QuickWeights:PaintWeights:Test')
-        pm.addAttr(root, ln='prefix', dt='string')
-        root.prefix.set(prefix)
 
         # When Joints/limbs added/removed
         pm.addAttr(root, ln='rebuildSkinInf', at='bool', h=hide)
@@ -87,7 +88,11 @@ class Root_Manager:
 
     def UpdateRootName(self, root):
         root.rename('%s_ROOT' % root.prefix.get())
+        limbs = pm.listConnections(root.emptyLimbs)
+        limbs += pm.listConnections(root.jointLimbs)
+        for limb in limbs:
+            self.limbMng.UpdateLimbName(limb)
 
-    def LoadSceneRoot(self):
-        '''For when tool opened AFTER scene opened'''
-        pass
+    # def LoadSceneRoot(self):
+    #     '''For when tool opened AFTER scene opened'''
+    #     pass

@@ -94,10 +94,15 @@ class SaveTemplate_UI:
     def NameChanged(self, text):
         self.templateName = text
         self.nameValid = False
-        if self.nameMng.IsValidCharacterLength(text):
-            if self.nameMng.DoesNotStartWithNumber(text):
-                if self.nameMng.AreAllValidCharacters(text):
-                    self.nameValid = True
+        if not self.nameMng.IsValidCharacterLength(text):
+            self.logger.error('**** Must be 2 or more characters')
+            return 
+        if not self.nameMng.DoesNotStartWithNumber(text):
+            self.logger.error('**** Cannot start with number OR _')
+            return
+        if self.nameMng.AreAllValidCharacters(text):
+            self.logger.error('**** May only contain A-Z, a-z, 0-9, _')
+            self.nameValid = True
         msg = 'TEMPLATE NAME | '+ self.nameMng.errorMsg[5:]
         pm.textFieldGroup(self.name_grp, e=1, l=msg)
         self.Update_SaveBtn()

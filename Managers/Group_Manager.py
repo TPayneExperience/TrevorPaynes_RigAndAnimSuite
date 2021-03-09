@@ -19,7 +19,7 @@ class Group_Manager:
 #============= ACCESSORS  ============================
 
     def GetLimbGroups(self, limb):
-        self.logger.debug('\tGrpMng > GetLimbGroups')
+        # self.logger.debug('\tGrpMng > GetLimbGroups')
         groups = []
         bhvType = limb.bhvType.get()
         # IK PV
@@ -30,8 +30,13 @@ class Group_Manager:
             groups += pm.listConnections(limb.bhvLookAtGroup)
         return groups
 
+    def GetAllLimbGroups(self, limb):
+        groups = pm.listConnections(limb.bhvIKPVGroup)
+        groups += pm.listConnections(limb.bhvLookAtGroup)
+        return groups
+
     def GetJointGroups(self, limb):
-        self.logger.debug('\tGrpMng > GetJointGroups')
+        # self.logger.debug('\tGrpMng > GetJointGroups')
         bhvType = limb.bhvType.get()
         if bhvType in rigData.EMPTY_BHV_INDEXES:
             return pm.listConnections(limb.bhvEmptyGroup)

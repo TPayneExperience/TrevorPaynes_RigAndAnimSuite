@@ -22,11 +22,11 @@ class PFRS_Debug:
             return
         print ('>>>>>>>>>>>>>> AUTO DEBUG ON <<<<<<<<<<<<<')
 
-        # self.LimbTypesTest(1)
         # self.SimpleChainTest(1)
+        # self.LimbTypesTest(1)
         # self.LegTest(1)
         # self.ArmTest(1)
-        self.SpineTest(1)
+        # self.SpineTest(1)
         # self.SkeletonTest()
 
 # ================= SETUP =============================
@@ -35,11 +35,11 @@ class PFRS_Debug:
         with self.parent.win:
             with pm.menu('Debug'):
                 pm.menuItem(l='Simple Chain Test', c=self.SimpleChainTest)
-                pm.menuItem(l='Limb Types Test', c=self.LimbTypesTest)
+                # pm.menuItem(l='Limb Types Test', c=self.LimbTypesTest)
+                pm.menuItem(l='Arm Test', c=self.ArmTest)
                 pm.menuItem(l='Leg Test', c=self.LegTest)
                 pm.menuItem(l='Spine Test', c=self.SpineTest)
-                pm.menuItem(l='Arm Test', c=self.ArmTest)
-                pm.menuItem(l='Skeleton Test', c=self.SkeletonTest)
+                # pm.menuItem(l='Skeleton Test', c=self.SkeletonTest)
 
 # ================= TESTS =============================
 
@@ -90,8 +90,8 @@ class PFRS_Debug:
         self.parent.UpdateEnableUI()
         self.parent.Setup_Editable()
         pm.tabLayout(self.parent.rig_ui.tab, e=1, sti=2) 
-        self.rigLS.AutoBuildByName()
-        pm.tabLayout(self.parent.rig_ui.tab, e=1, sti=3)
+        # self.rigLS.AutoBuildByName()
+        # pm.tabLayout(self.parent.rig_ui.tab, e=1, sti=3)
         
     def SpineTest(self, ignore):
         self._NewScene()

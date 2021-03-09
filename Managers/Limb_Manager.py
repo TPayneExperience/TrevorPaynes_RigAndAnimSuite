@@ -369,14 +369,17 @@ class Limb_Manager:
         pfrsName = limb.pfrsName.get()
         limbName = self.nameMng.GetName(pfrsName,
                                     'Limb',
-                                    # self.GetLimbSide(limb), 
                                     rigData.LIMB_SIDES[limb.side.get()],
                                     'NODE')
         limb.rename(limbName)
         for joint in pm.listConnections(limb.joints):
             self.jntMng.UpdateJointName(joint)
-        for group in self.grpMng.GetLimbGroups(limb):
+        if limb.bhvType.get() in rigData.EMPTY_BHV_INDEXES:
+            group = pm.listConnections(limb.bhvEmptyGroup)[0]
             self.grpMng.UpdateGroupName(group)
+        else:
+            for group in self.grpMng.GetAllLimbGroups(limb):
+                self.grpMng.UpdateGroupName(group)
 
     def ParentLimbsBySkeleton(self):
         limbParents = self.GetDefaultLimbHier()
