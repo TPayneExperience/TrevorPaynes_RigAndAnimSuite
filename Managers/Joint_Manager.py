@@ -37,7 +37,8 @@ class Joint_Manager:
         self.jointLayer.visibility.set(isVisible) # 0 = off, 1 = on
 
     def InitSceneJoints(self):
-        for joint in pm.ls(type='joint'):
+        joints = pm.ls(type='joint')
+        for joint in joints:
             if not joint.hasAttr('ID'):
                 self.InitJoint(joint)
             parent = pm.listRelatives(joint, p=1)
@@ -100,7 +101,7 @@ class Joint_Manager:
 
     def RemoveJoint(self, joint):
         self.logger.debug('\tJntMng > RemoveJoint')
-        limb = pm.listConnections(joint.limb)
+        limb = pm.listConnections(joint.limb)[0]
         if limb.limbType.get() != 0:
             for child in pm.listConnections(limb.bhvChildren):
                 self.AssignClosestBhvParentJoint(child)

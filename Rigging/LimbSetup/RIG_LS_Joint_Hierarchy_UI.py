@@ -26,7 +26,8 @@ class RIG_LS_Joint_Hierarchy_UI:
         self.joints = {}
         if not self.limb:
             return
-        for joint in util.GetSortedLimbJoints(self.limb):
+        joints = util.GetSortedLimbJoints(self.limb)
+        for joint in joints:
             jointID = joint.ID.get()
             self.joints[jointID] = joint
             name = joint.pfrsName.get()
@@ -58,7 +59,7 @@ class RIG_LS_Joint_Hierarchy_UI:
             return
         jointIDs = [int(ID) for ID in jointIDsStr]
         selJoints = [self.joints[ID] for ID in jointIDs]
-        joints = self.joints.values()
+        joints = util.GetSortedJoints(self.joints.values())
         if len(joints) == len(selJoints):
             return
         self.logger.info('\tJointHier > SELECTED joints:')

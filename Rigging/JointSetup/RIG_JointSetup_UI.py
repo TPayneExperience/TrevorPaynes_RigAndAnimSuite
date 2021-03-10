@@ -43,31 +43,37 @@ class RIG_JointSetup_UI:
 
     def InsertParentMidJoint(self, ignore):
         self.logger.debug('\tRIG_JointSetup_UI > InsertParentMidJoint')
-        joints = pm.ls(sl=1, type='joint')
-        if not joints:
-            return
-        oldJoint = joints[0]
-        newJoint = pm.duplicate(oldJoint, po=1, rc=1)[0]
-        parent = pm.listRelatives(oldJoint, p=1)
-        startPos = pm.xform(parent,q=1, t=1, ws=1)
-        startRot = pm.xform(parent,q=1, ro=1, ws=1)
-        endPos = pm.xform(oldJoint, q=1, t=1, ws=1)
-        endRot = pm.xform(oldJoint, q=1, ro=1, ws=1)
-        midPos = [(startPos[i] + endPos[i])/2 for i in range(3)]
-        midRot = [(startRot[i] + endRot[i])/2 for i in range(3)]
-        pm.xform(newJoint, t=midPos, ro=midRot, ws=1)
-        newJoint.radius.set(0.2)
+        
+        oldJoint, newJoint = self._DuplicateSelectedJoint()
+        parentJoint = pm.listRelatives(oldJoint, p=1, type='joint')
+        if parentJoint:
+            parentJoint = parentJoint[0]
+            cst = pm.parentConstraint(parentJoint, oldJoint, newJoint)
+            pm.delete(cst)
         pm.parent(oldJoint, newJoint)
 
     def InsertParentEndJoint(self, ignore):
         self.logger.debug('\tRIG_JointSetup_UI > InsertParentEndJoint')
+        oldJoint, newJoint = self._DuplicateSelectedJoint()
+        pm.parent(oldJoint, newJoint)
+
+    def _DuplicateSelectedJoint(self):
         joints = pm.ls(sl=1, type='joint')
         if not joints:
             return
         oldJoint = joints[0]
-        newJoint = pm.duplicate(oldJoint, po=1, rc=1)[0]
-        newJoint.radius.set(0.2)
-        pm.parent(oldJoint, newJoint)
+        pm.select(d=1)
+        newJoint = pm.joint(rad=0.2)
+        cst = pm.parentConstraint(oldJoint, newJoint)
+        pm.delete(cst)
+        rot = pm.xform(newJoint, q=1, ro=1)
+        pm.xform(newJoint, ro=(0,0,0))
+        pm.joint(newJoint, e=1, o=rot)
+        parent = pm.listRelatives(oldJoint, p=1)
+        if parent:
+            parent = parent[0]
+            pm.parent(newJoint, parent)
+        return oldJoint, newJoint
 
     def RemoveJoint(self, ignore):
         self.logger.debug('\tRIG_JointSetup_UI > RemoveJoint')
@@ -103,7 +109,6 @@ class RIG_JointSetup_UI:
         self.logger.info('Rigging > Joint Setup TEARDOWN\n')
         self.KillScripts()
         self.PrintJointTree()
-        # self.rigBHV.RebuildLimbs()
         self.jntMng.InitSceneJoints()
     
     def KillScripts(self):

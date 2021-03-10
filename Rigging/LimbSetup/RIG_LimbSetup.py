@@ -260,7 +260,7 @@ class RIG_LimbSetup:
                 break
             parent = parent[0]
             curPos = pm.xform(parent, q=1, t=1, ws=1)
-            if curPos == lastPos:
+            if self._RoundVector(curPos) == self._RoundVector(lastPos):
                 break
             joints.append(parent)
             if self.HasSibling(parent):
@@ -268,6 +268,12 @@ class RIG_LimbSetup:
             parent = pm.listRelatives(parent, p=1, type='joint')
             lastPos = curPos[:]
         return joints[::-1]
+    
+    def _RoundVector(self, vec):
+        newVec = []
+        for i in range(3):
+            newVec.append(round(vec[i], 5))
+        return newVec
 
     def GetJointBranch(self, startJoint):
         self.logger.debug('\trigLS > GetJointBranch')

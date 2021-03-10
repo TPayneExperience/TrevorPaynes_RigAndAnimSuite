@@ -130,9 +130,13 @@ class Rigging_UI:
     def UpdateControlVis(self):
         self.logger.debug('\tRigging_UI > UpdateControlVis')
         index = self.pfrs.root.riggingTab.get()
-        if index == 2:
+        if index in (0,):
+            self.jntMng.SetLayerState(True, False)
+        else:
+            self.jntMng.SetLayerState(True, True)
+        if index == 2: # Bhv
             self.ctrMng.SetLayerState(True, True)
-        elif index in (3, 4):
+        elif index in (3, 4): # App, Test
             self.ctrMng.SetLayerState(True, False)
         
     def TabChanged(self):

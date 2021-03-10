@@ -26,8 +26,8 @@ BHV_TYPES = (   'FK - Chain (3+ Joints)', # 0
 
                 'FK - Branch',          # 6
                 'Empty - Rig',          # 7
-                'FK - Reverse Chain (3+ Joints)', # 8
-                'FK - Reverse Relative',# 9
+                'FK - Chain Reversed (3+ Joints)', # 8
+                'FK - Relative Reversed',# 9
                 'FK - Relative',        # 10
 
                 'FK - Chain (2 Joints)',# 11

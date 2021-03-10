@@ -303,8 +303,8 @@ class Build_Manager:
         bhvType = limb.bhvType.get()
         if bhvType in rigData.REVERSE_BHV_INDEXES:
             joints = joints[::-1]
-        if bhvType in rigData.OMIT_LAST_JOINT_BHV_INDEXES:
-            joints = joints[:-1]
+        # if bhvType in rigData.OMIT_LAST_JOINT_BHV_INDEXES:
+        #     joints = joints[:-1]
         for joint in joints:
             group = pm.listConnections(joint.group)[0]
             ctr = pm.listConnections(group.control)[0]
@@ -454,9 +454,17 @@ class Build_Manager:
         if not parents:
             return 
         parent = parents[0]
-        if parent.bhvType.get() in rigData.EMPTY_BHV_INDEXES:
+        bhvType = parent.bhvType.get()
+        bhvFilter = rigData.IK_PV_BHV_INDEXES
+        bhvFilter += rigData.CST_BHV_INDEXES
+        bhvFilter += rigData.LOOK_AT_BHV_INDEXES
+        if bhvType in rigData.EMPTY_BHV_INDEXES:
             group = pm.listConnections(parent.bhvEmptyGroup)[0]
             parentControl = pm.listConnections(group.control)[0]
+        elif bhvType in bhvFilter:
+            index = limb.limbParentJoint.get()
+            joint = util.GetSortedLimbJoints(parent)[index]
+            parentControl = joint
         else:
             index = limb.limbParentJoint.get()
             joint = util.GetSortedLimbJoints(parent)[index]
