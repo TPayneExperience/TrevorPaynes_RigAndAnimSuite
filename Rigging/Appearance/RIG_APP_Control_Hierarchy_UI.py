@@ -40,8 +40,8 @@ class RIG_APP_Control_Hierarchy_UI:
             groups += self.grpMng.GetJointGroups(self.limb)
             if bhvType in rigData.REVERSE_BHV_INDEXES:
                 groups = groups[::-1]
-            if bhvType in rigData.OMIT_LAST_JOINT_BHV_INDEXES:
-                groups = groups[:-1]
+            # if bhvType in rigData.OMIT_LAST_JOINT_BHV_INDEXES:
+            #     groups = groups[:-1]
             if bhvType in rigData.RFK_BHV_INDEXES:
                 groups = [groups[0]]
         groups += self.grpMng.GetLimbGroups(self.limb)

@@ -16,7 +16,7 @@ RIG_MODES = ('Setup Rig', 'Animate Rig')
 
 # ============= BEHAVIORS =============
 CST_TYPES = ('Orient', 'Parent', 'Point',  'Scale')
-BHV_TYPES = (   'FK - Chain (3+ Joints)', # 0
+BHV_TYPES = (   'FK - Chain',           # 0
 
                 'IK - Pole Vector',     # 1
                 'Empty - Anim',         # 2
@@ -26,24 +26,24 @@ BHV_TYPES = (   'FK - Chain (3+ Joints)', # 0
 
                 'FK - Branch',          # 6
                 'Empty - Rig',          # 7
-                'FK - Chain Reversed (3+ Joints)', # 8
+                'FK - Chain Reversed',  # 8
                 'FK - Relative Reversed',# 9
                 'FK - Relative',        # 10
 
-                'FK - Chain (2 Joints)',# 11
-                'FK - Reverse Chain (2 Joints)' # 12
+                'DEPRICATED - FK - Chain (2 Joints)',# 11
+                'DEPRICATED - FK - Reverse Chain (2 Joints)' # 12
                 )
 EMPTY_BHV_INDEXES = (7,)
 ONE_JOINT_BHV_INDEXES = (6, 4, 3)
-TWO_JOINT_CHAIN_BHV_INDEXES = (11, 6, 12)
+TWO_JOINT_CHAIN_BHV_INDEXES = (0, 8, 6) # (11, 6, 12)
 THREE_JOINT_CHAIN_BHV_INDEXES = (0, 8, 6, 10, 9, 1, 3)
 TWO_JOINT_BRANCH_BHV_INDEXES = (6, 3)
 
-OMIT_LAST_JOINT_BHV_INDEXES = (0, 8)
+# OMIT_LAST_JOINT_BHV_INDEXES = (0, 8)
 REVERSE_BHV_INDEXES = (8, 12, 9)
 
 FK_BRANCH_BHV_INDEXES = (6,)
-FK_CHAIN_BHV_INDEXES = (0, 8, 11, 12)
+FK_CHAIN_BHV_INDEXES = (0, 8) # (0, 8, 11, 12)
 RFK_BHV_INDEXES = (10, 9)
 CST_BHV_INDEXES = (3,)
 LOOK_AT_BHV_INDEXES = (4,)

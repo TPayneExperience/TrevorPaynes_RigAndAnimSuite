@@ -137,9 +137,7 @@ class RIG_BHV_Limb_Properties_UI:
         self._PopulateConstraintProperties()
 
     def _PopulateTargetLimbProperties(self):
-        bhvFilter = rigData.IK_PV_BHV_INDEXES
-        bhvFilter += rigData.CST_BHV_INDEXES
-        if self.limb.bhvType.get() not in bhvFilter:
+        if self.limb.bhvType.get() not in rigData.CST_BHV_INDEXES:
             return
         pm.frameLayout(self.targetLayout, e=1, en=1)
         targetLimbs = pm.listConnections(self.limb.bhvParent)

@@ -107,6 +107,7 @@ class Build_Manager:
     def Setup_Internal(self, limbs):
         self.logger.debug('\tBldMng > Setup_Internal')
         for limb in limbs:
+            self.logger.debug('\t\t' + str(limb))
             bhvType = limb.bhvType.get()
             if bhvType in rigData.FK_CHAIN_BHV_INDEXES:
                 self.Setup_Internal_FKChain(limb)
@@ -124,11 +125,14 @@ class Build_Manager:
     def Setup_External(self, limbs):
         self.logger.debug('\tBldMng > Setup_External')
         for limb in limbs:
+            self.logger.debug('\t\t' + str(limb))
             bhvType = limb.bhvType.get()
             if bhvType in rigData.FK_CHAIN_BHV_INDEXES:
                 self.Setup_External_FKChain(limb)
             elif bhvType in rigData.IK_PV_BHV_INDEXES:
                 self.Setup_External_IKPoleVector(limb)
+            elif bhvType in rigData.CST_BHV_INDEXES:
+                self.Setup_External_Constraint(limb)
             elif bhvType in rigData.FK_BRANCH_BHV_INDEXES:
                 self.Setup_External_FKBranch(limb)
             elif bhvType in rigData.LOOK_AT_BHV_INDEXES:
@@ -145,13 +149,15 @@ class Build_Manager:
             bhvType = limb.bhvType.get()
             if bhvType in rigData.REVERSE_BHV_INDEXES:
                 groups = groups[::-1]
-            if bhvType in rigData.OMIT_LAST_JOINT_BHV_INDEXES:
-                groups = groups[:-1]
+            # if bhvType in rigData.OMIT_LAST_JOINT_BHV_INDEXES:
+            #     groups = groups[:-1]
             controls = []
             for group in groups:
-                controls += pm.listConnections(group.control)
+                if group.enableGroup.get():
+                    controls += pm.listConnections(group.control)
             for group in self.grpMng.GetLimbGroups(limb):
-                controls += pm.listConnections(group.control)
+                if group.enableGroup.get():
+                    controls += pm.listConnections(group.control)
             pm.controller(controls, g=1)
 
     def Setup_External_MayaControllers(self, limbs):
@@ -169,13 +175,15 @@ class Build_Manager:
             bhvType = limb.bhvType.get()
             if bhvType in rigData.REVERSE_BHV_INDEXES:
                 jointGroups = jointGroups[::-1]
-            if bhvType in rigData.OMIT_LAST_JOINT_BHV_INDEXES:
-                jointGroups = jointGroups[:-1]
+            # if bhvType in rigData.OMIT_LAST_JOINT_BHV_INDEXES:
+            #     jointGroups = jointGroups[:-1]
             controls = []
             for group in jointGroups:
-                controls += pm.listConnections(group.control)
+                if group.enableGroup.get():
+                    controls += pm.listConnections(group.control)
             for group in self.grpMng.GetLimbGroups(limb):
-                controls += pm.listConnections(group.control)
+                if group.enableGroup.get():
+                    controls += pm.listConnections(group.control)
             pm.controller(controls, parentControl, p=1)
 
 #=========== TEARDOWN FUNCTIONALITY ====================================
@@ -314,6 +322,12 @@ class Build_Manager:
     
     def Setup_Internal_Constraint(self, limb):
         self.logger.debug('\tBldMng > Setup_Internal_Constraint')
+        for joint in pm.listConnections(limb.joints):
+            group = pm.listConnections(joint.group)[0]
+            control = pm.listConnections(group.control)[0]
+            pm.parentConstraint(control, joint, mo=1)
+
+    def Setup_External_Constraint(self, limb):
         parentLimbs = pm.listConnections(limb.limbParent)
         targetLimbs = pm.listConnections(limb.bhvParent)
         if not targetLimbs:
@@ -342,22 +356,27 @@ class Build_Manager:
         skipRotX = not limb.cstRotX.get()
         skipRotY = not limb.cstRotY.get()
         skipRotZ = not limb.cstRotZ.get()
+        sourceGroup = pm.listConnections(sourceJoint.group)[0]
+        sourceControl = pm.listConnections(sourceGroup.control)[0]
+        targetGroup = pm.listConnections(targetJoint.group)[0]
+        targetControl = pm.listConnections(targetGroup.control)[0]
         
         for group in self.grpMng.GetJointGroups(limb):
-            joint = pm.listConnections(group.joint)[0]
+            self.ParentConstrainGroup(limb, group)
+            control = pm.listConnections(group.control)[0]
             cstType = limb.bhvCstType.get()
             weight = group.weight.get()
             if cstType == 0:
-                cst = pm.orientConstraint(sourceJoint, targetJoint, joint)
-                pm.setAttr('%s.%sW0' % (cst, sourceJoint), 1-weight)
-                pm.setAttr('%s.%sW1' % (cst, targetJoint), weight)
+                cst = pm.orientConstraint(sourceControl, targetControl, control)
+                pm.setAttr('%s.%sW0' % (cst, sourceControl), 1-weight)
+                pm.setAttr('%s.%sW1' % (cst, targetControl), weight)
                 if skipRotX: pm.orientConstraint(cst, e=1, sk='x')
                 if skipRotY: pm.orientConstraint(cst, e=1, sk='y')
                 if skipRotZ: pm.orientConstraint(cst, e=1, sk='z')
             if cstType == 1:
-                cst = pm.parentConstraint(sourceJoint, targetJoint, joint)
-                pm.setAttr('%s.%sW0' % (cst, sourceJoint), 1-weight)
-                pm.setAttr('%s.%sW1' % (cst, targetJoint), weight)
+                cst = pm.parentConstraint(sourceControl, targetControl, control)
+                pm.setAttr('%s.%sW0' % (cst, sourceControl), 1-weight)
+                pm.setAttr('%s.%sW1' % (cst, targetControl), weight)
                 if skipPosX: pm.parentConstraint(cst, e=1, st='x')
                 if skipPosY: pm.parentConstraint(cst, e=1, st='y')
                 if skipPosZ: pm.parentConstraint(cst, e=1, st='z')
@@ -365,18 +384,17 @@ class Build_Manager:
                 if skipRotY: pm.parentConstraint(cst, e=1, sr='y')
                 if skipRotZ: pm.parentConstraint(cst, e=1, sr='z')
             if cstType == 2:
-                cst = pm.pointConstraint(sourceJoint, targetJoint, joint)
-                pm.setAttr('%s.%sW0' % (cst, sourceJoint), 1-weight)
-                pm.setAttr('%s.%sW1' % (cst, targetJoint), weight)
+                cst = pm.pointConstraint(sourceControl, targetControl, control)
+                pm.setAttr('%s.%sW0' % (cst, sourceControl), 1-weight)
+                pm.setAttr('%s.%sW1' % (cst, targetControl), weight)
                 if skipPosX: pm.pointConstraint(cst, e=1, sk='x')
                 if skipPosY: pm.pointConstraint(cst, e=1, sk='y')
                 if skipPosZ: pm.pointConstraint(cst, e=1, sk='z')
             if cstType == 3:
-                cst = pm.scaleConstraint(sourceJoint, targetJoint, joint)
-                pm.setAttr('%s.%sW0' % (cst, sourceJoint), 1-weight)
-                pm.setAttr('%s.%sW1' % (cst, targetJoint), weight)
+                cst = pm.scaleConstraint(sourceControl, targetControl, control)
+                pm.setAttr('%s.%sW0' % (cst, sourceControl), 1-weight)
+                pm.setAttr('%s.%sW1' % (cst, targetControl), weight)
             
-
     def Teardown_Constraint(self, limb):
         self.logger.debug('\tBldMng > Teardown_Constraint')
         for joint in util.GetSortedLimbJoints(limb):
@@ -393,49 +411,35 @@ class Build_Manager:
         joints = util.GetSortedLimbJoints(limb)
         startJoint = joints[0]
         endJoint = joints[-1]
+        endGroup = pm.listConnections(endJoint.group)[0]
+        endControl = pm.listConnections(endGroup.control)[0]
         handle = pm.ikHandle(sj=startJoint, ee=endJoint)[0]
-        group = pm.listConnections(limb.bhvIKPVGroup)[0]
-        control = pm.listConnections(group.control)[0]
-        pm.poleVectorConstraint(control, handle)
+        handle.v.set(0)
+        pm.parent(handle, endControl)
+        pm.orientConstraint(endControl, endJoint, mo=1)
+        midGroup = pm.listConnections(limb.bhvIKPVGroup)[0]
+        midControl = pm.listConnections(midGroup.control)[0]
+        pm.poleVectorConstraint(midControl, handle)
+        for group in self.grpMng.GetJointGroups(limb)[:-1]:
+            joint = pm.listConnections(group.joint)[0]
+            pm.parentConstraint(joint, group, mo=1)
 
     def Setup_External_IKPoleVector(self, limb):
         self.logger.debug('\tBldMng > Setup_External_IKPoleVector')
-        # PARENT IK HANDLE TO TARGET CONTROL 
-        targetLimb = pm.listConnections(limb.bhvParent)
-        if not targetLimb:
-            msg = 'IK Pole Vector Limb "%s" missing TARGET limb' % limb
-            pm.confirmDialog(t='IK POLE VECTOR Error', m=msg, icon='error', b='Ok')
-            return
-        targetLimb = targetLimb[0]
-        distGroup = pm.listConnections(limb.bhvIKPVGroup)[0]
-        index = limb.bhvParentJoint.get()
-        targetGroup = self.grpMng.GetJointGroups(targetLimb)[index]
-        targetControl = pm.listConnections(targetGroup.control)[0]
-
-        joints = util.GetSortedLimbJoints(limb)
-        handle = pm.listConnections(joints[0].message)[0]
-        handle.v.set(0)
-        pm.parent(handle, targetControl)
-
-        # PARENT IKPV Control
-        parent = pm.listConnections(limb.limbParent)
-        if parent:
-            index = limb.limbParentJoint.get()
-            parentGroup = self.grpMng.GetJointGroups(parent[0])[index]
-            parentControl = pm.listConnections(parentGroup.control)[0]
-            pm.parent(distGroup, parentControl)
-        else:
-            pm.parent(distGroup, limb)
+        endJoint = util.GetSortedLimbJoints(limb)[-1]
+        endGroup = pm.listConnections(endJoint.group)[0]
+        self.ParentConstrainGroup(limb, endGroup)
+        midGroup = pm.listConnections(limb.bhvIKPVGroup)[0]
+        self.ParentConstrainGroup(limb, midGroup)
 
 #=========== MISC ====================================
     
-    # IK PV, LookAt
+    # LookAt
     def Setup_External_SingleControl(self, limb):
         self.logger.debug('\tBldMng > Setup_External_SingleControl')
         childGroup = self.grpMng.GetLimbGroups(limb)[0]
         self.ParentConstrainGroup(limb, childGroup)
 
-    # IK PV, LookAt
     def Setup_External_Empty(self, limb):
         self.logger.debug('\tBldMng > Setup_External_Empty')
         group = pm.listConnections(limb.bhvEmptyGroup)[0]
@@ -444,9 +448,11 @@ class Build_Manager:
     def Setup_Internal_LookAt(self, limb):
         self.logger.debug('\tBldMng > Setup_Internal_LookAt')
         joint = util.GetSortedLimbJoints(limb)[0]
-        group = self.grpMng.GetLimbGroups(limb)[0]
-        control = pm.listConnections(group.control)[0]
-        pm.aimConstraint(control, joint, mo=1)
+        lookAtGroup = pm.listConnections(limb.bhvLookAtGroup)[0]
+        lookAtControl = pm.listConnections(lookAtGroup.control)[0]
+        pm.aimConstraint(lookAtControl, joint, mo=1)
+        jointGroup = pm.listConnections(joint.group)[0]
+        pm.parentConstraint(joint, jointGroup, mo=1)
 
     def ParentConstrainGroup(self, limb, childGroup):
         self.logger.debug('\tBldMng > ParentConstrainGroup')
@@ -455,16 +461,16 @@ class Build_Manager:
             return 
         parent = parents[0]
         bhvType = parent.bhvType.get()
-        bhvFilter = rigData.IK_PV_BHV_INDEXES
-        bhvFilter += rigData.CST_BHV_INDEXES
-        bhvFilter += rigData.LOOK_AT_BHV_INDEXES
+        # bhvFilter = rigData.IK_PV_BHV_INDEXES
+        # bhvFilter += rigData.CST_BHV_INDEXES
+        # bhvFilter += rigData.LOOK_AT_BHV_INDEXES
         if bhvType in rigData.EMPTY_BHV_INDEXES:
             group = pm.listConnections(parent.bhvEmptyGroup)[0]
             parentControl = pm.listConnections(group.control)[0]
-        elif bhvType in bhvFilter:
-            index = limb.limbParentJoint.get()
-            joint = util.GetSortedLimbJoints(parent)[index]
-            parentControl = joint
+        # elif bhvType in bhvFilter:
+        #     index = limb.limbParentJoint.get()
+        #     joint = util.GetSortedLimbJoints(parent)[index]
+        #     parentControl = joint
         else:
             index = limb.limbParentJoint.get()
             joint = util.GetSortedLimbJoints(parent)[index]

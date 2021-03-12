@@ -50,14 +50,17 @@ class Group_Manager:
     def _AddGroup(self):
         groupID = self.pfrs.root.nextGroupID.get()
         self.pfrs.root.nextGroupID.set(groupID + 1)
+        hide = rigData.HIDE_ATTRS
         
         # groupTypes = ':'.join(self.grpTypes)
         groupTypes = ':'.join(rigData.GROUP_TYPES)
 
         group = pm.group(em=1, w=1)
-        pm.addAttr(group, ln='ID', at='long', dv=groupID)
-        pm.addAttr(group, ln='control', dt='string')
-        pm.addAttr(group, ln='groupType', at='enum', en=groupTypes) # IKPV, LookAt
+        pm.addAttr(group, ln='ID', at='long', dv=groupID, h=hide)
+        pm.addAttr(group, ln='control', dt='string', h=hide)
+        pm.addAttr(group, ln='groupType', at='enum', h=hide, en=groupTypes)
+        pm.addAttr(group, ln='enableGroup', at='bool', dv=1, h=hide)
+
         # util.ChannelBoxAttrs(group, 1, 1, 1, 1)
         group.v.set(0)
 
@@ -128,23 +131,29 @@ class Group_Manager:
         bhvType = limb.bhvType.get()
         bhvFilter = rigData.FK_CHAIN_BHV_INDEXES
         bhvFilter += rigData.FK_BRANCH_BHV_INDEXES
+        jointGroups = self.GetJointGroups(limb)
         if bhvType in bhvFilter:
-            groups = self.GetJointGroups(limb)
-            for group in groups:
+            for group in jointGroups:
+                if group.enableGroup.get():
+                    group.v.set(1)
+            # if bhvType in rigData.REVERSE_BHV_INDEXES:
+            #     jointGroups = jointGroups[::-1]
+            # if bhvType in rigData.OMIT_LAST_JOINT_BHV_INDEXES:
+            #     jointGroups[-1].v.set(0)
+        elif bhvType in rigData.IK_PV_BHV_INDEXES:
+            group = jointGroups[-1]
+            if group.enableGroup.get():
                 group.v.set(1)
+        elif bhvType in rigData.RFK_BHV_INDEXES:
+            jointGroups = self.GetJointGroups(limb)
             if bhvType in rigData.REVERSE_BHV_INDEXES:
-                groups = groups[::-1]
-            if bhvType in rigData.OMIT_LAST_JOINT_BHV_INDEXES:
-                groups[-1].v.set(0)
-        if bhvType in rigData.RFK_BHV_INDEXES:
-            groups = self.GetJointGroups(limb)
-            for group in groups:
-                group.v.set(0)
-            if bhvType in rigData.REVERSE_BHV_INDEXES:
-                groups = groups[::-1]
-            groups[0].v.set(1)
+                jointGroups = jointGroups[::-1]
+            group = jointGroups[0]
+            if group.enableGroup.get():
+                group.v.set(1)
         for group in self.GetLimbGroups(limb):
-            group.v.set(1)
+            if group.enableGroup.get():
+                group.v.set(1)
 
     def Teardown_LimbGroupVisibility(self, limb):
         self.logger.debug('\tGrpMng > Teardown_LimbGroupVisibility')

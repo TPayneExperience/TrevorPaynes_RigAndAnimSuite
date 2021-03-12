@@ -26,26 +26,19 @@ class RIG_BHV_Group_Properties_UI:
             return
         self.group = group
         pm.frameLayout(self.groupLayout, e=1, en=1)
-        # DELETE OLD ATTRS
-        # if self.parentSub_at:
-        #     pm.deleteUI(self.parentSub_at)
-        #     self.parentSub_at = None
         joint = pm.listConnections(group.joint)[0]
         limb = pm.listConnections(joint.limb)[0]
         bhvType = limb.bhvType.get()
         pm.attrFieldSliderGrp(self.weight_sg, e=1, en=0)
 
+        pm.attrControlGrp(  self.enableGroup_cg, e=1, 
+                                a=group.enableGroup,
+                                cc=pm.Callback(self.SetEnableGroup, 1))
         # CONSTRAINT
         if bhvType == 3: 
             pm.attrFieldSliderGrp(self.weight_sg, e=1, en=1, 
                                             at=self.group.weight)
-
-        # IK CHAIN
-        # elif bhvType in rigData.IK_CHAIN_BHV_INDEXES: 
-        #     self.parentSub_at = pm.attrEnumOptionMenu(  l='Target Joint',
-        #                                         at=self.group.targetJoint, 
-        #                                         p=self.bhvGroupProp_cl)
-
+        
 
 
 #========== SETUP ===============================
@@ -53,6 +46,9 @@ class RIG_BHV_Group_Properties_UI:
     def _Setup(self):
         with pm.frameLayout('Group Properties', bv=1, en=0) as self.groupLayout:
             with pm.columnLayout(adj=1) as self.bhvGroupProp_cl:
+                with pm.columnLayout(co=('left', -100)) as self.appLimbLockHide_cl:
+                    self.enableGroup_cg = pm.attrControlGrp(l='Enable Control',
+                                                    a='perspShape.shakeEnabled')
                 self.weight_sg = pm.attrFieldSliderGrp( l='Cst Weight', 
                                                         min=0.0,
                                                         max=1.0,
@@ -68,6 +64,10 @@ class RIG_BHV_Group_Properties_UI:
         self.logger.info('\tGroupProp > Weight SET to %f' % value)
 
 
+    def SetEnableGroup(self, ignore):
+        self.logger.debug('\tGroupProp > SetEnableGroup')
+        enabled = self.group.enableGroup.get()
+        self.group.v.set(enabled)
 
 
 

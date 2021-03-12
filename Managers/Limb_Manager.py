@@ -189,9 +189,7 @@ class Limb_Manager:
         '''Set IK / Cst targets to closest limbs / joints'''
         self.logger.debug('\tLimbMng > RebuildBhvParent')
         bhvType = sourceLimb.bhvType.get()
-        bhvFilter = rigData.IK_PV_BHV_INDEXES
-        bhvFilter += rigData.CST_BHV_INDEXES
-        if bhvType not in bhvFilter:
+        if bhvType not in rigData.CST_BHV_INDEXES:
             sourceLimb.rebuildBhvDep.set(0)
             return
         limbs = self._GetClosestLimbs(sourceLimb)
@@ -219,9 +217,7 @@ class Limb_Manager:
         elif newBhvIndex in rigData.LOOK_AT_BHV_INDEXES:
             self.grpMng.InitLookAtGroup(limb)
             self.grpMng.UpdateLookAtCtr(limb)
-        bhvFilter = rigData.IK_PV_BHV_INDEXES
-        bhvFilter += rigData.CST_BHV_INDEXES
-        if newBhvIndex in bhvFilter:
+        if newBhvIndex in rigData.CST_BHV_INDEXES:
             self.RebuildBhvParent(limb)
         self.grpMng.Setup_LimbGroupVisibility(limb)
 
