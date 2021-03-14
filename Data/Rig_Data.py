@@ -69,6 +69,9 @@ LIMB_TYPES = (  'Empty - Rigging',
                 '2+ Joint BRANCH',
                 '2 Joint CHAIN')
 LIMB_SIDES = ('M', 'L', 'R', '-')
+LIMB_JOINT_NAME_PRESETS = { # lowercase to for keycheck
+                'arm' : ['Shoulder', 'Elbow', 'Wrist'],
+                'leg' : ['Hip', 'Knee', 'Ankle']}
 
 # ============= JOINTS =============
 JOINT_COLORS = ((1, 0, 0), # Red

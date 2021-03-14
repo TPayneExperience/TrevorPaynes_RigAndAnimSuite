@@ -22,7 +22,7 @@ class PFRS_Debug:
             return
         print ('>>>>>>>>>>>>>> AUTO DEBUG ON <<<<<<<<<<<<<')
 
-        # self.SimpleChainTest(1)
+        self.SimpleChainTest(1)
         # self.LimbTypesTest(1)
         # self.LegTest(1)
         # self.ArmTest(1)
@@ -68,8 +68,9 @@ class PFRS_Debug:
         self.parent.UpdateEnableUI()
         self.parent.Setup_Editable()
         pm.tabLayout(self.parent.rig_ui.tab, e=1, sti=2) # Select Limb setup tab
-        self.rigLS.AutoBuildByName()
-        pm.tabLayout(self.parent.rig_ui.tab, e=1, sti=3)
+        # self.rigLS.AutoBuildByHierarchy()
+        # self.rigLS.AutoBuildByName()
+        # pm.tabLayout(self.parent.rig_ui.tab, e=1, sti=3)
 
     def LegTest(self, ignore):
         self._NewScene()

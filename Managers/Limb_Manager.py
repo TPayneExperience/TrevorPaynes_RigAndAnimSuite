@@ -278,6 +278,21 @@ class Limb_Manager:
         else:
             if pm.listConnections(sourceLimb.mirrorLimb):
                 self._BreakMirror(sourceLimb)
+        # Rename joints if limb named as preset 'leg', 'arm'...
+        if newName.lower() in rigData.LIMB_JOINT_NAME_PRESETS:
+            jointNames = rigData.LIMB_JOINT_NAME_PRESETS[newName.lower()]
+            for joint in pm.listConnections(sourceLimb.joints):
+                index = joint.jointIndex.get()
+                if index < len(jointNames):
+                    joint.pfrsName.set(jointNames[index])
+        # Rename joints if they're default names
+        else:
+            oldName = limb.pfrsName.get()
+            for joint in pm.listConnections(sourceLimb.joints):
+                jointName = joint.pfrsName.get()
+                if 'Joint' in jointName or oldName in jointName:
+                    indexStr = '%03d' % (joint.jointIndex.get() + 1)
+                    joint.pfrsName.set(newName + indexStr)
         sourceLimb.pfrsName.set(newName)
         self.UpdateLimbName(sourceLimb)
         return True
