@@ -10,12 +10,11 @@ reload(editPst)
 class RIG_BHV_Limb_Hierarchy_UI:
     def __init__(self, parent):
         self.parent = parent
-        self.limbMng = parent.limbMng
-        self.jntMng = parent.jntMng
-        self.rigBHV = parent.rigBHV
-        self.grpMng = parent.grpMng
-        self.nameMng = parent.nameMng
-        self.logger = parent.logger
+        self.limbMng = parent.pfrs.limbMng
+        self.jntMng = parent.pfrs.jntMng
+        self.grpMng = parent.pfrs.grpMng
+        self.nameMng = parent.pfrs.nameMng
+        self.logger = parent.pfrs.logger
         self.pfrs = parent.pfrs
         self.rootMng = self.pfrs.rootMng
         self.pstMng = parent.pfrs.pstMng

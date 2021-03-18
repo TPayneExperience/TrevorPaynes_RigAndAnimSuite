@@ -7,12 +7,8 @@ reload(util)
 class RIG_LS_Joint_Hierarchy_UI:
     def __init__(self, parent):
         self.parent = parent
-        self.limbMng = parent.limbMng
-        self.jntMng = parent.jntMng
-        self.grpMng = parent.grpMng
-        self.nameMng = parent.nameMng
-        self.logger = parent.logger
-        self.rigLS = parent.rigLS
+        self.logger = parent.pfrs.logger
+        self.rigLS = parent.pfrs.rigLS
 
         self.limb = None
         self.joints = {} # ID : Joint

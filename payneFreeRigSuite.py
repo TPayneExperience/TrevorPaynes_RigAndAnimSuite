@@ -31,6 +31,8 @@ import Managers.Root_Manager as rootMng
 reload(rootMng)
 import Managers.Preset_Manager as pstMng
 reload(pstMng)
+import Managers.Pose_Manager as posMng
+reload(posMng)
 
 import Rigging.Behavior.RIG_Behaviors as rigBHV
 reload(rigBHV)
@@ -38,6 +40,8 @@ import Rigging.LimbSetup.RIG_LimbSetup as rigLS
 reload(rigLS)
 import Rigging.JointSetup.RIG_JointSetup as rigJS
 reload(rigJS)
+import Animation.Poses.ANM_Poses as anmPOS
+reload(anmPOS)
 
 class PayneFreeRigSuite:
     def __init__(self):
@@ -60,18 +64,23 @@ class PayneFreeRigSuite:
         self.skinMng = skinMng.Skin_Mananger(self) # REMOVE LATER
         self.rootMng = rootMng.Root_Manager(self)
         self.pstMng = pstMng.Preset_Manager(self)
+        self.posMng = posMng.Pose_Manager(self)
 
         # RIGGING
         self.rigJS = rigJS.RIG_JointSetup(self)
         self.rigLS = rigLS.RIG_LimbSetup(self)
         self.rigBHV = rigBHV.RIG_Behaviors(self)
         
+        # ANIMATION
+        self.anmPOS = anmPOS.ANM_Poses(self)
+
         # START UP
         self.InitScene()
 
 #============= SCENE ============================
 
     def InitScene(self):
+        self.logger.debug('\tPFRS > InitScene')
         roots = self.rootMng.GetSceneRoots()
         if roots:
             self.root = roots[0]
@@ -84,29 +93,74 @@ class PayneFreeRigSuite:
         self.jntMng.InitSceneJoints()
 
     def NewScene(self):
+        self.logger.debug('\tPFRS > NewScene')
         self.ctrMng.NewScene()
         self.jntMng.NewScene()
         self.meshMng.NewScene()
 
     def LoadScene(self):
+        self.logger.debug('\tPFRS > LoadScene')
         self.ctrMng.LoadScene()
         self.jntMng.LoadScene()
         self.meshMng.LoadScene()
 
+    def ExportAnimationRig(self):
+        self.logger.debug('\tPFRS > ExportAnimationRig')
+        name = '%s_AnimRig' % self.root.prefix.get()
+        setupFile = pm.sceneName()
+        filePath = os.path.join(os.path.dirname(setupFile), name)
+        result = pm.fileDialog2(ff='Maya ASCII (*.ma);;Maya Binary (*.mb)', 
+                                dir=filePath, 
+                                cap='Save Exported Animation Rig')
+        if not result:
+            return
+        animFile = result[0]
+        # Make pose folder
+        folder = os.path.dirname(animFile)
+        poseFolder = os.path.join(folder, 'Poses')
+        if not os.path.exists(poseFolder):
+            os.makedirs(poseFolder)
+        self.root.posesFolderPath.set(poseFolder)
+
+        # BUILD RIG
+        limbs = pm.listConnections(self.root.jointLimbs)
+        limbs += pm.listConnections(self.root.emptyLimbs)
+        for limb in limbs:
+            self.grpMng.Setup_LimbGroupVisibility(limb)
+        self.bldMng.Setup_Rig()
+        self.ctrMng.SetLayerState(True, False)
+
+        # SET STARTING TAB
+        oldTab = self.root.mainTab.get()
+        self.root.mainTab.set(2)
+        pm.saveAs(animFile)
+        self.root.mainTab.set(oldTab)
+
+        self.bldMng.Teardown_Rig()
+        for limb in limbs:
+            self.grpMng.Teardown_LimbGroupVisibility(limb)
+
+        if setupFile:
+            pm.saveAs(setupFile)
+
 #============= ROOT ============================
 
     def NewRoot(self, prefix, nameOrder, showPrefix):
+        self.logger.debug('\tPFRS > NewRoot')
         self.root = self.rootMng.AddRoot(prefix, nameOrder, showPrefix)
         self.limbMng.NewRoot()
         self.jntMng.NewRoot()
         self.meshMng.NewRoot()
 
     def LoadRoot(self):
+        self.logger.debug('\tPFRS > LoadRoot')
         self.limbMng.LoadRoot()
         self.jntMng.LoadRoot()
         self.meshMng.LoadRoot()
+        self.posMng.InitPoses()
 
     def UpdateNames(self):
+        self.logger.debug('\tPFRS > UpdateNames')
         self.rootMng.UpdateRootName(self.root)
 
 #=========== LOGGER ====================================

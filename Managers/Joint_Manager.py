@@ -25,7 +25,7 @@ class Joint_Manager:
         self.jointLayer.displayType.set(2)
     
     def LoadScene(self):
-        self.jointLayer = pm.ls('Joints', type='displayLayer')
+        self.jointLayer = pm.ls('Joints', type='displayLayer')[0]
 
     def SetLayerState(self, isVisible, isReference):
         self.logger.debug('\tCtrMng > SetLayerState')
@@ -37,6 +37,7 @@ class Joint_Manager:
         self.jointLayer.visibility.set(isVisible) # 0 = off, 1 = on
 
     def InitSceneJoints(self):
+        self.logger.debug('\tJntMng > InitSceneJoints')
         joints = pm.ls(type='joint')
         for joint in joints:
             if not joint.hasAttr('ID'):
@@ -53,6 +54,7 @@ class Joint_Manager:
         self.jntGroup = pm.group(name='JOINTS', em=1, p=root)
 
     def LoadRoot(self):
+        self.logger.debug('\tJntMng > LoadRoot')
         root = self.pfrs.root
         for child in pm.listRelatives(root, c=1, type='transform'):
             if child.shortName() == 'JOINTS':

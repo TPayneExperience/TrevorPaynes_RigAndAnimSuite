@@ -12,7 +12,9 @@ SUITE = SUITES[2]
 
 
 # ============= ROOT =============
-RIG_MODES = ('Setup Rig', 'Animate Rig')
+RIG_MODES = (   'Setup Rig',
+                'Building Rig', # Incase of build breakage
+                'Animate Rig') 
 
 # ============= BEHAVIORS =============
 CST_TYPES = ('Orient', 'Parent', 'Point',  'Scale')
@@ -39,8 +41,7 @@ TWO_JOINT_CHAIN_BHV_INDEXES = (0, 8, 6) # (11, 6, 12)
 THREE_JOINT_CHAIN_BHV_INDEXES = (0, 8, 6, 10, 9, 1, 3)
 TWO_JOINT_BRANCH_BHV_INDEXES = (6, 3)
 
-# OMIT_LAST_JOINT_BHV_INDEXES = (0, 8)
-REVERSE_BHV_INDEXES = (8, 12, 9)
+REVERSE_BHV_INDEXES = (8, 9) # (8, 12, 9)
 
 FK_BRANCH_BHV_INDEXES = (6,)
 FK_CHAIN_BHV_INDEXES = (0, 8) # (0, 8, 11, 12)

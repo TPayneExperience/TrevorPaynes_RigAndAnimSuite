@@ -4,9 +4,9 @@ import pymel.core as pm
 class RIG_JointSetup_UI:
     def __init__(self, parent):
         self.parent = parent
-        self.jntMng = parent.jntMng
-        self.rigBHV = parent.rigBHV
-        self.logger = parent.logger
+        self.pfrs = parent.pfrs
+        self.jntMng = parent.pfrs.jntMng
+        self.logger = parent.pfrs.logger
         self.rigJS = parent.pfrs.rigJS
 
         self.scriptJob = None

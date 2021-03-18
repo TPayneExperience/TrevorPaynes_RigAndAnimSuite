@@ -13,13 +13,8 @@ reload(util)
 
 class RIG_LimbSetup_UI:
     def __init__(self, parent):
-        self.limbMng = parent.limbMng
-        self.jntMng = parent.jntMng
-        self.grpMng = parent.grpMng
-        self.ctrMng = parent.ctrMng
-        self.nameMng = parent.nameMng
-        self.rigBHV = parent.rigBHV
-        self.logger = parent.logger
+        self.rigBHV = parent.pfrs.rigBHV
+        self.logger = parent.pfrs.logger
         self.rigLS = parent.pfrs.rigLS
         self.pfrs = parent.pfrs
 

@@ -5,8 +5,8 @@ import pymel.core as pm
 class SaveTemplate_UI:
     def __init__(self, parent):
 
-        self.limbMng = parent.limbMng
-        self.nameMng = parent.nameMng
+        self.limbMng = parent.pfrs.limbMng
+        self.nameMng = parent.pfrs.nameMng
 
         self.selectedLimbs = []
         self.templateName = ''

@@ -29,20 +29,13 @@ reload(load_ui)
 class Rigging_UI:
     def __init__(self, parent):
         self.parent = parent
-        self.nameMng = parent.nameMng
-        self.fileMng = parent.fileMng
-        self.jsonMng = parent.jsonMng
         self.pfrs = parent.pfrs
-        self.logger = parent.logger
+        self.logger = parent.pfrs.logger
 
-        # NEED A BETTER PLACE FOR THIS
-        
-        self.limbMng = parent.limbMng
-        self.ctrMng = parent.ctrMng
-        self.grpMng = parent.grpMng
-        self.jntMng = parent.jntMng
-        self.rigBHV = parent.rigBHV
-        self.bldMng = parent.bldMng
+        self.limbMng = parent.pfrs.limbMng
+        self.ctrMng = parent.pfrs.ctrMng
+        self.grpMng = parent.pfrs.grpMng
+        self.jntMng = parent.pfrs.jntMng
 
         # self.saveLoadSkel = saveLoadSkel.SaveLoad_Skeleton(self)
 
@@ -58,7 +51,7 @@ class Rigging_UI:
 #=========== SETUP ====================================
 
     def _Setup(self):
-        with pm.tabLayout(cc=self.TabChanged) as self.tab:
+        with pm.tabLayout() as self.tab:
             with pm.horizontalLayout() as self.jntSetupTab:
                 self.jntSetup_ui = js_ui.RIG_JointSetup_UI(self)
             with pm.horizontalLayout() as self.limbSetupTab:
@@ -79,6 +72,12 @@ class Rigging_UI:
     
 #=========== TAB SWITCHING ====================================
 
+    def InitTab(self):
+        self.logger.info('\tRIG_UI > InitTab')
+        index = self.pfrs.root.riggingTab.get()
+        pm.tabLayout(self.tab, e=1, sti=index+1)
+        pm.tabLayout(self.tab, e=1, cc=self.TabChanged)
+
     def Setup_Editable(self):
         self.logger.info('Rigging SETUP')
         self.Setup_SubTab()
@@ -86,7 +85,7 @@ class Rigging_UI:
     
     def Setup_SubTab(self):
         self.logger.debug('\tRigging_UI > Setup_SubTab')
-        newIndex = pm.tabLayout(self.tab, q=1, selectTabIndex=1)-1
+        newIndex = pm.tabLayout(self.tab, q=1, sti=1)-1
         limbs = pm.listConnections(self.pfrs.root.jointLimbs)
         if newIndex in (0, 1):
             for limb in limbs:

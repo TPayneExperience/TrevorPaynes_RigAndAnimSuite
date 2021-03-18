@@ -7,9 +7,9 @@ reload(rigData)
 class RIG_APP_Limb_Hierarchy_UI:
     def __init__(self, parent):
         self.parent = parent
-        self.limbMng = parent.limbMng
-        self.rigBHV = parent.rigBHV
-        self.logger = parent.logger
+        self.limbMng = parent.pfrs.limbMng
+        self.rigBHV = parent.pfrs.rigBHV
+        self.logger = parent.pfrs.logger
         self.pfrs = parent.pfrs
         self.rootMng = self.pfrs.rootMng
 

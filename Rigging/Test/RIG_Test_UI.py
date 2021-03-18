@@ -7,8 +7,8 @@ reload(util)
 class RIG_Test_UI:
     def __init__(self, parent):
         self.parent = parent
-        self.bldMng = parent.bldMng
-        self.logger = parent.logger
+        self.bldMng = parent.pfrs.bldMng
+        self.logger = parent.pfrs.logger
 
         self._Setup()
 

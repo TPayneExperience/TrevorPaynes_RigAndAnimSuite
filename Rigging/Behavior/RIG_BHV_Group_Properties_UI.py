@@ -7,11 +7,11 @@ reload(rigData)
 class RIG_BHV_Group_Properties_UI:
     def __init__(self, parent):
         self.parent = parent
-        self.limbMng = parent.limbMng
-        self.jntMng = parent.jntMng
-        self.rigBHV = parent.rigBHV
-        self.grpMng = parent.grpMng
-        self.logger = parent.logger
+        self.limbMng = parent.pfrs.limbMng
+        self.jntMng = parent.pfrs.jntMng
+        self.rigBHV = parent.pfrs.rigBHV
+        self.grpMng = parent.pfrs.grpMng
+        self.logger = parent.pfrs.logger
 
         # self.parentSub_at = None
         

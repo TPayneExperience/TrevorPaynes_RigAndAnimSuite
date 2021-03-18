@@ -20,12 +20,12 @@ reload(paint)
 class PaintWeights_UI:
     def __init__(self, parent):
         self.parent = parent
-        self.limbMng = parent.limbMng
-        self.jntMng = parent.jntMng
-        self.rigBHV = parent.rigBHV
-        self.meshMng = parent.meshMng
-        self.skinMng = parent.skinMng
-        self.logger = parent.logger
+        self.limbMng = parent.pfrs.limbMng
+        self.jntMng = parent.pfrs.jntMng
+        self.rigBHV = parent.pfrs.rigBHV
+        self.meshMng = parent.pfrs.meshMng
+        self.skinMng = parent.pfrs.skinMng
+        self.logger = parent.pfrs.logger
         self.pfrs = parent.pfrs
 
         self.curMesh = None

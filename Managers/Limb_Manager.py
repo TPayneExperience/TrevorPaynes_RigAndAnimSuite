@@ -22,10 +22,10 @@ class Limb_Manager:
         self.limbGroup = pm.group(name='LIMBS', em=1, p=self.pfrs.root)
 
     def LoadRoot(self):
-        self.logger.debug('\tLimbMng > SetRoot')
+        self.logger.debug('\tLimbMng > LoadRoot')
         for child in pm.listRelatives(self.pfrs.root, c=1, type='transform'):
             if child.shortName() == 'LIMBS':
-                self.jntGroup = child
+                self.limbGroup = child
                 break
 
 #============= ADD LIMB ============================

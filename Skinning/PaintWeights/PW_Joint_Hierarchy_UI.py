@@ -7,9 +7,9 @@ reload(util)
 class PW_Joint_Hierarchy_UI:
     def __init__(self, parent):
         self.parent = parent
-        self.limbMng = parent.limbMng
-        self.jntMng = parent.jntMng
-        self.logger = parent.logger
+        self.limbMng = parent.pfrs.limbMng
+        self.jntMng = parent.pfrs.jntMng
+        self.logger = parent.pfrs.logger
 
         self.limb = None
         self.joints = {} # ID : joint

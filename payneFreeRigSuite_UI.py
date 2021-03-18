@@ -13,8 +13,8 @@ import Rigging.Rigging_UI as rig_ui
 reload(rig_ui)
 import Skinning.Skinning_UI as skin_ui
 reload(skin_ui)
-# import RigSetup.RigSetup_UI as rs_ui
-# reload(rs_ui)
+import Animation.Animation_UI as anim_ui
+reload(anim_ui)
 import Rigging.Popups.POPUP_EditRoot as root_popup
 reload(root_popup)
 
@@ -26,27 +26,14 @@ class PayneFreeRigSuite_UI:
         self.pfrs = pfrs.PayneFreeRigSuite()
 
         self.fileMng = self.pfrs.fileMng
-        self.jsonMng = self.pfrs.jsonMng
-
         self.nameMng = self.pfrs.nameMng
-        self.limbMng = self.pfrs.limbMng
-        self.ctrMng = self.pfrs.ctrMng
-        self.jntMng = self.pfrs.jntMng
-        self.grpMng = self.pfrs.grpMng
-        self.rigBHV = self.pfrs.rigBHV
-        self.bldMng = self.pfrs.bldMng
 
         # SKINNING
-        self.meshMng = self.pfrs.meshMng
         self.skinMng = self.pfrs.skinMng
-
         self.logger = self.pfrs.logger
 
-        # UI
-        # self.rigSetupUI = rs_ui.RigSetup_UI(self.nameMng,
-        #                                     self.fileMng,
-        #                                     self)
         self._Setup()
+        self.InitTab()
         self.Setup_Editable()
         debug.PFRS_Debug(self)
 
@@ -59,15 +46,13 @@ class PayneFreeRigSuite_UI:
         name += ' - v%s' %  rigData.__version__
         name += ' - by Trevor Payne'
         with pm.window(mb=True,mbv=True, t=name, w=500, h=500) as self.win:
-            with pm.tabLayout(e=0, cc=self.TabChanged) as self.tab:
+            with pm.tabLayout() as self.tab:
                 with pm.horizontalLayout() as self.rigging_l:
                     self.rig_ui = rig_ui.Rigging_UI(self)
                 with pm.horizontalLayout(en=0) as self.skinning_l:
                     self.skin_ui = skin_ui.Skinning_UI(self)
-                with pm.horizontalLayout(en=0) as self.animation_l:
-                    with pm.tabLayout() as self.animTab:
-                        with pm.horizontalLayout():
-                            pm.button('test', label='Three')
+                with pm.horizontalLayout() as self.animation_l:
+                    self.anim_ui = anim_ui.Animation_UI(self)
         pm.tabLayout(self.tab, e=1, 
                     tabLabel=(  (self.rigging_l,'Rigging'), 
                                 (self.skinning_l,'Skinning'), 
@@ -83,6 +68,8 @@ class PayneFreeRigSuite_UI:
             with pm.menu('File'):
                 pm.menuItem(l='New Rig...', c=self.NewRig_Dialog)
                 pm.menuItem(l='Edit Rig...', c=self.EditRig_Dialog)
+                pm.menuItem(divider=1)
+                pm.menuItem(l='Export Animation Rig', c=self.ExportAnimationRig)
                 pm.menuItem(divider=1)
                 pm.menuItem(l='Quit', en=0)
                 
@@ -141,6 +128,15 @@ class PayneFreeRigSuite_UI:
 
 #=========== TAB SWITCHING ====================================
 
+    def InitTab(self):
+        self.logger.debug('\tPFRS_UI > InitTab')
+        index = self.pfrs.root.mainTab.get()
+        pm.tabLayout(self.tab, e=1, sti=index+1)
+        self.rig_ui.InitTab()
+        self.skin_ui.InitTab()
+        self.anim_ui.InitTab()
+        pm.tabLayout(self.tab, e=1, cc=self.TabChanged)
+
     def Setup_Editable(self):
         self.logger.debug('\tPFRS_UI > SETUP_Editable')
         index = self.pfrs.root.mainTab.get()
@@ -148,24 +144,33 @@ class PayneFreeRigSuite_UI:
             self.rig_ui.Setup_Editable()
         elif (index == 1):
             self.skin_ui.Setup_Editable()
+        elif (index == 2):
+            self.anim_ui.Setup_Editable()
         
-    def Teardown_Editable(self, nextIndex):
+    def Teardown_Editable(self):
         self.logger.debug('\tPFRS_UI > TEARDOWN_Editable')
         lastIndex = self.pfrs.root.mainTab.get()
         if (lastIndex == 0): 
             self.rig_ui.Teardown_Editable()
         elif (lastIndex == 1): 
-            index = self.pfrs.root.skinningTab.get()
-            self.skin_ui.Teardown_Editable(index)
+            self.skin_ui.Teardown_Editable()
+        elif (lastIndex == 2):
+            self.anim_ui.Teardown_Editable()
             # self.skin_ui.skinMng.Teardown_Skins()
         
     def TabChanged(self):
         nextIndex = pm.tabLayout(self.tab, q=1, selectTabIndex=1)-1
-        self.Teardown_Editable(nextIndex)
+        self.Teardown_Editable()
         self.pfrs.root.mainTab.set(nextIndex)
         self.Setup_Editable()
     
 #=========== FUNCTIONALITY ====================================
+
+    def ExportAnimationRig(self, ignore):
+        self.logger.debug('\tPFRS_UI > ExportAnimationRig')
+        self.Teardown_Editable()
+        self.pfrs.ExportAnimationRig()
+        self.Setup_Editable()
 
     def OpenWebsite(self, ignore):
         webbrowser.open('https://youtu.be/yBLdQ1a4-JI?t=9')

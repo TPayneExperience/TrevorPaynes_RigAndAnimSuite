@@ -49,9 +49,10 @@ class Root_Manager:
                                     en='Joint:Limbs:Behaviors:Appearance:Test')
         pm.addAttr(root, ln='skinningTab', at='enum', 
                                     en='Mesh:QuickWeights:PaintWeights:Test')
+        pm.addAttr(root, ln='animationTab', at='enum', 
+                                    en='Poses')
         root.prefix.set(prefix)
 
-        
         # ROOT CONNECTIONS
         pm.addAttr(root, ln='jointLimbs', dt='string')
         pm.addAttr(root, ln='emptyLimbs', dt='string')
@@ -79,6 +80,9 @@ class Root_Manager:
         root.appJointCtrShape.set(names.index('Sphere_Poly'))
         root.appIKPVCtrShape.set(names.index('Diamond_Wire'))
         root.appLookAtCtrShape.set(names.index('Circle_Wire'))
+
+        # ANIMATION
+        pm.addAttr(root, ln='posesFolderPath', dt='string')
 
         self.UpdateRootName(root)
         return root

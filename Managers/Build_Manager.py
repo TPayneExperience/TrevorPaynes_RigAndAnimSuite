@@ -18,6 +18,7 @@ class Build_Manager:
 
     def Setup_Rig(self):
         self.logger.info('BldMng > Test SETUP')
+        self.pfrs.root.rigMode.set(1) # BUILDING Mode
         enabledLimbs = []
         limbs = []
         for rootLimb in self.limbMng.GetRootLimbs(self.pfrs.root):
@@ -40,9 +41,11 @@ class Build_Manager:
         self.Setup_Internal_MayaControllers(enabledLimbs)
         self.Setup_External_MayaControllers(enabledLimbs)
         pm.select(d=1)
+        self.pfrs.root.rigMode.set(2) # ANIMATE Mode
 
     def Teardown_Rig(self):
         self.logger.info('BldMng > Test TEARDOWN\n')
+        self.pfrs.root.rigMode.set(1) # BUILDING Mode
         enabledLimbs = []
         limbs = pm.listConnections(self.pfrs.root.jointLimbs)
         limbs += pm.listConnections(self.pfrs.root.emptyLimbs)
@@ -56,6 +59,7 @@ class Build_Manager:
         self.Teardown_Controls(enabledLimbs)
         self.Remove_Constraints()
         self.Teardown_Groups()
+        self.pfrs.root.rigMode.set(0) # SETUP Mode
 
 #=========== SETUP FUNCTIONALITY ====================================
     

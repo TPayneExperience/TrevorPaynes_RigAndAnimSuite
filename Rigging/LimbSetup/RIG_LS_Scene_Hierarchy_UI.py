@@ -5,11 +5,11 @@ import pymel.core as pm
 class RIG_LS_Scene_Hierarchy_UI:
     def __init__(self, parent):
         self.parent = parent
-        self.rigLS = parent.rigLS
-        self.limbMng = parent.limbMng
-        self.jntMng = parent.jntMng
-        self.rigBHV = parent.rigBHV
-        self.logger = parent.logger
+        self.rigLS = parent.pfrs.rigLS
+        self.limbMng = parent.pfrs.limbMng
+        self.jntMng = parent.pfrs.jntMng
+        self.rigBHV = parent.pfrs.rigBHV
+        self.logger = parent.pfrs.logger
 
         self.selectableJoints = []
         self.acceptSelection = True

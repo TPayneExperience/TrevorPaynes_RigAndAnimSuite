@@ -7,7 +7,7 @@ class PFRS_Debug:
     def __init__(self, parent):
         self.parent = parent
         self.pfrs = parent.pfrs
-        self.limbMng = parent.limbMng
+        self.limbMng = parent.pfrs.limbMng
         self.rigLS = parent.pfrs.rigLS
 
         # self.pfrs.NewScene()
@@ -22,7 +22,9 @@ class PFRS_Debug:
             return
         print ('>>>>>>>>>>>>>> AUTO DEBUG ON <<<<<<<<<<<<<')
 
-        self.SimpleChainTest(1)
+        # self._NewScene()
+        # self.AnimPosesTest(1)
+        # self.SimpleChainTest(1)
         # self.LimbTypesTest(1)
         # self.LegTest(1)
         # self.ArmTest(1)
@@ -44,10 +46,42 @@ class PFRS_Debug:
 # ================= TESTS =============================
 
     def _NewScene(self):
+        self.parent.logger.info('DEBUG TESTS > _NewScene')
         pm.tabLayout(self.parent.rig_ui.tab, e=1, sti=1)
         pm.newFile(f=1)
         pm.flushUndo()
         self.pfrs.InitScene()
+
+    def AnimPosesTest(self, ignore):
+        self.parent.logger.info('DEBUG TESTS > Anim Poses Test')
+        self._NewScene()
+        path = os.path.join(self.folder, 'PFX_AnimRig.ma')
+        pm.openFile(path, f=1)
+        self.pfrs.InitScene()
+        pm.tabLayout(self.parent.tab, e=1, sti=3)
+        # self._NewScene()
+        # pm.importFile(path)
+        # self.parent.UpdateEnableUI()
+        # self.parent.Setup_Editable()
+        # pm.tabLayout(self.parent.rig_ui.tab, e=1, sti=2) # Select Limb setup tab
+        # self.rigLS.AutoBuildByHierarchy()
+        # # self.rigLS.AutoBuildByName()
+        # # pm.tabLayout(self.parent.rig_ui.tab, e=1, sti=3)
+        # pm.tabLayout(self.parent.tab, e=1, sti=3)
+
+
+    def SimpleChainTest(self, ignore):
+        self._NewScene()
+        self.parent.logger.info('DEBUG TESTS > Simple Chain Test')
+        path = os.path.join(self.folder, 'TEST_SimpleChain_01.ma')
+        pm.importFile(path)
+        self.parent.UpdateEnableUI()
+        self.parent.Setup_Editable()
+        pm.tabLayout(self.parent.rig_ui.tab, e=1, sti=2) # Select Limb setup tab
+        self.rigLS.AutoBuildByHierarchy()
+        # self.rigLS.AutoBuildByName()
+        # pm.tabLayout(self.parent.rig_ui.tab, e=1, sti=3)
+        pm.tabLayout(self.parent.tab, e=1, sti=3)
 
     def LimbTypesTest(self, ignore):
         self._NewScene()
@@ -59,18 +93,6 @@ class PFRS_Debug:
         pm.tabLayout(self.parent.rig_ui.tab, e=1, sti=2) # Select Limb setup tab
         self.rigLS.AutoBuildByName()
         pm.tabLayout(self.parent.rig_ui.tab, e=1, sti=3) # Select Limb setup tab
-
-    def SimpleChainTest(self, ignore):
-        self._NewScene()
-        self.parent.logger.info('DEBUG TESTS > Limb Types')
-        path = os.path.join(self.folder, 'TEST_SimpleChain_01.ma')
-        pm.importFile(path)
-        self.parent.UpdateEnableUI()
-        self.parent.Setup_Editable()
-        pm.tabLayout(self.parent.rig_ui.tab, e=1, sti=2) # Select Limb setup tab
-        # self.rigLS.AutoBuildByHierarchy()
-        # self.rigLS.AutoBuildByName()
-        # pm.tabLayout(self.parent.rig_ui.tab, e=1, sti=3)
 
     def LegTest(self, ignore):
         self._NewScene()

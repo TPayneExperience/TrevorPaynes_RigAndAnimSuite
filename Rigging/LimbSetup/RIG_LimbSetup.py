@@ -196,7 +196,6 @@ class RIG_LimbSetup:
         self.limbMng.RebuildBhvType(limb)
         # limb.rebuildLimbType.set(1)
 
-
 #============= RELATIONSHIP ============================
 
     def AreJointsSiblings(self, joints):

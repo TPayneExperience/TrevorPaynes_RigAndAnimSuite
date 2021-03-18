@@ -7,10 +7,10 @@ reload(rigData)
 class RIG_BHV_Group_Hierarchy_UI:
     def __init__(self, parent):
         self.parent = parent
-        self.limbMng = parent.limbMng
-        self.grpMng = parent.grpMng
-        self.rigBHV = parent.rigBHV
-        self.logger = parent.logger
+        self.limbMng = parent.pfrs.limbMng
+        self.grpMng = parent.pfrs.grpMng
+        self.rigBHV = parent.pfrs.rigBHV
+        self.logger = parent.pfrs.logger
 
         self.limb = None
         self.groups = {} # ID : group

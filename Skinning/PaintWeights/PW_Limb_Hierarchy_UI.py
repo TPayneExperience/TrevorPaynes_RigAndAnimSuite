@@ -7,9 +7,9 @@ reload(rigData)
 class PW_Limb_Hierarchy_UI:
     def __init__(self, parent):
         self.parent = parent
-        self.rigBHV = parent.rigBHV
-        self.limbMng = parent.limbMng
-        self.jntMng = parent.jntMng
+        self.rigBHV = parent.pfrs.rigBHV
+        self.limbMng = parent.pfrs.limbMng
+        self.jntMng = parent.pfrs.jntMng
         # self.rigBHV = rigBHV
         self.logger = parent.logger
 

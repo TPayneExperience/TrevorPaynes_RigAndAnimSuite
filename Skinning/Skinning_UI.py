@@ -14,15 +14,15 @@ reload(paint_ui)
 class Skinning_UI:
     def __init__(self, parent):
         self.parent = parent
-        self.limbMng = parent.limbMng
-        self.jntMng = parent.jntMng
-        self.rigBHV = parent.rigBHV
-        self.nameMng = parent.nameMng
-        self.logger = parent.logger
+        self.limbMng = parent.pfrs.limbMng
+        self.jntMng = parent.pfrs.jntMng
+        self.rigBHV = parent.pfrs.rigBHV
+        self.nameMng = parent.pfrs.nameMng
+        self.logger = parent.pfrs.logger
         self.pfrs = parent.pfrs
+        self.meshMng = parent.pfrs.meshMng
+        self.skinMng = parent.pfrs.skinMng
 
-        self.meshMng = parent.meshMng
-        self.skinMng = parent.skinMng
 
         # self.meshMng = meshMng.Mesh_Manager()
         # self.skinMng = skinMng.Skin_Mananger(self)
@@ -32,7 +32,7 @@ class Skinning_UI:
 #=========== SETUP ====================================
 
     def _Setup(self):
-        with pm.tabLayout(cc=self.TabChanged) as self.tab:
+        with pm.tabLayout() as self.tab:
             with pm.horizontalLayout() as self.meshSetupTab:
                 self.meshSetup_ui = mesh_ui.MeshSetup_UI(self)
             with pm.horizontalLayout() as self.quickWeightsTab:
@@ -63,9 +63,15 @@ class Skinning_UI:
     
 #=========== TAB SWITCHING ====================================
 
+    def InitTab(self):
+        self.logger.info('\tSKIN_UI > InitTab')
+        index = self.pfrs.root.skinningTab.get()
+        pm.tabLayout(self.tab, e=1, sti=index+1)
+        pm.tabLayout(self.tab, e=1, cc=self.TabChanged)
+
     def Setup_Editable(self):
         self.logger.info('Rigging > Skinning SETUP')
-        index = self.root.skinningTab.get()
+        index = self.pfrs.root.skinningTab.get()
         if (index == 0):
             self.meshSetup_ui.Setup_Editable()
         # elif (index == 1):
@@ -85,8 +91,8 @@ class Skinning_UI:
         # elif index in [3, 4]:
         #     self.ctrMng.SetLayerState(True, False)
         
-    def Teardown_Editable(self, nextIndex):
-        lastIndex = self.root.skinningTab.get()
+    def Teardown_Editable(self):
+        lastIndex = self.pfrs.root.skinningTab.get()
         if (lastIndex == 0): 
             self.meshSetup_ui.Teardown_Editable()
         # elif (lastIndex == 1): 
@@ -98,25 +104,27 @@ class Skinning_UI:
         # elif (lastIndex == 4):
         #     self.RIG_Test_UI.Teardown_Editable() 
 
-        # Skin Weights for all but Mesh Setup
-        if lastIndex == 0 and nextIndex in [1, 2, 3]:
-            self.skinMng.Setup_Skins()
-        elif lastIndex in [1, 2, 3] and nextIndex == 0:
-            self.skinMng.Teardown_Skins()
+
+        # FIX LATER: SHOULD NOT REQUIRE 'nextIndex'
+        # # Skin Weights for all but Mesh Setup
+        # if lastIndex == 0 and nextIndex in [1, 2, 3]:
+        #     self.skinMng.Setup_Skins()
+        # elif lastIndex in [1, 2, 3] and nextIndex == 0:
+        #     self.skinMng.Teardown_Skins()
         
-        # Paint Display for Quick/Paint weights
-        if lastIndex in [0, 3] and nextIndex in [1, 2]:
-            # self.skinMng.Setup_PaintDisplay()
-            self.skinMng.Setup_JointAnim()
-        elif lastIndex in [1, 2] and nextIndex in [0, 3]:
-            # self.skinMng.Teardown_PaintDisplay()
-            self.skinMng.Teardown_JointAnim()
+        # # Paint Display for Quick/Paint weights
+        # if lastIndex in [0, 3] and nextIndex in [1, 2]:
+        #     # self.skinMng.Setup_PaintDisplay()
+        #     self.skinMng.Setup_JointAnim()
+        # elif lastIndex in [1, 2] and nextIndex in [0, 3]:
+        #     # self.skinMng.Teardown_PaintDisplay()
+        #     self.skinMng.Teardown_JointAnim()
         self.logger.info('Rigging > Skinning TEARDOWN\n')
         self.logger.info('--------------------------------\n')
         
         
     def TabChanged(self):
         nextIndex = pm.tabLayout(self.tab, q=1, selectTabIndex=1)-1
-        self.Teardown_Editable(nextIndex)
-        self.root.skinningTab.set(nextIndex)
+        self.Teardown_Editable()
+        self.pfrs.root.skinningTab.set(nextIndex)
         self.Setup_Editable()

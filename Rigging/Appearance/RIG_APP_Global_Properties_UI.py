@@ -7,9 +7,9 @@ reload(rigData)
 class RIG_APP_Global_Properties_UI:
     def __init__(self, parent):
         self.parent = parent
-        self.grpMng = parent.grpMng
-        self.ctrMng = parent.ctrMng
-        self.logger = parent.logger
+        self.grpMng = parent.pfrs.grpMng
+        self.ctrMng = parent.pfrs.ctrMng
+        self.logger = parent.pfrs.logger
         self.pfrs = parent.pfrs
 
         self._Setup()

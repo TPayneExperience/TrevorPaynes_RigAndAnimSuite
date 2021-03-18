@@ -15,14 +15,8 @@ reload(globalProp_UI)
 
 class RIG_Appearance_UI:
     def __init__(self, parent):
-
         self.parent = parent
-        self.limbMng = parent.limbMng
-        self.rigBHV = parent.rigBHV
-        self.grpMng = parent.grpMng
-        self.ctrMng = parent.ctrMng
-        self.nameMng = parent.nameMng
-        self.logger = parent.logger
+        self.logger = parent.pfrs.logger
         self.pfrs = parent.pfrs
 
         self._Setup()
@@ -53,7 +47,6 @@ class RIG_Appearance_UI:
     
     def Teardown_Editable(self):
         self.logger.info('Rigging > Appearance TEARDOWN\n')
-        # self.rigBHV.RebuildLimbs()
 
 #=========== LIMBS ====================================
 

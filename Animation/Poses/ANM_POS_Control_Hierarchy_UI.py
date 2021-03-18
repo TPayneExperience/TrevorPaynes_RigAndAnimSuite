@@ -4,7 +4,7 @@ import pymel.core as pm
 import Data.Rig_Data as rigData
 reload(rigData)
 
-class RIG_APP_Control_Hierarchy_UI:
+class ANM_POS_Control_Hierarchy_UI:
     def __init__(self, parent):
         self.parent = parent
         self.grpMng = parent.pfrs.grpMng
@@ -16,12 +16,12 @@ class RIG_APP_Control_Hierarchy_UI:
         self._Setup()
 
     def SetLimb(self, limb):
-        self.logger.debug('\tApp_ControlHier > SetLimb')
+        self.logger.debug('\tPos_ControlHier > SetLimb')
         self.limb = limb
         self.Populate()
     
     def Populate(self):
-        self.logger.debug('\tApp_ControlHier > Populate')
+        self.logger.debug('\tPos_ControlHier > Populate')
         pm.treeView(self.widget, e=1, removeAll=1)
         self.controls = {}
         if not self.limb:
@@ -57,19 +57,27 @@ class RIG_APP_Control_Hierarchy_UI:
 #=========== FUNCTIONALITY ====================================
 
     def IgnoreRename(self, idStr, newName):
-        self.logger.debug('\tApp_CtrHier > IgnoreRename')
+        self.logger.debug('\tPos_CtrHier > IgnoreRename')
         return ''
 
     def SelectionChanged(self):
-        self.logger.debug('\tApp_ControlHier > SelectionChanged')
+        self.logger.debug('\tPos_ControlHier > SelectionChanged')
         ctrStr = pm.treeView(self.widget, q=1, selectItem=1)
         if ctrStr:
             ctr = self.controls[int(ctrStr[0])]
-            msg = '\tCtrHier > SELECTED control "%s"'% str(ctr)
+            msg = '\tPos_CtrHier > SELECTED control "%s"'% str(ctr)
             self.logger.info(msg)
             pm.select(ctr)
         else:
-            self.logger.info('\tCtrHier > DESELECTED control')
+            self.logger.info('\tPos_CtrHier > DESELECTED control')
+
+
+
+
+
+
+
+
 
 
 

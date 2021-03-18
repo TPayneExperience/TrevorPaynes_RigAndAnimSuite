@@ -6,7 +6,6 @@ class POPUP_EditRoot:
     def __init__(self, parent):
         self.pfrs = parent.pfrs
         self.nameMng = parent.pfrs.nameMng
-        self.fileMng = parent.pfrs.fileMng
         self.parent = parent
         self.logger = parent.logger
         
