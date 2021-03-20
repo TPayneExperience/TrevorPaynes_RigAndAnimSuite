@@ -41,15 +41,31 @@ class Pose_Manager:
             for pose in poses:
                 pose.weight = 0
 
-    def GetPoses(self, limbs):
-        self.logger.debug('\tPosMng > GetPoses')
+    def GetPoseNames(self, limbs):
+        self.logger.debug('\tPosMng > GetPoseNames')
+        for limb in limbs:
+            limbName = self._GetLimbNameFromLimb(limb)
+            if limbName not in self.posesByLimbName:
+                return []
         limbName = self._GetLimbNameFromLimb(limbs[0])
-        poses = set(self.posesByLimbName[limbName])
+        poses = self.posesByLimbName[limbName]
+        posesByNames = {}
+        for pose in poses:
+            posesByNames[pose.poseName] = [pose]
+        poseNames = set([pose.poseName for pose in poses])
         for limb in limbs[1:]:
             limbName = self._GetLimbNameFromLimb(limb)
-            otherPoses = self.posesByLimbName[limbName]
-            poses = poses.intersection(otherPoses)
-        return list(poses)
+            poses = self.posesByLimbName[limbName]
+            for pose in poses:
+                if pose.poseName in posesByNames:
+                    posesByNames[pose.poseName].append(pose)
+            tempPoseNames = set([pose.poseName for pose in poses])
+            poseNames = poseNames.intersection(tempPoseNames)
+        allPoses = []
+        for poseName in poseNames:
+            allPoses += posesByNames[poseName]
+        poseNames = set([pose.poseName for pose in allPoses])
+        return list(poseNames)
 
     def InitPoses(self):
         self.logger.debug('\tPosMng > InitPoses')
@@ -73,38 +89,45 @@ class Pose_Manager:
         self.logger.debug('\tPosMng > _EvaluatePoses')
         for limb in limbs:
             limbName = self._GetLimbNameFromLimb(limb)
-            groups = self.grpMng.GetJointGroups(limb)
-            groups += self.grpMng.GetLimbGroups(limb)
-            for group in groups:
-                control = pm.listConnections(group.control)[0]
-                self._ResetControl(control)
+            poses = self.posesByLimbName[limbName]
+            for control in util.GetSortedLimbJointControls(limb):
+                self._PoseControl(control, poses)
+                # for pose in poses:
+                #     w = pose.weight
+                #     self._PoseControl(control, pose.jointControls[i], w)
 
-            joints = util.GetSortedLimbJoints(limb)
-            for pose in self.posesByLimbName[limbName]:
-                w = pose.weight
-                for i in range(len(joints)):
-                    control = self._GetJointControl(joints[i])
-                    self._PoseControl(control, pose.jointControls[i], w)
-                if pose.bhvType in rigData.EMPTY_BHV_INDEXES:
-                    group = pm.listConnections(limb.bhvEmptyGroup)[0]
-                    control = pm.listConnections(group.control)[0]
-                    self._PoseControl(control, pose.limbControls[0], w)
-                elif pose.bhvType in rigData.IK_PV_BHV_INDEXES:
-                    group = pm.listConnections(limb.bhvIKPVGroup)[0]
-                    control = pm.listConnections(group.control)[0]
-                    self._PoseControl(control, pose.limbControls[1], w)
-                elif pose.bhvType in rigData.LOOK_AT_BHV_INDEXES:
-                    group = pm.listConnections(limb.bhvLookAtGroup)[0]
-                    control = pm.listConnections(group.control)[0]
-                    self._PoseControl(control, pose.limbControls[2], w)
+            # groups = self.grpMng.GetJointGroups(limb)
+            # groups += self.grpMng.GetLimbGroups(limb)
+            # for group in groups:
+            #     control = pm.listConnections(group.control)[0]
+            #     self._ResetControl(control)
+            # joints = util.GetSortedLimbJoints(limb)
+
+                # for pose in poses:
+                #     w = pose.weight
+                #     for i in range(len(joints)):
+                #         control = self._GetJointControl(joints[i])
+                #         self._PoseControl(control, pose.jointControls[i], w)
+                #     if pose.bhvType in rigData.EMPTY_BHV_INDEXES:
+                #         group = pm.listConnections(limb.bhvEmptyGroup)[0]
+                #         control = pm.listConnections(group.control)[0]
+                #         self._PoseControl(control, pose.limbControls[0], w)
+                #     elif pose.bhvType in rigData.IK_PV_BHV_INDEXES:
+                #         group = pm.listConnections(limb.bhvIKPVGroup)[0]
+                #         control = pm.listConnections(group.control)[0]
+                #         self._PoseControl(control, pose.limbControls[1], w)
+                #     elif pose.bhvType in rigData.LOOK_AT_BHV_INDEXES:
+                #         group = pm.listConnections(limb.bhvLookAtGroup)[0]
+                #         control = pm.listConnections(group.control)[0]
+                #         self._PoseControl(control, pose.limbControls[2], w)
 
 #============= PRIVATE ============================
 
-    def _ResetControl(self, control):
-        pos = control.posePos.get()
-        rot = control.poseRot.get()
-        scale = control.poseScale.get()
-        pm.xform(control, t=pos, ro=rot, s=scale)
+    # def _ResetControl(self, control):
+    #     pos = control.posePos.get()
+    #     rot = control.poseRot.get()
+    #     scale = control.poseScale.get()
+    #     pm.xform(control, t=pos, ro=rot, s=scale)
 
     def SavePose(self, poseName, limb, folder):
         self.logger.debug('\tPosMng > SavePose')
@@ -181,14 +204,50 @@ class Pose_Manager:
         bhv = pose.bhvType
         return '%s_%d_%d' % (name, side, bhv)
 
-    def _PoseControl(self, control, data, weight):
+    # def _PoseControl(self, control, data, weight):
+    #     self.logger.debug('\tPosMng > _PoseControl')
+    #     if not data:
+    #         return
+    #     pos = [p*weight for p in data[0]]
+    #     rot = [r*weight for r in data[1]]
+    #     scale = [((s-1)*weight+1) for s in data[2]]
+    #     pm.xform(control, t=pos, ro=rot, s=scale, r=1)
+
+    def _PoseControl(self, control, poses):
         self.logger.debug('\tPosMng > _PoseControl')
-        if not data:
-            return
-        pos = [p*weight for p in data[0]]
-        rot = [r*weight for r in data[1]]
-        scale = [((s-1)*weight+1) for s in data[2]]
-        pm.xform(control, t=pos, ro=rot, s=scale, r=1)
+        group = pm.listConnections(control.group)[0]
+        groupType = group.groupType.get()
+        xform = [control.posePos.get()]
+        xform.append(control.poseRot.get())
+        xform.append(control.poseScale.get())
+        if groupType == 1: # Joint
+            index = control.controlIndex.get()
+            for pose in poses:
+                xform = self._AddXforms(xform, pose.jointControls[index], 
+                                                pose.weight)
+        elif groupType == 0: # Empty
+            for pose in poses:
+                xform = self._AddXforms(xform, pose.limbControls[0], 
+                                                        pose.weight)
+        elif groupType == 2: # IKPV
+            for pose in poses:
+                xform = self._AddXforms(xform, pose.limbControls[2], 
+                                                        pose.weight)
+        elif groupType == 3: # LookAt
+            for pose in poses:
+                xform = self._AddXforms(xform, pose.limbControls[3], 
+                                                        pose.weight)
+        pm.xform(control, t=xform[0], ro=xform[1], s=xform[2])
+
+    def _AddXforms(self, xform1, xform2, weight2):
+        self.logger.debug('\tPosMng > _AddXforms')
+        xform = [[xform1[0][i] + xform2[0][i]*weight2 for i in range(3)]]
+        xform.append([xform1[1][i] + xform2[1][i]*weight2 for i in range(3)])
+        xform.append([])
+        for i in range(3):
+            xform[2].append(((xform1[2][i]-1) + (xform2[2][i]-1)*weight2) + 1)
+        return xform
+
 
     def _GetJointControl(self, joint):
         group = pm.listConnections(joint.group)[0]

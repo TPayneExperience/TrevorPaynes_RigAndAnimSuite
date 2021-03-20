@@ -130,11 +130,24 @@ class PayneFreeRigSuite:
         self.bldMng.Setup_Rig()
         self.ctrMng.SetLayerState(True, False)
 
+        # SETUP CONTROLS FOR QUICKER RETRIEVAL
+        for limb in pm.listConnections(self.root.jointLimbs):
+            for joint in pm.listConnections(limb.joints):
+                group = pm.listConnections(joint.group)[0]
+                control = pm.listConnections(group.control)[0]
+                control.controlIndex.set(joint.jointIndex.get())
+                pm.connectAttr(limb.jointControls, control.limb)
+
         # SET STARTING TAB
         oldTab = self.root.mainTab.get()
         self.root.mainTab.set(2)
+        # SAVE
         pm.saveAs(animFile)
+
+        # REVERT
         self.root.mainTab.set(oldTab)
+        for limb in pm.listConnections(self.root.jointLimbs):
+            pm.disconnectAttr(limb.jointControls)
 
         self.bldMng.Teardown_Rig()
         for limb in limbs:

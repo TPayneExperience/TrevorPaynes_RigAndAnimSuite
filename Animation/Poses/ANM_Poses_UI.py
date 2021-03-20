@@ -65,9 +65,12 @@ class ANM_Poses_UI:
 
     def LimbsSelected(self, limbs):
         self.logger.debug('\tANM_Poses_UI > LimbSelected')
+        if not limbs:
+            self.ctrHier_ui.SetLimb(None)
+            return
         self.anmPOS.SetLimbs(limbs)
         self.limbPoses_ui.SetLimbs(limbs)
-        if not limbs or len(limbs) > 1:
+        if len(limbs) > 1:
             self.ctrHier_ui.SetLimb(None)
         else:
             self.ctrHier_ui.SetLimb(limbs[0])

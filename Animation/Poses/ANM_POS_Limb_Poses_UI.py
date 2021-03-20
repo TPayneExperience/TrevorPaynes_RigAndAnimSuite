@@ -29,9 +29,9 @@ class ANM_POS_Limb_Poses_UI:
         if not self.limbs:
             return
         pm.frameLayout(self.limbPoses_fl, e=1, en=1)
-        self.poses = self.posMng.GetPoses(self.limbs)
-        for i in range(len(self.poses)):
-            poseName = self.poses[i].poseName
+        self.poseNames = self.posMng.GetPoseNames(self.limbs)
+        for i in range(len(self.poseNames)):
+            poseName = self.poseNames[i]
             ui = pm.floatSliderGrp(l=poseName, f=1, cw3=(50, 40, 100),
                             max=1, p=self.poses_cl, pre=3,
                             dc=pm.Callback(self.SetPoseWeight, i))
@@ -54,7 +54,7 @@ class ANM_POS_Limb_Poses_UI:
 #=========== FUNCTIONALITY ==============================================
 
     def SetPoseWeight(self, index):
-        poseName = self.poses[index].poseName
+        poseName = self.poseNames[index]
         weight = pm.floatSliderGrp(self.poses_ui[index], q=1, v=1)
         self.anmPos.SetPoseWeight(poseName, self.limbs, weight)
         

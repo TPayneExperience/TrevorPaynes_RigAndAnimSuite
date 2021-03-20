@@ -6,7 +6,7 @@ class POSE:
         self.bhvType = -1
         self.side = -1
         self.weight = 0
-        self.limbControls = [] # IKPV AND LookAt (both)
+        self.limbControls = [] # [Empty, IKPV, LookAt]
         self.jointControls = [] # by index >>>
         # >>> empty = ignore, [[], [[pos], [rot], [scale]],...]
 

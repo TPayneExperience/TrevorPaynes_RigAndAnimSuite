@@ -65,6 +65,8 @@ class Control_Manager:
         ctr = pm.duplicate(sourceShape, ic=1)[0]
         pm.addAttr(ctr, ln='ID', at='long', dv=ctrID)
         pm.addAttr(ctr, ln='group', dt='string')
+        pm.addAttr(ctr, ln='limb', dt='string')
+        pm.addAttr(ctr, ln='controlIndex', at='short')
         pm.addAttr(ctr, ln='posePos', at='float3')
         pm.addAttr(ctr, ln='posePosX', at='float', p='posePos')
         pm.addAttr(ctr, ln='posePosY', at='float', p='posePos')
