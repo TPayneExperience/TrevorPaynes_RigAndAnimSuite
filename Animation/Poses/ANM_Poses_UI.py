@@ -43,7 +43,7 @@ class ANM_Poses_UI:
         with pm.verticalLayout():
             self.limbPoses_ui = limbPoses_UI.ANM_POS_Limb_Poses_UI(self)
     
-# #=========== SETUP + TEARDOWN ====================================
+#=========== SETUP + TEARDOWN ====================================
 
     def Setup_Editable(self):
         self.logger.info('Animation > Poses SETUP')
@@ -74,23 +74,17 @@ class ANM_Poses_UI:
             self.ctrHier_ui.SetLimb(None)
         else:
             self.ctrHier_ui.SetLimb(limbs[0])
-        # self.grpProp_ui.SetGroup(None)
 
-    def PoseSaved(self):
-        self.logger.debug('\tANM_Poses_UI > PoseSaved')
+    def UpdateLimbPoses(self):
+        self.logger.debug('\tANM_Poses_UI > UpdateLimbPoses')
         self.limbPoses_ui.Populate()
 
-#     def GroupSelected(self, group):
-#         self.logger.debug('\tANM_Poses_UI > GroupSelected')
-#         pm.select(group)
-#         self.limbPoses_ui.SetLimb(None)
-#         self.grpProp_ui.SetGroup(group)
+    def ResetLimbs(self, limbs):
+        self.logger.debug('\tANM_Poses_UI > ResetLimbs')
+        self.limbPoses_ui.SetLimbs(limbs)
+    
+    # def DeleteSelectedLimbPose(self, poseName, limbs):
+    #     self.logger.debug('\tANM_Poses_UI > DeleteSelectedLimbPose')
 
-#     def SetBhvType(self, limb):
-#         self.logger.debug('\tANM_Poses_UI > SetBhvType')
-#         self.ctrHier_ui.Populate()
-
-#     def SetEnableLimb(self, limb):
-#         self.logger.debug('\tANM_Poses_UI > SetEnableLimb')
-#         self.limbHier_ui.SetEnableLimb(limb)
-
+    # def DeleteAllLimbPose(self, poseName):
+    #     self.logger.debug('\tANM_Poses_UI > DeleteAllLimbPose')

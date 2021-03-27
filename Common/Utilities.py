@@ -27,9 +27,3 @@ def GetSortedJoints(joints):
     for joint in joints:
         temp[joint.longName()] = joint
     return [temp[i] for i in sorted(temp.keys())]
-
-def GetSortedLimbJointControls(limb):
-    temp = {}
-    for control in pm.listConnections(limb.jointControls):
-        temp[control.controlIndex.get()] = control
-    return [temp[i] for i in sorted(temp.keys())]

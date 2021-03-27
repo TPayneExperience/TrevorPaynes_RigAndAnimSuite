@@ -18,8 +18,8 @@ reload(anim_ui)
 import Rigging.Popups.POPUP_EditRoot as root_popup
 reload(root_popup)
 
-import PFRS_Debug as debug
-reload(debug)
+import PFRS_Debug_UI as debug_ui
+reload(debug_ui)
 
 class PayneFreeRigSuite_UI:
     def __init__(self):
@@ -33,9 +33,9 @@ class PayneFreeRigSuite_UI:
         self.logger = self.pfrs.logger
 
         self._Setup()
+        debug_ui.PFRS_Debug_UI(self)
         self.InitTab()
         self.Setup_Editable()
-        debug.PFRS_Debug(self)
 
 
 #=========== SETUP ====================================

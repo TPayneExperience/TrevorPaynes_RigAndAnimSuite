@@ -95,13 +95,13 @@ class RIG_LS_Limb_Hierarchy_UI:
     def Remove(self, ignore):
         self.logger.info('\tLS_LimbHier > Remove')
         limbIDStrs = pm.treeView(self.widget, q=1, selectItem=1)
-        if (pm.confirmDialog(   title='Remove Limb', 
+        if (pm.confirmDialog(   t='Remove Limb', 
                                 icon='warning', 
-                                message='Remove limb?', 
-                                button=['Yes','No'], 
-                                defaultButton='Yes', 
-                                cancelButton='No', 
-                                dismissString='No') == 'No'):
+                                m='Remove limb?', 
+                                b=['Yes','No'], 
+                                db='Yes', 
+                                cb='No', 
+                                ds='No') == 'No'):
             return
         limb = self._limbs[limbIDStrs[0]]
         self.rigLS.RemoveJointLimb(limb)
@@ -109,13 +109,13 @@ class RIG_LS_Limb_Hierarchy_UI:
 
     def RemoveAll(self, ignore):
         self.logger.info('\tLS_LimbHier > Remove ALL')
-        if (pm.confirmDialog(   title='Remove ALL Limbs', 
+        if (pm.confirmDialog(   t='Remove ALL Limbs', 
                                 icon='warning', 
-                                message='Remove ALL limbs?', 
-                                button=['Yes','No'], 
-                                defaultButton='Yes', 
-                                cancelButton='No', 
-                                dismissString='No') == 'No'):
+                                m='Remove ALL limbs?', 
+                                b=['Yes','No'], 
+                                db='Yes', 
+                                cb='No', 
+                                ds='No') == 'No'):
             return
         self.rigLS.RemoveAllJointLimbs()
         self.parent.RemoveJointLimb()

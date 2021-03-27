@@ -2,6 +2,7 @@
 class POSE:
     def __init__(self):
         self.poseName = 'asdf'
+        self.filePath = 'asdf'
         self.pfrsName = 'asdf' # limb.pfrsName.get()
         self.bhvType = -1
         self.side = -1

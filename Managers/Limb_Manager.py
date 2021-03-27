@@ -50,7 +50,6 @@ class Limb_Manager:
         pm.addAttr(limb, ln='side', at='enum', en=limbSides,
                                         h=hide)
         pm.addAttr(limb, ln='joints', dt='string', h=hide)
-        pm.addAttr(limb, ln='jointControls', dt='string', h=hide)
         pm.addAttr(limb, ln='enableLimb', at='bool', dv=1, h=hide)
         limb.pfrsName.set(pfrsName)
 
