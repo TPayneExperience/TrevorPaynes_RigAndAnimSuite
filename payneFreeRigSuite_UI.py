@@ -92,6 +92,7 @@ class PayneFreeRigSuite_UI:
                 pm.menuItem(l='disabled')
 
             with pm.menu('Help'):
+                pm.menuItem(l='Documentation', c=self.OpenDocumentation)
                 with pm.subMenuItem(l='Tutorials'):
                     pm.menuItem(l='QUICK START', d=1)
                     pm.menuItem(l='For Artists', en=0)
@@ -171,6 +172,11 @@ class PayneFreeRigSuite_UI:
         self.Teardown_Editable()
         self.pfrs.ExportAnimationRig()
         self.Setup_Editable()
+
+    def OpenDocumentation(self, ignore):
+        url = 'https://docs.google.com/document/d/1KxdOnofyA2Bxz'
+        url += 'QHInxrmWjFJK_Q1hCwvnAP0-0SgMRE/edit?usp=sharing'
+        webbrowser.open(url)
 
     def OpenWebsite(self, ignore):
         webbrowser.open('https://youtu.be/yBLdQ1a4-JI?t=9')
