@@ -45,6 +45,8 @@ reload(anmPOS)
 
 import PFRS_Debug as debug
 reload(debug)
+import Common.Utilities as util
+reload(util)
 
 class PayneFreeRigSuite:
     def __init__(self):
@@ -56,7 +58,7 @@ class PayneFreeRigSuite:
 
         # MANAGERS
         self.fileMng = fm.File_Manager()
-        self.jsonMng = js.Json_Manager()
+        # self.jsonMng = js.Json_Manager()
         self.nameMng = nm.Name_Manager(self)
         self.ctrMng = ctr.Control_Manager(self)
         self.grpMng = grp.Group_Manager(self)
@@ -128,8 +130,7 @@ class PayneFreeRigSuite:
         self.root.posesFolderPath.set(poseFolder)
 
         # BUILD RIG
-        limbs = pm.listConnections(self.root.jointLimbs)
-        limbs += pm.listConnections(self.root.emptyLimbs)
+        limbs = util.GetAllLimbs(self.root)
         for limb in limbs:
             self.grpMng.Setup_LimbGroupVisibility(limb)
         self.bldMng.Setup_Rig()

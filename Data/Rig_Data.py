@@ -35,6 +35,7 @@ BHV_TYPES = (   'FK - Chain',           # 0
                 'DEPRICATED - FK - Chain (2 Joints)',# 11
                 'DEPRICATED - FK - Reverse Chain (2 Joints)' # 12
                 )
+                
 EMPTY_BHV_INDEXES = (7,)
 ONE_JOINT_BHV_INDEXES = (6, 4, 3)
 TWO_JOINT_CHAIN_BHV_INDEXES = (0, 8, 6) # (11, 6, 12)
@@ -45,10 +46,14 @@ REVERSE_BHV_INDEXES = (8, 9) # (8, 12, 9)
 
 FK_BRANCH_BHV_INDEXES = (6,)
 FK_CHAIN_BHV_INDEXES = (0, 8) # (0, 8, 11, 12)
+FK_BHV_INDEXES = (0, 6, 8)
 RFK_BHV_INDEXES = (10, 9)
+JOINT_CONTROL_INDEXES = (0, 6, 8, 9, 10)
+
+IK_PV_BHV_INDEXES = (1,)
 CST_BHV_INDEXES = (3,)
 LOOK_AT_BHV_INDEXES = (4,)
-IK_PV_BHV_INDEXES = (1,)
+LIMB_CONTROL_INDEXES = (1, 4, 7)
 
 ROT_LOCK_OVERRIDE_BHV_INDEXES = (9, 10)
 POS_LOCK_OVERRIDE_BHV_INDEXES = (9, 10)

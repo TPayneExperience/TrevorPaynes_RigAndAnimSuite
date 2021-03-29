@@ -55,33 +55,16 @@ class Animation_UI:
     def Setup_Editable(self):
         self.logger.info('Animation SETUP')
         self.Setup_SubTab()
-    #     self.UpdateControlVis()
     
     def Setup_SubTab(self):
         self.logger.debug('\tAnimation_UI > Setup_SubTab')
         newIndex = pm.tabLayout(self.tab, q=1, selectTabIndex=1)-1
-    #     limbs = pm.listConnections(self.pfrs.root.jointLimbs)
-    #     if newIndex in (0, 1):
-    #         for limb in limbs:
-    #             self.grpMng.Teardown_LimbGroupVisibility(limb)
-    #     elif newIndex in (2, 3, 4):
-    #         for limb in limbs:
-    #             self.grpMng.Setup_LimbGroupVisibility(limb)
         self.pfrs.root.animationTab.set(newIndex)
         if (newIndex == 0):
             self.poses_ui.Setup_Editable()
-    #     elif (newIndex == 1):
-    #         self.RIG_LimbSetup_UI.Setup_Editable()
-    #     elif (newIndex == 2):
-    #         self.bhv_ui.Setup_Editable()
-    #     elif (newIndex == 3):
-    #         self.app_ui.Setup_Editable() 
-    #     elif (newIndex == 4):
-    #         self.RIG_Test_UI.Setup_Editable() 
         
 
     def Teardown_Editable(self):
-    #     self.Teardown_SubTab()
         self.logger.info('Animation TEARDOWN\n')
         self.logger.info('--------------------------------\n')
     
@@ -90,29 +73,7 @@ class Animation_UI:
         lastIndex = self.pfrs.root.animationTab.get()
         if (lastIndex == 0): 
             self.poses_ui.Teardown_Editable()
-    #     elif (lastIndex == 1): 
-    #         self.RIG_LimbSetup_UI.Teardown_Editable()
-    #     elif (lastIndex == 2):
-    #         self.bhv_ui.Teardown_Editable()
-    #     elif (lastIndex == 3):
-    #         self.app_ui.Teardown_Editable() 
-    #     elif (lastIndex == 4):
-    #         self.RIG_Test_UI.Teardown_Editable() 
-    #     self.limbMng.RebuildLimbs()
 
-    # def UpdateControlVis(self):
-    #     self.logger.debug('\tAnimation_UI > UpdateControlVis')
-    #     index = self.pfrs.root.animationTab.get()
-    #     if index in (0,):
-    #         self.jntMng.SetLayerState(True, False)
-    #     else:
-    #         self.jntMng.SetLayerState(True, True)
-    #     if index == 2: # Bhv
-    #         self.ctrMng.SetLayerState(True, True)
-    #     elif index in (3, 4): # App, Test
-    #         self.ctrMng.SetLayerState(True, False)
-        
     def TabChanged(self):
         self.Teardown_SubTab()
         self.Setup_SubTab()
-        # self.UpdateControlVis()

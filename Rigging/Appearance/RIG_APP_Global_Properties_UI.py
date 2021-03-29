@@ -69,7 +69,7 @@ class RIG_APP_Global_Properties_UI:
         self.logger.info('\tApp_GlobalProp > UpdateIKPVShapes')
         index = self.pfrs.root.appJointCtrShape.get()
         for limb in pm.listConnections(self.pfrs.root.jointLimbs):
-            group = pm.listConnections(limb.bhvIKPVGroup)[0]
+            group = pm.listConnections(limb.bhvIKPV1Group)[0]
             self.ctrMng.SetShape(group, index)
 
     def UpdateLookAtShapes(self, shape):

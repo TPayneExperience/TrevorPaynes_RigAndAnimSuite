@@ -117,8 +117,8 @@ class Joint_Manager:
             pm.parent(children, parents[0])
         else:
             pm.parent(children, w=1)
-        if pm.listConnections(joint.limb):
-            self.RemoveJoint(joint)
+        # if pm.listConnections(joint.limb):
+        #     self.RemoveJoint(joint)
         pm.delete(joint)
         
 #============= FUNCTIONALITY ============================

@@ -101,7 +101,8 @@ class Limb_Manager:
         hide = rigData.HIDE_ATTRS
 
         # LookAt, IKPV
-        pm.addAttr(limb, ln='bhvIKPVGroup', dt='string', h=hide)
+        pm.addAttr(limb, ln='bhvIKPV1Group', dt='string', h=hide)
+        pm.addAttr(limb, ln='bhvIKPV2Group', dt='string', h=hide)
         pm.addAttr(limb, ln='bhvLookAtGroup', dt='string', h=hide)
 
         # IK PV + CST 
@@ -258,7 +259,7 @@ class Limb_Manager:
 
     def RenameLimb(self, sourceLimb, newName): # list should repopulate after call
         self.logger.debug('\tLimbMng > Rename')
-        limbs =  pm.listConnections(self.pfrs.root.jointLimbs)
+        limbs = pm.listConnections(self.pfrs.root.jointLimbs)
         names = [limb.pfrsName.get() for limb in limbs]
         if (names.count(newName) >= 2): # Only 2 can have same name
             return False
@@ -318,12 +319,13 @@ class Limb_Manager:
         distLimbs = {} # dist : limb
         sourceJoint = util.GetSortedLimbJoints(sourceLimb)[-1]
         sourcePos = pm.xform(sourceJoint, q=1, t=1, ws=1)
-        limbs = pm.listConnections(self.pfrs.root.jointLimbs)
-        limbs += pm.listConnections(self.pfrs.root.emptyLimbs)
-        for limb in limbs:
+        # limbs = pm.listConnections(self.pfrs.root.jointLimbs)
+        # limbs += pm.listConnections(self.pfrs.root.emptyLimbs)
+        # for limb in limbs:
+        for limb in util.GetAllLimbs(self.pfrs.root):
             if limb == sourceLimb:
                 continue
-            if limb.limbType.get() == 0: # Empty
+            if limb.bhvType.get() in rigData.EMPTY_BHV_INDEXES:
                 joints = pm.listConnections(limb.bhvEmptyGroup)
             else:
                 joints = pm.listConnections(limb.joints)
@@ -355,9 +357,10 @@ class Limb_Manager:
     def GetRootLimbs(self, root):
         self.logger.debug('\tLimbMng > GetRootLimbs')
         rootLimbs = []
-        limbs = pm.listConnections(root.emptyLimbs)
-        limbs += pm.listConnections(root.jointLimbs)
-        for limb in limbs:
+        # limbs = pm.listConnections(root.emptyLimbs)
+        # limbs += pm.listConnections(root.jointLimbs)
+        # for limb in limbs:
+        for limb in util.GetAllLimbs(root):
             if not pm.listConnections(limb.limbParent):
                 rootLimbs.append(limb)
         return rootLimbs
@@ -383,14 +386,17 @@ class Limb_Manager:
                                     rigData.LIMB_SIDES[limb.side.get()],
                                     'NODE')
         limb.rename(limbName)
-        for joint in pm.listConnections(limb.joints):
-            self.jntMng.UpdateJointName(joint)
-        if limb.bhvType.get() in rigData.EMPTY_BHV_INDEXES:
-            group = pm.listConnections(limb.bhvEmptyGroup)[0]
+        for group in util.GetAllLimbGroups(limb):
             self.grpMng.UpdateGroupName(group)
-        else:
-            for group in self.grpMng.GetAllLimbGroups(limb):
-                self.grpMng.UpdateGroupName(group)
+        if limb.bhvType.get() not in rigData.EMPTY_BHV_INDEXES:
+            for joint in pm.listConnections(limb.joints):
+                self.jntMng.UpdateJointName(joint)
+        # if limb.bhvType.get() in rigData.EMPTY_BHV_INDEXES:
+        #     group = pm.listConnections(limb.bhvEmptyGroup)[0]
+        #     self.grpMng.UpdateGroupName(group)
+        # else:
+        #     for group in self.grpMng.GetAllLimbGroups(limb):
+        #         self.grpMng.UpdateGroupName(group)
 
     def ParentLimbsBySkeleton(self):
         limbParents = self.GetDefaultLimbHier()

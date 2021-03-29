@@ -24,14 +24,14 @@ class Group_Manager:
         bhvType = limb.bhvType.get()
         # IK PV
         if bhvType in rigData.IK_PV_BHV_INDEXES:
-            groups += pm.listConnections(limb.bhvIKPVGroup)
+            groups += pm.listConnections(limb.bhvIKPV1Group)
         # Look At
         if bhvType in rigData.LOOK_AT_BHV_INDEXES:
             groups += pm.listConnections(limb.bhvLookAtGroup)
         return groups
 
     def GetAllLimbGroups(self, limb):
-        groups = pm.listConnections(limb.bhvIKPVGroup)
+        groups = pm.listConnections(limb.bhvIKPV1Group)
         groups += pm.listConnections(limb.bhvLookAtGroup)
         return groups
 
@@ -100,7 +100,7 @@ class Group_Manager:
         group = self._AddGroup()
         group.groupType.set(2)
         pm.addAttr(group, ln='limb', dt='string')
-        pm.connectAttr(limb.bhvIKPVGroup, group.limb)
+        pm.connectAttr(limb.bhvIKPV1Group, group.limb)
         pm.parent(group, limb)
         self.ctrMng.AddIKPVControl(group)
         self.UpdateGroupName(group)
@@ -129,10 +129,8 @@ class Group_Manager:
     def Setup_LimbGroupVisibility(self, limb):
         self.logger.debug('\tGrpMng > Setup_LimbGroupVisibility')
         bhvType = limb.bhvType.get()
-        bhvFilter = rigData.FK_CHAIN_BHV_INDEXES
-        bhvFilter += rigData.FK_BRANCH_BHV_INDEXES
         jointGroups = self.GetJointGroups(limb)
-        if bhvType in bhvFilter:
+        if bhvType in rigData.FK_BHV_INDEXES:
             for group in jointGroups:
                 if group.enableGroup.get():
                     group.v.set(1)
@@ -200,7 +198,7 @@ class Group_Manager:
 
     def InitIKPVGroup(self, limb):
         self.logger.debug('\tGrpMng > InitIKPVGroup')
-        group = pm.listConnections(limb.bhvIKPVGroup)[0]
+        group = pm.listConnections(limb.bhvIKPV1Group)[0]
         joints = util.GetSortedLimbJoints(limb)
         j1 = joints[0]
         j2 = joints[1]
@@ -248,16 +246,18 @@ class Group_Manager:
 
     def UpdateLookAtCtr(self, limb):
         self.logger.debug('\tGrpMng > UpdateLookAtCtr')
-        group = pm.listConnections(limb.bhvLookAtGroup)[0]
         dist = limb.bhvLookAtDistance.get()
-        control = pm.listConnections(group.control)[0]
-        control.tx.set(dist)
+        util.GetLookAtControl(limb).tx.set(dist)
+        # group = pm.listConnections(limb.bhvLookAtGroup)[0]
+        # control = pm.listConnections(group.control)[0]
+        # control.tx.set(dist)
 
     def UpdateIKPVCtr(self, limb):
         self.logger.debug('\tGrpMng > UpdateLookAtCtr')
-        group = pm.listConnections(limb.bhvIKPVGroup)[0]
         dist = limb.bhvIKPVDistance.get()
-        control = pm.listConnections(group.control)[0]
-        control.tx.set(dist)
+        util.GetIKPV1Control(limb).tx.set(dist)
+        # group = pm.listConnections(limb.bhvIKPV1Group)[0]
+        # control = pm.listConnections(group.control)[0]
+        # control.tx.set(dist)
 
 

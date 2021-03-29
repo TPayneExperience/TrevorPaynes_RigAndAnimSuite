@@ -41,17 +41,12 @@ class RIG_BHV_Limb_Hierarchy_UI:
             rootLimbs += self.limbMng.GetRootLimbs(root)
         for rootLimb in rootLimbs[::-1]:
             for limb in self.limbMng.GetLimbCreationOrder(rootLimb):
-                self.logger.debug('\t\tlimb ' + str(limb))
                 root = pm.listConnections(limb.rigRoot)[0]
-                self.logger.debug('\t\troot ' + str(root))
                 rootID = root.ID.get()
                 prefix = root.prefix.get()
-                self.logger.debug('\t\tprefix ' + str(prefix))
                 limbID = '%d_%d' % (rootID, limb.ID.get())
-                self.logger.debug('\t\tlimbid ' + str(limbID))
                 self._limbs[limbID] = limb
                 name = '%s_%s' % (prefix, limb.pfrsName.get())
-                self.logger.debug('\t\tname ' + str(name))
                 parent = pm.listConnections(limb.limbParent)
                 parentID = ''
                 if parent:

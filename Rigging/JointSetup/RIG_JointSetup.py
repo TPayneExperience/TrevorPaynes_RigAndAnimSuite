@@ -8,7 +8,8 @@ class RIG_JointSetup:
 
     def IsJointValidForLimb(self, limb, joint):
         name = joint.pfrsName.get()
-        names = [j.pfrsName.get() for j in pm.listConnections(limb.joints)]
+        joints = pm.listConnections(limb.joints)
+        names = [j.pfrsName.get() for j in joints]
         if name in names:
             self.logger.error('**** Cannot add joint: joint of same pfrsName')
             self.logger.error('****     already exists on limb')

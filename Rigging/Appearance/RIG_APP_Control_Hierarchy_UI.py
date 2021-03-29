@@ -3,6 +3,9 @@ import pymel.core as pm
 
 import Data.Rig_Data as rigData
 reload(rigData)
+import Common.Utilities as util
+reload(util)
+
 
 class RIG_APP_Control_Hierarchy_UI:
     def __init__(self, parent):
@@ -26,21 +29,22 @@ class RIG_APP_Control_Hierarchy_UI:
         self.controls = {}
         if not self.limb:
             return
-        bhvType = self.limb.bhvType.get()
-        groups = []
-        bhvFilter = rigData.FK_CHAIN_BHV_INDEXES
-        bhvFilter += rigData.FK_BRANCH_BHV_INDEXES
-        bhvFilter += rigData.RFK_BHV_INDEXES
-        bhvFilter += rigData.EMPTY_BHV_INDEXES
-        if bhvType in bhvFilter:
-            groups += self.grpMng.GetJointGroups(self.limb)
-            if bhvType in rigData.REVERSE_BHV_INDEXES:
-                groups = groups[::-1]
-            if bhvType in rigData.RFK_BHV_INDEXES:
-                groups = [groups[0]]
-        groups += self.grpMng.GetLimbGroups(self.limb)
-        for group in groups:
-            control = pm.listConnections(group.control)[0]
+        # bhvType = self.limb.bhvType.get()
+        # groups = []
+        # bhvFilter = rigData.FK_CHAIN_BHV_INDEXES
+        # bhvFilter += rigData.FK_BRANCH_BHV_INDEXES
+        # bhvFilter += rigData.RFK_BHV_INDEXES
+        # bhvFilter += rigData.EMPTY_BHV_INDEXES
+        # if bhvType in bhvFilter:
+        #     groups += self.grpMng.GetJointGroups(self.limb)
+        #     if bhvType in rigData.REVERSE_BHV_INDEXES:
+        #         groups = groups[::-1]
+        #     if bhvType in rigData.RFK_BHV_INDEXES:
+        #         groups = [groups[0]]
+        # groups += self.grpMng.GetLimbGroups(self.limb)
+        # for group in groups:
+        #     control = pm.listConnections(group.control)[0]
+        for control in util.GetUsedControls(self.limb, 1):
             controlID = control.ID.get()
             self.controls[controlID] = control
             name = control.shortName()

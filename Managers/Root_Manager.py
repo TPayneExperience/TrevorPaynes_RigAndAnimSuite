@@ -92,9 +92,10 @@ class Root_Manager:
 
     def UpdateRootName(self, root):
         root.rename('%s_ROOT' % root.prefix.get())
-        limbs = pm.listConnections(root.emptyLimbs)
-        limbs += pm.listConnections(root.jointLimbs)
-        for limb in limbs:
+        # limbs = pm.listConnections(root.emptyLimbs)
+        # limbs += pm.listConnections(root.jointLimbs)
+        # for limb in limbs:
+        for limb in util.GetAllLimbs(root):
             self.limbMng.UpdateLimbName(limb)
 
     # def LoadSceneRoot(self):

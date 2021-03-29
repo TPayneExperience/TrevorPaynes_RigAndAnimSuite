@@ -16,7 +16,7 @@ class Pose_Manager:
         # self.limbMng = parent.limbMng
         # self.jntMng = parent.jntMng
         self.logger = parent.logger
-        self.jsonMng = parent.jsonMng
+        # self.jsonMng = parent.jsonMng
         self.pfrs = parent
         self.grpMng = parent.grpMng
         self.rootMng = parent.rootMng
@@ -45,26 +45,32 @@ class Pose_Manager:
                 self._LoadPose(filePath)
         # Store Limb controls
         for root in self.rootMng.GetSceneRoots():
-            limbs = pm.listConnections(root.emptyLimbs)
-            limbs += pm.listConnections(root.jointLimbs)
-            for limb in limbs:
+            # limbs = pm.listConnections(root.emptyLimbs)
+            # limbs += pm.listConnections(root.jointLimbs)
+            # for limb in limbs:
+            for limb in util.GetAllLimbs(root):
                 limbName = limb.longName()
                 self.limbControls[limbName] = [[], [None, None, None]] # [joint controls], [limb controls]
-                for group in self.grpMng.GetJointGroups(limb):
-                    control = pm.listConnections(group.control)[0]
-                    self.limbControls[limbName][0].append(control) 
+                # for group in self.grpMng.GetJointGroups(limb):
+                #     control = pm.listConnections(group.control)[0]
+                    # self.limbControls[limbName][0].append(control) 
+                controls = util.GetAllJointControls(limb, 1)
+                self.limbControls[limbName][0] = controls
                 bhvType = limb.bhvType.get()
                 if bhvType in rigData.EMPTY_BHV_INDEXES:
-                    group = pm.listConnections(limb.bhvEmptyGroup)[0]
-                    control = pm.listConnections(group.control)[0]
+                    # group = pm.listConnections(limb.bhvEmptyGroup)[0]
+                    # control = pm.listConnections(group.control)[0]
+                    control = util.GetEmptyControl(limb)
                     self.limbControls[limbName][1][0] = control
                 elif bhvType in rigData.IK_PV_BHV_INDEXES:
-                    group = pm.listConnections(limb.bhvIKPVGroup)[0]
-                    control = pm.listConnections(group.control)[0]
+                    # group = pm.listConnections(limb.bhvIKPV1Group)[0]
+                    # control = pm.listConnections(group.control)[0]
+                    control = util.GetIKPV1Control(limb)
                     self.limbControls[limbName][1][1] = control
                 elif bhvType in rigData.LOOK_AT_BHV_INDEXES:
-                    group = pm.listConnections(limb.bhvLookAtGroup)[0]
-                    control = pm.listConnections(group.control)[0]
+                    # group = pm.listConnections(limb.bhvLookAtGroup)[0]
+                    # control = pm.listConnections(group.control)[0]
+                    control = util.GetLookAtControl(limb)
                     self.limbControls[limbName][1][2] = control
                 self.StoreLimbControlValues(limb)
 
@@ -94,15 +100,13 @@ class Pose_Manager:
         data['jointControls'] = [[] for j in joints]
         if bhvType in rigData.REVERSE_BHV_INDEXES:
             joints = joints[::-1]
-        bhvFilter = rigData.FK_BRANCH_BHV_INDEXES
-        bhvFilter += rigData.FK_CHAIN_BHV_INDEXES
-        if bhvType in bhvFilter:
+        if bhvType in rigData.FK_BHV_INDEXES:
             for i in range(len(joints)):
                 joint = joints[i]
-                control = self._GetJointControl(joint)
+                control = util.GetJointControl(joint)
                 data['jointControls'][i] = self._GetControlData(control)
         elif bhvType in rigData.RFK_BHV_INDEXES:
-            control = self._GetJointControl(joints[0])
+            control = util.GetJointControl(joints[0])
             data['jointControls'][0] = self._GetControlData(control)
         elif bhvType in rigData.IK_PV_BHV_INDEXES:
             control = self._GetJointControl(joints[-1])
@@ -110,20 +114,23 @@ class Pose_Manager:
         
         data['limbControls'] = [[], [], []] # Empty, IKPV, LookAt
         if bhvType in rigData.EMPTY_BHV_INDEXES:
-            group = pm.listConnections(limb.bhvEmptyGroup)[0]
-            control = pm.listConnections(group.control)[0]
+            # group = pm.listConnections(limb.bhvEmptyGroup)[0]
+            # control = pm.listConnections(group.control)[0]
+            control = util.GetEmptyControl(limb)
             data['limbControls'][0] = self._GetControlData(control)
         elif bhvType in rigData.IK_PV_BHV_INDEXES:
-            group = pm.listConnections(limb.bhvIKPVGroup)[0]
-            control = pm.listConnections(group.control)[0]
+            # group = pm.listConnections(limb.bhvIKPV1Group)[0]
+            # control = pm.listConnections(group.control)[0]
+            control = util.GetIKPV1Control(limb)
             data['limbControls'][1] = self._GetControlData(control)
         elif bhvType in rigData.LOOK_AT_BHV_INDEXES:
-            group = pm.listConnections(limb.bhvLookAtGroup)[0]
-            control = pm.listConnections(group.control)[0]
+            # group = pm.listConnections(limb.bhvLookAtGroup)[0]
+            # control = pm.listConnections(group.control)[0]
+            control = util.GetLookAtControl(limb)
             data['limbControls'][2] = self._GetControlData(control)
         fileName = '%s_%s.json' % (poseName, self._GetLimbNameFromLimb(limb))
         filePath = os.path.join(folder, fileName)
-        self.jsonMng.Save(filePath, data)
+        util.SaveJson(filePath, data)
 
     def DeleteAllPosesOfName(self, poseName, folder):
         self.logger.debug('\tPosMng > DeleteAllPosesOfName')
@@ -159,7 +166,7 @@ class Pose_Manager:
 
     def _LoadPose(self, filePath):
         self.logger.debug('\tPosMng > LoadPose')
-        data = self.jsonMng.Load(filePath)
+        data = util.LoadJson(filePath)
         pose = animData.POSE()
         pose.filePath = filePath
         pose.poseName = data['poseName']
@@ -261,10 +268,6 @@ class Pose_Manager:
         for i in range(3):
             xform[2].append(((xform1[2][i]-1) + (xform2[2][i]-1)*weight2) + 1)
         return xform
-
-    def _GetJointControl(self, joint):
-        group = pm.listConnections(joint.group)[0]
-        return pm.listConnections(group.control)[0]
 
     def _GetControlData(self, control):
         self.logger.debug('\tPosMng > _GetControlData')
