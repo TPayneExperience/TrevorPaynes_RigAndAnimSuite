@@ -1,5 +1,8 @@
 
 import json
+import inspect
+import os
+import sys
 
 import pymel.core as pm
 
@@ -146,3 +149,30 @@ def GetSortedJoints(joints):
     for joint in joints:
         temp[joint.longName()] = joint
     return [temp[i] for i in sorted(temp.keys())]
+
+def GetOperation(moduleToImport, folderPath, rigRoot):
+    versions = {}
+    import Common.Abstract_Operation as absOp
+    reload(absOp)
+    for opFile in os.listdir(folderPath):
+        opFilePath = os.path.join(folderPath, opFile)
+        if not os.path.isfile(opFilePath):
+            continue
+        if '__init__.py' in opFile:
+            continue
+        fileName = os.path.splitext(opFile)[0]
+        moduleName = '%s.%s' % (moduleToImport, fileName)
+        exec('import %s' % moduleName)
+        exec('reload (%s)' % moduleName)
+        module = sys.modules[moduleName]
+        for name, obj in inspect.getmembers(module):
+            if inspect.isclass(obj):
+                if issubclass(obj, absOp.Abstract_Operation):
+                    versions[obj.version] = obj
+    if not versions:
+        return None
+    versionKeys = sorted(list(versions.keys()))
+    for i in versionKeys:
+        if not versions[i].IsRigSetup(rigRoot):
+            versions[i].InitRig(rigRoot)
+    return versions[versionKeys[-1]]

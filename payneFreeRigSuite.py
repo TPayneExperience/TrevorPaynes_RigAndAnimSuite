@@ -57,32 +57,31 @@ class PayneFreeRigSuite:
         self.StartLogger()
 
         # MANAGERS
-        self.fileMng = fm.File_Manager()
-        # self.jsonMng = js.Json_Manager()
-        self.nameMng = nm.Name_Manager(self)
-        self.ctrMng = ctr.Control_Manager(self)
-        self.grpMng = grp.Group_Manager(self)
-        self.jntMng = jm.Joint_Manager(self)
-        self.limbMng = lm.Limb_Manager(self)
-        self.bldMng = bldMng.Build_Manager(self)
-        self.meshMng = meshMng.Mesh_Manager(self)
-        self.skinMng = skinMng.Skin_Mananger(self) # REMOVE LATER
-        self.rootMng = rootMng.Root_Manager(self)
-        self.pstMng = pstMng.Preset_Manager(self)
-        self.posMng = posMng.Pose_Manager(self)
+        # self.fileMng = fm.File_Manager()
+        # self.nameMng = nm.Name_Manager(self)
+        # self.ctrMng = ctr.Control_Manager(self)
+        # self.grpMng = grp.Group_Manager(self)
+        # self.jntMng = jm.Joint_Manager(self)
+        # self.limbMng = lm.Limb_Manager(self)
+        # self.bldMng = bldMng.Build_Manager(self)
+        # self.meshMng = meshMng.Mesh_Manager(self)
+        # self.skinMng = skinMng.Skin_Mananger(self) # REMOVE LATER
+        # self.rootMng = rootMng.Root_Manager(self)
+        # self.pstMng = pstMng.Preset_Manager(self)
+        # self.posMng = posMng.Pose_Manager(self)
 
-        # RIGGING
-        self.rigJS = rigJS.RIG_JointSetup(self)
-        self.rigLS = rigLS.RIG_LimbSetup(self)
-        self.rigBHV = rigBHV.RIG_Behaviors(self)
+        # # RIGGING
+        # self.rigJS = rigJS.RIG_JointSetup(self)
+        # self.rigLS = rigLS.RIG_LimbSetup(self)
+        # self.rigBHV = rigBHV.RIG_Behaviors(self)
         
-        # ANIMATION
-        self.anmPOS = anmPOS.ANM_Poses(self)
+        # # ANIMATION
+        # self.anmPOS = anmPOS.ANM_Poses(self)
 
-        self.debug = debug.PFRS_Debug(self)
+        # self.debug = debug.PFRS_Debug(self)
 
-        # START UP
-        self.InitScene()
+        # # START UP
+        # self.InitScene()
 
 #============= SCENE ============================
 

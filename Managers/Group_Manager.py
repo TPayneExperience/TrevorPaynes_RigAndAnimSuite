@@ -229,35 +229,14 @@ class Group_Manager:
         pm.delete(a)
         pm.xform(group, t=pos2, ws=1)
 
-        # print('\n\npos1: ' + str(pos1))
-        # print('pos2: ' + str(pos2))
-        # print('pos3: ' + str(pos3))
-        # print('v12: ' + str(v12))
-        # print('v13: ' + str(v13))
-        # print('dot: ' + str(dot))
-        # print('mag12: ' + str(mag12))
-        # print('mag13: ' + str(mag13))
-        # print('magProd: ' + str(magProd))
-        # print('cosAngle: ' + str(cosAngle))
-        # print('Degrees: ' + str(math.degrees(math.acos(cosAngle))))
-        # print('adjMag: ' + str(scalar))
-        # print('posP: ' + str(posP))
-        # print('posPOffset: ' + str(posPOffset))
-
     def UpdateLookAtCtr(self, limb):
         self.logger.debug('\tGrpMng > UpdateLookAtCtr')
         dist = limb.bhvLookAtDistance.get()
         util.GetLookAtControl(limb).tx.set(dist)
-        # group = pm.listConnections(limb.bhvLookAtGroup)[0]
-        # control = pm.listConnections(group.control)[0]
-        # control.tx.set(dist)
 
     def UpdateIKPVCtr(self, limb):
         self.logger.debug('\tGrpMng > UpdateLookAtCtr')
         dist = limb.bhvIKPVDistance.get()
         util.GetIKPV1Control(limb).tx.set(dist)
-        # group = pm.listConnections(limb.bhvIKPV1Group)[0]
-        # control = pm.listConnections(group.control)[0]
-        # control.tx.set(dist)
 
 

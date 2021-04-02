@@ -298,6 +298,26 @@ class Limb_Manager:
         self.UpdateLimbName(sourceLimb)
         return True
     
+    def UpdateLimbName(self, limb):
+        self.logger.debug('\tLimbMng > UpdateLimbName')
+        pfrsName = limb.pfrsName.get()
+        limbName = self.nameMng.GetName(pfrsName,
+                                    'Limb',
+                                    rigData.LIMB_SIDES[limb.side.get()],
+                                    'NODE')
+        limb.rename(limbName)
+        for group in util.GetAllLimbGroups(limb):
+            self.grpMng.UpdateGroupName(group)
+        if limb.bhvType.get() not in rigData.EMPTY_BHV_INDEXES:
+            for joint in pm.listConnections(limb.joints):
+                self.jntMng.UpdateJointName(joint)
+        # if limb.bhvType.get() in rigData.EMPTY_BHV_INDEXES:
+        #     group = pm.listConnections(limb.bhvEmptyGroup)[0]
+        #     self.grpMng.UpdateGroupName(group)
+        # else:
+        #     for group in self.grpMng.GetAllLimbGroups(limb):
+        #         self.grpMng.UpdateGroupName(group)
+
     def _BreakMirror(self, sourceLimb):
         self.logger.debug('\tLimbMng > _BreakMirror')
         mirrorLimb = pm.listConnections(sourceLimb.mirrorLimb)[0]
@@ -319,9 +339,6 @@ class Limb_Manager:
         distLimbs = {} # dist : limb
         sourceJoint = util.GetSortedLimbJoints(sourceLimb)[-1]
         sourcePos = pm.xform(sourceJoint, q=1, t=1, ws=1)
-        # limbs = pm.listConnections(self.pfrs.root.jointLimbs)
-        # limbs += pm.listConnections(self.pfrs.root.emptyLimbs)
-        # for limb in limbs:
         for limb in util.GetAllLimbs(self.pfrs.root):
             if limb == sourceLimb:
                 continue
@@ -357,9 +374,6 @@ class Limb_Manager:
     def GetRootLimbs(self, root):
         self.logger.debug('\tLimbMng > GetRootLimbs')
         rootLimbs = []
-        # limbs = pm.listConnections(root.emptyLimbs)
-        # limbs += pm.listConnections(root.jointLimbs)
-        # for limb in limbs:
         for limb in util.GetAllLimbs(root):
             if not pm.listConnections(limb.limbParent):
                 rootLimbs.append(limb)
@@ -378,26 +392,6 @@ class Limb_Manager:
             orderedLimbs += children[:]
         return orderedLimbs
     
-    def UpdateLimbName(self, limb):
-        self.logger.debug('\tLimbMng > UpdateLimbName')
-        pfrsName = limb.pfrsName.get()
-        limbName = self.nameMng.GetName(pfrsName,
-                                    'Limb',
-                                    rigData.LIMB_SIDES[limb.side.get()],
-                                    'NODE')
-        limb.rename(limbName)
-        for group in util.GetAllLimbGroups(limb):
-            self.grpMng.UpdateGroupName(group)
-        if limb.bhvType.get() not in rigData.EMPTY_BHV_INDEXES:
-            for joint in pm.listConnections(limb.joints):
-                self.jntMng.UpdateJointName(joint)
-        # if limb.bhvType.get() in rigData.EMPTY_BHV_INDEXES:
-        #     group = pm.listConnections(limb.bhvEmptyGroup)[0]
-        #     self.grpMng.UpdateGroupName(group)
-        # else:
-        #     for group in self.grpMng.GetAllLimbGroups(limb):
-        #         self.grpMng.UpdateGroupName(group)
-
     def ParentLimbsBySkeleton(self):
         limbParents = self.GetDefaultLimbHier()
         for child, parent in limbParents.items():

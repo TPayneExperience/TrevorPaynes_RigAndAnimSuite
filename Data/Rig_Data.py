@@ -1,15 +1,4 @@
 
-# ============= GLOBALS =============
-HIDE_ATTRS = False
-# HIDE_ATTRS = True
-__author__ = 'Trevor Payne'
-__version__ = '0.1'
-
-LICENSES = ('Free', 'Personal', 'Professional')
-SUITES = ('RIG', 'ANIM', 'RIG & ANIM')
-LICENSE = LICENSES[0]
-SUITE = SUITES[2]
-
 
 # ============= ROOT =============
 RIG_MODES = (   'Setup Rig',

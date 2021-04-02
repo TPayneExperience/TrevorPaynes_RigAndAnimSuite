@@ -29,7 +29,6 @@ class Control_Manager:
         pm.parent(ctrShapes, ctrShapesParent)
         for ctr in ctrShapes:
             ctr.rename('PFRSCTR_' + ctr.shortName())
-
         self.ctrLayer = pm.createDisplayLayer(n='Controls', e=True)
         self.SetLayerState(True, True)
 
