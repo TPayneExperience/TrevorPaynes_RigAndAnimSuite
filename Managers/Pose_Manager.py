@@ -8,8 +8,10 @@ reload(animData)
 import Data.Rig_Data as rigData
 reload(rigData)
 
-import Common.Utilities as util
-reload(util)
+import Common.Rig_Utilities as rigUtil
+reload(rigUtil)
+import Common.General_Utilities as genUtil
+reload(genUtil)
 
 class Pose_Manager:
     def __init__(self, parent):
@@ -48,29 +50,29 @@ class Pose_Manager:
             # limbs = pm.listConnections(root.emptyLimbs)
             # limbs += pm.listConnections(root.jointLimbs)
             # for limb in limbs:
-            for limb in util.GetAllLimbs(root):
+            for limb in rigUtil.GetAllLimbs(root):
                 limbName = limb.longName()
                 self.limbControls[limbName] = [[], [None, None, None]] # [joint controls], [limb controls]
                 # for group in self.grpMng.GetJointGroups(limb):
                 #     control = pm.listConnections(group.control)[0]
                     # self.limbControls[limbName][0].append(control) 
-                controls = util.GetAllJointControls(limb, 1)
+                controls = rigUtil.GetAllJointControls(limb, 1)
                 self.limbControls[limbName][0] = controls
                 bhvType = limb.bhvType.get()
                 if bhvType in rigData.EMPTY_BHV_INDEXES:
                     # group = pm.listConnections(limb.bhvEmptyGroup)[0]
                     # control = pm.listConnections(group.control)[0]
-                    control = util.GetEmptyControl(limb)
+                    control = rigUtil.GetEmptyControl(limb)
                     self.limbControls[limbName][1][0] = control
                 elif bhvType in rigData.IK_PV_BHV_INDEXES:
                     # group = pm.listConnections(limb.bhvIKPV1Group)[0]
                     # control = pm.listConnections(group.control)[0]
-                    control = util.GetIKPV1Control(limb)
+                    control = rigUtil.GetIKPV1Control(limb)
                     self.limbControls[limbName][1][1] = control
                 elif bhvType in rigData.LOOK_AT_BHV_INDEXES:
                     # group = pm.listConnections(limb.bhvLookAtGroup)[0]
                     # control = pm.listConnections(group.control)[0]
-                    control = util.GetLookAtControl(limb)
+                    control = rigUtil.GetLookAtControl(limb)
                     self.limbControls[limbName][1][2] = control
                 self.StoreLimbControlValues(limb)
 
@@ -91,7 +93,7 @@ class Pose_Manager:
     def SavePose(self, poseName, limb, folder):
         self.logger.debug('\tPosMng > SavePose')
         bhvType = limb.bhvType.get()
-        joints = util.GetSortedLimbJoints(limb)
+        joints = rigUtil.GetSortedLimbJoints(limb)
         data = {}
         data['poseName'] = poseName
         data['pfrsName'] = limb.pfrsName.get()
@@ -103,10 +105,10 @@ class Pose_Manager:
         if bhvType in rigData.FK_BHV_INDEXES:
             for i in range(len(joints)):
                 joint = joints[i]
-                control = util.GetJointControl(joint)
+                control = rigUtil.GetJointControl(joint)
                 data['jointControls'][i] = self._GetControlData(control)
         elif bhvType in rigData.RFK_BHV_INDEXES:
-            control = util.GetJointControl(joints[0])
+            control = rigUtil.GetJointControl(joints[0])
             data['jointControls'][0] = self._GetControlData(control)
         elif bhvType in rigData.IK_PV_BHV_INDEXES:
             control = self._GetJointControl(joints[-1])
@@ -116,21 +118,21 @@ class Pose_Manager:
         if bhvType in rigData.EMPTY_BHV_INDEXES:
             # group = pm.listConnections(limb.bhvEmptyGroup)[0]
             # control = pm.listConnections(group.control)[0]
-            control = util.GetEmptyControl(limb)
+            control = rigUtil.GetEmptyControl(limb)
             data['limbControls'][0] = self._GetControlData(control)
         elif bhvType in rigData.IK_PV_BHV_INDEXES:
             # group = pm.listConnections(limb.bhvIKPV1Group)[0]
             # control = pm.listConnections(group.control)[0]
-            control = util.GetIKPV1Control(limb)
+            control = rigUtil.GetIKPV1Control(limb)
             data['limbControls'][1] = self._GetControlData(control)
         elif bhvType in rigData.LOOK_AT_BHV_INDEXES:
             # group = pm.listConnections(limb.bhvLookAtGroup)[0]
             # control = pm.listConnections(group.control)[0]
-            control = util.GetLookAtControl(limb)
+            control = rigUtil.GetLookAtControl(limb)
             data['limbControls'][2] = self._GetControlData(control)
         fileName = '%s_%s.json' % (poseName, self._GetLimbNameFromLimb(limb))
         filePath = os.path.join(folder, fileName)
-        util.SaveJson(filePath, data)
+        genUtil.SaveJson(filePath, data)
 
     def DeleteAllPosesOfName(self, poseName, folder):
         self.logger.debug('\tPosMng > DeleteAllPosesOfName')
@@ -166,7 +168,7 @@ class Pose_Manager:
 
     def _LoadPose(self, filePath):
         self.logger.debug('\tPosMng > LoadPose')
-        data = util.LoadJson(filePath)
+        data = genUtil.LoadJson(filePath)
         pose = animData.POSE()
         pose.filePath = filePath
         pose.poseName = data['poseName']

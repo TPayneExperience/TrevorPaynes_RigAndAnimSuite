@@ -10,9 +10,6 @@ LICENSES = ('Free',
             'Professional')
 LICENSE = LICENSES[0]
 
-OPERATION_FOLDERS = ('Rigging',
-                    'Skinning',
-                    'Animation')
 
 
 

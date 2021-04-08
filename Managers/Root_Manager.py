@@ -5,6 +5,8 @@ import Common.Utilities as util
 reload(util)
 import Data.Rig_Data as rigData
 reload(rigData)
+import Data.General_Data as genData
+reload(genData)
 
 
 class Root_Manager:
@@ -25,7 +27,7 @@ class Root_Manager:
         msg += '\n\t\tPrefix = ' + prefix
         msg += '\n\t\tNameOrder = ' + str(nameOrder)
         msg += '\n\t\tShowPrefix = ' + str(showPrefix)
-        hide = rigData.HIDE_ATTRS
+        hide = genData.HIDE_ATTRS
         self.logger.debug(msg)
         rootID = 1
         if self._roots:
@@ -33,6 +35,7 @@ class Root_Manager:
         rigModes = ':'.join(rigData.RIG_MODES)
         
         root = pm.group(name='ROOT_tempName', em=True)
+
         pm.addAttr(root, ln='ID', at='long', dv=rootID, h=hide)
         pm.addAttr(root, ln='rigMode', at='enum', en=rigModes, h=hide)
         

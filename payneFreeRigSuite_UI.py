@@ -12,18 +12,23 @@ reload(genData)
 import payneFreeRigSuite as pfrs
 reload(pfrs)
 
-import Common.Abstract_Operation as absOp
-reload(absOp)
+import Initializers
+reload(Initializers)
+import SceneObjects
+reload(SceneObjects)
+
+import Common.Logger as log
+reload(log)
+import SceneObjects.RigRoot as root
+reload(root)
+
 # import Import_Utilities as impUtil
 # reload(impUtil)
-import Factories as Factories
-reload(Factories)
+# import Factories as Factories
+# reload(Factories)
 
-import Common.Utilities as util
-reload(util)
-
-import Plugins.factories as piFac
-reload(piFac)
+# import Common.Utilities as util
+# reload(util)
 
 # import Rigging.Rigging_UI as rig_ui
 # reload(rig_ui)
@@ -40,7 +45,7 @@ reload(piFac)
 class PayneFreeRigSuite_UI:
     def __init__(self):
         self.pfrs = pfrs.PayneFreeRigSuite()
-        self.logger = self.pfrs.logger
+        # self.logger = self.pfrs.logger
 
         # self.fileMng = self.pfrs.fileMng
         # self.nameMng = self.pfrs.nameMng
@@ -48,15 +53,16 @@ class PayneFreeRigSuite_UI:
         # SKINNING
         # self.skinMng = self.pfrs.skinMng
 
-        self.catOps = {} # {categoryName : {fileName : classObj}}
-        self.operations = {} # {operationName : operationInstance}
-        self.cat_ui = [] # for deleting
+        # self.catOps = {} # {categoryName : {fileName : classObj}}
+        self.operationNames = []
+        self.operations = [] 
         self.currentOp = None
 
         self._Setup()
-        self.InitOperations()
+        # self.pfrs.InitOperations()
+        # self.pfrs.InitScene()
         self.PopulateCategories()
-        self.PopulateOperations('Rigging')
+        self.InitOptionMenues()
         # self.PopulateOperations()
         # debug_ui.PFRS_Debug_UI(self)
         # self.InitTab()
@@ -66,27 +72,29 @@ class PayneFreeRigSuite_UI:
 #=========== SETUP ====================================
 
     def _Setup(self):
+        log.logFuncFile()
         name = genData.LICENSE
         name += ' - Payne Free Rig Suite'
         name += ' - v%s' %  genData.__version__
         name += ' - by Trevor Payne'
         with pm.window(mb=True,mbv=True, t=name, w=500, h=500) as self.win:
-            with pm.horizontalLayout():
+            with pm.rowLayout(nc=4):
                 with pm.columnLayout(co=('left', 0)):
                     self.cat_op = pm.optionMenu(l='Category', 
                                                 cc=self.SetCategory)
                 with pm.columnLayout(co=('left', 0)):
                     self.op_op = pm.optionMenu(l='Operation', 
                                                 cc=self.SetOperation)
-            with pm.horizontalLayout() as self.layout:
-                pass
+                with pm.columnLayout(co=('left', 0)):
+                    pm.button(l='TESTING', c=self.TESTING)
+            # self.layout = pm.horizontalLayout(p=self.win)
+            # pm.text('asdf')
+            self.frame = pm.frameLayout(bv=0, lv=0)
                 
         pm.window(self.win, e=1, cc=self.closeEvent)
         self._Setup_MenuBar()
         pm.showWindow()
     
-#=========== SETUP MENUBAR ====================================
-
     def _Setup_MenuBar(self):
         with self.win:
             with pm.menu('File'):
@@ -134,85 +142,91 @@ class PayneFreeRigSuite_UI:
 
 #=========== COMBOBOX SWITCHING ====================================
 
+    @log.class_decorator
+    def TESTING(self, ignore):
+        import SceneObjects.Limb
+        reload(SceneObjects.Limb)
+        import SceneObjects.RigRoot
+        reload(SceneObjects.RigRoot)
+        rigRoot = SceneObjects.RigRoot.RigRoot.GetAll()[0]
+        SceneObjects.Limb.Limb.AddEmpty(rigRoot)
+        # from SceneObjects.RigRoot import RigRoot
+        # RigRoot.Add()
+        
+    @log.class_decorator
+    def InitOptionMenues(self):
+        rigRoot = root.RigRoot.GetAll()[0]
+        category = rigRoot.mainTab.get()
+        operationName = rigRoot.subTab.get()
+        index = self.pfrs.categories.index(category) + 1
+        pm.optionMenu(self.cat_op, e=1, sl=index)
+        self.PopulateOperations(category)
+        self.SetOperation(operationName)
+
+    @log.class_decorator
     def SetCategory(self, category):
-        self.logger.debug('\tPFRS_UI > SetCategory')
         print (category)
     
+    @log.class_decorator
     def SetOperation(self, operationName):
-        self.logger.debug('\tPFRS_UI > SetOperation')
-        pm.deleteUI(self.layout)
-        self.layout = pm.horizontalLayout(p=self.win)
-        self.currentOp = self.operations[operationName]
-        self.currentOp.Setup_UI(self.layout)
+        index = self.operationNames.index(operationName)
+        self.currentOp = self.operations[index]()
+        pm.deleteUI(self.frame)
+        with pm.frameLayout(p=self.win, lv=0) as self.frame:
+            with pm.horizontalLayout():
+                self.currentOp.Setup_UI()
 
-
-    def InitOperations(self):
-        self.logger.debug('\tPFRS_UI > InitOperations')
-        self.catOps = {}
-        rootPath = os.path.dirname(__file__)
-        rootPath = os.path.join(rootPath, 'Factories')
-        rootPath = os.path.join(rootPath, 'Operations')
-        moduleRoot = 'Factories.Operations'
-        for category in genData.OPERATION_FOLDERS:
-            self.catOps[category] = {}
-            moduleCat = '%s.%s' % (moduleRoot, category)
-            categoryPath = os.path.join(rootPath, category)
-            for operation in os.listdir(categoryPath):
-                moduleOp = '%s.%s' % (moduleCat, operation)
-                opPath = os.path.join(categoryPath, operation)
-                if os.path.isfile(opPath):
-                    continue
-                op = util.GetOperation( moduleOp, 
-                                        opPath, 
-                                        absOp.Abstract_Operation)
-                self.catOps[category][op.operationName] = op()
-
+    @log.class_decorator
     def PopulateCategories(self):
-        self.logger.debug('\tPFRS_UI > PopulateCategories')
-        for category in genData.OPERATION_FOLDERS:
-            if category in self.catOps:
-                pm.menuItem(l=category, p=self.cat_op)
+        for category in self.pfrs.categories:
+            pm.menuItem(l=category, p=self.cat_op)
     
+    @log.class_decorator
     def PopulateOperations(self, category):
-        self.logger.debug('\tPFRS_UI > PopulateOperations')
-        self.operations = {}
-        if self.cat_ui:
-            pm.deleteUI(self.cat_ui)
-            self.cat_ui = []
+        self.operationNames = []
+        self.operations = []
+        pm.optionMenu(self.op_op, e=1, dai=1)
         opPriorities = {}
-        for operation in list(self.catOps[category].values()):
+        for operation in list(self.pfrs.catOps[category].values()):
             opPriorities[operation.orderIndex] = operation
         for index in sorted(list(opPriorities.keys())):
             operation = opPriorities[index]
-            operationName = operation.operationName
-            item = pm.menuItem(l=operationName, p=self.op_op)
-            self.cat_ui.append(item)
-            self.operations[operationName] = operation
+            operationName = operation.uiName
+            pm.menuItem(l=operationName, p=self.op_op)
+            self.operationNames.append(operationName)
+            self.operations.append(operation)
 
-#=========== FUNCTIONALITY ====================================
+#=========== MENUBAR FUNCTIONS ====================================
 
+    @log.class_decorator
     def ExportAnimationRig(self, ignore):
-        self.logger.debug('\tPFRS_UI > ExportAnimationRig')
+        pass
+        # self.logger.debug('\tPFRS_UI > ExportAnimationRig')
         # self.Teardown_Editable()
         # self.pfrs.ExportAnimationRig()
         # self.Setup_Editable()
 
+    @log.class_decorator
     def OpenDocumentation(self, ignore):
-        self.logger.debug('\tPFRS_UI > OpenDocumentation')
+        # self.logger.debug('\tPFRS_UI > OpenDocumentation')
         url = 'https://docs.google.com/document/d/1KxdOnofyA2Bxz'
         url += 'QHInxrmWjFJK_Q1hCwvnAP0-0SgMRE/edit?usp=sharing'
         webbrowser.open(url)
 
+    @log.class_decorator
     def OpenWebsite(self, ignore):
-        self.logger.debug('\tPFRS_UI > OpenWebsite')
+        # self.logger.debug('\tPFRS_UI > OpenWebsite')
         webbrowser.open('https://youtu.be/yBLdQ1a4-JI?t=9')
 
+    @log.class_decorator
     def closeEvent(self):
-        self.logger.debug('\tPFRS_UI > closeEvent')
-        self.pfrs.EndLogger()
+        # self.logger.debug('\tPFRS_UI > closeEvent')
+        self.pfrs.close()
 
+    @log.class_decorator
     def NewRig_Dialog(self, ignore):
-        self.logger.debug('\tPFRS_UI > NewRig_Dialog')
+        pass
+        # self.logger.debug('\tPFRS_UI > NewRig_Dialog')
         # roots = self.pfrs.rootMng.GetSceneRoots()
         # if roots:
         #     pm.confirmDialog(
@@ -222,8 +236,10 @@ class PayneFreeRigSuite_UI:
         # else:
         #     self.pfrs.InitScene()
 
+    @log.class_decorator
     def EditRig_Dialog(self, ignore):
-        self.logger.debug('\tPFRS_UI > EditRig_Dialog')
+        # self.logger.debug('\tPFRS_UI > EditRig_Dialog')
+        pass
         # self.rootPopup = root_popup.POPUP_EditRoot(self)
         # self.rootPopup.EditRoot_Dialog()
 

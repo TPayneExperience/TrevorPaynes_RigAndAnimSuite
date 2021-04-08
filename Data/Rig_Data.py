@@ -5,6 +5,15 @@ RIG_MODES = (   'Setup Rig',
                 'Building Rig', # Incase of build breakage
                 'Animate Rig') 
 
+LIMBS_GROUP = 'LIMBS'
+JOINTS_GROUP = 'JOINTS'
+MESHES_GROUP = 'MESHES'
+CONTROL_TEMPLATE_GROUP = 'CONTROL_SHAPE_TEMPLATES'
+
+CONTROLS_LAYER = 'Controls'
+MESHES_LAYER = 'Meshes'
+JOINTS_LAYER = 'Joints'
+
 # ============= BEHAVIORS =============
 CST_TYPES = ('Orient', 'Parent', 'Point',  'Scale')
 BHV_TYPES = (   'FK - Chain',           # 0
@@ -57,12 +66,18 @@ AXES_XFORMS =   ((0,0,0),
 
 
 # ============= LIMBS =============
-LIMB_TYPES = (  'Empty - Rigging',
+LIMB_TYPES = (  'Empty',
         
-                '1 Joint BRANCH',
-                '3+ Joint CHAIN', 
-                '2+ Joint BRANCH',
-                '2 Joint CHAIN')
+                'OneJointBranch', 
+                'TwoJointBranch',
+                'TwoJointChain',
+                'ThreeJointChain')
+# LIMB_TYPES = (  'Empty - Rigging',
+        
+#                 '1 Joint BRANCH',
+#                 '3+ Joint CHAIN', 
+#                 '2+ Joint BRANCH',
+#                 '2 Joint CHAIN')
 LIMB_SIDES = ('M', 'L', 'R', '-')
 LIMB_JOINT_NAME_PRESETS = { # lowercase to for keycheck
                 'arm' : ['Shoulder', 'Elbow', 'Wrist'],
@@ -94,7 +109,7 @@ GROUP_TYPES = ( 'Empty', # DO NOT CHANGE ORDER
                 'LookAt')
 
 # ============= CONTROLS =============
-CONTROL_TEMPLATES = {} # Filled by ctrMng.NewScene()
+# CONTROL_TEMPLATES = {} # Filled by ctrMng.NewScene()
 
 
 

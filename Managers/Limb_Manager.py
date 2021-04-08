@@ -4,6 +4,9 @@ import pymel.core as pm
 import Data.Rig_Data as rigData
 reload(rigData)
 
+import Data.General_Data as genData
+reload(genData)
+
 import Common.Utilities as util
 reload(util)
 
@@ -15,18 +18,18 @@ class Limb_Manager:
         self.logger = parent.logger
         self.pfrs = parent
 
-#============= ROOT ============================
+# #============= ROOT ============================
 
-    def NewRoot(self):
-        self.logger.debug('\tLimbMng > NewRoot')
-        self.limbGroup = pm.group(name='LIMBS', em=1, p=self.pfrs.root)
+#     def NewRoot(self):
+#         self.logger.debug('\tLimbMng > NewRoot')
+#         self.limbGroup = pm.group(name='LIMBS', em=1, p=self.pfrs.root)
 
-    def LoadRoot(self):
-        self.logger.debug('\tLimbMng > LoadRoot')
-        for child in pm.listRelatives(self.pfrs.root, c=1, type='transform'):
-            if child.shortName() == 'LIMBS':
-                self.limbGroup = child
-                break
+#     def LoadRoot(self):
+#         self.logger.debug('\tLimbMng > LoadRoot')
+#         for child in pm.listRelatives(self.pfrs.root, c=1, type='transform'):
+#             if child.shortName() == 'LIMBS':
+#                 self.limbGroup = child
+#                 break
 
 #============= ADD LIMB ============================
 
@@ -34,7 +37,7 @@ class Limb_Manager:
         self.logger.debug('\tLimbMng > AddLimb')
         limbID = self.pfrs.root.nextLimbID.get()
         self.pfrs.root.nextLimbID.set(limbID + 1)
-        hide = rigData.HIDE_ATTRS
+        hide = genData.HIDE_ATTRS
         pfrsName = 'Limb%03d' % limbID
         limbTypes = ':'.join(rigData.LIMB_TYPES)
         limbSides = ':'.join(rigData.LIMB_SIDES)

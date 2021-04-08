@@ -33,15 +33,11 @@ class Control_Manager:
         self.SetLayerState(True, True)
 
     def LoadScene(self):
-        temp = pm.ls('Controls', type='displayLayer')
-        if temp:
-            self.ctrLayer = temp[0]
-        temp = pm.ls('CTR_TEMPLATES', tr=1)
-        if temp:
-            ctrShapesParent = temp[0]
-            rigData.CONTROL_TEMPLATES = {}
-            for control in pm.listRelatives(ctrShapesParent, c=1):
-                rigData.CONTROL_TEMPLATES[control.shortName()] = control
+        self.ctrLayer = pm.ls('Controls', type='displayLayer')[0]
+        ctrShapesParent = pm.ls('CTR_TEMPLATES', tr=1)[0]
+        rigData.CONTROL_TEMPLATES = {}
+        for control in pm.listRelatives(ctrShapesParent, c=1):
+            rigData.CONTROL_TEMPLATES[control.shortName()] = control
 
     def SetLayerState(self, isVisible, isReference):
         self.logger.debug('\tCtrMng > SetLayerState')
