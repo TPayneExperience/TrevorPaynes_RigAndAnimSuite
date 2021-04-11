@@ -11,20 +11,14 @@ import Data.Rig_Data as rigData
 reload(rigData)
 
 class Control:
-    _rigRoot = None
-    _shapeTemplates = {} # shapeName : templateNode
-
     @staticmethod
-    @log.static_decorator
-    def Add(group):
-        attr = group.groupType.get() + 'Shape'
-        shape = Control._rigRoot.getAttr(attr)
-        template = Control._shapeTemplates[shape]
+    def Add(rigRoot, group):
+        log.funcFileDebug()
+        attr = '.%sShape' % group.groupType.get()
+        template = pm.listConnections(rigRoot + attr)[0]
         control = pm.duplicate(template, ic=1)[0]
         genUtil.AbstractInitializer(control, 'Control')
-        controlID = Control._rigRoot.nextControlID.get()
-        Control._rigRoot.nextControlID.set(controlID + 1)
-        control.ID.set(controlID)
+        pm.disconnectAttr(control.rigRoot)
         rigUtil.ChannelBoxAttrs(control, 1, 1, 1, 0)
         pm.editDisplayLayerMembers( rigData.CONTROLS_LAYER, 
                                     control, nr=1)
@@ -33,22 +27,23 @@ class Control:
         return group
 
     @staticmethod
-    @log.static_decorator
     def Remove(control):
+        log.funcFileDebug()
+        log.funcFileDebug()
         pm.delete(control)
     
-    @staticmethod
-    @log.static_decorator
-    def InitScene(rigRoot):
-        group = None
-        Control._shapeTemplates = {}
-        Control._rigRoot = rigRoot
-        for child in pm.listRelatives(rigRoot, c=1):
-            if child.shortName() == rigData.CONTROL_TEMPLATE_GROUP:
-                group = child
-                break
-        for child in pm.listRelatives(group, c=1):
-            name = child.shortName()[8:]
-            Control._shapeTemplates[name] = child
+    # @staticmethod
+    # def InitScene(rigRoot):
+    #     log.funcFileDebug()
+    #     group = None
+    #     Control._shapeTemplates = {}
+    #     Control._rigRoot = rigRoot
+    #     for child in pm.listRelatives(rigRoot, c=1):
+    #         if child.shortName() == rigData.CONTROL_TEMPLATE_GROUP:
+    #             group = child
+    #             break
+    #     for child in pm.listRelatives(group, c=1):
+    #         name = child.shortName()[8:]
+    #         Control._shapeTemplates[name] = child
     
     

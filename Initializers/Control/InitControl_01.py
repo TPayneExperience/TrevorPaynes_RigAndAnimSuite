@@ -12,8 +12,8 @@ reload(log)
 
 class InitControl(absInit.Abstract_Initializer):
     @staticmethod
-    @log.static_decorator
     def Initialize(control):
+        log.funcFileDebug()
         if control.hasAttr('group'):
             return 
             

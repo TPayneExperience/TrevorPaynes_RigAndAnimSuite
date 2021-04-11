@@ -12,8 +12,8 @@ reload(log)
 
 class InitLimb(absInit.Abstract_Initializer):
     @staticmethod
-    @log.static_decorator
     def Initialize(limb):
+        log.funcFileDebug()
         if limb.hasAttr('limbType'):
             return
             

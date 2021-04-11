@@ -13,6 +13,8 @@ CONTROL_TEMPLATE_GROUP = 'CONTROL_SHAPE_TEMPLATES'
 CONTROLS_LAYER = 'Controls'
 MESHES_LAYER = 'Meshes'
 JOINTS_LAYER = 'Joints'
+JOINT_SHAPE_ATTR = 'JointShape'
+EMPTY_SHAPE_ATTR = 'EmptyShape'
 
 # ============= BEHAVIORS =============
 CST_TYPES = ('Orient', 'Parent', 'Point',  'Scale')

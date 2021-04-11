@@ -12,14 +12,14 @@ reload(log)
 
 class InitGroup(absInit.Abstract_Initializer):
     @staticmethod
-    @log.static_decorator
     def Initialize(group):
+        log.funcFileDebug()
         if group.hasAttr('control'):
             return 
             
         hide = genData.HIDE_ATTRS
         # pm.addAttr(group, ln='ID', at='long', dv=groupID, h=hide)
-        pm.addAttr(group, ln='index', at='long', h=hide)
+        pm.addAttr(group, ln='groupIndex', at='long', h=hide)
         pm.addAttr(group, ln='control', dt='string', h=hide)
         pm.addAttr(group, ln='joint', dt='string', h=hide)
         pm.addAttr(group, ln='limb', dt='string', h=hide)

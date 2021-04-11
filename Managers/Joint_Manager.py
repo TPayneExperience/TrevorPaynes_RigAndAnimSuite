@@ -130,17 +130,17 @@ class Joint_Manager:
         for i in range(len(joints)):
             joints[i].jointIndex.set(i)
     
-    def UpdateJointName(self, joint):
-        self.logger.debug('\tJntMng > UpdateJointName')
-        limb = pm.listConnections(joint.limb)[0]
-        side = rigData.LIMB_SIDES[limb.side.get()]
-        name = self.nameMng.GetName(limb.pfrsName.get(),
-                                    joint.pfrsName.get(),
-                                    side,
-                                    'JNT')
-        joint.rename(name)
-        group = pm.listConnections(joint.group)[0]
-        self.grpMng.UpdateGroupName(group)
+    # def UpdateJointName(self, joint):
+    #     self.logger.debug('\tJntMng > UpdateJointName')
+    #     limb = pm.listConnections(joint.limb)[0]
+    #     side = rigData.LIMB_SIDES[limb.side.get()]
+    #     name = self.nameMng.GetName(limb.pfrsName.get(),
+    #                                 joint.pfrsName.get(),
+    #                                 side,
+    #                                 'JNT')
+    #     joint.rename(name)
+    #     group = pm.listConnections(joint.group)[0]
+    #     self.grpMng.UpdateGroupName(group)
 
     def UpdateLimbParentJoint(self, childLimb):
         '''Updates limb parent group enum to closest to root group'''

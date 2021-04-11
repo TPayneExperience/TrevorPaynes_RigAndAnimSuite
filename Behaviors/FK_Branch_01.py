@@ -16,15 +16,15 @@ class FK_Branch_01(absBhv.Abstract_Behavior):
     orderIndex = 200  
     
     @staticmethod
-    @log.static_decorator
     def InitLimb(limb):
+        log.funcFileDebug()
         pass
     
 #============= EDITABLE ============================
 
     @staticmethod
-    @log.static_decorator
     def Setup_Editable(limb):
+        log.funcFileDebug()
         for joint in pm.listConnections(limb.joints):
             group = pm.listConnections(joint.group)[0]
             pm.connectAttr(limb.usedGroups, group.used)
@@ -32,8 +32,8 @@ class FK_Branch_01(absBhv.Abstract_Behavior):
 #============= RIG ============================
 
     @staticmethod
-    @log.static_decorator
     def Setup_Rig_Internal(limb):
+        log.funcFileDebug()
         for group in pm.listConnections(limb.usedGroups):
             if not group.enableGroup.get():
                 continue
@@ -43,8 +43,8 @@ class FK_Branch_01(absBhv.Abstract_Behavior):
             pm.parentConstraint(control, joint, mo=1)
     
     @staticmethod
-    @log.static_decorator
     def Setup_Rig_External(limb):
+        log.funcFileDebug()
         parentGroups = rigUtil.GetParentableGroupsOfParent(limb)
         if not parentGroups:
             return
@@ -58,8 +58,8 @@ class FK_Branch_01(absBhv.Abstract_Behavior):
         pm.controller(controls, parentControl, p=1)
     
     @staticmethod
-    @log.static_decorator
     def Teardown_Groups(limb):
+        log.funcFileDebug()
         for group in pm.listConnections(limb.usedGroups):
             joint = pm.listConnections(group.joint)[0]
             pm.parent(group, joint)
@@ -67,12 +67,12 @@ class FK_Branch_01(absBhv.Abstract_Behavior):
 #============= UI ============================
 
     @staticmethod
-    @log.static_decorator
     def Setup_LimbProperties_UI(limb):
+        log.funcFileDebug()
         return None
     
     @staticmethod
-    @log.static_decorator
     def Setup_GroupProperties_UI(limb):
+        log.funcFileDebug()
         return None
     

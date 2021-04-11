@@ -2,6 +2,7 @@
 import json
 import inspect
 import os
+import re
 import sys
 
 import pymel.core as pm
@@ -13,19 +14,120 @@ import Abstracts.Abstract_Initializer as absInit
 reload(absInit)
 
 
+#=========== NAMING ====================================
+
+class Name:
+    @staticmethod
+    def IsValidCharacterLength(name):
+        if (len(name) < 2):
+            # self.logger.error('**** Must be 2 or more characters')
+            return False
+        return True
+
+    @staticmethod
+    def DoesNotStartWithNumber(name):
+        if (name[0] in ['0','1','2','3','4','5','6','7','8','9', '_']):
+            # self.logger.error('**** Cannot start with number OR _')
+            return False
+        return True
+
+    @staticmethod
+    def AreAllValidCharacters(name):
+        try:
+            g = re.search('[A-Za-z0-9_]+', name).group(0)
+            if (len(g) == len(name)):
+                return True
+            # self.logger.error('**** May only contain A-Z, a-z, 0-9, _')
+            return False
+        except:
+            # self.logger.error('**** May only contain A-Z, a-z, 0-9, _')
+            return False
+
+    @staticmethod
+    def GetName(rigRoot, limbName, secondName, side, objType):
+        temp = {rigRoot.limbIndex.get() : limbName,
+                rigRoot.jointIndex.get() : secondName,
+                rigRoot.sideIndex.get() : side,
+                rigRoot.typeIndex.get() : objType}
+        if rigRoot.showPrefix.get():
+            temp[rigRoot.prefixIndex.get()] = rigRoot.prefix.get()
+        partNames = [temp[i] for i in sorted(list(temp.keys()))]
+        return '_'.join(partNames)
+
+#=========== UDPATE NAMES ====================================
+
+    @staticmethod
+    def UpdateLimbName(rigRoot, limb):
+        rigRoot = pm.listConnections(limb.rigRoot)[0]
+        pfrsName = limb.pfrsName.get()
+        limbName = Name.GetName(rigRoot,
+                            pfrsName,
+                            'Limb',
+                            rigData.LIMB_SIDES[limb.side.get()],
+                            'NODE')
+        limb.rename(limbName)
+        for group in pm.listConnections(limb.limbGroups):
+            Name.UpdateLimbGroupName(rigRoot, limb, group)
+        for joint in pm.listConnections(limb.joints):
+            Name.UpdateJointName(rigRoot, limb, joint)
+
+    @staticmethod
+    def UpdateJointName(rigRoot, limb, joint):
+        limb = pm.listConnections(joint.limb)[0]
+        side = rigData.LIMB_SIDES[limb.side.get()]
+        name = Name.GetName(rigRoot, 
+                            limb.pfrsName.get(),
+                            joint.pfrsName.get(),
+                            side,
+                            'JNT')
+        joint.rename(name)
+        Name.UpdateJointGroupName(rigRoot, limb, joint)
+
+    @staticmethod
+    def UpdateJointGroupName(rigRoot, limb, joint):
+        group = pm.listConnections(joint.group)[0]
+        pfrsName = joint.pfrsName.get()
+        Name._UpdateGroupName(rigRoot, limb, pfrsName, group)
+
+    @staticmethod
+    def UpdateLimbGroupName(rigRoot, limb, group):
+        pfrsName = limb.pfrsName.get()
+        Name._UpdateGroupName(rigRoot, limb, pfrsName, group)
+        
+    @staticmethod
+    def _UpdateGroupName(rigRoot, limb, pfrsName, group):
+        groupType = group.groupType.get()
+        groupName = Name.GetName(rigRoot,
+                                pfrsName,
+                                groupType,
+                                rigData.LIMB_SIDES[limb.side.get()],
+                                'GRP')
+        group.rename(groupName)
+        control = pm.listConnections(group.control)[0]
+        controlName = Name.GetName( rigRoot,
+                                    pfrsName,
+                                    groupType,
+                                    rigData.LIMB_SIDES[limb.side.get()],
+                                    'CTR')
+        control.rename(controlName)
+
+
 #=========== JSON ====================================
 
-def SaveJson(filePath, data):
-    print('Saving: ' + filePath)
-    with open(filePath, 'w') as outputFile:
-        json.dump(data, outputFile, indent=4)
+class Json:
+    @staticmethod
+    def SaveJson(filePath, data):
+        print('Saving: ' + filePath)
+        with open(filePath, 'w') as outputFile:
+            json.dump(data, outputFile, indent=4)
 
-def LoadJson(filePath):
-    print('Loading: ' + filePath)
-    data = None
-    with open(filePath, 'r') as readFile:
-        data = json.load(readFile)
-    return data
+    @staticmethod
+    def LoadJson(filePath):
+        print('Loading: ' + filePath)
+        data = None
+        with open(filePath, 'r') as readFile:
+            data = json.load(readFile)
+        return data
 
 #=========== MISC ====================================
 

@@ -12,8 +12,8 @@ reload(genUtil)
 
 class RigRoot:
     @staticmethod
-    @log.static_decorator
     def Add():
+        log.funcFileDebug()
         rigRoot = pm.group(name='ROOT_tempName', em=True)
         genUtil.AbstractInitializer(rigRoot, 'RigRoot')
         RigRoot.ImportControlShapeTemplates(rigRoot)
@@ -24,37 +24,46 @@ class RigRoot:
         return rigRoot
 
     @staticmethod
-    @log.static_decorator
     def GetAll():
+        log.funcFileDebug()
         return [r for r in pm.ls(tr=1) if r.hasAttr('limbs')]
 
     @staticmethod
-    @log.static_decorator
     def UpdateRootName(rigRoot):
+        log.funcFileDebug()
         rigRoot.rename('%s_ROOT' % rigRoot.prefix.get())
         for limb in pm.listConnections(rigRoot.limbs):
-            pass
-            # self.limbMng.UpdateLimbName(limb)
+            genUtil.Name.UpdateLimbName(rigRoot, limb)
 
     @staticmethod
-    @log.static_decorator
     def ImportControlShapeTemplates(rigRoot):
-        for child in pm.listRelatives(rigRoot, c=1):
-            if child.shortName() == rigData.CONTROL_TEMPLATE_GROUP:
-                pm.delete(child)
-                break
+        log.funcFileDebug()
+        old = pm.listConnections(rigRoot.controlTemplates)
+        pm.delete(old)
+
         folder = os.path.dirname(__file__)  # Scene Objects
         folder = os.path.dirname(folder)    # Root
         folder = os.path.join(folder, 'Templates')
         filePath = os.path.join(folder, 'Control_Shapes.ma')
         nodes = pm.importFile(filePath, returnNewNodes=1)
         ctrShapes = [n for n in nodes if pm.objectType(n) == 'transform']
-        ctrShapesParent = pm.group(name=rigData.CONTROL_TEMPLATE_GROUP, em=1)
+        ctrShapesParent = pm.group(ctrShapes, p=rigRoot,
+                                    name=rigData.CONTROL_TEMPLATE_GROUP)
         ctrShapesParent.v.set(0)
-        pm.parent(ctrShapes, ctrShapesParent)
-        pm.parent(ctrShapesParent, rigRoot)
+        pm.addAttr(ctrShapesParent, ln='rigRoot', dt='string')
+        pm.connectAttr(rigRoot.controlTemplates, ctrShapesParent.rigRoot)
         for ctr in ctrShapes:
-            ctr.rename('PFRSCTR_' + ctr.shortName())
+            pm.addAttr(ctr, ln='rigRoot', dt='string')
+        for ctr in ctrShapes:
+            if 'Sphere_Poly' in ctr.shortName():
+                attr = '.' + rigData.JOINT_SHAPE_ATTR
+                pm.connectAttr(rigRoot + attr, ctr.rigRoot)
+                break
+        for ctr in ctrShapes:
+            if 'Square_Wire' in ctr.shortName():
+                attr = '.' + rigData.EMPTY_SHAPE_ATTR
+                pm.connectAttr(rigRoot + attr, ctr.rigRoot)
+                break
 
 
 

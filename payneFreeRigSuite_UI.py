@@ -45,7 +45,6 @@ reload(root)
 class PayneFreeRigSuite_UI:
     def __init__(self):
         self.pfrs = pfrs.PayneFreeRigSuite()
-        # self.logger = self.pfrs.logger
 
         # self.fileMng = self.pfrs.fileMng
         # self.nameMng = self.pfrs.nameMng
@@ -59,10 +58,9 @@ class PayneFreeRigSuite_UI:
         self.currentOp = None
 
         self._Setup()
-        # self.pfrs.InitOperations()
-        # self.pfrs.InitScene()
         self.PopulateCategories()
         self.InitOptionMenues()
+
         # self.PopulateOperations()
         # debug_ui.PFRS_Debug_UI(self)
         # self.InitTab()
@@ -72,7 +70,7 @@ class PayneFreeRigSuite_UI:
 #=========== SETUP ====================================
 
     def _Setup(self):
-        log.logFuncFile()
+        log.funcFileDebug()
         name = genData.LICENSE
         name += ' - Payne Free Rig Suite'
         name += ' - v%s' %  genData.__version__
@@ -142,8 +140,8 @@ class PayneFreeRigSuite_UI:
 
 #=========== COMBOBOX SWITCHING ====================================
 
-    @log.class_decorator
     def TESTING(self, ignore):
+        log.funcFileDebug()
         import SceneObjects.Limb
         reload(SceneObjects.Limb)
         import SceneObjects.RigRoot
@@ -153,8 +151,8 @@ class PayneFreeRigSuite_UI:
         # from SceneObjects.RigRoot import RigRoot
         # RigRoot.Add()
         
-    @log.class_decorator
     def InitOptionMenues(self):
+        log.funcFileDebug()
         rigRoot = root.RigRoot.GetAll()[0]
         category = rigRoot.mainTab.get()
         operationName = rigRoot.subTab.get()
@@ -163,12 +161,12 @@ class PayneFreeRigSuite_UI:
         self.PopulateOperations(category)
         self.SetOperation(operationName)
 
-    @log.class_decorator
     def SetCategory(self, category):
+        log.funcFileInfo()
         print (category)
     
-    @log.class_decorator
     def SetOperation(self, operationName):
+        log.funcFileInfo()
         index = self.operationNames.index(operationName)
         self.currentOp = self.operations[index]()
         pm.deleteUI(self.frame)
@@ -176,13 +174,13 @@ class PayneFreeRigSuite_UI:
             with pm.horizontalLayout():
                 self.currentOp.Setup_UI()
 
-    @log.class_decorator
     def PopulateCategories(self):
+        log.funcFileDebug()
         for category in self.pfrs.categories:
             pm.menuItem(l=category, p=self.cat_op)
     
-    @log.class_decorator
     def PopulateOperations(self, category):
+        log.funcFileDebug()
         self.operationNames = []
         self.operations = []
         pm.optionMenu(self.op_op, e=1, dai=1)
@@ -198,33 +196,31 @@ class PayneFreeRigSuite_UI:
 
 #=========== MENUBAR FUNCTIONS ====================================
 
-    @log.class_decorator
     def ExportAnimationRig(self, ignore):
+        log.funcFileInfo()
         pass
         # self.logger.debug('\tPFRS_UI > ExportAnimationRig')
         # self.Teardown_Editable()
         # self.pfrs.ExportAnimationRig()
         # self.Setup_Editable()
 
-    @log.class_decorator
     def OpenDocumentation(self, ignore):
+        log.funcFileInfo()
         # self.logger.debug('\tPFRS_UI > OpenDocumentation')
         url = 'https://docs.google.com/document/d/1KxdOnofyA2Bxz'
         url += 'QHInxrmWjFJK_Q1hCwvnAP0-0SgMRE/edit?usp=sharing'
         webbrowser.open(url)
 
-    @log.class_decorator
     def OpenWebsite(self, ignore):
+        log.funcFileInfo()
         # self.logger.debug('\tPFRS_UI > OpenWebsite')
         webbrowser.open('https://youtu.be/yBLdQ1a4-JI?t=9')
 
-    @log.class_decorator
     def closeEvent(self):
-        # self.logger.debug('\tPFRS_UI > closeEvent')
-        self.pfrs.close()
+        log.funcFileInfo()
 
-    @log.class_decorator
     def NewRig_Dialog(self, ignore):
+        log.funcFileInfo()
         pass
         # self.logger.debug('\tPFRS_UI > NewRig_Dialog')
         # roots = self.pfrs.rootMng.GetSceneRoots()
@@ -236,8 +232,8 @@ class PayneFreeRigSuite_UI:
         # else:
         #     self.pfrs.InitScene()
 
-    @log.class_decorator
     def EditRig_Dialog(self, ignore):
+        log.funcFileInfo()
         # self.logger.debug('\tPFRS_UI > EditRig_Dialog')
         pass
         # self.rootPopup = root_popup.POPUP_EditRoot(self)

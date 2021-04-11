@@ -14,34 +14,34 @@ reload(ctr)
 
 class Group:
     @staticmethod
-    def _Add(index, groupName):
+    def _Add(rigRoot, index, groupName):
         group = pm.group(em=1, w=1)
         genUtil.AbstractInitializer(group, 'Group')
         group.groupType.set(groupName)
-        group.index.set(index)
-        ctr.Control.Add(group)
+        group.groupIndex.set(index)
+        ctr.Control.Add(rigRoot, group)
         return group
 
     @staticmethod
-    @log.static_decorator
-    def AddJointGroup(index, joint):
-        group = Group._Add(index, 'Joint')
+    def AddJointGroup(rigRoot, index, joint):
+        log.funcFileDebug()
+        group = Group._Add(rigRoot, index, 'Joint')
         pm.connectAttr(joint.group, group.joint)
         pm.parent(group, joint)
         pm.xform(group, t=(0,0,0), ro=(0,0,0), s=(1,1,1))
         return group
     
     @staticmethod
-    @log.static_decorator
-    def AddLimbGroup(index, groupName, limb):
-        group = Group._Add(index, groupName)
+    def AddLimbGroup(rigRoot, index, groupName, limb):
+        log.funcFileDebug()
+        group = Group._Add(rigRoot, index, groupName)
         pm.connectAttr(limb.limbGroups, group.limb)
         pm.parent(group, limb)
         return group
     
     @staticmethod
-    @log.static_decorator
     def Remove(group):
+        log.funcFileDebug()
         # missing remove control??/
         pm.delete(group)
     

@@ -40,8 +40,12 @@ class PayneFreeRigSuite_Plugin(om.MPxCommand):
 
     def doIt(self, args):
         print (PY_VER)
-        pfrs_ui.PayneFreeRigSuite_UI()
-
+        if not args:
+            pfrs_ui.PayneFreeRigSuite_UI()
+        else:
+            import payneFreeRigSuite
+            # pfrs.PayneFreeRigSuite()
+    
 
 def initializePlugin(plugin):
     pluginFn = om.MFnPlugin(plugin)

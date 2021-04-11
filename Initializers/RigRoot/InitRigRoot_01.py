@@ -12,9 +12,8 @@ reload(log)
 
 class InitRigRoot(absInit.Abstract_Initializer):
     @staticmethod
-    # @log.static_decorator
     def Initialize(rigRoot):
-        log.logFuncFile()
+        log.funcFileDebug()
         if rigRoot.hasAttr('limbs'):
             return
 
@@ -46,30 +45,14 @@ class InitRigRoot(absInit.Abstract_Initializer):
         pm.addAttr(rigRoot, ln='nextLimbID', at='short', dv=1)
         pm.addAttr(rigRoot, ln='nextJointID', at='short', dv=1)
         # pm.addAttr(rigRoot, ln='nextGroupID', at='long')
-        pm.addAttr(rigRoot, ln='nextControlID', at='long')
+        # pm.addAttr(rigRoot, ln='nextControlID', at='long')
         pm.addAttr(rigRoot, ln='nextMeshID', at='short', dv=1)
 
         # When Joints/limbs added/removed
         pm.addAttr(rigRoot, ln='rebuildSkinInf', at='bool', h=hide)
 
-        # CONTROLS
-        pm.addAttr(rigRoot, ln='appEmptyCtrShape', dt='string', h=hide)
-        pm.addAttr(rigRoot, ln='appJointCtrShape', dt='string', h=hide)
-        pm.addAttr(rigRoot, ln='appIKPVCtrShape', dt='string', h=hide)
-        pm.addAttr(rigRoot, ln='appLookAtCtrShape', dt='string', h=hide)
-
         # ANIMATION
         pm.addAttr(rigRoot, ln='posesFolderPath', dt='string')
-
-        #============= LAYERS ============================
-
-        controlDL = pm.createDisplayLayer(n=rigData.CONTROLS_LAYER, empty=True)
-        jointDL = pm.createDisplayLayer(n=rigData.JOINTS_LAYER, empty=True)
-        meshDL = pm.createDisplayLayer(n=rigData.MESHES_LAYER, empty=True)
-        controlDL.visibility.set(0)
-        controlDL.displayType.set(2)
-        jointDL.displayType.set(2)
-        meshDL.displayType.set(2)
 
         #============= GROUPS ============================
 
@@ -77,6 +60,7 @@ class InitRigRoot(absInit.Abstract_Initializer):
         pm.addAttr(rigRoot, ln='jointsParentGroup', dt='string')
         pm.addAttr(rigRoot, ln='limbsParentGroup', dt='string')
         pm.addAttr(rigRoot, ln='meshesParentGroup', dt='string')
+        pm.addAttr(rigRoot, ln='controlTemplates', dt='string')
 
         group = pm.group(name=rigData.JOINTS_GROUP, em=True, p=rigRoot)
         pm.addAttr(group, ln='rigRoot', dt='string')
@@ -87,3 +71,21 @@ class InitRigRoot(absInit.Abstract_Initializer):
         group = pm.group(name=rigData.MESHES_GROUP, em=True, p=rigRoot)
         pm.addAttr(group, ln='rigRoot', dt='string')
         pm.connectAttr(rigRoot.meshesParentGroup, group.rigRoot)
+        
+        # CONTROLS
+        pm.addAttr(rigRoot, ln=rigData.JOINT_SHAPE_ATTR, dt='string', h=hide)
+        pm.addAttr(rigRoot, ln=rigData.EMPTY_SHAPE_ATTR, dt='string', h=hide)
+        # pm.addAttr(rigRoot, ln='appEmptyCtrShape', dt='string', h=hide)
+        # pm.addAttr(rigRoot, ln='appJointCtrShape', dt='string', h=hide)
+        # pm.addAttr(rigRoot, ln='appIKPVCtrShape', dt='string', h=hide)
+        # pm.addAttr(rigRoot, ln='appLookAtCtrShape', dt='string', h=hide)
+
+        #============= LAYERS ============================
+
+        controlDL = pm.createDisplayLayer(n=rigData.CONTROLS_LAYER, empty=True)
+        jointDL = pm.createDisplayLayer(n=rigData.JOINTS_LAYER, empty=True)
+        meshDL = pm.createDisplayLayer(n=rigData.MESHES_LAYER, empty=True)
+        controlDL.visibility.set(0)
+        controlDL.displayType.set(2)
+        jointDL.displayType.set(2)
+        meshDL.displayType.set(2)

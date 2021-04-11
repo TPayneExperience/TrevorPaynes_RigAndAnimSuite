@@ -12,8 +12,8 @@ reload(log)
 
 class InitJoint(absInit.Abstract_Initializer):
     @staticmethod
-    @log.static_decorator
     def Initialize(joint):
+        log.funcFileDebug()
         if joint.hasAttr('group'):
             return 
         # pm.addAttr(joint, ln='ID', at='short')

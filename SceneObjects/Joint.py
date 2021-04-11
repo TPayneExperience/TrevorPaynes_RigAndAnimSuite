@@ -15,25 +15,26 @@ reload(grp)
 
 class Joint:
     @staticmethod
-    @log.static_decorator
-    def Add(index, limb, joint):
+    def Add(rigRoot, index, limb, joint):
+        log.funcFileDebug()
+        pm.editDisplayLayerMembers(rigData.JOINTS_LAYER, 
+                                        joint, nr=1)
         genUtil.AbstractInitializer(joint, 'Joint')
+        pm.connectAttr(limb.joints, joint.limb)
         groups = pm.listConnections(joint.group)
         if groups:
             group = groups[0]
             genUtil.AbstractInitializer(group, 'Group')
-            group.index.set(index)
+            group.groupIndex.set(index)
             pm.disconnectAttr(group.parentable)
         else:
-            group = grp.Group.AddJointGroup(index, joint)
+            group = grp.Group.AddJointGroup(rigRoot, index, joint)
         pm.connectAttr(limb.parentableGroups, group.parentable)
-        pm.connectAttr(limb.joints, joint.limb)
-        pm.editDisplayLayerMembers(rigData.JOINTS_LAYER, 
-                                        joint, nr=1)
+        joint.pfrsName.set('Joint%03d' % (index))
     
     @staticmethod
-    @log.static_decorator
     def Remove(joint):
+        log.funcFileDebug()
         pm.disconnectAttr(joint.limb)
     
     

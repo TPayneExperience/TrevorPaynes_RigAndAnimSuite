@@ -1,74 +1,20 @@
 
 import inspect
-# import logging
 import os
-# import platform
-# import subprocess
 import sys
 
 import pymel.core as pm
 
-import Data.General_Data as genData
-reload(genData)
-
-import Common.General_Utilities as genUtil
-reload(genUtil)
-import Abstracts.Abstract_Initializer as absInit
-reload(absInit)
 import Operations
 reload(Operations)
 import Abstracts.Abstract_OperationUI as absOpUI
 reload(absOpUI)
+import Abstracts.Abstract_Operation as absOp
+reload(absOp)
 import Common.Logger as log
 reload(log)
 import SceneObjects.RigRoot as root
 reload(root)
-import SceneObjects.Limb as lmb
-reload(lmb)
-import Data.Rig_Data as rigData
-reload(rigData)
-
-
-# import Managers.File_Manager as fm
-# reload(fm)
-# import Managers.Json_Manager as js
-# reload(js)
-# import Managers.Name_Manager as nm
-# reload(nm)
-# import Managers.Joint_Manager as jm
-# reload(jm)
-# import Managers.Limb_Manager as lm
-# reload(lm)
-# import Managers.Group_Manager as grp
-# reload(grp)
-# import Managers.Control_Manager as ctr
-# reload(ctr)
-# import Managers.Build_Manager as bldMng
-# reload(bldMng)
-# import Managers.Mesh_Manager as meshMng
-# reload(meshMng)
-# import Managers.Skin_Manager as skinMng
-# reload(skinMng)
-# import Managers.Root_Manager as rootMng
-# reload(rootMng)
-# import Managers.Preset_Manager as pstMng
-# reload(pstMng)
-# import Managers.Pose_Manager as posMng
-# reload(posMng)
-
-# import Rigging.Behavior.RIG_Behaviors as rigBHV
-# reload(rigBHV)
-# import Rigging.LimbSetup.RIG_LimbSetup as rigLS
-# reload(rigLS)
-# import Rigging.JointSetup.RIG_JointSetup as rigJS
-# reload(rigJS)
-# import Animation.Poses.ANM_Poses as anmPOS
-# reload(anmPOS)
-
-# import PFRS_Debug as debug
-# reload(debug)
-# import Common.Utilities as util
-# reload(util)
 
 class PayneFreeRigSuite:
     def __init__(self):
@@ -78,12 +24,20 @@ class PayneFreeRigSuite:
         self.catOps = {} # {categoryName : {fileName : classObj}}
         self.categories = []
 
+        self._InitOperations()
         self.InitScene()
 
-#=========== OPERATIONS ====================================
-   
-    @log.class_decorator
+    def __del__(self):
+        self._EndLogger()
+
+#=========== PUBLIC ====================================
+
+    def OpenLog(self, ignore):
+        log.funcFileDebug()
+        log.OpenLog()
+
     def InitScene(self):
+        log.funcFileInfo()
         rigRoot = root.RigRoot.GetAll()
         if rigRoot:
             rigRoot = rigRoot[0]
@@ -96,20 +50,12 @@ class PayneFreeRigSuite:
             parent = pm.listRelatives(joint, p=1)
             if not parent or pm.objectType(parent[0]) != 'joint':
                 pm.parent(joint, jointGroup)
-        self._InitOperations()
+        
 
-    def _StartLogger(self):
-        startTxt = '\n'
-        startTxt += '='*40
-        startTxt += '\n'
-        startTxt += '-'*15
-        startTxt += ' START '
-        startTxt += '-'*15
-        startTxt += '\n'
-        log.Logger.Get().info(startTxt)
+#=========== PRIVATE ====================================
 
-    @log.class_decorator
     def _InitOperations(self):
+        log.funcFileDebug()
         self.catOps = {}
         rootPath = os.path.dirname(__file__)
         rootPath = os.path.join(rootPath, 'Operations')
@@ -126,13 +72,14 @@ class PayneFreeRigSuite:
             moduleCat = '%s.%s' % ('Operations', category)
             categoryPath = os.path.join(rootPath, category)
             for opFile in os.listdir(categoryPath):
-                fileName = os.path.splitext(opFile)[0]
-                moduleName = '%s.%s' % (moduleCat, fileName)
+                if '__init__.py' in opFile:
+                    continue
                 opFilePath = os.path.join(categoryPath, opFile)
                 if not os.path.isfile(opFilePath):
                     continue
-                if '__init__.py' in opFile:
-                    continue
+                fileName = os.path.splitext(opFile)[0]
+                moduleName = '%s.%s' % (moduleCat, fileName)
+                print (moduleName)
                 # UI
                 exec('import %s' % moduleName)
                 exec('reload (%s)' % moduleName)
@@ -141,29 +88,25 @@ class PayneFreeRigSuite:
                     if inspect.isclass(obj):
                         if issubclass(obj, absOpUI.Abstract_OperationUI):
                             self.catOps[category][obj.uiName] = obj
-
-
-        # self.catOps = {}
-        # rootPath = os.path.dirname(__file__)
-        # rootPath = os.path.join(rootPath, 'Factories')
-        # rootPath = os.path.join(rootPath, 'Operations')
-        # moduleRoot = 'Factories.Operations'
-        # for category in genData.OPERATION_FOLDERS:
-        #     self.catOps[category] = {}
-        #     moduleCat = '%s.%s' % (moduleRoot, category)
-        #     categoryPath = os.path.join(rootPath, category)
-        #     for operation in os.listdir(categoryPath):
-        #         moduleOp = '%s.%s' % (moduleCat, operation)
-        #         opPath = os.path.join(categoryPath, operation)
-        #         if os.path.isfile(opPath):
-        #             continue
-        #         op = genUtil.GetOperation(moduleOp, opPath)
-        #         self.catOps[category][op.operationName] = op
+                for name, obj in inspect.getmembers(module):
+                    if inspect.isclass(obj):
+                        if issubclass(obj, absOp.Abstract_Operation):
+                            setattr(self, name, obj)
 
 #=========== LOGGER ====================================
    
-    @log.class_decorator
-    def close(self):
+    def _StartLogger(self):
+        startTxt = '\n'
+        startTxt += '='*40
+        startTxt += '\n'
+        startTxt += '-'*15
+        startTxt += ' START '
+        startTxt += '-'*15
+        startTxt += '\n'
+        log.info(startTxt)
+
+    def _EndLogger(self):
+        log.funcFileDebug()
         endTxt = '\n\n'
         endTxt += '-'*15
         endTxt += ' END '
@@ -171,19 +114,8 @@ class PayneFreeRigSuite:
         endTxt += '\n'
         endTxt += '='*40
         endTxt += '\n\n'
-        log.Logger.Get().info(endTxt)
-        pass
+        log.info(endTxt)
 
-    @log.class_decorator
-    def OpenLog(self, ignore):
-        log.Logger.Get().debug('asdfasdf')
-        log.OpenLog()
-    #     if platform.system() == 'Darwin':       # macOS
-    #         subprocess.call(('open', self.logFile))
-    #     elif platform.system() == 'Windows':    # Windows
-    #         os.startfile(self.logFile)
-    #     else:                                   # linux variants
-    #         subprocess.call(('xdg-open', self.logFile))
 
 # #============= SCENE ============================
 

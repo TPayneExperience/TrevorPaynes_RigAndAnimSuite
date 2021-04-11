@@ -30,48 +30,64 @@ class Limb:
         return limb
     
     @staticmethod
-    def _AddJoints(limb, joints):
+    def _AddJoints(rigRoot, limb, joints):
         for i in range(len(joints)):
             joint = joints[i]
-            jnt.Joint.Add(i, limb, joint)
+            jnt.Joint.Add(rigRoot, i, limb, joint)
 
     @staticmethod
-    @log.static_decorator
     def AddEmpty(rigRoot):
+        log.funcFileDebug()
         limb = Limb._Add(rigRoot)
-        limb.bhvType.set(rigData.LIMB_TYPES[0])
-        group = grp.Group.AddLimbGroup(0, 'Empty', limb)
+        limb.limbType.set(rigData.LIMB_TYPES[0])
+        group = grp.Group.AddLimbGroup(rigRoot, 0, 'Empty', limb)
         pm.connectAttr(limb.parentableGroups, group.parentable)
+        genUtil.Name.UpdateLimbName(rigRoot, limb)
         return limb
 
     @staticmethod
-    @log.static_decorator
     def AddOneJointBranch(rigRoot, joints):
+        log.funcFileDebug()
         limb = Limb._Add(rigRoot)
-        limb.bhvType.set(rigData.LIMB_TYPES[1])
-        Limb._AddJoints(limb, joints)
+        limb.limbType.set(rigData.LIMB_TYPES[1])
+        Limb._AddJoints(rigRoot, limb, joints)
+        genUtil.Name.UpdateLimbName(rigRoot, limb)
         return limb
 
     @staticmethod
-    @log.static_decorator
     def AddTwoJointBranch(rigRoot, joints):
+        log.funcFileDebug()
         limb = Limb._Add(rigRoot)
-        limb.bhvType.set(rigData.LIMB_TYPES[2])
-        Limb._AddJoints(limb, joints)
+        limb.limbType.set(rigData.LIMB_TYPES[2])
+        Limb._AddJoints(rigRoot, limb, joints)
+        genUtil.Name.UpdateLimbName(rigRoot, limb)
         return limb
 
     @staticmethod
-    @log.static_decorator
     def AddTwoJointChain(rigRoot, joints):
+        log.funcFileDebug()
         limb = Limb._Add(rigRoot)
-        limb.bhvType.set(rigData.LIMB_TYPES[3])
-        Limb._AddJoints(limb, joints)
+        limb.limbType.set(rigData.LIMB_TYPES[3])
+        Limb._AddJoints(rigRoot, limb, joints)
+        genUtil.Name.UpdateLimbName(rigRoot, limb)
         return limb
 
     @staticmethod
-    @log.static_decorator
     def AddThreeJointChain(rigRoot, joints):
+        log.funcFileDebug()
         limb = Limb._Add(rigRoot)
-        limb.bhvType.set(rigData.LIMB_TYPES[4])
-        Limb._AddJoints(limb, joints)
+        limb.limbType.set(rigData.LIMB_TYPES[4])
+        Limb._AddJoints(rigRoot, limb, joints)
+        genUtil.Name.UpdateLimbName(rigRoot, limb)
         return limb
+
+    @staticmethod
+    def Remove(limb):
+        for joint in pm.listConnections(limb.joints):
+            jnt.Joint.Remove(joint)
+        for group in pm.listConnections(limb.limbGroups):
+            grp.Group.Remove(group)
+        limbPresets = pm.listConnections(limb.presets)
+        pm.delete(limbPresets)
+        pm.delete(limb)
+

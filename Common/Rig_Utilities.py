@@ -44,7 +44,7 @@ def ResetAttrs(xform):
 def SortGroups(groups):
     temp = {}
     for group in groups:
-        temp[group.index.get()] = group
+        temp[group.groupIndex.get()] = group
     return [temp[i] for i in sorted(temp.keys())]
     
 def GetParentableGroupsOfParent(limb):

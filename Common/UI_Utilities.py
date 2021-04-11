@@ -55,7 +55,7 @@ def PopulateLimbHier(widget, curRigRoot):
 def PopulateControlHier(widget, limb):
     groups = {} # index : group
     for group in pm.listConnections(limb.usedGroups):
-        groupID = str(group.index.get())
+        groupID = str(group.groupIndex.get())
         groups[groupID] = group
     for i in range(len(groups)):
         group = groups[i]
@@ -69,10 +69,10 @@ def PopluateJointHier(widget, limb):
     joints = {} # index : joint
     for joint in pm.listConnections(limb.joints):
         group = pm.listConnections(joint.group)[0]
-        groupID = str(group.index.get())
+        groupID = str(group.groupIndex.get())
         joints[groupID] = joint
     for i in range(len(joints)):
-        joint = joints[i]
+        joint = joints[str(i)]
         name = joint.pfrsName.get()
         pm.treeView(widget, e=1, addItem=(str(i), ''))
         pm.treeView(widget, e=1, displayLabel=(str(i), name))
