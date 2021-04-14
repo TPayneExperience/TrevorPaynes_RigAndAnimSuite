@@ -14,13 +14,17 @@ reload(pfrs)
 
 import Initializers
 reload(Initializers)
-import SceneObjects
-reload(SceneObjects)
+import SceneData
+reload(SceneData)
 
 import Common.Logger as log
 reload(log)
-import SceneObjects.RigRoot as root
-reload(root)
+import SceneData.RigRoot as rrt
+reload(rrt)
+import Data.Rig_Data as rigData
+reload(rigData)
+import Common.Rig_Utilities as rigUtil
+reload(rigUtil)
 
 # import Import_Utilities as impUtil
 # reload(impUtil)
@@ -39,8 +43,8 @@ reload(root)
 # import Rigging.Popups.POPUP_EditRoot as root_popup
 # reload(root_popup)
 
-# import PFRS_Debug_UI as debug_ui
-# reload(debug_ui)
+import PFRS_Debug_UI as debug_ui
+reload(debug_ui)
 
 class PayneFreeRigSuite_UI:
     def __init__(self):
@@ -59,10 +63,10 @@ class PayneFreeRigSuite_UI:
 
         self._Setup()
         self.PopulateCategories()
+        debug_ui.PFRS_Debug_UI(self)
         self.InitOptionMenues()
 
         # self.PopulateOperations()
-        # debug_ui.PFRS_Debug_UI(self)
         # self.InitTab()
         # self.Setup_Editable()
 
@@ -137,42 +141,67 @@ class PayneFreeRigSuite_UI:
                 pm.menuItem(l='Free Version', c=self.OpenWebsite)
                 pm.menuItem(l='Personal Version', en=0)
                 pm.menuItem(l='Professional Version', en=0)
-
+            
 #=========== COMBOBOX SWITCHING ====================================
 
     def TESTING(self, ignore):
         log.funcFileDebug()
-        import SceneObjects.Limb
-        reload(SceneObjects.Limb)
-        import SceneObjects.RigRoot
-        reload(SceneObjects.RigRoot)
-        rigRoot = SceneObjects.RigRoot.RigRoot.GetAll()[0]
-        SceneObjects.Limb.Limb.AddEmpty(rigRoot)
-        # from SceneObjects.RigRoot import RigRoot
+        import SceneData.Limb
+        reload(SceneData.Limb)
+        import SceneData.RigRoot
+        reload(SceneData.RigRoot)
+        rigRoot = SceneData.RigRoot.RigRoot.GetAll()[0]
+        SceneData.Limb.Limb.AddEmpty(rigRoot)
+        # from SceneData.RigRoot import RigRoot
         # RigRoot.Add()
         
     def InitOptionMenues(self):
         log.funcFileDebug()
-        rigRoot = root.RigRoot.GetAll()[0]
+        rigRoot = rrt.RigRoot.GetAll()[0]
         category = rigRoot.mainTab.get()
         operationName = rigRoot.subTab.get()
         index = self.pfrs.categories.index(category) + 1
         pm.optionMenu(self.cat_op, e=1, sl=index)
         self.PopulateOperations(category)
+        index = self.operationNames.index(operationName) + 1
+        pm.optionMenu(self.op_op, e=1, sl=index)
         self.SetOperation(operationName)
 
     def SetCategory(self, category):
         log.funcFileInfo()
-        print (category)
+        self.PopulateOperations(category)
     
     def SetOperation(self, operationName):
         log.funcFileInfo()
+        pm.deleteUI(self.frame)
         index = self.operationNames.index(operationName)
         self.currentOp = self.operations[index]()
-        pm.deleteUI(self.frame)
+        # TEARDOWN RIG / EDITABLE
+        toBeBuilt = self.currentOp.operation.isRigBuilt
+        for rigRoot in rrt.RigRoot.GetAll():
+            if not toBeBuilt:
+                if rigRoot.isBuilt.get():
+                    self.pfrs.Teardown_Rig(rigRoot)
+            if toBeBuilt:
+                if not rigRoot.isBuilt.get():
+                    self.pfrs.Teardown_Editable(rigRoot)
+
+        # SETUP RIG / EDITABLE
+        for rigRoot in rrt.RigRoot.GetAll():
+            if toBeBuilt:
+                if not rigRoot.isBuilt.get():
+                    self.pfrs.Setup_Rig(rigRoot)
+            if not toBeBuilt:
+                if rigRoot.isBuilt.get():
+                    self.pfrs.Setup_Editable(rigRoot)
+            rigRoot.isBuilt.set(toBeBuilt)
         with pm.frameLayout(p=self.win, lv=0) as self.frame:
             with pm.horizontalLayout():
                 self.currentOp.Setup_UI()
+        c = self.currentOp.operation.controlLayerState
+        j = self.currentOp.operation.jointLayerState
+        rigUtil.SetLayerState(rigData.CONTROLS_LAYER, c[0], c[1])
+        rigUtil.SetLayerState(rigData.JOINTS_LAYER, j[0], j[1])
 
     def PopulateCategories(self):
         log.funcFileDebug()

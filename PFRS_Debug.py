@@ -3,12 +3,17 @@ import os
 
 import pymel.core as pm
 
+import Common.Logger as log
+reload(log)
+import SceneData.RigRoot as rrt
+reload(rrt)
+
 class PFRS_Debug:
     def __init__(self, parent):
-        self.pfrs = parent
-        self.limbMng = parent.limbMng
-        self.rigLS = parent.rigLS
-        self.logger = parent.logger
+        self.pfrs = parent.pfrs
+        # self.limbMng = parent.limbMng
+        # self.rigLS = parent.rigLS
+        # self.logger = parent.logger
 
         folder = os.path.dirname(__file__)
         self.folder = os.path.join(folder,'TESTING_FILES')
@@ -19,7 +24,7 @@ class PFRS_Debug:
         print ('>>>>>>>>>>>>>> AUTO DEBUG ON <<<<<<<<<<<<<')
 
         # self.AnimPosesTest()
-        # self.SimpleChainTest()
+        self.SimpleChainTest()
         # self.LimbTypesTest()
         # self.LegTest()
         # self.ArmTest()
@@ -29,7 +34,7 @@ class PFRS_Debug:
 # ================= TESTS =============================
 
     def NewScene(self):
-        self.logger.info('DEBUG TESTS > NewScene')
+        log.funcFileDebug()
         pm.newFile(f=1)
         pm.flushUndo()
 
@@ -42,6 +47,10 @@ class PFRS_Debug:
         self.NewScene()
         path = os.path.join(self.folder, 'TEST_SimpleChain_01.ma')
         pm.importFile(path)
+        self.pfrs.InitScene()
+        self.pfrs.LimbSetup.AutoBuildByHierarchy()
+        rigRoot = rrt.RigRoot.GetAll()[0]
+        rigRoot.subTab.set('Behavior')
         # self.parent.UpdateEnableUI()
         # self.parent.Setup_Editable()
         # pm.tabLayout(self.parent.rig_ui.tab, e=1, sti=2) # Select Limb setup tab

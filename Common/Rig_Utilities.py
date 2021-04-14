@@ -47,8 +47,8 @@ def SortGroups(groups):
         temp[group.groupIndex.get()] = group
     return [temp[i] for i in sorted(temp.keys())]
     
-def GetParentableGroupsOfParent(limb):
-    parents = pm.listConnections(limb.limbParent)
+def GetParentableGroupsOfParent(childLimb):
+    parents = pm.listConnections(childLimb.limbParent)
     if not parents:
         return []
     parent = parents[0]

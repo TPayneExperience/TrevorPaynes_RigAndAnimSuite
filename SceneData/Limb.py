@@ -40,8 +40,6 @@ class Limb:
         log.funcFileDebug()
         limb = Limb._Add(rigRoot)
         limb.limbType.set(rigData.LIMB_TYPES[0])
-        group = grp.Group.AddLimbGroup(rigRoot, 0, 'Empty', limb)
-        pm.connectAttr(limb.parentableGroups, group.parentable)
         genUtil.Name.UpdateLimbName(rigRoot, limb)
         return limb
 

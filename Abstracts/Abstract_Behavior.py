@@ -6,9 +6,10 @@ from abc import ABCMeta, abstractmethod
 
 class Abstract_Behavior:
     __metaclass__ = ABCMeta
+    bhvName = ''            # Empty, FK Chain
     validLimbTypes = ()     # rigData.LIMB_TYPES
-    groupNames = []         # LookAt, IKPV...
-    isDepricated = True    
+    groupNames = []         # MUST BE UNIQUE: LookAt, IKPV1...
+    groupMoveable = False   # for moving control pivots
     orderIndex = 1000       # in hundred, 0 = first
 
     @staticmethod
@@ -17,7 +18,8 @@ class Abstract_Behavior:
         # LIMB GROUPS MUST BE CREATED BEFORE CALLING THIS
         # Add limb Attrs
         # Add Group Attrs
-        # Parent limb groups to joints / position them
+        # Connect 'used' joint groups to limb.usedGroups
+            # limb groups auto-added/connected
         pass
     
 #============= EDITABLE ============================
@@ -25,7 +27,13 @@ class Abstract_Behavior:
     @staticmethod
     @abstractmethod
     def Setup_Editable(limb):
-        # Mainly for joint/limb group visibility
+        # Position / parent limb groups to joints
+        pass
+    
+    @staticmethod
+    @abstractmethod
+    def Teardown_Editable(limb):
+        # Reset limb groups
         pass
     
 #============= RIG ============================
@@ -40,21 +48,21 @@ class Abstract_Behavior:
     def Setup_Rig_External(limb):
         pass
     
-    @staticmethod
-    @abstractmethod
-    def Teardown_Rig(limb):
-        # constraints removed in parent
-        pass
+    # @staticmethod
+    # @abstractmethod
+    # def Teardown_Rig(limb):
+    #     # constraints removed in parent
+    #     pass
     
 #============= UI ============================
 
     @staticmethod
     @abstractmethod
     def Setup_LimbProperties_UI(limb):
-        return None # return ui created
+        return False # return if UI is enabled
     
     @staticmethod
     @abstractmethod
-    def Setup_GroupProperties_UI(limb):
-        return None # return ui created
+    def Setup_GroupProperties_UI(group):
+        pass
     

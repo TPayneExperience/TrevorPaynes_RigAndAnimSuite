@@ -24,6 +24,7 @@ class InitRigRoot(absInit.Abstract_Initializer):
         
         pm.addAttr(rigRoot, ln='ID', at='long', dv=1, h=hide)
         pm.addAttr(rigRoot, ln='rigMode', at='enum', en=rigModes, h=hide)
+        pm.addAttr(rigRoot, ln='isBuilt', at='bool', h=hide)
         
         # NAMING
         pm.addAttr(rigRoot, ln='prefix', dt='string')

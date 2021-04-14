@@ -29,7 +29,6 @@ class Control:
     @staticmethod
     def Remove(control):
         log.funcFileDebug()
-        log.funcFileDebug()
         pm.delete(control)
     
     # @staticmethod

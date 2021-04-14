@@ -10,24 +10,28 @@ import Common.Logger as log
 reload(log)
 
 class FK_Branch_01(absBhv.Abstract_Behavior):
+    bhvName = 'FK Branch'
     validLimbTypes = (1, 2, 3, 4) # rigData.LIMB_TYPES
     groupNames = []        # LookAt, IKPV...
-    isDepricated = False    
+    groupMoveable = True   # for moving control pivots
     orderIndex = 200  
     
     @staticmethod
     def InitLimb(limb):
         log.funcFileDebug()
-        pass
+        for joint in pm.listConnections(limb.joints):
+            group = pm.listConnections(joint.group)[0]
+            pm.connectAttr(limb.usedGroups, group.used)
     
 #============= EDITABLE ============================
 
     @staticmethod
     def Setup_Editable(limb):
         log.funcFileDebug()
-        for joint in pm.listConnections(limb.joints):
-            group = pm.listConnections(joint.group)[0]
-            pm.connectAttr(limb.usedGroups, group.used)
+    
+    @staticmethod
+    def Teardown_Editable(limb):
+        log.funcFileDebug()
     
 #============= RIG ============================
 
@@ -57,22 +61,21 @@ class FK_Branch_01(absBhv.Abstract_Behavior):
             controls.append(pm.listConnections(group.control)[0])
         pm.controller(controls, parentControl, p=1)
     
-    @staticmethod
-    def Teardown_Groups(limb):
-        log.funcFileDebug()
-        for group in pm.listConnections(limb.usedGroups):
-            joint = pm.listConnections(group.joint)[0]
-            pm.parent(group, joint)
+    # @staticmethod
+    # def Teardown_Groups(limb):
+    #     log.funcFileDebug()
+    #     for group in pm.listConnections(limb.usedGroups):
+    #         joint = pm.listConnections(group.joint)[0]
+    #         pm.parent(group, joint)
     
 #============= UI ============================
 
     @staticmethod
     def Setup_LimbProperties_UI(limb):
         log.funcFileDebug()
-        return None
+        return False
     
     @staticmethod
-    def Setup_GroupProperties_UI(limb):
+    def Setup_GroupProperties_UI(group):
         log.funcFileDebug()
-        return None
     

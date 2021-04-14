@@ -6,7 +6,7 @@ reload(rigData)
 import Common.Rig_Utilities as rigUtil
 reload(rigUtil)
 
-import SceneObjects.RigRoot as rrt
+import SceneData.RigRoot as rrt
 reload(rrt)
 
 # enable = for mult rigs
@@ -57,12 +57,15 @@ def PopulateControlHier(widget, limb):
     for group in pm.listConnections(limb.usedGroups):
         groupID = str(group.groupIndex.get())
         groups[groupID] = group
+    
     for i in range(len(groups)):
-        group = groups[i]
+        group = groups[str(i)]
         control = pm.listConnections(group.control)[0]
         name = control.shortName()
         pm.treeView(widget, e=1, addItem=(str(i), ''))
         pm.treeView(widget, e=1, displayLabel=(str(i), name))
+        enable = group.enableGroup.get()
+        pm.treeView(widget, e=1, enl=(str(i), enable))
     return groups
 
 def PopluateJointHier(widget, limb):

@@ -1,14 +1,17 @@
 
 import pymel.core as pm
 
+import PFRS_Debug as dbg
+reload(dbg)
+
+import Common.Logger as log
+reload(log)
+
 class PFRS_Debug_UI:
     def __init__(self, parent):
         self.parent = parent
         self.pfrs = parent.pfrs
-        self.limbMng = parent.pfrs.limbMng
-        self.rigLS = parent.pfrs.rigLS
-        self.logger = parent.pfrs.logger
-        self.debug = parent.pfrs.debug
+        self.debug = dbg.PFRS_Debug(self)
 
         self._Setup()
 
@@ -27,37 +30,38 @@ class PFRS_Debug_UI:
 # ================= TESTS =============================
 
     def AnimPosesTest(self, ignore):
-        self.logger.info('DEBUG TESTS > AnimPosesTest')
+        log.funcFileDebug()
         self.debug.AnimPosesTest()
         self.pfrs.InitScene()
 
     def SimpleChainTest(self, ignore):
-        self.logger.info('DEBUG TESTS > SimpleChainTest')
+        log.funcFileDebug()
         self.debug.SimpleChainTest()
         self.pfrs.InitScene()
+        # self.pfrs.LimbSetup.AutoBuildByHierarchy()
 
     def LimbTypesTest(self, ignore):
-        self.logger.info('DEBUG TESTS > LimbTypesTest')
+        log.funcFileDebug()
         self.debug.LimbTypesTest()
         self.pfrs.InitScene()
 
     def LegTest(self, ignore):
-        self.logger.info('DEBUG TESTS > LegTest')
+        log.funcFileDebug()
         self.debug.LegTest()
         self.pfrs.InitScene()
 
     def ArmTest(self, ignore):
-        self.logger.info('DEBUG TESTS > ArmTest')
+        log.funcFileDebug()
         self.debug.ArmTest()
         self.pfrs.InitScene()
         
     def SpineTest(self, ignore):
-        self.logger.info('DEBUG TESTS > SpineTest')
+        log.funcFileDebug()
         self.debug.SpineTest()
         self.pfrs.InitScene()
 
     def SkeletonTest(self, ignore):
-        self.logger.info('DEBUG TESTS > SkeletonTest')
+        log.funcFileDebug()
         self.debug.SkeletonTest()
         self.pfrs.InitScene()
 

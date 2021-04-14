@@ -7,19 +7,21 @@ import Common.Logger as log
 reload(log)
 import Data.Rig_Data as rigData
 reload(rigData)
-import SceneObjects.Limb as lmb
+import SceneData.Limb as lmb
 reload(lmb)
 import Common.General_Utilities as genUtil
 reload(genUtil)
-import SceneObjects.RigRoot as rrt
+import SceneData.RigRoot as rrt
 reload(rrt)
+import SceneData.Behavior_Manager as bhv
+reload(bhv)
 
 class LimbSetup(absOp.Abstract_Operation):
     isRigBuilt = False
     validRigStates = (0, )      # 0 = Setup, 1 = Anim
     requiredLicense = 0         # 0 = Free, 1 = Personal, 2 = Pro
     controlLayerState = (0, 0)  # isVis, isRef
-    jointLayerState = (1, 1)    # isVis, isRef
+    jointLayerState = (1, 0)    # isVis, isRef
 
 #============= LIMBS ============================
 
@@ -37,7 +39,9 @@ class LimbSetup(absOp.Abstract_Operation):
             msg = 'Joints must be either chained or siblings'
             msg += ' of same parent'
             raise ValueError(msg)
-        return func(rigRoot, joints)
+        limb = func(rigRoot, joints)
+        LimbSetup._InitBehavior(limb)
+        return limb
 
     @staticmethod
     def RemoveLimbs(limbs):
@@ -53,21 +57,22 @@ class LimbSetup(absOp.Abstract_Operation):
         if not genUtil.Name.IsValidCharacterLength(newName):
             msg = 'Limb Name Must be 2 or more characters'
             log.error(msg)
-            return
+            return False
         if not genUtil.Name.DoesNotStartWithNumber(newName):
             msg = 'Cannot start with number OR _'
             log.error(msg)
-            return
+            return False
         if not genUtil.Name.AreAllValidCharacters(newName):
             msg = 'May only contain A-Z, a-z, 0-9, _'
             log.error(msg)
-            return
+            return False
         rigRoot = pm.listConnections(limb.rigRoot)[0]
         if LimbSetup._LimbNamesCount(rigRoot, newName) >= 2:
             msg = 'Rig may only contain 2 limbs of the same name'
             log.error(msg)
-            return
+            return False
         LimbSetup._RenameLimb(limb, newName)
+        return True
 
     @staticmethod
     def FlipSides(sourceLimb):
@@ -121,6 +126,11 @@ class LimbSetup(absOp.Abstract_Operation):
         LimbSetup._RenameJoint(rigRoot, limb, joint, newName)
 
 #============= MISC ============================
+
+    @staticmethod
+    def _InitBehavior(limb):
+        bhv.Behavior_Manager.InitLimb(limb)
+        bhv.Behavior_Manager.Setup_Editable(limb)
 
     @staticmethod
     def _LimbNamesCount(rigRoot, limbName):
@@ -390,13 +400,14 @@ class LimbSetup(absOp.Abstract_Operation):
             newLimbJoints = newLimbJointSets[i]
             limbType = limbTypes[i]
             if limbType == 1:
-                lmb.Limb.AddOneJointBranch(rigRoot, newLimbJoints)
+                limb = lmb.Limb.AddOneJointBranch(rigRoot, newLimbJoints)
             elif limbType == 2:
-                lmb.Limb.AddTwoJointBranch(rigRoot, newLimbJoints)
+                limb = lmb.Limb.AddTwoJointBranch(rigRoot, newLimbJoints)
             elif limbType == 3:
-                lmb.Limb.AddTwoJointChain(rigRoot, newLimbJoints)
+                limb = lmb.Limb.AddTwoJointChain(rigRoot, newLimbJoints)
             elif limbType == 4:
-                lmb.Limb.AddThreeJointChain(rigRoot, newLimbJoints)
+                limb = lmb.Limb.AddThreeJointChain(rigRoot, newLimbJoints)
+            LimbSetup._InitBehavior(limb)
         # AWAITING BHV IMPLEMENTATION
         # self.limbMng.ParentLimbsBySkeleton()
     
@@ -482,6 +493,7 @@ class LimbSetup(absOp.Abstract_Operation):
             elif side.upper() == 'R':
                 limb.side.set(2)
             genUtil.Name.UpdateLimbName(rigRoot, limb)
+            LimbSetup._InitBehavior(limb)
         # AWAITING BHV IMPLMEMENTATION
         # self.limbMng.ParentLimbsBySkeleton()
 

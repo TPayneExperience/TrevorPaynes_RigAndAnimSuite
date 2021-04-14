@@ -12,7 +12,7 @@ reload(genUtil)
 import Common.Logger as log
 reload(log)
 
-import SceneObjects.RigRoot as rrt
+import SceneData.RigRoot as rrt
 reload(rrt)
 
 class LimbSetup_UI(absOpUI.Abstract_OperationUI):
@@ -63,16 +63,21 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
                 pm.treeView(self.limb_tv, e=1, scc=self.SelectedLimb,   
                                                 elc=self.RenameLimb)
                 with pm.popupMenu():
-                    self.add_mi = pm.menuItem(l='Add Joint Limb', en=0, c=self.AddJointLimb)
-                    self.flipSides_mi = pm.menuItem(l='Flip Sides', en=0, c=self.FlipSides)
+                    self.add_mi = pm.menuItem(l='Add Joint Limb', 
+                                            en=0, c=self.AddJointLimb)
+                    self.flipSides_mi = pm.menuItem(l='Flip Sides', 
+                                            en=0, c=self.FlipSides)
                     pm.menuItem(divider=1)
-                    self.remove_mi = pm.menuItem(l='Remove Limbs', en=0, c=self.RemoveLimbs)
+                    self.remove_mi = pm.menuItem(l='Remove Limbs', 
+                                            en=0, c=self.RemoveLimbs)
             with pm.frameLayout(l='---', bv=1, en=0) as self.jntHier_fl:
                 tt = 'BRANCH limbs may reorder joints'
                 tt += '\nDouble LMB Click to RENAME'
                 self.joint_tv = pm.treeView(ams=0, arp=0, ann=tt)
                 pm.treeView(self.joint_tv, e=1, dad=self.ReorderJoints,
                                                 elc=self.RenameJoint)
+
+#=========== SCENE HIER ====================================
 
     def PopulateSceneHier(self):
         log.funcFileDebug()
@@ -108,24 +113,6 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
                     usedCount += 1
         txt = 'Scene Joints (%d of %d used)' % (usedCount, len(totalJoints))
         pm.frameLayout(self.sceneHier_fl, e=1, l=txt)
-
-    def PopulateLimbHier(self):
-        log.funcFileDebug()
-        self._limbIDs = uiUtil.PopulateLimbHier(self.limb_tv, 
-                                                self._rigRoot)
-    
-    def PopulateJointHier(self, limb):
-        log.funcFileDebug()
-        pm.treeView(self.joint_tv, e=1, removeAll=1)
-        pm.frameLayout(self.jntHier_fl, e=1, en=0, l='---')
-        if limb:
-            txt = "%s's Joints" % limb.pfrsName.get()
-            txt += ' (%s)' % limb.limbType.get()
-            pm.frameLayout(self.jntHier_fl, e=1, en=1, l=txt)
-            self._limbJoints = uiUtil.PopluateJointHier(self.joint_tv, 
-                                                        limb)
-        
-#=========== SCENE HIER ====================================
 
     def Refresh(self, ignore):
         self.PopulateSceneHier()
@@ -168,10 +155,10 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
 
     def GetSelectedSceneJoints(self):
         log.funcFileDebug()
-        names = pm.treeView(self.scene_tv, q=1, selectItem=1)
-        if not names:
+        limbIDStrs = pm.treeView(self.scene_tv, q=1, selectItem=1)
+        if not limbIDStrs:
             return []
-        return [self.allJoints[name] for name in names]
+        return [self.allJoints[limbID] for limbID in limbIDStrs]
     
     def EvaluateSceneJoints(self):
         log.funcFileDebug()
@@ -187,18 +174,23 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
 
 #=========== LIMB HIER ====================================
 
+    def PopulateLimbHier(self):
+        log.funcFileDebug()
+        self._limbIDs = uiUtil.PopulateLimbHier(self.limb_tv, 
+                                                self._rigRoot)
+    
     def SelectedLimb(self):
         log.funcFileInfo()
-        names = pm.treeView(self.limb_tv, q=1, selectItem=1)
+        limbIDStrs = pm.treeView(self.limb_tv, q=1, selectItem=1)
         pm.menuItem(self.remove_mi, e=1, en=0)
         pm.menuItem(self.flipSides_mi, e=1, en=0)
         self._selectedLimbs = None
         self.PopulateJointHier(None)
-        if not names:
+        if not limbIDStrs:
             return
-        for name in names:
-            log.debug('\t\t' + name)
-        self._selectedLimbs = [self._limbIDs[name] for name in names]
+        self._selectedLimbs = [self._limbIDs[ID] for ID in limbIDStrs]
+        for limb in self._selectedLimbs:
+            log.debug('\t\t' + limb.pfrsName.get())
         if len(self._selectedLimbs) == 1:
             limb = self._selectedLimbs[0]
             self.PopulateJointHier(limb)
@@ -208,7 +200,8 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
 
     def AddJointLimb(self, ignore):
         log.funcFileInfo()
-        self._limbFunc(self._rigRoot, self._selectedSceneJoints)
+        limb = self._limbFunc(self._rigRoot, self._selectedSceneJoints)
+        ls.LimbSetup._InitBehavior(limb)
         self.PopulateLimbHier()
         self.PopulateSceneHier()
 
@@ -233,39 +226,33 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
         oldName = limb.pfrsName.get()
         msg = '\t"%s" to "%s"' % (oldName, newName)
         log.info(msg)
-        if not genUtil.Name.IsValidCharacterLength(newName):
-            msg = 'Limb Name Must be 2 or more characters'
-            log.error(msg)
-            return ''
-        if not genUtil.Name.DoesNotStartWithNumber(newName):
-            msg = 'Cannot start with number OR _'
-            log.error(msg)
-            return ''
-        if not genUtil.Name.AreAllValidCharacters(newName):
-            msg = 'May only contain A-Z, a-z, 0-9, _'
-            log.error(msg)
-            return ''
-        rigRoot = pm.listConnections(limb.rigRoot)[0]
-        if ls.LimbSetup._LimbNamesCount(rigRoot, newName) >= 2:
-            msg = 'Rig may only contain 2 limbs of the same name'
-            log.error(msg)
-            return ''
-        ls.LimbSetup._RenameLimb(limb, newName)
-        self.PopulateLimbHier()
-        self.PopulateJointHier(None)
-        self.PopulateSceneHier()
+        if ls.LimbSetup.RenameLimb(limb, newName):
+            self.PopulateLimbHier()
+            self.PopulateJointHier(None)
+            self.PopulateSceneHier()
         return ''
 
     def FlipSides(self, ignore):
         log.funcFileInfo()
-        names = pm.treeView(self.limb_tv, q=1, selectItem=1)
-        limb = self._limbIDs[names[0]]
+        limbIDStrs = pm.treeView(self.limb_tv, q=1, selectItem=1)
+        limb = self._limbIDs[limbIDStrs[0]]
         ls.LimbSetup.FlipSides(limb)
         self.PopulateLimbHier()
         self.PopulateJointHier(None)
 
 #=========== JOINT HIER ====================================
 
+    def PopulateJointHier(self, limb):
+        log.funcFileDebug()
+        pm.treeView(self.joint_tv, e=1, removeAll=1)
+        pm.frameLayout(self.jntHier_fl, e=1, en=0, l='---')
+        if limb:
+            txt = "%s's Joints" % limb.pfrsName.get()
+            txt += ' (%s)' % limb.limbType.get()
+            pm.frameLayout(self.jntHier_fl, e=1, en=1, l=txt)
+            self._limbJoints = uiUtil.PopluateJointHier(self.joint_tv, 
+                                                        limb)
+        
     def ReorderJoints(self, limbIDsStr, oldParents, i2, newParentIDStr, i3, i4, i5):
         log.funcFileInfo()
         limb = self._selectedLimbs[0]

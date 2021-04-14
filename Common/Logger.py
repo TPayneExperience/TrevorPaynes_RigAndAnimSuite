@@ -1,4 +1,5 @@
-
+import datetime as dt
+reload(dt)
 import functools
 import inspect
 import logging
@@ -82,7 +83,7 @@ class _General_Logger:
         hdlr = logging.FileHandler(_GetLogPath())
         f = '%(asctime)s %(levelname)s | '
         f += '%(message)s'
-        formatter = logging.Formatter(f, '%H:%M:%S')
+        formatter = _CustomFormatter(f)
         hdlr.setFormatter(formatter)
         logger.addHandler(hdlr) 
         logger.setLevel(_General_Logger.loggingLevel)
@@ -102,7 +103,7 @@ class _FuncFile_Logger:
         hdlr = logging.FileHandler(_GetLogPath())
         f = '%(asctime)s %(levelname)s | '
         f += '%(filename)s > %(funcName)s'
-        formatter = _CustomFormatter(f, '%H:%M:%S')
+        formatter = _CustomFormatter(f)
         hdlr.setFormatter(formatter)
         logger.addHandler(hdlr) 
         logger.setLevel(_FuncFile_Logger.loggingLevel)
@@ -114,7 +115,14 @@ class _CustomFormatter(logging.Formatter):
         if hasattr(record, 'func_name_override'):
             record.funcName = record.func_name_override
         if hasattr(record, 'file_name_override'):
-            record.filename = record.file_name_override
+            fileName = record.file_name_override
+            ender = '-'*(25-len(fileName))
+            record.filename = '%s %s' % (ender, fileName)
         return super(_CustomFormatter, self).format(record)
 
-
+    converter=dt.datetime.fromtimestamp
+    def formatTime(self, record, datefmt=None):
+        ct = _CustomFormatter.converter(record.created)
+        t = ct.strftime('%H:%M:%S')
+        s = '%s.%02d' % (t, (record.msecs / 10))
+        return s

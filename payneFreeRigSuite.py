@@ -7,14 +7,18 @@ import pymel.core as pm
 
 import Operations
 reload(Operations)
+import Behaviors
+reload(Behaviors)
 import Abstracts.Abstract_OperationUI as absOpUI
 reload(absOpUI)
 import Abstracts.Abstract_Operation as absOp
 reload(absOp)
 import Common.Logger as log
 reload(log)
-import SceneObjects.RigRoot as root
+import SceneData.RigRoot as root
 reload(root)
+import SceneData.Behavior_Manager as bhv
+reload(bhv)
 
 class PayneFreeRigSuite:
     def __init__(self):
@@ -25,7 +29,9 @@ class PayneFreeRigSuite:
         self.categories = []
 
         self._InitOperations()
-        self.InitScene()
+        # self.InitScene()
+        self.bhvMng = bhv.Behavior_Manager
+        self.bhvMng.InitBehaviors()
 
     def __del__(self):
         self._EndLogger()
@@ -50,7 +56,25 @@ class PayneFreeRigSuite:
             parent = pm.listRelatives(joint, p=1)
             if not parent or pm.objectType(parent[0]) != 'joint':
                 pm.parent(joint, jointGroup)
-        
+    
+    def Setup_Rig(self, rigRoot):
+        log.funcFileInfo()
+        bhv.Behavior_Manager.Setup_Rig(rigRoot)
+
+    def Teardown_Rig(self, rigRoot):
+        log.funcFileInfo()
+        bhv.Behavior_Manager.Teardown_Rig(rigRoot)
+
+    def Setup_Editable(self, rigRoot):
+        log.funcFileInfo()
+        for limb in pm.listConnections(rigRoot.limbs):
+            bhv.Behavior_Manager.Setup_Editable(limb)
+
+    def Teardown_Editable(self, rigRoot):
+        log.funcFileInfo()
+        for limb in pm.listConnections(rigRoot.limbs):
+            bhv.Behavior_Manager.Teardown_Editable(limb)
+
 
 #=========== PRIVATE ====================================
 
