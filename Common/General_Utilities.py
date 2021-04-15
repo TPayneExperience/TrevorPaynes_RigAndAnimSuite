@@ -131,6 +131,28 @@ class Json:
 
 #=========== MISC ====================================
 
+def GetDefaultLimbHier(rigRoot):
+    limbParents = {} # childLimb : parentLimb
+    for childLimb in pm.listConnections(rigRoot.limbs):
+        limbParents[childLimb] = None
+        if childLimb.limbType.get() == 0:
+            continue
+        childJoints = pm.listConnections(childLimb.joints)
+        for childJoint in childJoints:
+            parentJoints = pm.listRelatives(childJoint, p=1, type='joint')
+            if not parentJoints:
+                break
+            parentJoint = parentJoints[0]
+            if parentJoint in childJoints:
+                continue
+            if not parentJoint.hasAttr('limb'):
+                break
+            parentLimbs = pm.listConnections(parentJoint.limb)
+            if parentLimbs:
+                limbParents[childLimb] = parentLimbs[0]
+            break
+    return limbParents
+
 def AbstractInitializer(objectInstance, folder):
     # self.logger.debug('\tPFRS_UI > InitOperations')
     rootPath = os.path.dirname(__file__)

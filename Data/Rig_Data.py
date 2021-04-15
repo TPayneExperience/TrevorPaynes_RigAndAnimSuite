@@ -73,7 +73,13 @@ LIMB_TYPES = (  'Empty',
                 'OneJointBranch', 
                 'TwoJointBranch',
                 'TwoJointChain',
-                'ThreeJointChain')
+                'ThreeJointChain',
+                'Custom0',
+                'Custom1',
+                'Custom2',
+                'Custom3',
+                'Custom4',
+                'Custom5')
 # LIMB_TYPES = (  'Empty - Rigging',
         
 #                 '1 Joint BRANCH',

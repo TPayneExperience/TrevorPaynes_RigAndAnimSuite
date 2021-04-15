@@ -39,7 +39,7 @@ class Limb:
     def AddEmpty(rigRoot):
         log.funcFileDebug()
         limb = Limb._Add(rigRoot)
-        limb.limbType.set(rigData.LIMB_TYPES[0])
+        limb.limbType.set(0)
         genUtil.Name.UpdateLimbName(rigRoot, limb)
         return limb
 
@@ -47,7 +47,7 @@ class Limb:
     def AddOneJointBranch(rigRoot, joints):
         log.funcFileDebug()
         limb = Limb._Add(rigRoot)
-        limb.limbType.set(rigData.LIMB_TYPES[1])
+        limb.limbType.set(1)
         Limb._AddJoints(rigRoot, limb, joints)
         genUtil.Name.UpdateLimbName(rigRoot, limb)
         return limb
@@ -56,7 +56,7 @@ class Limb:
     def AddTwoJointBranch(rigRoot, joints):
         log.funcFileDebug()
         limb = Limb._Add(rigRoot)
-        limb.limbType.set(rigData.LIMB_TYPES[2])
+        limb.limbType.set(2)
         Limb._AddJoints(rigRoot, limb, joints)
         genUtil.Name.UpdateLimbName(rigRoot, limb)
         return limb
@@ -65,7 +65,7 @@ class Limb:
     def AddTwoJointChain(rigRoot, joints):
         log.funcFileDebug()
         limb = Limb._Add(rigRoot)
-        limb.limbType.set(rigData.LIMB_TYPES[3])
+        limb.limbType.set(3)
         Limb._AddJoints(rigRoot, limb, joints)
         genUtil.Name.UpdateLimbName(rigRoot, limb)
         return limb
@@ -74,7 +74,7 @@ class Limb:
     def AddThreeJointChain(rigRoot, joints):
         log.funcFileDebug()
         limb = Limb._Add(rigRoot)
-        limb.limbType.set(rigData.LIMB_TYPES[4])
+        limb.limbType.set(4)
         Limb._AddJoints(rigRoot, limb, joints)
         genUtil.Name.UpdateLimbName(rigRoot, limb)
         return limb

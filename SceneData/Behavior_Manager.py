@@ -51,8 +51,7 @@ class Behavior_Manager:
     @staticmethod
     def InitLimb(limb):
         log.funcFileDebug()
-        limbType = limb.limbType.get()
-        bhvFile = Behavior_Manager._GetDefaultBehaviorFile(limbType)
+        bhvFile = Behavior_Manager._GetDefaultBehaviorFile(limb)
         Behavior_Manager.SetBehavior(limb, bhvFile)
     
     @staticmethod
@@ -121,11 +120,11 @@ class Behavior_Manager:
         pm.refresh()
 
     @staticmethod
-    def _GetDefaultBehaviorFile(limbType):
-        limbTypeIndex = rigData.LIMB_TYPES.index(limbType)
+    def _GetDefaultBehaviorFile(limb):
+        limbType = limb.limbType.get()
         bhvOptions = {} # orderIndex : [bhvFile1, bhvFile2...]
         for bhvFile, bhv in Behavior_Manager.bhvs.items():
-            if limbTypeIndex in bhv.validLimbTypes:
+            if limbType in bhv.validLimbTypes:
                 if bhv.orderIndex not in bhvOptions:
                     bhvOptions[bhv.orderIndex] = []
                 bhvOptions[bhv.orderIndex].append(bhvFile)

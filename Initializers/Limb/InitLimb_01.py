@@ -20,12 +20,13 @@ class InitLimb(absInit.Abstract_Initializer):
         #============= ATTRS ============================
 
         hide = genData.HIDE_ATTRS
+        limbTypes = ':'.join(rigData.LIMB_TYPES)
         limbSides = ':'.join(rigData.LIMB_SIDES)
         
         pm.addAttr(limb, ln='rigRoot', dt='string', h=hide)
         pm.addAttr(limb, ln='ID', at='long', h=hide)
         pm.addAttr(limb, ln='pfrsName', dt='string', h=hide)
-        pm.addAttr(limb, ln='limbType', dt='string', h=hide)
+        pm.addAttr(limb, ln='limbType', at='enum', en=limbTypes, h=hide)
         pm.addAttr(limb, ln='side', at='enum', en=limbSides, h=hide)
         pm.addAttr(limb, ln='joints', dt='string', h=hide)
         pm.addAttr(limb, ln='enableLimb', at='bool', dv=1, h=hide)

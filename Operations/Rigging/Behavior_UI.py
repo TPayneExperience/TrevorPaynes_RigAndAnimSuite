@@ -51,13 +51,13 @@ class Behavior_UI(absOpUI.Abstract_OperationUI):
                     self._removeEmpty_mi = pm.menuItem(l='Remove Empty Limb', 
                                                 en=0, c=self.RemoveEmptyLimb)
                     pm.menuItem(d=1)
-                    pm.menuItem(l='Load Skeleton Hierarchy')#, 
-                                                # c=self.LoadSkelHier)
+                    self._loadSkel_mi = pm.menuItem(l='Load Skeletal Hierarchy', 
+                                                en=0, c=self.LoadSkeletalHierarchy)
                     pm.menuItem(l='PRESETS', d=1)
                     self.savePreset_mi = pm.menuItem(l='Save Preset', 
                                                 en=0)#, c=self.SavePreset)
-                    pm.menuItem(l='Edit Presets')#, c=self.EditPresets)
-                    pm.menuItem(l='APPLY PRESET', d=1)
+                    pm.menuItem(l='Edit Presets', en=0)#, c=self.EditPresets)
+                    pm.menuItem(l='APPLY PRESET', en=0, d=1)
             with pm.frameLayout('Controls', bv=1):
                 tt = 'DOT = pivot is moveable!'
                 tt += '\nDimmed = Disabled group'
@@ -76,7 +76,7 @@ class Behavior_UI(absOpUI.Abstract_OperationUI):
                                                                 at='perspShape.filmFit')
             with pm.frameLayout('Behavior Properties', bv=1, en=0) as self.bhvProp_fl:
                 self.bhvProp_cl = pm.columnLayout(adj=1)
-            with pm.frameLayout('Group Properties', bv=1, en=0) as self.groupProp_fl:
+            with pm.frameLayout('Control Properties', bv=1, en=0) as self.groupProp_fl:
                 with pm.columnLayout(adj=1) as self.groupProp_cl:
                     with pm.columnLayout(co=('left', -100)) as self.appLimbLockHide_cl:
                         self.enableGroup_cg = pm.attrControlGrp(l='Enable Control',
@@ -84,13 +84,29 @@ class Behavior_UI(absOpUI.Abstract_OperationUI):
 
 #=========== LIMB HIER ====================================
 
-    def PopulateLimbHier(self):
+    def LoadSkeletalHierarchy(self, ignore):
+        log.funcFileDebug()
+        limb = self._selectedLimbs[0]
+        rigRoot = pm.listConnections(limb.rigRoot)[0]
+        bhv.Behavior.LoadSkeletalHierarchy(rigRoot)
+        self.PopulateLimbHier()
+        self.PopulateControlHier(None)
+        self.PopulateLimbProperties(None)
+        self.PopulateBhvProperties(None)
+        self.PopulateGroupProperties(None)
+
+    def PopulateLimbHier(self, selectLimb=None):
         log.funcFileDebug()
         self._limbIDs = {}
         for rigRoot in rrt.RigRoot.GetAll():
             self._limbIDs.update(uiUtil.PopulateLimbHier(self.limb_tv, 
                                                     rigRoot))
-     
+        if not selectLimb:
+            return
+        for limbID, limb in self._limbIDs.items():
+            if limb == selectLimb:
+                pm.treeView(self.limb_tv, e=1, si=(limbID, 1))
+
     def SelectedLimb(self):
         log.funcFileInfo()
         pm.menuItem(self.savePreset_mi, e=1, en=0)
@@ -100,6 +116,7 @@ class Behavior_UI(absOpUI.Abstract_OperationUI):
         self.PopulateBhvProperties(None)
         pm.menuItem(self._addEmpty_mi, e=1, en=0)
         pm.menuItem(self._removeEmpty_mi, e=1, en=0)
+        pm.menuItem(self._loadSkel_mi, e=1, en=0)
         # Depop Group Prop
         if not limbIDStrs:
             return
@@ -112,8 +129,8 @@ class Behavior_UI(absOpUI.Abstract_OperationUI):
             self.PopulateLimbProperties(limb)
             self.PopulateControlHier(limb)
             self.PopulateBhvProperties(limb)
-            index = rigData.LIMB_TYPES.index(limb.limbType.get())
-            if index == 0:
+            pm.menuItem(self._loadSkel_mi, e=1, en=1)
+            if limb.limbType.get() == 0: # Empty
                 pm.menuItem(self._removeEmpty_mi, e=1, en=1)
 
     def ReparentLimb(self, limbIDsStr, oldParents, i2, newParentIDStr, i3, i4, i5):
@@ -137,13 +154,13 @@ class Behavior_UI(absOpUI.Abstract_OperationUI):
         log.funcFileInfo()
         limb = self._selectedLimbs[0]
         rigRoot = pm.listConnections(limb.rigRoot)[0]
-        bhv.Behavior.AddEmptyLimb(rigRoot)
-        self.PopulateLimbHier()
-        self.PopulateLimbProperties(None)
-        self.PopulateControlHier(None)
-        self.PopulateBhvProperties(None)
-        pm.menuItem(self._addEmpty_mi, e=1, en=0)
-        pm.menuItem(self._removeEmpty_mi, e=1, en=0)
+        newLimb = bhv.Behavior.AddEmptyLimb(rigRoot)
+        self.PopulateLimbHier(newLimb)
+        self.PopulateLimbProperties(newLimb)
+        self.PopulateControlHier(newLimb)
+        self.PopulateBhvProperties(newLimb)
+        self._selectedLimbs = [newLimb]
+        pm.menuItem(self._removeEmpty_mi, e=1, en=1)
 
     def RemoveEmptyLimb(self, ignore):
         log.funcFileInfo()
@@ -159,14 +176,13 @@ class Behavior_UI(absOpUI.Abstract_OperationUI):
     def RenameLimb(self, limbIDStr, newName):
         log.funcFileInfo()
         limb = self._limbIDs[limbIDStr]
+        if limb.limbType.get() != 0:
+            return ''
         oldName = limb.pfrsName.get()
         msg = '\t"%s" to "%s"' % (oldName, newName)
         log.info(msg)
         if bhv.Behavior.RenameLimb(limb, newName):
-            self.PopulateLimbHier()
-            self.PopulateLimbProperties(None)
-            self.PopulateControlHier(None)
-            self.PopulateBhvProperties(None)
+            self.PopulateLimbHier(limb)
             pm.menuItem(self._addEmpty_mi, e=1, en=0)
             pm.menuItem(self._removeEmpty_mi, e=1, en=0)
         return ''
@@ -215,11 +231,11 @@ class Behavior_UI(absOpUI.Abstract_OperationUI):
         pm.optionMenu(self.bhvType_om, e=1, dai=1)
         self._bhvNames = []
         bhvFile = limb.bhvFile.get()
-        limbTypeIndex = rigData.LIMB_TYPES.index(limb.limbType.get())
+        limbType = limb.limbType.get()
         limbBhvName = ''
         for bhvName, bhvFiles in bhvMng.Behavior_Manager.bhvFiles.items():
             bhv = bhvMng.Behavior_Manager.bhvs[bhvFiles[-1]]
-            if limbTypeIndex in bhv.validLimbTypes:
+            if limbType in bhv.validLimbTypes:
                 pm.menuItem(l=bhvName, p=self.bhvType_om)
                 self._bhvNames.append(bhvName)
             if bhvFile in bhvFiles:
@@ -253,7 +269,7 @@ class Behavior_UI(absOpUI.Abstract_OperationUI):
                                 cc=pm.Callback(self.SetEnableLimb, 1))
         pm.deleteUI(self.grpParent_at)
         self.grpParent_at = pm.attrEnumOptionMenu(  self.grpParent_at, 
-                                                    l='Parent Joint', 
+                                                    l='Parent Control', 
                                                     p=self.bhvLimbProp_cl,
                                                     at=limb.limbParentControl,
                                                     cc=self.LogGroupParent)
@@ -300,7 +316,7 @@ class Behavior_UI(absOpUI.Abstract_OperationUI):
     def SetEnableGroup(self, ignore):
         log.funcFileDebug()
         enable = self._selectedGroup.enableGroup.get()
-        self._selectedGroup.v.set(enable)
+        bhv.Behavior._EnableControl(self._selectedGroup, enable)
         groupID = str(self._selectedGroup.groupIndex.get())
         pm.treeView(self.control_tv, e=1, enl=(groupID, enable))
 

@@ -39,7 +39,7 @@ class PayneFreeRigSuite:
 #=========== PUBLIC ====================================
 
     def OpenLog(self, ignore):
-        log.funcFileDebug()
+        log.funcFileInfo()
         log.OpenLog()
 
     def InitScene(self):

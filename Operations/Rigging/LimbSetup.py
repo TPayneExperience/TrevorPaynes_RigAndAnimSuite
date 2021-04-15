@@ -15,6 +15,8 @@ import SceneData.RigRoot as rrt
 reload(rrt)
 import SceneData.Behavior_Manager as bhv
 reload(bhv)
+import Common.Rig_Utilities as rigUtil
+reload(rigUtil)
 
 class LimbSetup(absOp.Abstract_Operation):
     isRigBuilt = False
@@ -346,6 +348,7 @@ class LimbSetup(absOp.Abstract_Operation):
 
     @staticmethod
     def AutoBuildByHierarchy():
+        log.funcFileInfo()
         # Build Joint Parent Dictionary
         rigRoot = rrt.RigRoot.GetAll()[0]
         jointParents = {}   # childJoint : parentJoint
@@ -408,11 +411,11 @@ class LimbSetup(absOp.Abstract_Operation):
             elif limbType == 4:
                 limb = lmb.Limb.AddThreeJointChain(rigRoot, newLimbJoints)
             LimbSetup._InitBehavior(limb)
-        # AWAITING BHV IMPLEMENTATION
-        # self.limbMng.ParentLimbsBySkeleton()
+        LimbSetup._LoadSkeletalHierarchy(rigRoot)
     
     @staticmethod
     def AutoBuildByName():
+        log.funcFileInfo()
         # GROUP JOINTS AND VALIDATE NAMES
         freeJoints = []
         for joint in pm.ls(type='joint'):
@@ -494,7 +497,55 @@ class LimbSetup(absOp.Abstract_Operation):
                 limb.side.set(2)
             genUtil.Name.UpdateLimbName(rigRoot, limb)
             LimbSetup._InitBehavior(limb)
-        # AWAITING BHV IMPLMEMENTATION
-        # self.limbMng.ParentLimbsBySkeleton()
+        LimbSetup._LoadSkeletalHierarchy(rigRoot)
+
+
+    @staticmethod
+    def _LoadSkeletalHierarchy(rigRoot):
+        log.funcFileDebug()
+        limbParents = genUtil.GetDefaultLimbHier(rigRoot)
+        for child, parent in limbParents.items():
+            LimbSetup._ReparentLimb(child, parent)
+
+    @staticmethod
+    def _ReparentLimb(childLimb, parentLimb):
+        log.funcFileDebug()
+        pm.disconnectAttr(childLimb.limbParent)
+        if parentLimb:
+            pm.connectAttr(parentLimb.limbChildren, childLimb.limbParent)
+        LimbSetup._UpdateParentControl(childLimb)
+    
+    @staticmethod
+    def _UpdateParentControl(childLimb):
+        log.funcFileDebug()
+        parentGroups = rigUtil.GetParentableGroupsOfParent(childLimb)
+        if not parentGroups:
+            pm.addAttr(childLimb.limbParentControl, e=1, en='None', dv=0)
+            return
+        parentControls = [pm.listConnections(g.control)[0] for g in parentGroups]
+        parentControlNames = [c.shortName() for c in parentControls]
+        namesStr = ':'.join(parentControlNames)
+        pm.addAttr(childLimb.limbParentControl, e=1, en=namesStr)
+        childGroups = pm.listConnections(childLimb.parentableGroups)
+        childGroup = rigUtil.SortGroups(childGroups)[0]
+        sourcePos = pm.xform(childGroup, q=1, t=1, ws=1)
+        index = LimbSetup._GetClosestGroupIndex(sourcePos, parentGroups)
+        childLimb.limbParentControl.set(index)
+
+    @staticmethod
+    def _GetClosestGroupIndex(sourcePos, groups):
+        log.funcFileDebug()
+        distances = {} # dist : [targetJoint1, joint2...]
+        for group in groups:
+            targetPos = pm.xform(group, q=1, t=1, ws=1)
+            dist = 0
+            for i in range(3):
+                dist += (sourcePos[i]-targetPos[i])**2
+            if dist not in distances:
+                distances[dist] = []
+            distances[dist].append(group)
+        targetDist = sorted(list(distances.keys()))[0]
+        group = distances[targetDist][0]
+        return groups.index(group)
 
 
