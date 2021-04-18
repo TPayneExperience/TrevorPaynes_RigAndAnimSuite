@@ -24,7 +24,7 @@ class Control:
                                     control, nr=1)
         pm.connectAttr(group.control, control.group)
         pm.parent(control, group)
-        return group
+        return control
 
     @staticmethod
     def Remove(control):

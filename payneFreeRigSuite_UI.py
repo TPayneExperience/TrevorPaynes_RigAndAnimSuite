@@ -80,15 +80,15 @@ class PayneFreeRigSuite_UI:
         name += ' - v%s' %  genData.__version__
         name += ' - by Trevor Payne'
         with pm.window(mb=True,mbv=True, t=name, w=500, h=500) as self.win:
-            with pm.rowLayout(nc=4):
+            with pm.rowLayout(nc=2):
                 with pm.columnLayout(co=('left', 0)):
                     self.cat_op = pm.optionMenu(l='Category', 
                                                 cc=self.SetCategory)
                 with pm.columnLayout(co=('left', 0)):
                     self.op_op = pm.optionMenu(l='Operation', 
                                                 cc=self.SetOperation)
-                with pm.columnLayout(co=('left', 0)):
-                    pm.button(l='TESTING', c=self.TESTING)
+                # with pm.columnLayout(co=('left', 0)):
+                #     pm.button(l='TESTING', c=self.TESTING)
             # self.layout = pm.horizontalLayout(p=self.win)
             # pm.text('asdf')
             self.frame = pm.frameLayout(bv=0, lv=0)
@@ -144,14 +144,14 @@ class PayneFreeRigSuite_UI:
             
 #=========== COMBOBOX SWITCHING ====================================
 
-    def TESTING(self, ignore):
-        log.funcFileDebug()
-        import SceneData.Limb
-        reload(SceneData.Limb)
-        import SceneData.RigRoot
-        reload(SceneData.RigRoot)
-        rigRoot = SceneData.RigRoot.RigRoot.GetAll()[0]
-        SceneData.Limb.Limb.AddEmpty(rigRoot)
+    # def TESTING(self, ignore):
+    #     log.funcFileDebug()
+    #     import SceneData.Limb
+    #     reload(SceneData.Limb)
+    #     import SceneData.RigRoot
+    #     reload(SceneData.RigRoot)
+    #     rigRoot = SceneData.RigRoot.RigRoot.GetAll()[0]
+    #     SceneData.Limb.Limb.AddEmpty(rigRoot)
         # from SceneData.RigRoot import RigRoot
         # RigRoot.Add()
         
@@ -175,33 +175,12 @@ class PayneFreeRigSuite_UI:
         log.funcFileInfo()
         pm.deleteUI(self.frame)
         index = self.operationNames.index(operationName)
-        self.currentOp = self.operations[index]()
-        # TEARDOWN RIG / EDITABLE
-        toBeBuilt = self.currentOp.operation.isRigBuilt
-        for rigRoot in rrt.RigRoot.GetAll():
-            if not toBeBuilt:
-                if rigRoot.isBuilt.get():
-                    self.pfrs.Teardown_Rig(rigRoot)
-            if toBeBuilt:
-                if not rigRoot.isBuilt.get():
-                    self.pfrs.Teardown_Editable(rigRoot)
+        self.currentOp = self.operations[index]
 
-        # SETUP RIG / EDITABLE
-        for rigRoot in rrt.RigRoot.GetAll():
-            if toBeBuilt:
-                if not rigRoot.isBuilt.get():
-                    self.pfrs.Setup_Rig(rigRoot)
-            if not toBeBuilt:
-                if rigRoot.isBuilt.get():
-                    self.pfrs.Setup_Editable(rigRoot)
-            rigRoot.isBuilt.set(toBeBuilt)
+        self.currentOp.operation.Setup()
         with pm.frameLayout(p=self.win, lv=0) as self.frame:
             with pm.horizontalLayout():
                 self.currentOp.Setup_UI()
-        c = self.currentOp.operation.controlLayerState
-        j = self.currentOp.operation.jointLayerState
-        rigUtil.SetLayerState(rigData.CONTROLS_LAYER, c[0], c[1])
-        rigUtil.SetLayerState(rigData.JOINTS_LAYER, j[0], j[1])
 
     def PopulateCategories(self):
         log.funcFileDebug()

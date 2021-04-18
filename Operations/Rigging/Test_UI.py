@@ -20,7 +20,7 @@ reload (tst)
 class Test_UI(absOpUI.Abstract_OperationUI):
     uiName = 'Test'
     orderIndex = 500
-    operation = tst.Test
+    operation = tst.Test()
     # def __init__(self):
 #         self._limbFunc = None
         # self._rigRoot = None

@@ -57,23 +57,23 @@ class PayneFreeRigSuite:
             if not parent or pm.objectType(parent[0]) != 'joint':
                 pm.parent(joint, jointGroup)
     
-    def Setup_Rig(self, rigRoot):
-        log.funcFileInfo()
-        bhv.Behavior_Manager.Setup_Rig(rigRoot)
+    # def Setup_Rig(self, rigRoot):
+    #     log.funcFileInfo()
+    #     bhv.Behavior_Manager.Setup_Rig(rigRoot)
 
-    def Teardown_Rig(self, rigRoot):
-        log.funcFileInfo()
-        bhv.Behavior_Manager.Teardown_Rig(rigRoot)
+    # def Teardown_Rig(self, rigRoot):
+    #     log.funcFileInfo()
+    #     bhv.Behavior_Manager.Teardown_Rig(rigRoot)
 
-    def Setup_Editable(self, rigRoot):
-        log.funcFileInfo()
-        for limb in pm.listConnections(rigRoot.limbs):
-            bhv.Behavior_Manager.Setup_Editable(limb)
+    # def Setup_Editable(self, rigRoot):
+    #     log.funcFileInfo()
+    #     for limb in pm.listConnections(rigRoot.limbs):
+    #         bhv.Behavior_Manager.Setup_Editable(limb)
 
-    def Teardown_Editable(self, rigRoot):
-        log.funcFileInfo()
-        for limb in pm.listConnections(rigRoot.limbs):
-            bhv.Behavior_Manager.Teardown_Editable(limb)
+    # def Teardown_Editable(self, rigRoot):
+    #     log.funcFileInfo()
+    #     for limb in pm.listConnections(rigRoot.limbs):
+    #         bhv.Behavior_Manager.Teardown_Editable(limb)
 
 
 #=========== PRIVATE ====================================
@@ -111,11 +111,11 @@ class PayneFreeRigSuite:
                 for name, obj in inspect.getmembers(module):
                     if inspect.isclass(obj):
                         if issubclass(obj, absOpUI.Abstract_OperationUI):
-                            self.catOps[category][obj.uiName] = obj
+                            self.catOps[category][obj.uiName] = obj()
                 for name, obj in inspect.getmembers(module):
                     if inspect.isclass(obj):
                         if issubclass(obj, absOp.Abstract_Operation):
-                            setattr(self, name, obj)
+                            setattr(self, name, obj())
 
 #=========== LOGGER ====================================
    

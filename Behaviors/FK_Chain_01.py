@@ -12,12 +12,12 @@ reload(log)
 class FK_Chain_01(absBhv.Abstract_Behavior):
     bhvName = 'FK Chain'
     validLimbTypes = (3, 4) # rigData.LIMB_TYPES
-    groupNames = []        # LookAt, IKPV...
+    groupName = ''        # LookAt, IKPV...
+    groupCount = 0
     groupMoveable = True   # for moving control pivots
     orderIndex = 100  
     
-    @staticmethod
-    def InitLimb(limb):
+    def InitLimb(self, limb):
         log.funcFileDebug()
         for joint in pm.listConnections(limb.joints):
             group = pm.listConnections(joint.group)[0]
@@ -25,21 +25,19 @@ class FK_Chain_01(absBhv.Abstract_Behavior):
     
 #============= EDITABLE ============================
 
-    @staticmethod
-    def Setup_Editable(limb):
+    def Setup_Editable(self, limb):
         log.funcFileDebug()
     
-    @staticmethod
-    def Teardown_Editable(limb):
+    def Teardown_Editable(self, limb):
         log.funcFileDebug()
     
 #============= RIG ============================
 
-    @staticmethod
-    def Setup_Rig_Internal(limb):
+    def Setup_Rig_Internal(self, limb):
         log.funcFileDebug()
         groups = pm.listConnections(limb.usedGroups)
         groups = rigUtil.SortGroups(groups)
+        pm.parent(groups[0], limb)
         for i in range(len(groups)-1):
             group = groups[i+1]
             if not group.enableGroup.get():
@@ -50,8 +48,7 @@ class FK_Chain_01(absBhv.Abstract_Behavior):
             control = pm.listConnections(group.control)[0]
             pm.parentConstraint(control, joint, mo=1)
     
-    @staticmethod
-    def Setup_Rig_External(limb):
+    def Setup_Rig_External(self, limb):
         log.funcFileDebug()
         parentGroups = rigUtil.GetParentableGroupsOfParent(limb)
         if not parentGroups:
@@ -67,21 +64,12 @@ class FK_Chain_01(absBhv.Abstract_Behavior):
             controls.append(pm.listConnections(group.control)[0])
         pm.controller(controls, parentControl, p=1)
     
-    # @staticmethod
-    # def Teardown_Rig(limb):
-    #     log.funcFileDebug()
-    #     for group in pm.listConnections(limb.usedGroups):
-    #         joint = pm.listConnections(group.joint)[0]
-    #         pm.parent(group, joint)
-    
 #============= UI ============================
 
-    @staticmethod
-    def Setup_LimbProperties_UI(limb):
+    def Setup_LimbProperties_UI(self, limb):
         log.funcFileDebug()
         return False
     
-    @staticmethod
-    def Setup_GroupProperties_UI(group):
+    def Setup_GroupProperties_UI(self, group):
         log.funcFileDebug()
     

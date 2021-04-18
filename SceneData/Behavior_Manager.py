@@ -46,7 +46,7 @@ class Behavior_Manager:
                             Behavior_Manager.bhvFiles[bhvName] = []
                         Behavior_Manager.bhvFiles[bhvName].append(
                                                             fileName)
-                        Behavior_Manager.bhvs[fileName] = obj
+                        Behavior_Manager.bhvs[fileName] = obj()
     
     @staticmethod
     def InitLimb(limb):
@@ -59,7 +59,9 @@ class Behavior_Manager:
         log.funcFileDebug()
         limb.bhvFile.set(bhvFile)
         bhv = Behavior_Manager.bhvs[bhvFile]
-        Behavior_Manager._SetupLimbGroups(limb, bhv.groupNames)
+        Behavior_Manager._SetupLimbGroups(  limb, 
+                                            bhv.groupName, 
+                                            bhv.groupCount)
         bhv.InitLimb(limb)
 
     @staticmethod
@@ -101,6 +103,11 @@ class Behavior_Manager:
                 control = pm.listConnections(group.control)[0]
                 rigUtil.ChannelBoxAttrs(control, 1, 1, 1, 0)
                 rigUtil.ResetAttrs(control)
+                if group.groupType.get() == 'Joint':
+                    joint = pm.listConnections(group.joint)[0]
+                    pm.parent(group, joint)
+                else:
+                    pm.parent(group, limb)
         Behavior_Manager._DeleteChildConstraints(rigRoot)
           
 #============= UTIL ============================
@@ -133,7 +140,7 @@ class Behavior_Manager:
         return bhvFile
 
     @staticmethod
-    def _SetupLimbGroups(limb, groupNames):
+    def _SetupLimbGroups(limb, groupName, groupCount):
         log.funcFileDebug()
         pm.disconnectAttr(limb.usedGroups)
         rigRoot = pm.listConnections(limb.rigRoot)[0]
@@ -141,15 +148,18 @@ class Behavior_Manager:
         limbGroupDict = {} # groupName : Group
         for group in limbGroups:
             name = group.groupType.get()
-            limbGroupDict[name] = group
-        for i in range(len(groupNames)):
-            groupName = groupNames[i]
-            if groupName not in limbGroupDict:
-                group = grp.Group.AddLimbGroup(rigRoot, i, groupName, limb)
-                limbGroupDict[groupName] = group
-                genUtil.Name.UpdateLimbGroupName(rigRoot, limb, group)
-        for groupName in groupNames:
-            group = limbGroupDict[groupName]
+            if name not in limbGroupDict:
+                limbGroupDict[name] = []
+            limbGroupDict[name].append(group)
+        if groupName not in limbGroupDict:
+            limbGroupDict[groupName] = []
+        toCreate = max(groupCount - len(limbGroupDict[groupName]), 0)
+        for i in range(toCreate):
+            group = grp.Group.AddLimbGroup(rigRoot, i, groupName, limb)
+            limbGroupDict[groupName].append(group)
+        for i in range(groupCount):
+            group = limbGroupDict[groupName][i]
             pm.connectAttr(limb.usedGroups, group.used)
+            genUtil.Name.UpdateLimbGroupName(rigRoot, limb, group)
 
 

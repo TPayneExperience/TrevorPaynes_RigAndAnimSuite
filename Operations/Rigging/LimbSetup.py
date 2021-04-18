@@ -21,41 +21,38 @@ reload(rigUtil)
 class LimbSetup(absOp.Abstract_Operation):
     isRigBuilt = False
     validRigStates = (0, )      # 0 = Setup, 1 = Anim
-    requiredLicense = 0         # 0 = Free, 1 = Personal, 2 = Pro
     controlLayerState = (0, 0)  # isVis, isRef
     jointLayerState = (1, 0)    # isVis, isRef
+    meshLayerState = (1, 1)    # isVis, isRef
 
 #============= LIMBS ============================
 
-    @staticmethod
-    def AddJointLimb(rigRoot, joints):
+    def AddJointLimb(self, rigRoot, joints):
         if not joints or type(joints) != list:
             raise ValueError('Please pass in LIST of JOINTS')
         for joint in joints:
             if pm.objectType(joint) != 'joint':
                 raise ValueError('Please pass in LIST of JOINTS')
-        if not LimbSetup._AreJointsDisconnected(joints):
+        if not self._AreJointsDisconnected(joints):
             raise ValueError('Joints must be DISCONNECTED from LIMB')
-        func = LimbSetup._GetLimbFuncForJoints(joints)
+        func = self._GetLimbFuncForJoints(joints)
         if not func:
             msg = 'Joints must be either chained or siblings'
             msg += ' of same parent'
             raise ValueError(msg)
         limb = func(rigRoot, joints)
-        LimbSetup._InitBehavior(limb)
+        self._InitBehavior(limb)
         return limb
 
-    @staticmethod
-    def RemoveLimbs(limbs):
+    def RemoveLimbs(self, limbs):
         if not limbs or type(limbs) != list:
             raise ValueError('Please pass in LIST of LIMBS')
         for limb in limbs:
             if pm.listConnections(limb.mirrorLimb):
-                LimbSetup._BreakMirror(limb)
+                self._BreakMirror(limb)
             lmb.Limb.Remove(limb)
         
-    @staticmethod
-    def RenameLimb(limb, newName):
+    def RenameLimb(self, limb, newName):
         if not genUtil.Name.IsValidCharacterLength(newName):
             msg = 'Limb Name Must be 2 or more characters'
             log.error(msg)
@@ -69,15 +66,14 @@ class LimbSetup(absOp.Abstract_Operation):
             log.error(msg)
             return False
         rigRoot = pm.listConnections(limb.rigRoot)[0]
-        if LimbSetup._LimbNamesCount(rigRoot, newName) >= 2:
+        if self._LimbNamesCount(rigRoot, newName) >= 2:
             msg = 'Rig may only contain 2 limbs of the same name'
             log.error(msg)
             return False
-        LimbSetup._RenameLimb(limb, newName)
+        self._RenameLimb(limb, newName)
         return True
 
-    @staticmethod
-    def FlipSides(sourceLimb):
+    def FlipSides(self, sourceLimb):
         mirrors = pm.listConnections(sourceLimb.mirrorLimb)
         if not mirrors:
             msg = 'Limb must have mirror to flip sides'
@@ -95,13 +91,11 @@ class LimbSetup(absOp.Abstract_Operation):
 
 #============= JOINTS ============================
 
-    @staticmethod
-    def JointTool():
+    def JointTool(self):
         log.funcFileDebug()
         pm.mel.eval('JointTool()')
 
-    @staticmethod
-    def RenameJoint(joint, newName):
+    def RenameJoint(self, joint, newName):
         oldName = joint.pfrsName.get()
         msg = '\t"%s" to "%s"' % (oldName, newName)
         log.info(msg)
@@ -125,32 +119,27 @@ class LimbSetup(absOp.Abstract_Operation):
             msg = 'Every limb joint name must be UNIQUE'
             log.error(msg)
         rigRoot = pm.listConnections(limb.rigRoot)[0]
-        LimbSetup._RenameJoint(rigRoot, limb, joint, newName)
+        self._RenameJoint(rigRoot, limb, joint, newName)
 
 #============= MISC ============================
 
-    @staticmethod
-    def _InitBehavior(limb):
+    def _InitBehavior(self, limb):
         bhv.Behavior_Manager.InitLimb(limb)
         bhv.Behavior_Manager.Setup_Editable(limb)
 
-    @staticmethod
-    def _LimbNamesCount(rigRoot, limbName):
+    def _LimbNamesCount(self, rigRoot, limbName):
         limbs = pm.listConnections(rigRoot.limbs)
         names = [limb.pfrsName.get() for limb in limbs]
         return names.count(limbName)
 
-    @staticmethod
-    def _JointNamesCount(rigRoot, limbName):
+    def _JointNamesCount(self, rigRoot, limbName):
         limbs = pm.listConnections(rigRoot.limbs)
         names = [limb.pfrsName.get() for limb in limbs]
         return names.count(limbName)
 
 #============= RELATIONSHIP ============================
 
-
-    @staticmethod
-    def _BreakMirror(sourceLimb):
+    def _BreakMirror(self, sourceLimb):
         log.funcFileDebug()
         mirrorLimb = pm.listConnections(sourceLimb.mirrorLimb)[0]
         mirrorLimb.side.set(0)
@@ -159,8 +148,7 @@ class LimbSetup(absOp.Abstract_Operation):
         rigRoot = pm.listConnections(mirrorLimb.rigRoot)[0]
         genUtil.Name.UpdateLimbName(rigRoot, mirrorLimb)
 
-    @staticmethod
-    def _RenameLimb(sourceLimb, newName): # list should repopulate after call
+    def _RenameLimb(self, sourceLimb, newName): # list should repopulate after call
         log.funcFileDebug()
         rigRoot = pm.listConnections(sourceLimb.rigRoot)[0]
         limbs = pm.listConnections(rigRoot.limbs)
@@ -180,7 +168,7 @@ class LimbSetup(absOp.Abstract_Operation):
         # BREAK MIRROR
         else:
             if pm.listConnections(sourceLimb.mirrorLimb):
-                LimbSetup._BreakMirror(sourceLimb)
+                self._BreakMirror(sourceLimb)
         # Rename joints if limb named as preset 'leg', 'arm'...
         if newName.lower() in rigData.LIMB_JOINT_NAME_PRESETS:
             jointNames = rigData.LIMB_JOINT_NAME_PRESETS[newName.lower()]
@@ -203,23 +191,20 @@ class LimbSetup(absOp.Abstract_Operation):
         genUtil.Name.UpdateLimbName(rigRoot, sourceLimb)
         return True
     
-    @staticmethod
-    def _RenameJoint(rigRoot, limb, joint, newName):
+    def _RenameJoint(self, rigRoot, limb, joint, newName):
         joint.pfrsName.set(newName)
         genUtil.Name.UpdateJointName(rigRoot, limb, joint)
 
-    @staticmethod
-    def _AreJointsDisconnected(joints):
+    def _AreJointsDisconnected(self, joints):
         log.funcFileDebug()
-        if LimbSetup._AreJointsChained(joints):
-            joints = LimbSetup._GetCompleteJointChain(joints)
+        if self._AreJointsChained(joints):
+            joints = self._GetCompleteJointChain(joints)
         for joint in joints:
             if joint.hasAttr('limb') and pm.listConnections(joint.limb):
                 return False
         return True
 
-    @staticmethod
-    def _AreJointsSiblings(joints):
+    def _AreJointsSiblings(self, joints):
         log.funcFileDebug()
         isBranch = True
         parent1 = pm.listRelatives(joints[0], p=1, type='joint')
@@ -229,10 +214,9 @@ class LimbSetup(absOp.Abstract_Operation):
                 isBranch = False
         return isBranch
     
-    @staticmethod
-    def _AreJointsChained(joints):
+    def _AreJointsChained(self, joints):
         log.funcFileDebug()
-        jointsCopy = LimbSetup._GetSortedJoints(joints)
+        jointsCopy = self._GetSortedJoints(joints)
         child = jointsCopy[-1]
         jointsCopy.remove(child)
         while (jointsCopy):
@@ -247,8 +231,7 @@ class LimbSetup(absOp.Abstract_Operation):
             child = parent
         return True
 
-    @staticmethod
-    def _HasSibling(joint):
+    def _HasSibling(self, joint):
         log.funcFileDebug()
         parent = pm.listRelatives(joint, p=1, type='joint')
         if not parent:
@@ -258,24 +241,22 @@ class LimbSetup(absOp.Abstract_Operation):
         
 #============= UTILS ============================
 
-    @staticmethod
-    def _GetLimbFuncForJoints(joints):
+    def _GetLimbFuncForJoints(self, joints):
         log.funcFileDebug()
         if (len(joints) == 1):
             return lmb.Limb.AddOneJointBranch
-        elif LimbSetup._AreJointsSiblings(joints):
+        elif self._AreJointsSiblings(joints):
             return lmb.Limb.AddTwoJointBranch
-        elif LimbSetup._AreJointsChained(joints):
+        elif self._AreJointsChained(joints):
             if (len(joints) == 2):
                 return lmb.Limb.AddTwoJointChain
             else:
                 return lmb.Limb.AddThreeJointChain
         return None
 
-    @staticmethod
-    def _GetCompleteJointChain(joints):
+    def _GetCompleteJointChain(self, joints):
         log.funcFileDebug()
-        sortedJoints = LimbSetup._GetSortedJoints(joints)
+        sortedJoints = self._GetSortedJoints(joints)
         parent = sortedJoints[-1]
         rootParent = sortedJoints[0]
         jointChain = [parent]
@@ -284,19 +265,17 @@ class LimbSetup(absOp.Abstract_Operation):
             jointChain.append(parent)
         return jointChain
 
-    @staticmethod
-    def _GetSortedJoints(joints):
+    def _GetSortedJoints(self, joints):
         log.funcFileDebug()
         temp = {}
         for joint in joints:
             temp[joint.longName()] = joint
         return [temp[n] for n in sorted(list(temp.keys()))]
 
-    @staticmethod
-    def _GetLongestJointChain(startJoint):
+    def _GetLongestJointChain(self, startJoint):
         log.funcFileDebug()
         joints = [startJoint]
-        if LimbSetup._HasSibling(startJoint):
+        if self._HasSibling(startJoint):
             return joints
         lastPos = pm.xform(startJoint, q=1, t=1, ws=1)
         parent = pm.listRelatives(startJoint, p=1, type='joint')
@@ -305,17 +284,16 @@ class LimbSetup(absOp.Abstract_Operation):
                 break
             parent = parent[0]
             curPos = pm.xform(parent, q=1, t=1, ws=1)
-            if LimbSetup._RoundVector(curPos) == LimbSetup._RoundVector(lastPos):
+            if self._RoundVector(curPos) == self._RoundVector(lastPos):
                 break
             joints.append(parent)
-            if LimbSetup._HasSibling(parent):
+            if self._HasSibling(parent):
                 break
             parent = pm.listRelatives(parent, p=1, type='joint')
             lastPos = curPos[:]
         return joints[::-1]
     
-    @staticmethod
-    def _HasSibling(joint):
+    def _HasSibling(self, joint):
         log.funcFileDebug()
         parent = pm.listRelatives(joint, p=1, type='joint')
         if not parent:
@@ -323,15 +301,13 @@ class LimbSetup(absOp.Abstract_Operation):
         children = pm.listRelatives(parent, c=1, type='joint')
         return (len(children) > 1)
         
-    @staticmethod
-    def _RoundVector(vec):
+    def _RoundVector(self, vec):
         newVec = []
         for i in range(3):
             newVec.append(round(vec[i], 5))
         return newVec
 
-    @staticmethod
-    def _GetJointBranch(startJoint):
+    def _GetJointBranch(self, startJoint):
         log.funcFileDebug()
         joints = [startJoint]
         parent = pm.listRelatives(startJoint, p=1, type='joint')
@@ -346,8 +322,7 @@ class LimbSetup(absOp.Abstract_Operation):
 
 #============= AUTOBUILD ============================
 
-    @staticmethod
-    def AutoBuildByHierarchy():
+    def AutoBuildByHierarchy(self):
         log.funcFileInfo()
         # Build Joint Parent Dictionary
         rigRoot = rrt.RigRoot.GetAll()[0]
@@ -371,14 +346,14 @@ class LimbSetup(absOp.Abstract_Operation):
                 if child not in jointParents:
                     continue
                 # Unparent CHAIN root joint + track
-                joints = LimbSetup._GetLongestJointChain(child)
+                joints = self._GetLongestJointChain(child)
                 
                 if len(joints) >= 3:
                     limbType = 4
                 elif len(joints) == 2:
                     limbType = 3
                 else:
-                    joints = LimbSetup._GetJointBranch(child)
+                    joints = self._GetJointBranch(child)
                     if len(joints) == 1:
                         limbType = 1
                     else:
@@ -410,11 +385,10 @@ class LimbSetup(absOp.Abstract_Operation):
                 limb = lmb.Limb.AddTwoJointChain(rigRoot, newLimbJoints)
             elif limbType == 4:
                 limb = lmb.Limb.AddThreeJointChain(rigRoot, newLimbJoints)
-            LimbSetup._InitBehavior(limb)
-        LimbSetup._LoadSkeletalHierarchy(rigRoot)
+            self._InitBehavior(limb)
+        self._LoadSkeletalHierarchy(rigRoot)
     
-    @staticmethod
-    def AutoBuildByName():
+    def AutoBuildByName(self):
         log.funcFileInfo()
         # GROUP JOINTS AND VALIDATE NAMES
         freeJoints = []
@@ -443,14 +417,14 @@ class LimbSetup(absOp.Abstract_Operation):
         # VALIDATE LIMBS
         limbTypes = {}
         for limbName, joints in newLimbs.items():
-            newLimbs[limbName] = LimbSetup._GetSortedJoints(joints)
-            if LimbSetup._AreJointsSiblings(joints):
+            newLimbs[limbName] = self._GetSortedJoints(joints)
+            if self._AreJointsSiblings(joints):
                 if len(joints) == 1:
                     limbTypes[limbName] = 1
                 else:
                     limbTypes[limbName] = 2
                 continue
-            if LimbSetup._AreJointsChained(joints):
+            if self._AreJointsChained(joints):
                 if len(joints) == 2:
                     limbTypes[limbName] = 3
                 else:
@@ -496,27 +470,24 @@ class LimbSetup(absOp.Abstract_Operation):
             elif side.upper() == 'R':
                 limb.side.set(2)
             genUtil.Name.UpdateLimbName(rigRoot, limb)
-            LimbSetup._InitBehavior(limb)
-        LimbSetup._LoadSkeletalHierarchy(rigRoot)
+            self._InitBehavior(limb)
+        self._LoadSkeletalHierarchy(rigRoot)
 
 
-    @staticmethod
-    def _LoadSkeletalHierarchy(rigRoot):
+    def _LoadSkeletalHierarchy(self, rigRoot):
         log.funcFileDebug()
         limbParents = genUtil.GetDefaultLimbHier(rigRoot)
         for child, parent in limbParents.items():
-            LimbSetup._ReparentLimb(child, parent)
+            self._ReparentLimb(child, parent)
 
-    @staticmethod
-    def _ReparentLimb(childLimb, parentLimb):
+    def _ReparentLimb(self, childLimb, parentLimb):
         log.funcFileDebug()
         pm.disconnectAttr(childLimb.limbParent)
         if parentLimb:
             pm.connectAttr(parentLimb.limbChildren, childLimb.limbParent)
-        LimbSetup._UpdateParentControl(childLimb)
+        self._UpdateParentControl(childLimb)
     
-    @staticmethod
-    def _UpdateParentControl(childLimb):
+    def _UpdateParentControl(self, childLimb):
         log.funcFileDebug()
         parentGroups = rigUtil.GetParentableGroupsOfParent(childLimb)
         if not parentGroups:
@@ -529,11 +500,10 @@ class LimbSetup(absOp.Abstract_Operation):
         childGroups = pm.listConnections(childLimb.parentableGroups)
         childGroup = rigUtil.SortGroups(childGroups)[0]
         sourcePos = pm.xform(childGroup, q=1, t=1, ws=1)
-        index = LimbSetup._GetClosestGroupIndex(sourcePos, parentGroups)
+        index = self._GetClosestGroupIndex(sourcePos, parentGroups)
         childLimb.limbParentControl.set(index)
 
-    @staticmethod
-    def _GetClosestGroupIndex(sourcePos, groups):
+    def _GetClosestGroupIndex(self, sourcePos, groups):
         log.funcFileDebug()
         distances = {} # dist : [targetJoint1, joint2...]
         for group in groups:

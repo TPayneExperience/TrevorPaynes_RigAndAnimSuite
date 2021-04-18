@@ -22,7 +22,7 @@ reload(bhvMng)
 class Behavior_UI(absOpUI.Abstract_OperationUI):
     uiName = 'Behavior'
     orderIndex = 200
-    operation = bhv.Behavior
+    operation = bhv.Behavior()
     def __init__(self):
         self._bhvNames = []
         self._currentBhv = None # for verifying group selection
@@ -88,7 +88,7 @@ class Behavior_UI(absOpUI.Abstract_OperationUI):
         log.funcFileDebug()
         limb = self._selectedLimbs[0]
         rigRoot = pm.listConnections(limb.rigRoot)[0]
-        bhv.Behavior.LoadSkeletalHierarchy(rigRoot)
+        self.operation.LoadSkeletalHierarchy(rigRoot)
         self.PopulateLimbHier()
         self.PopulateControlHier(None)
         self.PopulateLimbProperties(None)
@@ -146,7 +146,7 @@ class Behavior_UI(absOpUI.Abstract_OperationUI):
         else:
             parent = None
             log.info('"%s" to world' % name)
-        bhv.Behavior.ReparentLimb(child, parent)
+        self.operation.ReparentLimb(child, parent)
         # self.PopulateLimbProperties(child)
         # self.jntMng.UpdateLimbParentJoint(child)
     
@@ -154,7 +154,7 @@ class Behavior_UI(absOpUI.Abstract_OperationUI):
         log.funcFileInfo()
         limb = self._selectedLimbs[0]
         rigRoot = pm.listConnections(limb.rigRoot)[0]
-        newLimb = bhv.Behavior.AddEmptyLimb(rigRoot)
+        newLimb = self.operation.AddEmptyLimb(rigRoot)
         self.PopulateLimbHier(newLimb)
         self.PopulateLimbProperties(newLimb)
         self.PopulateControlHier(newLimb)
@@ -165,7 +165,7 @@ class Behavior_UI(absOpUI.Abstract_OperationUI):
     def RemoveEmptyLimb(self, ignore):
         log.funcFileInfo()
         limb = self._selectedLimbs[0]
-        bhv.Behavior.RemoveEmptyLimb(limb)
+        self.operation.RemoveEmptyLimb(limb)
         self.PopulateLimbHier()
         self.PopulateLimbProperties(None)
         self.PopulateControlHier(None)
@@ -181,7 +181,7 @@ class Behavior_UI(absOpUI.Abstract_OperationUI):
         oldName = limb.pfrsName.get()
         msg = '\t"%s" to "%s"' % (oldName, newName)
         log.info(msg)
-        if bhv.Behavior.RenameLimb(limb, newName):
+        if self.operation.RenameLimb(limb, newName):
             self.PopulateLimbHier(limb)
             pm.menuItem(self._addEmpty_mi, e=1, en=0)
             pm.menuItem(self._removeEmpty_mi, e=1, en=0)
@@ -316,7 +316,7 @@ class Behavior_UI(absOpUI.Abstract_OperationUI):
     def SetEnableGroup(self, ignore):
         log.funcFileDebug()
         enable = self._selectedGroup.enableGroup.get()
-        bhv.Behavior._EnableControl(self._selectedGroup, enable)
+        self.operation._EnableControl(self._selectedGroup, enable)
         groupID = str(self._selectedGroup.groupIndex.get())
         pm.treeView(self.control_tv, e=1, enl=(groupID, enable))
 

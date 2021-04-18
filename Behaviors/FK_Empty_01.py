@@ -12,34 +12,30 @@ reload(log)
 class FK_Empty_01(absBhv.Abstract_Behavior):
     bhvName = 'Empty'
     validLimbTypes = (0,)   # rigData.LIMB_TYPES
-    groupNames = ['Empty']  # LookAt, IKPV...
+    groupName = 'Empty'  # LookAt, IKPV...
+    groupCount = 1
     groupMoveable = True    # for moving control pivots
     orderIndex = 100  
     
-    @staticmethod
-    def InitLimb(limb):
+    def InitLimb(self, limb):
         log.funcFileDebug()
         group = pm.listConnections(limb.limbGroups)[0]
         pm.connectAttr(limb.parentableGroups, group.parentable)
     
 #============= EDITABLE ============================
 
-    @staticmethod
-    def Setup_Editable(limb):
+    def Setup_Editable(self, limb):
         log.funcFileDebug()
     
-    @staticmethod
-    def Teardown_Editable(limb):
+    def Teardown_Editable(self, limb):
         log.funcFileDebug()
     
 #============= RIG ============================
 
-    @staticmethod
-    def Setup_Rig_Internal(limb):
+    def Setup_Rig_Internal(self, limb):
         log.funcFileDebug()
     
-    @staticmethod
-    def Setup_Rig_External(limb):
+    def Setup_Rig_External(self, limb):
         log.funcFileDebug()
         parentGroups = rigUtil.GetParentableGroupsOfParent(limb)
         if not parentGroups:
@@ -54,12 +50,10 @@ class FK_Empty_01(absBhv.Abstract_Behavior):
     
 #============= UI ============================
 
-    @staticmethod
-    def Setup_LimbProperties_UI(limb):
+    def Setup_LimbProperties_UI(self, limb):
         log.funcFileDebug()
         return False
     
-    @staticmethod
-    def Setup_GroupProperties_UI(group):
+    def Setup_GroupProperties_UI(self, group):
         log.funcFileDebug()
     

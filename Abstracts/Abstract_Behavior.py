@@ -1,20 +1,42 @@
 
-from abc import ABCMeta, abstractmethod
+from abc import ABCMeta, abstractmethod, abstractproperty
 
 # import Common.Utilities as util
 # reload(util)
 
 class Abstract_Behavior:
     __metaclass__ = ABCMeta
-    bhvName = ''            # Empty, FK Chain
-    validLimbTypes = ()     # rigData.LIMB_TYPES
-    groupNames = []         # MUST BE UNIQUE: LookAt, IKPV1...
-    groupMoveable = False   # for moving control pivots
-    orderIndex = 1000       # in hundred, 0 = first
+    
+#============= PROPERTIES ============================
 
-    @staticmethod
+    @abstractproperty
+    def bhvName(self):          # str | 'Empty', 'FK Chain'
+        pass 
+
+    @abstractproperty
+    def validLimbTypes(self):   # tuple int | 
+        pass 
+
+    @abstractproperty
+    def groupName(self):        # str | 'IKPV', 'Empty'
+        pass 
+
+    @abstractproperty
+    def groupCount(self):       # int | 2
+        pass 
+
+    @abstractproperty
+    def groupMoveable(self):    # bool | True
+        pass 
+
+    @abstractproperty
+    def orderIndex(self):       # int | 0, 100, 200...
+        pass 
+
+#============= METHODS ============================
+
     @abstractmethod
-    def InitLimb(limb):
+    def InitLimb(self, limb):
         # LIMB GROUPS MUST BE CREATED BEFORE CALLING THIS
         # Add limb Attrs
         # Add Group Attrs
@@ -24,45 +46,33 @@ class Abstract_Behavior:
     
 #============= EDITABLE ============================
 
-    @staticmethod
     @abstractmethod
-    def Setup_Editable(limb):
+    def Setup_Editable(self, limb):
         # Position / parent limb groups to joints
         pass
     
-    @staticmethod
     @abstractmethod
-    def Teardown_Editable(limb):
+    def Teardown_Editable(self, limb):
         # Reset limb groups
         pass
     
 #============= RIG ============================
 
-    @staticmethod
     @abstractmethod
-    def Setup_Rig_Internal(limb):
+    def Setup_Rig_Internal(self, limb):
         pass
     
-    @staticmethod
     @abstractmethod
-    def Setup_Rig_External(limb):
+    def Setup_Rig_External(self, limb):
         pass
-    
-    # @staticmethod
-    # @abstractmethod
-    # def Teardown_Rig(limb):
-    #     # constraints removed in parent
-    #     pass
     
 #============= UI ============================
 
-    @staticmethod
     @abstractmethod
-    def Setup_LimbProperties_UI(limb):
+    def Setup_LimbProperties_UI(self, limb):
         return False # return if UI is enabled
     
-    @staticmethod
     @abstractmethod
-    def Setup_GroupProperties_UI(group):
+    def Setup_GroupProperties_UI(self, group):
         pass
     

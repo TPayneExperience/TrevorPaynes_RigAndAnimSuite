@@ -24,10 +24,10 @@ class PFRS_Debug:
         print ('>>>>>>>>>>>>>> AUTO DEBUG ON <<<<<<<<<<<<<')
 
         # self.AnimPosesTest()
-        # self.SimpleChainTest()
+        self.SimpleChainTest()
         # self.LimbTypesTest()
         # self.LegTest()
-        self.ArmTest()
+        # self.ArmTest()
         # self.SpineTest()
         # self.SkeletonTest()
 
@@ -50,7 +50,7 @@ class PFRS_Debug:
         self.pfrs.InitScene()
         self.pfrs.LimbSetup.AutoBuildByHierarchy()
         rigRoot = rrt.RigRoot.GetAll()[0]
-        rigRoot.subTab.set('Behavior')
+        rigRoot.subTab.set('Appearance')
         # self.parent.UpdateEnableUI()
         # self.parent.Setup_Editable()
         # pm.tabLayout(self.parent.rig_ui.tab, e=1, sti=2) # Select Limb setup tab

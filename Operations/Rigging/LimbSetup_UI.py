@@ -20,7 +20,7 @@ reload(rigData)
 class LimbSetup_UI(absOpUI.Abstract_OperationUI):
     uiName = 'Limb Setup'
     orderIndex = 100
-    operation = ls.LimbSetup
+    operation = ls.LimbSetup()
     def __init__(self):
         self._limbFunc = None
         self._rigRoot = None
@@ -48,7 +48,7 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
                 with pm.popupMenu():
                     pm.menuItem(l='Refresh', c=self.Refresh)
                     self.buildHier_mi = pm.menuItem(l='Joint Tool',
-                                            c=pm.Callback(ls.LimbSetup.JointTool)) 
+                                            c=pm.Callback(self.operation.JointTool)) 
                     msg1 = 'Autobuild by JOINT HIERARCHY'
                     msg2 = 'Autobuild by JOINT NAMES: [limb]_[L/M/R]_[joint]'
                     self.buildHier_mi = pm.menuItem(l=msg1, en=0, 
@@ -122,14 +122,14 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
 
     def AutoBuildByHierarchy(self, ignore):
         log.funcFileInfo()
-        ls.LimbSetup.AutoBuildByHierarchy()
+        self.operation.AutoBuildByHierarchy()
         self.PopulateSceneHier()
         self.PopulateLimbHier()
         self.PopulateJointHier(None)
 
     def AutoBuildByName(self, ignore):
         log.funcFileInfo()
-        ls.LimbSetup.AutoBuildByName()
+        self.operation.AutoBuildByName()
         self.PopulateSceneHier()
         self.PopulateLimbHier()
         self.PopulateJointHier(None)
@@ -167,9 +167,9 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
         self._limbFunc = None
         if not self._selectedSceneJoints:
             return 
-        if not ls.LimbSetup._AreJointsDisconnected(self._selectedSceneJoints):
+        if not self.operation._AreJointsDisconnected(self._selectedSceneJoints):
             return
-        self._limbFunc = ls.LimbSetup._GetLimbFuncForJoints(self._selectedSceneJoints)
+        self._limbFunc = self.operation._GetLimbFuncForJoints(self._selectedSceneJoints)
         b = bool(self._limbFunc)
         pm.menuItem(self.add_mi, e=1, en=b)
 
@@ -207,7 +207,7 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
     def AddJointLimb(self, ignore):
         log.funcFileInfo()
         limb = self._limbFunc(self._rigRoot, self._selectedSceneJoints)
-        ls.LimbSetup._InitBehavior(limb)
+        self.operation._InitBehavior(limb)
         self.PopulateLimbHier(limb)
         self.PopulateJointHier(limb)
         self.PopulateSceneHier()
@@ -222,7 +222,7 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
                                 cb='No', 
                                 ds='No') == 'No'):
             return
-        ls.LimbSetup.RemoveLimbs(self._selectedLimbs)
+        self.operation.RemoveLimbs(self._selectedLimbs)
         self.PopulateLimbHier()
         self.PopulateJointHier(None)
         self.PopulateSceneHier()
@@ -234,7 +234,7 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
         oldName = limb.pfrsName.get()
         msg = '\t"%s" to "%s"' % (oldName, newName)
         log.info(msg)
-        if ls.LimbSetup.RenameLimb(limb, newName):
+        if self.operation.RenameLimb(limb, newName):
             self.PopulateLimbHier(limb)
             self.PopulateSceneHier()
         return ''
@@ -243,7 +243,7 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
         log.funcFileInfo()
         limbIDStrs = pm.treeView(self.limb_tv, q=1, selectItem=1)
         limb = self._limbIDs[limbIDStrs[0]]
-        ls.LimbSetup.FlipSides(limb)
+        self.operation.FlipSides(limb)
         self.PopulateLimbHier(limb)
         self.PopulateJointHier(limb)
 
@@ -305,7 +305,7 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
             log.error(msg)
             return ''
         rigRoot = pm.listConnections(limb.rigRoot)[0]
-        ls.LimbSetup._RenameJoint(rigRoot, limb, joint, newName)
+        self.operation._RenameJoint(rigRoot, limb, joint, newName)
         self.PopulateJointHier(limb, joint)
         self.PopulateSceneHier()
         return ''

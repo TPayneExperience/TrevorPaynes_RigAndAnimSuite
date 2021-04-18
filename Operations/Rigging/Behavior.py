@@ -21,51 +21,45 @@ reload(genUtil)
 class Behavior(absOp.Abstract_Operation):
     isRigBuilt = False
     validRigStates = (0, 1)     # 0 = Setup, 1 = Anim
-    requiredLicense = 0         # 0 = Free, 1 = Personal, 2 = Pro
     controlLayerState = (1, 1)  # isVis, isRef
     jointLayerState = (1, 1)    # isVis, isRef
+    meshLayerState = (1, 1)    # isVis, isRef
+    def __init__(self):
+        self._ls = ls.LimbSetup()
 
-    @staticmethod
-    def AddEmptyLimb(rigRoot):
+    def AddEmptyLimb(self, rigRoot):
         log.funcFileDebug()
         limb = lmb.Limb.AddEmpty(rigRoot)
-        ls.LimbSetup._InitBehavior(limb)
+        self._ls._InitBehavior(limb)
         return limb
 
-    @staticmethod
-    def RemoveEmptyLimb(limb):
+    def RemoveEmptyLimb(self, limb):
         log.funcFileDebug()
         lmb.Limb.Remove(limb)
 
-    @staticmethod
-    def ReparentLimb(childLimb, parentLimb):
+    def ReparentLimb(self, childLimb, parentLimb):
         log.funcFileDebug()
-        ls.LimbSetup._ReparentLimb(childLimb, parentLimb)
+        self._ls._ReparentLimb(childLimb, parentLimb)
     
-    @staticmethod
-    def RenameLimb(limb, newName):
-        return ls.LimbSetup.RenameLimb(limb, newName)
+    def RenameLimb(self, limb, newName):
+        return self._ls.RenameLimb(limb, newName)
 
-    @staticmethod
-    def LoadSkeletalHierarchy(rigRoot):
+    def LoadSkeletalHierarchy(self, rigRoot):
         log.funcFileDebug()
-        ls.LimbSetup._LoadSkeletalHierarchy(rigRoot)
+        self._ls._LoadSkeletalHierarchy(rigRoot)
     
-    @staticmethod
-    def EnableLimb(limb, isEnabled):
+    def EnableLimb(self, limb, isEnabled):
         log.funcFileDebug()
         limb.enableLimb.set(isEnabled)
     
-    @staticmethod
-    def EnableControl(control, isEnabled):
+    def EnableControl(self, control, isEnabled):
         log.funcFileDebug()
         if control.hasAttr('control'):
             group = control
         else:
             group = pm.listConnections(control.group)[0]
         group.enableGroup.set(isEnabled)
-        Behavior._EnableControl(group, isEnabled)
+        self._EnableControl(group, isEnabled)
     
-    @staticmethod
-    def _EnableControl(group, isEnabled):
+    def _EnableControl(self, group, isEnabled):
         group.v.set(isEnabled)
