@@ -16,6 +16,8 @@ import Initializers
 reload(Initializers)
 import SceneData
 reload(SceneData)
+import Popups
+reload(Popups)
 
 import Common.Logger as log
 reload(log)

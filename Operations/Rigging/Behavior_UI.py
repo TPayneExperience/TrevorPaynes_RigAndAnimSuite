@@ -13,6 +13,8 @@ import Common.Logger as log
 reload(log)
 import Data.Rig_Data as rigData
 reload(rigData)
+import Popups.EditPresets as editPst
+reload(editPst)
 
 import SceneData.RigRoot as rrt
 reload(rrt)
@@ -27,12 +29,15 @@ class Behavior_UI(absOpUI.Abstract_OperationUI):
         self._bhvNames = []
         self._currentBhv = None # for verifying group selection
         self._selectedLimbs = []
+        self._presets = {} # preset_name : presetRoot
+        self._presetsUI = []
 
     def Setup_UI(self, rigRoot, allRigRoots):  # Return nothing, parent should cleanup
         self._Setup()
         self._rigRoot = rigRoot
         self._allRigRoots = allRigRoots
         self.PopulateLimbHier()
+        self.PopulatePresets()
         
 #=========== SETUP UI ====================================
 
@@ -56,9 +61,9 @@ class Behavior_UI(absOpUI.Abstract_OperationUI):
                     self._loadSkel_mi = pm.menuItem(l='Load Skeletal Hierarchy', 
                                                 en=0, c=self.LoadSkeletalHierarchy)
                     pm.menuItem(l='PRESETS', d=1)
-                    self.savePreset_mi = pm.menuItem(l='Save Preset', 
-                                                en=0)#, c=self.SavePreset)
-                    pm.menuItem(l='Edit Presets', en=0)#, c=self.EditPresets)
+                    self._savePreset_mi = pm.menuItem(l='Save Preset', 
+                                                en=0, c=self.SavePreset)
+                    pm.menuItem(l='Edit Presets', c=self.EditPresets)
                     pm.menuItem(l='APPLY PRESET', en=0, d=1)
             with pm.frameLayout('Controls', bv=1):
                 tt = 'DOT = pivot is moveable!'
@@ -104,7 +109,7 @@ class Behavior_UI(absOpUI.Abstract_OperationUI):
 
     def SelectedLimb(self):
         log.funcFileInfo()
-        pm.menuItem(self.savePreset_mi, e=1, en=0)
+        pm.menuItem(self._savePreset_mi, e=1, en=0)
         limbIDStrs = pm.treeView(self.limb_tv, q=1, selectItem=1)
         self.PopulateLimbProperties(None)
         self.PopulateControlHier(None)
@@ -112,9 +117,11 @@ class Behavior_UI(absOpUI.Abstract_OperationUI):
         pm.menuItem(self._addEmpty_mi, e=1, en=0)
         pm.menuItem(self._removeEmpty_mi, e=1, en=0)
         pm.menuItem(self._loadSkel_mi, e=1, en=0)
+        pm.menuItem(self._savePreset_mi, e=1, en=0)
         # Depop Group Prop
         if not limbIDStrs:
             return
+        pm.menuItem(self._savePreset_mi, e=1, en=1)
         self._selectedLimbs = [self._limbIDs[ID] for ID in limbIDStrs]
         for limb in self._selectedLimbs:
             log.debug('\t\t' + limb.pfrsName.get())
@@ -183,6 +190,48 @@ class Behavior_UI(absOpUI.Abstract_OperationUI):
             pm.menuItem(self._removeEmpty_mi, e=1, en=0)
         return ''
 
+    def SavePreset(self, ignore):
+        log.funcFileInfo()
+        result = pm.promptDialog(
+                title='Save Preset',
+                message='New Preset Name:',
+                button=['OK', 'Cancel'],
+                defaultButton='OK',
+                cancelButton='Cancel',
+                dismissString='Cancel')
+        if result == 'Cancel':
+            return
+            
+        presetName = pm.promptDialog(query=True, text=True)
+        self.operation.SavePreset(presetName, self._rigRoot, 
+                                        self._selectedLimbs)
+        self.PopulatePresets()
+
+    def ApplyPreset(self, preset):
+        log.funcFileInfo()
+        self.operation.ApplyPreset(preset)
+        self._selectedLimbs = []
+        self.PopulateLimbHier()
+        self.PopulateControlHier(None)
+        self.PopulateLimbProperties(None)
+        self.PopulateBhvProperties(None)
+
+    def EditPresets(self, ignore):
+        log.funcFileDebug()
+        editPst.EditPresets(self._rigRoot, self.operation)
+        self.PopulatePresets()
+
+    def PopulatePresets(self):
+        log.funcFileInfo()
+        if self._presetsUI:
+            pm.deleteUI(self._presetsUI)
+            self._presetsUI = []
+        for preset in sorted(pm.listConnections(self._rigRoot.presets)):
+            presetName = preset.presetName.get()
+            item = pm.menuItem(l=presetName, p=self.rmb_ui, 
+                            c=pm.Callback(self.ApplyPreset, preset))
+            self._presetsUI.append(item)
+
 #=========== CONTROL HIER ====================================
 
     def PopulateControlHier(self, limb):
@@ -241,24 +290,13 @@ class Behavior_UI(absOpUI.Abstract_OperationUI):
                 pm.optionMenu(self.bhvType_om, e=1, sl=index)
         self._currentBhv = bhvMng.Behavior_Manager.bhvs[bhvFile]
 
-    def SetBhvType(self, bhvTypeStr): # Mostly UI
+    def SetBhvType(self, bhvType):
         log.funcFileInfo()
-        bhvFile = bhvMng.Behavior_Manager.bhvFiles[bhvTypeStr][-1]
         limb = self._selectedLimbs[0]
-        bhvMng.Behavior_Manager.SetBehavior(limb, bhvFile)
-        self._currentBhv = bhvMng.Behavior_Manager.bhvs[bhvFile]
+        self._currentBhv = self.operation.SetLimbBehaviorType(limb, 
+                                                            bhvType)
         self.PopulateControlHier(limb)
         self.PopulateBhvProperties(limb)
-        # newBhvIndex = rigData.BHV_TYPES.index(bhvTypeStr)
-        # old = rigData.BHV_TYPES[self.limb.bhvType.get()]
-        # self.logger.info('\tLimbProp > SET BEHAVIOR:')
-        # self.logger.info('\t\t%s >>> %s' % (old, bhvTypeStr))
-        
-        # self.limbMng.SetBhvType(self.limb, newBhvIndex)
-        # # self.PopulateLimbProperties(newBhvIndex)
-        # # self.PopulateBhvProperties()
-        # # self.parent.SetBhvType(self.limb) 
-        # self.parent.Populate()
 
     def PopulateLimbProperties(self, limb):
         log.funcFileDebug()

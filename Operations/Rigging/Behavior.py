@@ -15,8 +15,10 @@ import LimbSetup as ls
 reload(ls)
 import Common.General_Utilities as genUtil
 reload(genUtil)
-# import SceneData.RigRoot as rrt
-# reload(rrt)
+import SceneData.Preset as pst
+reload(pst)
+import SceneData.Behavior_Manager as bhvMng
+reload(bhvMng)
 
 class Behavior(absOp.Abstract_Operation):
     isRigBuilt = False
@@ -26,6 +28,8 @@ class Behavior(absOp.Abstract_Operation):
     meshLayerState = (1, 1)    # isVis, isRef
     def __init__(self):
         self._ls = ls.LimbSetup()
+
+#=========== LIMB SETUP WRAPPERS ====================================
 
     def AddEmptyLimb(self, rigRoot):
         log.funcFileDebug()
@@ -48,7 +52,59 @@ class Behavior(absOp.Abstract_Operation):
         log.funcFileDebug()
         self._ls._LoadSkeletalHierarchy(rigRoot)
     
+#=========== PRESETS ====================================
+
+    def SavePreset(self, presetName, rigRoot, limbs):
+        log.funcFileDebug()
+        preset = pst.Preset.Add(presetName, rigRoot, limbs)
+        self._UpdatePresetName(preset, rigRoot)
+        return preset
+
+    def ApplyPreset(self, preset):
+        log.funcFileDebug()
+        for limbPreset in pm.listConnections(preset.limbPresets):
+            limb = pm.listConnections(limbPreset.limb)[0]
+            newBhvFile = limbPreset.bhvFile.get()
+            oldBhvFile = limb.bhvFile.get()
+            if oldBhvFile != newBhvFile:
+                self.SetLimbBehaviorFile(limb, newBhvFile)
+            newLimbParent = pm.listConnections(limbPreset.limbParent)
+            if newLimbParent:
+                self.ReparentLimb(limb, newLimbParent[0])
+            else:
+                self.ReparentLimb(limb, None)
+            self._ls._UpdateParentControlEnum(limb)
+            limb.limbParentControl.set(limbPreset.limbParentControl.get())
+            limb.enableLimb.set(limbPreset.enableLimb.get())
+
+    def DeletePreset(self, preset):
+        log.funcFileDebug()
+        limbPresets = pm.listConnections(preset.limbPresets)
+        pm.delete(preset)
+        pm.delete(limbPresets)
+    
+    def RenamePreset(self, preset, newName, rigRoot):
+        log.funcFileDebug()
+        preset.presetName.set(newName)
+        self._UpdatePresetName(preset, rigRoot)
+
+    def _UpdatePresetName(self, preset, rigRoot):
+        presetName = preset.presetName.get()
+        name = '%s_%s_Preset_#' % (rigRoot.prefix.get(), presetName)
+        preset.rename(name)
+
+
+#=========== MISC ====================================
+
     def EnableLimb(self, limb, isEnabled):
         log.funcFileDebug()
         limb.enableLimb.set(isEnabled)
     
+    def SetLimbBehaviorType(self, limb, bhvType):
+        log.funcFileDebug()
+        bhvFile = bhvMng.Behavior_Manager.bhvFiles[bhvType][-1]
+        return self.SetLimbBehaviorFile(limb, bhvFile)
+
+    def SetLimbBehaviorFile(self, limb, bhvFile):
+        log.funcFileDebug()
+        return bhvMng.Behavior_Manager.SetBehavior(limb, bhvFile)

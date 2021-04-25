@@ -68,6 +68,7 @@ class Behavior_Manager:
         Behavior_Manager._SetupLimbGroups(rigRoot, limb, bhv)
         bhv.InitLimb(limb)
         Behavior_Manager._Setup_GroupVisibility(limb)
+        return bhv
 
     @staticmethod
     def Setup_Rig(rigRoot):

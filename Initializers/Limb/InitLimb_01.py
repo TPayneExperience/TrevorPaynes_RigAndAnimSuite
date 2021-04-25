@@ -42,9 +42,7 @@ class InitLimb(absInit.Abstract_Initializer):
         # BEHAVIORS
         pm.addAttr(limb, ln='bhvFile', dt='string', h=hide)
         pm.addAttr(limb, ln='limbGroups', dt='string', h=hide)
-            #>>> TO IMPLEMENT!
         pm.addAttr(limb, ln='usedGroups', dt='string', h=hide)
-        # pm.addAttr(limb, ln='rebuildBhvDep', at='bool', h=hide)
 
         # CHANNEL BOX
         pm.addAttr(limb, ln='channelBoxJointCtrPos', at='bool', dv=1, h=hide)

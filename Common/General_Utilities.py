@@ -155,7 +155,6 @@ def GetDefaultLimbHier(rigRoot):
     return limbParents
 
 def AbstractInitializer(objectInstance, folder):
-    # self.logger.debug('\tPFRS_UI > InitOperations')
     rootPath = os.path.dirname(__file__)
     rootPath = os.path.dirname(rootPath)
     rootPath = os.path.join(rootPath, 'Initializers')
