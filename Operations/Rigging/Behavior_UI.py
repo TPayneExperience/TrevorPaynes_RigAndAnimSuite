@@ -26,10 +26,12 @@ class Behavior_UI(absOpUI.Abstract_OperationUI):
     def __init__(self):
         self._bhvNames = []
         self._currentBhv = None # for verifying group selection
-        self._selectedGroup = None
+        self._selectedLimbs = []
 
-    def Setup_UI(self): # Return nothing, parent should cleanup
+    def Setup_UI(self, rigRoot, allRigRoots):  # Return nothing, parent should cleanup
         self._Setup()
+        self._rigRoot = rigRoot
+        self._allRigRoots = allRigRoots
         self.PopulateLimbHier()
         
 #=========== SETUP UI ====================================
@@ -67,20 +69,15 @@ class Behavior_UI(absOpUI.Abstract_OperationUI):
         with pm.verticalLayout():
             with pm.frameLayout('Limb Properties', bv=1, en=0) as self.limbProp_fl:
                 with pm.columnLayout(adj=1) as self.bhvLimbProp_cl:
-                    with pm.columnLayout(co=('left', -100)) as self.appLimbLockHide_cl:
+                    with pm.columnLayout(co=('left', -100)):
                         self.enableLimb_cg = pm.attrControlGrp(l='Enable Limb',
                                                         a='perspShape.shakeEnabled')
                     self.bhvType_om = pm.optionMenu(l='Bhv Type', 
-                                                    cc=pm.Callback(self.SetBhvType))
+                                                    cc=self.SetBhvType)
                     self.grpParent_at = pm.attrEnumOptionMenu(  l='Parent Joint', 
                                                                 at='perspShape.filmFit')
             with pm.frameLayout('Behavior Properties', bv=1, en=0) as self.bhvProp_fl:
                 self.bhvProp_cl = pm.columnLayout(adj=1)
-            with pm.frameLayout('Control Properties', bv=1, en=0) as self.groupProp_fl:
-                with pm.columnLayout(adj=1) as self.groupProp_cl:
-                    with pm.columnLayout(co=('left', -100)) as self.appLimbLockHide_cl:
-                        self.enableGroup_cg = pm.attrControlGrp(l='Enable Control',
-                                                        a='perspShape.shakeEnabled')
 
 #=========== LIMB HIER ====================================
 
@@ -93,14 +90,12 @@ class Behavior_UI(absOpUI.Abstract_OperationUI):
         self.PopulateControlHier(None)
         self.PopulateLimbProperties(None)
         self.PopulateBhvProperties(None)
-        self.PopulateGroupProperties(None)
 
     def PopulateLimbHier(self, selectLimb=None):
         log.funcFileDebug()
-        self._limbIDs = {}
-        for rigRoot in rrt.RigRoot.GetAll():
-            self._limbIDs.update(uiUtil.PopulateLimbHier(self.limb_tv, 
-                                                    rigRoot))
+        self._limbIDs = uiUtil.PopulateLimbHier(self.limb_tv, 
+                                                self._rigRoot,
+                                                self._allRigRoots)
         if not selectLimb:
             return
         for limbID, limb in self._limbIDs.items():
@@ -187,7 +182,6 @@ class Behavior_UI(absOpUI.Abstract_OperationUI):
             pm.menuItem(self._removeEmpty_mi, e=1, en=0)
         return ''
 
-
 #=========== CONTROL HIER ====================================
 
     def PopulateControlHier(self, limb):
@@ -203,26 +197,21 @@ class Behavior_UI(absOpUI.Abstract_OperationUI):
                                             ornament=(groupID, 1, 0, 3))
         
     def IgnoreRename(self, idStr, newName):
-        log.funcFileDebug()
         return ''
 
     def SelectedControl(self):
-        log.funcFileDebug()
+        log.funcFileInfo()
         groupIDStr = pm.treeView(self.control_tv, q=1, selectItem=1)
         if groupIDStr:
-            self._selectedGroup = self._limbGroups[groupIDStr[0]]
-            msg = '\t"%s"'% self._selectedGroup
+            group = self._limbGroups[groupIDStr[0]]
+            msg = '\t"%s"'% group
             log.info(msg)
             if self._currentBhv.groupMoveable:
-                pm.select(self._selectedGroup)
+                pm.select(group)
             else:
                 pm.select(d=1)
-            # self.PopulateLimbProperties(None)
-            # self.PopulateBehaviorProperties(group)
-            self.PopulateGroupProperties(self._selectedGroup)
         else:
             pm.select(d=1)
-            self.PopulateGroupProperties(None)
 
 #=========== LIMB PROPERTIES ====================================
 
@@ -233,20 +222,32 @@ class Behavior_UI(absOpUI.Abstract_OperationUI):
         bhvFile = limb.bhvFile.get()
         limbType = limb.limbType.get()
         limbBhvName = ''
-        for bhvName, bhvFiles in bhvMng.Behavior_Manager.bhvFiles.items():
+        orderedBhvs = {}
+        for bhvFiles in list(bhvMng.Behavior_Manager.bhvFiles.values()):
             bhv = bhvMng.Behavior_Manager.bhvs[bhvFiles[-1]]
+            if bhvFile in bhvFiles:
+                limbBhvName = bhv.bhvName
+            orderedBhvs[bhv.orderIndex] = bhv
+        index = 0
+        for priority in sorted(list(orderedBhvs.keys())):
+            bhv = orderedBhvs[priority]
+            bhvName = bhv.bhvName
             if limbType in bhv.validLimbTypes:
                 pm.menuItem(l=bhvName, p=self.bhvType_om)
                 self._bhvNames.append(bhvName)
-            if bhvFile in bhvFiles:
-                limbBhvName = bhvName
-        bhvIndex = self._bhvNames.index(limbBhvName) + 1
-        pm.optionMenu(self.bhvType_om, e=1, sl=bhvIndex)
+                index += 1
+            if bhvName == limbBhvName:
+                pm.optionMenu(self.bhvType_om, e=1, sl=index)
         self._currentBhv = bhvMng.Behavior_Manager.bhvs[bhvFile]
 
-    def SetBhvType(self): # Mostly UI
-        log.funcFileDebug()
-        # bhvTypeStr = pm.optionMenu(self.bhvType_om, q=1, v=1)
+    def SetBhvType(self, bhvTypeStr): # Mostly UI
+        log.funcFileInfo()
+        bhvFile = bhvMng.Behavior_Manager.bhvFiles[bhvTypeStr][-1]
+        limb = self._selectedLimbs[0]
+        bhvMng.Behavior_Manager.SetBehavior(limb, bhvFile)
+        self._currentBhv = bhvMng.Behavior_Manager.bhvs[bhvFile]
+        self.PopulateControlHier(limb)
+        self.PopulateBhvProperties(limb)
         # newBhvIndex = rigData.BHV_TYPES.index(bhvTypeStr)
         # old = rigData.BHV_TYPES[self.limb.bhvType.get()]
         # self.logger.info('\tLimbProp > SET BEHAVIOR:')
@@ -294,41 +295,6 @@ class Behavior_UI(absOpUI.Abstract_OperationUI):
             return
         pm.deleteUI(self.bhvProp_cl)
         with pm.columnLayout(adj=1, p=self.bhvProp_fl) as self.bhvProp_cl:
-            enable = self._currentBhv.Setup_LimbProperties_UI(limb)
+            enable = self._currentBhv.Setup_Editable_Limb_UI(limb)
         pm.frameLayout(self.bhvProp_fl, e=1, en=enable)
-
-#=========== GROUP PROPERTIES ====================================
-
-    def PopulateGroupProperties(self, group):
-        log.funcFileDebug()
-        pm.frameLayout(self.groupProp_fl, e=1, en=0)
-        if not group:
-            return
-        pm.frameLayout(self.groupProp_fl, e=1, en=1)
-        pm.deleteUI(self.groupProp_cl)
-        with pm.columnLayout(adj=1, p=self.groupProp_fl) as self.groupProp_cl:
-            with pm.columnLayout(co=('left', -100)) as self.appLimbLockHide_cl:
-                self.enableGroup_cg = pm.attrControlGrp(l='Enable Control',
-                                            a=group.enableGroup,
-                                            cc=pm.Callback(self.SetEnableGroup, 1))
-            self._currentBhv.Setup_GroupProperties_UI(group)
-
-    def SetEnableGroup(self, ignore):
-        log.funcFileDebug()
-        enable = self._selectedGroup.enableGroup.get()
-        self.operation._EnableControl(self._selectedGroup, enable)
-        groupID = str(self._selectedGroup.groupIndex.get())
-        pm.treeView(self.control_tv, e=1, enl=(groupID, enable))
-
-        # if no group, disable
-        # Add the enable group button
-        # setup ui from bhv
-
-        # pm.frameLayout(self.bhvProp_fl, e=1, en=0)
-        # if not limb:
-        #     return
-        # pm.deleteUI(self.bhvProp_cl)
-        # with pm.columnLayout(adj=1, p=self.bhvProp_fl) as self.bhvProp_cl:
-        #     enable = self._currentBhv.Setup_LimbProperties_UI(limb)
-        # pm.frameLayout(self.bhvProp_fl, e=1, en=enable)
 

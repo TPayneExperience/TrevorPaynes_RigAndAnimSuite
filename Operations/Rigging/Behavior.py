@@ -52,14 +52,3 @@ class Behavior(absOp.Abstract_Operation):
         log.funcFileDebug()
         limb.enableLimb.set(isEnabled)
     
-    def EnableControl(self, control, isEnabled):
-        log.funcFileDebug()
-        if control.hasAttr('control'):
-            group = control
-        else:
-            group = pm.listConnections(control.group)[0]
-        group.enableGroup.set(isEnabled)
-        self._EnableControl(group, isEnabled)
-    
-    def _EnableControl(self, group, isEnabled):
-        group.v.set(isEnabled)

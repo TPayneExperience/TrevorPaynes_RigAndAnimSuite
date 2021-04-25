@@ -9,14 +9,14 @@ reload(rigUtil)
 import Common.Logger as log
 reload(log)
 
-class FK_Branch_01(absBhv.Abstract_Behavior):
-    bhvName = 'FK Branch'
-    validLimbTypes = (1, 2, 3, 4) # rigData.LIMB_TYPES
+class FK_Chain_Reverse_01(absBhv.Abstract_Behavior):
+    bhvName = 'FK Chain Reverse'
+    validLimbTypes = (3, 4) # rigData.LIMB_TYPES
     groupType = ''        # LookAt, IKPV...
     groupShape = ''
     groupCount = 0
     groupMoveable = True   # for moving control pivots
-    orderIndex = 230  
+    orderIndex = 220  
     
     def InitLimb(self, limb):
         log.funcFileDebug()
@@ -30,8 +30,14 @@ class FK_Branch_01(absBhv.Abstract_Behavior):
 
     def Setup_Rig_Internal(self, limb):
         log.funcFileDebug()
-        for group in pm.listConnections(limb.usedGroups):
-            pm.parent(group, limb)
+        groups = pm.listConnections(limb.usedGroups)
+        groups = rigUtil.SortGroups(groups)[::-1]
+        pm.parent(groups[0], limb)
+        for i in range(len(groups)-1):
+            group = groups[i+1]
+            parentCtr = pm.listConnections(groups[i].control)[0]
+            pm.parent(group, parentCtr)
+        for group in groups:
             joint = pm.listConnections(group.joint)[0]
             control = pm.listConnections(group.control)[0]
             pm.parentConstraint(control, joint, mo=1)
@@ -41,8 +47,9 @@ class FK_Branch_01(absBhv.Abstract_Behavior):
         parentControl = rigUtil.GetParentControl(limb)
         if not parentControl:
             return
-        for group in pm.listConnections(limb.usedGroups):
-            pm.parentConstraint(parentControl, group, mo=1)
+        groups = pm.listConnections(limb.usedGroups)
+        groups = rigUtil.SortGroups(groups)[::-1]
+        pm.parentConstraint(parentControl, groups[0], mo=1)
     
     def Teardown_Rig(self, limb):
         log.funcFileDebug()
@@ -51,9 +58,7 @@ class FK_Branch_01(absBhv.Abstract_Behavior):
         joints = [pm.listConnections(g.joint)[0] for g in jointGroups]
         constraints = [pm.listConnections(j.rx)[0] for j in joints]
         pm.delete(constraints)
-        if pm.listConnections(limb.limbParent):
-            constraints = [pm.listConnections(g.rx)[0] for g in jointGroups]
-            pm.delete(constraints)
+        pm.delete(pm.listConnections(jointGroups[-1].rx))
 
         for group, joint in zip(jointGroups, joints):
             pm.parent(group, joint)

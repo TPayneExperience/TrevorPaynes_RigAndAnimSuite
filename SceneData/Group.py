@@ -14,10 +14,10 @@ reload(ctr)
 
 class Group:
     @staticmethod
-    def _Add(rigRoot, index, groupName):
+    def _Add(rigRoot, index, groupType):
         group = pm.group(em=1, w=1)
         genUtil.AbstractInitializer(group, 'Group')
-        group.groupType.set(groupName)
+        group.groupType.set(groupType)
         group.groupIndex.set(index)
         ctr.Control.Add(rigRoot, group)
         return group
@@ -32,9 +32,9 @@ class Group:
         return group
     
     @staticmethod
-    def AddLimbGroup(rigRoot, index, groupName, limb):
+    def AddLimbGroup(rigRoot, index, groupType, limb):
         log.funcFileDebug()
-        group = Group._Add(rigRoot, index, groupName)
+        group = Group._Add(rigRoot, index, groupType)
         pm.connectAttr(limb.limbGroups, group.limb)
         pm.parent(group, limb)
         return group

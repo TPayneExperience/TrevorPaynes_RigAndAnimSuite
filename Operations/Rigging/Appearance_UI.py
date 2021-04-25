@@ -31,8 +31,10 @@ class Appearance_UI(absOpUI.Abstract_OperationUI):
         self._selectedGroup = None
         self._rigRoot = None
 
-    def Setup_UI(self):
+    def Setup_UI(self, rigRoot, allRigRoots): 
         self._Setup()
+        self._rigRoot = rigRoot
+        self._allRigRoots = allRigRoots
         self.PopulateLimbHier()
         
 #=========== SETUP UI ====================================
@@ -71,14 +73,12 @@ class Appearance_UI(absOpUI.Abstract_OperationUI):
    
     def PopulateLimbHier(self):
         log.funcFileDebug()
-        self._limbIDs = {}
-        self._rigRoot = None
         self.PopulateControlHier(None)
         self.PopulateLimbProperties(None)
         pm.frameLayout(self.ctrShapes_fl, e=1, en=0)
-        for rigRoot in rrt.RigRoot.GetAll():
-            self._limbIDs.update(uiUtil.PopulateLimbHier(self.limb_tv, 
-                                                    rigRoot))
+        self._limbIDs = uiUtil.PopulateLimbHier(self.limb_tv, 
+                                                self._rigRoot,
+                                                self._allRigRoots)
 
     def IgnoreRename(self, idStr, newName):
         log.funcFileInfo()

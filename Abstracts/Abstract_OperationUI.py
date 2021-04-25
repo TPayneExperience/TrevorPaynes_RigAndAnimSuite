@@ -17,7 +17,7 @@ class Abstract_OperationUI:
         pass 
 
     @abstractmethod
-    def Setup_UI(self):     # parent should cleanup
+    def Setup_UI(self, rigRoot, allRigRoots):     # parent should cleanup
         pass
     
 

@@ -18,7 +18,6 @@ class InitGroup(absInit.Abstract_Initializer):
             return 
             
         hide = genData.HIDE_ATTRS
-        # pm.addAttr(group, ln='ID', at='long', dv=groupID, h=hide)
         pm.addAttr(group, ln='groupIndex', at='long', h=hide)
         pm.addAttr(group, ln='control', dt='string', h=hide)
         pm.addAttr(group, ln='joint', dt='string', h=hide)
@@ -26,7 +25,6 @@ class InitGroup(absInit.Abstract_Initializer):
             # >>> TO IMPLEMENT
         pm.addAttr(group, ln='used', dt='string', h=hide)
         pm.addAttr(group, ln='groupType', dt='string', h=hide)
-        pm.addAttr(group, ln='enableGroup', at='bool', dv=1, h=hide)
         pm.addAttr(group, ln='parentable', dt='string', h=hide)
 
 

@@ -75,11 +75,6 @@ class InitRigRoot(absInit.Abstract_Initializer):
         
         # CONTROLS
         pm.addAttr(rigRoot, ln=rigData.JOINT_SHAPE_ATTR, dt='string', h=hide)
-        pm.addAttr(rigRoot, ln=rigData.EMPTY_SHAPE_ATTR, dt='string', h=hide)
-        # pm.addAttr(rigRoot, ln='appEmptyCtrShape', dt='string', h=hide)
-        # pm.addAttr(rigRoot, ln='appJointCtrShape', dt='string', h=hide)
-        # pm.addAttr(rigRoot, ln='appIKPVCtrShape', dt='string', h=hide)
-        # pm.addAttr(rigRoot, ln='appLookAtCtrShape', dt='string', h=hide)
 
         #============= LAYERS ============================
 

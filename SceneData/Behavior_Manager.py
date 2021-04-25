@@ -17,6 +17,8 @@ import SceneData.Group as grp
 reload(grp)
 import Common.General_Utilities as genUtil
 reload(genUtil)
+import Data.General_Data as genData
+reload(genUtil)
 
 class Behavior_Manager:
     bhvFiles = {}   # bhvName : [fileName1, fileName 2,...]
@@ -44,8 +46,9 @@ class Behavior_Manager:
                         bhvName = obj.bhvName
                         if bhvName not in Behavior_Manager.bhvFiles:
                             Behavior_Manager.bhvFiles[bhvName] = []
-                        Behavior_Manager.bhvFiles[bhvName].append(
-                                                            fileName)
+                        if fileName not in Behavior_Manager.bhvFiles[bhvName]:
+                            Behavior_Manager.bhvFiles[bhvName].append(
+                                                                fileName)
                         Behavior_Manager.bhvs[fileName] = obj()
     
     @staticmethod
@@ -57,28 +60,34 @@ class Behavior_Manager:
     @staticmethod
     def SetBehavior(limb, bhvFile):
         log.funcFileDebug()
+        # Behavior_Manager.Teardown_Editable(limb)
+        Behavior_Manager._Teardown_GroupVisibility(limb)
         limb.bhvFile.set(bhvFile)
         bhv = Behavior_Manager.bhvs[bhvFile]
-        Behavior_Manager._SetupLimbGroups(  limb, 
-                                            bhv.groupName, 
-                                            bhv.groupCount)
+        rigRoot = pm.listConnections(limb.rigRoot)[0]
+        Behavior_Manager._InitRigRootBhv(rigRoot, bhv)
+        Behavior_Manager._SetupLimbGroups(rigRoot, limb, bhv)
         bhv.InitLimb(limb)
+        # Behavior_Manager.Setup_Editable(limb)
+        Behavior_Manager._Setup_GroupVisibility(limb)
 
-    @staticmethod
-    def Setup_Editable(limb):
-        log.funcFileDebug()
-        log.debug('\t%s' % limb.pfrsName.get())
-        bhvFile = limb.bhvFile.get()
-        bhv = Behavior_Manager.bhvs[bhvFile]
-        bhv.Setup_Editable(limb)
+    # @staticmethod
+    # def Setup_Editable(limb):
+    #     log.funcFileDebug()
+    #     log.debug('\t%s' % limb.pfrsName.get())
+    #     bhvFile = limb.bhvFile.get()
+    #     bhv = Behavior_Manager.bhvs[bhvFile]
+    #     bhv.Setup_Editable(limb)
         
-    @staticmethod
-    def Teardown_Editable(limb):
-        log.funcFileDebug()
-        bhvFile = limb.bhvFile.get()
-        log.debug('\t%s : %s' % (limb.pfrsName.get(), bhvFile))
-        bhv = Behavior_Manager.bhvs[bhvFile]
-        bhv.Teardown_Editable(limb)
+    # @staticmethod
+    # def Teardown_Editable(limb):
+    #     log.funcFileDebug()
+    #     bhvFile = limb.bhvFile.get()
+    #     if not bhvFile:
+    #         return
+    #     log.debug('\t%s : %s' % (limb.pfrsName.get(), bhvFile))
+    #     bhv = Behavior_Manager.bhvs[bhvFile]
+    #     bhv.Teardown_Editable(limb)
     
     @staticmethod
     def Setup_Rig(rigRoot):
@@ -90,75 +99,96 @@ class Behavior_Manager:
         for limb in limbs:
             bhv = Behavior_Manager.bhvs[limb.bhvFile.get()]
             bhv.Setup_Rig_External(limb)
+            if pm.listConnections(limb.limbParent):
+                rigUtil.Setup_ControllersToParent(limb)
+            else:
+                rigUtil.Setup_ControllersGroup(limb)
         # CHANNEL BOX SETUP in pfrs???
         
     @staticmethod
     def Teardown_Rig(rigRoot):
         log.funcFileDebug()
         # delete Maya controls, rfk nodes
-        pm.delete(pm.ls(type='controller'))
-        pm.delete(pm.ls(type='multiplyDivide')) 
-        for limb in pm.listConnections(rigRoot.limbs):
+        limbs = pm.listConnections(rigRoot.limbs)
+        # Reset Controls
+        for limb in limbs:
             for group in pm.listConnections(limb.usedGroups):
                 control = pm.listConnections(group.control)[0]
                 rigUtil.ChannelBoxAttrs(control, 1, 1, 1, 0)
                 rigUtil.ResetAttrs(control)
-                if group.groupType.get() == 'Joint':
-                    joint = pm.listConnections(group.joint)[0]
-                    pm.parent(group, joint)
-                else:
-                    pm.parent(group, limb)
-        Behavior_Manager._DeleteChildConstraints(rigRoot)
+        pm.refresh()
+        # Teardown Rig
+        for limb in limbs:
+            bhv = Behavior_Manager.bhvs[limb.bhvFile.get()]
+            bhv.Teardown_Rig(limb)
+            rigUtil.Teardown_Controllers(limb)
           
 #============= UTIL ============================
 
     @staticmethod
-    def _DeleteChildConstraints(parent): # USE IN CST BHV!
-        toDelete = []
-        types = [   'ikHandle',
-                    'parentConstraint',
-                    'pointConstraint' ,
-                    'orientConstraint', 
-                    'scaleConstraint', 
-                    'aimConstraint']
-        for t in types:
-            toDelete += pm.listRelatives(parent, ad=1, type=t)
-        pm.delete(toDelete)
-        pm.refresh()
+    def _Teardown_GroupVisibility(limb): # USE IN CST BHV!
+        for group in pm.listConnections(limb.usedGroups):
+            group.v.set(0)
+
+    @staticmethod
+    def _Setup_GroupVisibility(limb): # USE IN CST BHV!
+        for group in pm.listConnections(limb.usedGroups):
+            group.v.set(1)
 
     @staticmethod
     def _GetDefaultBehaviorFile(limb):
         limbType = limb.limbType.get()
-        bhvOptions = {} # orderIndex : [bhvFile1, bhvFile2...]
-        for bhvFile, bhv in Behavior_Manager.bhvs.items():
+        orderedFiles = {}
+        for bhvFiles in list(Behavior_Manager.bhvFiles.values()):
+            bhvFile = bhvFiles[-1]
+            bhv = Behavior_Manager.bhvs[bhvFile]
+            orderIndex = bhv.orderIndex
+            if orderIndex in orderedFiles:
+                msg = 'All behavior orderIndex values must be unique!'
+                msg = '\n"%s" is conflicting.' % bhv.bhvName
+                raise ValueError(msg)
             if limbType in bhv.validLimbTypes:
-                if bhv.orderIndex not in bhvOptions:
-                    bhvOptions[bhv.orderIndex] = []
-                bhvOptions[bhv.orderIndex].append(bhvFile)
-        index = sorted(list(bhvOptions.keys()))[0]
-        bhvFile = bhvOptions[index][-1]
-        return bhvFile
+                orderedFiles[orderIndex] = bhvFile
+        index = sorted(list(orderedFiles.keys()))[0]
+        return orderedFiles[index]
 
     @staticmethod
-    def _SetupLimbGroups(limb, groupName, groupCount):
+    def _InitRigRootBhv(rigRoot, behavior):
         log.funcFileDebug()
+        if not behavior.groupCount:
+            return
+        attr = behavior.groupType + 'Shape'
+        if rigRoot.hasAttr(attr):
+            return
+        groupShape = behavior.groupShape
+        pm.addAttr(rigRoot, ln=attr, dt='string', h=genData.HIDE_ATTRS)
+        tempParent = pm.listConnections(rigRoot.controlTemplates)[0]
+        for ctr in pm.listRelatives(tempParent, c=1):
+            if groupShape in ctr.shortName():
+                pm.connectAttr(ctr.rigRoot, rigRoot + '.' + attr)
+                return
+
+    @staticmethod
+    def _SetupLimbGroups(rigRoot, limb, behavior):
+        log.funcFileDebug()
+        groupType = behavior.groupType
+        groupCount = behavior.groupCount
         pm.disconnectAttr(limb.usedGroups)
-        rigRoot = pm.listConnections(limb.rigRoot)[0]
         limbGroups = pm.listConnections(limb.limbGroups)
-        limbGroupDict = {} # groupName : Group
+        limbGroupDict = {} # groupType : Group
         for group in limbGroups:
             name = group.groupType.get()
             if name not in limbGroupDict:
                 limbGroupDict[name] = []
             limbGroupDict[name].append(group)
-        if groupName not in limbGroupDict:
-            limbGroupDict[groupName] = []
-        toCreate = max(groupCount - len(limbGroupDict[groupName]), 0)
+        if groupType not in limbGroupDict:
+            limbGroupDict[groupType] = []
+        toCreate = max(groupCount - len(limbGroupDict[groupType]), 0)
         for i in range(toCreate):
-            group = grp.Group.AddLimbGroup(rigRoot, i, groupName, limb)
-            limbGroupDict[groupName].append(group)
+            group = grp.Group.AddLimbGroup(rigRoot, i, groupType, limb)
+            limbGroupDict[groupType].append(group)
         for i in range(groupCount):
-            group = limbGroupDict[groupName][i]
+            group = limbGroupDict[groupType][i]
             pm.connectAttr(limb.usedGroups, group.used)
             genUtil.Name.UpdateLimbGroupName(rigRoot, limb, group)
 

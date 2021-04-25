@@ -88,7 +88,6 @@ class LimbSetup(absOp.Abstract_Operation):
         genUtil.Name.UpdateLimbName(rigRoot, sourceLimb)
         genUtil.Name.UpdateLimbName(rigRoot, mirrorLimb)
 
-
 #============= JOINTS ============================
 
     def JointTool(self):
@@ -125,7 +124,7 @@ class LimbSetup(absOp.Abstract_Operation):
 
     def _InitBehavior(self, limb):
         bhv.Behavior_Manager.InitLimb(limb)
-        bhv.Behavior_Manager.Setup_Editable(limb)
+        # bhv.Behavior_Manager.Setup_Editable(limb)
 
     def _LimbNamesCount(self, rigRoot, limbName):
         limbs = pm.listConnections(rigRoot.limbs)
@@ -189,11 +188,15 @@ class LimbSetup(absOp.Abstract_Operation):
                     joint.pfrsName.set(newName + indexStr)
         sourceLimb.pfrsName.set(newName)
         genUtil.Name.UpdateLimbName(rigRoot, sourceLimb)
+        for childLimb in pm.listConnections(sourceLimb.limbChildren):
+            self._UpdateParentControlEnum(childLimb)
         return True
     
     def _RenameJoint(self, rigRoot, limb, joint, newName):
         joint.pfrsName.set(newName)
         genUtil.Name.UpdateJointName(rigRoot, limb, joint)
+        for childLimb in pm.listConnections(limb.limbChildren):
+            self._UpdateParentControlEnum(childLimb)
 
     def _AreJointsDisconnected(self, joints):
         log.funcFileDebug()
@@ -322,10 +325,9 @@ class LimbSetup(absOp.Abstract_Operation):
 
 #============= AUTOBUILD ============================
 
-    def AutoBuildByHierarchy(self):
+    def AutoBuildByHierarchy(self, rigRoot):
         log.funcFileInfo()
         # Build Joint Parent Dictionary
-        rigRoot = rrt.RigRoot.GetAll()[0]
         jointParents = {}   # childJoint : parentJoint
         for joint in pm.ls(type='joint'):
             parent = pm.listRelatives(joint, parent=1)
@@ -388,7 +390,7 @@ class LimbSetup(absOp.Abstract_Operation):
             self._InitBehavior(limb)
         self._LoadSkeletalHierarchy(rigRoot)
     
-    def AutoBuildByName(self):
+    def AutoBuildByName(self, rigRoot):
         log.funcFileInfo()
         # GROUP JOINTS AND VALIDATE NAMES
         freeJoints = []
@@ -444,7 +446,6 @@ class LimbSetup(absOp.Abstract_Operation):
             return
 
         # ADD LIMBS
-        rigRoot = rrt.RigRoot.GetAll()[0]
         for indexName, joints in newLimbs.items():
             tempJoint = joints[0]
             limbName, side, j = tempJoint.shortName().split('_')
@@ -485,9 +486,21 @@ class LimbSetup(absOp.Abstract_Operation):
         pm.disconnectAttr(childLimb.limbParent)
         if parentLimb:
             pm.connectAttr(parentLimb.limbChildren, childLimb.limbParent)
-        self._UpdateParentControl(childLimb)
+        self._UpdateParentControlEnum(childLimb)
+        self._UpdateParentControlIndex(childLimb)
     
-    def _UpdateParentControl(self, childLimb):
+    def _UpdateParentControlEnum(self, childLimb):
+        log.funcFileDebug()
+        parentGroups = rigUtil.GetParentableGroupsOfParent(childLimb)
+        if not parentGroups:
+            pm.addAttr(childLimb.limbParentControl, e=1, en='None', dv=0)
+            return
+        parentControls = [pm.listConnections(g.control)[0] for g in parentGroups]
+        parentControlNames = [c.shortName() for c in parentControls]
+        namesStr = ':'.join(parentControlNames)
+        pm.addAttr(childLimb.limbParentControl, e=1, en=namesStr)
+
+    def _UpdateParentControlIndex(self, childLimb):
         log.funcFileDebug()
         parentGroups = rigUtil.GetParentableGroupsOfParent(childLimb)
         if not parentGroups:

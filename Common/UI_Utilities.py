@@ -11,20 +11,20 @@ reload(rrt)
 
 # enable = for mult rigs
 # pm.treeView(widget, e=1, removeAll=1) # call in parent ui
-def PopulateLimbHier(widget, curRigRoot): 
+def PopulateLimbHier(widget, currentRigRoot, allRigRoots): 
     pm.treeView(widget, e=1, removeAll=1)
     limbIDs = {}
     rootLimbs = []
-    for root in rrt.RigRoot.GetAll():
-        for limb in pm.listConnections(root.limbs):
+    for rigRoot in allRigRoots:
+        for limb in pm.listConnections(rigRoot.limbs):
             if not pm.listConnections(limb.limbParent):
                 rootLimbs.append(limb)
     for rootLimb in rootLimbs[::-1]:
         for limb in rigUtil.GetLimbCreationOrder(rootLimb):
-            root = pm.listConnections(limb.rigRoot)[0]
-            rootID = root.ID.get()
-            prefix = root.prefix.get()
-            limbID = '%d_%d' % (rootID, limb.ID.get())
+            rigRoot = pm.listConnections(limb.rigRoot)[0]
+            rigRootID = rigRoot.ID.get()
+            prefix = rigRoot.prefix.get()
+            limbID = '%d_%d' % (rigRootID, limb.ID.get())
             limbIDs[limbID] = limb
             name = '%s_%s' % (prefix, limb.pfrsName.get())
             parent = pm.listConnections(limb.limbParent)
@@ -32,12 +32,12 @@ def PopulateLimbHier(widget, curRigRoot):
             if parent:
                 parent = parent[0]
                 parentRoot = pm.listConnections(parent.rigRoot)[0]
-                parentRootID = parentRoot.ID.get()
-                parentID = '%d_%d' % (parentRootID, parent.ID.get())
-            if root.rigMode.get() == 0: # Setup Rig
+                parentrigRootID = parentRoot.ID.get()
+                parentID = '%d_%d' % (parentrigRootID, parent.ID.get())
+            if rigRoot.rigMode.get() == 0: # Setup Rig
                 enable = limb.enableLimb.get()
-            elif root.rigMode.get() == 1: # Animate Rig
-                enable = (root == curRigRoot)
+            elif rigRoot.rigMode.get() == 1: # Animate Rig
+                enable = (rigRoot == currentRigRoot)
             pm.treeView(widget, e=1, ai=(limbID, parentID))
             pm.treeView(widget, e=1, enl=(limbID, enable))
             pm.treeView(widget, e=1, dl=(limbID, name))
@@ -64,8 +64,6 @@ def PopulateControlHier(widget, limb):
         name = control.shortName()
         pm.treeView(widget, e=1, addItem=(str(i), ''))
         pm.treeView(widget, e=1, displayLabel=(str(i), name))
-        enable = group.enableGroup.get()
-        pm.treeView(widget, e=1, enl=(str(i), enable))
     return groups
 
 def PopluateJointHier(widget, limb):

@@ -97,18 +97,19 @@ class Name:
     @staticmethod
     def _UpdateGroupName(rigRoot, limb, pfrsName, group):
         groupType = group.groupType.get()
+        index = group.groupIndex.get()
         groupName = Name.GetName(rigRoot,
                                 pfrsName,
                                 groupType,
                                 rigData.LIMB_SIDES[limb.side.get()],
-                                'GRP')
+                                'GRP' + str(index))
         group.rename(groupName)
         control = pm.listConnections(group.control)[0]
         controlName = Name.GetName( rigRoot,
                                     pfrsName,
                                     groupType,
                                     rigData.LIMB_SIDES[limb.side.get()],
-                                    'CTR')
+                                    'CTR' + str(index))
         control.rename(controlName)
 
 

@@ -49,26 +49,18 @@ reload(debug_ui)
 class PayneFreeRigSuite_UI:
     def __init__(self):
         self.pfrs = pfrs.PayneFreeRigSuite()
-
-        # self.fileMng = self.pfrs.fileMng
-        # self.nameMng = self.pfrs.nameMng
-
-        # SKINNING
-        # self.skinMng = self.pfrs.skinMng
-
-        # self.catOps = {} # {categoryName : {fileName : classObj}}
+        
         self.operationNames = []
         self.operations = [] 
         self.currentOp = None
+        self._rigRoot = None
+        self._allRigRoots = []
 
         self._Setup()
         self.PopulateCategories()
         debug_ui.PFRS_Debug_UI(self)
+        self.InitRigRoots()
         self.InitOptionMenues()
-
-        # self.PopulateOperations()
-        # self.InitTab()
-        # self.Setup_Editable()
 
 
 #=========== SETUP ====================================
@@ -137,29 +129,27 @@ class PayneFreeRigSuite_UI:
                 pm.menuItem(l='Share...', en=0)
                 pm.menuItem(l='Open Log', c=self.pfrs.OpenLog)
 
-            with pm.menu('Store'):
-                pm.menuItem(l='Free Version', c=self.OpenWebsite)
-                pm.menuItem(l='Personal Version', en=0)
-                pm.menuItem(l='Professional Version', en=0)
+            # ADD BACK LATER
+            # with pm.menu('Store'):
+            #     pm.menuItem(l='Free Version', c=self.OpenWebsite)
+            #     pm.menuItem(l='Personal Version', en=0)
+            #     pm.menuItem(l='Professional Version', en=0)
             
 #=========== COMBOBOX SWITCHING ====================================
 
-    # def TESTING(self, ignore):
-    #     log.funcFileDebug()
-    #     import SceneData.Limb
-    #     reload(SceneData.Limb)
-    #     import SceneData.RigRoot
-    #     reload(SceneData.RigRoot)
-    #     rigRoot = SceneData.RigRoot.RigRoot.GetAll()[0]
-    #     SceneData.Limb.Limb.AddEmpty(rigRoot)
-        # from SceneData.RigRoot import RigRoot
-        # RigRoot.Add()
-        
+    def InitRigRoots(self):
+        rigRoots = self.pfrs.GetRigRoots()
+        if rigRoots:
+            self._rigRoot = rigRoots[0]
+            self._allRigRoots = rigRoots
+        else:
+            self._rigRoot = self.pfrs.AddRigRoot()
+            self._allRigRoots = [self._rigRoot]
+
     def InitOptionMenues(self):
         log.funcFileDebug()
-        rigRoot = rrt.RigRoot.GetAll()[0]
-        category = rigRoot.mainTab.get()
-        operationName = rigRoot.subTab.get()
+        category = self._rigRoot.mainTab.get()
+        operationName = self._rigRoot.subTab.get()
         index = self.pfrs.categories.index(category) + 1
         pm.optionMenu(self.cat_op, e=1, sl=index)
         self.PopulateOperations(category)
@@ -177,10 +167,11 @@ class PayneFreeRigSuite_UI:
         index = self.operationNames.index(operationName)
         self.currentOp = self.operations[index]
 
-        self.currentOp.operation.Setup()
+        self.currentOp.operation.Setup(self._allRigRoots)
         with pm.frameLayout(p=self.win, lv=0) as self.frame:
             with pm.horizontalLayout():
-                self.currentOp.Setup_UI()
+                self.currentOp.Setup_UI(self._rigRoot, 
+                                        self._allRigRoots)
 
     def PopulateCategories(self):
         log.funcFileDebug()

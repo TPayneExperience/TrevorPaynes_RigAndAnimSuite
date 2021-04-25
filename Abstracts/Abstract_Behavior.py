@@ -14,11 +14,15 @@ class Abstract_Behavior:
         pass 
 
     @abstractproperty
-    def validLimbTypes(self):   # tuple int | 
+    def validLimbTypes(self):   # tuple int | (0, 1)
         pass 
 
     @abstractproperty
-    def groupName(self):        # str | 'IKPV', 'Empty'
+    def groupType(self):        # str | 'IKPV', 'Empty'
+        pass 
+
+    @abstractproperty
+    def groupShape(self):       # str | 'Circle_Wire', 'Cube_Poly'
         pass 
 
     @abstractproperty
@@ -40,23 +44,15 @@ class Abstract_Behavior:
         # LIMB GROUPS MUST BE CREATED BEFORE CALLING THIS
         # Add limb Attrs
         # Add Group Attrs
-        # Connect 'used' joint groups to limb.usedGroups
-            # limb groups auto-added/connected
-        pass
-    
-#============= EDITABLE ============================
-
-    @abstractmethod
-    def Setup_Editable(self, limb):
-        # Position / parent limb groups to joints
+        # POSITION Limb groups (NO PARENTING)
         pass
     
     @abstractmethod
-    def Teardown_Editable(self, limb):
-        # Reset limb groups
+    def CleanupLimb(self, limb):
+        # Remove lingering behavior specific stuff (EX - IK Spline curve)
         pass
     
-#============= RIG ============================
+#============= RIG (Requires Setup) ============================
 
     @abstractmethod
     def Setup_Rig_Internal(self, limb):
@@ -66,13 +62,42 @@ class Abstract_Behavior:
     def Setup_Rig_External(self, limb):
         pass
     
-#============= UI ============================
+    @abstractmethod
+    def Teardown_Rig(self, limb):
+        # Remove constraints
+        # Reparent groups to limbs/joints
+        pass
+    
+#============= BAKE (Requires Setup) ============================
 
     @abstractmethod
-    def Setup_LimbProperties_UI(self, limb):
+    def Setup_Bake(self, limb):
+        # Setup controls to recieve keys from joints
+        pass
+    
+    @abstractmethod
+    def Teardown_Bake(self, limb):
+        # Remove constraints
+        # Reparent groups to limbs/joints
+        pass
+    
+#============= EDITABLE UI ============================
+
+    @abstractmethod
+    def Setup_Editable_Limb_UI(self, limb):
         return False # return if UI is enabled
     
     @abstractmethod
-    def Setup_GroupProperties_UI(self, group):
+    def Setup_Editable_Group_UI(self, group):
+        pass
+    
+#============= ANIMATION UI ============================
+
+    @abstractmethod
+    def Setup_Animation_Limb_UI(self, limb):
+        return False # return if UI is enabled
+    
+    @abstractmethod
+    def Setup_Animation_Group_UI(self, group):
         pass
     

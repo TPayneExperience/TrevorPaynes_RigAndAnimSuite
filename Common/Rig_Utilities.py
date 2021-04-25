@@ -55,6 +55,17 @@ def GetParentableGroupsOfParent(childLimb):
     groups = pm.listConnections(parent.parentableGroups)
     return SortGroups(groups)
 
+def GetParentControl(childLimb):
+    parents = pm.listConnections(childLimb.limbParent)
+    if not parents:
+        return None
+    parent = parents[0]
+    parentGroups = pm.listConnections(parent.parentableGroups)
+    parentGroups = SortGroups(parentGroups)
+    index = childLimb.limbParentControl.get()
+    parentGroup = parentGroups[index]
+    return pm.listConnections(parentGroup.control)[0]
+
 def GetLimbCreationOrder(rootLimb):
     '''Returns ordered list of limbs: ROOT TO bottom most CHILD'''
     orderedLimbs = [rootLimb]
@@ -67,9 +78,34 @@ def GetLimbCreationOrder(rootLimb):
         orderedLimbs += children[:]
     return orderedLimbs
 
-#=========== MISC ====================================
+def GetLimbGroups(limb, groupType):
+    groups = {} # order index : group
+    for group in pm.listConnections(limb.limbGroups):
+        if group.groupType.get() == groupType:
+            groups[group.groupIndex.get()] = group
+    return [groups[i] for i in sorted(list(groups.keys()))]
 
+#=========== RIG SETUP ====================================
 
+def Setup_ControllersToParent(limb):
+    controls = []
+    for group in pm.listConnections(limb.usedGroups):
+        controls.append(pm.listConnections(group.control)[0])
+    parentLimb = pm.listConnections(limb.limbParent)[0]
+    usedParentGroup = pm.listConnections(parentLimb.usedGroups)[0]
+    usedParentControl = pm.listConnections(usedParentGroup.control)[0]
+    pm.controller(controls, usedParentControl, p=1)
+
+def Setup_ControllersGroup(limb):
+    controls = []
+    for group in pm.listConnections(limb.usedGroups):
+        controls.append(pm.listConnections(group.control)[0])
+    pm.controller(controls, g=1)
+
+def Teardown_Controllers(limb):
+    for group in pm.listConnections(limb.usedGroups):
+        controller = pm.listConnections(group.control)[0]
+        pm.delete(pm.listConnections(controller.message, type='controller'))
 
 # def GetSortedJoints(joints):
 #     temp = {} # LongName : joint

@@ -29,9 +29,10 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
         self._limbIDs = {} # limbID : limb
         self._selectedLimbs = []
 
-    def Setup_UI(self): # Return nothing, parent should cleanup
+    def Setup_UI(self, rigRoot, allRigRoots):  # Return nothing, parent should cleanup
         self._Setup()
-        self._rigRoot = rrt.RigRoot.GetAll()[0]
+        self._rigRoot = rigRoot
+        self._allRigRoots = allRigRoots
         self.PopulateLimbHier()
         
         self.PopulateSceneHier()
@@ -122,14 +123,14 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
 
     def AutoBuildByHierarchy(self, ignore):
         log.funcFileInfo()
-        self.operation.AutoBuildByHierarchy()
+        self.operation.AutoBuildByHierarchy(self._rigRoot)
         self.PopulateSceneHier()
         self.PopulateLimbHier()
         self.PopulateJointHier(None)
 
     def AutoBuildByName(self, ignore):
         log.funcFileInfo()
-        self.operation.AutoBuildByName()
+        self.operation.AutoBuildByName(self._rigRoot)
         self.PopulateSceneHier()
         self.PopulateLimbHier()
         self.PopulateJointHier(None)
@@ -178,7 +179,8 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
     def PopulateLimbHier(self, selectLimb=None):
         log.funcFileDebug()
         self._limbIDs = uiUtil.PopulateLimbHier(self.limb_tv, 
-                                                self._rigRoot)
+                                                self._rigRoot,
+                                                self._allRigRoots)
         if not selectLimb:
             return
         for limbID, limb in self._limbIDs.items():
@@ -202,6 +204,7 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
             self.PopulateJointHier(limb)
             if pm.listConnections(limb.mirrorLimb):
                 pm.menuItem(self.flipSides_mi, e=1, en=1)
+            pm.select(pm.listConnections(limb.joints))
         pm.menuItem(self.remove_mi, e=1, en=1)
 
     def AddJointLimb(self, ignore):
@@ -231,11 +234,16 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
     def RenameLimb(self, limbIDStr, newName):
         log.funcFileInfo()
         limb = self._limbIDs[limbIDStr]
+        prefix = self._rigRoot.prefix.get()
         oldName = limb.pfrsName.get()
+        comboOldName = '%s_%s' % (prefix, oldName)
+        if comboOldName == newName:
+            return '' 
         msg = '\t"%s" to "%s"' % (oldName, newName)
         log.info(msg)
         if self.operation.RenameLimb(limb, newName):
             self.PopulateLimbHier(limb)
+            self.PopulateJointHier(limb)
             self.PopulateSceneHier()
         return ''
 
@@ -283,6 +291,8 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
         log.funcFileInfo()
         joint = self._limbJoints[jointIDStr]
         oldName = joint.pfrsName.get()
+        if newName == oldName:
+            return ''
         msg = '\t"%s" to "%s"' % (oldName, newName)
         log.info(msg)
         if not genUtil.Name.IsValidCharacterLength(newName):

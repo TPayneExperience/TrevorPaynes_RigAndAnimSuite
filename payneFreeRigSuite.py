@@ -15,14 +15,19 @@ import Abstracts.Abstract_Operation as absOp
 reload(absOp)
 import Common.Logger as log
 reload(log)
-import SceneData.RigRoot as root
-reload(root)
+import SceneData.RigRoot as rrt
+reload(rrt)
 import SceneData.Behavior_Manager as bhv
 reload(bhv)
+import Data.Rig_Data as rigData
+reload(rigData)
+import Common.General_Utilities as genUtil
+reload(genUtil)
 
 class PayneFreeRigSuite:
     def __init__(self):
-        self.root = None
+        self.currentRigRoot = None
+        self.allRigRoots = []
         self._StartLogger()
 
         self.catOps = {} # {categoryName : {fileName : classObj}}
@@ -42,14 +47,21 @@ class PayneFreeRigSuite:
         log.funcFileInfo()
         log.OpenLog()
 
-    def InitScene(self):
+#=========== RIG ROOT ====================================
+
+    def GetRigRoots(self):
+        log.funcFileDebug()
+        return [r for r in pm.ls(tr=1) if r.hasAttr('limbs')]
+
+    def AddRigRoot(self):
+        rigRoot = rrt.RigRoot.Add()
+        self.UpdateRootName(rigRoot)
+        self.ReimportRigRootControlShapeTemplates(rigRoot)
+        self.InitSceneJoints(rigRoot)
+        return rigRoot
+
+    def InitSceneJoints(self, rigRoot):
         log.funcFileInfo()
-        rigRoot = root.RigRoot.GetAll()
-        if rigRoot:
-            rigRoot = rigRoot[0]
-        else:
-            rigRoot = root.RigRoot.Add()
-        # JOINTS
         jointGroup = pm.listConnections(rigRoot.jointsParentGroup)[0]
         joints = pm.ls(type='joint')
         for joint in joints:
@@ -57,23 +69,34 @@ class PayneFreeRigSuite:
             if not parent or pm.objectType(parent[0]) != 'joint':
                 pm.parent(joint, jointGroup)
     
-    # def Setup_Rig(self, rigRoot):
-    #     log.funcFileInfo()
-    #     bhv.Behavior_Manager.Setup_Rig(rigRoot)
+    def ReimportRigRootControlShapeTemplates(self, rigRoot):
+        log.funcFileDebug()
+        old = pm.listConnections(rigRoot.controlTemplates)
+        pm.delete(old)
 
-    # def Teardown_Rig(self, rigRoot):
-    #     log.funcFileInfo()
-    #     bhv.Behavior_Manager.Teardown_Rig(rigRoot)
+        folder = os.path.dirname(__file__)  # Scene Objects
+        folder = os.path.join(folder, 'Templates')
+        filePath = os.path.join(folder, 'Control_Shapes.ma')
+        nodes = pm.importFile(filePath, returnNewNodes=1)
+        ctrShapes = [n for n in nodes if pm.objectType(n) == 'transform']
+        ctrShapesParent = pm.group(ctrShapes, p=rigRoot,
+                                    name=rigData.CONTROL_TEMPLATE_GROUP)
+        ctrShapesParent.v.set(0)
+        pm.addAttr(ctrShapesParent, ln='rigRoot', dt='string')
+        pm.connectAttr(rigRoot.controlTemplates, ctrShapesParent.rigRoot)
+        for ctr in ctrShapes:
+            pm.addAttr(ctr, ln='rigRoot', dt='string')
+        for ctr in ctrShapes:
+            if 'Cube_Poly' in ctr.shortName():
+                attr = '.' + rigData.JOINT_SHAPE_ATTR
+                pm.connectAttr(ctr.rigRoot, rigRoot + attr)
+                break
 
-    # def Setup_Editable(self, rigRoot):
-    #     log.funcFileInfo()
-    #     for limb in pm.listConnections(rigRoot.limbs):
-    #         bhv.Behavior_Manager.Setup_Editable(limb)
-
-    # def Teardown_Editable(self, rigRoot):
-    #     log.funcFileInfo()
-    #     for limb in pm.listConnections(rigRoot.limbs):
-    #         bhv.Behavior_Manager.Teardown_Editable(limb)
+    def UpdateRootName(self, rigRoot):
+        log.funcFileDebug()
+        rigRoot.rename('%s_ROOT' % rigRoot.prefix.get())
+        for limb in pm.listConnections(rigRoot.limbs):
+            genUtil.Name.UpdateLimbName(rigRoot, limb)
 
 
 #=========== PRIVATE ====================================

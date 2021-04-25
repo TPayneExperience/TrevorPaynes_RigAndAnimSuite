@@ -31,18 +31,4 @@ class Control:
         log.funcFileDebug()
         pm.delete(control)
     
-    # @staticmethod
-    # def InitScene(rigRoot):
-    #     log.funcFileDebug()
-    #     group = None
-    #     Control._shapeTemplates = {}
-    #     Control._rigRoot = rigRoot
-    #     for child in pm.listRelatives(rigRoot, c=1):
-    #         if child.shortName() == rigData.CONTROL_TEMPLATE_GROUP:
-    #             group = child
-    #             break
-    #     for child in pm.listRelatives(group, c=1):
-    #         name = child.shortName()[8:]
-    #         Control._shapeTemplates[name] = child
-    
     

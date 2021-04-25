@@ -33,11 +33,10 @@ class InitLimb(absInit.Abstract_Initializer):
 
         # LIMB PARENTING
         pm.addAttr(limb, ln='limbParent', dt='string', h=hide)
-            #>>> TO IMPLEMENT!
-        pm.addAttr(limb, ln='parentableGroups', dt='string', h=hide)
+        pm.addAttr(limb, ln='limbChildren', dt='string', h=hide)
         pm.addAttr(limb, ln='limbParentControl', at='enum', en='None', 
                                         h=hide)
-        pm.addAttr(limb, ln='limbChildren', dt='string', h=hide)
+        pm.addAttr(limb, ln='parentableGroups', dt='string', h=hide)
         pm.addAttr(limb, ln='mirrorLimb', at='long', h=hide)
 
         # BEHAVIORS

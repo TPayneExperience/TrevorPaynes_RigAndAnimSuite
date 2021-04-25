@@ -38,28 +38,17 @@ class Abstract_Operation:
     def meshLayerState(self):       # tuple int | (0, 0)  # isVis, isRef
         pass
 
-    def Setup(self):
+    def Setup(self, allRigRoots):
         toBeBuilt = self.isRigBuilt
         # TEARDOWN
-        for rigRoot in rrt.RigRoot.GetAll():
+        for rigRoot in allRigRoots:
             if not toBeBuilt:
                 if rigRoot.isBuilt.get():
                     bhv.Behavior_Manager.Teardown_Rig(rigRoot)
-            if toBeBuilt:
-                if not rigRoot.isBuilt.get():
-                    for limb in pm.listConnections(rigRoot.limbs):
-                        bhv.Behavior_Manager.Teardown_Editable(limb)
-
-        # SETUP
-        for rigRoot in rrt.RigRoot.GetAll():
-            if toBeBuilt:
+            else:
                 if not rigRoot.isBuilt.get():
                     bhv.Behavior_Manager.Setup_Rig(rigRoot)
-            if not toBeBuilt:
-                if rigRoot.isBuilt.get():
-                    for limb in pm.listConnections(rigRoot.limbs):
-                        bhv.Behavior_Manager.Setup_Editable(limb)
-        rigRoot.isBuilt.set(toBeBuilt)
+            rigRoot.isBuilt.set(toBeBuilt)
         
         # LAYERS
         c = self.controlLayerState

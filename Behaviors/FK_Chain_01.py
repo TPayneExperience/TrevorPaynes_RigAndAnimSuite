@@ -12,23 +12,18 @@ reload(log)
 class FK_Chain_01(absBhv.Abstract_Behavior):
     bhvName = 'FK Chain'
     validLimbTypes = (3, 4) # rigData.LIMB_TYPES
-    groupName = ''        # LookAt, IKPV...
+    groupType = ''        # LookAt, IKPV...
+    groupShape = ''
     groupCount = 0
     groupMoveable = True   # for moving control pivots
-    orderIndex = 100  
+    orderIndex = 210  
     
     def InitLimb(self, limb):
         log.funcFileDebug()
-        for joint in pm.listConnections(limb.joints):
-            group = pm.listConnections(joint.group)[0]
+        for group in pm.listConnections(limb.parentableGroups):
             pm.connectAttr(limb.usedGroups, group.used)
     
-#============= EDITABLE ============================
-
-    def Setup_Editable(self, limb):
-        log.funcFileDebug()
-    
-    def Teardown_Editable(self, limb):
+    def CleanupLimb(self, limb):
         log.funcFileDebug()
     
 #============= RIG ============================
@@ -40,36 +35,74 @@ class FK_Chain_01(absBhv.Abstract_Behavior):
         pm.parent(groups[0], limb)
         for i in range(len(groups)-1):
             group = groups[i+1]
-            if not group.enableGroup.get():
-                continue
             parentCtr = pm.listConnections(groups[i].control)[0]
             pm.parent(group, parentCtr)
+        for group in groups:
             joint = pm.listConnections(group.joint)[0]
             control = pm.listConnections(group.control)[0]
             pm.parentConstraint(control, joint, mo=1)
     
     def Setup_Rig_External(self, limb):
         log.funcFileDebug()
-        parentGroups = rigUtil.GetParentableGroupsOfParent(limb)
-        if not parentGroups:
+        parentControl = rigUtil.GetParentControl(limb)
+        if not parentControl:
             return
-        index = limb.limbParentControl.get()
-        parentGroup = parentGroups[index]
-        parentControl = pm.listConnections(parentGroup.control)[0]
+        groups = pm.listConnections(limb.usedGroups)
+        group = rigUtil.SortGroups(groups)[0]
+        pm.parentConstraint(parentControl, group, mo=1)
+    
+    def Teardown_Rig(self, limb):
+        log.funcFileDebug()
+        jointGroups = pm.listConnections(limb.usedGroups)
+        jointGroups = rigUtil.SortGroups(jointGroups)
+        joints = [pm.listConnections(g.joint)[0] for g in jointGroups]
+        constraints = [pm.listConnections(j.rx)[0] for j in joints]
+        pm.delete(constraints)
+        pm.delete(pm.listConnections(jointGroups[0].rx))
+
+        for group, joint in zip(jointGroups, joints):
+            pm.parent(group, joint)
+
+#============= BAKE (Requires Setup) ============================
+
+    def Setup_Bake(self, limb):
+        log.funcFileDebug()
         groups = pm.listConnections(limb.usedGroups)
         groups = rigUtil.SortGroups(groups)
-        pm.parentConstraint(parentControl, groups[0], mo=1)
-        controls = []
+        pm.parent(groups[0], limb)
+        # Build hierarchy
+        for i in range(len(groups)-1):
+            group = groups[i+1]
+            parentCtr = pm.listConnections(groups[i].control)[0]
+            pm.parent(group, parentCtr)
+        # Constrain controls to joints
         for group in groups:
-            controls.append(pm.listConnections(group.control)[0])
-        pm.controller(controls, parentControl, p=1)
+            joint = pm.listConnections(group.joint)[0]
+            control = pm.listConnections(group.control)[0]
+            pm.orientConstraint(joint, control, mo=1)
     
-#============= UI ============================
+    def Teardown_Bake(self, limb):
+        log.funcFileDebug()
+        for group in pm.listConnections(limb.usedGroups):
+            joint = pm.listConnections(group.joint)[0]
+            control = pm.listConnections(group.control)[0]
+            pm.delete(pm.listConnections(control.rx))
+            pm.parent(group, joint)
+    
+#============= EDITABLE UI ============================
 
-    def Setup_LimbProperties_UI(self, limb):
+    def Setup_Editable_Limb_UI(self, limb):
         log.funcFileDebug()
         return False
     
-    def Setup_GroupProperties_UI(self, group):
+    def Setup_Editable_Group_UI(self, group):
         log.funcFileDebug()
+    
+#============= ANIMATION UI ============================
+
+    def Setup_Animation_Limb_UI(self, limb):
+        return False 
+    
+    def Setup_Animation_Group_UI(self, group):
+        pass
     

@@ -24,10 +24,10 @@ class PFRS_Debug:
         print ('>>>>>>>>>>>>>> AUTO DEBUG ON <<<<<<<<<<<<<')
 
         # self.AnimPosesTest()
-        self.SimpleChainTest()
+        # self.SimpleChainTest()
         # self.LimbTypesTest()
         # self.LegTest()
-        # self.ArmTest()
+        self.ArmTest()
         # self.SpineTest()
         # self.SkeletonTest()
 
@@ -46,11 +46,12 @@ class PFRS_Debug:
     def SimpleChainTest(self):
         self.NewScene()
         path = os.path.join(self.folder, 'TEST_SimpleChain_01.ma')
+        rigRoot = self.pfrs.AddRigRoot()
+        rigRoot.subTab.set('Behavior')
         pm.importFile(path)
-        self.pfrs.InitScene()
-        self.pfrs.LimbSetup.AutoBuildByHierarchy()
-        rigRoot = rrt.RigRoot.GetAll()[0]
-        rigRoot.subTab.set('Appearance')
+        self.pfrs.InitSceneJoints(rigRoot)
+        self.pfrs.LimbSetup.AutoBuildByHierarchy(rigRoot)
+        # rigRoot.subTab.set('Appearance')
         # self.parent.UpdateEnableUI()
         # self.parent.Setup_Editable()
         # pm.tabLayout(self.parent.rig_ui.tab, e=1, sti=2) # Select Limb setup tab
@@ -83,15 +84,10 @@ class PFRS_Debug:
         self.NewScene()
         path = os.path.join(self.folder, 'TEST_ArmFingers_01.ma')
         pm.importFile(path)
-        self.pfrs.InitScene()
-        self.pfrs.LimbSetup.AutoBuildByHierarchy()
-        rigRoot = rrt.RigRoot.GetAll()[0]
+        rigRoot = self.pfrs.AddRigRoot()
         rigRoot.subTab.set('Behavior')
-        # self.parent.UpdateEnableUI()
-        # self.parent.Setup_Editable()
-        # pm.tabLayout(self.parent.rig_ui.tab, e=1, sti=2) 
-        # self.rigLS.AutoBuildByName()
-        # pm.tabLayout(self.parent.rig_ui.tab, e=1, sti=3)
+        # self.pfrs.LimbSetup.AutoBuildByHierarchy(rigRoot)
+        self.pfrs.LimbSetup.AutoBuildByName(rigRoot)
         
     def SpineTest(self):
         self.NewScene()

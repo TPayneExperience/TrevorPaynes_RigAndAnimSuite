@@ -60,8 +60,8 @@ class Animation_UI:
         self.logger.debug('\tAnimation_UI > Setup_SubTab')
         newIndex = pm.tabLayout(self.tab, q=1, selectTabIndex=1)-1
         self.pfrs.root.animationTab.set(newIndex)
-        if (newIndex == 0):
-            self.poses_ui.Setup_Editable()
+        # if (newIndex == 0):
+        #     self.poses_ui.Setup_Editable()
         
 
     def Teardown_Editable(self):
