@@ -87,10 +87,6 @@ class Abstract_Behavior:
     def Setup_Editable_Limb_UI(self, limb):
         return False # return if UI is enabled
     
-    @abstractmethod
-    def Setup_Editable_Group_UI(self, group):
-        pass
-    
 #============= ANIMATION UI ============================
 
     @abstractmethod

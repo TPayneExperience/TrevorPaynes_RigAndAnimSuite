@@ -87,9 +87,6 @@ class LookAt_01(absBhv.Abstract_Behavior):
                             cc=pm.Callback(self._UpdateControl, limb))
         return True
     
-    def Setup_Editable_Group_UI(self, group):
-        log.funcFileDebug()
-    
 #============= ANIMATION UI ============================
 
     def Setup_Animation_Limb_UI(self, limb):

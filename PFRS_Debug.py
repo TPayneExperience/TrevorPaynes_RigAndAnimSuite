@@ -23,12 +23,12 @@ class PFRS_Debug:
             return
         print ('>>>>>>>>>>>>>> AUTO DEBUG ON <<<<<<<<<<<<<')
 
-        # self.AnimPosesTest()
         # self.SimpleChainTest()
-        # self.LimbTypesTest()
+        # self.ArmTest()
         # self.LegTest()
-        self.ArmTest()
-        # self.SpineTest()
+        self.SpineTest()
+        # self.AnimPosesTest()
+        # self.LimbTypesTest()
         # self.SkeletonTest()
 
 # ================= TESTS =============================
@@ -38,11 +38,6 @@ class PFRS_Debug:
         pm.newFile(f=1)
         pm.flushUndo()
 
-    def AnimPosesTest(self):
-        self.NewScene()
-        path = os.path.join(self.folder, 'PFX_AnimRig.ma')
-        pm.openFile(path, f=1)
-
     def SimpleChainTest(self):
         self.NewScene()
         path = os.path.join(self.folder, 'TEST_SimpleChain_01.ma')
@@ -51,34 +46,6 @@ class PFRS_Debug:
         pm.importFile(path)
         self.pfrs.InitSceneJoints(rigRoot)
         self.pfrs.LimbSetup.AutoBuildByHierarchy(rigRoot)
-        # rigRoot.subTab.set('Appearance')
-        # self.parent.UpdateEnableUI()
-        # self.parent.Setup_Editable()
-        # pm.tabLayout(self.parent.rig_ui.tab, e=1, sti=2) # Select Limb setup tab
-        # self.rigLS.AutoBuildByHierarchy()
-        # self.rigLS.AutoBuildByName()
-        # pm.tabLayout(self.parent.rig_ui.tab, e=1, sti=3)
-        # pm.tabLayout(self.parent.tab, e=1, sti=3)
-
-    def LimbTypesTest(self):
-        self.NewScene()
-        path = os.path.join(self.folder, 'TEST_LimbTypes_01.ma')
-        pm.importFile(path)
-        # self.parent.UpdateEnableUI()
-        # self.parent.Setup_Editable()
-        # pm.tabLayout(self.parent.rig_ui.tab, e=1, sti=2) # Select Limb setup tab
-        # self.rigLS.AutoBuildByName()
-        # pm.tabLayout(self.parent.rig_ui.tab, e=1, sti=3) # Select Limb setup tab
-
-    def LegTest(self):
-        self.NewScene()
-        path = os.path.join(self.folder, 'TEST_LegFoot_01.ma')
-        pm.importFile(path)
-        # self.parent.UpdateEnableUI()
-        # self.parent.Setup_Editable()
-        # pm.tabLayout(self.parent.rig_ui.tab, e=1, sti=2) # LS
-        # self.rigLS.AutoBuildByName()
-        # pm.tabLayout(self.parent.rig_ui.tab, e=1, sti=3) # BHV
 
     def ArmTest(self):
         self.NewScene()
@@ -89,20 +56,37 @@ class PFRS_Debug:
         # self.pfrs.LimbSetup.AutoBuildByHierarchy(rigRoot)
         self.pfrs.LimbSetup.AutoBuildByName(rigRoot)
         
+    def LegTest(self):
+        self.NewScene()
+        path = os.path.join(self.folder, 'TEST_LegFoot_01.ma')
+        pm.importFile(path)
+        rigRoot = self.pfrs.AddRigRoot()
+        rigRoot.subTab.set('Behavior')
+        # self.pfrs.LimbSetup.AutoBuildByHierarchy(rigRoot)
+        self.pfrs.LimbSetup.AutoBuildByName(rigRoot)
+
     def SpineTest(self):
         self.NewScene()
         path = os.path.join(self.folder, 'TEST_Spine_01.ma')
         pm.importFile(path)
+        rigRoot = self.pfrs.AddRigRoot()
+        rigRoot.subTab.set('Behavior')
+        # self.pfrs.LimbSetup.AutoBuildByHierarchy(rigRoot)
+        self.pfrs.LimbSetup.AutoBuildByName(rigRoot)
+        
+    def AnimPosesTest(self):
+        self.NewScene()
+        path = os.path.join(self.folder, 'PFX_AnimRig.ma')
+        pm.openFile(path, f=1)
+
+    def LimbTypesTest(self):
+        self.NewScene()
+        path = os.path.join(self.folder, 'TEST_LimbTypes_01.ma')
+        pm.importFile(path)
         # self.parent.UpdateEnableUI()
         # self.parent.Setup_Editable()
-        # pm.tabLayout(self.parent.rig_ui.tab, e=1, sti=2)
+        # pm.tabLayout(self.parent.rig_ui.tab, e=1, sti=2) # Select Limb setup tab
         # self.rigLS.AutoBuildByName()
-        # pm.tabLayout(self.parent.rig_ui.tab, e=1, sti=3)
-        # spine = pm.ls('PFX_Spine_Limb_M_NODE', tr=1)[0]
-        # self.limbMng.SetBhvType(spine, 10) # Relative FK
-        # # root = pm.ls('PFX_Root_Limb_M_NODE', tr=1)[0]
-        # # self.parent.limbMng.Reparent(spine, -1)
-        # # self.parent.limbMng.Reparent(root, spine)
         # pm.tabLayout(self.parent.rig_ui.tab, e=1, sti=3) # Select Limb setup tab
 
     def SkeletonTest(self):

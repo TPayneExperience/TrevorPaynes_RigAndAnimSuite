@@ -69,7 +69,8 @@ class IK_Spline_01(absBhv.Abstract_Behavior):
         temp = pm.ikHandle(sj=joints[0], ee=joints[-1], c=curve, ccv=0, 
                                                     sol='ikSplineSolver')
         handle = temp[0]
-        pm.parent(handle, limb)
+        handle.v.set(0)
+        pm.parent(handle, curve, limb)
         # Setup Control clusters
         for i in range(4):
             control = pm.listConnections(limbGroups[i].control)[0]
@@ -96,13 +97,23 @@ class IK_Spline_01(absBhv.Abstract_Behavior):
         jointGroups = pm.listConnections(limb.parentableGroups)
         jointGroups = rigUtil.SortGroups(jointGroups)
         joints = [pm.listConnections(g.joint)[0] for g in jointGroups]
-        handle = pm.listConnections(joints[0].message)[0]
+
+        # Delete IK Handle
+        handle = pm.listRelatives(limb, c=1, type='ikHandle')
         pm.delete(handle)
+
+        # Delete Joint Constraints
         pm.delete(pm.listConnections(joints[-1].rx)) # orientCst
         constraints = [pm.listConnections(g.rx)[0] for g in jointGroups]
         pm.delete(constraints) # parentCsts
+
+        # Delete Limb Group Constraints
         limbGroups = pm.listConnections(limb.usedGroups)
         limbGroups = rigUtil.SortGroups(limbGroups)
+        constraints = [pm.listConnections(g.rx)[0] for g in limbGroups]
+        pm.delete(constraints) # parentCsts
+
+        # Delete Clusters
         toDelete = []
         for limbGroup in limbGroups:
             control = pm.listConnections(limbGroup.control)[0]
@@ -126,9 +137,6 @@ class IK_Spline_01(absBhv.Abstract_Behavior):
     def Setup_Editable_Limb_UI(self, limb):
         log.funcFileDebug()
         return False
-    
-    def Setup_Editable_Group_UI(self, group):
-        log.funcFileDebug()
     
 #============= ANIMATION UI ============================
 

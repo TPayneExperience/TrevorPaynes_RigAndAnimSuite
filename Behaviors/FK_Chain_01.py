@@ -5,6 +5,8 @@ import Abstracts.Abstract_Behavior as absBhv
 reload(absBhv)
 import Common.Rig_Utilities as rigUtil
 reload(rigUtil)
+import Data.General_Data as genData
+reload(genData)
 
 import Common.Logger as log
 reload(log)
@@ -20,7 +22,14 @@ class FK_Chain_01(absBhv.Abstract_Behavior):
     
     def InitLimb(self, limb):
         log.funcFileDebug()
-        for group in pm.listConnections(limb.parentableGroups):
+        if not limb.hasAttr('enableEndControl'):
+            pm.addAttr(limb, ln='enableEndControl', at='bool', 
+                                    dv=1, h=genData.HIDE_ATTRS)
+        groups = pm.listConnections(limb.parentableGroups)
+        groups = rigUtil.SortGroups(groups)
+        if not limb.enableEndControl.get():
+            groups = groups[:-1]
+        for group in groups:
             pm.connectAttr(limb.usedGroups, group.used)
     
     def CleanupLimb(self, limb):
@@ -93,10 +102,22 @@ class FK_Chain_01(absBhv.Abstract_Behavior):
 
     def Setup_Editable_Limb_UI(self, limb):
         log.funcFileDebug()
-        return False
+        with pm.columnLayout(co=('left', -100)):
+            pm.attrControlGrp(l='Enable End Control',
+                                a=limb.enableEndControl,
+                        cc=pm.Callback(self._SetEnableEndControl, limb))
+        return True
     
-    def Setup_Editable_Group_UI(self, group):
+    def _SetEnableEndControl(self, limb):
         log.funcFileDebug()
+        isEnabled = limb.enableEndControl.get()
+        groups = pm.listConnections(limb.parentableGroups)
+        group = rigUtil.SortGroups(groups)[-1]
+        group.v.set(isEnabled)
+        if isEnabled:
+            pm.connectAttr(limb.usedGroups, group.used)
+        else:
+            pm.disconnectAttr(group.used)
     
 #============= ANIMATION UI ============================
 

@@ -121,6 +121,7 @@ class Behavior_UI(absOpUI.Abstract_OperationUI):
         if len(self._selectedLimbs) == 1:
             pm.menuItem(self._addEmpty_mi, e=1, en=1)
             limb = self._selectedLimbs[0]
+            pm.select(pm.listConnections(limb.usedGroups))
             self.PopulateLimbProperties(limb)
             self.PopulateControlHier(limb)
             self.PopulateBhvProperties(limb)
@@ -267,7 +268,7 @@ class Behavior_UI(absOpUI.Abstract_OperationUI):
         self.PopulateBehaviorsOptionMenu(limb)
         pm.attrControlGrp(  self.enableLimb_cg, e=1, 
                                 a=limb.enableLimb,
-                                cc=pm.Callback(self.SetEnableLimb, 1))
+                                cc=pm.Callback(self.SetEnableLimb))
         pm.deleteUI(self.grpParent_at)
         self.grpParent_at = pm.attrEnumOptionMenu(  self.grpParent_at, 
                                                     l='Parent Control', 
@@ -275,7 +276,7 @@ class Behavior_UI(absOpUI.Abstract_OperationUI):
                                                     at=limb.limbParentControl,
                                                     cc=self.LogGroupParent)
 
-    def SetEnableLimb(self, ignore):
+    def SetEnableLimb(self):
         limb = self._selectedLimbs[0]
         root = pm.listConnections(limb.rigRoot)[0]
         enable = limb.enableLimb.get()

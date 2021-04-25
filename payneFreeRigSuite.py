@@ -98,7 +98,6 @@ class PayneFreeRigSuite:
         for limb in pm.listConnections(rigRoot.limbs):
             genUtil.Name.UpdateLimbName(rigRoot, limb)
 
-
 #=========== PRIVATE ====================================
 
     def _InitOperations(self):
@@ -162,7 +161,6 @@ class PayneFreeRigSuite:
         endTxt += '='*40
         endTxt += '\n\n'
         log.info(endTxt)
-
 
 # #============= SCENE ============================
 

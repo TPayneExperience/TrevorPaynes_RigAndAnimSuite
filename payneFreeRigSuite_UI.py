@@ -83,7 +83,8 @@ class PayneFreeRigSuite_UI:
                 #     pm.button(l='TESTING', c=self.TESTING)
             # self.layout = pm.horizontalLayout(p=self.win)
             # pm.text('asdf')
-            self.frame = pm.frameLayout(bv=0, lv=0)
+            with pm.frameLayout(bv=0, lv=0) as self.frame:
+                pm.text(l='Loading...', en=0)
                 
         pm.window(self.win, e=1, cc=self.closeEvent)
         self._Setup_MenuBar()
@@ -166,7 +167,7 @@ class PayneFreeRigSuite_UI:
         pm.deleteUI(self.frame)
         index = self.operationNames.index(operationName)
         self.currentOp = self.operations[index]
-
+        self._allRigRoots = self.pfrs.GetRigRoots()
         self.currentOp.operation.Setup(self._allRigRoots)
         with pm.frameLayout(p=self.win, lv=0) as self.frame:
             with pm.horizontalLayout():

@@ -99,9 +99,6 @@ class FK_Relative_01(absBhv.Abstract_Behavior):
         log.funcFileDebug()
         return False
     
-    def Setup_Editable_Group_UI(self, group):
-        log.funcFileDebug()
-    
 #============= ANIMATION UI ============================
 
     def Setup_Animation_Limb_UI(self, limb):

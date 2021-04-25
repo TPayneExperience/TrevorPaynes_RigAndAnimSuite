@@ -88,11 +88,23 @@ class IK_PoleVector_01(absBhv.Abstract_Behavior):
         jointGroups = pm.listConnections(limb.parentableGroups)
         jointGroups = rigUtil.SortGroups(jointGroups)
         joints = [pm.listConnections(g.joint)[0] for g in jointGroups]
-        pm.delete(pm.listConnections(joints[0].message)) # ikHandle
+
+        # Delete ikHandle
+        limbGroups = pm.listConnections(limb.usedGroups)
+        endGroup = rigUtil.SortGroups(limbGroups)[1]
+        endControl = pm.listConnections(endGroup.control)[0]
+        handle = pm.listRelatives(endControl, c=1, type='ikHandle')
+        pm.delete(handle)
+
+        # Delete joint constraints
         pm.delete(pm.listConnections(joints[-1].rx)) # orientCst
         constraints = [pm.listConnections(g.rx)[0] for g in jointGroups]
         pm.delete(constraints) # parentCsts
         
+        # Delete limb groups constraints
+        constraints = [pm.listConnections(g.rx)[0] for g in limbGroups]
+        pm.delete(constraints) # parentCsts
+
         # Reposition group to second joint
         groups = pm.listConnections(limb.usedGroups)
         groups = rigUtil.SortGroups(groups)
@@ -119,9 +131,6 @@ class IK_PoleVector_01(absBhv.Abstract_Behavior):
         pm.attrControlGrp( l='Control Distance', a=limb.ikpvDistance,
                             cc=pm.Callback(self._UpdateIKPV1, limb))
         return True
-    
-    def Setup_Editable_Group_UI(self, group):
-        log.funcFileDebug()
     
 #============= ANIMATION UI ============================
 

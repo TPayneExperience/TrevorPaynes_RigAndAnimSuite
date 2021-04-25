@@ -15,6 +15,9 @@ import time
 # log.debug(msg)
 # log.info(msg)
 
+# LOGGING_LEVEL = logging.DEBUG
+LOGGING_LEVEL = logging.INFO
+
 def info(msg):
     logger_obj = _General_Logger.Get()
     logger_obj.info(msg)
@@ -42,6 +45,8 @@ def funcFileInfo():
     logger_obj.info('', extra=extra_args)
 
 def funcFileDebug():
+    if LOGGING_LEVEL != logging.DEBUG:
+        return
     logger_obj = _FuncFile_Logger.Get()
     funcName = inspect.stack()[1][3]
     filePath = inspect.stack()[1][1]
@@ -72,7 +77,7 @@ def _GetLogPath():
 
 class _General_Logger:
     logger = None
-    loggingLevel = logging.DEBUG # INFO
+    loggingLevel = LOGGING_LEVEL # INFO
 
     @staticmethod
     def Get():
@@ -92,7 +97,7 @@ class _General_Logger:
 
 class _FuncFile_Logger:
     logger = None
-    loggingLevel = logging.DEBUG # INFO
+    loggingLevel = LOGGING_LEVEL # INFO
 
     @staticmethod
     def Get():

@@ -60,7 +60,6 @@ class Behavior_Manager:
     @staticmethod
     def SetBehavior(limb, bhvFile):
         log.funcFileDebug()
-        # Behavior_Manager.Teardown_Editable(limb)
         Behavior_Manager._Teardown_GroupVisibility(limb)
         limb.bhvFile.set(bhvFile)
         bhv = Behavior_Manager.bhvs[bhvFile]
@@ -68,27 +67,8 @@ class Behavior_Manager:
         Behavior_Manager._InitRigRootBhv(rigRoot, bhv)
         Behavior_Manager._SetupLimbGroups(rigRoot, limb, bhv)
         bhv.InitLimb(limb)
-        # Behavior_Manager.Setup_Editable(limb)
         Behavior_Manager._Setup_GroupVisibility(limb)
 
-    # @staticmethod
-    # def Setup_Editable(limb):
-    #     log.funcFileDebug()
-    #     log.debug('\t%s' % limb.pfrsName.get())
-    #     bhvFile = limb.bhvFile.get()
-    #     bhv = Behavior_Manager.bhvs[bhvFile]
-    #     bhv.Setup_Editable(limb)
-        
-    # @staticmethod
-    # def Teardown_Editable(limb):
-    #     log.funcFileDebug()
-    #     bhvFile = limb.bhvFile.get()
-    #     if not bhvFile:
-    #         return
-    #     log.debug('\t%s : %s' % (limb.pfrsName.get(), bhvFile))
-    #     bhv = Behavior_Manager.bhvs[bhvFile]
-    #     bhv.Teardown_Editable(limb)
-    
     @staticmethod
     def Setup_Rig(rigRoot):
         log.funcFileDebug()
@@ -126,14 +106,14 @@ class Behavior_Manager:
 #============= UTIL ============================
 
     @staticmethod
-    def _Teardown_GroupVisibility(limb): # USE IN CST BHV!
-        for group in pm.listConnections(limb.usedGroups):
-            group.v.set(0)
-
-    @staticmethod
     def _Setup_GroupVisibility(limb): # USE IN CST BHV!
         for group in pm.listConnections(limb.usedGroups):
             group.v.set(1)
+
+    @staticmethod
+    def _Teardown_GroupVisibility(limb): # USE IN CST BHV!
+        for group in pm.listConnections(limb.usedGroups):
+            group.v.set(0)
 
     @staticmethod
     def _GetDefaultBehaviorFile(limb):
