@@ -24,4 +24,5 @@ class InitLimbPreset(absInit.Abstract_Initializer):
         pm.addAttr(limbPreset, ln='limbParent', dt='string', h=hide)
         pm.addAttr(limbPreset, ln='limbParentControl', at='short',h=hide)
         pm.addAttr(limbPreset, ln='bhvFile', dt='string', h=hide)
+        pm.addAttr(limbPreset, ln='bhvType', dt='string', h=hide)
         pm.addAttr(limbPreset, ln='enableLimb', at='bool', h=hide)

@@ -200,11 +200,20 @@ class PayneFreeRigSuite_UI:
 
     def ExportAnimationRig(self, ignore):
         log.funcFileInfo()
-        pass
-        # self.logger.debug('\tPFRS_UI > ExportAnimationRig')
-        # self.Teardown_Editable()
-        # self.pfrs.ExportAnimationRig()
-        # self.Setup_Editable()
+        if self._rigRoot.rigMode.get() != 0:
+            return pm.confirmDialog(
+                t='Rig Already Exported',
+                m='Rig Root has already be exported to anim rig',
+                button=['Ok']) 
+        name = '%s_AnimRig' % self._rigRoot.prefix.get()
+        setupFile = pm.sceneName()
+        filePath = os.path.join(os.path.dirname(setupFile), name)
+        result = pm.fileDialog2(ff='Maya ASCII (*.ma);;Maya Binary (*.mb)', 
+                                dir=filePath, 
+                                cap='Save Exported Animation Rig')
+        if not result:
+            return
+        self.pfrs.ExportAnimationRig(self._rigRoot, result[0])
 
     def OpenDocumentation(self, ignore):
         log.funcFileInfo()

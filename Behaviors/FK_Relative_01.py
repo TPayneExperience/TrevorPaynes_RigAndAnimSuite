@@ -10,7 +10,7 @@ import Common.Logger as log
 reload(log)
 
 class FK_Relative_01(absBhv.Abstract_Behavior):
-    bhvName = 'FK Relative'
+    bhvType = 'FK Relative'
     validLimbTypes = (4,)   # rigData.LIMB_TYPES
     groupType = 'FKR'  # LookAt, IKPV...
     groupShape = 'Cube_Poly'

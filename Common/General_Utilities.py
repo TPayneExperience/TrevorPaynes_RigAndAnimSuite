@@ -117,14 +117,12 @@ class Name:
 
 class Json:
     @staticmethod
-    def SaveJson(filePath, data):
-        print('Saving: ' + filePath)
+    def Save(filePath, data):
         with open(filePath, 'w') as outputFile:
             json.dump(data, outputFile, indent=4)
 
     @staticmethod
-    def LoadJson(filePath):
-        print('Loading: ' + filePath)
+    def Load(filePath):
         data = None
         with open(filePath, 'r') as readFile:
             data = json.load(readFile)

@@ -10,7 +10,7 @@ import Common.Logger as log
 reload(log)
 
 class IK_PoleVector_01(absBhv.Abstract_Behavior):
-    bhvName = 'IK Pole Vector'
+    bhvType = 'IK Pole Vector'
     validLimbTypes = (4,)   # rigData.LIMB_TYPES
     groupType = 'IKPV'  # LookAt, IKPV...
     groupShape = 'Sphere_Poly'

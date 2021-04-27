@@ -1,0 +1,29 @@
+{
+    "controls": [
+        [
+            [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            [
+                0.0, 
+                -32.26873690526338, 
+                0.0
+            ], 
+            [
+                1.0, 
+                1.0, 
+                1.0
+            ]
+        ], 
+        [], 
+        [], 
+        []
+    ], 
+    "bhvFile": "FK_Chain_01", 
+    "poseName": "Spread", 
+    "bhvType": "FK Chain", 
+    "side": 0, 
+    "pfrsName": "Index"
+}

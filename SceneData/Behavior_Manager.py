@@ -20,6 +20,7 @@ reload(genUtil)
 import Data.General_Data as genData
 reload(genUtil)
 
+# FUNCTIONS MUST BE STATIC, USED ACROSS MULTIPLE FILES
 class Behavior_Manager:
     bhvFiles = {}   # bhvName : [fileName1, fileName 2,...]
     bhvs = {}       # fileName : class
@@ -43,11 +44,11 @@ class Behavior_Manager:
             for name, obj in inspect.getmembers(module):
                 if inspect.isclass(obj):
                     if issubclass(obj, absBhv.Abstract_Behavior):
-                        bhvName = obj.bhvName
-                        if bhvName not in Behavior_Manager.bhvFiles:
-                            Behavior_Manager.bhvFiles[bhvName] = []
-                        if fileName not in Behavior_Manager.bhvFiles[bhvName]:
-                            Behavior_Manager.bhvFiles[bhvName].append(
+                        bhvType = obj.bhvType
+                        if bhvType not in Behavior_Manager.bhvFiles:
+                            Behavior_Manager.bhvFiles[bhvType] = []
+                        if fileName not in Behavior_Manager.bhvFiles[bhvType]:
+                            Behavior_Manager.bhvFiles[bhvType].append(
                                                                 fileName)
                         Behavior_Manager.bhvs[fileName] = obj()
     
@@ -61,8 +62,9 @@ class Behavior_Manager:
     def SetBehavior(limb, bhvFile):
         log.funcFileDebug()
         Behavior_Manager._Teardown_GroupVisibility(limb)
-        limb.bhvFile.set(bhvFile)
         bhv = Behavior_Manager.bhvs[bhvFile]
+        limb.bhvFile.set(bhvFile)
+        limb.bhvType.set(bhv.bhvType)
         rigRoot = pm.listConnections(limb.rigRoot)[0]
         Behavior_Manager._InitRigRootBhv(rigRoot, bhv)
         Behavior_Manager._SetupLimbGroups(rigRoot, limb, bhv)
@@ -126,7 +128,7 @@ class Behavior_Manager:
             orderIndex = bhv.orderIndex
             if orderIndex in orderedFiles:
                 msg = 'All behavior orderIndex values must be unique!'
-                msg = '\n"%s" is conflicting.' % bhv.bhvName
+                msg = '\n"%s" is conflicting.' % bhv.bhvType
                 raise ValueError(msg)
             if limbType in bhv.validLimbTypes:
                 orderedFiles[orderIndex] = bhvFile

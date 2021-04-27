@@ -10,7 +10,7 @@ import Common.Logger as log
 reload(log)
 
 class LookAt_01(absBhv.Abstract_Behavior):
-    bhvName = 'Look At'
+    bhvType = 'Look At'
     validLimbTypes = (1,)   # rigData.LIMB_TYPES
     groupType = 'LookAt'  # LookAt, IKPV...
     groupShape = 'Circle_Wire'

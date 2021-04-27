@@ -26,7 +26,7 @@ class Behavior_UI(absOpUI.Abstract_OperationUI):
     orderIndex = 200
     operation = bhv.Behavior()
     def __init__(self):
-        self._bhvNames = []
+        self._bhvTypes = []
         self._currentBhv = None # for verifying group selection
         self._selectedLimbs = []
         self._presets = {} # preset_name : presetRoot
@@ -268,25 +268,24 @@ class Behavior_UI(absOpUI.Abstract_OperationUI):
     def PopulateBehaviorsOptionMenu(self, limb):
         log.funcFileDebug()
         pm.optionMenu(self.bhvType_om, e=1, dai=1)
-        self._bhvNames = []
+        self._bhvTypes = []
         bhvFile = limb.bhvFile.get()
+        limbBhvType = limb.bhvType.get()
         limbType = limb.limbType.get()
-        limbBhvName = ''
+        limbBhvType = ''
         orderedBhvs = {}
         for bhvFiles in list(bhvMng.Behavior_Manager.bhvFiles.values()):
             bhv = bhvMng.Behavior_Manager.bhvs[bhvFiles[-1]]
-            if bhvFile in bhvFiles:
-                limbBhvName = bhv.bhvName
             orderedBhvs[bhv.orderIndex] = bhv
         index = 0
         for priority in sorted(list(orderedBhvs.keys())):
             bhv = orderedBhvs[priority]
-            bhvName = bhv.bhvName
+            bhvType = bhv.bhvType
             if limbType in bhv.validLimbTypes:
-                pm.menuItem(l=bhvName, p=self.bhvType_om)
-                self._bhvNames.append(bhvName)
+                pm.menuItem(l=bhvType, p=self.bhvType_om)
+                self._bhvTypes.append(bhvType)
                 index += 1
-            if bhvName == limbBhvName:
+            if bhvType == limbBhvType:
                 pm.optionMenu(self.bhvType_om, e=1, sl=index)
         self._currentBhv = bhvMng.Behavior_Manager.bhvs[bhvFile]
 

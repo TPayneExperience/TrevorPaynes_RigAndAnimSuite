@@ -16,8 +16,8 @@ reload(log)
 # import SceneData.Control as ctr
 # reload(ctr)
 
-import SceneData.RigRoot as rrt
-reload(rrt)
+# import SceneData.RigRoot as rrt
+# reload(rrt)
 # import SceneData.Behavior_Manager as bhvMng
 # reload(bhvMng)
 

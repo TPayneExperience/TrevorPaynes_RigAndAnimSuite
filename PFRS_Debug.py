@@ -26,8 +26,8 @@ class PFRS_Debug:
         # self.SimpleChainTest()
         # self.ArmTest()
         # self.LegTest()
-        self.SpineTest()
-        # self.AnimPosesTest()
+        # self.SpineTest()
+        self.AnimPosesTest()
         # self.LimbTypesTest()
         # self.SkeletonTest()
 
@@ -75,7 +75,6 @@ class PFRS_Debug:
         self.pfrs.LimbSetup.AutoBuildByName(rigRoot)
         
     def AnimPosesTest(self):
-        self.NewScene()
         path = os.path.join(self.folder, 'PFX_AnimRig.ma')
         pm.openFile(path, f=1)
 

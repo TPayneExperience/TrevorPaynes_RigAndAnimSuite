@@ -10,7 +10,7 @@ import Common.Logger as log
 reload(log)
 
 class Empty_01(absBhv.Abstract_Behavior):
-    bhvName = 'Empty'
+    bhvType = 'Empty'
     validLimbTypes = (0,)   # rigData.LIMB_TYPES
     groupType = 'Empty'  # LookAt, IKPV...
     groupShape = 'Square_Wire'

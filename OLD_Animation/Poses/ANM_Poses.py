@@ -48,15 +48,15 @@ class ANM_Poses:
         cmd = 'explorer /select,"%s"' % filePath
         subprocess.Popen(cmd)
 
-    def DeleteAllLimbPose(self, poseName):
-        self.logger.info('\tANM_Poses > DeleteAllLimbPose')
-        folder = self.pfrs.root.posesFolderPath.get()
-        self.posMng.DeleteAllPosesOfName(poseName, folder)
-        self.posMng.InitPoses()
-
     def DeleteSelectedLimbPose(self, poseName, limbs):
         self.logger.info('\tANM_Poses > DeleteSelectedLimbPose')
         folder = self.pfrs.root.posesFolderPath.get()
         for limb in limbs:
             self.posMng.DeleteLimbPose(poseName, folder, limb)
+        self.posMng.InitPoses()
+
+    def DeleteAllLimbPose(self, poseName):
+        self.logger.info('\tANM_Poses > DeleteAllLimbPose')
+        folder = self.pfrs.root.posesFolderPath.get()
+        self.posMng.DeleteAllPosesOfName(poseName, folder)
         self.posMng.InitPoses()

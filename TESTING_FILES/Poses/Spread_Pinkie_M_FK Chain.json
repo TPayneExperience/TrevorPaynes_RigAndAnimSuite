@@ -1,0 +1,29 @@
+{
+    "controls": [
+        [
+            [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            [
+                0.0, 
+                26.07835565579318, 
+                0.0
+            ], 
+            [
+                1.0, 
+                1.0, 
+                1.0
+            ]
+        ], 
+        [], 
+        [], 
+        []
+    ], 
+    "bhvFile": "FK_Chain_01", 
+    "poseName": "Spread", 
+    "bhvType": "FK Chain", 
+    "side": 0, 
+    "pfrsName": "Pinkie"
+}

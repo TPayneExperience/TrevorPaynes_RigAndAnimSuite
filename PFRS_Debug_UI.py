@@ -32,36 +32,42 @@ class PFRS_Debug_UI:
     def AnimPosesTest(self, ignore):
         log.funcFileDebug()
         self.debug.AnimPosesTest()
-        self.pfrs.InitScene()
+        self.parent.InitRigRoots()
+        self.parent.InitOptionMenues()
 
     def SimpleChainTest(self, ignore):
         log.funcFileDebug()
         self.debug.SimpleChainTest()
-        self.pfrs.InitScene()
-        # self.pfrs.LimbSetup.AutoBuildByHierarchy()
+        self.parent.InitRigRoots()
+        self.parent.InitOptionMenues()
 
     def LimbTypesTest(self, ignore):
         log.funcFileDebug()
         self.debug.LimbTypesTest()
-        self.pfrs.InitScene()
+        self.parent.InitRigRoots()
+        self.parent.InitOptionMenues()
 
     def LegTest(self, ignore):
         log.funcFileDebug()
         self.debug.LegTest()
-        self.pfrs.InitScene()
+        self.parent.InitRigRoots()
+        self.parent.InitOptionMenues()
 
     def ArmTest(self, ignore):
         log.funcFileDebug()
         self.debug.ArmTest()
-        self.pfrs.InitScene()
+        self.parent.InitRigRoots()
+        self.parent.InitOptionMenues()
         
     def SpineTest(self, ignore):
         log.funcFileDebug()
         self.debug.SpineTest()
-        self.pfrs.InitScene()
+        self.parent.InitRigRoots()
+        self.parent.InitOptionMenues()
 
     def SkeletonTest(self, ignore):
         log.funcFileDebug()
         self.debug.SkeletonTest()
-        self.pfrs.InitScene()
+        self.parent.InitRigRoots()
+        self.parent.InitOptionMenues()
 

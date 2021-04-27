@@ -98,6 +98,34 @@ class PayneFreeRigSuite:
         for limb in pm.listConnections(rigRoot.limbs):
             genUtil.Name.UpdateLimbName(rigRoot, limb)
 
+    def ExportAnimationRig(self, rigRoot, filePath):
+        log.funcFileDebug()
+        # Make pose folder
+        folder = os.path.dirname(filePath)
+        poseFolder = os.path.join(folder, 'Poses')
+        if not os.path.exists(poseFolder):
+            os.makedirs(poseFolder)
+        rigRoot.posesFolderPath.set(poseFolder)
+
+        # Set rigmode, export, revert
+        rigMode = rigRoot.rigMode.get()
+        if rigMode == 0:
+            rigRoot.rigMode.set(1)
+        oldMain = rigRoot.mainTab.get()
+        oldSub = rigRoot.subTab.get()
+        rigRoot.mainTab.set('Animation')
+        rigRoot.subTab.set('Poses')
+        setupFile = pm.sceneName()
+        
+        pm.saveAs(filePath)
+
+        rigRoot.rigMode.set(rigMode)
+        rigRoot.mainTab.set(oldMain)
+        rigRoot.subTab.set(oldSub)
+
+        if setupFile:
+            pm.saveAs(setupFile)
+
 #=========== PRIVATE ====================================
 
     def _InitOperations(self):

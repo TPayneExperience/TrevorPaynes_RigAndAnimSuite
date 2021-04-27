@@ -2,8 +2,7 @@
 
 # ============= ROOT =============
 RIG_MODES = (   'Setup Rig',
-                'Building Rig', # Incase of build breakage
-                'Animate Rig') 
+                'Animate Rig')  # Maybe post anim rig later???
 
 LIMBS_GROUP = 'LIMBS'
 JOINTS_GROUP = 'JOINTS'

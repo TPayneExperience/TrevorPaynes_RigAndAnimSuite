@@ -10,7 +10,7 @@ import Common.Logger as log
 reload(log)
 
 class IK_Spline_01(absBhv.Abstract_Behavior):
-    bhvName = 'IK Spline'
+    bhvType = 'IK Spline'
     validLimbTypes = (4,)   # rigData.LIMB_TYPES
     groupType = 'IKS'  # LookAt, IKPV...
     groupShape = 'Cylinder_Poly'

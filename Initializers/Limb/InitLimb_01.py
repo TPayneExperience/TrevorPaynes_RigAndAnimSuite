@@ -40,6 +40,7 @@ class InitLimb(absInit.Abstract_Initializer):
         pm.addAttr(limb, ln='mirrorLimb', at='long', h=hide)
 
         # BEHAVIORS
+        pm.addAttr(limb, ln='bhvType', dt='string', h=hide)
         pm.addAttr(limb, ln='bhvFile', dt='string', h=hide)
         pm.addAttr(limb, ln='limbGroups', dt='string', h=hide)
         pm.addAttr(limb, ln='usedGroups', dt='string', h=hide)

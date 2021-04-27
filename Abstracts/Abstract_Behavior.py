@@ -10,7 +10,7 @@ class Abstract_Behavior:
 #============= PROPERTIES ============================
 
     @abstractproperty
-    def bhvName(self):          # str | 'Empty', 'FK Chain'
+    def bhvType(self):          # str | 'Empty', 'FK Chain'
         pass 
 
     @abstractproperty

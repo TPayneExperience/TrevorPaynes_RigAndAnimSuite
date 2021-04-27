@@ -10,7 +10,7 @@ import Common.Logger as log
 reload(log)
 
 class FK_Branch_01(absBhv.Abstract_Behavior):
-    bhvName = 'FK Branch'
+    bhvType = 'FK Branch'
     validLimbTypes = (1, 2, 3, 4) # rigData.LIMB_TYPES
     groupType = ''        # LookAt, IKPV...
     groupShape = ''

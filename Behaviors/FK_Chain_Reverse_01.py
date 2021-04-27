@@ -12,7 +12,7 @@ import Common.Logger as log
 reload(log)
 
 class FK_Chain_Reverse_01(absBhv.Abstract_Behavior):
-    bhvName = 'FK Chain Reverse'
+    bhvType = 'FK Chain Reverse'
     validLimbTypes = (3, 4) # rigData.LIMB_TYPES
     groupType = ''        # LookAt, IKPV...
     groupShape = ''
