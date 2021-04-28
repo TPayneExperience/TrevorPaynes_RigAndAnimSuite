@@ -103,6 +103,7 @@ class Poses(absOp.Abstract_Operation):
             raise ValueError('Limb has no mirror')
         mirrorLimb = mirrorLimbs[0]
         pose1 = self._CopyPose(limb)
+        pose2 = self._CopyPose(mirrorLimb)
         self._PastePose(pose1, mirrorLimb)
         self._PastePose(pose2, limb)
     
