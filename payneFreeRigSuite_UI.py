@@ -154,9 +154,14 @@ class PayneFreeRigSuite_UI:
         index = self.pfrs.categories.index(category) + 1
         pm.optionMenu(self.cat_op, e=1, sl=index)
         self.PopulateOperations(category)
-        index = self.operationNames.index(operationName) + 1
-        pm.optionMenu(self.op_op, e=1, sl=index)
-        self.SetOperation(operationName)
+        # Set Operation
+        if operationName in self.operationNames:
+            index = self.operationNames.index(operationName) + 2
+            pm.optionMenu(self.op_op, e=1, sl=index)
+            self.SetOperation(operationName)
+        else:
+            pm.optionMenu(self.op_op, e=1, sl=1)
+            self.SetOperation('asdf')
 
     def SetCategory(self, category):
         log.funcFileInfo()
@@ -165,6 +170,11 @@ class PayneFreeRigSuite_UI:
     def SetOperation(self, operationName):
         log.funcFileInfo()
         pm.deleteUI(self.frame)
+        if operationName not in self.operationNames:
+            with pm.frameLayout(p=self.win, lv=0) as self.frame:
+                msg = "You're Breathtaking! Select an operation :)"
+                pm.text(l=msg)
+                return
         index = self.operationNames.index(operationName)
         self.currentOp = self.operations[index]
         self._allRigRoots = self.pfrs.GetRigRoots()
@@ -184,6 +194,7 @@ class PayneFreeRigSuite_UI:
         self.operationNames = []
         self.operations = []
         pm.optionMenu(self.op_op, e=1, dai=1)
+        pm.menuItem(l=' ', p=self.op_op) # Empty
         opPriorities = {}
         for operation in list(self.pfrs.catOps[category].values()):
             opPriorities[operation.orderIndex] = operation
