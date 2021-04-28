@@ -16,9 +16,9 @@ class RigRoot:
         log.funcFileDebug()
         rigRoot = pm.group(name='ROOT_tempName', em=True)
         genUtil.AbstractInitializer(rigRoot, 'RigRoot')
-        rigRoot.prefix.set('TEMP')
-        rigRoot.mainTab.set('Rigging')
-        rigRoot.subTab.set('Limb Setup')
+        rigRoot.pfrsName.set('TEMP')
+        rigRoot.category.set('Rigging')
+        rigRoot.operation.set('Limb Setup')
 
         return rigRoot
 

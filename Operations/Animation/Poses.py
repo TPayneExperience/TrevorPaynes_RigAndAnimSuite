@@ -26,7 +26,7 @@ class Poses(absOp.Abstract_Operation):
 
 #============= POSE LIBRARY ============================
 
-    def OpenPosesLibraryFolder(self, rigRoot):
+    def OpenPosesFolder(self, rigRoot):
         log.funcFileInfo()
         filePath = rigRoot.posesFolderPath.get()
         files = os.listdir(filePath)
@@ -36,7 +36,7 @@ class Poses(absOp.Abstract_Operation):
         cmd = 'explorer /select,"%s"' % filePath
         subprocess.Popen(cmd)
 
-    def SetPosesLibraryFolder(self, rigRoot, folderPath):
+    def SetPosesFolder(self, rigRoot, folderPath):
         log.funcFileInfo()
         rigRoot.posesFolderPath.set(folderPath)
 
@@ -72,6 +72,47 @@ class Poses(absOp.Abstract_Operation):
             self._SavePose(poseName, limb, folder)
             self.ResetLimbControls(limb)
         self.InitPoses(rigRoot)
+
+    def CopyPose(self, limb):
+        log.funcFileInfo()
+        return self._CopyPose(limb)
+    
+    def PastePose(self, pose, limb):
+        log.funcFileInfo()
+        if pose.bhvType != limb.bhvType.get():
+            msg = 'Pose data and limb must have same bhvType'
+            raise ValueError(msg)
+        if pose.pfrsName != limb.pfrsName.get():
+            msg = 'Pose data and limb must have same pfrsName'
+            raise ValueError(msg)
+        self._PastePose(pose, limb)
+
+    def MirrorPose(self, limb):
+        log.funcFileInfo()
+        mirrorLimbs = pm.listConnections(limb.mirrorLimb)
+        if not mirrorLimbs:
+            raise ValueError('Limb has no mirror')
+        mirrorLimb = mirrorLimbs[0]
+        pose = self._CopyPose(limb)
+        self._PastePose(pose, mirrorLimb)
+    
+    def FlipPose(self, limb):
+        log.funcFileInfo()
+        mirrorLimbs = pm.listConnections(limb.mirrorLimb)
+        if not mirrorLimbs:
+            raise ValueError('Limb has no mirror')
+        mirrorLimb = mirrorLimbs[0]
+        pose1 = self._CopyPose(limb)
+        self._PastePose(pose1, mirrorLimb)
+        self._PastePose(pose2, limb)
+    
+    def _PastePose(self, pose, limb):
+        log.funcFileInfo()
+        groups = pm.listConnections(limb.usedGroups)
+        controls = [pm.listConnections(g.control)[0] for g in groups]
+        for i in range(len(controls)):
+            self._PoseControl(controls[i], [pose], i)
+
 
 #============= POSE LIBRARY ============================
 
@@ -201,6 +242,22 @@ class Poses(absOp.Abstract_Operation):
             if controlData:
                 xform = self._AddXforms(xform, controlData, pose.weight)
         pm.xform(control, t=xform[0], ro=xform[1], s=xform[2])
+
+    def _CopyPose(self, limb):
+        log.funcFileDebug()
+        pose = animData.POSE()
+        pose.bhvFile = limb.bhvFile.get()
+        pose.bhvType = limb.bhvType.get()
+        pose.pfrsName = limb.pfrsName.get()
+        pose.weight = 1
+        # pose.side = limb.side.get()
+        pose.controls = []
+        groups = pm.listConnections(limb.usedGroups)
+        groups = rigUtil.SortGroups(groups)
+        for group in groups:
+            control = pm.listConnections(group.control)[0]
+            pose.controls.append(self._GetControlData(control))
+        return pose
 
 #============= UTIL ============================
 

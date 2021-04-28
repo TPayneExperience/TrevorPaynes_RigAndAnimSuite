@@ -234,9 +234,9 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
     def RenameLimb(self, limbIDStr, newName):
         log.funcFileInfo()
         limb = self._limbIDs[limbIDStr]
-        prefix = self._rigRoot.prefix.get()
+        rootName = self._rigRoot.pfrsName.get()
         oldName = limb.pfrsName.get()
-        comboOldName = '%s_%s' % (prefix, oldName)
+        comboOldName = '%s_%s' % (rootName, oldName)
         if comboOldName == newName:
             return '' 
         msg = '\t"%s" to "%s"' % (oldName, newName)

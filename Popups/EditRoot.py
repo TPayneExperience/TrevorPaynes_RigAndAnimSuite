@@ -1,67 +1,55 @@
 
 import pymel.core as pm
 
+import Common.General_Utilities as genUtil
+reload(genUtil)
+import Common.Logger as log
+reload(log)
 
-class POPUP_EditRoot:
-    def __init__(self, parent):
-        self.pfrs = parent.pfrs
-        self.nameMng = parent.pfrs.nameMng
-        self.parent = parent
-        self.logger = parent.logger
+class EditRoot:
+    def __init__(self, rigRoot, parentUI):
+        self._rigRoot = rigRoot
+        self._parentUI = parentUI
         
-        self.prefix = ''
+        self.rootName = ''
         self.showRootName = True
         self.nameOrder = [0,1,2,3,4]
 
-        self.prefixValid = False
-        # self.meshPathValid = False
+        self.rootNameValid = False
 
-        self.rigNaming = [  'Prefix (CAT, ELF)',
+        self.rigNaming = [  'RootName (CAT, ELF)',
                             'Limb (ARM, LEG)',
                             'Joint (ELBOW, KNEE_02)',
                             'Side (L, M, R)',
                             'Type (JNT, CTR)']
     
-    # def NewRig_Dialog(self):
-    #     self.startPrefix = 'PFX'
-    #     self.startShowPrefix = True
-    #     self.startNameOrder = [0,1,2,3,4]
-    #     self._CopyInitValues()
-    #     result = pm.layoutDialog(ui=self._Setup, title='Rig Setup')
-    #     if result == 'save':
-    #         self.parent.NewRig(   self.prefix, 
-    #                                 self.nameOrder, 
-    #                                 self.showRootName)
-
-    # def EditRig_Dialog(self, prefix, showRootName, order, root):
-    def EditRoot_Dialog(self):
-        order = [self.pfrs.root.rootIndex.get()]
-        order.append(self.pfrs.root.limbIndex.get())
-        order.append(self.pfrs.root.jointIndex.get())
-        order.append(self.pfrs.root.sideIndex.get())
-        order.append(self.pfrs.root.typeIndex.get())
-        self.startPrefix = self.pfrs.root.prefix.get()
-        self.startShowPrefix = self.pfrs.root.showRootName.get()
+        order = [self._rigRoot.rootIndex.get()]
+        order.append(self._rigRoot.limbIndex.get())
+        order.append(self._rigRoot.jointIndex.get())
+        order.append(self._rigRoot.sideIndex.get())
+        order.append(self._rigRoot.typeIndex.get())
+        self.startRootName = self._rigRoot.pfrsName.get()
+        self.startShowRootName = self._rigRoot.showRootName.get()
         self.startNameOrder = order
         self._CopyInitValues()
-        result = pm.layoutDialog(ui=self._Setup, title='Rig Root Setup')
-        prefixChanged = (self.startPrefix != self.prefix)
-        showRootNameChanged = (self.startShowPrefix != self.showRootName)
+        result = pm.layoutDialog(ui=self._Setup, title='Rig Root Setup') # WINDOW
+        rootNameChanged = (self.startRootName != self.rootName)
+        showRootNameChanged = (self.startShowRootName != self.showRootName)
         nameOrderChanged = (self.startNameOrder != self.nameOrder)
-        namesChanged = any((prefixChanged, showRootNameChanged, nameOrderChanged))
+        namesChanged = any((rootNameChanged, showRootNameChanged, nameOrderChanged))
         if result == 'Save':
-            if (prefixChanged):
-                self.pfrs.root.prefix.set(self.prefix)
+            if (rootNameChanged):
+                self._rigRoot.pfrsName.set(self.rootName)
             if (showRootNameChanged):
-                self.pfrs.root.showRootName.set(self.showRootName)
+                self._rigRoot.showRootName.set(self.showRootName)
             if (nameOrderChanged):
-                self.pfrs.root.rootIndex.set(self.nameOrder[0])
-                self.pfrs.root.limbIndex.set(self.nameOrder[1])
-                self.pfrs.root.jointIndex.set(self.nameOrder[2])
-                self.pfrs.root.sideIndex.set(self.nameOrder[3])
-                self.pfrs.root.typeIndex.set(self.nameOrder[4])
+                self._rigRoot.rootIndex.set(self.nameOrder[0])
+                self._rigRoot.limbIndex.set(self.nameOrder[1])
+                self._rigRoot.jointIndex.set(self.nameOrder[2])
+                self._rigRoot.sideIndex.set(self.nameOrder[3])
+                self._rigRoot.typeIndex.set(self.nameOrder[4])
             if namesChanged:
-                self.pfrs.UpdateNames()
+                self._parentUI.UpdateRigRoot()
     
 #============ SETUP ============================
 
@@ -71,9 +59,9 @@ class POPUP_EditRoot:
         # ASSET DETAILS
         ass_fl = pm.frameLayout(l='Asset Details', 
                                     bv=1, mh=5, mw=5, p=form)
-        self.prefix_grp = pm.textFieldGrp(  l='ASSET PREFIX', adj=1, pht='CAT...', 
-                                            tcc=self.PrefixChanged, 
-                                            text=self.startPrefix,
+        self.rootName_grp = pm.textFieldGrp(  l='ASSET PREFIX', adj=1, pht='CAT...', 
+                                            tcc=self.RootNameChanged, 
+                                            text=self.startRootName,
                                             cw=(2,80), cal=(1,'left'))
 
         # EXAMPLE NAMING
@@ -87,7 +75,7 @@ class POPUP_EditRoot:
         # RIG NAMING
         msg = 'MMB + Drag to reorganize'
         order_fl = pm.frameLayout(l='Rig Naming', bv=1, mh=5, mw=5, p=form)
-        self.showPfx_cb = pm.checkBox(l='Show Prefix', v=self.showRootName, cc=self.ToggleShowPrefix)
+        self.showPfx_cb = pm.checkBox(l='Show RootName', v=self.showRootName, cc=self.ToggleShowRootName)
         self.order_tv = pm.treeView(ams=0, arp=0, h=110, ann=msg, 
                                                 dad=self.Update_ExampleLabels)
         for i in range(5):
@@ -116,22 +104,22 @@ class POPUP_EditRoot:
                                         (self.close_btn, 'right', 5, 50), 
                                         (self.save_btn, 'left', 5, 50)])
         self.Update_ExampleLabels(0,0,0,0,0,0,0)
-        self.PrefixChanged(self.startPrefix)
+        self.RootNameChanged(self.startRootName)
 
 #============ POPULATE + UPDATE ============================
 
     def _CopyInitValues(self):
-        self.prefix = self.startPrefix 
-        self.showRootName = self.startShowPrefix
+        self.rootName = self.startRootName 
+        self.showRootName = self.startShowRootName
         self.nameOrder = self.startNameOrder[:]
 
-    def _GetName(self, prefix, limb, joint, side, objType):
+    def _GetName(self, rootName, limb, joint, side, objType):
         temp = {self.nameOrder[1]:limb,
                 self.nameOrder[2]:joint,
                 self.nameOrder[3]:side,
                 self.nameOrder[4]:objType}
         if self.showRootName:
-            temp[self.nameOrder[0]] = prefix
+            temp[self.nameOrder[0]] = rootName
         partNames = [temp[i] for i in sorted(list(temp.keys()))]
         return '_'.join(partNames)
 
@@ -148,34 +136,29 @@ class POPUP_EditRoot:
         pm.text(self.ex2_t, e=1, l=ex2)
         pm.text(self.ex3_t, e=1, l=ex3)
 
-    def ToggleShowPrefix(self, state):
+    def ToggleShowRootName(self, state):
         self.showRootName = state
         self.Update_ExampleLabels(0,0,0,0,0,0,0)
 
-    def PrefixChanged(self, text):
-        self.logger.debug('\tEditRoot > PrefixChanged')
-        self.prefix = text
-        self.prefixValid = False
+    def RootNameChanged(self, text):
+        log.funcFileDebug()
+        self.rootName = text
+        self.rootNameValid = False
         pm.button(self.save_btn, e=1, en=0)
         msg = 'ASSET PREFIX'
-        if not self.nameMng.IsValidCharacterLength(text):
+        if not genUtil.Name.IsValidCharacterLength(text):
             msg += ' | Must be 2 or more characters'
-            return pm.textFieldGrp(self.prefix_grp, e=1, l=msg)
-        if not self.nameMng.DoesNotStartWithNumber(text):
+            return pm.textFieldGrp(self.rootName_grp, e=1, l=msg)
+        if not genUtil.Name.DoesNotStartWithNumber(text):
             msg += ' | Cannot start with number OR _'
-            return pm.textFieldGrp(self.prefix_grp, e=1, l=msg)
-        if not self.nameMng.AreAllValidCharacters(text):
+            return pm.textFieldGrp(self.rootName_grp, e=1, l=msg)
+        if not genUtil.Name.AreAllValidCharacters(text):
             msg += ' | May only contain A-Z, a-z, 0-9, _'
-            return pm.textFieldGrp(self.prefix_grp, e=1, l=msg)
-        self.prefixValid = True
-        pm.textFieldGrp(self.prefix_grp, e=1, l=msg)
+            return pm.textFieldGrp(self.rootName_grp, e=1, l=msg)
+        self.rootNameValid = True
+        pm.textFieldGrp(self.rootName_grp, e=1, l=msg)
         pm.button(self.save_btn, e=1, en=1)
-    #     self.Update_SaveBtn()
-    
-    # def Update_SaveBtn(self):
-    #     combo = self.prefixValid and self.meshPathValid
-    #     pm.button(self.save_btn, e=1, en=combo)
-
+        
     def Close(self, ignore):
         pm.layoutDialog(dis='close')
     

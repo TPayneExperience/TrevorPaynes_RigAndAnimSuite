@@ -147,27 +147,30 @@ class LimbSetup(absOp.Abstract_Operation):
         rigRoot = pm.listConnections(mirrorLimb.rigRoot)[0]
         genUtil.Name.UpdateLimbName(rigRoot, mirrorLimb)
 
-    def _RenameLimb(self, sourceLimb, newName): # list should repopulate after call
+    def _UpdateMirrorConnection(self, allLimbs, limb):
         log.funcFileDebug()
-        rigRoot = pm.listConnections(sourceLimb.rigRoot)[0]
-        limbs = pm.listConnections(rigRoot.limbs)
-        names = [limb.pfrsName.get() for limb in limbs]
-
         # PAIR WITH MIRROR
-        if (names.count(newName) == 1):
-            for mirrorLimb in limbs:
-                if (mirrorLimb.pfrsName.get() == newName):
+        name = limb.pfrsName.get()
+        names = [l.pfrsName.get() for l in allLimbs]
+        if (names.count(name) == 1):
+            for mirrorLimb in allLimbs:
+                if (mirrorLimb.pfrsName.get() == name):
                     break
-            if (sourceLimb == mirrorLimb): # prevent pairing with self
+            if (limb == mirrorLimb): # prevent pairing with self
                 return
-            pm.connectAttr(sourceLimb.mirrorLimb, mirrorLimb.mirrorLimb)
+            pm.connectAttr(limb.mirrorLimb, mirrorLimb.mirrorLimb)
             mirrorLimb.side.set(1)
-            sourceLimb.side.set(2)
+            limb.side.set(2)
 
         # BREAK MIRROR
         else:
-            if pm.listConnections(sourceLimb.mirrorLimb):
-                self._BreakMirror(sourceLimb)
+            if pm.listConnections(limb.mirrorLimb):
+                self._BreakMirror(limb)
+
+    def _RenameLimb(self, sourceLimb, newName): # list should repopulate after call
+        log.funcFileDebug()
+        rigRoot = pm.listConnections(sourceLimb.rigRoot)[0]
+        allLimbs = pm.listConnections(rigRoot.limbs)
         # Rename joints if limb named as preset 'leg', 'arm'...
         if newName.lower() in rigData.LIMB_JOINT_NAME_PRESETS:
             jointNames = rigData.LIMB_JOINT_NAME_PRESETS[newName.lower()]
@@ -178,7 +181,7 @@ class LimbSetup(absOp.Abstract_Operation):
                     joint.pfrsName.set(jointNames[index])
         # Rename joints if they're default names
         else:
-            oldName = limb.pfrsName.get()
+            oldName = sourceLimb.pfrsName.get()
             for joint in pm.listConnections(sourceLimb.joints):
                 jointName = joint.pfrsName.get()
                 if 'Joint' in jointName or oldName in jointName:
@@ -187,6 +190,7 @@ class LimbSetup(absOp.Abstract_Operation):
                     indexStr = '%03d' % (index + 1)
                     joint.pfrsName.set(newName + indexStr)
         sourceLimb.pfrsName.set(newName)
+        self._UpdateMirrorConnection(allLimbs, sourceLimb)
         genUtil.Name.UpdateLimbName(rigRoot, sourceLimb)
         for childLimb in pm.listConnections(sourceLimb.limbChildren):
             self._UpdateParentControlEnum(childLimb)
@@ -446,6 +450,7 @@ class LimbSetup(absOp.Abstract_Operation):
             return
 
         # ADD LIMBS
+        allLimbs = {} # pfrsName : limb
         for indexName, joints in newLimbs.items():
             tempJoint = joints[0]
             limbName, side, j = tempJoint.shortName().split('_')
@@ -470,8 +475,13 @@ class LimbSetup(absOp.Abstract_Operation):
                 limb.side.set(1)
             elif side.upper() == 'R':
                 limb.side.set(2)
+            if limbName in allLimbs:
+                mirror = allLimbs[limbName]
+                pm.connectAttr(limb.mirrorLimb, mirror.mirrorLimb)
+                del(allLimbs[limbName])
             genUtil.Name.UpdateLimbName(rigRoot, limb)
             self._InitBehavior(limb)
+            allLimbs[limbName] = limb
         self._LoadSkeletalHierarchy(rigRoot)
 
 

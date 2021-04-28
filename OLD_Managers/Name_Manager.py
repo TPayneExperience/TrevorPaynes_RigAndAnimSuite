@@ -14,8 +14,8 @@ class Name_Manager:
     #             self.pfrs.root.jointIndex.get() : secondName,
     #             self.pfrs.root.sideIndex.get() : side,
     #             self.pfrs.root.typeIndex.get() : objType}
-    #     if self.pfrs.root.showPrefix.get():
-    #         temp[self.pfrs.root.prefixIndex.get()] = self.pfrs.root.prefix.get()
+    #     if self.pfrs.root.showRootName.get():
+    #         temp[self.pfrs.root.rootIndex.get()] = self.pfrs.root.prefix.get()
     #     partNames = [temp[i] for i in sorted(list(temp.keys()))]
     #     return '_'.join(partNames)
     

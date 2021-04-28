@@ -14,10 +14,11 @@ class InitGroup(absInit.Abstract_Initializer):
     @staticmethod
     def Initialize(group):
         log.funcFileDebug()
-        if group.hasAttr('control'):
+        if group.hasAttr('pfrsVersion'):
             return 
             
         hide = genData.HIDE_ATTRS
+        pm.addAttr(group, ln='pfrsVersion', at='short', dv=100, h=hide)
         pm.addAttr(group, ln='groupIndex', at='long', h=hide)
         pm.addAttr(group, ln='control', dt='string', h=hide)
         pm.addAttr(group, ln='joint', dt='string', h=hide)

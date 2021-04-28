@@ -28,6 +28,7 @@ class Poses_UI(absOpUI.Abstract_OperationUI):
     def __init__(self):
         self._limbIDs = []
         self.poses_ui = []
+        self._copiedPoses = {} # pfrsName : Pose
 #         self._bhvNames = []
 #         self._currentBhv = None # for verifying group selection
 #         self._selectedGroup = None
@@ -47,12 +48,17 @@ class Poses_UI(absOpUI.Abstract_OperationUI):
             with pm.frameLayout('Limbs', bv=1):
                 self.limb_tv = pm.treeView(adr=0, arp=0, nb=1, enk=1)
                 with pm.popupMenu() as self.rmb_ui:
-                    self.save_mi = pm.menuItem(l='Save Pose', en=0, c=self.SavePose)
                     self.reset_mi = pm.menuItem(l='Reset Limb Controls', en=0, 
                                                 c=self.ResetLimbControls)
-                    pm.menuItem(d=1)
-                    pm.menuItem(l='Open Poses Library Folder', c=self.OpenPosesFolder)
-                    pm.menuItem(l='Set Poses Library Folder', c=self.SetPosesFolder)
+                    pm.menuItem(l='Pose Tools', d=1)
+                    self.save_mi = pm.menuItem(l='Save Pose', en=0, c=self.SavePose)
+                    self.copy_mi = pm.menuItem(l='Copy Pose', en=0, c=self.CopyPose)
+                    self.paste_mi = pm.menuItem(l='Paste Pose', en=0, c=self.PastePose)
+                    self.mirror_mi = pm.menuItem(l='Mirror Pose', en=0, c=self.MirrorPose)
+                    self.flip_mi = pm.menuItem(l='Flip With Mirror', en=0, c=self.FlipPose)
+                    pm.menuItem(l='Pose Library', d=1)
+                    pm.menuItem(l='Open Poses Folder', c=self.OpenPosesFolder)
+                    pm.menuItem(l='Set Poses Folder', c=self.SetPosesFolder)
                 pm.treeView(self.limb_tv, e=1, scc=self.SelectedLimb,
                                                 elc=self.IgnoreRename)
             with pm.frameLayout('Controls', bv=1):
@@ -77,28 +83,53 @@ class Poses_UI(absOpUI.Abstract_OperationUI):
 
     def SelectedLimb(self):
         log.funcFileInfo()
+        # Disable everything, if non selected
         pm.menuItem(self.save_mi, e=1, en=0)
         pm.menuItem(self.reset_mi, e=1, en=0)
+        pm.menuItem(self.copy_mi, e=1, en=0)
+        pm.menuItem(self.paste_mi, e=1, en=0)
+        pm.menuItem(self.mirror_mi, e=1, en=0)
+        pm.menuItem(self.flip_mi, e=1, en=0)
         limbIDStrs = pm.treeView(self.limb_tv, q=1, selectItem=1)
         self.PopulateControlHier(None)
         if not limbIDStrs:
             self._selectedLimbs = []
             pm.select(d=1)
             return
+        # Only allow single common root
         self._selectedLimbs = [self._limbIDs[limbStr] for limbStr in limbIDStrs]
         rigRoot = pm.listConnections(self._selectedLimbs[0].rigRoot)[0]
         for limb in self._selectedLimbs[1:]:
             if rigRoot != pm.listConnections(limb.rigRoot)[0]:
                 # self.parent.LimbsSelected(None)
                 return
+        # Enable RMB
         pm.menuItem(self.save_mi, e=1, en=1)
         pm.menuItem(self.reset_mi, e=1, en=1)
+        # Copy pose: all limb pfrsNames must be unique
+        # Paste pose: if limb pfrsName in copied list
+        # Mirror / Flip: if limb has mirror
+        pm.menuItem(self.copy_mi, e=1, en=1)
+        pfrsNames = []
+        for limb in self._selectedLimbs:
+            name = limb.pfrsName.get()
+            if name not in pfrsNames:
+                pfrsNames.append(name)
+            else:
+                pm.menuItem(self.copy_mi, e=1, en=0)
+            if name in self._copiedPoses:
+                pm.menuItem(self.paste_mi, e=1, en=1)
+            if pm.listConnections(limb.mirrorLimb):
+                pm.menuItem(self.mirror_mi, e=1, en=1)
+                pm.menuItem(self.flip_mi, e=1, en=1)
+        # Select Controls
         controls = []
         for limb in self._selectedLimbs:
             log.debug('\t%s' % limb.pfrsName.get())
             for group in pm.listConnections(limb.usedGroups):
                 controls += pm.listConnections(group.control)
         pm.select(controls)
+        # Populate
         if len(self._selectedLimbs) == 1:
             self.PopulateControlHier(self._selectedLimbs[0])
         self.PopulatePoseLibrary()
@@ -111,7 +142,7 @@ class Poses_UI(absOpUI.Abstract_OperationUI):
 
     def OpenPosesFolder(self, ignore):
         log.funcFileInfo()
-        self.operation.OpenPosesLibraryFolder(self._rigRoot)
+        self.operation.OpenPosesFolder(self._rigRoot)
 
     def SetPosesFolder(self, ignore):
         log.funcFileInfo()
@@ -119,7 +150,7 @@ class Poses_UI(absOpUI.Abstract_OperationUI):
         result = pm.fileDialog2(fm=3, dir=folder, 
                                 cap='Set Pose Library Folder')
         if result:
-            self.operation.SetPosesLibraryFolder(self._rigRoot, result[0])
+            self.operation.SetPosesFolder(self._rigRoot, result[0])
 
     def IgnoreRename(self, idStr, newName):
         log.funcFileInfo()
@@ -141,6 +172,34 @@ class Poses_UI(absOpUI.Abstract_OperationUI):
         poseName = pm.promptDialog(q=1, tx=1)
         self.operation.SavePose(poseName, self._rigRoot, limbs)
         self.PopulatePoseLibrary()
+
+    def CopyPose(self, ignore):
+        log.funcFileDebug()
+        self._copiedPoses = {}
+        for limb in self._selectedLimbs:
+            name = limb.pfrsName.get()
+            self._copiedPoses[name] = self.operation.CopyPose(limb)
+
+    def PastePose(self, ignore):
+        log.funcFileDebug()
+        for limb in self._selectedLimbs:
+            name = limb.pfrsName.get()
+            if name not in self._copiedPoses:
+                continue
+            pose = self._copiedPoses[name]
+            self.operation.PastePose(pose, limb)
+
+    def MirrorPose(self, ignore):
+        log.funcFileDebug()
+        for limb in self._selectedLimbs:
+            if pm.listConnections(limb.mirrorLimb):
+                self.operation.MirrorPose(limb)
+
+    def FlipPose(self, ignore):
+        log.funcFileDebug()
+        for limb in self._selectedLimbs:
+            if pm.listConnections(limb.mirrorLimb):
+                self.operation.FlipPose(limb)
 
 #=========== CONTROL HIER ====================================
 

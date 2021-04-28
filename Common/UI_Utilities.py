@@ -23,10 +23,10 @@ def PopulateLimbHier(widget, currentRigRoot, allRigRoots):
         for limb in rigUtil.GetLimbCreationOrder(rootLimb):
             rigRoot = pm.listConnections(limb.rigRoot)[0]
             rigRootID = rigRoot.ID.get()
-            prefix = rigRoot.prefix.get()
+            rootName = rigRoot.pfrsName.get()
             limbID = '%d_%d' % (rigRootID, limb.ID.get())
             limbIDs[limbID] = limb
-            name = '%s_%s' % (prefix, limb.pfrsName.get())
+            name = '%s_%s' % (rootName, limb.pfrsName.get())
             parent = pm.listConnections(limb.limbParent)
             parentID = ''
             if parent:

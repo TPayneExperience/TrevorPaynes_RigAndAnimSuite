@@ -49,8 +49,8 @@ class Name:
                 rigRoot.jointIndex.get() : secondName,
                 rigRoot.sideIndex.get() : side,
                 rigRoot.typeIndex.get() : objType}
-        if rigRoot.showPrefix.get():
-            temp[rigRoot.prefixIndex.get()] = rigRoot.prefix.get()
+        if rigRoot.showRootName.get():
+            temp[rigRoot.rootIndex.get()] = rigRoot.pfrsName.get()
         partNames = [temp[i] for i in sorted(list(temp.keys()))]
         return '_'.join(partNames)
 

@@ -90,7 +90,7 @@ class Behavior(absOp.Abstract_Operation):
 
     def _UpdatePresetName(self, preset, rigRoot):
         presetName = preset.presetName.get()
-        name = '%s_%s_Preset_#' % (rigRoot.prefix.get(), presetName)
+        name = '%s_%s_Preset_#' % (rigRoot.pfrsName.get(), presetName)
         preset.rename(name)
 
 

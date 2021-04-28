@@ -14,7 +14,7 @@ class InitRigRoot(absInit.Abstract_Initializer):
     @staticmethod
     def Initialize(rigRoot):
         log.funcFileDebug()
-        if rigRoot.hasAttr('limbs'):
+        if rigRoot.hasAttr('pfrsVersion'):
             return
 
         #============= ATTRS ============================
@@ -22,46 +22,47 @@ class InitRigRoot(absInit.Abstract_Initializer):
         hide = genData.HIDE_ATTRS
         rigModes = ':'.join(rigData.RIG_MODES)
         
+        pm.addAttr(rigRoot, ln='pfrsVersion', at='short', dv=100, h=hide)
         pm.addAttr(rigRoot, ln='ID', at='long', dv=1, h=hide)
         pm.addAttr(rigRoot, ln='rigMode', at='enum', en=rigModes, h=hide)
         pm.addAttr(rigRoot, ln='isBuilt', at='bool', h=hide)
         
         # NAMING
-        pm.addAttr(rigRoot, ln='prefix', dt='string')
-        pm.addAttr(rigRoot, ln='prefixIndex', at='short')
-        pm.addAttr(rigRoot, ln='limbIndex', at='short', dv=1)
-        pm.addAttr(rigRoot, ln='jointIndex', at='short', dv=2)
-        pm.addAttr(rigRoot, ln='sideIndex', at='short', dv=3)
-        pm.addAttr(rigRoot, ln='typeIndex', at='short', dv=4)
-        pm.addAttr(rigRoot, ln='showPrefix', at='bool')
-        pm.addAttr(rigRoot, ln='mainTab', dt='string') # Changed to string
-        pm.addAttr(rigRoot, ln='subTab', dt='string') # replace old indexes
+        pm.addAttr(rigRoot, ln='pfrsName', dt='string', h=hide)
+        pm.addAttr(rigRoot, ln='rootIndex', at='short', h=hide)
+        pm.addAttr(rigRoot, ln='limbIndex', at='short', dv=1, h=hide)
+        pm.addAttr(rigRoot, ln='jointIndex', at='short', dv=2, h=hide)
+        pm.addAttr(rigRoot, ln='sideIndex', at='short', dv=3, h=hide)
+        pm.addAttr(rigRoot, ln='typeIndex', at='short', dv=4, h=hide)
+        pm.addAttr(rigRoot, ln='showRootName', at='bool', h=hide)
+        pm.addAttr(rigRoot, ln='category', dt='string', h=hide)
+        pm.addAttr(rigRoot, ln='operation', dt='string', h=hide)
 
         # ROOT CONNECTIONS
-        pm.addAttr(rigRoot, ln='limbs', dt='string')
-        pm.addAttr(rigRoot, ln='meshes', dt='string')
-        pm.addAttr(rigRoot, ln='presets', dt='string')
+        pm.addAttr(rigRoot, ln='limbs', dt='string', h=hide)
+        pm.addAttr(rigRoot, ln='meshes', dt='string', h=hide)
+        pm.addAttr(rigRoot, ln='presets', dt='string', h=hide)
 
         # IDS
-        pm.addAttr(rigRoot, ln='nextLimbID', at='short', dv=1)
-        pm.addAttr(rigRoot, ln='nextJointID', at='short', dv=1)
-        # pm.addAttr(rigRoot, ln='nextGroupID', at='long')
-        # pm.addAttr(rigRoot, ln='nextControlID', at='long')
-        pm.addAttr(rigRoot, ln='nextMeshID', at='short', dv=1)
+        pm.addAttr(rigRoot, ln='nextLimbID', at='short', dv=1, h=hide)
+        pm.addAttr(rigRoot, ln='nextJointID', at='short', dv=1, h=hide)
+        # pm.addAttr(rigRoot, ln='nextGroupID', at='long', h=hide)
+        # pm.addAttr(rigRoot, ln='nextControlID', at='long', h=hide)
+        pm.addAttr(rigRoot, ln='nextMeshID', at='short', dv=1, h=hide)
 
         # When Joints/limbs added/removed
         pm.addAttr(rigRoot, ln='rebuildSkinInf', at='bool', h=hide)
 
         # ANIMATION
-        pm.addAttr(rigRoot, ln='posesFolderPath', dt='string')
+        pm.addAttr(rigRoot, ln='posesFolderPath', dt='string', h=hide)
 
         #============= GROUPS ============================
 
         # GROUPS
-        pm.addAttr(rigRoot, ln='jointsParentGroup', dt='string')
-        pm.addAttr(rigRoot, ln='limbsParentGroup', dt='string')
-        pm.addAttr(rigRoot, ln='meshesParentGroup', dt='string')
-        pm.addAttr(rigRoot, ln='controlTemplates', dt='string')
+        pm.addAttr(rigRoot, ln='jointsParentGroup', dt='string', h=hide)
+        pm.addAttr(rigRoot, ln='limbsParentGroup', dt='string', h=hide)
+        pm.addAttr(rigRoot, ln='meshesParentGroup', dt='string', h=hide)
+        pm.addAttr(rigRoot, ln='controlTemplates', dt='string', h=hide)
 
         group = pm.group(name=rigData.JOINTS_GROUP, em=True, p=rigRoot)
         pm.addAttr(group, ln='rigRoot', dt='string')

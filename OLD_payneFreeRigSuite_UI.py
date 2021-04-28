@@ -131,7 +131,7 @@ class PayneFreeRigSuite_UI:
 
     def InitTab(self):
         self.logger.debug('\tPFRS_UI > InitTab')
-        index = self.pfrs.root.mainTab.get()
+        index = self.pfrs.root.category.get()
         pm.tabLayout(self.tab, e=1, sti=index+1)
         self.rig_ui.InitTab()
         self.skin_ui.InitTab()
@@ -140,7 +140,7 @@ class PayneFreeRigSuite_UI:
 
     def Setup_Editable(self):
         self.logger.debug('\tPFRS_UI > SETUP_Editable')
-        index = self.pfrs.root.mainTab.get()
+        index = self.pfrs.root.category.get()
         if (index == 0):
             self.rig_ui.Setup_Editable()
         elif (index == 1):
@@ -150,7 +150,7 @@ class PayneFreeRigSuite_UI:
         
     def Teardown_Editable(self):
         self.logger.debug('\tPFRS_UI > TEARDOWN_Editable')
-        lastIndex = self.pfrs.root.mainTab.get()
+        lastIndex = self.pfrs.root.category.get()
         if (lastIndex == 0): 
             self.rig_ui.Teardown_Editable()
         elif (lastIndex == 1): 
@@ -162,7 +162,7 @@ class PayneFreeRigSuite_UI:
     def TabChanged(self):
         nextIndex = pm.tabLayout(self.tab, q=1, selectTabIndex=1)-1
         self.Teardown_Editable()
-        self.pfrs.root.mainTab.set(nextIndex)
+        self.pfrs.root.category.set(nextIndex)
         self.Setup_Editable()
     
 #=========== FUNCTIONALITY ====================================
@@ -225,11 +225,11 @@ class PayneFreeRigSuite_UI:
         #     prefix = (tempPrefix != self.pfrs.nameMng.GetPrefix())
         #     meshPath = (tempMeshPath != self.pfrs.fileMng.GetMeshPath())
         #     outputPath = (tempOutputPath != self.pfrs.fileMng.GetOutputFile())
-        #     showPrefix = (tempShowPrefix != self.pfrs.nameMng.GetShowPrefix())
+        #     showRootName = (tempShowPrefix != self.pfrs.nameMng.GetShowPrefix())
         #     order = (tempOrder != self.pfrs.nameMng.GetNamingOrder())
         #     if (prefix):
         #         self.pfrs.rigSceneMng.UpdatePrefix()
-        #     if (prefix or showPrefix or order):
+        #     if (prefix or showRootName or order):
         #         self.limbs_tw.UpdateNaming()
         #     if meshPath:
         #         self.pfrs.rigSceneMng.UpdateMeshes()

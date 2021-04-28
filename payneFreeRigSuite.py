@@ -94,7 +94,7 @@ class PayneFreeRigSuite:
 
     def UpdateRootName(self, rigRoot):
         log.funcFileDebug()
-        rigRoot.rename('%s_ROOT' % rigRoot.prefix.get())
+        rigRoot.rename('%s_ROOT' % rigRoot.pfrsName.get())
         for limb in pm.listConnections(rigRoot.limbs):
             genUtil.Name.UpdateLimbName(rigRoot, limb)
 
@@ -111,17 +111,17 @@ class PayneFreeRigSuite:
         rigMode = rigRoot.rigMode.get()
         if rigMode == 0:
             rigRoot.rigMode.set(1)
-        oldMain = rigRoot.mainTab.get()
-        oldSub = rigRoot.subTab.get()
-        rigRoot.mainTab.set('Animation')
-        rigRoot.subTab.set('Poses')
+        oldMain = rigRoot.category.get()
+        oldSub = rigRoot.operation.get()
+        rigRoot.category.set('Animation')
+        rigRoot.operation.set('Poses')
         setupFile = pm.sceneName()
         
         pm.saveAs(filePath)
 
         rigRoot.rigMode.set(rigMode)
-        rigRoot.mainTab.set(oldMain)
-        rigRoot.subTab.set(oldSub)
+        rigRoot.category.set(oldMain)
+        rigRoot.operation.set(oldSub)
 
         if setupFile:
             pm.saveAs(setupFile)
@@ -217,51 +217,11 @@ class PayneFreeRigSuite:
 #         self.jntMng.LoadScene()
 #         self.meshMng.LoadScene()
 
-#     def ExportAnimationRig(self):
-#         self.logger.debug('\tPFRS > ExportAnimationRig')
-#         name = '%s_AnimRig' % self.root.prefix.get()
-#         setupFile = pm.sceneName()
-#         filePath = os.path.join(os.path.dirname(setupFile), name)
-#         result = pm.fileDialog2(ff='Maya ASCII (*.ma);;Maya Binary (*.mb)', 
-#                                 dir=filePath, 
-#                                 cap='Save Exported Animation Rig')
-#         if not result:
-#             return
-#         animFile = result[0]
-#         # Make pose folder
-#         folder = os.path.dirname(animFile)
-#         poseFolder = os.path.join(folder, 'Poses')
-#         if not os.path.exists(poseFolder):
-#             os.makedirs(poseFolder)
-#         self.root.posesFolderPath.set(poseFolder)
-
-#         # BUILD RIG
-#         limbs = util.GetAllLimbs(self.root)
-#         for limb in limbs:
-#             self.grpMng.Setup_LimbGroupVisibility(limb)
-#         self.bldMng.Setup_Rig()
-#         self.ctrMng.SetLayerState(True, False)
-
-#         # SET STARTING TAB
-#         oldTab = self.root.mainTab.get()
-#         self.root.mainTab.set(2)
-#         # SAVE
-#         pm.saveAs(animFile)
-
-#         # REVERT
-#         self.root.mainTab.set(oldTab)
-#         self.bldMng.Teardown_Rig()
-#         for limb in limbs:
-#             self.grpMng.Teardown_LimbGroupVisibility(limb)
-
-#         if setupFile:
-#             pm.saveAs(setupFile)
-
 # #============= ROOT ============================
 
-#     def NewRoot(self, prefix, nameOrder, showPrefix):
+#     def NewRoot(self, rootName, nameOrder, showRootName):
 #         self.logger.debug('\tPFRS > NewRoot')
-#         self.root = self.rootMng.AddRoot(prefix, nameOrder, showPrefix)
+#         self.root = self.rootMng.AddRoot(rootName, nameOrder, showRootName)
 #         self.limbMng.NewRoot()
 #         self.jntMng.NewRoot()
 #         self.meshMng.NewRoot()

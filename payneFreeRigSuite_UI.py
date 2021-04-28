@@ -27,6 +27,8 @@ import Data.Rig_Data as rigData
 reload(rigData)
 import Common.Rig_Utilities as rigUtil
 reload(rigUtil)
+import Popups.EditRoot as edRt
+reload(edRt)
 
 # import Import_Utilities as impUtil
 # reload(impUtil)
@@ -81,10 +83,6 @@ class PayneFreeRigSuite_UI:
                 with pm.columnLayout(co=('left', 0)):
                     self.op_op = pm.optionMenu(l='Operation', 
                                                 cc=self.SetOperation)
-                # with pm.columnLayout(co=('left', 0)):
-                #     pm.button(l='TESTING', c=self.TESTING)
-            # self.layout = pm.horizontalLayout(p=self.win)
-            # pm.text('asdf')
             with pm.frameLayout(bv=0, lv=0) as self.frame:
                 pm.text(l='Loading...', en=0)
                 
@@ -151,8 +149,8 @@ class PayneFreeRigSuite_UI:
 
     def InitOptionMenues(self):
         log.funcFileDebug()
-        category = self._rigRoot.mainTab.get()
-        operationName = self._rigRoot.subTab.get()
+        category = self._rigRoot.category.get()
+        operationName = self._rigRoot.operation.get()
         index = self.pfrs.categories.index(category) + 1
         pm.optionMenu(self.cat_op, e=1, sl=index)
         self.PopulateOperations(category)
@@ -205,7 +203,7 @@ class PayneFreeRigSuite_UI:
                 t='Rig Already Exported',
                 m='Rig Root has already be exported to anim rig',
                 button=['Ok']) 
-        name = '%s_AnimRig' % self._rigRoot.prefix.get()
+        name = '%s_AnimRig' % self._rigRoot.pfrsName.get()
         setupFile = pm.sceneName()
         filePath = os.path.join(os.path.dirname(setupFile), name)
         result = pm.fileDialog2(ff='Maya ASCII (*.ma);;Maya Binary (*.mb)', 
@@ -245,8 +243,10 @@ class PayneFreeRigSuite_UI:
 
     def EditRig_Dialog(self, ignore):
         log.funcFileInfo()
-        # self.logger.debug('\tPFRS_UI > EditRig_Dialog')
-        pass
+        edRt.EditRoot(self._rigRoot, self)
         # self.rootPopup = root_popup.POPUP_EditRoot(self)
         # self.rootPopup.EditRoot_Dialog()
 
+    def UpdateRigRoot(self):
+        self.pfrs.UpdateRootName(self._rigRoot)
+        self.SetOperation(self._rigRoot.operation.get())

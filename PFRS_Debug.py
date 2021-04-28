@@ -28,6 +28,7 @@ class PFRS_Debug:
         # self.LegTest()
         # self.SpineTest()
         self.AnimPosesTest()
+        # self.MirrorTest()
         # self.LimbTypesTest()
         # self.SkeletonTest()
 
@@ -42,7 +43,7 @@ class PFRS_Debug:
         self.NewScene()
         path = os.path.join(self.folder, 'TEST_SimpleChain_01.ma')
         rigRoot = self.pfrs.AddRigRoot()
-        rigRoot.subTab.set('Behavior')
+        rigRoot.operation.set('Behavior')
         pm.importFile(path)
         self.pfrs.InitSceneJoints(rigRoot)
         self.pfrs.LimbSetup.AutoBuildByHierarchy(rigRoot)
@@ -52,7 +53,7 @@ class PFRS_Debug:
         path = os.path.join(self.folder, 'TEST_ArmFingers_01.ma')
         pm.importFile(path)
         rigRoot = self.pfrs.AddRigRoot()
-        rigRoot.subTab.set('Behavior')
+        rigRoot.operation.set('Behavior')
         # self.pfrs.LimbSetup.AutoBuildByHierarchy(rigRoot)
         self.pfrs.LimbSetup.AutoBuildByName(rigRoot)
         
@@ -61,7 +62,7 @@ class PFRS_Debug:
         path = os.path.join(self.folder, 'TEST_LegFoot_01.ma')
         pm.importFile(path)
         rigRoot = self.pfrs.AddRigRoot()
-        rigRoot.subTab.set('Behavior')
+        rigRoot.operation.set('Behavior')
         # self.pfrs.LimbSetup.AutoBuildByHierarchy(rigRoot)
         self.pfrs.LimbSetup.AutoBuildByName(rigRoot)
 
@@ -70,8 +71,15 @@ class PFRS_Debug:
         path = os.path.join(self.folder, 'TEST_Spine_01.ma')
         pm.importFile(path)
         rigRoot = self.pfrs.AddRigRoot()
-        rigRoot.subTab.set('Behavior')
-        # self.pfrs.LimbSetup.AutoBuildByHierarchy(rigRoot)
+        rigRoot.operation.set('Behavior')
+        self.pfrs.LimbSetup.AutoBuildByName(rigRoot)
+        
+    def MirrorTest(self):
+        self.NewScene()
+        path = os.path.join(self.folder, 'TEST_Mirror_01.ma')
+        pm.importFile(path)
+        rigRoot = self.pfrs.AddRigRoot()
+        rigRoot.operation.set('Behavior')
         self.pfrs.LimbSetup.AutoBuildByName(rigRoot)
         
     def AnimPosesTest(self):

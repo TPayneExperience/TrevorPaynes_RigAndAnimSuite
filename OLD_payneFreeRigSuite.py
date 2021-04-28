@@ -109,13 +109,13 @@ class PayneFreeRigSuite:
         self.ctrMng.SetLayerState(True, False)
 
         # SET STARTING TAB
-        oldTab = self.root.mainTab.get()
-        self.root.mainTab.set(2)
+        oldTab = self.root.category.get()
+        self.root.category.set(2)
         # SAVE
         pm.saveAs(animFile)
 
         # REVERT
-        self.root.mainTab.set(oldTab)
+        self.root.category.set(oldTab)
         self.bldMng.Teardown_Rig()
         for limb in limbs:
             self.grpMng.Teardown_LimbGroupVisibility(limb)
@@ -125,9 +125,9 @@ class PayneFreeRigSuite:
 
 #============= ROOT ============================
 
-    def NewRoot(self, prefix, nameOrder, showPrefix):
+    def NewRoot(self, prefix, nameOrder, showRootName):
         self.logger.debug('\tPFRS > NewRoot')
-        self.root = self.rootMng.AddRoot(prefix, nameOrder, showPrefix)
+        self.root = self.rootMng.AddRoot(prefix, nameOrder, showRootName)
         self.limbMng.NewRoot()
         self.jntMng.NewRoot()
         self.meshMng.NewRoot()

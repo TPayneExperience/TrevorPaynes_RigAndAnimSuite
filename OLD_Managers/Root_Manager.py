@@ -22,11 +22,11 @@ class Root_Manager:
 
 #============= ADD / REMOVE? ============================
 
-    def AddRoot(self, prefix, nameOrder, showPrefix):
+    def AddRoot(self, prefix, nameOrder, showRootName):
         msg = '\tRootMng > AddRoot'
         msg += '\n\t\tPrefix = ' + prefix
         msg += '\n\t\tNameOrder = ' + str(nameOrder)
-        msg += '\n\t\tShowPrefix = ' + str(showPrefix)
+        msg += '\n\t\tShowPrefix = ' + str(showRootName)
         hide = genData.HIDE_ATTRS
         self.logger.debug(msg)
         rootID = 1
@@ -41,13 +41,13 @@ class Root_Manager:
         
         # NAMING
         pm.addAttr(root, ln='prefix', dt='string')
-        pm.addAttr(root, ln='prefixIndex', at='short', dv=nameOrder[0])
+        pm.addAttr(root, ln='rootIndex', at='short', dv=nameOrder[0])
         pm.addAttr(root, ln='limbIndex', at='short', dv=nameOrder[1])
         pm.addAttr(root, ln='jointIndex', at='short', dv=nameOrder[2])
         pm.addAttr(root, ln='sideIndex', at='short', dv=nameOrder[3])
         pm.addAttr(root, ln='typeIndex', at='short', dv=nameOrder[4])
-        pm.addAttr(root, ln='showPrefix', at='bool', dv=showPrefix)
-        pm.addAttr(root, ln='mainTab', at='enum', en='Rig:Skin:Anim')
+        pm.addAttr(root, ln='showRootName', at='bool', dv=showRootName)
+        pm.addAttr(root, ln='category', at='enum', en='Rig:Skin:Anim')
         pm.addAttr(root, ln='riggingTab', at='enum',
                                     en='Joint:Limbs:Behaviors:Appearance:Test')
         pm.addAttr(root, ln='skinningTab', at='enum', 

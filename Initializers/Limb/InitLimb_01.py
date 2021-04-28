@@ -14,7 +14,7 @@ class InitLimb(absInit.Abstract_Initializer):
     @staticmethod
     def Initialize(limb):
         log.funcFileDebug()
-        if limb.hasAttr('limbType'):
+        if limb.hasAttr('pfrsVersion'):
             return
             
         #============= ATTRS ============================
@@ -23,6 +23,7 @@ class InitLimb(absInit.Abstract_Initializer):
         limbTypes = ':'.join(rigData.LIMB_TYPES)
         limbSides = ':'.join(rigData.LIMB_SIDES)
         
+        pm.addAttr(limb, ln='pfrsVersion', at='short', dv=100, h=hide)
         pm.addAttr(limb, ln='rigRoot', dt='string', h=hide)
         pm.addAttr(limb, ln='ID', at='long', h=hide)
         pm.addAttr(limb, ln='pfrsName', dt='string', h=hide)
