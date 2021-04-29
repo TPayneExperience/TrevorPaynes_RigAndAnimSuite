@@ -22,6 +22,7 @@ class IK_Spline_01(absBhv.Abstract_Behavior):
         log.funcFileDebug()
         if not limb.hasAttr('IKSCurve'):
             pm.addAttr(limb, ln='IKSCurve', dt='string')
+            pm.addAttr(limb, ln='IKSTwist', at='float')
         limbGroups = pm.listConnections(limb.usedGroups)
         limbGroups = rigUtil.SortGroups(limbGroups)
         jointGroups = pm.listConnections(limb.parentableGroups)
@@ -70,6 +71,7 @@ class IK_Spline_01(absBhv.Abstract_Behavior):
                                                     sol='ikSplineSolver')
         handle = temp[0]
         handle.v.set(0)
+        pm.connectAttr(limb.IKSTwist, handle.twist)
         pm.parent(handle, curve, limb)
         # Setup Control clusters
         for i in range(4):
@@ -141,9 +143,8 @@ class IK_Spline_01(absBhv.Abstract_Behavior):
 #============= ANIMATION UI ============================
 
     def Setup_Animation_Limb_UI(self, limb):
-        return False # return if UI is enabled
-    
-    def Setup_Animation_Group_UI(self, group):
-        pass
+        with pm.columnLayout(co=('left', -100)):
+            pm.attrControlGrp(l='Twist', a=limb.IKSTwist)
+        return True # return if UI is enabled
     
     

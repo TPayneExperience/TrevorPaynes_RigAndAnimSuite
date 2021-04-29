@@ -20,7 +20,7 @@ reload(pst)
 import SceneData.Behavior_Manager as bhvMng
 reload(bhvMng)
 
-class Behavior(absOp.Abstract_Operation):
+class RIG_Behavior(absOp.Abstract_Operation):
     isRigBuilt = False
     validRigStates = (0, 1)     # 0 = Setup, 1 = Anim
     controlLayerState = (1, 1)  # isVis, isRef

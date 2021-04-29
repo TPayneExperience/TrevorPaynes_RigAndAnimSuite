@@ -3,7 +3,7 @@ import pymel.core as pm
 
 import Abstracts.Abstract_OperationUI as absOpUI
 reload(absOpUI)
-import Behavior as bhv
+import RIG_Behavior as bhv
 reload(bhv)
 import Common.UI_Utilities as uiUtil
 reload(uiUtil)
@@ -21,10 +21,10 @@ reload(rrt)
 import SceneData.Behavior_Manager as bhvMng
 reload(bhvMng)
 
-class Behavior_UI(absOpUI.Abstract_OperationUI):
+class RIG_Behavior_UI(absOpUI.Abstract_OperationUI):
     uiName = 'Behavior'
     orderIndex = 200
-    operation = bhv.Behavior()
+    operation = bhv.RIG_Behavior()
     def __init__(self):
         self._bhvTypes = []
         self._currentBhv = None # for verifying group selection

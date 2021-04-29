@@ -93,7 +93,3 @@ class Abstract_Behavior:
     def Setup_Animation_Limb_UI(self, limb):
         return False # return if UI is enabled
     
-    @abstractmethod
-    def Setup_Animation_Group_UI(self, group):
-        pass
-    

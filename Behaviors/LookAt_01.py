@@ -23,6 +23,9 @@ class LookAt_01(absBhv.Abstract_Behavior):
         if not limb.hasAttr('lookAtDistance'):
             pm.addAttr(limb, ln='lookAtDistance', at='float', 
                                                 min=0, dv=1)
+            pm.addAttr(limb, ln='lookAtOffsetX', at='float')
+            pm.addAttr(limb, ln='lookAtOffsetY', at='float')
+            pm.addAttr(limb, ln='lookAtOffsetZ', at='float')
         joint = pm.listConnections(limb.joints)[0]
         group = pm.listConnections(limb.usedGroups)[0]
         pm.parent(group, joint)
@@ -47,7 +50,10 @@ class LookAt_01(absBhv.Abstract_Behavior):
         rigUtil.ResetAttrs(control)
 
         # Aim Constraint + Joint Group Constraint
-        pm.aimConstraint(control, joint, mo=1)
+        cst = pm.aimConstraint(control, joint, mo=1)
+        pm.connectAttr(limb.lookAtOffsetX, cst.offsetX)
+        pm.connectAttr(limb.lookAtOffsetY, cst.offsetY)
+        pm.connectAttr(limb.lookAtOffsetZ, cst.offsetZ)
         jointGroup = pm.listConnections(joint.group)[0]
         pm.parentConstraint(joint, jointGroup, mo=1)
     
@@ -90,10 +96,11 @@ class LookAt_01(absBhv.Abstract_Behavior):
 #============= ANIMATION UI ============================
 
     def Setup_Animation_Limb_UI(self, limb):
-        return False # return if UI is enabled
-    
-    def Setup_Animation_Group_UI(self, group):
-        pass
+        with pm.columnLayout(co=('left', -100)):
+            pm.attrControlGrp(l='Offset X', a=limb.lookAtOffsetX)
+            pm.attrControlGrp(l='Offset Y', a=limb.lookAtOffsetY)
+            pm.attrControlGrp(l='Offset Z', a=limb.lookAtOffsetZ)
+        return True # return if UI is enabled
     
     def _UpdateControl(self, limb):
         dist = limb.lookAtDistance.get()

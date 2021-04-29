@@ -124,6 +124,3 @@ class FK_Chain_01(absBhv.Abstract_Behavior):
     def Setup_Animation_Limb_UI(self, limb):
         return False 
     
-    def Setup_Animation_Group_UI(self, group):
-        pass
-    

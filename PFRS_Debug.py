@@ -27,7 +27,9 @@ class PFRS_Debug:
         # self.ArmTest()
         # self.LegTest()
         # self.SpineTest()
-        self.AnimPosesTest()
+        # self.AnimPosesTest()
+        # self.RigBehaviorTest()
+        self.AnimBehaviorTest()
         # self.MirrorTest()
         # self.LimbTypesTest()
         # self.SkeletonTest()
@@ -85,6 +87,21 @@ class PFRS_Debug:
     def AnimPosesTest(self):
         path = os.path.join(self.folder, 'PFX_AnimRig.ma')
         pm.openFile(path, f=1)
+
+    def RigBehaviorTest(self):
+        self.NewScene()
+        path = os.path.join(self.folder, 'TEST_Mirror_01.ma')
+        pm.importFile(path)
+        rigRoot = self.pfrs.AddRigRoot()
+        rigRoot.operation.set('Behavior')
+        self.pfrs.LimbSetup.AutoBuildByName(rigRoot)
+
+    def AnimBehaviorTest(self):
+        path = os.path.join(self.folder, 'PFX_AnimRig.ma')
+        pm.openFile(path, f=1)
+        allRoots = self.pfrs.GetRigRoots()
+        rigRoot = allRoots[0]
+        rigRoot.operation.set('Behavior')
 
     def LimbTypesTest(self):
         self.NewScene()

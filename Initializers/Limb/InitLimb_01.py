@@ -56,22 +56,4 @@ class InitLimb(absInit.Abstract_Initializer):
         
         pm.addAttr(limb, ln='presets', dt='string', h=hide)
 
-        # SHOULD BE HANDLED BY BEHAVIOERS INSTEAD!!!
-        # # CST
-        # pm.addAttr(limb, ln='bhvChildren', dt='string', h=hide) 
-        # pm.addAttr(limb, ln='bhvParent', dt='string', h=hide) 
-        # pm.addAttr(limb, ln='bhvParentJoint', at='enum', en='None', h=hide)
-        # pm.addAttr(limb, ln='bhvCstType', at='enum', en=bhvCstTypes, h=hide)
-        # pm.addAttr(limb, ln='cstPosX', at='bool', dv=1, h=hide)
-        # pm.addAttr(limb, ln='cstPosY', at='bool', dv=1, h=hide)
-        # pm.addAttr(limb, ln='cstPosZ', at='bool', dv=1, h=hide)
-        # pm.addAttr(limb, ln='cstRotX', at='bool', dv=1, h=hide)
-        # pm.addAttr(limb, ln='cstRotY', at='bool', dv=1, h=hide)
-        # pm.addAttr(limb, ln='cstRotZ', at='bool', dv=1, h=hide)
-
-        # # IK PV + Look At
-        # pm.addAttr(limb, ln='bhvLookAtAxis', at='enum', en=axes) # IKPV, LookAt
-        # pm.addAttr(limb, ln='bhvLookAtDistance', at='float', min=0, dv=1) # IKPV, LookAt
-        # pm.addAttr(limb, ln='bhvIKPVDistance', at='float', min=0, dv=1) # IKPV, LookAt
-        
         

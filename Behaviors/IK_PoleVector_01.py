@@ -137,9 +137,6 @@ class IK_PoleVector_01(absBhv.Abstract_Behavior):
     def Setup_Animation_Limb_UI(self, limb):
         return False # return if UI is enabled
     
-    def Setup_Animation_Group_UI(self, group):
-        pass
-    
     def _UpdateIKPV1(self, limb):
         dist = limb.ikpvDistance.get()
         ikpv1 = rigUtil.GetLimbGroups(limb, self.groupType)[0]

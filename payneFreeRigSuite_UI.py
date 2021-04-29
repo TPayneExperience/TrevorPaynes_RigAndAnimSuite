@@ -154,7 +154,9 @@ class PayneFreeRigSuite_UI:
         index = self.pfrs.categories.index(category) + 1
         pm.optionMenu(self.cat_op, e=1, sl=index)
         self.PopulateOperations(category)
-        # Set Operation
+        self.UpdateOperationOptionMenu(operationName)
+    
+    def UpdateOperationOptionMenu(self, operationName):
         if operationName in self.operationNames:
             index = self.operationNames.index(operationName) + 2
             pm.optionMenu(self.op_op, e=1, sl=index)
@@ -166,6 +168,9 @@ class PayneFreeRigSuite_UI:
     def SetCategory(self, category):
         log.funcFileInfo()
         self.PopulateOperations(category)
+        operationName = self._rigRoot.operation.get()
+        self.SetOperation(operationName)
+        self.UpdateOperationOptionMenu(operationName)
     
     def SetOperation(self, operationName):
         log.funcFileInfo()
