@@ -17,6 +17,8 @@ class Empty_01(absBhv.Abstract_Behavior):
     groupCount = 1
     groupMoveable = True    # for moving control pivots
     orderIndex = 110  
+    usesJointControls = False
+    usesLimbControls = True
     
     def InitLimb(self, limb):
         log.funcFileDebug()

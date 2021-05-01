@@ -70,6 +70,7 @@ class Behavior_Manager:
         Behavior_Manager._SetupLimbGroups(rigRoot, limb, bhv)
         bhv.InitLimb(limb)
         Behavior_Manager._Setup_GroupVisibility(limb)
+        rigUtil.UpdateUsedControlMaterials(rigRoot, limb)
         return bhv
 
     @staticmethod
@@ -86,7 +87,20 @@ class Behavior_Manager:
                 rigUtil.Setup_ControllersToParent(limb)
             else:
                 rigUtil.Setup_ControllersGroup(limb)
-        # CHANNEL BOX SETUP in pfrs???
+            if bhv.usesJointControls:
+                for group in pm.listConnections(limb.parentableGroups):
+                    control = pm.listConnections(group.control)[0]
+                    pos = limb.channelBoxJointCtrPos.get()
+                    rot = limb.channelBoxJointCtrRot.get()
+                    scale = limb.channelBoxJointCtrScale.get()
+                    rigUtil.ChannelBoxAttrs(control, pos, rot, scale, 0)
+            if bhv.usesLimbControls:
+                for group in pm.listConnections(limb.limbGroups):
+                    control = pm.listConnections(group.control)[0]
+                    pos = limb.channelBoxLimbCtrPos.get()
+                    rot = limb.channelBoxLimbCtrRot.get()
+                    scale = limb.channelBoxLimbCtrScale.get()
+                    rigUtil.ChannelBoxAttrs(control, pos, rot, scale, 0)
         
     @staticmethod
     def Teardown_Rig(rigRoot):

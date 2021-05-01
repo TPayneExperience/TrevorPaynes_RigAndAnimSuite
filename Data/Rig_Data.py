@@ -34,28 +34,6 @@ BHV_TYPES = (   'FK - Chain',           # 200
                 'DEPRICATED - FK - Reverse Chain (2 Joints)' # 12
                 )
                 
-# EMPTY_BHV_INDEXES = (7,)
-# ONE_JOINT_BHV_INDEXES = (6, 4, 3)
-# TWO_JOINT_CHAIN_BHV_INDEXES = (0, 8, 6) # (11, 6, 12)
-# THREE_JOINT_CHAIN_BHV_INDEXES = (0, 8, 6, 10, 9, 1, 3)
-# TWO_JOINT_BRANCH_BHV_INDEXES = (6, 3)
-
-# REVERSE_BHV_INDEXES = (8, 9) # (8, 12, 9)
-
-# FK_BRANCH_BHV_INDEXES = (6,)
-# FK_CHAIN_BHV_INDEXES = (0, 8) # (0, 8, 11, 12)
-# FK_BHV_INDEXES = (0, 6, 8)
-# RFK_BHV_INDEXES = (10, 9)
-# JOINT_CONTROL_INDEXES = (0, 6, 8, 9, 10)
-
-# IK_PV_BHV_INDEXES = (1,)
-# CST_BHV_INDEXES = (3,)
-# LOOK_AT_BHV_INDEXES = (4,)
-# LIMB_CONTROL_INDEXES = (1, 4, 7)
-
-# ROT_LOCK_OVERRIDE_BHV_INDEXES = (9, 10)
-# POS_LOCK_OVERRIDE_BHV_INDEXES = (9, 10)
-
 AXES_NAMES = ('X', '-X', 'Y', '-Y', 'Z', '-Z')
 AXES_XFORMS =   ((0,0,0),
                 (0,180,0),
@@ -78,12 +56,6 @@ LIMB_TYPES = (  'Empty',
                 'Custom3',
                 'Custom4',
                 'Custom5')
-# LIMB_TYPES = (  'Empty - Rigging',
-        
-#                 '1 Joint BRANCH',
-#                 '3+ Joint CHAIN', 
-#                 '2+ Joint BRANCH',
-#                 '2 Joint CHAIN')
 LIMB_SIDES = ('M', 'L', 'R', '-')
 LIMB_JOINT_NAME_PRESETS = { # lowercase to for keycheck
                 'arm' : ['Shoulder', 'Elbow', 'Wrist'],

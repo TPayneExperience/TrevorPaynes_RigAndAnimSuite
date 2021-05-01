@@ -34,6 +34,14 @@ class Abstract_Behavior:
         pass 
 
     @abstractproperty
+    def usesJointControls(self):    # bool | True
+        pass 
+
+    @abstractproperty
+    def usesLimbControls(self):    # bool | True
+        pass 
+
+    @abstractproperty
     def orderIndex(self):       # int | 0, 100, 200...
         pass 
 

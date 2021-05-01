@@ -7,6 +7,8 @@ import Appearance as app
 reload(app)
 import Common.UI_Utilities as uiUtil
 reload(uiUtil)
+import Common.Rig_Utilities as rigUtil
+reload(rigUtil)
 # import Common.General_Utilities as genUtil
 # reload(genUtil)
 import Common.Logger as log
@@ -18,8 +20,8 @@ reload(log)
 
 # import SceneData.RigRoot as rrt
 # reload(rrt)
-# import SceneData.Behavior_Manager as bhvMng
-# reload(bhvMng)
+import SceneData.Behavior_Manager as bhvMng
+reload(bhvMng)
 
 class Appearance_UI(absOpUI.Abstract_OperationUI):
     uiName = 'Appearance'
@@ -32,11 +34,29 @@ class Appearance_UI(absOpUI.Abstract_OperationUI):
         self._rigRoot = None
 
     def Setup_UI(self, rigRoot, allRigRoots): 
-        self._Setup()
         self._rigRoot = rigRoot
         self._allRigRoots = allRigRoots
+        self._Setup()
         self.PopulateLimbHier()
-        
+        for rigRoot in allRigRoots:
+            for limb in pm.listConnections(rigRoot.limbs):
+                bhv = bhvMng.Behavior_Manager.bhvs[limb.bhvFile.get()]
+                if bhv.groupMoveable:
+                    continue
+                for group in pm.listConnections(limb.usedGroups):
+                    control = pm.listConnections(group.control)[0]
+                    rigUtil.ChannelBoxAttrs(control, 0, 1, 1, 0)
+
+    def Teardown_UI(self, rigRoot, allRigRoots):
+        for rigRoot in allRigRoots:
+            for limb in pm.listConnections(rigRoot.limbs):
+                bhv = bhvMng.Behavior_Manager.bhvs[limb.bhvFile.get()]
+                if bhv.groupMoveable:
+                    continue
+                for group in pm.listConnections(limb.usedGroups):
+                    control = pm.listConnections(group.control)[0]
+                    rigUtil.ChannelBoxAttrs(control, 1, 1, 1, 0)
+
 #=========== SETUP UI ====================================
 
     def _Setup(self):
@@ -45,27 +65,45 @@ class Appearance_UI(absOpUI.Abstract_OperationUI):
                 self.limb_tv = pm.treeView(ams=0, adr=0, arp=0, nb=1, enk=1,
                                             elc=self.IgnoreRename)
                 pm.treeView(self.limb_tv, e=1, scc=self.SelectedLimb)
+                with pm.popupMenu(): #as self.rmb_ui:
+                    self._reimport_mi = pm.menuItem(l='Reimport Control Shapes', 
+                                                    c=self.ReimportControlShapes)
             with pm.frameLayout('Controls', bv=1):
                 self.control_tv = pm.treeView(arp=0, adr=0, ams=0,
                                             elc=self.IgnoreRename)
                 pm.treeView(self.control_tv, e=1, scc=self.SelectedControl)
         with pm.verticalLayout():
-            with pm.frameLayout('Set Control Channelboxes', bv=1, en=0) as self.limbProp_fl:
+            with pm.frameLayout('Set Control Channelboxes (see tooltips)', bv=1, en=0) as self.limbProp_fl:
                 with pm.columnLayout(co=('left', -100)) as self.appLimbLockHide_cl:
-                    msg = 'FK = Joint FK, Empty'
-                    self.jointPos = pm.attrControlGrp(l='FK Translate', ann=msg,
+                    msg = 'Joint = FK Chain + Reverse, FK Branch Controls'
+                    self.jointPos = pm.attrControlGrp(l='Joint Translate', ann=msg,
                                                     a='perspShape.shakeEnabled')
-                    self.jointRot = pm.attrControlGrp(l='FK Rotate', ann=msg,
+                    self.jointRot = pm.attrControlGrp(l='Joint Rotate', ann=msg,
                                                     a='perspShape.shakeEnabled')
-                    self.jointScale = pm.attrControlGrp(l='FK Scale', ann=msg,
+                    self.jointScale = pm.attrControlGrp(l='Joint Scale', ann=msg,
                                                     a='perspShape.shakeEnabled')
-                    msg = 'Misc = Look At, IK Pole Vector'
-                    self.limbPos = pm.attrControlGrp(l='MISC Translate', ann=msg,
+                    msg = 'Limb = Look At, IK Pole Vector, IK Spline, Empty, FK Relative'
+                    self.limbPos = pm.attrControlGrp(l='Limb Translate', ann=msg,
                                                     a='perspShape.shakeEnabled')
-                    self.limbRot = pm.attrControlGrp(l='MISC Rotate', ann=msg,
+                    self.limbRot = pm.attrControlGrp(l='Limb Rotate', ann=msg,
                                                     a='perspShape.shakeEnabled')
-                    self._limbscale = pm.attrControlGrp(l='MISC Scale', ann=msg,
+                    self._limbscale = pm.attrControlGrp(l='Limb Scale', ann=msg,
                                                     a='perspShape.shakeEnabled')
+            with pm.frameLayout('Set Control Colors', bv=1, en=0) as self.mtr_fl:
+                with pm.columnLayout(adj=1):
+                    self.clrL_cg = pm.attrColorSliderGrp(l='L Color', cw4=(66,44,44,22),
+                                                    at='perspShape.backgroundColor')
+                    self.opL_cg = pm.attrColorSliderGrp(l='L Opacity', cw4=(66,44,44,22),
+                                                    at='perspShape.backgroundColor')
+                    self.clrM_cg = pm.attrColorSliderGrp(l='M Color', cw4=(66,44,44,22),
+                                                    at='perspShape.backgroundColor')
+                    self.opM_cg = pm.attrColorSliderGrp(l='M Opacity', cw4=(66,44,44,22),
+                                                    at='perspShape.backgroundColor')
+                    self.clrR_cg = pm.attrColorSliderGrp(l='R Color', cw4=(66,44,44,22),
+                                                    at='perspShape.backgroundColor')
+                    self.opR_cg = pm.attrColorSliderGrp(l='R Opacity', cw4=(66,44,44,22),
+                                                    at='perspShape.backgroundColor')
+                    
             with pm.frameLayout('Set Control Shapes', bv=1, en=0) as self.ctrShapes_fl:
                 self.ctrShapes_cl = pm.columnLayout(adj=1)
 
@@ -75,7 +113,6 @@ class Appearance_UI(absOpUI.Abstract_OperationUI):
         log.funcFileDebug()
         self.PopulateControlHier(None)
         self.PopulateLimbProperties(None)
-        pm.frameLayout(self.ctrShapes_fl, e=1, en=0)
         self._limbIDs = uiUtil.PopulateLimbHier(self.limb_tv, 
                                                 self._rigRoot,
                                                 self._allRigRoots)
@@ -87,9 +124,11 @@ class Appearance_UI(absOpUI.Abstract_OperationUI):
     def SelectedLimb(self):
         log.funcFileInfo()
         limbIDStrs = pm.treeView(self.limb_tv, q=1, selectItem=1)
-        pm.frameLayout(self.ctrShapes_fl, e=1, en=bool(limbIDStrs))
+        self._rigRoot = None
         self.PopulateLimbProperties(None)
         self.PopulateControlHier(None)
+        self.PopulateControlMaterials(None)
+        self.PopulateControlShapes()
         if not limbIDStrs:
             return
         self._selectedLimbs = [self._limbIDs[ID] for ID in limbIDStrs]
@@ -97,11 +136,16 @@ class Appearance_UI(absOpUI.Abstract_OperationUI):
             log.debug('\t\t' + limb.pfrsName.get())
         if len(self._selectedLimbs) == 1:
             limb = self._selectedLimbs[0]
-            self.PopulateLimbProperties(limb)
+            self._rigRoot = pm.listConnections(limb.rigRoot)[0]
             self.PopulateControlHier(limb)
-            rigRoot = pm.listConnections(limb.rigRoot)[0]
-            self.PopulateControlShapes(rigRoot)
-         
+            self.PopulateLimbProperties(limb)
+            self.PopulateControlMaterials(self._rigRoot)
+            self.PopulateControlShapes()
+
+    def ReimportControlShapes(self, ignore):
+        log.funcFileInfo()
+        self.operation.ReimportControlShapes(self._rigRoot)
+
 #=========== CONTROL HIER ====================================
 
     def PopulateControlHier(self, limb):
@@ -137,13 +181,35 @@ class Appearance_UI(absOpUI.Abstract_OperationUI):
         pm.attrControlGrp(self.limbRot, e=1, a=limb.channelBoxLimbCtrRot)
         pm.attrControlGrp(self._limbscale, e=1, a=limb.channelBoxLimbCtrScale)
 
+#=========== MATERIAL PROPERTIES ====================================
+
+    def PopulateControlMaterials(self, rigRoot):
+        log.funcFileDebug()
+        pm.frameLayout(self.mtr_fl, e=1, en=bool(rigRoot))
+        if not rigRoot:
+            return
+        sgL = pm.listConnections(rigRoot.controlMtrL)[0]
+        sgM = pm.listConnections(rigRoot.controlMtrM)[0]
+        sgR = pm.listConnections(rigRoot.controlMtrR)[0]
+        mtrL = pm.listConnections(sgL.surfaceShader)[0]
+        mtrM = pm.listConnections(sgM.surfaceShader)[0]
+        mtrR = pm.listConnections(sgR.surfaceShader)[0]
+        pm.attrColorSliderGrp(self.clrL_cg, e=1, at=mtrL.outColor)
+        pm.attrColorSliderGrp(self.opL_cg, e=1, at=mtrL.outTransparency)
+        pm.attrColorSliderGrp(self.clrM_cg, e=1, at=mtrM.outColor)
+        pm.attrColorSliderGrp(self.opM_cg, e=1, at=mtrM.outTransparency)
+        pm.attrColorSliderGrp(self.clrR_cg, e=1, at=mtrR.outColor)
+        pm.attrColorSliderGrp(self.opR_cg, e=1, at=mtrR.outTransparency)
+
 #=========== RIG CONTROL SHAPES ====================================
 
-    def PopulateControlShapes(self, rigRoot):
+    def PopulateControlShapes(self):
         log.funcFileDebug()
-        if self._rigRoot == rigRoot:
+        pm.frameLayout(self.ctrShapes_fl, e=1, en=0)
+        if not self._rigRoot:
             return
-        self._rigRoot = rigRoot
+        rigRoot = self._rigRoot
+        pm.frameLayout(self.ctrShapes_fl, e=1, en=1)
         self._shapes_om = []
         pm.deleteUI(self.ctrShapes_cl)
         self._controlTemplates = self.operation.GetShapeTemplates(rigRoot)
@@ -180,6 +246,8 @@ class Appearance_UI(absOpUI.Abstract_OperationUI):
         self.operation.SetControlShape( self._rigRoot, 
                                         groupType, 
                                         shape)
+        for limb in pm.listConnections(self._rigRoot.limbs):
+            rigUtil.UpdateUsedControlMaterials(self._rigRoot, limb)
 
 
 

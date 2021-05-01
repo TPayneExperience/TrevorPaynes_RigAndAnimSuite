@@ -17,6 +17,8 @@ class IK_PoleVector_01(absBhv.Abstract_Behavior):
     groupCount = 2
     groupMoveable = False    # for moving control pivots
     orderIndex = 310  
+    usesJointControls = False
+    usesLimbControls = True
     
     def InitLimb(self, limb):
         log.funcFileDebug()
@@ -102,8 +104,9 @@ class IK_PoleVector_01(absBhv.Abstract_Behavior):
         pm.delete(constraints) # parentCsts
         
         # Delete limb groups constraints
-        constraints = [pm.listConnections(g.rx)[0] for g in limbGroups]
-        pm.delete(constraints) # parentCsts
+        if pm.listConnections(limb.limbParent):
+            constraints = [pm.listConnections(g.rx)[0] for g in limbGroups]
+            pm.delete(constraints) # parentCsts
 
         # Reposition group to second joint
         groups = pm.listConnections(limb.usedGroups)

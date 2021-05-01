@@ -28,8 +28,8 @@ class PFRS_Debug:
         # self.LegTest()
         # self.SpineTest()
         # self.AnimPosesTest()
-        # self.RigBehaviorTest()
-        self.AnimBehaviorTest()
+        self.RigBehaviorTest()
+        # self.AnimBehaviorTest()
         # self.MirrorTest()
         # self.LimbTypesTest()
         # self.SkeletonTest()
@@ -93,7 +93,8 @@ class PFRS_Debug:
         path = os.path.join(self.folder, 'TEST_Mirror_01.ma')
         pm.importFile(path)
         rigRoot = self.pfrs.AddRigRoot()
-        rigRoot.operation.set('Behavior')
+        # rigRoot.operation.set('Behavior')
+        rigRoot.operation.set('Appearance')
         self.pfrs.LimbSetup.AutoBuildByName(rigRoot)
 
     def AnimBehaviorTest(self):

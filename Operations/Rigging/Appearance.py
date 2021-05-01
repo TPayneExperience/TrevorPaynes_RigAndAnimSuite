@@ -1,4 +1,6 @@
 
+import os
+
 import pymel.core as pm
 
 import Abstracts.Abstract_Operation as absOp
@@ -9,8 +11,8 @@ import SceneData.Control as ctr
 reload(ctr)
 # import Common.Rig_Utilities as rigUtil
 # reload(rigUtil)
-# import Data.Rig_Data as rigData
-# reload(rigData)
+import Data.Rig_Data as rigData
+reload(rigData)
 # import SceneData.Limb as lmb
 # reload(lmb)
 # import LimbSetup as ls
@@ -26,6 +28,35 @@ class Appearance(absOp.Abstract_Operation):
     controlLayerState = (1, 0)  # isVis, isRef
     jointLayerState = (1, 1)    # isVis, isRef
     meshLayerState = (1, 1)    # isVis, isRef
+
+    @staticmethod
+    def ReimportControlShapes(rigRoot):
+        log.funcFileDebug()
+        old = pm.listConnections(rigRoot.controlTemplates)
+        pm.delete(old)
+
+        folder = os.path.dirname(__file__)  # Rigging
+        folder = os.path.dirname(folder)  # Operations
+        folder = os.path.dirname(folder)  # Main
+        folder = os.path.join(folder, 'Templates')
+        filePath = os.path.join(folder, 'Control_Shapes.ma')
+        nodes = pm.importFile(filePath, returnNewNodes=1)
+        ctrShapes = [n for n in nodes if pm.objectType(n) == 'transform']
+        ctrShapesParent = pm.group(ctrShapes, p=rigRoot,
+                                    name=rigData.CONTROL_TEMPLATE_GROUP)
+        ctrShapesParent.v.set(0)
+        pm.addAttr(ctrShapesParent, ln='rigRoot', dt='string')
+        pm.connectAttr(rigRoot.controlTemplates, ctrShapesParent.rigRoot)
+        for ctr in ctrShapes:
+            pm.addAttr(ctr, ln='rigRoot', dt='string')
+        for ctr in ctrShapes:
+            if 'Cube_Poly' in ctr.shortName():
+                attr = '.' + rigData.JOINT_SHAPE_ATTR
+                pm.connectAttr(ctr.rigRoot, rigRoot + attr)
+                break
+        
+        pm.delete([ 'Control_Shapes_sceneConfigurationScriptNode', 
+                    'Control_Shapes_uiConfigurationScriptNode'])
 
     def GetShapeTemplates(self, rigRoot):
         controlTemplates = {}

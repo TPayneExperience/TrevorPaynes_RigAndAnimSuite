@@ -42,12 +42,13 @@ class InitRigRoot(absInit.Abstract_Initializer):
         pm.addAttr(rigRoot, ln='limbs', dt='string', h=hide)
         pm.addAttr(rigRoot, ln='meshes', dt='string', h=hide)
         pm.addAttr(rigRoot, ln='presets', dt='string', h=hide)
+        pm.addAttr(rigRoot, ln='controlMtrL', dt='string', h=hide)
+        pm.addAttr(rigRoot, ln='controlMtrM', dt='string', h=hide)
+        pm.addAttr(rigRoot, ln='controlMtrR', dt='string', h=hide)
 
         # IDS
         pm.addAttr(rigRoot, ln='nextLimbID', at='short', dv=1, h=hide)
         pm.addAttr(rigRoot, ln='nextJointID', at='short', dv=1, h=hide)
-        # pm.addAttr(rigRoot, ln='nextGroupID', at='long', h=hide)
-        # pm.addAttr(rigRoot, ln='nextControlID', at='long', h=hide)
         pm.addAttr(rigRoot, ln='nextMeshID', at='short', dv=1, h=hide)
 
         # When Joints/limbs added/removed

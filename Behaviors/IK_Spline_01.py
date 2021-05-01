@@ -17,6 +17,8 @@ class IK_Spline_01(absBhv.Abstract_Behavior):
     groupCount = 4
     groupMoveable = False    # for moving control pivots
     orderIndex = 320  
+    usesJointControls = False
+    usesLimbControls = True
     
     def InitLimb(self, limb):
         log.funcFileDebug()
@@ -112,8 +114,9 @@ class IK_Spline_01(absBhv.Abstract_Behavior):
         # Delete Limb Group Constraints
         limbGroups = pm.listConnections(limb.usedGroups)
         limbGroups = rigUtil.SortGroups(limbGroups)
-        constraints = [pm.listConnections(g.rx)[0] for g in limbGroups]
-        pm.delete(constraints) # parentCsts
+        if pm.listConnections(limb.limbParent):
+            constraints = [pm.listConnections(g.rx)[0] for g in limbGroups]
+            pm.delete(constraints) # parentCsts
 
         # Delete Clusters
         toDelete = []

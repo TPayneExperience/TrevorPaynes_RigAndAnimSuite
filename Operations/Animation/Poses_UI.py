@@ -41,6 +41,9 @@ class Poses_UI(absOpUI.Abstract_OperationUI):
         self.PopulateLimbHier()
         self.operation.InitPoses(rigRoot)
         
+    def Teardown_UI(self, rigRoot, allRigRoots):
+        pass
+
 #=========== SETUP UI ====================================
 
     def _Setup(self):

@@ -11,7 +11,7 @@ reload(rigData)
 
 # !!! Functions used ACROSS MULTIPLE OPERATIONS !!!
 
-#=========== GET CONTROLS ====================================
+#=========== LAYERS ====================================
 
 def SetLayerState(layerName, isVisible, isReference):
     layer = pm.ls(layerName, type='displayLayer')[0]
@@ -85,7 +85,7 @@ def GetLimbGroups(limb, groupType):
             groups[group.groupIndex.get()] = group
     return [groups[i] for i in sorted(list(groups.keys()))]
 
-#=========== RIG SETUP ====================================
+#=========== CONTROLLERS ====================================
 
 def Setup_ControllersToParent(limb):
     controls = []
@@ -106,6 +106,26 @@ def Teardown_Controllers(limb):
     for group in pm.listConnections(limb.usedGroups):
         controller = pm.listConnections(group.control)[0]
         pm.delete(pm.listConnections(controller.message, type='controller'))
+
+def UpdateUsedControlMaterials(rigRoot, limb):
+    groups = pm.listConnections(limb.usedGroups)
+    controls = [pm.listConnections(g.control)[0] for g in groups]
+    if limb.side.get() == 0:
+        sg = pm.listConnections(rigRoot.controlMtrM)[0]
+    elif limb.side.get() == 1:
+        sg = pm.listConnections(rigRoot.controlMtrL)[0]
+    elif limb.side.get() == 2:
+        sg = pm.listConnections(rigRoot.controlMtrR)[0]
+    mtr = pm.listConnections(sg.surfaceShader)[0]
+    for control in controls:
+        shape = pm.listRelatives(control, c=1)[0]
+        if pm.objectType(shape) == 'mesh':
+            pm.sets(sg, e=True, forceElement=shape)
+        elif pm.objectType(shape) == 'nurbsCurve':
+            shape.overrideEnabled.set(1)
+            shape.overrideRGBColors.set(1)
+            pm.disconnectAttr(shape.overrideColorRGB)
+            pm.connectAttr(mtr.outColor, shape.overrideColorRGB)
 
 # def GetSortedJoints(joints):
 #     temp = {} # LongName : joint

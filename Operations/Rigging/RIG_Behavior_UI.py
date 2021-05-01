@@ -39,6 +39,9 @@ class RIG_Behavior_UI(absOpUI.Abstract_OperationUI):
         self.PopulateLimbHier()
         self.PopulatePresets()
         
+    def Teardown_UI(self, rigRoot, allRigRoots):
+        pass
+    
 #=========== SETUP UI ====================================
 
     def _Setup(self):
@@ -265,6 +268,22 @@ class RIG_Behavior_UI(absOpUI.Abstract_OperationUI):
 
 #=========== LIMB PROPERTIES ====================================
 
+    def PopulateLimbProperties(self, limb):
+        log.funcFileDebug()
+        pm.frameLayout(self.limbProp_fl, e=1, en=bool(limb))
+        if not limb:
+            return
+        self.PopulateBehaviorsOptionMenu(limb)
+        pm.attrControlGrp(  self.enableLimb_cg, e=1, 
+                                a=limb.enableLimb,
+                                cc=pm.Callback(self.SetEnableLimb))
+        pm.deleteUI(self.grpParent_at)
+        self.grpParent_at = pm.attrEnumOptionMenu(  self.grpParent_at, 
+                                                    l='Parent Control', 
+                                                    p=self.bhvLimbProp_cl,
+                                                    at=limb.limbParentControl,
+                                                    cc=self.LogGroupParent)
+
     def PopulateBehaviorsOptionMenu(self, limb):
         log.funcFileDebug()
         pm.optionMenu(self.bhvType_om, e=1, dai=1)
@@ -272,7 +291,6 @@ class RIG_Behavior_UI(absOpUI.Abstract_OperationUI):
         bhvFile = limb.bhvFile.get()
         limbBhvType = limb.bhvType.get()
         limbType = limb.limbType.get()
-        limbBhvType = ''
         orderedBhvs = {}
         for bhvFiles in list(bhvMng.Behavior_Manager.bhvFiles.values()):
             bhv = bhvMng.Behavior_Manager.bhvs[bhvFiles[-1]]
@@ -296,22 +314,6 @@ class RIG_Behavior_UI(absOpUI.Abstract_OperationUI):
                                                             bhvType)
         self.PopulateControlHier(limb)
         self.PopulateBhvProperties(limb)
-
-    def PopulateLimbProperties(self, limb):
-        log.funcFileDebug()
-        pm.frameLayout(self.limbProp_fl, e=1, en=bool(limb))
-        if not limb:
-            return
-        self.PopulateBehaviorsOptionMenu(limb)
-        pm.attrControlGrp(  self.enableLimb_cg, e=1, 
-                                a=limb.enableLimb,
-                                cc=pm.Callback(self.SetEnableLimb))
-        pm.deleteUI(self.grpParent_at)
-        self.grpParent_at = pm.attrEnumOptionMenu(  self.grpParent_at, 
-                                                    l='Parent Control', 
-                                                    p=self.bhvLimbProp_cl,
-                                                    at=limb.limbParentControl,
-                                                    cc=self.LogGroupParent)
 
     def SetEnableLimb(self):
         limb = self._selectedLimbs[0]

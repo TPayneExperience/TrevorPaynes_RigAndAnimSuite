@@ -174,6 +174,9 @@ class PayneFreeRigSuite_UI:
     
     def SetOperation(self, operationName):
         log.funcFileInfo()
+        if self.currentOp:
+            self.currentOp.Teardown_UI(self._rigRoot, 
+                                        self._allRigRoots)
         pm.deleteUI(self.frame)
         if operationName not in self.operationNames:
             with pm.frameLayout(p=self.win, lv=0) as self.frame:
@@ -183,6 +186,7 @@ class PayneFreeRigSuite_UI:
         index = self.operationNames.index(operationName)
         self.currentOp = self.operations[index]
         self._allRigRoots = self.pfrs.GetRigRoots()
+        # Setup Rig
         self.currentOp.operation.Setup(self._allRigRoots)
         with pm.frameLayout(p=self.win, lv=0) as self.frame:
             with pm.horizontalLayout():

@@ -17,6 +17,8 @@ class FK_Branch_01(absBhv.Abstract_Behavior):
     groupCount = 0
     groupMoveable = True   # for moving control pivots
     orderIndex = 230  
+    usesJointControls = True
+    usesLimbControls = False
     
     def InitLimb(self, limb):
         log.funcFileDebug()

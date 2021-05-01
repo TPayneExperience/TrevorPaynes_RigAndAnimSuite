@@ -35,13 +35,13 @@ class LimbSetup(absOp.Abstract_Operation):
                 raise ValueError('Please pass in LIST of JOINTS')
         if not self._AreJointsDisconnected(joints):
             raise ValueError('Joints must be DISCONNECTED from LIMB')
-        func = self._GetLimbFuncForJoints(joints)
-        if not func:
+        createLimbFunc = self._GetLimbFuncForJoints(joints)
+        if not createLimbFunc:
             msg = 'Joints must be either chained or siblings'
             msg += ' of same parent'
             raise ValueError(msg)
-        limb = func(rigRoot, joints)
-        self._InitBehavior(limb)
+        limb = createLimbFunc(rigRoot, joints)
+        self._InitBehavior(rigRoot, limb)
         return limb
 
     def RemoveLimbs(self, limbs):
@@ -122,8 +122,9 @@ class LimbSetup(absOp.Abstract_Operation):
 
 #============= MISC ============================
 
-    def _InitBehavior(self, limb):
+    def _InitBehavior(self, rigRoot, limb):
         bhv.Behavior_Manager.InitLimb(limb)
+        rigUtil.UpdateUsedControlMaterials(rigRoot, limb)
         # bhv.Behavior_Manager.Setup_Editable(limb)
 
     def _LimbNamesCount(self, rigRoot, limbName):
@@ -147,10 +148,11 @@ class LimbSetup(absOp.Abstract_Operation):
         rigRoot = pm.listConnections(mirrorLimb.rigRoot)[0]
         genUtil.Name.UpdateLimbName(rigRoot, mirrorLimb)
 
-    def _UpdateMirrorConnection(self, allLimbs, limb):
+    def _UpdateMirrorConnection(self, rigRoot, limb):
         log.funcFileDebug()
         # PAIR WITH MIRROR
         name = limb.pfrsName.get()
+        allLimbs = pm.listConnections(rigRoot.limbs)
         names = [l.pfrsName.get() for l in allLimbs]
         if (names.count(name) == 1):
             for mirrorLimb in allLimbs:
@@ -161,16 +163,20 @@ class LimbSetup(absOp.Abstract_Operation):
             pm.connectAttr(limb.mirrorLimb, mirrorLimb.mirrorLimb)
             mirrorLimb.side.set(1)
             limb.side.set(2)
+            rigUtil.UpdateUsedControlMaterials(rigRoot, limb)
+            rigUtil.UpdateUsedControlMaterials(rigRoot, mirrorLimb)
 
         # BREAK MIRROR
         else:
-            if pm.listConnections(limb.mirrorLimb):
+            mirrorLimbs = pm.listConnections(limb.mirrorLimb)
+            if mirrorLimbs:
                 self._BreakMirror(limb)
+                rigUtil.UpdateUsedControlMaterials(rigRoot, limb)
+                rigUtil.UpdateUsedControlMaterials(rigRoot, mirrorLimbs[0])
 
     def _RenameLimb(self, sourceLimb, newName): # list should repopulate after call
         log.funcFileDebug()
         rigRoot = pm.listConnections(sourceLimb.rigRoot)[0]
-        allLimbs = pm.listConnections(rigRoot.limbs)
         # Rename joints if limb named as preset 'leg', 'arm'...
         if newName.lower() in rigData.LIMB_JOINT_NAME_PRESETS:
             jointNames = rigData.LIMB_JOINT_NAME_PRESETS[newName.lower()]
@@ -190,7 +196,7 @@ class LimbSetup(absOp.Abstract_Operation):
                     indexStr = '%03d' % (index + 1)
                     joint.pfrsName.set(newName + indexStr)
         sourceLimb.pfrsName.set(newName)
-        self._UpdateMirrorConnection(allLimbs, sourceLimb)
+        self._UpdateMirrorConnection(rigRoot, sourceLimb)
         genUtil.Name.UpdateLimbName(rigRoot, sourceLimb)
         for childLimb in pm.listConnections(sourceLimb.limbChildren):
             self._UpdateParentControlEnum(childLimb)
@@ -391,7 +397,7 @@ class LimbSetup(absOp.Abstract_Operation):
                 limb = lmb.Limb.AddTwoJointChain(rigRoot, newLimbJoints)
             elif limbType == 4:
                 limb = lmb.Limb.AddThreeJointChain(rigRoot, newLimbJoints)
-            self._InitBehavior(limb)
+            self._InitBehavior(rigRoot, limb)
         self._LoadSkeletalHierarchy(rigRoot)
     
     def AutoBuildByName(self, rigRoot):
@@ -480,7 +486,7 @@ class LimbSetup(absOp.Abstract_Operation):
                 pm.connectAttr(limb.mirrorLimb, mirror.mirrorLimb)
                 del(allLimbs[limbName])
             genUtil.Name.UpdateLimbName(rigRoot, limb)
-            self._InitBehavior(limb)
+            self._InitBehavior(rigRoot, limb)
             allLimbs[limbName] = limb
         self._LoadSkeletalHierarchy(rigRoot)
 

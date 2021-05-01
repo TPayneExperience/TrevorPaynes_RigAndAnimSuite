@@ -38,6 +38,9 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
         self.PopulateSceneHier()
         pm.treeView(self.joint_tv, e=1, removeAll=1)
     
+    def Teardown_UI(self, rigRoot, allRigRoots):
+        pass
+    
 #=========== SETUP UI ====================================
 
     def _Setup(self):
