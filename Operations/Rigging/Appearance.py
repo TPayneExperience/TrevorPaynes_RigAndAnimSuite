@@ -54,9 +54,9 @@ class Appearance(absOp.Abstract_Operation):
                 attr = '.' + rigData.JOINT_SHAPE_ATTR
                 pm.connectAttr(ctr.rigRoot, rigRoot + attr)
                 break
-        
-        pm.delete([ 'Control_Shapes_sceneConfigurationScriptNode', 
-                    'Control_Shapes_uiConfigurationScriptNode'])
+        if pm.objExists('Control_Shapes_sceneConfigurationScriptNode'):
+            pm.delete([ 'Control_Shapes_sceneConfigurationScriptNode', 
+                        'Control_Shapes_uiConfigurationScriptNode'])
 
     def GetShapeTemplates(self, rigRoot):
         controlTemplates = {}

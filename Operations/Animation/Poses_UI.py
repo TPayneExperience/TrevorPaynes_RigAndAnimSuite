@@ -29,10 +29,8 @@ class Poses_UI(absOpUI.Abstract_OperationUI):
         self._limbIDs = []
         self.poses_ui = []
         self._copiedPoses = {} # pfrsName : Pose
-#         self._bhvNames = []
-#         self._currentBhv = None # for verifying group selection
-#         self._selectedGroup = None
-#         self._rigRoot = None
+        self._rigRoot = None
+        self._allRigRoots = []
 
     def Setup_UI(self, rigRoot, allRigRoots): 
         self._Setup()
@@ -106,6 +104,7 @@ class Poses_UI(absOpUI.Abstract_OperationUI):
             if rigRoot != pm.listConnections(limb.rigRoot)[0]:
                 # self.parent.LimbsSelected(None)
                 return
+        self._rigRoot = rigRoot
         # Enable RMB
         pm.menuItem(self.save_mi, e=1, en=1)
         pm.menuItem(self.reset_mi, e=1, en=1)
@@ -161,8 +160,6 @@ class Poses_UI(absOpUI.Abstract_OperationUI):
 
     def SavePose(self, ignore):
         log.funcFileDebug()
-        limbIDStrs = pm.treeView(self.limb_tv, q=1, selectItem=1)
-        limbs = [self._limbIDs[limbStr] for limbStr in limbIDStrs]
         result = pm.promptDialog(
                 title='Save Pose',
                 message='New Pose Name:',
@@ -173,7 +170,8 @@ class Poses_UI(absOpUI.Abstract_OperationUI):
         if result != 'OK':
             return
         poseName = pm.promptDialog(q=1, tx=1)
-        self.operation.SavePose(poseName, self._rigRoot, limbs)
+        self.operation.SavePose(poseName, self._rigRoot, 
+                                    self._selectedLimbs)
         self.PopulatePoseLibrary()
 
     def CopyPose(self, ignore):

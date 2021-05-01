@@ -8,7 +8,7 @@
             ], 
             [
                 0.0, 
-                -42.606117303397696, 
+                -25.245041416635388, 
                 0.0
             ], 
             [
@@ -22,8 +22,8 @@
         []
     ], 
     "bhvFile": "FK_Chain_01", 
-    "poseName": "Spread", 
+    "poseName": "Hand_Spread", 
     "bhvType": "FK Chain", 
     "side": 0, 
-    "pfrsName": "Thumb"
+    "pfrsName": "Index"
 }

@@ -118,7 +118,7 @@ class PayneFreeRigSuite:
                                     n=name, 
                                     asShader=1)
             mtr.outColor.set(color)
-            mtr.outTransparency.set((0.7, 0.7, 0.7))
+            mtr.outTransparency.set((0.8, 0.8, 0.8))
             sg = pm.sets(em=1, r=1, nss=1, name=name+'SG')
             pm.connectAttr( mtr+'.outColor', sg+'.surfaceShader', f=1)        
             pm.addAttr(sg, ln='rigRoot', dt='string')

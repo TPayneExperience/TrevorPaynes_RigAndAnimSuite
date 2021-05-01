@@ -42,7 +42,7 @@ class ANM_Behavior_UI(absOpUI.Abstract_OperationUI):
         self.PopulatePresets()
         
     def Teardown_UI(self, rigRoot, allRigRoots):
-        pass
+        self._presetsUI = []
 
 #=========== SETUP UI ====================================
 

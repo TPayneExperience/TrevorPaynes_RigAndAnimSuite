@@ -213,7 +213,7 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
     def AddJointLimb(self, ignore):
         log.funcFileInfo()
         limb = self._limbFunc(self._rigRoot, self._selectedSceneJoints)
-        self.operation._InitBehavior(limb)
+        self.operation._InitBehavior(self._rigRoot, limb)
         self.PopulateLimbHier(limb)
         self.PopulateJointHier(limb)
         self.PopulateSceneHier()

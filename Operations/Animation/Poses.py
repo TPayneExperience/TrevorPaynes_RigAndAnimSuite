@@ -68,6 +68,8 @@ class Poses(absOp.Abstract_Operation):
             return
         # MISSING: Verify poseName is valid with NameMng
         folder = rigRoot.posesFolderPath.get()
+        if not folder:
+            raise ValueError('RigRoot missing poses folder path')
         for limb in limbs:
             self._SavePose(poseName, limb, folder)
             self.ResetLimbControls(limb)

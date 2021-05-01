@@ -154,12 +154,11 @@ class LimbSetup(absOp.Abstract_Operation):
         name = limb.pfrsName.get()
         allLimbs = pm.listConnections(rigRoot.limbs)
         names = [l.pfrsName.get() for l in allLimbs]
-        if (names.count(name) == 1):
+        if (names.count(name) == 2):
             for mirrorLimb in allLimbs:
                 if (mirrorLimb.pfrsName.get() == name):
-                    break
-            if (limb == mirrorLimb): # prevent pairing with self
-                return
+                    if mirrorLimb != limb:
+                        break
             pm.connectAttr(limb.mirrorLimb, mirrorLimb.mirrorLimb)
             mirrorLimb.side.set(1)
             limb.side.set(2)

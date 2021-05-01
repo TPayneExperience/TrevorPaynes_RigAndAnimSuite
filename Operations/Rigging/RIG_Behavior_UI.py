@@ -40,7 +40,7 @@ class RIG_Behavior_UI(absOpUI.Abstract_OperationUI):
         self.PopulatePresets()
         
     def Teardown_UI(self, rigRoot, allRigRoots):
-        pass
+        self._presetsUI = []
     
 #=========== SETUP UI ====================================
 
@@ -68,7 +68,7 @@ class RIG_Behavior_UI(absOpUI.Abstract_OperationUI):
                                                 en=0, c=self.SavePreset)
                     pm.menuItem(l='Edit Presets', c=self.EditPresets)
                     pm.menuItem(l='APPLY PRESET', en=0, d=1)
-            with pm.frameLayout('Controls', bv=1):
+            with pm.frameLayout('Controls (select + move pivots)', bv=1):
                 tt = 'DOT = pivot is moveable!'
                 tt += '\nDimmed = Disabled group'
                 self.control_tv = pm.treeView(arp=0, adr=0, ams=0, ann=tt,

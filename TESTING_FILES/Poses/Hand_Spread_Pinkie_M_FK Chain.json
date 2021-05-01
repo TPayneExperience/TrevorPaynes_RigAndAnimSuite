@@ -8,7 +8,7 @@
             ], 
             [
                 0.0, 
-                26.07835565579318, 
+                35.16299140888935, 
                 0.0
             ], 
             [
@@ -22,7 +22,7 @@
         []
     ], 
     "bhvFile": "FK_Chain_01", 
-    "poseName": "Spread", 
+    "poseName": "Hand_Spread", 
     "bhvType": "FK Chain", 
     "side": 0, 
     "pfrsName": "Pinkie"
