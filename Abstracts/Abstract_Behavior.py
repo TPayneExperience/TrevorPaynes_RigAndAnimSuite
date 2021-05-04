@@ -35,7 +35,7 @@ class Abstract_Behavior:
 
     @abstractproperty
     def usesJointControls(self):    # bool | True
-        pass 
+        pass                            #
 
     @abstractproperty
     def usesLimbControls(self):    # bool | True
@@ -43,6 +43,10 @@ class Abstract_Behavior:
 
     @abstractproperty
     def orderIndex(self):       # int | 0, 100, 200...
+        pass 
+
+    @abstractproperty
+    def bakeLosesData(self):       # bool | False
         pass 
 
 #============= METHODS ============================
@@ -60,33 +64,40 @@ class Abstract_Behavior:
         # Remove lingering behavior specific stuff (EX - IK Spline curve)
         pass
     
-#============= RIG (Requires Setup) ============================
+#============= SETUP ============================
 
     @abstractmethod
     def Setup_Rig_Internal(self, limb):
-        pass
+        return [] # Return internal groups to be baked
     
     @abstractmethod
     def Setup_Rig_External(self, limb):
+        return []  # Return external groups to be baked
+    
+    @abstractmethod
+    def Setup_Constraint_JointsToControls(self, limb):
         pass
     
     @abstractmethod
-    def Teardown_Rig(self, limb):
-        # Remove constraints
-        # Reparent groups to limbs/joints
+    def Setup_Constraint_ControlsToJoints(self, limb):
         pass
     
-#============= BAKE (Requires Setup) ============================
+#============= TEARDOWN ============================
 
     @abstractmethod
-    def Setup_Bake(self, limb):
-        # Setup controls to recieve keys from joints
+    def Teardown_Rig_Internal(self, limb):
+        pass
+
+    @abstractmethod
+    def Teardown_Rig_External(self, limb):
         pass
     
     @abstractmethod
-    def Teardown_Bake(self, limb):
-        # Remove constraints
-        # Reparent groups to limbs/joints
+    def Teardown_Constraint_JointsToControls(self, limb):
+        pass
+    
+    @abstractmethod
+    def Teardown_Constraint_ControlsToJoints(self, limb):
         pass
     
 #============= EDITABLE UI ============================

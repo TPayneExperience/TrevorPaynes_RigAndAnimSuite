@@ -94,7 +94,7 @@ class PayneFreeRigSuite:
         oldMain = rigRoot.category.get()
         oldSub = rigRoot.operation.get()
         rigRoot.category.set('Animation')
-        rigRoot.operation.set('Poses')
+        rigRoot.operation.set('Behavior')
         setupFile = pm.sceneName()
         
         pm.saveAs(filePath)

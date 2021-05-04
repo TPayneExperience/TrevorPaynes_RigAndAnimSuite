@@ -19,6 +19,7 @@ class LookAt_01(absBhv.Abstract_Behavior):
     orderIndex = 410
     usesJointControls = False
     usesLimbControls = True
+    bakeLosesData = False
     
     def InitLimb(self, limb):
         log.funcFileDebug()
@@ -38,55 +39,77 @@ class LookAt_01(absBhv.Abstract_Behavior):
     def CleanupLimb(self, limb):
         log.funcFileDebug()
     
-#============= RIG ============================
+#============= SETUP ============================
 
     def Setup_Rig_Internal(self, limb):
         log.funcFileDebug()
-        joint = pm.listConnections(limb.joints)[0]
         limbGroup = pm.listConnections(limb.usedGroups)[0]
         control = pm.listConnections(limbGroup.control)[0]
 
         # Move Mid Group to Mid control position
-        pos = pm.xform(limbGroup, q=1, t=1, ws=1)
+        pos = pm.xform(control, q=1, t=1, ws=1)
         pm.xform(limbGroup, t=pos, ws=1)
         rigUtil.ResetAttrs(control)
+        return []
 
-        # Aim Constraint + Joint Group Constraint
+    def Setup_Rig_External(self, limb):
+        log.funcFileDebug()
+        parentControl = rigUtil.GetParentControl(limb)
+        group = pm.listConnections(limb.usedGroups)[0]
+        if parentControl:
+            pm.parentConstraint(parentControl, group, mo=1)
+        return [group]
+    
+    def Setup_Constraint_JointsToControls(self, limb):
+        log.funcFileDebug()
+        joint = pm.listConnections(limb.joints)[0]
+        limbGroup = pm.listConnections(limb.usedGroups)[0]
+        control = pm.listConnections(limbGroup.control)[0]
+        # Aim Constraint
         cst = pm.aimConstraint(control, joint, mo=1)
         pm.connectAttr(limb.lookAtOffsetX, cst.offsetX)
         pm.connectAttr(limb.lookAtOffsetY, cst.offsetY)
         pm.connectAttr(limb.lookAtOffsetZ, cst.offsetZ)
+        # Joint Group Constraint
         jointGroup = pm.listConnections(joint.group)[0]
         pm.parentConstraint(joint, jointGroup, mo=1)
     
-    def Setup_Rig_External(self, limb):
-        log.funcFileDebug()
-        parentControl = rigUtil.GetParentControl(limb)
-        if not parentControl:
-            return
-        group = pm.listConnections(limb.usedGroups)[0]
-        pm.parentConstraint(parentControl, group, mo=1)
-    
-    def Teardown_Rig(self, limb):
+    def Setup_Constraint_ControlsToJoints(self, limb):
         log.funcFileDebug()
         joint = pm.listConnections(limb.joints)[0]
-        pm.delete(pm.listConnections(joint.rx))
         limbGroup = pm.listConnections(limb.usedGroups)[0]
-        pm.delete(pm.listConnections(limbGroup.rx))
+        control = pm.listConnections(limbGroup.control)[0]
+        pm.parentConstraint(joint, control, mo=1)
 
-        # Reposition group to second joint
+#============= TEARDOWN ============================
+
+    def Teardown_Rig_Internal(self, limb):
+        log.funcFileDebug()
+        limbGroup = pm.listConnections(limb.usedGroups)[0]
+        joint = pm.listConnections(limb.joints)[0]
         jointPos = pm.xform(joint, q=1, t=1, ws=1)
         pm.xform(limbGroup, t=jointPos, ws=1)
         self._UpdateControl(limb)
 
-#============= BAKE (Requires Setup) ============================
+    def Teardown_Rig_External(self, limb):
+        log.funcFileDebug()
+        if pm.listConnections(limb.limbParent):
+            limbGroup = pm.listConnections(limb.usedGroups)[0]
+            pm.delete(pm.listConnections(limbGroup.rx))
 
-    def Setup_Bake(self, limb):
+    def Teardown_Constraint_JointsToControls(self, limb):
         log.funcFileDebug()
+        joint = pm.listConnections(limb.joints)[0]
+        pm.delete(pm.listConnections(joint.rx))
+        group = pm.listConnections(limb.jointGroups)[0]
+        pm.delete(pm.listConnections(group.rx))
     
-    def Teardown_Bake(self, limb):
+    def Teardown_Constraint_ControlsToJoints(self, limb):
         log.funcFileDebug()
-    
+        group = pm.listConnections(limb.usedGroups)[0]
+        control = pm.listConnections(group.control)[0]
+        pm.delete(pm.listConnections(control.rx))
+
 #============= EDITABLE UI ============================
 
     def Setup_Editable_Limb_UI(self, limb):

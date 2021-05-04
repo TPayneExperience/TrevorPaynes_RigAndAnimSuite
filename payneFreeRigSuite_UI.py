@@ -184,6 +184,7 @@ class PayneFreeRigSuite_UI:
                 pm.text(l=msg)
                 return
         index = self.operationNames.index(operationName)
+        self._rigRoot.operation.set(operationName)
         self.currentOp = self.operations[index]
         self._allRigRoots = self.pfrs.GetRigRoots()
         # Setup Rig

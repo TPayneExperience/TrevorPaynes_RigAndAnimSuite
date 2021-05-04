@@ -73,16 +73,22 @@ class Behavior_Manager:
         rigUtil.UpdateUsedControlMaterials(rigRoot, limb)
         return bhv
 
+#============= SETUP / TEARDOWN RIG ============================
+
     @staticmethod
     def Setup_Rig(rigRoot):
         log.funcFileDebug()
         limbs = pm.listConnections(rigRoot.limbs)
+
+        # Setup Internal Rig
         for limb in limbs:
             bhv = Behavior_Manager.bhvs[limb.bhvFile.get()]
             if bhv.groupMoveable:
                 for group in pm.listConnections(limb.usedGroups):
                     Behavior_Manager._Setup_ControlPivot(group)
             bhv.Setup_Rig_Internal(limb)
+
+        # Setup External Rig
         for limb in limbs:
             bhv = Behavior_Manager.bhvs[limb.bhvFile.get()]
             bhv.Setup_Rig_External(limb)
@@ -90,8 +96,16 @@ class Behavior_Manager:
                 rigUtil.Setup_ControllersToParent(limb)
             else:
                 rigUtil.Setup_ControllersGroup(limb)
+
+        # Setup Joint Constraints
+        for limb in limbs:
+            bhv = Behavior_Manager.bhvs[limb.bhvFile.get()]
+            bhv.Setup_Constraint_JointsToControls(limb)
+
+        # Lock Hide Channel Box Attrs
+        for limb in limbs:
             if bhv.usesJointControls:
-                for group in pm.listConnections(limb.parentableGroups):
+                for group in pm.listConnections(limb.jointGroups):
                     control = pm.listConnections(group.control)[0]
                     pos = limb.channelBoxJointCtrPos.get()
                     rot = limb.channelBoxJointCtrRot.get()
@@ -108,25 +122,108 @@ class Behavior_Manager:
     @staticmethod
     def Teardown_Rig(rigRoot):
         log.funcFileDebug()
-        # delete Maya controls, rfk nodes
         limbs = pm.listConnections(rigRoot.limbs)
+
         # Reset Controls
         for limb in limbs:
             for group in pm.listConnections(limb.usedGroups):
                 control = pm.listConnections(group.control)[0]
+                pm.cutKey(control) # TEMP, DELETE LATER
                 rigUtil.ChannelBoxAttrs(control, 1, 1, 1, 0)
                 rigUtil.ResetAttrs(control)
         pm.refresh()
-        # Teardown Rig
+
+        # Teardown Joint Constraints
         for limb in limbs:
             bhv = Behavior_Manager.bhvs[limb.bhvFile.get()]
-            bhv.Teardown_Rig(limb)
+            bhv.Teardown_Constraint_JointsToControls(limb)
+
+        # Teardown External Rig
+        for limb in limbs:
+            bhv = Behavior_Manager.bhvs[limb.bhvFile.get()]
+            bhv.Teardown_Rig_External(limb)
             rigUtil.Teardown_Controllers(limb)
+
+        # Teardown Internal Rig
+        for limb in limbs:
+            bhv = Behavior_Manager.bhvs[limb.bhvFile.get()]
+            bhv.Teardown_Rig_Internal(limb)
+
         # Reset control pivots
         for limb in limbs:
             for group in pm.listConnections(limb.usedGroups):
                 Behavior_Manager._Teardown_ControlPivot(group)
-          
+       
+#============= ANIMATION TRANSFER (BAKING) ============================
+   
+    @staticmethod
+    def _BakeControlsToJointData(limbs, tempGroupParent, startTime, endTime):
+        log.funcFileDebug()
+        tempGroups = {} # joint : tempGroup
+        allJoints = []
+        for limb in limbs:
+            allJoints += pm.listConnections(limb.joints)
+        tempCsts = []
+        for joint in allJoints:
+            group = pm.group(em=1, p=tempGroupParent)
+            tempCsts.append(pm.parentConstraint(joint, group))
+            tempGroups[joint] = group
+        groups = list(tempGroups.values())
+        pm.bakeResults(groups, sm=1, t=(startTime, endTime))
+        pm.delete(tempCsts)
+        return tempGroups
+
+    @staticmethod
+    def _TeardownLimbs(limbs):
+        log.funcFileDebug()
+        keyedLimbs = []
+        for limb in limbs:
+            bhvFile = limb.bhvFile.get()
+            bhv = Behavior_Manager.bhvs[bhvFile]
+            bhv.Teardown_Constraint_JointsToControls(limb)
+            bhv.Teardown_Rig_External(limb)
+            bhv.Teardown_Rig_Internal(limb)
+            groups = pm.listConnections(limb.usedGroups)
+            controls = [pm.listConnections(g.control)[0] for g in groups]
+            if any([pm.keyframe(c, q=1, kc=1) for c in controls]):
+                keyedLimbs.append(limb)
+        return keyedLimbs
+
+    @staticmethod
+    def _SetupRigConstrainedToJoints(limbs, bakeAll, bakeExternalOnly):
+        log.funcFileDebug()
+        changedControls = []
+        for limb in limbs:
+            bhvFile = limb.bhvFile.get()
+            bhv = Behavior_Manager.bhvs[bhvFile]
+            groups = bhv.Setup_Rig_Internal(limb)
+            if limb in bakeAll:
+                controls = [pm.listConnections(g.control)[0] for g in groups]
+                changedControls += controls
+            groups = bhv.Setup_Rig_External(limb)
+            if limb in (bakeAll + bakeExternalOnly):
+                controls = [pm.listConnections(g.control)[0] for g in groups]
+                changedControls += controls
+            bhv.Setup_Constraint_ControlsToJoints(limb)
+        return changedControls
+
+    @staticmethod
+    def _BakeJointDataToControls(tempGroups, controls, startTime, endTime):
+        log.funcFileDebug()
+        for joint, group in tempGroups.items():
+            pm.parentConstraint(group, joint)
+        pm.cutKey(controls)
+        pm.bakeResults(controls, sm=1, t=(startTime, endTime))
+
+    @staticmethod
+    def _SetupJointsConstrainedToRig(limbs):
+        log.funcFileDebug()
+        for limb in limbs:
+            bhvFile = limb.bhvFile.get()
+            bhv = Behavior_Manager.bhvs[bhvFile]
+            bhv.Teardown_Constraint_ControlsToJoints(limb)
+            bhv.Setup_Constraint_JointsToControls(limb)
+
 #============= UTIL ============================
 
     @staticmethod
@@ -150,12 +247,12 @@ class Behavior_Manager:
         pm.xform(control, t=cPos, ws=1)
 
     @staticmethod
-    def _Setup_GroupVisibility(limb): # USE IN CST BHV!
+    def _Setup_GroupVisibility(limb):
         for group in pm.listConnections(limb.usedGroups):
             group.v.set(1)
 
     @staticmethod
-    def _Teardown_GroupVisibility(limb): # USE IN CST BHV!
+    def _Teardown_GroupVisibility(limb):
         for group in pm.listConnections(limb.usedGroups):
             group.v.set(0)
 

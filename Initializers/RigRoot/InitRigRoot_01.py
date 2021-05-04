@@ -9,6 +9,8 @@ import Data.Rig_Data as rigData
 reload(rigData)
 import Common.Logger as log
 reload(log)
+import Common.Rig_Utilities as rigUtil
+reload(rigUtil)
 
 class InitRigRoot(absInit.Abstract_Initializer):
     @staticmethod
@@ -65,24 +67,29 @@ class InitRigRoot(absInit.Abstract_Initializer):
         pm.addAttr(rigRoot, ln='meshesParentGroup', dt='string', h=hide)
         pm.addAttr(rigRoot, ln='controlTemplates', dt='string', h=hide)
 
-        group = pm.group(name=rigData.JOINTS_GROUP, em=True, p=rigRoot)
+        group = pm.group(name=rigData.JOINTS_GROUP, em=1, p=rigRoot)
         pm.addAttr(group, ln='rigRoot', dt='string')
         pm.connectAttr(rigRoot.jointsParentGroup, group.rigRoot)
-        group = pm.group(name=rigData.LIMBS_GROUP, em=True, p=rigRoot)
+        rigUtil.ChannelBoxAttrs(group, 0, 0, 0, 0)
+
+        group = pm.group(name=rigData.LIMBS_GROUP, em=1, p=rigRoot)
         pm.addAttr(group, ln='rigRoot', dt='string')
         pm.connectAttr(rigRoot.limbsParentGroup, group.rigRoot)
-        group = pm.group(name=rigData.MESHES_GROUP, em=True, p=rigRoot)
+        rigUtil.ChannelBoxAttrs(group, 0, 0, 0, 0)
+
+        group = pm.group(name=rigData.MESHES_GROUP, em=1, p=rigRoot)
         pm.addAttr(group, ln='rigRoot', dt='string')
         pm.connectAttr(rigRoot.meshesParentGroup, group.rigRoot)
+        rigUtil.ChannelBoxAttrs(group, 0, 0, 0, 0)
         
         # CONTROLS
         pm.addAttr(rigRoot, ln=rigData.JOINT_SHAPE_ATTR, dt='string', h=hide)
 
         #============= LAYERS ============================
 
-        controlDL = pm.createDisplayLayer(n=rigData.CONTROLS_LAYER, empty=True)
-        jointDL = pm.createDisplayLayer(n=rigData.JOINTS_LAYER, empty=True)
-        meshDL = pm.createDisplayLayer(n=rigData.MESHES_LAYER, empty=True)
+        controlDL = pm.createDisplayLayer(n=rigData.CONTROLS_LAYER, empty=1)
+        jointDL = pm.createDisplayLayer(n=rigData.JOINTS_LAYER, empty=1)
+        meshDL = pm.createDisplayLayer(n=rigData.MESHES_LAYER, empty=1)
         controlDL.visibility.set(0)
         controlDL.displayType.set(2)
         jointDL.displayType.set(2)

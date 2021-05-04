@@ -506,7 +506,7 @@ class LimbSetup(absOp.Abstract_Operation):
     
     def _UpdateParentControlEnum(self, childLimb):
         log.funcFileDebug()
-        parentGroups = rigUtil.GetParentableGroupsOfParent(childLimb)
+        parentGroups = rigUtil.GetjointGroupsOfParent(childLimb)
         if not parentGroups:
             pm.addAttr(childLimb.limbParentControl, e=1, en='None', dv=0)
             return
@@ -517,7 +517,7 @@ class LimbSetup(absOp.Abstract_Operation):
 
     def _UpdateParentControlIndex(self, childLimb):
         log.funcFileDebug()
-        parentGroups = rigUtil.GetParentableGroupsOfParent(childLimb)
+        parentGroups = rigUtil.GetjointGroupsOfParent(childLimb)
         if not parentGroups:
             pm.addAttr(childLimb.limbParentControl, e=1, en='None', dv=0)
             return
@@ -525,7 +525,7 @@ class LimbSetup(absOp.Abstract_Operation):
         parentControlNames = [c.shortName() for c in parentControls]
         namesStr = ':'.join(parentControlNames)
         pm.addAttr(childLimb.limbParentControl, e=1, en=namesStr)
-        childGroups = pm.listConnections(childLimb.parentableGroups)
+        childGroups = pm.listConnections(childLimb.jointGroups)
         childGroup = rigUtil.SortGroups(childGroups)[0]
         sourcePos = pm.xform(childGroup, q=1, t=1, ws=1)
         index = self._GetClosestGroupIndex(sourcePos, parentGroups)

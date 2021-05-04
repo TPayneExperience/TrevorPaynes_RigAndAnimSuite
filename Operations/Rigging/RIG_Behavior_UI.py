@@ -276,7 +276,7 @@ class RIG_Behavior_UI(absOpUI.Abstract_OperationUI):
         self.PopulateBehaviorsOptionMenu(limb)
         pm.attrControlGrp(  self.enableLimb_cg, e=1, 
                                 a=limb.enableLimb,
-                                cc=pm.Callback(self.SetEnableLimb))
+                                cc=pm.Callback(self.SetEnableLimb, limb))
         pm.deleteUI(self.grpParent_at)
         self.grpParent_at = pm.attrEnumOptionMenu(  self.grpParent_at, 
                                                     l='Parent Control', 
@@ -315,8 +315,7 @@ class RIG_Behavior_UI(absOpUI.Abstract_OperationUI):
         self.PopulateControlHier(limb)
         self.PopulateBhvProperties(limb)
 
-    def SetEnableLimb(self):
-        limb = self._selectedLimbs[0]
+    def SetEnableLimb(self, limb):
         root = pm.listConnections(limb.rigRoot)[0]
         enable = limb.enableLimb.get()
         limbID = '%d_%d' % (root.ID.get(), limb.ID.get())

@@ -19,13 +19,14 @@ class IK_PoleVector_01(absBhv.Abstract_Behavior):
     orderIndex = 310  
     usesJointControls = False
     usesLimbControls = True
+    bakeLosesData = True
     
     def InitLimb(self, limb):
         log.funcFileDebug()
         if not limb.hasAttr('ikpvDistance'):
             pm.addAttr(limb, ln='ikpvDistance', at='float', 
                                                 min=0, dv=1)
-        jointGroups = pm.listConnections(limb.parentableGroups)
+        jointGroups = pm.listConnections(limb.jointGroups)
         jointGroups = rigUtil.SortGroups(jointGroups)
         joints = [pm.listConnections(g.joint)[0] for g in jointGroups]
         limbGroups = pm.listConnections(limb.usedGroups)
@@ -41,12 +42,25 @@ class IK_PoleVector_01(absBhv.Abstract_Behavior):
     def CleanupLimb(self, limb):
         log.funcFileDebug()
     
-#============= RIG ============================
+#============= SETUP ============================
 
     def Setup_Rig_Internal(self, limb):
         log.funcFileDebug()
+        return []
+    
+    def Setup_Rig_External(self, limb):
+        log.funcFileDebug()
+        groups = pm.listConnections(limb.usedGroups)
+        parentControl = rigUtil.GetParentControl(limb)
+        if parentControl:
+            for group in groups:
+                pm.parentConstraint(parentControl, group, mo=1)
+        return groups
+    
+    def Setup_Constraint_JointsToControls(self, limb):
+        log.funcFileDebug()
         # IK Handle
-        jointGroups = pm.listConnections(limb.parentableGroups)
+        jointGroups = pm.listConnections(limb.jointGroups)
         jointGroups = rigUtil.SortGroups(jointGroups)
         joints = [pm.listConnections(g.joint)[0] for g in jointGroups]
         startJoint = joints[0]
@@ -77,17 +91,35 @@ class IK_PoleVector_01(absBhv.Abstract_Behavior):
             joint = pm.listConnections(group.joint)[0]
             pm.parentConstraint(joint, group, mo=1)
     
-    def Setup_Rig_External(self, limb):
+    def Setup_Constraint_ControlsToJoints(self, limb):
         log.funcFileDebug()
-        parentControl = rigUtil.GetParentControl(limb)
-        if not parentControl:
-            return
-        for group in pm.listConnections(limb.usedGroups):
-            pm.parentConstraint(parentControl, group, mo=1)
+        jointGroups = pm.listConnections(limb.jointGroups)
+        jointGroups = rigUtil.SortGroups(jointGroups)
+        joints = [pm.listConnections(g.joint)[0] for g in jointGroups]
+        limbGroups = pm.listConnections(limb.usedGroups)
+        controls = [pm.listConnections(g.control)[0] for g in limbGroups]
+        ikpvMid = controls[0]
+        ikpvEnd = controls[1]
+        pm.parentConstraint(joints[-1], ikpvEnd)
+        self._UpdateIKPV1(limb)
+        pm.parentConstraint(joints[1], ikpvMid, mo=1)
+
     
-    def Teardown_Rig(self, limb):
+#============= TEARDOWN ============================
+
+    def Teardown_Rig_Internal(self, limb):
         log.funcFileDebug()
-        jointGroups = pm.listConnections(limb.parentableGroups)
+
+    def Teardown_Rig_External(self, limb):
+        log.funcFileDebug()
+        if pm.listConnections(limb.limbParent):
+            groups = pm.listConnections(limb.usedGroups)
+            constraints = [pm.listConnections(g.rx)[0] for g in groups]
+            pm.delete(constraints)
+
+    def Teardown_Constraint_JointsToControls(self, limb):
+        log.funcFileDebug()
+        jointGroups = pm.listConnections(limb.jointGroups)
         jointGroups = rigUtil.SortGroups(jointGroups)
         joints = [pm.listConnections(g.joint)[0] for g in jointGroups]
 
@@ -116,16 +148,12 @@ class IK_PoleVector_01(absBhv.Abstract_Behavior):
         pm.xform(midGroup, t=jointPos, ws=1)
         self._UpdateIKPV1(limb)
 
-        for group in pm.listConnections(limb.usedGroups):
-            pm.parent(group, limb)
-
-#============= BAKE (Requires Setup) ============================
-
-    def Setup_Bake(self, limb):
+    def Teardown_Constraint_ControlsToJoints(self, limb):
         log.funcFileDebug()
-    
-    def Teardown_Bake(self, limb):
-        log.funcFileDebug()
+        limbGroups = pm.listConnections(limb.usedGroups)
+        controls = [pm.listConnections(g.control)[0] for g in limbGroups]
+        pm.delete(pm.listConnections(controls[0].rx))
+        pm.delete(pm.listConnections(controls[1].rx))
     
 #============= EDITABLE UI ============================
 
@@ -149,7 +177,7 @@ class IK_PoleVector_01(absBhv.Abstract_Behavior):
         control.tz.set(0)
 
     def _InitIKPV1(self, limb, ikpv1):
-        jointGroups = pm.listConnections(limb.parentableGroups)
+        jointGroups = pm.listConnections(limb.jointGroups)
         jointGroups = rigUtil.SortGroups(jointGroups)
         j1 = pm.listConnections(jointGroups[0].joint)[0]
         j2 = pm.listConnections(jointGroups[1].joint)[0]

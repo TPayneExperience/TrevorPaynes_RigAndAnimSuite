@@ -8,6 +8,8 @@ reload(rigUtil)
 
 import Common.Logger as log
 reload(log)
+import SceneData.Joint as jnt
+reload(jnt)
 
 class Empty_01(absBhv.Abstract_Behavior):
     bhvType = 'Empty'
@@ -19,41 +21,76 @@ class Empty_01(absBhv.Abstract_Behavior):
     orderIndex = 110  
     usesJointControls = False
     usesLimbControls = True
+    bakeLosesData = False
     
     def InitLimb(self, limb):
         log.funcFileDebug()
-        group = pm.listConnections(limb.limbGroups)[0]
-        pm.connectAttr(limb.parentableGroups, group.parentable)
-    
+        pm.select(d=1)
+        joint = pm.joint()
+        rigRoot = pm.listConnections(limb.rigRoot)[0]
+        jnt.Joint.Add(rigRoot, 0, limb, joint)
+        joint.pfrsName.set('Empty')
+        joint.v.set(0)
+        limbGroup = pm.listConnections(limb.usedGroups)[0]
+        limbControl = pm.listConnections(limbGroup.control)[0]
+        jointGroup = pm.listConnections(joint.group)[0]
+        jointGroup.v.set(0)
+        pm.parent(jointGroup, limbControl)
+        
     def CleanupLimb(self, limb):
         log.funcFileDebug()
+        joint = pm.listConnections(limb.joints)[0]
+        jnt.Joint.Remove(joint)
     
-#============= RIG ============================
+#============= SETUP ============================
 
     def Setup_Rig_Internal(self, limb):
         log.funcFileDebug()
+        return []
     
     def Setup_Rig_External(self, limb):
         log.funcFileDebug()
         parentControl = rigUtil.GetParentControl(limb)
-        if not parentControl:
-            return
-        group = pm.listConnections(limb.limbGroups)[0]
-        pm.parentConstraint(parentControl, group, mo=1)
+        group = pm.listConnections(limb.usedGroups)[0]
+        if parentControl:
+            pm.parentConstraint(parentControl, group, mo=1)
+        return [group]
     
-    def Teardown_Rig(self, limb):
+    def Setup_Constraint_JointsToControls(self, limb):
         log.funcFileDebug()
-        group = pm.listConnections(limb.limbGroups)[0]
-        pm.delete(pm.listConnections(group.rx))
-        rigUtil.Teardown_Controllers(limb)
-
-#============= BAKE ============================
-
-    def Setup_Bake(self, limb):
-        log.funcFileDebug()
+        group = pm.listConnections(limb.usedGroups)[0]
+        joint = pm.listConnections(limb.joints)[0]
+        control = pm.listConnections(group.control)[0]
+        pm.parentConstraint(control, joint)
     
-    def Teardown_Bake(self, limb):
+    def Setup_Constraint_ControlsToJoints(self, limb):
         log.funcFileDebug()
+        group = pm.listConnections(limb.usedGroups)[0]
+        joint = pm.listConnections(limb.joints)[0]
+        control = pm.listConnections(group.control)[0]
+        pm.parentConstraint(joint, control)
+    
+#============= TEARDOWN ============================
+
+    def Teardown_Rig_Internal(self, limb):
+        log.funcFileDebug()
+
+    def Teardown_Rig_External(self, limb):
+        log.funcFileDebug()
+        if pm.listConnections(limb.limbParent):
+            group = pm.listConnections(limb.limbGroups)[0]
+            pm.delete(pm.listConnections(group.rx))
+
+    def Teardown_Constraint_JointsToControls(self, limb):
+        log.funcFileDebug()
+        joint = pm.listConnections(limb.joints)[0]
+        pm.delete(pm.listConnections(joint.rx))
+    
+    def Teardown_Constraint_ControlsToJoints(self, limb):
+        log.funcFileDebug()
+        group = pm.listConnections(limb.usedGroups)[0]
+        control = pm.listConnections(group.control)[0]
+        pm.delete(pm.listConnections(control.rx))
     
 #============= EDITABLE UI ============================
 

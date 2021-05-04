@@ -9,8 +9,8 @@ import Common.Logger as log
 reload(log)
 import SceneData.Control as ctr
 reload(ctr)
-# import Common.Rig_Utilities as rigUtil
-# reload(rigUtil)
+import Common.Rig_Utilities as rigUtil
+reload(rigUtil)
 import Data.Rig_Data as rigData
 reload(rigData)
 # import SceneData.Limb as lmb
@@ -45,6 +45,7 @@ class Appearance(absOp.Abstract_Operation):
         ctrShapesParent = pm.group(ctrShapes, p=rigRoot,
                                     name=rigData.CONTROL_TEMPLATE_GROUP)
         ctrShapesParent.v.set(0)
+        rigUtil.ChannelBoxAttrs(ctrShapesParent, 0, 0, 0, 0)
         pm.addAttr(ctrShapesParent, ln='rigRoot', dt='string')
         pm.connectAttr(rigRoot.controlTemplates, ctrShapesParent.rigRoot)
         for ctr in ctrShapes:

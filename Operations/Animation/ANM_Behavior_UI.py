@@ -7,21 +7,10 @@ import ANM_Behavior as bhv
 reload(bhv)
 import Common.UI_Utilities as uiUtil
 reload(uiUtil)
-# # import Common.General_Utilities as genUtil
-# # reload(genUtil)
 import Common.Logger as log
 reload(log)
 import SceneData.Behavior_Manager as bhvMng
 reload(bhvMng)
-# import Data.Rig_Data as rigData
-# reload(rigData)
-# import Popups.EditPresets as editPst
-# reload(editPst)
-
-# import SceneData.RigRoot as rrt
-# reload(rrt)
-# import SceneData.Behavior_Manager as bhvMng
-# reload(bhvMng)
 
 class ANM_Behavior_UI(absOpUI.Abstract_OperationUI):
     uiName = 'Behavior'
@@ -39,7 +28,7 @@ class ANM_Behavior_UI(absOpUI.Abstract_OperationUI):
         self._rigRoot = rigRoot
         self._allRigRoots = allRigRoots
         self.PopulateLimbHier()
-        self.PopulatePresets()
+        self.PopulatePresets(None)
         
     def Teardown_UI(self, rigRoot, allRigRoots):
         self._presetsUI = []
@@ -54,7 +43,6 @@ class ANM_Behavior_UI(absOpUI.Abstract_OperationUI):
                                                 elc=self.IgnoreRename)
                 with pm.popupMenu() as self.rmb_ui:
                     pm.menuItem(l='APPLY PRESET', en=0, d=1)
-                    pm.menuItem(l='asdf')
             with pm.frameLayout('Controls', bv=1):
                 self.control_tv = pm.treeView(arp=0, adr=0, ams=0,
                                             elc=self.IgnoreRename)
@@ -64,6 +52,7 @@ class ANM_Behavior_UI(absOpUI.Abstract_OperationUI):
             with pm.frameLayout(l=msg, bv=1, en=0) as self.limbProp_fl:
                 with pm.columnLayout(adj=1) as self.bhvLimbProp_cl:
                     pm.text('(EDIT in RIGGING Category)')
+                    pm.text('(Select Limb to key bhv attrs)')
                     with pm.columnLayout(co=('left', -100)):
                         self.enableLimb_cg = pm.attrControlGrp(
                                                 l='Enable Limb',
@@ -97,6 +86,7 @@ class ANM_Behavior_UI(absOpUI.Abstract_OperationUI):
         self.PopulateLimbProperties(None)
         self.PopulateControlHier(None)
         self.PopulateBhvProperties(None)
+        self.PopulatePresets(None)
         limbIDStrs = pm.treeView(self.limb_tv, q=1, selectItem=1)
         if not limbIDStrs:
             return
@@ -105,11 +95,10 @@ class ANM_Behavior_UI(absOpUI.Abstract_OperationUI):
             log.debug('\t\t' + limb.pfrsName.get())
         if len(self._selectedLimbs) == 1:
             limb = self._selectedLimbs[0]
+            self._rigRoot = pm.listConnections(limb.rigRoot)[0]
+            self.PopulatePresets(self._rigRoot)
             bhvFile = limb.bhvFile.get()
             self._currentBhv = bhvMng.Behavior_Manager.bhvs[bhvFile]
-            # groups = pm.listConnections(limb.usedGroups)
-            # controls = [pm.listConnections(g.control)[0] for g in groups]
-            # pm.select(controls)
             self.PopulateLimbProperties(limb)
             self.PopulateControlHier(limb)
             self.PopulateBhvProperties(limb)
@@ -117,6 +106,26 @@ class ANM_Behavior_UI(absOpUI.Abstract_OperationUI):
 
     def ApplyPreset(self, preset):
         log.funcFileInfo()
+        # warn if going to lose data:
+        willLoseData = False
+        for limbPreset in pm.listConnections(preset.limbPresets):
+            bhvFile = limbPreset.bhvFile.get()
+            bhv = bhvMng.Behavior_Manager.bhvs[bhvFile]
+            if bhv.bakeLosesData:
+                willLoseData = True
+        if willLoseData:
+            msg = 'Applying this preset may result in '
+            msg += '\nkeyframe data loss. Proceed?'
+            result = pm.confirmDialog(
+                            t='Apply Preset Baking Warning', 
+                            icon='warning', 
+                            m=msg, 
+                            b=['Ok', 'Cancel'], 
+                            db='Cancel', 
+                            cb='Cancel', 
+                            ds='Cancel')
+            if result == 'Cancel':
+                return
         self.operation.ApplyPreset(preset)
         self._selectedLimbs = []
         self.PopulateLimbHier()
@@ -124,12 +133,14 @@ class ANM_Behavior_UI(absOpUI.Abstract_OperationUI):
         self.PopulateLimbProperties(None)
         self.PopulateBhvProperties(None)
 
-    def PopulatePresets(self):
+    def PopulatePresets(self, rigRoot):
         log.funcFileInfo()
         if self._presetsUI:
             pm.deleteUI(self._presetsUI)
             self._presetsUI = []
-        for preset in sorted(pm.listConnections(self._rigRoot.presets)):
+        if not rigRoot:
+            return
+        for preset in sorted(pm.listConnections(rigRoot.presets)):
             presetName = preset.presetName.get()
             item = pm.menuItem(l=presetName, p=self.rmb_ui, 
                             c=pm.Callback(self.ApplyPreset, preset))

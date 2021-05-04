@@ -19,15 +19,17 @@ class IK_Spline_01(absBhv.Abstract_Behavior):
     orderIndex = 320  
     usesJointControls = False
     usesLimbControls = True
+    bakeLosesData = True
     
     def InitLimb(self, limb):
         log.funcFileDebug()
         if not limb.hasAttr('IKSCurve'):
             pm.addAttr(limb, ln='IKSCurve', dt='string')
             pm.addAttr(limb, ln='IKSTwist', at='float')
+            pm.setAttr(limb.IKSTwist, cb=1)
         limbGroups = pm.listConnections(limb.usedGroups)
         limbGroups = rigUtil.SortGroups(limbGroups)
-        jointGroups = pm.listConnections(limb.parentableGroups)
+        jointGroups = pm.listConnections(limb.jointGroups)
         jointGroups = rigUtil.SortGroups(jointGroups)
         joints = [pm.listConnections(g.joint)[0] for g in jointGroups]
         startJoint = joints[0]
@@ -63,18 +65,36 @@ class IK_Spline_01(absBhv.Abstract_Behavior):
 
     def Setup_Rig_Internal(self, limb):
         log.funcFileDebug()
+        return []
+    
+    def Setup_Rig_External(self, limb):
+        log.funcFileDebug()
+        parentControl = rigUtil.GetParentControl(limb)
+        groups = pm.listConnections(limb.usedGroups)
+        if parentControl:
+            for group in groups:
+                pm.parentConstraint(parentControl, group, mo=1)
+        return groups
+    
+    def Setup_Constraint_JointsToControls(self, limb):
+        log.funcFileDebug()
+        # Get Stuff
         limbGroups = pm.listConnections(limb.usedGroups)
         limbGroups = rigUtil.SortGroups(limbGroups)
-        jointGroups = pm.listConnections(limb.parentableGroups)
+        jointGroups = pm.listConnections(limb.jointGroups)
         jointGroups = rigUtil.SortGroups(jointGroups)
         joints = [pm.listConnections(g.joint)[0] for g in jointGroups]
         curve = pm.listConnections(limb.IKSCurve)[0]
-        temp = pm.ikHandle(sj=joints[0], ee=joints[-1], c=curve, ccv=0, 
-                                                    sol='ikSplineSolver')
-        handle = temp[0]
+
+        # Handle setup
+        handle = pm.ikHandle(sj=joints[0], ee=joints[-1], 
+                                            c=curve, 
+                                            ccv=0, 
+                                            sol='ikSplineSolver')[0]
         handle.v.set(0)
         pm.connectAttr(limb.IKSTwist, handle.twist)
         pm.parent(handle, curve, limb)
+
         # Setup Control clusters
         for i in range(4):
             control = pm.listConnections(limbGroups[i].control)[0]
@@ -83,22 +103,41 @@ class IK_Spline_01(absBhv.Abstract_Behavior):
             clusterXform = clusters[1]
             pm.parent(clusterXform, control)
             clusterXform.v.set(0)
+
         # Joint groups for parenting
         for group in jointGroups:
             joint = pm.listConnections(group.joint)[0]
             pm.parentConstraint(joint, group, mo=1)
-
-    def Setup_Rig_External(self, limb):
-        log.funcFileDebug()
-        parentControl = rigUtil.GetParentControl(limb)
-        if not parentControl:
-            return
-        for group in pm.listConnections(limb.usedGroups):
-            pm.parentConstraint(parentControl, group, mo=1)
     
-    def Teardown_Rig(self, limb):
+    def Setup_Constraint_ControlsToJoints(self, limb):
         log.funcFileDebug()
-        jointGroups = pm.listConnections(limb.parentableGroups)
+        limbGroups = pm.listConnections(limb.usedGroups)
+        limbGroups = rigUtil.SortGroups(limbGroups)
+        limbControls = [pm.listConnections(g.control)[0] for g in limbGroups]
+        jointGroups = pm.listConnections(limb.jointGroups)
+        jointGroups = rigUtil.SortGroups(jointGroups)
+        joints = [pm.listConnections(g.joint) for g in jointGroups]
+
+        # Constrain end controls
+        pm.parentConstraint(joints[0], limbControls[0])
+        pm.parentConstraint(joints[-1], limbControls[-1])
+        pm.parentConstraint(joints[1], limbControls[1])
+        pm.parentConstraint(joints[-2], limbControls[-2])
+        
+#============= TEARDOWN ============================
+
+    def Teardown_Rig_Internal(self, limb):
+        log.funcFileDebug()
+
+    def Teardown_Rig_External(self, limb):
+        log.funcFileDebug()
+        if pm.listConnections(limb.limbParent):
+            for group in pm.listConnections(limb.usedGroups):
+                pm.delete(pm.listConnections(group.rx))
+
+    def Teardown_Constraint_JointsToControls(self, limb):
+        log.funcFileDebug()
+        jointGroups = pm.listConnections(limb.jointGroups)
         jointGroups = rigUtil.SortGroups(jointGroups)
         joints = [pm.listConnections(g.joint)[0] for g in jointGroups]
 
@@ -126,16 +165,12 @@ class IK_Spline_01(absBhv.Abstract_Behavior):
                 toDelete += pm.listRelatives(child, c=1, type='clusterHandle')
         pm.delete(toDelete)
 
-        for group in pm.listConnections(limb.usedGroups):
-            pm.parent(group, limb)
-
-#============= BAKE (Requires Setup) ============================
-
-    def Setup_Bake(self, limb):
+    def Teardown_Constraint_ControlsToJoints(self, limb):
         log.funcFileDebug()
-    
-    def Teardown_Bake(self, limb):
-        log.funcFileDebug()
+        groups = pm.listConnections(limb.usedGroups)
+        controls = [pm.listConnections(g.control)[0] for g in groups]
+        for control in controls:
+            pm.delete(pm.listConnections(control.rx))
     
 #============= EDITABLE UI ============================
 

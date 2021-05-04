@@ -27,14 +27,17 @@ class Joint:
             genUtil.AbstractInitializer(group, 'Group')
             group.groupIndex.set(index)
             pm.disconnectAttr(group.parentable)
+            pm.parent(group, limb)
         else:
-            group = grp.Group.AddJointGroup(rigRoot, index, joint)
-        pm.connectAttr(limb.parentableGroups, group.parentable)
+            group = grp.Group.AddJointGroup(rigRoot, index, limb, joint)
+        pm.connectAttr(limb.jointGroups, group.parentable)
         joint.pfrsName.set('Joint%03d' % (index))
     
     @staticmethod
     def Remove(joint):
         log.funcFileDebug()
+        group = pm.listConnections(joint.group)[0]
+        pm.parent(group, joint)
         pm.disconnectAttr(joint.limb)
     
     

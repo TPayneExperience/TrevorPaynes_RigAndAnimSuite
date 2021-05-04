@@ -21,13 +21,14 @@ class FK_Chain_01(absBhv.Abstract_Behavior):
     orderIndex = 210  
     usesJointControls = True
     usesLimbControls = False
+    bakeLosesData = False
     
     def InitLimb(self, limb):
         log.funcFileDebug()
         if not limb.hasAttr('enableEndControl'):
             pm.addAttr(limb, ln='enableEndControl', at='bool', 
                                     dv=1, h=genData.HIDE_ATTRS)
-        groups = pm.listConnections(limb.parentableGroups)
+        groups = pm.listConnections(limb.jointGroups)
         groups = rigUtil.SortGroups(groups)
         if not limb.enableEndControl.get():
             groups = groups[:-1]
@@ -37,68 +38,68 @@ class FK_Chain_01(absBhv.Abstract_Behavior):
     def CleanupLimb(self, limb):
         log.funcFileDebug()
     
-#============= RIG ============================
+#============= SETUP ============================
 
     def Setup_Rig_Internal(self, limb):
         log.funcFileDebug()
         groups = pm.listConnections(limb.usedGroups)
         groups = rigUtil.SortGroups(groups)
-        pm.parent(groups[0], limb)
         for i in range(len(groups)-1):
             group = groups[i+1]
             parentCtr = pm.listConnections(groups[i].control)[0]
             pm.parent(group, parentCtr)
-        for group in groups:
-            joint = pm.listConnections(group.joint)[0]
-            control = pm.listConnections(group.control)[0]
-            pm.parentConstraint(control, joint, mo=1)
+        return groups[1:]
     
     def Setup_Rig_External(self, limb):
         log.funcFileDebug()
         parentControl = rigUtil.GetParentControl(limb)
-        if not parentControl:
-            return
         groups = pm.listConnections(limb.usedGroups)
         group = rigUtil.SortGroups(groups)[0]
-        pm.parentConstraint(parentControl, group, mo=1)
+        if parentControl:
+            pm.parentConstraint(parentControl, group, mo=1)
+        return [group]
     
-    def Teardown_Rig(self, limb):
-        log.funcFileDebug()
-        jointGroups = pm.listConnections(limb.usedGroups)
-        jointGroups = rigUtil.SortGroups(jointGroups)
-        joints = [pm.listConnections(g.joint)[0] for g in jointGroups]
-        constraints = [pm.listConnections(j.rx)[0] for j in joints]
-        pm.delete(constraints)
-        pm.delete(pm.listConnections(jointGroups[0].rx))
-
-        for group, joint in zip(jointGroups, joints):
-            pm.parent(group, joint)
-
-#============= BAKE (Requires Setup) ============================
-
-    def Setup_Bake(self, limb):
-        log.funcFileDebug()
-        groups = pm.listConnections(limb.usedGroups)
-        groups = rigUtil.SortGroups(groups)
-        pm.parent(groups[0], limb)
-        # Build hierarchy
-        for i in range(len(groups)-1):
-            group = groups[i+1]
-            parentCtr = pm.listConnections(groups[i].control)[0]
-            pm.parent(group, parentCtr)
-        # Constrain controls to joints
-        for group in groups:
-            joint = pm.listConnections(group.joint)[0]
-            control = pm.listConnections(group.control)[0]
-            pm.orientConstraint(joint, control, mo=1)
-    
-    def Teardown_Bake(self, limb):
+    def Setup_Constraint_JointsToControls(self, limb):
         log.funcFileDebug()
         for group in pm.listConnections(limb.usedGroups):
             joint = pm.listConnections(group.joint)[0]
             control = pm.listConnections(group.control)[0]
-            pm.delete(pm.listConnections(control.rx))
-            pm.parent(group, joint)
+            pm.parentConstraint(control, joint, mo=1)
+    
+    def Setup_Constraint_ControlsToJoints(self, limb):
+        log.funcFileDebug()
+        for group in pm.listConnections(limb.usedGroups):
+            joint = pm.listConnections(group.joint)[0]
+            control = pm.listConnections(group.control)[0]
+            pm.parentConstraint(joint, control)
+    
+#============= TEARDOWN ============================
+
+    def Teardown_Rig_Internal(self, limb):
+        log.funcFileDebug()
+        groups = pm.listConnections(limb.usedGroups)
+        groups = rigUtil.SortGroups(groups)[1:]
+        pm.parent(groups, limb)
+
+    def Teardown_Rig_External(self, limb):
+        log.funcFileDebug()
+        if pm.listConnections(limb.limbParent):
+            jointGroups = pm.listConnections(limb.usedGroups)
+            jointGroup = rigUtil.SortGroups(jointGroups)[0]
+            pm.delete(pm.listConnections(jointGroup.rx))
+
+    def Teardown_Constraint_JointsToControls(self, limb):
+        log.funcFileDebug()
+        joints = pm.listConnections(limb.joints)
+        constraints = [pm.listConnections(j.rx)[0] for j in joints]
+        pm.delete(constraints)
+    
+    def Teardown_Constraint_ControlsToJoints(self, limb):
+        log.funcFileDebug()
+        jointGroups = pm.listConnections(limb.usedGroups)
+        controls = [pm.listConnections(g.control)[0] for g in jointGroups]
+        constraints = [pm.listConnections(c.rx)[0] for c in controls]
+        pm.delete(constraints)
     
 #============= EDITABLE UI ============================
 
@@ -113,7 +114,7 @@ class FK_Chain_01(absBhv.Abstract_Behavior):
     def _SetEnableEndControl(self, limb):
         log.funcFileDebug()
         isEnabled = limb.enableEndControl.get()
-        groups = pm.listConnections(limb.parentableGroups)
+        groups = pm.listConnections(limb.jointGroups)
         group = rigUtil.SortGroups(groups)[-1]
         group.v.set(isEnabled)
         if isEnabled:
@@ -124,5 +125,6 @@ class FK_Chain_01(absBhv.Abstract_Behavior):
 #============= ANIMATION UI ============================
 
     def Setup_Animation_Limb_UI(self, limb):
+        log.funcFileDebug()
         return False 
     

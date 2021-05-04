@@ -23,12 +23,13 @@ class Group:
         return group
 
     @staticmethod
-    def AddJointGroup(rigRoot, index, joint):
+    def AddJointGroup(rigRoot, index, limb, joint):
         log.funcFileDebug()
         group = Group._Add(rigRoot, index, 'Joint')
         pm.connectAttr(joint.group, group.joint)
         pm.parent(group, joint)
         pm.xform(group, t=(0,0,0), ro=(0,0,0), s=(1,1,1))
+        pm.parent(group, limb)
         return group
     
     @staticmethod

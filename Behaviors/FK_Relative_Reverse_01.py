@@ -19,11 +19,12 @@ class FK_Relative_01(absBhv.Abstract_Behavior):
     orderIndex = 250  
     usesJointControls = False
     usesLimbControls = True
+    bakeLosesData = True
     
     def InitLimb(self, limb):
         log.funcFileDebug()
         group = pm.listConnections(limb.usedGroups)[0]
-        jointGroups = pm.listConnections(limb.parentableGroups)
+        jointGroups = pm.listConnections(limb.jointGroups)
         jointGroup = rigUtil.SortGroups(jointGroups)[-1]
         joint = pm.listConnections(jointGroup.joint)[0]
         pm.parent(group, joint)
@@ -33,13 +34,13 @@ class FK_Relative_01(absBhv.Abstract_Behavior):
     def CleanupLimb(self, limb):
         log.funcFileDebug()
     
-#============= RIG ============================
+#============= SETUP ============================
 
     def Setup_Rig_Internal(self, limb):
         log.funcFileDebug()
         limbGroup = pm.listConnections(limb.usedGroups)[0]
         limbControl = pm.listConnections(limbGroup.control)[0]
-        jointGroups = pm.listConnections(limb.parentableGroups)
+        jointGroups = pm.listConnections(limb.jointGroups)
         jointGroups = rigUtil.SortGroups(jointGroups)[::-1]
         controls = []
         # Parent control hierarchy
@@ -48,53 +49,70 @@ class FK_Relative_01(absBhv.Abstract_Behavior):
             parentCtr = pm.listConnections(jointGroups[i].control)[0]
             pm.parent(childGroup, parentCtr)
             controls.append(parentCtr)
-        pm.parent(jointGroups[0], limbControl)
-        # Bind Joints
-        for group in jointGroups:
-            joint = pm.listConnections(group.joint)[0]
-            control = pm.listConnections(group.control)[0]
-            pm.parentConstraint(control, joint, mo=1)
         multNode = pm.createNode('multiplyDivide')
         pm.connectAttr(limbControl.rotate, multNode.input1)
         scalar = 1.0/max(len(controls)-2, 1)
         multNode.input2.set(scalar, scalar, scalar)
-        for childControl in controls[1:]:
+        for childControl in controls: #[1:]:
             pm.connectAttr(multNode.output, childControl.rotate)
+        return []
         
     def Setup_Rig_External(self, limb):
         log.funcFileDebug()
         parentControl = rigUtil.GetParentControl(limb)
-        if not parentControl:
-            return
         group = pm.listConnections(limb.usedGroups)[0]
-        pm.parentConstraint(parentControl, group, mo=1)
+        if parentControl:
+            pm.parentConstraint(parentControl, group, mo=1)
+        return [group]
     
-    def Teardown_Rig(self, limb):
+    def Setup_Constraint_JointsToControls(self, limb):
+        log.funcFileDebug()
+        for group in pm.listConnections(limb.jointGroups):
+            joint = pm.listConnections(group.joint)[0]
+            control = pm.listConnections(group.control)[0]
+            pm.parentConstraint(control, joint, mo=1)
+    
+    def Setup_Constraint_ControlsToJoints(self, limb):
         log.funcFileDebug()
         limbGroup = pm.listConnections(limb.usedGroups)[0]
         limbControl = pm.listConnections(limbGroup.control)[0]
-        jointGroups = pm.listConnections(limb.parentableGroups)
-        jointGroups = rigUtil.SortGroups(jointGroups)
-        joints = [pm.listConnections(g.joint)[0] for g in jointGroups]
-        constraints = [pm.listConnections(j.rx)[0] for j in joints]
-        pm.delete(constraints)                      # delete joint parent cst
-        if pm.listConnections(limb.limbParent):
-            parentCst = pm.listConnections(limbGroup.rx)
-            pm.delete(parentCst) # delete parent cst
+        jointGroups = pm.listConnections(limb.jointGroups)
+        jointGroup = rigUtil.SortGroups(jointGroups)[-1]
+        joint = pm.listConnections(jointGroup.joint)[0]
+        pm.parentConstraint(joint, limbControl, mo=1)
+    
+#============= TEARDOWN ============================
+
+    def Teardown_Rig_Internal(self, limb):
+        log.funcFileDebug()
+        limbGroup = pm.listConnections(limb.usedGroups)[0]
+        limbControl = pm.listConnections(limbGroup.control)[0]
         conversionNode = pm.listConnections(limbControl.r)[0]
         multNodes = pm.listConnections(conversionNode.output)
         pm.delete(multNodes) # delete mult node
+        groups = pm.listConnections(limb.jointGroups)
+        groups = rigUtil.SortGroups(groups)[:-1]
+        pm.parent(groups, limb)
 
-        for group, joint in zip(jointGroups, joints):
-            pm.parent(group, joint)
-
-#============= BAKE (Requires Setup) ============================
-
-    def Setup_Bake(self, limb):
+    def Teardown_Rig_External(self, limb):
         log.funcFileDebug()
+        if pm.listConnections(limb.limbParent):
+            limbGroup = pm.listConnections(limb.usedGroups)[0]
+            parentCst = pm.listConnections(limbGroup.rx)
+            pm.delete(parentCst) # delete parent cst
+
+    def Teardown_Constraint_JointsToControls(self, limb):
+        log.funcFileDebug()
+        jointGroups = pm.listConnections(limb.jointGroups)
+        joints = [pm.listConnections(g.joint)[0] for g in jointGroups]
+        constraints = [pm.listConnections(j.rx)[0] for j in joints]
+        pm.delete(constraints) 
     
-    def Teardown_Bake(self, limb):
+    def Teardown_Constraint_ControlsToJoints(self, limb):
         log.funcFileDebug()
+        limbGroup = pm.listConnections(limb.usedGroups)[0]
+        limbControl = pm.listConnections(limbGroup.control)[0]
+        pm.delete(pm.listConnections(limbControl.rx)) 
     
 #============= EDITABLE UI ============================
 
