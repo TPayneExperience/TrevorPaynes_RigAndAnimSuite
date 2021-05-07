@@ -35,7 +35,7 @@ class InitLimb(absInit.Abstract_Initializer):
         # LIMB PARENTING
         pm.addAttr(limb, ln='limbParent', dt='string', h=hide)
         pm.addAttr(limb, ln='limbChildren', dt='string', h=hide)
-        pm.addAttr(limb, ln='limbParentControl', at='enum', en='None', 
+        pm.addAttr(limb, ln='limbParentJoint', at='enum', en='None', 
                                         h=hide)
         pm.addAttr(limb, ln='jointGroups', dt='string', h=hide)
         pm.addAttr(limb, ln='mirrorLimb', at='long', h=hide)
@@ -56,4 +56,9 @@ class InitLimb(absInit.Abstract_Initializer):
         
         pm.addAttr(limb, ln='presets', dt='string', h=hide)
 
+        # BAKING
+        pm.addAttr(limb, ln='hasKeys', at='bool', dv=1, h=hide)
+        pm.addAttr(limb, ln='controlKeyframes', dt='string', h=hide)
+        pm.addAttr(limb, ln='bakeInternal', at='bool', dv=1, h=hide)
+        pm.addAttr(limb, ln='bakeExternal', at='bool', dv=1, h=hide)
         

@@ -81,21 +81,24 @@ class FK_Chain_Reverse_01(absBhv.Abstract_Behavior):
     def Teardown_Rig_External(self, limb):
         log.funcFileDebug()
         if pm.listConnections(limb.limbParent):
-            jointGroups = pm.listConnections(limb.usedGroups)
-            jointGroup = rigUtil.SortGroups(jointGroups)[-1]
-            pm.delete(pm.listConnections(jointGroup.rx))
+            groups = pm.listConnections(limb.usedGroups)
+            group = rigUtil.SortGroups(groups)[-1]
+            cst = pm.listRelatives(group, c=1, type='parentConstraint')
+            pm.delete(cst)
 
     def Teardown_Constraint_JointsToControls(self, limb):
         jointGroups = pm.listConnections(limb.usedGroups)
         joints = [pm.listConnections(g.joint)[0] for g in jointGroups]
-        constraints = [pm.listConnections(j.rx)[0] for j in joints]
-        pm.delete(constraints)
+        for joint in joints:
+            cst = pm.listRelatives(joint, c=1, type='parentConstraint')
+            pm.delete(cst)
     
     def Teardown_Constraint_ControlsToJoints(self, limb):
         jointGroups = pm.listConnections(limb.usedGroups)
         controls = [pm.listConnections(g.control)[0] for g in jointGroups]
-        constraints = [pm.listConnections(c.rx)[0] for c in controls]
-        pm.delete(constraints)
+        for control in controls:
+            cst = pm.listRelatives(control, c=1, type='parentConstraint')
+            pm.delete(cst)
 
 #============= EDITABLE UI ============================
 

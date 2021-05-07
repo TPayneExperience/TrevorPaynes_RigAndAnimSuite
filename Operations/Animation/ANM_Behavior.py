@@ -19,40 +19,66 @@ class ANM_Behavior(absOp.Abstract_Operation):
     def __init__(self):
         self._rigBhv = rigBhv.RIG_Behavior()
 
-    def ApplyPreset(self, preset):
+    def ApplyPreset(self, preset, keyframesOnly=True):
         log.funcFileDebug()
+        rigRoot = pm.listConnections(preset.rigRoot)[0]
         mng = bhvMng.Behavior_Manager
         limbPresets = pm.listConnections(preset.limbPresets)
-        limbs = [pm.listConnections(p.limb)[0] for p in limbPresets]
-        tempParent = pm.group(n='PFRS_BAKED_JOINT_DATA', em=1, w=1)
-        start = pm.playbackOptions(q=1, ast=1)
-        end = pm.playbackOptions(q=1, aet=1)
+        limbs = [pm.listConnections(lp.limb)[0] for lp in limbPresets]
+        start = int(pm.playbackOptions(q=1, ast=1))
+        end = int(pm.playbackOptions(q=1, aet=1))
         
-        tempGroups = mng._BakeControlsToJointData(limbs, tempParent,
-                                                        start,
-                                                        end)
-        keyedLimbs = mng._TeardownLimbs(limbs)
+        # keyframe data
+        if keyframesOnly:
+            for limb in limbs:
+                groups = pm.listConnections(limb.usedGroups)
+                controls = [pm.listConnections(g.control)[0] for g in groups]
+                limb.hasKeys.set(False)
+                if any([pm.keyframe(c, q=1, kc=1) for c in controls]):
+                    limb.hasKeys.set(True)
+                    limb.controlKeyframes.set('')
+                    keyframes = set()
+                    for control in controls:
+                        for k in pm.keyframe(control, q=1, t=(start,end), 
+                                                            vc=1, tc=1):
+                            keyframes.add(k[0])
+                    keyframes = sorted(list(keyframes))
+                    keyframes = [str(k) for k in keyframes]
+                    limb.controlKeyframes.set(':'.join(keyframes))
 
+        mng.Teardown_Anim_Rig(rigRoot)
+
+        # Assign new Behaviors + new parents
         log.debug('Assign New Behaviors')
-        bakeAll = []
         for limbPreset in limbPresets:
             limb = pm.listConnections(limbPreset.limb)[0]
+            limb.bakeInternal.set(False)
+            limb.bakeExternal.set(False)
             if self._rigBhv._ApplyLimbPreset_Bhv(limbPreset):
-                if limb in keyedLimbs:
-                    bakeAll.append(limb)
-                
+                if limb.hasKeys.get():
+                    limb.bakeInternal.set(True)
+                    limb.bakeExternal.set(True)
         log.debug('Assign New Parents')
-        bakeExternalOnly = []
         for limbPreset in limbPresets:
             limb = pm.listConnections(limbPreset.limb)[0]
             if self._rigBhv._ApplyLimbPreset_Parent(limbPreset):
-                if limb not in bakeAll and limb in keyedLimbs:
-                    bakeExternalOnly.append(limb)
+                if limb.hasKeys.get():
+                    limb.bakeExternal.set(True)
 
-        controls = mng._SetupRigConstrainedToJoints(limbs, bakeAll, 
-                                                        bakeExternalOnly)
+        mng.Setup_Anim_Rig(rigRoot)
 
-        if controls:
-            mng._BakeJointDataToControls(tempGroups, controls, start, end)
-        pm.delete(tempParent)
-        mng._SetupJointsConstrainedToRig(limbs)
+        if keyframesOnly:
+            for limb in limbs:
+                if not limb.hasKeys.get():
+                    continue
+                keyframes = limb.controlKeyframes.get()
+                if not keyframes:
+                    continue
+                keyframes = keyframes.split(':')
+                keyframes = set([int(float(k)) for k in keyframes])
+                groups = pm.listConnections(limb.usedGroups)
+                controls = [pm.listConnections(g.control)[0] for g in groups]
+                for i in range(start, end+1):
+                    if i in keyframes:
+                        continue
+                    pm.cutKey(controls, t=(i, i))

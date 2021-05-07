@@ -42,7 +42,7 @@ class Preset:
         pm.connectAttr(limb.presets, limbPreset.limb)
         limbPreset.bhvFile.set(limb.bhvFile.get())
         limbPreset.enableLimb.set(limb.enableLimb.get())
-        limbPreset.limbParentControl.set(limb.limbParentControl.get())
+        limbPreset.limbParentJoint.set(limb.limbParentJoint.get())
 
         # Connect parent
         limbParent = pm.listConnections(limb.limbParent)

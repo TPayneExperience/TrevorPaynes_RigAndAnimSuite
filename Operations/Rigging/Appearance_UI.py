@@ -159,7 +159,7 @@ class Appearance_UI(absOpUI.Abstract_OperationUI):
     def SelectedControl(self):
         log.funcFileDebug()
         groupIDStr = pm.treeView(self.control_tv, q=1, selectItem=1)
-        if groupIDStr:
+        if groupIDStr and self._rigRoot.rigMode.get() == 0:
             group = self._limbGroups[groupIDStr[0]]
             control = pm.listConnections(group.control)[0]
             log.info('\t"%s"'% control)

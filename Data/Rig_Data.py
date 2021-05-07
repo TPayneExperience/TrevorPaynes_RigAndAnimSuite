@@ -4,9 +4,6 @@
 RIG_MODES = (   'Setup Rig',
                 'Animate Rig')  # Maybe post anim rig later???
 
-LIMBS_GROUP = 'LIMBS'
-JOINTS_GROUP = 'JOINTS'
-MESHES_GROUP = 'MESHES'
 CONTROL_TEMPLATE_GROUP = 'CONTROL_SHAPE_TEMPLATES'
 
 CONTROLS_LAYER = 'Controls'

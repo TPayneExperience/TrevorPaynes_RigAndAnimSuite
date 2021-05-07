@@ -94,21 +94,25 @@ class LookAt_01(absBhv.Abstract_Behavior):
     def Teardown_Rig_External(self, limb):
         log.funcFileDebug()
         if pm.listConnections(limb.limbParent):
-            limbGroup = pm.listConnections(limb.usedGroups)[0]
-            pm.delete(pm.listConnections(limbGroup.rx))
+            group = pm.listConnections(limb.usedGroups)[0]
+            cst = pm.listRelatives(group, c=1, type='parentConstraint')
+            pm.delete(cst)
 
     def Teardown_Constraint_JointsToControls(self, limb):
         log.funcFileDebug()
         joint = pm.listConnections(limb.joints)[0]
-        pm.delete(pm.listConnections(joint.rx))
+        cst = pm.listRelatives(joint, c=1, type='aimConstraint')
+        pm.delete(cst)
         group = pm.listConnections(limb.jointGroups)[0]
-        pm.delete(pm.listConnections(group.rx))
+        cst = pm.listRelatives(group, c=1, type='parentConstraint')
+        pm.delete(cst)
     
     def Teardown_Constraint_ControlsToJoints(self, limb):
         log.funcFileDebug()
         group = pm.listConnections(limb.usedGroups)[0]
         control = pm.listConnections(group.control)[0]
-        pm.delete(pm.listConnections(control.rx))
+        cst = pm.listRelatives(control, c=1, type='parentConstraint')
+        pm.delete(cst)
 
 #============= EDITABLE UI ============================
 

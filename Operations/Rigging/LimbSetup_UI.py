@@ -70,6 +70,8 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
                 with pm.popupMenu():
                     self.add_mi = pm.menuItem(l='Add Joint Limb', 
                                             en=0, c=self.AddJointLimb)
+                    self.duplicate_mi = pm.menuItem(l='Duplicate Limbs', 
+                                            en=0, c=self.DuplicateLimbs)
                     self.flipSides_mi = pm.menuItem(l='Flip Sides', 
                                             en=0, c=self.FlipSides)
                     pm.menuItem(divider=1)
@@ -184,6 +186,9 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
         self._limbIDs = uiUtil.PopulateLimbHier(self.limb_tv, 
                                                 self._rigRoot,
                                                 self._allRigRoots)
+        for limbID, limb in self._limbIDs.items():
+            if limb.limbType.get() == 0:
+                pm.treeView(self.limb_tv, e=1, enl=(limbID, 0))
         if not selectLimb:
             return
         for limbID, limb in self._limbIDs.items():
@@ -195,11 +200,13 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
         limbIDStrs = pm.treeView(self.limb_tv, q=1, selectItem=1)
         pm.menuItem(self.remove_mi, e=1, en=0)
         pm.menuItem(self.flipSides_mi, e=1, en=0)
+        pm.menuItem(self.duplicate_mi, e=1, en=0)
         self._selectedLimbs = None
         self.PopulateJointHier(None)
         if not limbIDStrs:
             return
         self._selectedLimbs = [self._limbIDs[ID] for ID in limbIDStrs]
+        pm.menuItem(self.duplicate_mi, e=1, en=1)
         for limb in self._selectedLimbs:
             log.debug('\t\t' + limb.pfrsName.get())
         if len(self._selectedLimbs) == 1:
@@ -217,6 +224,14 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
         self.PopulateLimbHier(limb)
         self.PopulateJointHier(limb)
         self.PopulateSceneHier()
+
+    def DuplicateLimbs(self, ignore):
+        log.funcFileInfo()
+        self.operation.DuplicateLimbs(self._selectedLimbs)
+        self.PopulateLimbHier()
+        self.PopulateSceneHier()
+        self.PopulateJointHier(None)
+
 
     def RemoveLimbs(self, ignore):
         log.funcFileInfo()

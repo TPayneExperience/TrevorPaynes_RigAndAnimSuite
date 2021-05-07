@@ -31,6 +31,7 @@ class RIG_Behavior_UI(absOpUI.Abstract_OperationUI):
         self._selectedLimbs = []
         self._presets = {} # preset_name : presetRoot
         self._presetsUI = []
+        self._rigRoot = None
 
     def Setup_UI(self, rigRoot, allRigRoots):  # Return nothing, parent should cleanup
         self._Setup()
@@ -112,6 +113,7 @@ class RIG_Behavior_UI(absOpUI.Abstract_OperationUI):
 
     def SelectedLimb(self):
         log.funcFileInfo()
+        self._rigRoot = None
         pm.menuItem(self._savePreset_mi, e=1, en=0)
         limbIDStrs = pm.treeView(self.limb_tv, q=1, selectItem=1)
         self.PopulateLimbProperties(None)
@@ -129,12 +131,14 @@ class RIG_Behavior_UI(absOpUI.Abstract_OperationUI):
         for limb in self._selectedLimbs:
             log.debug('\t\t' + limb.pfrsName.get())
         if len(self._selectedLimbs) == 1:
-            pm.menuItem(self._addEmpty_mi, e=1, en=1)
             limb = self._selectedLimbs[0]
             pm.select(pm.listConnections(limb.usedGroups))
             self.PopulateLimbProperties(limb)
             self.PopulateControlHier(limb)
-            self.PopulateBhvProperties(limb)
+            self._rigRoot = pm.listConnections(limb.rigRoot)[0]
+            if self._rigRoot.rigMode.get() == 0: # Editable rig
+                pm.menuItem(self._addEmpty_mi, e=1, en=1)
+                self.PopulateBhvProperties(limb)
             pm.menuItem(self._loadSkel_mi, e=1, en=1)
             if limb.limbType.get() == 0: # Empty
                 pm.menuItem(self._removeEmpty_mi, e=1, en=1)
@@ -255,7 +259,7 @@ class RIG_Behavior_UI(absOpUI.Abstract_OperationUI):
     def SelectedControl(self):
         log.funcFileInfo()
         groupIDStr = pm.treeView(self.control_tv, q=1, selectItem=1)
-        if groupIDStr:
+        if groupIDStr and self._rigRoot.rigMode.get() == 0:
             group = self._limbGroups[groupIDStr[0]]
             msg = '\t"%s"'% group
             log.info(msg)
@@ -279,9 +283,9 @@ class RIG_Behavior_UI(absOpUI.Abstract_OperationUI):
                                 cc=pm.Callback(self.SetEnableLimb, limb))
         pm.deleteUI(self.grpParent_at)
         self.grpParent_at = pm.attrEnumOptionMenu(  self.grpParent_at, 
-                                                    l='Parent Control', 
+                                                    l='Parent Joint', 
                                                     p=self.bhvLimbProp_cl,
-                                                    at=limb.limbParentControl,
+                                                    at=limb.limbParentJoint,
                                                     cc=self.LogGroupParent)
 
     def PopulateBehaviorsOptionMenu(self, limb):

@@ -79,18 +79,21 @@ class Empty_01(absBhv.Abstract_Behavior):
         log.funcFileDebug()
         if pm.listConnections(limb.limbParent):
             group = pm.listConnections(limb.limbGroups)[0]
-            pm.delete(pm.listConnections(group.rx))
+            cst = pm.listRelatives(group, c=1, type='parentConstraint')
+            pm.delete(cst)
 
     def Teardown_Constraint_JointsToControls(self, limb):
         log.funcFileDebug()
         joint = pm.listConnections(limb.joints)[0]
-        pm.delete(pm.listConnections(joint.rx))
+        cst = pm.listRelatives(joint, c=1, type='parentConstraint')
+        pm.delete(cst)
     
     def Teardown_Constraint_ControlsToJoints(self, limb):
         log.funcFileDebug()
         group = pm.listConnections(limb.usedGroups)[0]
         control = pm.listConnections(group.control)[0]
-        pm.delete(pm.listConnections(control.rx))
+        cst = pm.listRelatives(control, c=1, type='parentConstraint')
+        pm.delete(cst)
     
 #============= EDITABLE UI ============================
 

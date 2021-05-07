@@ -65,21 +65,27 @@ class InitRigRoot(absInit.Abstract_Initializer):
         pm.addAttr(rigRoot, ln='jointsParentGroup', dt='string', h=hide)
         pm.addAttr(rigRoot, ln='limbsParentGroup', dt='string', h=hide)
         pm.addAttr(rigRoot, ln='meshesParentGroup', dt='string', h=hide)
+        pm.addAttr(rigRoot, ln='bakedDataGroup', dt='string', h=hide)
         pm.addAttr(rigRoot, ln='controlTemplates', dt='string', h=hide)
 
-        group = pm.group(name=rigData.JOINTS_GROUP, em=1, p=rigRoot)
+        group = pm.group(name='JOINTS', em=1, p=rigRoot)
         pm.addAttr(group, ln='rigRoot', dt='string')
         pm.connectAttr(rigRoot.jointsParentGroup, group.rigRoot)
         rigUtil.ChannelBoxAttrs(group, 0, 0, 0, 0)
 
-        group = pm.group(name=rigData.LIMBS_GROUP, em=1, p=rigRoot)
+        group = pm.group(name='LIMBS', em=1, p=rigRoot)
         pm.addAttr(group, ln='rigRoot', dt='string')
         pm.connectAttr(rigRoot.limbsParentGroup, group.rigRoot)
         rigUtil.ChannelBoxAttrs(group, 0, 0, 0, 0)
 
-        group = pm.group(name=rigData.MESHES_GROUP, em=1, p=rigRoot)
+        group = pm.group(name='MESHES', em=1, p=rigRoot)
         pm.addAttr(group, ln='rigRoot', dt='string')
         pm.connectAttr(rigRoot.meshesParentGroup, group.rigRoot)
+        rigUtil.ChannelBoxAttrs(group, 0, 0, 0, 0)
+        
+        group = pm.group(name='BAKED_DATA', em=1, p=rigRoot)
+        pm.addAttr(group, ln='rigRoot', dt='string')
+        pm.connectAttr(rigRoot.bakedDataGroup, group.rigRoot)
         rigUtil.ChannelBoxAttrs(group, 0, 0, 0, 0)
         
         # CONTROLS

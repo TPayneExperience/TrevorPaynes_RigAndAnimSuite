@@ -119,10 +119,8 @@ class IK_Spline_01(absBhv.Abstract_Behavior):
         joints = [pm.listConnections(g.joint) for g in jointGroups]
 
         # Constrain end controls
-        pm.parentConstraint(joints[0], limbControls[0])
-        pm.parentConstraint(joints[-1], limbControls[-1])
-        pm.parentConstraint(joints[1], limbControls[1])
-        pm.parentConstraint(joints[-2], limbControls[-2])
+        for i in (-2, -1, 0, 1):
+            pm.parentConstraint(joints[i], limbControls[i])
         
 #============= TEARDOWN ============================
 
@@ -133,29 +131,30 @@ class IK_Spline_01(absBhv.Abstract_Behavior):
         log.funcFileDebug()
         if pm.listConnections(limb.limbParent):
             for group in pm.listConnections(limb.usedGroups):
-                pm.delete(pm.listConnections(group.rx))
+                cst = pm.listRelatives(group, c=1, type='parentConstraint')
+                pm.delete(cst)
 
     def Teardown_Constraint_JointsToControls(self, limb):
         log.funcFileDebug()
         jointGroups = pm.listConnections(limb.jointGroups)
         jointGroups = rigUtil.SortGroups(jointGroups)
-        joints = [pm.listConnections(g.joint)[0] for g in jointGroups]
 
         # Delete IK Handle
         handle = pm.listRelatives(limb, c=1, type='ikHandle')
         pm.delete(handle)
 
         # Delete Joint Constraints
-        pm.delete(pm.listConnections(joints[-1].rx)) # orientCst
-        constraints = [pm.listConnections(g.rx)[0] for g in jointGroups]
-        pm.delete(constraints) # parentCsts
+        for group in jointGroups:
+            cst = pm.listRelatives(group, c=1, type='parentConstraint')
+            pm.delete(cst)
 
         # Delete Limb Group Constraints
         limbGroups = pm.listConnections(limb.usedGroups)
         limbGroups = rigUtil.SortGroups(limbGroups)
         if pm.listConnections(limb.limbParent):
-            constraints = [pm.listConnections(g.rx)[0] for g in limbGroups]
-            pm.delete(constraints) # parentCsts
+            for group in limbGroups:
+                cst = pm.listRelatives(group, c=1, type='parentConstraint')
+                pm.delete(cst)
 
         # Delete Clusters
         toDelete = []
@@ -170,7 +169,8 @@ class IK_Spline_01(absBhv.Abstract_Behavior):
         groups = pm.listConnections(limb.usedGroups)
         controls = [pm.listConnections(g.control)[0] for g in groups]
         for control in controls:
-            pm.delete(pm.listConnections(control.rx))
+            cst = pm.listRelatives(control, c=1, type='parentConstraint')
+            pm.delete(cst)
     
 #============= EDITABLE UI ============================
 

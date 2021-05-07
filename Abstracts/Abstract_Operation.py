@@ -42,12 +42,19 @@ class Abstract_Operation:
         toBeBuilt = self.isRigBuilt
         # TEARDOWN
         for rigRoot in allRigRoots:
+            rigMode = rigRoot.rigMode.get()
             if not toBeBuilt:
                 if rigRoot.isBuilt.get():
-                    bhv.Behavior_Manager.Teardown_Rig(rigRoot)
+                    if rigMode == 0:
+                        bhv.Behavior_Manager.Teardown_Edit_Rig(rigRoot)
+                    elif rigMode == 1:
+                        bhv.Behavior_Manager.Teardown_Anim_Rig(rigRoot)
             else:
                 if not rigRoot.isBuilt.get():
-                    bhv.Behavior_Manager.Setup_Rig(rigRoot)
+                    if rigMode == 0:
+                        bhv.Behavior_Manager.Setup_Edit_Rig(rigRoot)
+                    elif rigMode == 1:
+                        bhv.Behavior_Manager.Setup_Anim_Rig(rigRoot)
             rigRoot.isBuilt.set(toBeBuilt)
         
         # LAYERS

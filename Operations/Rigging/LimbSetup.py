@@ -44,6 +44,9 @@ class LimbSetup(absOp.Abstract_Operation):
         self._InitBehavior(rigRoot, limb)
         return limb
 
+    def DuplicateLimbs(self, limbs):
+        pass
+
     def RemoveLimbs(self, limbs):
         if not limbs or type(limbs) != list:
             raise ValueError('Please pass in LIST of LIMBS')
@@ -198,7 +201,8 @@ class LimbSetup(absOp.Abstract_Operation):
         self._UpdateMirrorConnection(rigRoot, sourceLimb)
         genUtil.Name.UpdateLimbName(rigRoot, sourceLimb)
         for childLimb in pm.listConnections(sourceLimb.limbChildren):
-            self._UpdateParentControlEnum(childLimb)
+            if self._UpdateParentControlEnum(childLimb):
+                self._UpdateParentControlIndex(childLimb)
         return True
     
     def _RenameJoint(self, rigRoot, limb, joint, newName):
@@ -501,35 +505,29 @@ class LimbSetup(absOp.Abstract_Operation):
         pm.disconnectAttr(childLimb.limbParent)
         if parentLimb:
             pm.connectAttr(parentLimb.limbChildren, childLimb.limbParent)
-        self._UpdateParentControlEnum(childLimb)
-        self._UpdateParentControlIndex(childLimb)
+        if self._UpdateParentControlEnum(childLimb):
+            self._UpdateParentControlIndex(childLimb)
     
     def _UpdateParentControlEnum(self, childLimb):
         log.funcFileDebug()
-        parentGroups = rigUtil.GetjointGroupsOfParent(childLimb)
+        parentGroups = rigUtil.GetJointGroupsOfParent(childLimb)
         if not parentGroups:
-            pm.addAttr(childLimb.limbParentControl, e=1, en='None', dv=0)
-            return
-        parentControls = [pm.listConnections(g.control)[0] for g in parentGroups]
-        parentControlNames = [c.shortName() for c in parentControls]
-        namesStr = ':'.join(parentControlNames)
-        pm.addAttr(childLimb.limbParentControl, e=1, en=namesStr)
+            pm.addAttr(childLimb.limbParentJoint, e=1, en='None', dv=0)
+            return False
+        parentJoints = [pm.listConnections(g.joint)[0] for g in parentGroups]
+        parentJointNames = [j.pfrsName.get() for j in parentJoints]
+        namesStr = ':'.join(parentJointNames)
+        pm.addAttr(childLimb.limbParentJoint, e=1, en=namesStr)
+        return True
 
     def _UpdateParentControlIndex(self, childLimb):
         log.funcFileDebug()
-        parentGroups = rigUtil.GetjointGroupsOfParent(childLimb)
-        if not parentGroups:
-            pm.addAttr(childLimb.limbParentControl, e=1, en='None', dv=0)
-            return
-        parentControls = [pm.listConnections(g.control)[0] for g in parentGroups]
-        parentControlNames = [c.shortName() for c in parentControls]
-        namesStr = ':'.join(parentControlNames)
-        pm.addAttr(childLimb.limbParentControl, e=1, en=namesStr)
+        parentGroups = rigUtil.GetJointGroupsOfParent(childLimb)
         childGroups = pm.listConnections(childLimb.jointGroups)
         childGroup = rigUtil.SortGroups(childGroups)[0]
         sourcePos = pm.xform(childGroup, q=1, t=1, ws=1)
         index = self._GetClosestGroupIndex(sourcePos, parentGroups)
-        childLimb.limbParentControl.set(index)
+        childLimb.limbParentJoint.set(index)
 
     def _GetClosestGroupIndex(self, sourcePos, groups):
         log.funcFileDebug()

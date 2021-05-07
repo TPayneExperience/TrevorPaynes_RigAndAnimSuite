@@ -104,11 +104,11 @@ class RIG_Behavior(absOp.Abstract_Operation):
             else:
                 self.ReparentLimb(limb, None)
             self._ls._UpdateParentControlEnum(limb)
-        oldIndex = limb.limbParentControl.get()
-        newIndex = limbPreset.limbParentControl.get()
+        oldIndex = limb.limbParentJoint.get()
+        newIndex = limbPreset.limbParentJoint.get()
         if oldIndex != newLimbParent:
             parentChanged = True
-            limb.limbParentControl.set(newIndex)
+            limb.limbParentJoint.set(newIndex)
         return parentChanged
         
     def _ApplyLimbPreset_Enable(self, limbPreset):
@@ -135,7 +135,7 @@ class RIG_Behavior(absOp.Abstract_Operation):
     #         else:
     #             self.ReparentLimb(limb, None)
     #         self._ls._UpdateParentControlEnum(limb)
-    #     limb.limbParentControl.set(limbPreset.limbParentControl.get())
+    #     limb.limbParentJoint.set(limbPreset.limbParentJoint.get())
     #     limb.enableLimb.set(limbPreset.enableLimb.get())
 
 #=========== MISC ====================================

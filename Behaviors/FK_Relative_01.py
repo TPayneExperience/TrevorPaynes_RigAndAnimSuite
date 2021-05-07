@@ -23,13 +23,13 @@ class FK_Relative_01(absBhv.Abstract_Behavior):
     
     def InitLimb(self, limb):
         log.funcFileDebug()
-        group = pm.listConnections(limb.usedGroups)[0]
+        limbGroup = pm.listConnections(limb.usedGroups)[0]
         jointGroups = pm.listConnections(limb.jointGroups)
         jointGroup = rigUtil.SortGroups(jointGroups)[0]
         joint = pm.listConnections(jointGroup.joint)[0]
-        pm.parent(group, joint)
-        rigUtil.ResetAttrs(group)
-        pm.parent(group, limb)
+        pm.parent(limbGroup, joint)
+        rigUtil.ResetAttrs(limbGroup)
+        pm.parent(limbGroup, limb)
     
     def CleanupLimb(self, limb):
         log.funcFileDebug()
@@ -90,29 +90,31 @@ class FK_Relative_01(absBhv.Abstract_Behavior):
         conversionNode = pm.listConnections(limbControl.r)[0]
         multNodes = pm.listConnections(conversionNode.output)
         pm.delete(multNodes) # delete mult node
-        groups = pm.listConnections(limb.jointGroups)
-        groups = rigUtil.SortGroups(groups)[1:]
-        pm.parent(groups, limb)
+        jointGroups = pm.listConnections(limb.jointGroups)
+        jointGroups = rigUtil.SortGroups(jointGroups)[1:]
+        pm.parent(jointGroups, limb)
 
     def Teardown_Rig_External(self, limb):
         log.funcFileDebug()
         if pm.listConnections(limb.limbParent):
-            limbGroup = pm.listConnections(limb.usedGroups)[0]
-            parentCst = pm.listConnections(limbGroup.rx)
-            pm.delete(parentCst) # delete parent cst
+            group = pm.listConnections(limb.usedGroups)[0]
+            cst = pm.listRelatives(group, c=1, type='parentConstraint')
+            pm.delete(cst)
 
     def Teardown_Constraint_JointsToControls(self, limb):
         log.funcFileDebug()
         jointGroups = pm.listConnections(limb.jointGroups)
         joints = [pm.listConnections(g.joint)[0] for g in jointGroups]
-        constraints = [pm.listConnections(j.rx)[0] for j in joints]
-        pm.delete(constraints) 
+        for joint in joints:
+            cst = pm.listRelatives(joint, c=1, type='parentConstraint')
+            pm.delete(cst)
     
     def Teardown_Constraint_ControlsToJoints(self, limb):
         log.funcFileDebug()
         limbGroup = pm.listConnections(limb.usedGroups)[0]
         limbControl = pm.listConnections(limbGroup.control)[0]
-        pm.delete(pm.listConnections(limbControl.rx)) 
+        cst = pm.listRelatives(limbControl, c=1, type='parentConstraint')
+        pm.delete(cst)
     
 #============= EDITABLE UI ============================
 

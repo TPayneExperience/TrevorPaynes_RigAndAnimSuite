@@ -74,7 +74,7 @@ class PayneFreeRigSuite:
     
     def UpdateRootName(self, rigRoot):
         log.funcFileDebug()
-        rigRoot.rename('%s_ROOT' % rigRoot.pfrsName.get())
+        rigRoot.rename('%s_RigRoot' % rigRoot.pfrsName.get())
         for limb in pm.listConnections(rigRoot.limbs):
             genUtil.Name.UpdateLimbName(rigRoot, limb)
 
@@ -88,6 +88,8 @@ class PayneFreeRigSuite:
         rigRoot.posesFolderPath.set(poseFolder)
 
         # Set rigmode, export, revert
+        if rigRoot.isBuilt.get():
+            bhv.Behavior_Manager.Teardown_Edit_Rig(rigRoot)
         rigMode = rigRoot.rigMode.get()
         if rigMode == 0:
             rigRoot.rigMode.set(1)
@@ -102,6 +104,8 @@ class PayneFreeRigSuite:
         rigRoot.rigMode.set(rigMode)
         rigRoot.category.set(oldMain)
         rigRoot.operation.set(oldSub)
+        if rigRoot.isBuilt.get():
+            bhv.Behavior_Manager.Setup_Edit_Rig(rigRoot)
 
         if setupFile:
             pm.saveAs(setupFile)

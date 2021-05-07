@@ -97,6 +97,7 @@ class IK_PoleVector_01(absBhv.Abstract_Behavior):
         jointGroups = rigUtil.SortGroups(jointGroups)
         joints = [pm.listConnections(g.joint)[0] for g in jointGroups]
         limbGroups = pm.listConnections(limb.usedGroups)
+        limbGroups = rigUtil.SortGroups(limbGroups)
         controls = [pm.listConnections(g.control)[0] for g in limbGroups]
         ikpvMid = controls[0]
         ikpvEnd = controls[1]
@@ -114,8 +115,9 @@ class IK_PoleVector_01(absBhv.Abstract_Behavior):
         log.funcFileDebug()
         if pm.listConnections(limb.limbParent):
             groups = pm.listConnections(limb.usedGroups)
-            constraints = [pm.listConnections(g.rx)[0] for g in groups]
-            pm.delete(constraints)
+            for group in groups:
+                cst = pm.listRelatives(group, c=1, type='parentConstraint')
+                pm.delete(cst)
 
     def Teardown_Constraint_JointsToControls(self, limb):
         log.funcFileDebug()
@@ -131,14 +133,16 @@ class IK_PoleVector_01(absBhv.Abstract_Behavior):
         pm.delete(handle)
 
         # Delete joint constraints
-        pm.delete(pm.listConnections(joints[-1].rx)) # orientCst
-        constraints = [pm.listConnections(g.rx)[0] for g in jointGroups]
-        pm.delete(constraints) # parentCsts
+        pm.delete(pm.listRelatives(joints[-1], c=1, type='orientConstraint'))
+        for group in jointGroups:
+            cst = pm.listRelatives(group, c=1, type='parentConstraint')
+            pm.delete(cst)
         
         # Delete limb groups constraints
         if pm.listConnections(limb.limbParent):
-            constraints = [pm.listConnections(g.rx)[0] for g in limbGroups]
-            pm.delete(constraints) # parentCsts
+            for group in limbGroups:
+                cst = pm.listRelatives(group, c=1, type='parentConstraint')
+                pm.delete(cst)
 
         # Reposition group to second joint
         groups = pm.listConnections(limb.usedGroups)
@@ -152,8 +156,8 @@ class IK_PoleVector_01(absBhv.Abstract_Behavior):
         log.funcFileDebug()
         limbGroups = pm.listConnections(limb.usedGroups)
         controls = [pm.listConnections(g.control)[0] for g in limbGroups]
-        pm.delete(pm.listConnections(controls[0].rx))
-        pm.delete(pm.listConnections(controls[1].rx))
+        for control in controls:
+            pm.delete(pm.listRelatives(control, c=1, type='parentConstraint'))
     
 #============= EDITABLE UI ============================
 

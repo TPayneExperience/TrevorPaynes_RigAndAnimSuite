@@ -42,6 +42,7 @@ class ANM_Behavior_UI(absOpUI.Abstract_OperationUI):
                 pm.treeView(self.limb_tv, e=1, scc=self.SelectedLimb,
                                                 elc=self.IgnoreRename)
                 with pm.popupMenu() as self.rmb_ui:
+                    self.kfOnly_mi = pm.menuItem(l='Copy Keyframes Only', cb=1)
                     pm.menuItem(l='APPLY PRESET', en=0, d=1)
             with pm.frameLayout('Controls', bv=1):
                 self.control_tv = pm.treeView(arp=0, adr=0, ams=0,
@@ -126,7 +127,8 @@ class ANM_Behavior_UI(absOpUI.Abstract_OperationUI):
                             ds='Cancel')
             if result == 'Cancel':
                 return
-        self.operation.ApplyPreset(preset)
+        kfOnly = pm.menuItem(self.kfOnly_mi, q=1, cb=1)
+        self.operation.ApplyPreset(preset, kfOnly)
         self._selectedLimbs = []
         self.PopulateLimbHier()
         self.PopulateControlHier(None)
@@ -181,7 +183,7 @@ class ANM_Behavior_UI(absOpUI.Abstract_OperationUI):
         self.grpParent_at = pm.attrEnumOptionMenu(  self.grpParent_at, 
                                                     l='Parent Control', 
                                                     p=self.bhvLimbProp_cl,
-                                                    at=limb.limbParentControl)
+                                                    at=limb.limbParentJoint)
 
 #=========== BEHAVIOR PROPERTIES ====================================
 
