@@ -42,7 +42,7 @@ class ANM_Behavior_UI(absOpUI.Abstract_OperationUI):
                 pm.treeView(self.limb_tv, e=1, scc=self.SelectedLimb,
                                                 elc=self.IgnoreRename)
                 with pm.popupMenu() as self.rmb_ui:
-                    self.kfOnly_mi = pm.menuItem(l='Copy Keyframes Only', cb=1)
+                    self.kfOnly_mi = pm.menuItem(l='Copy Keyframes Only', cb=0)
                     pm.menuItem(l='APPLY PRESET', en=0, d=1)
             with pm.frameLayout('Controls', bv=1):
                 self.control_tv = pm.treeView(arp=0, adr=0, ams=0,

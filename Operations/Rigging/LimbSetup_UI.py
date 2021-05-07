@@ -72,6 +72,13 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
                                             en=0, c=self.AddJointLimb)
                     self.duplicate_mi = pm.menuItem(l='Duplicate Limbs', 
                                             en=0, c=self.DuplicateLimbs)
+                    with pm.subMenuItem(l='Mirror Limbs', en=0) as self.mirror_mi:
+                        pm.menuItem(l='X Axis', 
+                                    c=pm.Callback(self.MirrorLimbs, 'X'))
+                        pm.menuItem(l='Y Axis', 
+                                    c=pm.Callback(self.MirrorLimbs, 'Y'))
+                        pm.menuItem(l='Z Axis', 
+                                    c=pm.Callback(self.MirrorLimbs, 'Z'))
                     self.flipSides_mi = pm.menuItem(l='Flip Sides', 
                                             en=0, c=self.FlipSides)
                     pm.menuItem(divider=1)
@@ -201,14 +208,18 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
         pm.menuItem(self.remove_mi, e=1, en=0)
         pm.menuItem(self.flipSides_mi, e=1, en=0)
         pm.menuItem(self.duplicate_mi, e=1, en=0)
+        pm.menuItem(self.mirror_mi, e=1, en=0)
         self._selectedLimbs = None
         self.PopulateJointHier(None)
         if not limbIDStrs:
             return
-        self._selectedLimbs = [self._limbIDs[ID] for ID in limbIDStrs]
+        pm.menuItem(self.mirror_mi, e=1, en=1)
         pm.menuItem(self.duplicate_mi, e=1, en=1)
+        self._selectedLimbs = [self._limbIDs[ID] for ID in limbIDStrs]
         for limb in self._selectedLimbs:
             log.debug('\t\t' + limb.pfrsName.get())
+            if pm.listConnections(limb.mirrorLimb):
+                pm.menuItem(self.mirror_mi, e=1, en=0)
         if len(self._selectedLimbs) == 1:
             limb = self._selectedLimbs[0]
             self.PopulateJointHier(limb)
@@ -232,6 +243,12 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
         self.PopulateSceneHier()
         self.PopulateJointHier(None)
 
+    def MirrorLimbs(self, axis):
+        log.funcFileInfo()
+        self.operation.MirrorLimbs(self._selectedLimbs, axis)
+        self.PopulateLimbHier()
+        self.PopulateSceneHier()
+        self.PopulateJointHier(None)
 
     def RemoveLimbs(self, ignore):
         log.funcFileInfo()
@@ -243,7 +260,8 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
                                 cb='No', 
                                 ds='No') == 'No'):
             return
-        self.operation.RemoveLimbs(self._selectedLimbs)
+        for limb in self._selectedLimbs:
+            self.operation.RemoveLimb(limb)
         self.PopulateLimbHier()
         self.PopulateJointHier(None)
         self.PopulateSceneHier()

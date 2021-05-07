@@ -26,7 +26,6 @@ class InitGroup(absInit.Abstract_Initializer):
             # >>> TO IMPLEMENT
         pm.addAttr(group, ln='used', dt='string', h=hide)
         pm.addAttr(group, ln='groupType', dt='string', h=hide)
-        pm.addAttr(group, ln='parentable', dt='string', h=hide)
 
 
         

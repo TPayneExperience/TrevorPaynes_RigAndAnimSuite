@@ -26,11 +26,11 @@ class Joint:
             group = groups[0]
             genUtil.AbstractInitializer(group, 'Group')
             group.groupIndex.set(index)
-            pm.disconnectAttr(group.parentable)
+            pm.disconnectAttr(group.limb)
             pm.parent(group, limb)
         else:
             group = grp.Group.AddJointGroup(rigRoot, index, limb, joint)
-        pm.connectAttr(limb.jointGroups, group.parentable)
+        pm.connectAttr(limb.jointGroups, group.limb)
         joint.pfrsName.set('Joint%03d' % (index))
     
     @staticmethod

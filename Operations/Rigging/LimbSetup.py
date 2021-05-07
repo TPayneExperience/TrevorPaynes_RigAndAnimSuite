@@ -24,6 +24,9 @@ class LimbSetup(absOp.Abstract_Operation):
     controlLayerState = (0, 0)  # isVis, isRef
     jointLayerState = (1, 0)    # isVis, isRef
     meshLayerState = (1, 1)    # isVis, isRef
+    mirrorAxisScales = {'X': (-1,1,1),
+                        'Y': (1,-1,1),
+                        'Z': (1,1,-1)}
 
 #============= LIMBS ============================
 
@@ -45,15 +48,104 @@ class LimbSetup(absOp.Abstract_Operation):
         return limb
 
     def DuplicateLimbs(self, limbs):
-        pass
+        oldNewLimbs = {}
+        oldNewJoints = {}
+        newLimbs = []
+        for oldLimb in limbs:
+            oldJoints = pm.listConnections(oldLimb.joints)
+            ojGroups = [pm.listConnections(j.group)[0] for j in oldJoints]
+            ojControls = [pm.listConnections(g.control)[0] for g in ojGroups]
 
-    def RemoveLimbs(self, limbs):
-        if not limbs or type(limbs) != list:
-            raise ValueError('Please pass in LIST of LIMBS')
-        for limb in limbs:
-            if pm.listConnections(limb.mirrorLimb):
-                self._BreakMirror(limb)
-            lmb.Limb.Remove(limb)
+            # Old Joint Group Setup
+            for joint, group in zip(oldJoints, ojGroups):
+                pm.parent(group, joint)
+
+            # New Limb, limbGroups, rigRoot
+            newLimb = pm.duplicate(oldLimb)[0]
+            oldNewLimbs[oldLimb] = newLimb
+            for group in pm.listRelatives(newLimb, c=1):
+                pm.connectAttr(newLimb.limbGroups, group.limb)
+            rigRoot = pm.listConnections(oldLimb.rigRoot)[0]
+            nextID = rigRoot.nextLimbID.get()
+            rigRoot.nextLimbID.set(nextID + 1)
+            newLimb.ID.set(nextID)
+            
+            pm.connectAttr(rigRoot.limbs, newLimb.rigRoot)
+            
+            # New Joints
+            newJoints = pm.duplicate(oldJoints, po=1)
+            for oldJoint, newJoint in zip(oldJoints, newJoints):
+                oldNewJoints[oldJoint] = newJoint
+            njGroups = pm.duplicate(ojGroups, po=1)
+            njControls = pm.duplicate(ojControls)
+            for joint, group, control in zip(newJoints, njGroups, njControls):
+                pm.connectAttr(newLimb.joints, joint.limb)
+                pm.connectAttr(joint.group, group.joint)
+                pm.connectAttr(group.control, control.group)
+                pm.connectAttr(newLimb.jointGroups, group.limb)
+                pm.parent(group, newLimb)
+                pm.parent(control, group)
+            
+            # MISSING NEW PRESET SYSTEM
+
+            # Old Joint Group Teardown
+            for group in ojGroups:
+                pm.parent(group, oldLimb)
+            
+            # Setup behavior
+            bhvFile = newLimb.bhvFile.get()
+            bhv.Behavior_Manager.SetBehavior(newLimb, bhvFile)
+
+            self.RenameLimb(newLimb, newLimb.pfrsName.get() + '_Copy')
+            newLimbs.append(newLimb)
+
+        # Reparenting
+        for oldLimb, newLimb in oldNewLimbs.items():
+            parent = pm.listConnections(oldLimb.limbParent)
+            if parent:
+                parent = parent[0]
+                if parent in oldNewLimbs:
+                    parent = oldNewLimbs[parent]
+                pm.connectAttr(parent.limbChildren, newLimb.limbParent)
+            oldJoints = pm.listConnections(oldLimb.joints)
+            for oldJoint in oldJoints:
+                oldParents = pm.listRelatives(oldJoint, p=1)
+                if not oldParents:
+                    continue
+                oldParent = oldParents[0]
+                if oldParent not in oldNewJoints:
+                    continue
+                newJoint = oldNewJoints[oldJoint]
+                newParent = oldNewJoints[oldParent]
+                pm.parent(newJoint, newParent)
+        return newLimbs
+
+    def MirrorLimbs(self, limbs, axisLetter):
+        scale = self.mirrorAxisScales[axisLetter.upper()]
+        newLimbs = self.DuplicateLimbs(limbs)
+        for oldLimb, newLimb in zip(limbs, newLimbs):
+            self.RenameLimb(newLimb, oldLimb.pfrsName.get())
+            joints = pm.listConnections(newLimb.joints)
+            jointParents = {}
+            for joint in joints:
+                jointParents[joint] = pm.listRelatives(joint, p=1)
+            group = pm.group(em=1)
+            pm.parent(joints, group)
+            pm.xform(group, s=scale)
+            pm.makeIdentity(group, a=1, s=1)
+            for joint in joints:
+                parents = jointParents[joint]
+                if parents: # Delete later, after limbsetup
+                    parent = parents[0]
+                    pm.parent(joint, parent)
+                else:
+                    pm.parent(joint, w=1)
+            pm.delete(group)
+
+    def RemoveLimb(self, limb):
+        if pm.listConnections(limb.mirrorLimb):
+            self._BreakMirror(limb)
+        lmb.Limb.Remove(limb)
         
     def RenameLimb(self, limb, newName):
         if not genUtil.Name.IsValidCharacterLength(newName):
