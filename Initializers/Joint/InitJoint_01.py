@@ -19,6 +19,7 @@ class InitJoint(absInit.Abstract_Initializer):
 
         hide = genData.HIDE_ATTRS
         pm.addAttr(joint, ln='pfrsVersion', at='short', dv=100, h=hide)
+        pm.addAttr(joint, ln='ID', at='long', h=hide) # needed for skinning
         pm.addAttr(joint, ln='limb', dt='string', h=hide)
         pm.addAttr(joint, ln='pfrsName', dt='string', h=hide)
         pm.addAttr(joint, ln='group', dt='string', h=hide)

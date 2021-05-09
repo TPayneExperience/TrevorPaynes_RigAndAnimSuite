@@ -15,8 +15,8 @@ import time
 # log.debug(msg)
 # log.info(msg)
 
-LOGGING_LEVEL = logging.DEBUG
-# LOGGING_LEVEL = logging.INFO
+# LOGGING_LEVEL = logging.DEBUG
+LOGGING_LEVEL = logging.INFO
 
 def info(msg):
     logger_obj = _General_Logger.Get()

@@ -27,25 +27,8 @@ import Data.Rig_Data as rigData
 reload(rigData)
 import Common.Rig_Utilities as rigUtil
 reload(rigUtil)
-import Popups.EditRoot as edRt
+import Popups.EditRigRoot as edRt
 reload(edRt)
-
-# import Import_Utilities as impUtil
-# reload(impUtil)
-# import Factories as Factories
-# reload(Factories)
-
-# import Common.Utilities as util
-# reload(util)
-
-# import Rigging.Rigging_UI as rig_ui
-# reload(rig_ui)
-# import Skinning.Skinning_UI as skin_ui
-# reload(skin_ui)
-# import Animation.Animation_UI as anim_ui
-# reload(anim_ui)
-# import Rigging.Popups.POPUP_EditRoot as root_popup
-# reload(root_popup)
 
 import PFRS_Debug_UI as debug_ui
 reload(debug_ui)
@@ -264,9 +247,9 @@ class PayneFreeRigSuite_UI:
 
     def EditRig_Dialog(self, ignore):
         log.funcFileInfo()
-        edRt.EditRoot(self._rigRoot, self)
-        # self.rootPopup = root_popup.POPUP_EditRoot(self)
-        # self.rootPopup.EditRoot_Dialog()
+        edRt.EditRigRoot(self._rigRoot, self)
+        # self.rootPopup = root_popup.POPUP_EditRigRoot(self)
+        # self.rootPopup.EditRigRoot_Dialog()
 
     def UpdateRigRoot(self):
         self.pfrs.UpdateRootName(self._rigRoot)

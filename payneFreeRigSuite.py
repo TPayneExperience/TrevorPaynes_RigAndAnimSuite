@@ -2,6 +2,7 @@
 import inspect
 import os
 import sys
+import webbrowser
 
 import pymel.core as pm
 
@@ -53,7 +54,8 @@ class PayneFreeRigSuite:
 
     def GetRigRoots(self):
         log.funcFileDebug()
-        return [r for r in pm.ls(tr=1) if r.hasAttr('limbs')]
+        return genUtil.GetRigRoots()
+        # return [r for r in pm.ls(tr=1) if r.hasAttr('limbs')]
 
     def AddRigRoot(self):
         rigRoot = rrt.RigRoot.Add()
@@ -77,6 +79,13 @@ class PayneFreeRigSuite:
         rigRoot.rename('%s_RigRoot' % rigRoot.pfrsName.get())
         for limb in pm.listConnections(rigRoot.limbs):
             genUtil.Name.UpdateLimbName(rigRoot, limb)
+
+    def SubmitFeedback(self):
+        pass
+        # email = 'trevor@paynefreerigsuite.com'
+        # subject = 'PFRS Feedback (FREE Version)'
+        # cmds = "mailto:?to=%s&subject=%s&body=You're Amazing!" % (email, subject)
+        # webbrowser.open('mailto:?to=' + recipient + '&subject=' + subject + '&body=' + body, new=1)
 
     def ExportAnimationRig(self, rigRoot, filePath):
         log.funcFileDebug()

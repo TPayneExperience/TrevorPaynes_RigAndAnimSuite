@@ -179,6 +179,10 @@ def AbstractInitializer(objectInstance, folder):
                     obj.Initialize(objectInstance)
                     visited.append(fileName)
 
+def GetRigRoots():
+    return [r for r in pm.ls(tr=1) if r.hasAttr('rigMode')]
+
+
 # def GetOperation(moduleToImport, folderPath):
 #     versions = {}
 #     import Abstracts.Abstract_Operation as absOp

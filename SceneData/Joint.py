@@ -20,6 +20,9 @@ class Joint:
         pm.editDisplayLayerMembers(rigData.JOINTS_LAYER, 
                                         joint, nr=1)
         genUtil.AbstractInitializer(joint, 'Joint')
+        nextJointID = rigRoot.nextJointID.get()
+        rigRoot.nextJointID.set(nextJointID + 1)
+        joint.ID.set(nextJointID)
         pm.connectAttr(limb.joints, joint.limb)
         groups = pm.listConnections(joint.group)
         if groups:

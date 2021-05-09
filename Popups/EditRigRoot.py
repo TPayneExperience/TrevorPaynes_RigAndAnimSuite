@@ -6,7 +6,7 @@ reload(genUtil)
 import Common.Logger as log
 reload(log)
 
-class EditRoot:
+class EditRigRoot:
     def __init__(self, rigRoot, parentUI):
         self._rigRoot = rigRoot
         self._parentUI = parentUI

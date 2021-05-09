@@ -125,21 +125,23 @@ class LimbSetup(absOp.Abstract_Operation):
         newLimbs = self.DuplicateLimbs(limbs)
         for oldLimb, newLimb in zip(limbs, newLimbs):
             self.RenameLimb(newLimb, oldLimb.pfrsName.get())
-            joints = pm.listConnections(newLimb.joints)
-            jointParents = {}
-            for joint in joints:
-                jointParents[joint] = pm.listRelatives(joint, p=1)
+            toFlip = pm.listConnections(newLimb.joints)
+            toFlip += pm.listConnections(newLimb.limbGroups)
+            toFlip += pm.listConnections(newLimb.jointGroups)
+            oldParents = {}
+            for joint in toFlip:
+                oldParents[joint] = pm.listRelatives(joint, p=1)
             group = pm.group(em=1)
-            pm.parent(joints, group)
+            pm.parent(toFlip, group)
             pm.xform(group, s=scale)
             pm.makeIdentity(group, a=1, s=1)
-            for joint in joints:
-                parents = jointParents[joint]
+            for thing in toFlip:
+                parents = oldParents[thing]
                 if parents: # Delete later, after limbsetup
                     parent = parents[0]
-                    pm.parent(joint, parent)
+                    pm.parent(thing, parent)
                 else:
-                    pm.parent(joint, w=1)
+                    pm.parent(thing, w=1)
             pm.delete(group)
 
     def RemoveLimb(self, limb):
@@ -182,6 +184,76 @@ class LimbSetup(absOp.Abstract_Operation):
         mirrorLimb.side.set(side1)
         genUtil.Name.UpdateLimbName(rigRoot, sourceLimb)
         genUtil.Name.UpdateLimbName(rigRoot, mirrorLimb)
+
+    def SaveTemplate(self, rigRoot, limbs, filePath):
+        log.funcFileInfo()
+        curFile = pm.sceneName()
+        pm.saveFile()
+
+        # Unparent limbs
+        joints = []
+        for limb in limbs:
+            joints += pm.listConnections(limb.joints)
+            pm.parent(limb, w=1)
+
+        # Unparent joints
+        for joint in joints:
+            parents = pm.listRelatives(joint, p=1)
+            if parents and parents[0] not in joints:
+                pm.parent(joint, w=1)
+            for child in pm.listRelatives(joint, c=1):
+                if child in joints:
+                    continue
+                pm.delete(child)
+
+        # Delete unused stuff
+        layers = [l for l in pm.ls(type='displayLayer') if str(l) != 'defaultLayer']
+        pm.delete(layers)
+        pm.delete(rigRoot)
+        pm.saveAs(filePath, f=1)
+        pm.openFile(curFile, f=1)
+
+    def LoadTemplate(self, rigRoot, filePath):
+        log.funcFileInfo()
+        limbsParent = pm.listConnections(rigRoot.limbsParentGroup)[0]
+        jointsParent = pm.listConnections(rigRoot.jointsParentGroup)[0]
+        nodes = pm.importFile(filePath, rnn=1)
+
+        # Get limbs, joints
+        limbs = []
+        joints = []
+        for node in nodes:
+            if node.hasAttr('limbType'):
+                limbs.append(node)
+            elif pm.objectType(node) == 'joint':
+                parents = pm.listRelatives(node, p=1)
+                if not parents:
+                    joints.append(node)
+                    continue
+
+        # Setup limbs, joints
+        pm.parent(limbs, limbsParent)
+        pm.parent(joints, jointsParent)
+        controls = []
+        for limb in limbs:
+            pm.connectAttr(rigRoot.limbs, limb.rigRoot)
+            for group in pm.listConnections(limb.jointGroups):
+                controls += pm.listConnections(group.control)
+            for group in pm.listConnections(limb.limbGroups):
+                controls += pm.listConnections(group.control)
+            nextLimbID = rigRoot.nextLimbID.get()
+            rigRoot.nextLimbID.set(nextLimbID + 1)
+            limb.ID.set(nextLimbID)
+            genUtil.Name.UpdateLimbName(rigRoot, limb)
+        for joint in joints:
+            nextJointID = rigRoot.nextJointID.get()
+            rigRoot.nextJointID.set(nextJointID + 1)
+            joint.ID.set(nextJointID)
+        pm.editDisplayLayerMembers( rigData.JOINTS_LAYER, 
+                                    joints, nr=1)
+        pm.editDisplayLayerMembers( rigData.CONTROLS_LAYER, 
+                                    controls, nr=1)
+        
 
 #============= JOINTS ============================
 

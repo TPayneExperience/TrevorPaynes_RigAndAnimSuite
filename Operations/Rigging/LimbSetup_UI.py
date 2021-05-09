@@ -1,4 +1,6 @@
 
+import os
+
 import pymel.core as pm
 
 import Abstracts.Abstract_OperationUI as absOpUI
@@ -14,6 +16,8 @@ reload(log)
 
 import SceneData.RigRoot as rrt
 reload(rrt)
+import Popups.LoadTemplates as ldTmp
+reload(ldTmp)
 import Data.Rig_Data as rigData
 reload(rigData)
 
@@ -70,6 +74,9 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
                 with pm.popupMenu():
                     self.add_mi = pm.menuItem(l='Add Joint Limb', 
                                             en=0, c=self.AddJointLimb)
+                    self.flipSides_mi = pm.menuItem(l='Flip Sides', 
+                                            en=0, c=self.FlipSides)
+                    pm.menuItem(d=1)
                     self.duplicate_mi = pm.menuItem(l='Duplicate Limbs', 
                                             en=0, c=self.DuplicateLimbs)
                     with pm.subMenuItem(l='Mirror Limbs', en=0) as self.mirror_mi:
@@ -79,9 +86,12 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
                                     c=pm.Callback(self.MirrorLimbs, 'Y'))
                         pm.menuItem(l='Z Axis', 
                                     c=pm.Callback(self.MirrorLimbs, 'Z'))
-                    self.flipSides_mi = pm.menuItem(l='Flip Sides', 
-                                            en=0, c=self.FlipSides)
-                    pm.menuItem(divider=1)
+                    pm.menuItem(d=1)
+                    self.loadTemp_mi = pm.menuItem(l='Load Template', 
+                                            c=self.LoadTemplate)
+                    self.saveTemp_mi = pm.menuItem(l='Save Template', 
+                                            en=0, c=self.SaveTemplate)
+                    pm.menuItem(d=1)
                     self.remove_mi = pm.menuItem(l='Remove Limbs', 
                                             en=0, c=self.RemoveLimbs)
             with pm.frameLayout(l='---', bv=1, en=0) as self.jntHier_fl:
@@ -209,12 +219,14 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
         pm.menuItem(self.flipSides_mi, e=1, en=0)
         pm.menuItem(self.duplicate_mi, e=1, en=0)
         pm.menuItem(self.mirror_mi, e=1, en=0)
+        pm.menuItem(self.saveTemp_mi, e=1, en=0)
         self._selectedLimbs = None
         self.PopulateJointHier(None)
         if not limbIDStrs:
             return
         pm.menuItem(self.mirror_mi, e=1, en=1)
         pm.menuItem(self.duplicate_mi, e=1, en=1)
+        pm.menuItem(self.saveTemp_mi, e=1, en=1)
         self._selectedLimbs = [self._limbIDs[ID] for ID in limbIDStrs]
         for limb in self._selectedLimbs:
             log.debug('\t\t' + limb.pfrsName.get())
@@ -248,6 +260,38 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
         self.operation.MirrorLimbs(self._selectedLimbs, axis)
         self.PopulateLimbHier()
         self.PopulateSceneHier()
+        self.PopulateJointHier(None)
+
+    def SaveTemplate(self, ignore):
+        log.funcFileInfo()
+        if not str(pm.sceneName()):
+            msg = 'Please SAVE current scene before '
+            msg += '\nsaving a template'
+            pm.confirmDialog(   t='Save Current Scene', 
+                                m=msg, 
+                                icon='warning', 
+                                b='Ok')
+            return
+        result = pm.promptDialog(
+                title='Save Template',
+                message='New Template Name:',
+                button=['OK', 'Cancel'],
+                defaultButton='OK',
+                cancelButton='Cancel',
+                dismissString='Cancel')
+        if result != 'OK':
+            return
+        templateName = pm.promptDialog(q=1, tx=1) + '.ma'
+        filePath = os.path.join(rigData.TEMPLATES_FOLDER, templateName)
+        self.operation.SaveTemplate(self._rigRoot, 
+                                    self._selectedLimbs, 
+                                    filePath)
+
+    def LoadTemplate(self, ignore):
+        log.funcFileInfo()
+        ldTmp.LoadTemplates(self._rigRoot, rigData.TEMPLATES_FOLDER)
+        self.PopulateSceneHier()
+        self.PopulateLimbHier()
         self.PopulateJointHier(None)
 
     def RemoveLimbs(self, ignore):

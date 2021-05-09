@@ -1,5 +1,14 @@
 
 
+# ============= USER SETTINGS =============
+
+import os
+_folder = os.path.dirname(__file__)
+_folder = os.path.dirname(_folder)
+_folder = os.path.join(_folder, 'Templates')
+_folder = os.path.join(_folder, 'Limbs')
+TEMPLATES_FOLDER = _folder
+
 # ============= ROOT =============
 RIG_MODES = (   'Setup Rig',
                 'Animate Rig')  # Maybe post anim rig later???
