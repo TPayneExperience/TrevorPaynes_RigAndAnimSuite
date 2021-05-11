@@ -17,33 +17,33 @@ class EditRigRoot:
 
         self.rootNameValid = False
 
-        self.rigNaming = [  'RootName (CAT, ELF)',
+        self.rigNaming = (  'RootName (CAT, ELF)',
                             'Limb (ARM, LEG)',
                             'Joint (ELBOW, KNEE_02)',
                             'Side (L, M, R)',
-                            'Type (JNT, CTR)']
+                            'Type (JNT, CTR)')
     
-        order = [self._rigRoot.rootIndex.get()]
-        order.append(self._rigRoot.limbIndex.get())
-        order.append(self._rigRoot.jointIndex.get())
-        order.append(self._rigRoot.sideIndex.get())
-        order.append(self._rigRoot.typeIndex.get())
-        self.startRootName = self._rigRoot.pfrsName.get()
-        self.startShowRootName = self._rigRoot.showRootName.get()
-        self.startNameOrder = order
+        self.startNameOrder = [ rigRoot.rigRootIndex.get(),
+                                rigRoot.limbIndex.get(),
+                                rigRoot.jointIndex.get(),
+                                rigRoot.sideIndex.get(),
+                                rigRoot.typeIndex.get()]
+        self.startRootName = rigRoot.pfrsName.get()
+        self.startShowRootName = rigRoot.showRootName.get()
         self._CopyInitValues()
         result = pm.layoutDialog(ui=self._Setup, title='Rig Root Setup') # WINDOW
         rootNameChanged = (self.startRootName != self.rootName)
         showRootNameChanged = (self.startShowRootName != self.showRootName)
         nameOrderChanged = (self.startNameOrder != self.nameOrder)
         namesChanged = any((rootNameChanged, showRootNameChanged, nameOrderChanged))
+        # IF PROBLEMS ARISE, CHECK OUT UserSettings.PY. Naming order correct there
         if result == 'Save':
             if (rootNameChanged):
                 self._rigRoot.pfrsName.set(self.rootName)
             if (showRootNameChanged):
                 self._rigRoot.showRootName.set(self.showRootName)
             if (nameOrderChanged):
-                self._rigRoot.rootIndex.set(self.nameOrder[0])
+                self._rigRoot.rigRootIndex.set(self.nameOrder[0])
                 self._rigRoot.limbIndex.set(self.nameOrder[1])
                 self._rigRoot.jointIndex.set(self.nameOrder[2])
                 self._rigRoot.sideIndex.set(self.nameOrder[3])
@@ -83,7 +83,7 @@ class EditRigRoot:
             pm.treeView(self.order_tv, e=1, ai=(part, ''))
 
         # BUTTONS + LAYOUT
-        self.close_btn = pm.button(l='Close', parent=form, c=self.Close)
+        self.cancel_btn = pm.button(l='Cancel', parent=form, c=self.Cancel)
         self.save_btn = pm.button(l='Save', parent=form, c=self.Save)
         pm.formLayout(form, edit=True, width=340, height=250,
                         attachForm=[(ass_fl, 'top', 5), 
@@ -91,17 +91,17 @@ class EditRigRoot:
                                     (ass_fl, 'right', 5), 
                                     (ex_fl, 'left', 5), 
                                     (order_fl, 'right', 5), 
-                                    (self.close_btn, 'left', 5), 
-                                    (self.close_btn, 'bottom', 5), 
+                                    (self.cancel_btn, 'left', 5), 
+                                    (self.cancel_btn, 'bottom', 5), 
                                     (self.save_btn, 'bottom', 5), 
                                     (self.save_btn, 'right', 5)],
                         attachControl=[(ex_fl, 'top', 5, ass_fl),
-                                        (ex_fl, 'bottom', 5, self.close_btn),
+                                        (ex_fl, 'bottom', 5, self.cancel_btn),
                                         (order_fl, 'top', 5, ass_fl),
                                         (order_fl, 'bottom', 5, self.save_btn)],
                         attachPosition=[(ex_fl, 'right', 5, 50), 
                                         (order_fl, 'left', 5, 50), 
-                                        (self.close_btn, 'right', 5, 50), 
+                                        (self.cancel_btn, 'right', 5, 50), 
                                         (self.save_btn, 'left', 5, 50)])
         self.Update_ExampleLabels(0,0,0,0,0,0,0)
         self.RootNameChanged(self.startRootName)
@@ -159,7 +159,7 @@ class EditRigRoot:
         pm.textFieldGrp(self.rootName_grp, e=1, l=msg)
         pm.button(self.save_btn, e=1, en=1)
         
-    def Close(self, ignore):
+    def Cancel(self, ignore):
         pm.layoutDialog(dis='close')
     
     def Save(self, ignore):

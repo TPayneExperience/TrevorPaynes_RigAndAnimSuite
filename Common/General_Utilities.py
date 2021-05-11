@@ -50,7 +50,7 @@ class Name:
                 rigRoot.sideIndex.get() : side,
                 rigRoot.typeIndex.get() : objType}
         if rigRoot.showRootName.get():
-            temp[rigRoot.rootIndex.get()] = rigRoot.pfrsName.get()
+            temp[rigRoot.rigRootIndex.get()] = rigRoot.pfrsName.get()
         partNames = [temp[i] for i in sorted(list(temp.keys()))]
         return '_'.join(partNames)
 
@@ -178,6 +178,7 @@ def AbstractInitializer(objectInstance, folder):
                 if issubclass(obj, absInit.Abstract_Initializer):
                     obj.Initialize(objectInstance)
                     visited.append(fileName)
+    return objectInstance
 
 def GetRigRoots():
     return [r for r in pm.ls(tr=1) if r.hasAttr('rigMode')]

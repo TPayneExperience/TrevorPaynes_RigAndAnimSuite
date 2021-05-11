@@ -10,6 +10,8 @@ import Operations
 reload(Operations)
 import Behaviors
 reload(Behaviors)
+import Behaviors
+reload(Behaviors)
 import Abstracts.Abstract_OperationUI as absOpUI
 reload(absOpUI)
 import Abstracts.Abstract_Operation as absOp
@@ -18,28 +20,31 @@ import Common.Logger as log
 reload(log)
 import SceneData.RigRoot as rrt
 reload(rrt)
-import SceneData.Behavior_Manager as bhv
-reload(bhv)
+import SceneData.Behavior_Manager as bMng
+reload(bMng)
 import Data.Rig_Data as rigData
 reload(rigData)
 import Common.General_Utilities as genUtil
 reload(genUtil)
 import Operations.Rigging.Appearance as app
 reload(app)
+# import Data.Config as cnfg
+# reload(cnfg)
 
 class PayneFreeRigSuite:
     def __init__(self):
         self.currentRigRoot = None
         self.allRigRoots = []
-        self._StartLogger()
-
         self.catOps = {} # {categoryName : {fileName : classObj}}
         self.categories = []
 
-        self._InitOperations()
-        # self.InitScene()
-        self.bhvMng = bhv.Behavior_Manager
+        self._StartLogger()
+        self.bhvMng = bMng.Behavior_Manager
         self.bhvMng.InitBehaviors()
+        self._InitOperations()
+
+        # self.InitScene()
+        self._InitConfigFile()
 
     def __del__(self):
         self._EndLogger()
@@ -81,11 +86,11 @@ class PayneFreeRigSuite:
             genUtil.Name.UpdateLimbName(rigRoot, limb)
 
     def SubmitFeedback(self):
-        pass
-        # email = 'trevor@paynefreerigsuite.com'
-        # subject = 'PFRS Feedback (FREE Version)'
-        # cmds = "mailto:?to=%s&subject=%s&body=You're Amazing!" % (email, subject)
-        # webbrowser.open('mailto:?to=' + recipient + '&subject=' + subject + '&body=' + body, new=1)
+        email = 'trevor@paynefreerigsuite.com'
+        subject = 'PFRS Feedback (FREE Version)'
+        url = 'mailto:?to=%s&subject=%s' % (email, subject)
+        url += "&body=You're Amazing!"
+        webbrowser.open(url, new=1)
 
     def ExportAnimationRig(self, rigRoot, filePath):
         log.funcFileDebug()
@@ -98,7 +103,7 @@ class PayneFreeRigSuite:
 
         # Set rigmode, export, revert
         if rigRoot.isBuilt.get():
-            bhv.Behavior_Manager.Teardown_Edit_Rig(rigRoot)
+            self.bhvMng.Teardown_Edit_Rig(rigRoot)
         rigMode = rigRoot.rigMode.get()
         if rigMode == 0:
             rigRoot.rigMode.set(1)
@@ -114,7 +119,7 @@ class PayneFreeRigSuite:
         rigRoot.category.set(oldMain)
         rigRoot.operation.set(oldSub)
         if rigRoot.isBuilt.get():
-            bhv.Behavior_Manager.Setup_Edit_Rig(rigRoot)
+            self.bhvMng.Setup_Edit_Rig(rigRoot)
 
         if setupFile:
             pm.saveAs(setupFile)
@@ -176,6 +181,30 @@ class PayneFreeRigSuite:
                     if inspect.isclass(obj):
                         if issubclass(obj, absOp.Abstract_Operation):
                             setattr(self, name, obj())
+
+    def _InitConfigFile(self):
+        log.funcFileDebug()
+        folder = os.path.dirname(__file__)
+        folder = os.path.join(folder, 'Data')
+        filePath = os.path.join(folder, 'Config.json')
+        if not os.path.isfile(filePath):
+            genUtil.Json.Save(filePath, {})
+            
+        # Creating temp class was only way to maintain data
+        temp = type('tempClass', (), {'data':{}})
+        temp.data = genUtil.Json.Load(filePath)
+        genUtil.AbstractInitializer(temp, 'Config')
+
+        # Setup Control Shape Defaults
+        for bhvFiles in list(self.bhvMng.bhvFiles.values()):
+            bhv = self.bhvMng.bhvs[bhvFiles[-1]]
+            if not bhv.groupType:
+                continue
+            controlShapeName = 'ControlShape_' + bhv.groupType
+            if controlShapeName in temp.data:
+                continue
+            temp.data[controlShapeName] = bhv.groupShape
+        genUtil.Json.Save(filePath, temp.data)
 
 #=========== LOGGER ====================================
    

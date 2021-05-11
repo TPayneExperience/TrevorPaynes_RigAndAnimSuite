@@ -10,6 +10,7 @@ _folder = os.path.join(_folder, 'Limbs')
 TEMPLATES_FOLDER = _folder
 
 # ============= ROOT =============
+
 RIG_MODES = (   'Setup Rig',
                 'Animate Rig')  # Maybe post anim rig later???
 
@@ -21,6 +22,7 @@ JOINTS_LAYER = 'Joints'
 JOINT_SHAPE_ATTR = 'JointShape'
 
 # ============= BEHAVIORS =============
+
 CST_TYPES = ('Orient', 'Parent', 'Point',  'Scale')
 BHV_TYPES = (   'FK - Chain',           # 200
 
@@ -50,6 +52,7 @@ AXES_XFORMS =   ((0,0,0),
 
 
 # ============= LIMBS =============
+
 LIMB_TYPES = (  'Empty',
         
                 'OneJointBranch', 
@@ -68,6 +71,7 @@ LIMB_JOINT_NAME_PRESETS = { # lowercase to for keycheck
                 'leg' : ['Hip', 'Knee', 'Ankle']}
 
 # ============= JOINTS =============
+
 JOINT_COLORS = ((1, 0, 0), # Red
                 (0, 1, 0), # Green
                 (0, 0, 1), # Blue
@@ -80,21 +84,20 @@ JOINT_COLORS = ((1, 0, 0), # Red
                 (0.5, 1, 0), # 
                 (0, 0.5, 1), # 
                 (1, 0, 0.5)) 
-# MIRROR_XFORMS = {   'X': (-1,1,1),
-#                     'Y': (1,-1,1),
-#                     'Z': (1,1,-1)}
 
-# ============= GROUPS =============
-# GROUP_TYPES = ( 'Empty', # DO NOT CHANGE ORDER
+JOINT_ROT_ORDER = ( 'XYZ',
+                    'YZX',
+                    'ZXY',
+                    'XZY',
+                    'YXZ',
+                    'ZYX')
 
-#                 'Joint', # FK, CST, IK Chain
-#                 'IKPV',
-#                 'DEPRICATED - FKIKSwitch',
-#                 'LookAt')
-
-# ============= CONTROLS =============
-# CONTROL_TEMPLATES = {} # Filled by ctrMng.NewScene()
-
+JOINT_AIM_UP_AXES = (   'X',
+                        '-X',
+                        'Y',
+                        '-Y',
+                        'Z',
+                        '-Z')
 
 
 

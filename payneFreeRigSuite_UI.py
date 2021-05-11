@@ -9,9 +9,6 @@ import pymel.core as pm
 import Data.General_Data as genData
 reload(genData)
 
-import payneFreeRigSuite as pfrs
-reload(pfrs)
-
 import Initializers
 reload(Initializers)
 import SceneData
@@ -27,8 +24,15 @@ import Data.Rig_Data as rigData
 reload(rigData)
 import Common.Rig_Utilities as rigUtil
 reload(rigUtil)
+import Common.General_Utilities as genUtil
+reload(genUtil)
 import Popups.EditRigRoot as edRt
 reload(edRt)
+import Popups.UserSettings as usr
+reload(usr)
+
+import payneFreeRigSuite as pfrs
+reload(pfrs)
 
 import PFRS_Debug_UI as debug_ui
 reload(debug_ui)
@@ -73,11 +77,14 @@ class PayneFreeRigSuite_UI:
         self._Setup_MenuBar()
         pm.showWindow()
     
+#=========== SETUP MENUBAR ====================================
+
     def _Setup_MenuBar(self):
         with self.win:
             with pm.menu('File'):
-                pm.menuItem(l='New Rig...', c=self.NewRig_Dialog)
+                # pm.menuItem(l='New Rig...', c=self.NewRig_Dialog)
                 pm.menuItem(l='Edit Rig...', c=self.EditRig_Dialog)
+                pm.menuItem(l='User Settings', c=self.UserSettings_Dialog)
                 pm.menuItem(divider=1)
                 pm.menuItem(l='Export Animation Rig', c=self.ExportAnimationRig)
                 pm.menuItem(divider=1)
@@ -109,7 +116,7 @@ class PayneFreeRigSuite_UI:
                     pm.menuItem(l='Poses', en=0)
                     
                 pm.menuItem(divider=1)
-                pm.menuItem(l='Submit Feedback...', en=0)
+                pm.menuItem(l='Submit Feedback...', c=self.SubmitFeedback)
                 pm.menuItem(l='Share...', en=0)
                 pm.menuItem(l='Open Log', c=self.pfrs.OpenLog)
 
@@ -200,6 +207,14 @@ class PayneFreeRigSuite_UI:
 
 #=========== MENUBAR FUNCTIONS ====================================
 
+    def UserSettings_Dialog(self, ignore):
+        log.funcFileInfo()
+        usr.UserSettings()
+
+    def SubmitFeedback(self, ignore):
+        log.funcFileInfo()
+        self.pfrs.SubmitFeedback()
+
     def ExportAnimationRig(self, ignore):
         log.funcFileInfo()
         if self._rigRoot.rigMode.get() != 0:
@@ -232,9 +247,9 @@ class PayneFreeRigSuite_UI:
     def closeEvent(self):
         log.funcFileInfo()
 
-    def NewRig_Dialog(self, ignore):
-        log.funcFileInfo()
-        pass
+    # def NewRig_Dialog(self, ignore):
+    #     log.funcFileInfo()
+    #     pass
         # self.logger.debug('\tPFRS_UI > NewRig_Dialog')
         # roots = self.pfrs.rootMng.GetSceneRoots()
         # if roots:
@@ -248,8 +263,7 @@ class PayneFreeRigSuite_UI:
     def EditRig_Dialog(self, ignore):
         log.funcFileInfo()
         edRt.EditRigRoot(self._rigRoot, self)
-        # self.rootPopup = root_popup.POPUP_EditRigRoot(self)
-        # self.rootPopup.EditRigRoot_Dialog()
+        self.pfrs.UpdateRootName(self._rigRoot)
 
     def UpdateRigRoot(self):
         self.pfrs.UpdateRootName(self._rigRoot)

@@ -84,7 +84,7 @@ createNode transform -n "TEMP_RigRoot";
 		-at "enum";
 	addAttr -ci true -sn "isBuilt" -ln "isBuilt" -min 0 -max 1 -at "bool";
 	addAttr -ci true -sn "pfrsName" -ln "pfrsName" -dt "string";
-	addAttr -ci true -sn "rootIndex" -ln "rootIndex" -at "short";
+	addAttr -ci true -sn "rigRootIndex" -ln "rigRootIndex" -at "short";
 	addAttr -ci true -sn "limbIndex" -ln "limbIndex" -dv 1 -at "short";
 	addAttr -ci true -sn "jointIndex" -ln "jointIndex" -dv 2 -at "short";
 	addAttr -ci true -sn "sideIndex" -ln "sideIndex" -dv 3 -at "short";

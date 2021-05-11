@@ -31,7 +31,7 @@ class InitRigRoot(absInit.Abstract_Initializer):
         
         # NAMING
         pm.addAttr(rigRoot, ln='pfrsName', dt='string', h=hide)
-        pm.addAttr(rigRoot, ln='rootIndex', at='short', h=hide)
+        pm.addAttr(rigRoot, ln='rigRootIndex', at='short', h=hide)
         pm.addAttr(rigRoot, ln='limbIndex', at='short', dv=1, h=hide)
         pm.addAttr(rigRoot, ln='jointIndex', at='short', dv=2, h=hide)
         pm.addAttr(rigRoot, ln='sideIndex', at='short', dv=3, h=hide)
