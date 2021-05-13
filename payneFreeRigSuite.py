@@ -39,7 +39,7 @@ class PayneFreeRigSuite:
         self.categories = []
 
         self._StartLogger()
-        self.bhvMng = bMng.Behavior_Manager
+        self.bhvMng = bMng.Behavior_Manager()
         self.bhvMng.InitBehaviors()
         self._InitOperations()
 
@@ -64,21 +64,29 @@ class PayneFreeRigSuite:
 
     def AddRigRoot(self):
         rigRoot = rrt.RigRoot.Add()
-        self.UpdateRootName(rigRoot)
+
+        # Get Config Data
+        folder = os.path.dirname(__file__)
+        folder = os.path.join(folder, 'Data')
+        filePath = os.path.join(folder, 'Config.json')
+        config = genUtil.Json.Load(filePath)
+
+        # Set Defaults
+        rigRoot.pfrsName.set(config['rigRootName'])
+        rigRoot.showRootName.set(config['showRootName'])
+        rigRoot.rigRootIndex.set(config['rigRootIndex'])
+        rigRoot.limbIndex.set(config['limbIndex'])
+        rigRoot.jointIndex.set(config['jointIndex'])
+        rigRoot.sideIndex.set(config['sideIndex'])
+        rigRoot.typeIndex.set(config['typeIndex'])
+
+        self.bhvMng.InitRigRootControlShapeAttrs(rigRoot)
+        app.Appearance.bhvMng = self.bhvMng
         app.Appearance.ReimportControlShapes(rigRoot)
-        self.InitSceneJoints(rigRoot)
+        self.UpdateRootName(rigRoot)
         self._AddRigRootMaterials(rigRoot)
         return rigRoot
 
-    def InitSceneJoints(self, rigRoot):
-        log.funcFileInfo()
-        jointGroup = pm.listConnections(rigRoot.jointsParentGroup)[0]
-        joints = pm.ls(type='joint')
-        for joint in joints:
-            parent = pm.listRelatives(joint, p=1)
-            if not parent or pm.objectType(parent[0]) != 'joint':
-                pm.parent(joint, jointGroup)
-    
     def UpdateRootName(self, rigRoot):
         log.funcFileDebug()
         rigRoot.rename('%s_RigRoot' % rigRoot.pfrsName.get())
@@ -127,16 +135,30 @@ class PayneFreeRigSuite:
 #=========== PRIVATE ====================================
 
     def _AddRigRootMaterials(self, rigRoot):
+
+        # Get Config Data
+        folder = os.path.dirname(__file__)
+        folder = os.path.join(folder, 'Data')
+        filePath = os.path.join(folder, 'Config.json')
+        config = genUtil.Json.Load(filePath)
+
+        colors = [config['lControlColor']]
+        colors.append(config['mControlColor'])
+        colors.append(config['rControlColor'])
+
+        trans = [config['lControlTransparency']]
+        trans.append(config['mControlTransparency'])
+        trans.append(config['rControlTransparency'])
+
         attr = 'controlMtr'
         sides = ('L', 'M', 'R')
-        colors = ((0, 0, 1), (1, 1, 0), (1, 0, 0))
-        for side, color in zip(sides, colors):
+        for side, color, tran in zip(sides, colors, trans):
             name = '%sControlsMaterial' % side
             mtr = pm.shadingNode(  'surfaceShader', 
                                     n=name, 
                                     asShader=1)
             mtr.outColor.set(color)
-            mtr.outTransparency.set((0.8, 0.8, 0.8))
+            mtr.outTransparency.set((tran, tran, tran))
             sg = pm.sets(em=1, r=1, nss=1, name=name+'SG')
             pm.connectAttr( mtr+'.outColor', sg+'.surfaceShader', f=1)        
             pm.addAttr(sg, ln='rigRoot', dt='string')
@@ -176,7 +198,9 @@ class PayneFreeRigSuite:
                 for name, obj in inspect.getmembers(module):
                     if inspect.isclass(obj):
                         if issubclass(obj, absOpUI.Abstract_OperationUI):
-                            self.catOps[category][obj.uiName] = obj()
+                            opUI = obj()
+                            opUI.operation.bhvMng = self.bhvMng
+                            self.catOps[category][obj.uiName] = opUI
                 for name, obj in inspect.getmembers(module):
                     if inspect.isclass(obj):
                         if issubclass(obj, absOp.Abstract_Operation):

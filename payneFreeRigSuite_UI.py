@@ -74,6 +74,7 @@ class PayneFreeRigSuite_UI:
                 pm.text(l='Loading...', en=0)
                 
         pm.window(self.win, e=1, cc=self.closeEvent)
+        self._LoadWindowPos()
         self._Setup_MenuBar()
         pm.showWindow()
     
@@ -246,6 +247,9 @@ class PayneFreeRigSuite_UI:
 
     def closeEvent(self):
         log.funcFileInfo()
+        self._SaveWindowPos()
+        
+        # Get Config Data
 
     # def NewRig_Dialog(self, ignore):
     #     log.funcFileInfo()
@@ -268,3 +272,23 @@ class PayneFreeRigSuite_UI:
     def UpdateRigRoot(self):
         self.pfrs.UpdateRootName(self._rigRoot)
         self.SetOperation(self._rigRoot.operation.get())
+
+#=========== MISC ====================================
+
+    def _SaveWindowPos(self):
+        # Save Config File
+        folder = os.path.dirname(__file__)
+        folder = os.path.join(folder, 'Data')
+        filePath = os.path.join(folder, 'Config.json')
+        config = genUtil.Json.Load(filePath)
+
+        config['windowPos'] = pm.window(self.win, q=1, tlc=1)
+        genUtil.Json.Save(filePath, config)
+
+    def _LoadWindowPos(self):
+        # Load Config File
+        folder = os.path.dirname(__file__)
+        folder = os.path.join(folder, 'Data')
+        filePath = os.path.join(folder, 'Config.json')
+        config = genUtil.Json.Load(filePath)
+        pm.window(self.win, e=1, tlc=config['windowPos'])

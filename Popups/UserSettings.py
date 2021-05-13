@@ -15,6 +15,7 @@ class UserSettings:
         self.rootNameValid = True
         self.templateValid = True
         self.shapeFileValid = True
+        self.save_btn = None
 
         folder = os.path.dirname(__file__)
         folder = os.path.dirname(folder)
@@ -349,17 +350,5 @@ class UserSettings:
         pm.button(self.save_btn, e=1, en=1)
 
     def Save(self, ignore):
-        folder = pm.textFieldButtonGrp(self.tmpFolder_tbg, q=1, tx=1)
-        # PATHS
-        if os.path.isdir(folder):
-            self.config['templateFolderPath'] = folder
-        else:
-            self.config['templateFolderPath'] = ''
-        filePath = pm.textFieldButtonGrp(self.ctrShpFile_tbg, q=1, tx=1)
-        if os.path.isfile(filePath):
-            self.config['controlShapesFilePath'] = filePath
-        else:
-            self.config['controlShapesFilePath'] = ''
-
         genUtil.Json.Save(self.filePath, self.config)
         pm.layoutDialog(dis='save')

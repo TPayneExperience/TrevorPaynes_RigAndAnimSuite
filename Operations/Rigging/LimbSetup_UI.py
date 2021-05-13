@@ -37,10 +37,11 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
         self._Setup()
         self._rigRoot = rigRoot
         self._allRigRoots = allRigRoots
-        self.PopulateLimbHier()
+        self.Refresh(0)
+        # self.PopulateLimbHier()
         
-        self.PopulateSceneHier()
-        pm.treeView(self.joint_tv, e=1, removeAll=1)
+        # self.PopulateSceneHier()
+        # pm.treeView(self.joint_tv, e=1, removeAll=1)
     
     def Teardown_UI(self, rigRoot, allRigRoots):
         pass
@@ -50,8 +51,9 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
     def _Setup(self):
         with pm.verticalLayout():
             with pm.frameLayout(l='---', bv=1) as self.sceneHier_fl:
-                self.scene_tv = pm.treeView(adr=0, arp=0, sc=self.IsSceneJointSelectable, 
+                self.scene_tv = pm.treeView(#adr=0, # sc=self.IsSceneJointSelectable, 
                                                 scc=self.SelectedSceneJoints,
+                                                dad=self.ReparentJoint,
                                                 elc=self.IgnoreRename)
                 with pm.popupMenu():
                     pm.menuItem(l='Refresh', c=self.Refresh)
@@ -105,7 +107,7 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
 
     def PopulateSceneHier(self):
         log.funcFileDebug()
-        self.selectableJoints = []
+        # self.selectableJoints = []
         pm.treeView(self.scene_tv, e=1, removeAll=1)
         self.allJoints = {} # longName : joint
         limbJoints = []
@@ -122,8 +124,8 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
             else:
                 pm.treeView(self.scene_tv, e=1, ai=(longName, ''))
             pm.treeView(self.scene_tv, e=1, enl=(longName, joint not in limbJoints))
-            if joint not in limbJoints:
-                self.selectableJoints.append(longName)
+            # if joint not in limbJoints:
+            #     self.selectableJoints.append(longName)
             pm.treeView(self.scene_tv, e=1, dl=(longName, joint.shortName()))
         hasJoints = bool(self.allJoints)
         pm.menuItem(self.buildHier_mi, e=1, en=hasJoints)
@@ -139,6 +141,7 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
         pm.frameLayout(self.sceneHier_fl, e=1, l=txt)
 
     def Refresh(self, ignore):
+        self.operation.InitSceneJoints(self._rigRoot)
         self.PopulateSceneHier()
         self.PopulateLimbHier()
         self.PopulateJointHier(None)
@@ -161,28 +164,49 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
         log.funcFileInfo()
         return ''
 
-    def IsSceneJointSelectable(self, name, state):
-        log.funcFileDebug()
-        return name in self.selectableJoints
+    # def IsSceneJointSelectable(self, name, state):
+    #     log.funcFileDebug()
+    #     return name in self.selectableJoints
     
     def SelectedSceneJoints(self):
         log.funcFileInfo()
-        joints = self.GetSelectedSceneJoints()
-        for joint in joints:
-            log.debug('\t\t' + str(joint))
-        if joints:
-            pm.select(joints)
-            self._selectedSceneJoints = joints
+        selJoints = self.GetSelectedSceneJoints()
+        limbJoints = set()
+
+        # Get all limb joints
+        for selJoint in selJoints:
+            log.debug('\t\t' + str(selJoint))
+            if not selJoint.hasAttr('limb'):
+                continue
+            limbs = pm.listConnections(selJoint.limb)
+            if not limbs:
+                continue
+            limb = limbs[0]
+            for joint in pm.listConnections(limb.joints):
+                limbJoints.add(joint)
+
+        # Add ornaments for limb joints
+        for name in list(self.allJoints.keys()):
+            pm.treeView(self.scene_tv, e=1, ornament=(name, 0, 0, 3))
+        for limbJoint in list(limbJoints):
+            ln = limbJoint.longName()
+            pm.treeView(self.scene_tv, e=1, ornament=(ln, 1, 0, 3), 
+                                            orc=(ln, 0, 1, 0))
+
+        # Select + store selected joints
+        if selJoints:
+            pm.select(selJoints)
+            self._selectedSceneJoints = selJoints
             self.EvaluateSceneJoints()
         else:
             pm.select(d=1)
 
     def GetSelectedSceneJoints(self):
         log.funcFileDebug()
-        limbIDStrs = pm.treeView(self.scene_tv, q=1, selectItem=1)
-        if not limbIDStrs:
+        jointIDStrs = pm.treeView(self.scene_tv, q=1, selectItem=1)
+        if not jointIDStrs:
             return []
-        return [self.allJoints[limbID] for limbID in limbIDStrs]
+        return [self.allJoints[jointID] for jointID in jointIDStrs]
     
     def EvaluateSceneJoints(self):
         log.funcFileDebug()
@@ -196,6 +220,21 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
         b = bool(self._limbFunc)
         pm.menuItem(self.add_mi, e=1, en=b)
 
+    def ReparentJoint(self, jointIDsStr, oldParents, i2, newParentIDStr, i3, i4, i5):
+        if oldParents[0] == newParentIDStr:
+            return
+        child = self.allJoints[jointIDsStr[0]]
+        if newParentIDStr:
+            parent = self.allJoints[newParentIDStr]
+            msg = '\tSceneHier > REPARENTING '
+            msg += '"%s" to "%s"' % (child, parent)
+            log.info(msg)
+        else:
+            parent = None
+            log.info('\tLimbHier > REPARENTING "%s" to world' % child)
+        self.operation.ReparentJoint(self._rigRoot, child, parent)
+        self.Refresh(0)
+    
 #=========== LIMB HIER ====================================
 
     def PopulateLimbHier(self, selectLimb=None):
@@ -282,17 +321,34 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
         if result != 'OK':
             return
         templateName = pm.promptDialog(q=1, tx=1) + '.ma'
-        filePath = os.path.join(rigData.TEMPLATES_FOLDER, templateName)
+        templateFolder = self._GetTemplateFolder()
+
+        filePath = os.path.join(templateFolder, templateName)
         self.operation.SaveTemplate(self._rigRoot, 
                                     self._selectedLimbs, 
                                     filePath)
 
     def LoadTemplate(self, ignore):
         log.funcFileInfo()
-        ldTmp.LoadTemplates(self._rigRoot, rigData.TEMPLATES_FOLDER)
+        
+        templateFolder = self._GetTemplateFolder()
+        ldTmp.LoadTemplates(self._rigRoot, templateFolder)
         self.PopulateSceneHier()
         self.PopulateLimbHier()
         self.PopulateJointHier(None)
+
+    def _GetTemplateFolder(self):
+        rootFolder = os.path.dirname(__file__)
+        rootFolder = os.path.dirname(rootFolder)
+        rootFolder = os.path.dirname(rootFolder)
+        folder = os.path.join(rootFolder, 'Data')
+        filePath = os.path.join(folder, 'Config.json')
+        config = genUtil.Json.Load(filePath)
+        templateFolder = config['templateFolderPath']
+        if not templateFolder:
+            templateFolder = os.path.join(rootFolder, 'Templates')
+            templateFolder = os.path.join(templateFolder, 'Limbs')
+        return templateFolder
 
     def RemoveLimbs(self, ignore):
         log.funcFileInfo()

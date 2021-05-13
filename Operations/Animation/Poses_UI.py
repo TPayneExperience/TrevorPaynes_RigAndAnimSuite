@@ -18,8 +18,6 @@ reload(log)
 
 # import SceneData.RigRoot as rrt
 # reload(rrt)
-# import SceneData.Behavior_Manager as bhvMng
-# reload(bhvMng)
 
 class Poses_UI(absOpUI.Abstract_OperationUI):
     uiName = 'Poses'

@@ -18,8 +18,6 @@ reload(editPst)
 
 import SceneData.RigRoot as rrt
 reload(rrt)
-import SceneData.Behavior_Manager as bhvMng
-reload(bhvMng)
 
 class RIG_Behavior_UI(absOpUI.Abstract_OperationUI):
     uiName = 'Behavior'
@@ -296,8 +294,8 @@ class RIG_Behavior_UI(absOpUI.Abstract_OperationUI):
         limbBhvType = limb.bhvType.get()
         limbType = limb.limbType.get()
         orderedBhvs = {}
-        for bhvFiles in list(bhvMng.Behavior_Manager.bhvFiles.values()):
-            bhv = bhvMng.Behavior_Manager.bhvs[bhvFiles[-1]]
+        for bhvFiles in list(self.operation.bhvMng.bhvFiles.values()):
+            bhv = self.operation.bhvMng.bhvs[bhvFiles[-1]]
             orderedBhvs[bhv.orderIndex] = bhv
         index = 0
         for priority in sorted(list(orderedBhvs.keys())):
@@ -309,7 +307,7 @@ class RIG_Behavior_UI(absOpUI.Abstract_OperationUI):
                 index += 1
             if bhvType == limbBhvType:
                 pm.optionMenu(self.bhvType_om, e=1, sl=index)
-        self._currentBhv = bhvMng.Behavior_Manager.bhvs[bhvFile]
+        self._currentBhv = bhvMng.bhvs[bhvFile]
 
     def SetBhvType(self, bhvType):
         log.funcFileInfo()

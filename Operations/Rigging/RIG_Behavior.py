@@ -17,8 +17,6 @@ import Common.General_Utilities as genUtil
 reload(genUtil)
 import SceneData.Preset as pst
 reload(pst)
-import SceneData.Behavior_Manager as bhvMng
-reload(bhvMng)
 
 class RIG_Behavior(absOp.Abstract_Operation):
     isRigBuilt = False
@@ -146,9 +144,9 @@ class RIG_Behavior(absOp.Abstract_Operation):
     
     def SetLimbBehaviorType(self, limb, bhvType):
         log.funcFileDebug()
-        bhvFile = bhvMng.Behavior_Manager.bhvFiles[bhvType][-1]
+        bhvFile = self.bhvMng.bhvFiles[bhvType][-1]
         return self.SetLimbBehaviorFile(limb, bhvFile)
 
     def SetLimbBehaviorFile(self, limb, bhvFile):
         log.funcFileDebug()
-        return bhvMng.Behavior_Manager.SetBehavior(limb, bhvFile)
+        return self.bhvMng.SetBehavior(limb, bhvFile)

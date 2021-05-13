@@ -1,42 +1,45 @@
 {
     "rControlColor": [
-        0.0, 
+        1.0, 
         0.0, 
         1.0
     ], 
     "mirrorAimAxis": 1, 
-    "rigRootName": "asdf", 
+    "ControlShape_Joint": "Cube_Poly", 
+    "rigRootName": "TEMP", 
     "showRootName": false, 
     "ControlShape_IKS": "Cylinder_Poly", 
     "templateFolderPath": "", 
-    "windowPos": [], 
+    "windowPos": [
+        530, 
+        873
+    ], 
     "jointUpAxis": 2, 
     "limbIndex": 0, 
     "ControlShape_Empty": "Square_Wire", 
-    "lControlTransparency": 0.912698413082768, 
-    "Joint": "Cube_Poly", 
+    "lControlTransparency": 0.8, 
     "version": 100, 
     "mirrorUpAxis": 3, 
-    "rigRootIndex": 1, 
+    "rigRootIndex": 4, 
     "jointAimAxis": 0, 
-    "sideIndex": 3, 
-    "rControlTransparency": 0.31746031775597544, 
-    "mControlTransparency": 0.5396825392538357, 
+    "sideIndex": 2, 
+    "rControlTransparency": 0.8, 
+    "mControlTransparency": 0.8, 
     "lControlColor": [
-        0.0, 
-        1.0, 
-        0.004199981689453125
+        0, 
+        0, 
+        1
     ], 
     "ControlShape_LookAt": "Circle_Wire", 
     "mControlColor": [
-        0.0, 
-        1.0, 
-        1.0
+        1, 
+        1, 
+        0
     ], 
     "jointRotOrder": 0, 
     "ControlShape_IKPV": "Sphere_Poly", 
-    "jointIndex": 2, 
-    "typeIndex": 4, 
+    "jointIndex": 1, 
+    "typeIndex": 3, 
     "ControlShape_FKR": "Cube_Poly", 
-    "controlShapesFilePath": ""
+    "controlShapesFilePath": "D:\\Assets\\Programming\\Python\\Maya\\ModularAutoRigger\\Templates\\Control_Shapes.ma"
 }

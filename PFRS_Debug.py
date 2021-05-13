@@ -47,7 +47,7 @@ class PFRS_Debug:
         rigRoot = self.pfrs.AddRigRoot()
         rigRoot.operation.set('Behavior')
         pm.importFile(path)
-        self.pfrs.InitSceneJoints(rigRoot)
+        self.pfrs.LimbSetup.InitSceneJoints(rigRoot)
         self.pfrs.LimbSetup.AutoBuildByHierarchy(rigRoot)
 
     def ArmTest(self):

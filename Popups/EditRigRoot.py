@@ -78,8 +78,14 @@ class EditRigRoot:
         self.showPfx_cb = pm.checkBox(l='Show RootName', v=self.showRootName, cc=self.ToggleShowRootName)
         self.order_tv = pm.treeView(ams=0, arp=0, h=110, ann=msg, 
                                                 dad=self.Update_ExampleLabels)
+        
+        startOrder = {} # orderNumber : attr
         for i in range(5):
-            part = self.rigNaming[self.startNameOrder[i]]
+            index = self.startNameOrder[i]
+            startOrder[index] = self.rigNaming[i]
+
+        for i in range(5):
+            part = startOrder[i]
             pm.treeView(self.order_tv, e=1, ai=(part, ''))
 
         # BUTTONS + LAYOUT

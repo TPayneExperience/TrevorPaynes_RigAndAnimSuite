@@ -13,8 +13,6 @@ import Common.General_Utilities as genUtil
 reload(genUtil)
 import SceneData.RigRoot as rrt
 reload(rrt)
-import SceneData.Behavior_Manager as bhv
-reload(bhv)
 import Common.Rig_Utilities as rigUtil
 reload(rigUtil)
 
@@ -94,7 +92,7 @@ class LimbSetup(absOp.Abstract_Operation):
             
             # Setup behavior
             bhvFile = newLimb.bhvFile.get()
-            bhv.Behavior_Manager.SetBehavior(newLimb, bhvFile)
+            self.bhvMng.SetBehavior(newLimb, bhvFile)
 
             self.RenameLimb(newLimb, newLimb.pfrsName.get() + '_Copy')
             newLimbs.append(newLimb)
@@ -254,7 +252,6 @@ class LimbSetup(absOp.Abstract_Operation):
         pm.editDisplayLayerMembers( rigData.CONTROLS_LAYER, 
                                     controls, nr=1)
         
-
 #============= JOINTS ============================
 
     def JointTool(self):
@@ -287,12 +284,48 @@ class LimbSetup(absOp.Abstract_Operation):
         rigRoot = pm.listConnections(limb.rigRoot)[0]
         self._RenameJoint(rigRoot, limb, joint, newName)
 
+    def ReparentJoint(self, rigRoot, childJoint, parentJoint):
+        # Disconnect child limb
+        if not childJoint.hasAttr('limb'):
+            return
+        childLimbs = pm.listConnections(childJoint.limb)
+        if not childLimbs:
+            return
+        childLimb = childLimbs[0]
+        pm.disconnectAttr(childLimb.limbParent)
+
+        # Setup Parent joint / connection
+        if not parentJoint:
+            jointGroup = pm.listConnections(rigRoot.jointsParentGroup)[0]
+            pm.parent(childJoint, jointGroup)
+            return
+        pm.parent(childJoint, parentJoint)
+        if not parentJoint.hasAttr('limb'):
+            return
+        parentLimbs = pm.listConnections(parentJoint.limb)
+        if not parentLimbs:
+            return
+        parentLimb = parentLimbs[0]
+        if childLimb == parentLimb:
+            return
+            
+        # Reparent limb
+        if not self._IsChildAParent(childLimb, parentLimb):
+            self._ReparentLimb(childLimb, parentLimb)
+
 #============= MISC ============================
 
+    def _IsChildAParent(self, child, parent):
+        if parent == child:
+            return True
+        parents = pm.listConnections(parent.limbParent)
+        if not parents:
+            return False
+        return self._IsChildAParent(child, parents[0])
+
     def _InitBehavior(self, rigRoot, limb):
-        bhv.Behavior_Manager.InitLimb(limb)
+        self.bhvMng.InitLimb(limb)
         rigUtil.UpdateUsedControlMaterials(rigRoot, limb)
-        # bhv.Behavior_Manager.Setup_Editable(limb)
 
     def _LimbNamesCount(self, rigRoot, limbName):
         limbs = pm.listConnections(rigRoot.limbs)
@@ -304,6 +337,15 @@ class LimbSetup(absOp.Abstract_Operation):
         names = [limb.pfrsName.get() for limb in limbs]
         return names.count(limbName)
 
+    def InitSceneJoints(self, rigRoot):
+        log.funcFileInfo()
+        jointGroup = pm.listConnections(rigRoot.jointsParentGroup)[0]
+        joints = pm.ls(type='joint')
+        for joint in joints:
+            parent = pm.listRelatives(joint, p=1)
+            if not parent or pm.objectType(parent[0]) != 'joint':
+                pm.parent(joint, jointGroup)
+    
 #============= RELATIONSHIP ============================
 
     def _BreakMirror(self, sourceLimb):
@@ -498,7 +540,6 @@ class LimbSetup(absOp.Abstract_Operation):
                 if child not in joints:
                     joints.append(child)
         return joints
-
 
 #============= AUTOBUILD ============================
 

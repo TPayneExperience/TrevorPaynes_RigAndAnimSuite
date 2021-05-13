@@ -9,8 +9,6 @@ import Common.UI_Utilities as uiUtil
 reload(uiUtil)
 import Common.Logger as log
 reload(log)
-import SceneData.Behavior_Manager as bhvMng
-reload(bhvMng)
 
 class ANM_Behavior_UI(absOpUI.Abstract_OperationUI):
     uiName = 'Behavior'
@@ -99,7 +97,7 @@ class ANM_Behavior_UI(absOpUI.Abstract_OperationUI):
             self._rigRoot = pm.listConnections(limb.rigRoot)[0]
             self.PopulatePresets(self._rigRoot)
             bhvFile = limb.bhvFile.get()
-            self._currentBhv = bhvMng.Behavior_Manager.bhvs[bhvFile]
+            self._currentBhv = self.bhvMng.bhvs[bhvFile]
             self.PopulateLimbProperties(limb)
             self.PopulateControlHier(limb)
             self.PopulateBhvProperties(limb)
@@ -111,7 +109,7 @@ class ANM_Behavior_UI(absOpUI.Abstract_OperationUI):
         willLoseData = False
         for limbPreset in pm.listConnections(preset.limbPresets):
             bhvFile = limbPreset.bhvFile.get()
-            bhv = bhvMng.Behavior_Manager.bhvs[bhvFile]
+            bhv = self.bhvMng.bhvs[bhvFile]
             if bhv.bakeLosesData:
                 willLoseData = True
         if willLoseData:

@@ -20,8 +20,6 @@ reload(log)
 
 # import SceneData.RigRoot as rrt
 # reload(rrt)
-import SceneData.Behavior_Manager as bhvMng
-reload(bhvMng)
 
 class Appearance_UI(absOpUI.Abstract_OperationUI):
     uiName = 'Appearance'
@@ -40,7 +38,7 @@ class Appearance_UI(absOpUI.Abstract_OperationUI):
         self.PopulateLimbHier()
         for rigRoot in allRigRoots:
             for limb in pm.listConnections(rigRoot.limbs):
-                bhv = bhvMng.Behavior_Manager.bhvs[limb.bhvFile.get()]
+                bhv = self.operation.bhvMng.bhvs[limb.bhvFile.get()]
                 if bhv.groupMoveable:
                     continue
                 for group in pm.listConnections(limb.usedGroups):
@@ -50,7 +48,7 @@ class Appearance_UI(absOpUI.Abstract_OperationUI):
     def Teardown_UI(self, rigRoot, allRigRoots):
         for rigRoot in allRigRoots:
             for limb in pm.listConnections(rigRoot.limbs):
-                bhv = bhvMng.Behavior_Manager.bhvs[limb.bhvFile.get()]
+                bhv = self.operation.bhvMng.bhvs[limb.bhvFile.get()]
                 if bhv.groupMoveable:
                     continue
                 for group in pm.listConnections(limb.usedGroups):

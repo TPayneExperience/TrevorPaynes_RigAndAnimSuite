@@ -17,8 +17,8 @@ reload(rigData)
 # reload(lmb)
 # import LimbSetup as ls
 # reload(ls)
-# import Common.General_Utilities as genUtil
-# reload(genUtil)
+import Common.General_Utilities as genUtil
+reload(genUtil)
 # import SceneData.RigRoot as rrtp
 # reload(rrt)
 
@@ -32,15 +32,22 @@ class Appearance(absOp.Abstract_Operation):
     @staticmethod
     def ReimportControlShapes(rigRoot):
         log.funcFileDebug()
-        old = pm.listConnections(rigRoot.controlTemplates)
-        pm.delete(old)
+        pm.delete(pm.listConnections(rigRoot.controlTemplates))
 
-        folder = os.path.dirname(__file__)  # Rigging
-        folder = os.path.dirname(folder)  # Operations
-        folder = os.path.dirname(folder)  # Main
-        folder = os.path.join(folder, 'Templates')
-        filePath = os.path.join(folder, 'Control_Shapes.ma')
-        nodes = pm.importFile(filePath, returnNewNodes=1)
+        # Import Control Shapes
+        rootFolder = os.path.dirname(__file__)  # Rigging
+        rootFolder = os.path.dirname(rootFolder)  # Operations
+        rootFolder = os.path.dirname(rootFolder)  # Main
+        folder = os.path.join(rootFolder, 'Data')
+        filePath = os.path.join(folder, 'Config.json')
+        config = genUtil.Json.Load(filePath)
+        shapeFile = config['controlShapesFilePath']
+        if not shapeFile:
+            folder = os.path.join(rootFolder, 'Templates')
+            shapeFile = os.path.join(folder, 'Control_Shapes.ma')
+        nodes = pm.importFile(shapeFile, returnNewNodes=1)
+
+        # Setup Control template parent
         ctrShapes = [n for n in nodes if pm.objectType(n) == 'transform']
         ctrShapesParent = pm.group(ctrShapes, p=rigRoot,
                                     name=rigData.CONTROL_TEMPLATE_GROUP)
@@ -48,13 +55,21 @@ class Appearance(absOp.Abstract_Operation):
         rigUtil.ChannelBoxAttrs(ctrShapesParent, 0, 0, 0, 0)
         pm.addAttr(ctrShapesParent, ln='rigRoot', dt='string')
         pm.connectAttr(rigRoot.controlTemplates, ctrShapesParent.rigRoot)
+
+        # Connect Shape Templates to RigRoot
+        shapeDict = {} # ctrName : ctrShape
         for ctr in ctrShapes:
             pm.addAttr(ctr, ln='rigRoot', dt='string')
-        for ctr in ctrShapes:
-            if 'Cube_Poly' in ctr.shortName():
-                attr = '.' + rigData.JOINT_SHAPE_ATTR
-                pm.connectAttr(ctr.rigRoot, rigRoot + attr)
-                break
+            ctr.rigRoot.set(ctr.shortName())
+            shapeDict[ctr.shortName()] = ctr
+        groupTypes = list(Appearance.bhvMng.groupTypes)
+        for groupType in groupTypes:
+            attr = '%s.%sShape' % (rigRoot, groupType)
+            shapeName = pm.getAttr(attr)
+            shape = shapeDict[shapeName]
+            pm.connectAttr(shape.rigRoot, attr)
+
+        # Cleanup from import
         if pm.objExists('Control_Shapes_sceneConfigurationScriptNode'):
             pm.delete([ 'Control_Shapes_sceneConfigurationScriptNode', 
                         'Control_Shapes_uiConfigurationScriptNode'])

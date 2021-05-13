@@ -10,8 +10,6 @@ import Common.Logger as log
 reload(log)
 # import Common.General_Utilities as genUtil
 # reload(genUtil)
-# import SceneData.Behavior_Manager as bMng
-# reload(bMng)
 
 class PFRS_Debug_UI:
     def __init__(self, parent):

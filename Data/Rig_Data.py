@@ -1,14 +1,4 @@
 
-
-# ============= USER SETTINGS =============
-
-import os
-_folder = os.path.dirname(__file__)
-_folder = os.path.dirname(_folder)
-_folder = os.path.join(_folder, 'Templates')
-_folder = os.path.join(_folder, 'Limbs')
-TEMPLATES_FOLDER = _folder
-
 # ============= ROOT =============
 
 RIG_MODES = (   'Setup Rig',
@@ -19,7 +9,6 @@ CONTROL_TEMPLATE_GROUP = 'CONTROL_SHAPE_TEMPLATES'
 CONTROLS_LAYER = 'Controls'
 MESHES_LAYER = 'Meshes'
 JOINTS_LAYER = 'Joints'
-JOINT_SHAPE_ATTR = 'JointShape'
 
 # ============= BEHAVIORS =============
 

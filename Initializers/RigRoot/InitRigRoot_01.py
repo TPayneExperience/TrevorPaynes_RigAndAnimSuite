@@ -89,7 +89,7 @@ class InitRigRoot(absInit.Abstract_Initializer):
         rigUtil.ChannelBoxAttrs(group, 0, 0, 0, 0)
         
         # CONTROLS
-        pm.addAttr(rigRoot, ln=rigData.JOINT_SHAPE_ATTR, dt='string', h=hide)
+        # pm.addAttr(rigRoot, ln=rigData.JOINT_SHAPE_ATTR, dt='string', h=hide)
 
         #============= LAYERS ============================
 

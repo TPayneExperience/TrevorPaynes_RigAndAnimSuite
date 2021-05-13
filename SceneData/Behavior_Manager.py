@@ -21,16 +21,17 @@ import Data.General_Data as genData
 reload(genUtil)
 
 # FUNCTIONS MUST BE STATIC, USED ACROSS MULTIPLE FILES
-class Behavior_Manager:
+class Behavior_Manager(object):
     bhvFiles = {}   # bhvName : [fileName1, fileName 2,...]
     bhvs = {}       # fileName : class
     bakeData = {}   # joint : group (with bake xforms)
+    groupTypes = set()
 
-    @staticmethod
-    def InitBehaviors():
+    def InitBehaviors(self):
         log.funcFileDebug()
-        Behavior_Manager.bhvFiles = {}
-        Behavior_Manager.bhvs = {}
+        self.bhvFiles = {}
+        self.bhvs = {}
+        self.groupTypes = set(['Joint'])
         rootPath = os.path.dirname(__file__)
         rootPath = os.path.dirname(rootPath)
         bhvPath = os.path.join(rootPath, 'Behaviors')
@@ -46,46 +47,45 @@ class Behavior_Manager:
                 if inspect.isclass(obj):
                     if issubclass(obj, absBhv.Abstract_Behavior):
                         bhvType = obj.bhvType
-                        if bhvType not in Behavior_Manager.bhvFiles:
-                            Behavior_Manager.bhvFiles[bhvType] = []
-                        if fileName not in Behavior_Manager.bhvFiles[bhvType]:
-                            Behavior_Manager.bhvFiles[bhvType].append(
+                        if bhvType not in self.bhvFiles:
+                            self.bhvFiles[bhvType] = []
+                        if fileName not in self.bhvFiles[bhvType]:
+                            self.bhvFiles[bhvType].append(
                                                                 fileName)
-                        Behavior_Manager.bhvs[fileName] = obj()
+                        bhv = obj()
+                        self.bhvs[fileName] = bhv
+                        if bhv.groupType:
+                            self.groupTypes.add(bhv.groupType)
     
-    @staticmethod
-    def InitLimb(limb):
+    def InitLimb(self, limb):
         log.funcFileDebug()
-        bhvFile = Behavior_Manager._GetDefaultBehaviorFile(limb)
-        Behavior_Manager.SetBehavior(limb, bhvFile)
+        bhvFile = self._GetDefaultBehaviorFile(limb)
+        self.SetBehavior(limb, bhvFile)
     
-    @staticmethod
-    def SetBehavior(limb, bhvFile):
+    def SetBehavior(self, limb, bhvFile):
         log.funcFileDebug()
-        Behavior_Manager._Teardown_GroupVisibility(limb)
-        bhv = Behavior_Manager.bhvs[bhvFile]
+        self._Teardown_GroupVisibility(limb)
+        bhv = self.bhvs[bhvFile]
         limb.bhvFile.set(bhvFile)
         limb.bhvType.set(bhv.bhvType)
         rigRoot = pm.listConnections(limb.rigRoot)[0]
-        Behavior_Manager._InitRigRootBhv(rigRoot, bhv)
-        Behavior_Manager._SetupLimbGroups(rigRoot, limb, bhv)
+        self._SetupLimbGroups(rigRoot, limb, bhv)
         bhv.InitLimb(limb)
-        Behavior_Manager._Setup_GroupVisibility(limb)
+        self._Setup_GroupVisibility(limb)
         rigUtil.UpdateUsedControlMaterials(rigRoot, limb)
         return bhv
 
 #============= SETUP / TEARDOWN RIG ============================
 
-    @staticmethod
-    def Setup_Edit_Rig(rigRoot):
+    def Setup_Edit_Rig(self, rigRoot):
         log.funcFileDebug()
         limbs = pm.listConnections(rigRoot.limbs)
         # Setup Control Pivots
         for limb in limbs:
-            Behavior_Manager._Setup_ControlPivot(limb)
+            self._Setup_ControlPivot(limb)
         # Setup Rig
         for limb in limbs:
-            bhv = Behavior_Manager.bhvs[limb.bhvFile.get()]
+            bhv = self.bhvs[limb.bhvFile.get()]
             bhv.Setup_Rig_Internal(limb)
             bhv.Setup_Rig_External(limb)
             bhv.Setup_Constraint_JointsToControls(limb)
@@ -95,34 +95,32 @@ class Behavior_Manager:
                 rigUtil.Setup_ControllersGroup(limb)
         # Lock hide channelbox
         for limb in limbs:
-            Behavior_Manager._LockHideLimbControls(limb)
+            self._LockHideLimbControls(limb)
 
-    @staticmethod
-    def Setup_Anim_Rig(rigRoot):
+    def Setup_Anim_Rig(self, rigRoot):
         log.funcFileDebug()
         limbs = pm.listConnections(rigRoot.limbs)
-        controls = Behavior_Manager._SetupRig(limbs)
+        controls = self._SetupRig(limbs)
         for limb in limbs:
-            bhv = Behavior_Manager.bhvs[limb.bhvFile.get()]
+            bhv = self.bhvs[limb.bhvFile.get()]
             bhv.Setup_Constraint_ControlsToJoints(limb)
         pm.refresh()
         if controls:
-            Behavior_Manager._BakeJointDataToControls(
-                                            Behavior_Manager.bakeData, 
+            self._BakeJointDataToControls(
+                                            self.bakeData, 
                                             controls)
         for limb in limbs:
-            bhv = Behavior_Manager.bhvs[limb.bhvFile.get()]
+            bhv = self.bhvs[limb.bhvFile.get()]
             bhv.Teardown_Constraint_ControlsToJoints(limb)
         for limb in limbs:
-            bhv = Behavior_Manager.bhvs[limb.bhvFile.get()]
+            bhv = self.bhvs[limb.bhvFile.get()]
             bhv.Setup_Constraint_JointsToControls(limb)
         for limb in limbs:
-            Behavior_Manager._LockHideLimbControls(limb)
+            self._LockHideLimbControls(limb)
         
-    @staticmethod
-    def _LockHideLimbControls(limb):
+    def _LockHideLimbControls(self, limb):
         log.funcFileDebug()
-        bhv = Behavior_Manager.bhvs[limb.bhvFile.get()]
+        bhv = self.bhvs[limb.bhvFile.get()]
         if bhv.usesJointControls:
             for group in pm.listConnections(limb.jointGroups):
                 control = pm.listConnections(group.control)[0]
@@ -138,19 +136,17 @@ class Behavior_Manager:
                 scale = limb.channelBoxLimbCtrScale.get()
                 rigUtil.ChannelBoxAttrs(control, pos, rot, scale, 0)
         
-    @staticmethod
-    def Teardown_Anim_Rig(rigRoot):
+    def Teardown_Anim_Rig(self, rigRoot):
         log.funcFileDebug()
         limbs = pm.listConnections(rigRoot.limbs)
         bakeDataParent = pm.listConnections(rigRoot.bakedDataGroup)[0]
-        temp = Behavior_Manager._BakeControlsToJointData(limbs, 
+        temp = self._BakeControlsToJointData(limbs, 
                                                 bakeDataParent)
-        Behavior_Manager.bakeData = temp
+        self.bakeData = temp
         for limb in limbs:
-            Behavior_Manager._TeardownLimb(limb)
+            self._TeardownLimb(limb)
 
-    @staticmethod
-    def Teardown_Edit_Rig(rigRoot):
+    def Teardown_Edit_Rig(self, rigRoot):
         log.funcFileDebug()
         limbs = pm.listConnections(rigRoot.limbs)
 
@@ -163,15 +159,14 @@ class Behavior_Manager:
                 rigUtil.ResetAttrs(control)
         pm.refresh()
         for limb in limbs:
-            Behavior_Manager._TeardownLimb(limb)
+            self._TeardownLimb(limb)
         for limb in limbs:
             for group in pm.listConnections(limb.usedGroups):
-                Behavior_Manager._Teardown_ControlPivot(group)
+                self._Teardown_ControlPivot(group)
     
 #============= ANIMATION TRANSFER (BAKING) ============================
    
-    @staticmethod
-    def _BakeControlsToJointData(limbs, bakeDataParent):
+    def _BakeControlsToJointData(self, limbs, bakeDataParent):
         log.funcFileDebug()
         bakeData = {} # joint : tempGroup
         allJoints = []
@@ -190,29 +185,27 @@ class Behavior_Manager:
         pm.delete(tempCsts)
         return bakeData
 
-    @staticmethod
-    def _TeardownLimb(limb):
+    def _TeardownLimb(self, limb):
         log.funcFileDebug()
         bhvFile = limb.bhvFile.get()
-        bhv = Behavior_Manager.bhvs[bhvFile]
+        bhv = self.bhvs[bhvFile]
         rigUtil.Teardown_Controllers(limb)
         bhv.Teardown_Constraint_JointsToControls(limb)
         bhv.Teardown_Rig_External(limb)
         bhv.Teardown_Rig_Internal(limb)
 
 
-    @staticmethod
-    def _SetupRig(limbs):
+    def _SetupRig(self, limbs):
         log.funcFileDebug()
         controls = []
-        data = bool(Behavior_Manager.bakeData)
+        data = bool(self.bakeData)
         for limb in limbs:
             # if joints have keys or there's baked data
             joints = pm.listConnections(limb.joints)
             keys = any([pm.keyframe(j, q=1, kc=1) for j in joints])
             hasKeys = (data or keys)
             bhvFile = limb.bhvFile.get()
-            bhv = Behavior_Manager.bhvs[bhvFile]
+            bhv = self.bhvs[bhvFile]
             # Setup rig and store controls
             groups = bhv.Setup_Rig_Internal(limb)
             if limb.bakeInternal.get() and hasKeys:
@@ -222,8 +215,7 @@ class Behavior_Manager:
                 controls += [pm.listConnections(g.control)[0] for g in groups]
         return controls
 
-    @staticmethod
-    def _BakeJointDataToControls(tempGroups, controls):
+    def _BakeJointDataToControls(self, tempGroups, controls):
         start = pm.playbackOptions(q=1, ast=1)
         end = pm.playbackOptions(q=1, aet=1)
         log.funcFileDebug()
@@ -236,10 +228,9 @@ class Behavior_Manager:
 
 #============= UTIL ============================
 
-    @staticmethod
-    def _Setup_ControlPivot(limb):
+    def _Setup_ControlPivot(self, limb):
         log.funcFileDebug()
-        bhv = Behavior_Manager.bhvs[limb.bhvFile.get()]
+        bhv = self.bhvs[limb.bhvFile.get()]
         if bhv.groupMoveable:
             for group in pm.listConnections(limb.usedGroups):
                 control = pm.listConnections(group.control)[0]
@@ -250,8 +241,7 @@ class Behavior_Manager:
                             control.scalePivot, 
                             control.rotatePivot, ws=1)
 
-    @staticmethod
-    def _Teardown_ControlPivot(group):
+    def _Teardown_ControlPivot(self, group):
         control = pm.listConnections(group.control)[0]
         pm.xform(control, cp=1) # Re-center pivots
         gPos = pm.xform(group, q=1, t=1, ws=1)
@@ -260,23 +250,20 @@ class Behavior_Manager:
         pm.makeIdentity(control, a=1, t=1, r=1, s=1) # Freeze xforms
         pm.xform(control, t=cPos, ws=1)
 
-    @staticmethod
-    def _Setup_GroupVisibility(limb):
+    def _Setup_GroupVisibility(self, limb):
         for group in pm.listConnections(limb.usedGroups):
             group.v.set(1)
 
-    @staticmethod
-    def _Teardown_GroupVisibility(limb):
+    def _Teardown_GroupVisibility(self, limb):
         for group in pm.listConnections(limb.usedGroups):
             group.v.set(0)
 
-    @staticmethod
-    def _GetDefaultBehaviorFile(limb):
+    def _GetDefaultBehaviorFile(self, limb):
         limbType = limb.limbType.get()
         orderedFiles = {}
-        for bhvFiles in list(Behavior_Manager.bhvFiles.values()):
+        for bhvFiles in list(self.bhvFiles.values()):
             bhvFile = bhvFiles[-1]
-            bhv = Behavior_Manager.bhvs[bhvFile]
+            bhv = self.bhvs[bhvFile]
             orderIndex = bhv.orderIndex
             if orderIndex in orderedFiles:
                 msg = 'All behavior orderIndex values must be unique!'
@@ -287,24 +274,39 @@ class Behavior_Manager:
         index = sorted(list(orderedFiles.keys()))[0]
         return orderedFiles[index]
 
-    @staticmethod
-    def _InitRigRootBhv(rigRoot, behavior):
-        log.funcFileDebug()
-        if not behavior.groupCount:
-            return
-        attr = behavior.groupType + 'Shape'
-        if rigRoot.hasAttr(attr):
-            return
-        groupShape = behavior.groupShape
-        pm.addAttr(rigRoot, ln=attr, dt='string', h=genData.HIDE_ATTRS)
-        tempParent = pm.listConnections(rigRoot.controlTemplates)[0]
-        for ctr in pm.listRelatives(tempParent, c=1):
-            if groupShape in ctr.shortName():
-                pm.connectAttr(ctr.rigRoot, rigRoot + '.' + attr)
-                return
+    # @staticmethod
+    # def _InitRigRootBhv(rigRoot, behavior):
+    #     log.funcFileDebug()
+    #     if not behavior.groupCount:
+    #         return
+    #     attr = behavior.groupType + 'Shape'
+    #     if rigRoot.hasAttr(attr):
+    #         return
+    #     groupShape = behavior.groupShape
+    #     pm.addAttr(rigRoot, ln=attr, dt='string', h=genData.HIDE_ATTRS)
+    #     tempParent = pm.listConnections(rigRoot.controlTemplates)[0]
+    #     for ctr in pm.listRelatives(tempParent, c=1):
+    #         if groupShape in ctr.shortName():
+    #             pm.connectAttr(ctr.rigRoot, rigRoot + '.' + attr)
+    #             return
 
-    @staticmethod
-    def _SetupLimbGroups(rigRoot, limb, behavior):
+    def InitRigRootControlShapeAttrs(self, rigRoot):
+        folder = os.path.dirname(__file__)
+        folder = os.path.dirname(folder)
+        folder = os.path.join(folder, 'Data')
+        filePath = os.path.join(folder, 'Config.json')
+        config = genUtil.Json.Load(filePath)
+
+        hide = genData.HIDE_ATTRS
+        for groupType in self.groupTypes:
+            attr = '%sShape' % (groupType)
+            if not rigRoot.hasAttr(attr):
+                pm.addAttr(rigRoot, ln=attr, dt='string', h=hide)
+                fullAttr = '%s.%s' % (rigRoot, attr)
+                configAttr = 'ControlShape_' + groupType
+                pm.setAttr(fullAttr, config[configAttr])
+
+    def _SetupLimbGroups(self, rigRoot, limb, behavior):
         log.funcFileDebug()
         groupType = behavior.groupType
         groupCount = behavior.groupCount

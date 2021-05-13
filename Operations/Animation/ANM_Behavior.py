@@ -7,8 +7,6 @@ import Common.Logger as log
 reload(log)
 import Operations.Rigging.RIG_Behavior as rigBhv
 reload(rigBhv)
-import SceneData.Behavior_Manager as bhvMng
-reload(bhvMng)
 
 class ANM_Behavior(absOp.Abstract_Operation):
     isRigBuilt = True
@@ -22,7 +20,6 @@ class ANM_Behavior(absOp.Abstract_Operation):
     def ApplyPreset(self, preset, keyframesOnly=True):
         log.funcFileDebug()
         rigRoot = pm.listConnections(preset.rigRoot)[0]
-        mng = bhvMng.Behavior_Manager
         limbPresets = pm.listConnections(preset.limbPresets)
         limbs = [pm.listConnections(lp.limb)[0] for lp in limbPresets]
         start = int(pm.playbackOptions(q=1, ast=1))
@@ -46,7 +43,7 @@ class ANM_Behavior(absOp.Abstract_Operation):
                     keyframes = [str(k) for k in keyframes]
                     limb.controlKeyframes.set(':'.join(keyframes))
 
-        mng.Teardown_Anim_Rig(rigRoot)
+        self.bhvMng.Teardown_Anim_Rig(rigRoot)
 
         # Assign new Behaviors + new parents
         log.debug('Assign New Behaviors')
@@ -65,7 +62,7 @@ class ANM_Behavior(absOp.Abstract_Operation):
                 if limb.hasKeys.get():
                     limb.bakeExternal.set(True)
 
-        mng.Setup_Anim_Rig(rigRoot)
+        self.bhvMng.Setup_Anim_Rig(rigRoot)
 
         if keyframesOnly:
             for limb in limbs:

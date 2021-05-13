@@ -16,8 +16,9 @@ class InitConfig(absInit.Abstract_Initializer):
         log.funcFileDebug()
         if temp.data:
             return 
-        temp.data = {'version': 100,
-                'windowPos': [],
+        temp.data = {
+                'version': 100,
+                'windowPos': [200, 200],
                 'jointRotOrder': 0,
 
                 # Joint Aim/Up axes, rigData.JOINT_AIM_UP_AXES
@@ -48,7 +49,7 @@ class InitConfig(absInit.Abstract_Initializer):
                 'rControlTransparency': 0.8,
 
                 # Control Shapes
-                'Joint': 'Cube_Poly'
+                'ControlShape_Joint': 'Cube_Poly'
                 }
 
 
