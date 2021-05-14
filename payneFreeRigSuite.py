@@ -43,7 +43,6 @@ class PayneFreeRigSuite:
         self.bhvMng.InitBehaviors()
         self._InitOperations()
 
-        # self.InitScene()
         self._InitConfigFile()
 
     def __del__(self):
@@ -252,50 +251,3 @@ class PayneFreeRigSuite:
         endTxt += '='*40
         endTxt += '\n\n'
         log.info(endTxt)
-
-# #============= SCENE ============================
-
-#     def InitScene(self):
-#         self.logger.debug('\tPFRS > InitScene')
-#         roots = self.rootMng.GetSceneRoots()
-#         if roots:
-#             self.root = roots[0]
-#             self.LoadScene()
-#             self.LoadRoot()
-#         else:
-#             self.NewScene()
-#             self.NewRoot('PFX', range(5), True)
-#         self.meshMng.InitSceneMeshes()
-#         self.jntMng.InitSceneJoints()
-
-#     def NewScene(self):
-#         self.logger.debug('\tPFRS > NewScene')
-#         self.ctrMng.NewScene()
-#         self.jntMng.NewScene()
-#         self.meshMng.NewScene()
-
-#     def LoadScene(self):
-#         self.logger.debug('\tPFRS > LoadScene')
-#         self.ctrMng.LoadScene()
-#         self.jntMng.LoadScene()
-#         self.meshMng.LoadScene()
-
-# #============= ROOT ============================
-
-#     def NewRoot(self, rootName, nameOrder, showRootName):
-#         self.logger.debug('\tPFRS > NewRoot')
-#         self.root = self.rootMng.AddRoot(rootName, nameOrder, showRootName)
-#         self.limbMng.NewRoot()
-#         self.jntMng.NewRoot()
-#         self.meshMng.NewRoot()
-
-#     def LoadRoot(self):
-#         self.logger.debug('\tPFRS > LoadRoot')
-#         self.limbMng.LoadRoot()
-#         self.jntMng.LoadRoot()
-#         self.meshMng.LoadRoot()
-#         self.posMng.InitPoses()
-
-#     def UpdateNames(self):
-#         self.logger.debug('\tPFRS > UpdateNames')
-#         self.rootMng.UpdateRootName(self.root)

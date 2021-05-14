@@ -10,7 +10,118 @@ import Data.Rig_Data as rigData
 reload(rigData)
 
 # !!! Functions used ACROSS MULTIPLE OPERATIONS !!!
+class Joint:
+    @staticmethod
+    def _HasSibling(joint):
+        parent = pm.listRelatives(joint, p=1, type='joint')
+        if not parent:
+            return False
+        children = pm.listRelatives(parent, c=1, type='joint')
+        return (len(children) > 1)
+        
+    @staticmethod
+    def _RoundVector(vec):
+        newVec = []
+        for i in range(3):
+            newVec.append(round(vec[i], 5))
+        return newVec
 
+    @staticmethod
+    def _GetJointBranch(startJoint):
+        joints = [startJoint]
+        parent = pm.listRelatives(startJoint, p=1, type='joint')
+        if not parent:
+            return [startJoint]
+        for child in pm.listRelatives(parent[0], c=1, type='joint'):
+            if not pm.listRelatives(child, c=1, type='joint'):
+                if child not in joints:
+                    joints.append(child)
+        return joints
+
+    @staticmethod
+    def _GetLongestJointChain(startJoint):
+        joints = [startJoint]
+        if Joint._HasSibling(startJoint):
+            return joints
+        lastPos = pm.xform(startJoint, q=1, t=1, ws=1)
+        parent = pm.listRelatives(startJoint, p=1, type='joint')
+        for i in range(99):
+            if not parent:
+                break
+            parent = parent[0]
+            curPos = pm.xform(parent, q=1, t=1, ws=1)
+            if Joint._RoundVector(curPos) == Joint._RoundVector(lastPos):
+                break
+            joints.append(parent)
+            if Joint._HasSibling(parent):
+                break
+            parent = pm.listRelatives(parent, p=1, type='joint')
+            lastPos = curPos[:]
+        return joints[::-1]
+
+    @staticmethod
+    def _AreJointsSiblings(joints):
+        isBranch = True
+        parent1 = pm.listRelatives(joints[0], p=1, type='joint')
+        for joint in joints[1:]:
+            parent2 = pm.listRelatives(joint, p=1, type='joint')
+            if (parent1 != parent2):
+                isBranch = False
+        return isBranch
+    
+    @staticmethod
+    def _AreJointsChained(joints):
+        jointsCopy = Joint._GetSortedJoints(joints)
+        child = jointsCopy[-1]
+        jointsCopy.remove(child)
+        while (jointsCopy):
+            parent = pm.listRelatives(child, p=1, type='joint')
+            if not parent:
+                return False
+            parent = parent[0]
+            if not pm.objectType(parent, isa='joint'):
+                return False
+            if parent in jointsCopy:
+                jointsCopy.remove(parent)
+            child = parent
+        return True
+
+    @staticmethod
+    def _HasSibling(joint):
+        parent = pm.listRelatives(joint, p=1, type='joint')
+        if not parent:
+            return False
+        children = pm.listRelatives(parent, c=1, type='joint')
+        return (len(children) > 1)
+    
+    @staticmethod
+    def _GetCompleteJointChain(joints):
+        sortedJoints = Joint._GetSortedJoints(joints)
+        parent = sortedJoints[-1]
+        rootParent = sortedJoints[0]
+        jointChain = [parent]
+        while(parent != rootParent):
+            parent = pm.listRelatives(parent, p=1, type='joint')[0]
+            jointChain.append(parent)
+        return jointChain
+
+    @staticmethod
+    def _GetSortedJoints(joints):
+        temp = {}
+        for joint in joints:
+            temp[joint.longName()] = joint
+        return [temp[n] for n in sorted(list(temp.keys()))]
+
+    @staticmethod
+    def _AreJointsDisconnected(joints):
+        if Joint._AreJointsChained(joints):
+            joints = Joint._GetCompleteJointChain(joints)
+        for joint in joints:
+            if joint.hasAttr('limb') and pm.listConnections(joint.limb):
+                return False
+        return True
+
+    
 #=========== LAYERS ====================================
 
 def SetLayerState(layerName, isVisible, isReference):

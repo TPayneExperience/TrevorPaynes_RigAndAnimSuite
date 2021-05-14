@@ -230,7 +230,8 @@ class Behavior_Manager(object):
 
     def _Setup_ControlPivot(self, limb):
         log.funcFileDebug()
-        bhv = self.bhvs[limb.bhvFile.get()]
+        bhvFile = limb.bhvFile.get()
+        bhv = self.bhvs[bhvFile]
         if bhv.groupMoveable:
             for group in pm.listConnections(limb.usedGroups):
                 control = pm.listConnections(group.control)[0]

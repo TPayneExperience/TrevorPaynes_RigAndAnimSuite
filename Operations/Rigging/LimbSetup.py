@@ -1,4 +1,8 @@
 
+import inspect
+import os
+import sys
+
 import pymel.core as pm
 
 import Abstracts.Abstract_Operation as absOp
@@ -15,6 +19,10 @@ import SceneData.RigRoot as rrt
 reload(rrt)
 import Common.Rig_Utilities as rigUtil
 reload(rigUtil)
+# import Operations.Rigging.Autobuild as auto
+# reload(auto)
+import Abstracts.Abstract_Autobuild as absBld
+reload(absBld)
 
 class LimbSetup(absOp.Abstract_Operation):
     isRigBuilt = False
@@ -26,7 +34,48 @@ class LimbSetup(absOp.Abstract_Operation):
                         'Y': (1,-1,1),
                         'Z': (1,1,-1)}
 
+    def InitAutobuilders(self):
+        log.funcFileDebug()
+        self._autobuilders = {} # uiName : class instance
+        folder = os.path.dirname(__file__)
+        folder = os.path.join(folder, 'Autobuild')
+        for buildFile in os.listdir(folder):
+            if '__init__.py' in buildFile:
+                continue
+            fileName = os.path.splitext(buildFile)[0]
+            moduleName = 'Operations.Rigging.Autobuild.%s' % fileName
+            exec('import %s' % moduleName)
+            exec('reload (%s)' % moduleName)
+            module = sys.modules[moduleName]
+            for name, obj in inspect.getmembers(module):
+                if inspect.isclass(obj):
+                    if issubclass(obj, absBld.Abstract_Autobuild):
+                        uiName = obj.uiName
+                        if uiName not in self._autobuilders:
+                            inst = obj()
+                            self._autobuilders[uiName] = inst
+                            fName = 'Autobuild%s' % name
+                            setattr(self, fName, inst.Execute) #Untested
+    
+    def Autobuild(self, rigRoot, autobuilder):
+        limbs = autobuilder.Execute(rigRoot)
+        for limb in limbs:
+            self._InitBehavior(rigRoot, limb)
+        self._LoadSkeletalHierarchy(rigRoot)
+        
 #============= LIMBS ============================
+
+    def GetLimbFuncForJoints(self, joints):
+        if (len(joints) == 1):
+            return lmb.Limb.AddOneJointBranch
+        elif rigUtil.Joint._AreJointsSiblings(joints):
+            return lmb.Limb.AddTwoJointBranch
+        elif rigUtil.Joint._AreJointsChained(joints):
+            if (len(joints) == 2):
+                return lmb.Limb.AddTwoJointChain
+            else:
+                return lmb.Limb.AddThreeJointChain
+        return None
 
     def AddJointLimb(self, rigRoot, joints):
         if not joints or type(joints) != list:
@@ -34,9 +83,9 @@ class LimbSetup(absOp.Abstract_Operation):
         for joint in joints:
             if pm.objectType(joint) != 'joint':
                 raise ValueError('Please pass in LIST of JOINTS')
-        if not self._AreJointsDisconnected(joints):
+        if not rigUtil.Joint._AreJointsDisconnected(joints):
             raise ValueError('Joints must be DISCONNECTED from LIMB')
-        createLimbFunc = self._GetLimbFuncForJoints(joints)
+        createLimbFunc = self.GetLimbFuncForJoints(joints)
         if not createLimbFunc:
             msg = 'Joints must be either chained or siblings'
             msg += ' of same parent'
@@ -292,26 +341,18 @@ class LimbSetup(absOp.Abstract_Operation):
         if not childLimbs:
             return
         childLimb = childLimbs[0]
-        pm.disconnectAttr(childLimb.limbParent)
 
         # Setup Parent joint / connection
         if not parentJoint:
             jointGroup = pm.listConnections(rigRoot.jointsParentGroup)[0]
             pm.parent(childJoint, jointGroup)
+            self.SetupDefaultLimbParent(childLimb)
             return
         pm.parent(childJoint, parentJoint)
-        if not parentJoint.hasAttr('limb'):
-            return
-        parentLimbs = pm.listConnections(parentJoint.limb)
-        if not parentLimbs:
-            return
-        parentLimb = parentLimbs[0]
-        if childLimb == parentLimb:
-            return
-            
+        self.SetupDefaultLimbParent(childLimb)
         # Reparent limb
-        if not self._IsChildAParent(childLimb, parentLimb):
-            self._ReparentLimb(childLimb, parentLimb)
+        # if not self._IsChildAParent(childLimb, parentLimb):
+        #     self._ReparentLimb(childLimb, parentLimb)
 
 #============= MISC ============================
 
@@ -417,287 +458,342 @@ class LimbSetup(absOp.Abstract_Operation):
         for childLimb in pm.listConnections(limb.limbChildren):
             self._UpdateParentControlEnum(childLimb)
 
-    def _AreJointsDisconnected(self, joints):
-        log.funcFileDebug()
-        if self._AreJointsChained(joints):
-            joints = self._GetCompleteJointChain(joints)
-        for joint in joints:
-            if joint.hasAttr('limb') and pm.listConnections(joint.limb):
-                return False
-        return True
+    # def _AreJointsDisconnected(self, joints):
+    #     log.funcFileDebug()
+    #     if self._AreJointsChained(joints):
+    #         joints = self._GetCompleteJointChain(joints)
+    #     for joint in joints:
+    #         if joint.hasAttr('limb') and pm.listConnections(joint.limb):
+    #             return False
+    #     return True
 
-    def _AreJointsSiblings(self, joints):
-        log.funcFileDebug()
-        isBranch = True
-        parent1 = pm.listRelatives(joints[0], p=1, type='joint')
-        for joint in joints[1:]:
-            parent2 = pm.listRelatives(joint, p=1, type='joint')
-            if (parent1 != parent2):
-                isBranch = False
-        return isBranch
+    # def _AreJointsSiblings(self, joints):
+    #     log.funcFileDebug()
+    #     isBranch = True
+    #     parent1 = pm.listRelatives(joints[0], p=1, type='joint')
+    #     for joint in joints[1:]:
+    #         parent2 = pm.listRelatives(joint, p=1, type='joint')
+    #         if (parent1 != parent2):
+    #             isBranch = False
+    #     return isBranch
     
-    def _AreJointsChained(self, joints):
-        log.funcFileDebug()
-        jointsCopy = self._GetSortedJoints(joints)
-        child = jointsCopy[-1]
-        jointsCopy.remove(child)
-        while (jointsCopy):
-            parent = pm.listRelatives(child, p=1, type='joint')
-            if not parent:
-                return False
-            parent = parent[0]
-            if not pm.objectType(parent, isa='joint'):
-                return False
-            if parent in jointsCopy:
-                jointsCopy.remove(parent)
-            child = parent
-        return True
+    # def _AreJointsChained(self, joints):
+    #     log.funcFileDebug()
+    #     jointsCopy = self._GetSortedJoints(joints)
+    #     child = jointsCopy[-1]
+    #     jointsCopy.remove(child)
+    #     while (jointsCopy):
+    #         parent = pm.listRelatives(child, p=1, type='joint')
+    #         if not parent:
+    #             return False
+    #         parent = parent[0]
+    #         if not pm.objectType(parent, isa='joint'):
+    #             return False
+    #         if parent in jointsCopy:
+    #             jointsCopy.remove(parent)
+    #         child = parent
+    #     return True
 
-    def _HasSibling(self, joint):
-        log.funcFileDebug()
-        parent = pm.listRelatives(joint, p=1, type='joint')
-        if not parent:
-            return False
-        children = pm.listRelatives(parent, c=1, type='joint')
-        return (len(children) > 1)
-        
+    # def _HasSibling(self, joint):
+    #     log.funcFileDebug()
+    #     parent = pm.listRelatives(joint, p=1, type='joint')
+    #     if not parent:
+    #         return False
+    #     children = pm.listRelatives(parent, c=1, type='joint')
+    #     return (len(children) > 1)
+    
+    def SetupDefaultLimbParent(self, limb):
+        jointGroups = pm.listConnections(limb.jointGroups)
+        jointGroups = rigUtil.SortGroups(jointGroups)
+        joints = [pm.listConnections(g.joint)[0] for g in jointGroups]
+        joint = joints[0]
+        parentLimb = None
+        parentJoints = pm.listRelatives(joint, p=1, type='joint')
+        if parentJoints:
+            parentJoint = parentJoints[0]
+            if parentJoint.hasAttr('limb'):
+                parentLimbs = pm.listConnections(parentJoint.limb)
+                if parentLimbs:
+                    parent = parentLimbs[0]
+                    if limb != parent:
+                        if not self._IsChildAParent(limb, parent):
+                            parentLimb = parent
+        self._ReparentLimb(limb, parentLimb)
+
+    def SetupDefaultLimbChildren(self, limb):
+        joints = pm.listConnections(limb.joints)
+        for joint in joints:
+            childrenJoints = pm.listRelatives(joint, c=1)
+            for childJoint in childrenJoints:
+                if not childJoint.hasAttr('limb'):
+                    continue
+                childLimbs = pm.listConnections(childJoint.limb)
+                if not childLimbs:
+                    continue
+                childLimb = childLimbs[0]
+                if childLimb == limb:
+                    continue
+                pm.disconnectAttr(childLimb.limbParent)
+                pm.connectAttr(limb.limbChildren, childLimb.limbParent)
+
+    def ApplyJointAimUp(self, limb):
+        log.funcFileInfo()
+        # config = self._GetConfig()
+        # aim = config['jointAimAxis']
+        # up = config['jointUpAxis']
+        # MISSING
+
+    def ApplyMirrorAimUp(self, limb):
+        log.funcFileInfo()
+        # config = self._GetConfig()
+        # aim = config['mirrorAimAxis']
+        # up = config['mirrorUpAxis']
+        # mISSING
+
+    def _GetConfig(self):
+        folder = os.path.dirname(__file__)
+        folder = os.path.dirname(folder)
+        folder = os.path.dirname(folder)
+        folder = os.path.join(folder, 'Data')
+        filePath = os.path.join(folder, 'Config.json')
+        return genUtil.Json.Load(filePath)
+
 #============= UTILS ============================
 
-    def _GetLimbFuncForJoints(self, joints):
-        log.funcFileDebug()
-        if (len(joints) == 1):
-            return lmb.Limb.AddOneJointBranch
-        elif self._AreJointsSiblings(joints):
-            return lmb.Limb.AddTwoJointBranch
-        elif self._AreJointsChained(joints):
-            if (len(joints) == 2):
-                return lmb.Limb.AddTwoJointChain
-            else:
-                return lmb.Limb.AddThreeJointChain
-        return None
+    # def _GetLimbFuncForJoints(self, joints):
+    #     log.funcFileDebug()
+    #     if (len(joints) == 1):
+    #         return lmb.Limb.AddOneJointBranch
+    #     elif self._AreJointsSiblings(joints):
+    #         return lmb.Limb.AddTwoJointBranch
+    #     elif self._AreJointsChained(joints):
+    #         if (len(joints) == 2):
+    #             return lmb.Limb.AddTwoJointChain
+    #         else:
+    #             return lmb.Limb.AddThreeJointChain
+    #     return None
 
-    def _GetCompleteJointChain(self, joints):
-        log.funcFileDebug()
-        sortedJoints = self._GetSortedJoints(joints)
-        parent = sortedJoints[-1]
-        rootParent = sortedJoints[0]
-        jointChain = [parent]
-        while(parent != rootParent):
-            parent = pm.listRelatives(parent, p=1, type='joint')[0]
-            jointChain.append(parent)
-        return jointChain
+    # def _GetCompleteJointChain(self, joints):
+    #     log.funcFileDebug()
+    #     sortedJoints = self._GetSortedJoints(joints)
+    #     parent = sortedJoints[-1]
+    #     rootParent = sortedJoints[0]
+    #     jointChain = [parent]
+    #     while(parent != rootParent):
+    #         parent = pm.listRelatives(parent, p=1, type='joint')[0]
+    #         jointChain.append(parent)
+    #     return jointChain
 
-    def _GetSortedJoints(self, joints):
-        log.funcFileDebug()
-        temp = {}
-        for joint in joints:
-            temp[joint.longName()] = joint
-        return [temp[n] for n in sorted(list(temp.keys()))]
+    # def _GetSortedJoints(self, joints):
+    #     log.funcFileDebug()
+    #     temp = {}
+    #     for joint in joints:
+    #         temp[joint.longName()] = joint
+    #     return [temp[n] for n in sorted(list(temp.keys()))]
 
-    def _GetLongestJointChain(self, startJoint):
-        log.funcFileDebug()
-        joints = [startJoint]
-        if self._HasSibling(startJoint):
-            return joints
-        lastPos = pm.xform(startJoint, q=1, t=1, ws=1)
-        parent = pm.listRelatives(startJoint, p=1, type='joint')
-        for i in range(99):
-            if not parent:
-                break
-            parent = parent[0]
-            curPos = pm.xform(parent, q=1, t=1, ws=1)
-            if self._RoundVector(curPos) == self._RoundVector(lastPos):
-                break
-            joints.append(parent)
-            if self._HasSibling(parent):
-                break
-            parent = pm.listRelatives(parent, p=1, type='joint')
-            lastPos = curPos[:]
-        return joints[::-1]
+    # def _GetLongestJointChain(self, startJoint):
+    #     log.funcFileDebug()
+    #     joints = [startJoint]
+    #     if self._HasSibling(startJoint):
+    #         return joints
+    #     lastPos = pm.xform(startJoint, q=1, t=1, ws=1)
+    #     parent = pm.listRelatives(startJoint, p=1, type='joint')
+    #     for i in range(99):
+    #         if not parent:
+    #             break
+    #         parent = parent[0]
+    #         curPos = pm.xform(parent, q=1, t=1, ws=1)
+    #         if self._RoundVector(curPos) == self._RoundVector(lastPos):
+    #             break
+    #         joints.append(parent)
+    #         if self._HasSibling(parent):
+    #             break
+    #         parent = pm.listRelatives(parent, p=1, type='joint')
+    #         lastPos = curPos[:]
+    #     return joints[::-1]
     
-    def _HasSibling(self, joint):
-        log.funcFileDebug()
-        parent = pm.listRelatives(joint, p=1, type='joint')
-        if not parent:
-            return False
-        children = pm.listRelatives(parent, c=1, type='joint')
-        return (len(children) > 1)
+    # def _HasSibling(self, joint):
+    #     log.funcFileDebug()
+    #     parent = pm.listRelatives(joint, p=1, type='joint')
+    #     if not parent:
+    #         return False
+    #     children = pm.listRelatives(parent, c=1, type='joint')
+    #     return (len(children) > 1)
         
-    def _RoundVector(self, vec):
-        newVec = []
-        for i in range(3):
-            newVec.append(round(vec[i], 5))
-        return newVec
+    # def _RoundVector(self, vec):
+    #     newVec = []
+    #     for i in range(3):
+    #         newVec.append(round(vec[i], 5))
+    #     return newVec
 
-    def _GetJointBranch(self, startJoint):
-        log.funcFileDebug()
-        joints = [startJoint]
-        parent = pm.listRelatives(startJoint, p=1, type='joint')
-        if not parent:
-            return [startJoint]
-        for child in pm.listRelatives(parent[0], c=1, type='joint'):
-            if not pm.listRelatives(child, c=1, type='joint'):
-                if child not in joints:
-                    joints.append(child)
-        return joints
+    # def _GetJointBranch(self, startJoint):
+    #     log.funcFileDebug()
+    #     joints = [startJoint]
+    #     parent = pm.listRelatives(startJoint, p=1, type='joint')
+    #     if not parent:
+    #         return [startJoint]
+    #     for child in pm.listRelatives(parent[0], c=1, type='joint'):
+    #         if not pm.listRelatives(child, c=1, type='joint'):
+    #             if child not in joints:
+    #                 joints.append(child)
+    #     return joints
 
 #============= AUTOBUILD ============================
 
-    def AutoBuildByHierarchy(self, rigRoot):
-        log.funcFileInfo()
-        # Build Joint Parent Dictionary
-        jointParents = {}   # childJoint : parentJoint
-        for joint in pm.ls(type='joint'):
-            parent = pm.listRelatives(joint, parent=1)
-            if parent:
-                jointParents[joint] = parent[0]
-            else:
-                jointParents[joint] = None
-        # Group joints by limb structure: one, chain or branch
-        disconnectJoints = {} # parent : [[j1, j2], [j3], ...]
-        newLimbJointSets = []  # [[jnt1, jnt2], [jnt3], ...]
-        limbTypes = []
-        for i in range(99):
-            children = set(jointParents.keys())
-            parents = set(jointParents.values())
-            # Iterate through all end children,
-            # solving for branches and end chains
-            for child in list(children - parents):
-                if child not in jointParents:
-                    continue
-                # Unparent CHAIN root joint + track
-                joints = self._GetLongestJointChain(child)
+    # def AutoBuildByHierarchy(self, rigRoot):
+    #     log.funcFileInfo()
+    #     # Build Joint Parent Dictionary
+    #     jointParents = {}   # childJoint : parentJoint
+    #     for joint in pm.ls(type='joint'):
+    #         parent = pm.listRelatives(joint, parent=1)
+    #         if parent:
+    #             jointParents[joint] = parent[0]
+    #         else:
+    #             jointParents[joint] = None
+    #     # Group joints by limb structure: one, chain or branch
+    #     disconnectJoints = {} # parent : [[j1, j2], [j3], ...]
+    #     newLimbJointSets = []  # [[jnt1, jnt2], [jnt3], ...]
+    #     limbTypes = []
+    #     for i in range(99):
+    #         children = set(jointParents.keys())
+    #         parents = set(jointParents.values())
+    #         # Iterate through all end children,
+    #         # solving for branches and end chains
+    #         for child in list(children - parents):
+    #             if child not in jointParents:
+    #                 continue
+    #             # Unparent CHAIN root joint + track
+    #             joints = self._GetLongestJointChain(child)
                 
-                if len(joints) >= 3:
-                    limbType = 4
-                elif len(joints) == 2:
-                    limbType = 3
-                else:
-                    joints = self._GetJointBranch(child)
-                    if len(joints) == 1:
-                        limbType = 1
-                    else:
-                        limbType = 2
-                    parent = pm.listRelatives(child, p=1, type='joint')
-                    if parent:
-                        parent = parent[0]
-                        if parent not in disconnectJoints:
-                            disconnectJoints[parent] = []
-                        disconnectJoints[parent] += joints
-                        if len(joints) == 1:
-                            pm.parent(joints[0], w=1)
-                        else:
-                            pm.parent(joints, w=1)
-                newLimbJointSets.append(joints)
-                limbTypes.append(limbType)
-                for joint in joints:
-                    del(jointParents[joint])
-        for parent, children in disconnectJoints.items():
-            pm.parent(children, parent)
-        for i in range(len(newLimbJointSets)):
-            newLimbJoints = newLimbJointSets[i]
-            limbType = limbTypes[i]
-            if limbType == 1:
-                limb = lmb.Limb.AddOneJointBranch(rigRoot, newLimbJoints)
-            elif limbType == 2:
-                limb = lmb.Limb.AddTwoJointBranch(rigRoot, newLimbJoints)
-            elif limbType == 3:
-                limb = lmb.Limb.AddTwoJointChain(rigRoot, newLimbJoints)
-            elif limbType == 4:
-                limb = lmb.Limb.AddThreeJointChain(rigRoot, newLimbJoints)
-            self._InitBehavior(rigRoot, limb)
-        self._LoadSkeletalHierarchy(rigRoot)
+    #             if len(joints) >= 3:
+    #                 limbType = 4
+    #             elif len(joints) == 2:
+    #                 limbType = 3
+    #             else:
+    #                 joints = self._GetJointBranch(child)
+    #                 if len(joints) == 1:
+    #                     limbType = 1
+    #                 else:
+    #                     limbType = 2
+    #                 parent = pm.listRelatives(child, p=1, type='joint')
+    #                 if parent:
+    #                     parent = parent[0]
+    #                     if parent not in disconnectJoints:
+    #                         disconnectJoints[parent] = []
+    #                     disconnectJoints[parent] += joints
+    #                     if len(joints) == 1:
+    #                         pm.parent(joints[0], w=1)
+    #                     else:
+    #                         pm.parent(joints, w=1)
+    #             newLimbJointSets.append(joints)
+    #             limbTypes.append(limbType)
+    #             for joint in joints:
+    #                 del(jointParents[joint])
+    #     for parent, children in disconnectJoints.items():
+    #         pm.parent(children, parent)
+    #     for i in range(len(newLimbJointSets)):
+    #         newLimbJoints = newLimbJointSets[i]
+    #         limbType = limbTypes[i]
+    #         if limbType == 1:
+    #             limb = lmb.Limb.AddOneJointBranch(rigRoot, newLimbJoints)
+    #         elif limbType == 2:
+    #             limb = lmb.Limb.AddTwoJointBranch(rigRoot, newLimbJoints)
+    #         elif limbType == 3:
+    #             limb = lmb.Limb.AddTwoJointChain(rigRoot, newLimbJoints)
+    #         elif limbType == 4:
+    #             limb = lmb.Limb.AddThreeJointChain(rigRoot, newLimbJoints)
+    #         self._InitBehavior(rigRoot, limb)
+    #     self._LoadSkeletalHierarchy(rigRoot)
     
-    def AutoBuildByName(self, rigRoot):
-        log.funcFileInfo()
-        # GROUP JOINTS AND VALIDATE NAMES
-        freeJoints = []
-        for joint in pm.ls(type='joint'):
-            if joint.hasAttr('limb'):
-                if not pm.listConnections(joint.limb):
-                    freeJoints.append(joint)
-            else:
-                freeJoints.append(joint)
-        newLimbs = {} # limbName : jointList
-        for joint in freeJoints:
-            splitName = joint.shortName().split('_')
-            if len(splitName) != 3:
-                msg = 'Joints must be named as "LimbName_Side_JointName"'
-                msg += '\nJoint Misnamed: %s' % joint
-                pm.confirmDialog(   t='Breaking IK Connections!', 
-                                    m=msg, 
-                                    icon='error', 
-                                    b='Ok')
-                return
-            limbSideName = '_'.join(splitName[:-1])
-            if limbSideName not in newLimbs:
-                newLimbs[limbSideName] = []
-            newLimbs[limbSideName].append(joint)
+    # def AutoBuildByName(self, rigRoot):
+    #     log.funcFileInfo()
+    #     # GROUP JOINTS AND VALIDATE NAMES
+    #     freeJoints = []
+    #     for joint in pm.ls(type='joint'):
+    #         if joint.hasAttr('limb'):
+    #             if not pm.listConnections(joint.limb):
+    #                 freeJoints.append(joint)
+    #         else:
+    #             freeJoints.append(joint)
+    #     newLimbs = {} # limbName : jointList
+    #     for joint in freeJoints:
+    #         splitName = joint.shortName().split('_')
+    #         if len(splitName) != 3:
+    #             msg = 'Joints must be named as "LimbName_Side_JointName"'
+    #             msg += '\nJoint Misnamed: %s' % joint
+    #             pm.confirmDialog(   t='Breaking IK Connections!', 
+    #                                 m=msg, 
+    #                                 icon='error', 
+    #                                 b='Ok')
+    #             return
+    #         limbSideName = '_'.join(splitName[:-1])
+    #         if limbSideName not in newLimbs:
+    #             newLimbs[limbSideName] = []
+    #         newLimbs[limbSideName].append(joint)
 
-        # VALIDATE LIMBS
-        limbTypes = {}
-        for limbName, joints in newLimbs.items():
-            newLimbs[limbName] = self._GetSortedJoints(joints)
-            if self._AreJointsSiblings(joints):
-                if len(joints) == 1:
-                    limbTypes[limbName] = 1
-                else:
-                    limbTypes[limbName] = 2
-                continue
-            if self._AreJointsChained(joints):
-                if len(joints) == 2:
-                    limbTypes[limbName] = 3
-                else:
-                    limbTypes[limbName] = 4
-                continue
-            msg = 'Limbs may only have the following joint arrangements:\n'
-            msg += '\n- 1+ joints that are all the immediate children '
-            msg += 'of the same parent [BRANCH]'
-            msg += '\n- 2+ joints that are parented to one another [CHAIN]'
-            msg += '\n--------------------------'
-            msg += '\nLimb = ' + limbName
-            msg += '\nJoints = ' + str(joints)
-            pm.confirmDialog(   t='Limbs ERROR', 
-                                m=msg, 
-                                icon='error', 
-                                b='Ok')
-            return
+    #     # VALIDATE LIMBS
+    #     limbTypes = {}
+    #     for limbName, joints in newLimbs.items():
+    #         newLimbs[limbName] = self._GetSortedJoints(joints)
+    #         if self._AreJointsSiblings(joints):
+    #             if len(joints) == 1:
+    #                 limbTypes[limbName] = 1
+    #             else:
+    #                 limbTypes[limbName] = 2
+    #             continue
+    #         if self._AreJointsChained(joints):
+    #             if len(joints) == 2:
+    #                 limbTypes[limbName] = 3
+    #             else:
+    #                 limbTypes[limbName] = 4
+    #             continue
+    #         msg = 'Limbs may only have the following joint arrangements:\n'
+    #         msg += '\n- 1+ joints that are all the immediate children '
+    #         msg += 'of the same parent [BRANCH]'
+    #         msg += '\n- 2+ joints that are parented to one another [CHAIN]'
+    #         msg += '\n--------------------------'
+    #         msg += '\nLimb = ' + limbName
+    #         msg += '\nJoints = ' + str(joints)
+    #         pm.confirmDialog(   t='Limbs ERROR', 
+    #                             m=msg, 
+    #                             icon='error', 
+    #                             b='Ok')
+    #         return
 
-        # ADD LIMBS
-        allLimbs = {} # pfrsName : limb
-        for indexName, joints in newLimbs.items():
-            tempJoint = joints[0]
-            limbName, side, j = tempJoint.shortName().split('_')
-            pfrsNames = []
-            for joint in joints:
-                splitName = joint.shortName().split('_')
-                pfrsNames.append(splitName[-1])
-            limbType = limbTypes[indexName]
-            if limbType == 1:
-                limb = lmb.Limb.AddOneJointBranch(rigRoot, joints)
-            elif limbType == 2:
-                limb = lmb.Limb.AddTwoJointBranch(rigRoot, joints)
-            elif limbType == 3:
-                limb = lmb.Limb.AddTwoJointChain(rigRoot, joints)
-            elif limbType == 4:
-                limb = lmb.Limb.AddThreeJointChain(rigRoot, joints)
-            for i in range(len(joints)):
-                joint = joints[i]
-                joint.pfrsName.set(pfrsNames[i])
-            limb.pfrsName.set(limbName)
-            if side.upper() == 'L':
-                limb.side.set(1)
-            elif side.upper() == 'R':
-                limb.side.set(2)
-            if limbName in allLimbs:
-                mirror = allLimbs[limbName]
-                pm.connectAttr(limb.mirrorLimb, mirror.mirrorLimb)
-                del(allLimbs[limbName])
-            genUtil.Name.UpdateLimbName(rigRoot, limb)
-            self._InitBehavior(rigRoot, limb)
-            allLimbs[limbName] = limb
-        self._LoadSkeletalHierarchy(rigRoot)
-
+    #     # ADD LIMBS
+    #     allLimbs = {} # pfrsName : limb
+    #     for indexName, joints in newLimbs.items():
+    #         tempJoint = joints[0]
+    #         limbName, side, j = tempJoint.shortName().split('_')
+    #         pfrsNames = []
+    #         for joint in joints:
+    #             splitName = joint.shortName().split('_')
+    #             pfrsNames.append(splitName[-1])
+    #         limbType = limbTypes[indexName]
+    #         if limbType == 1:
+    #             limb = lmb.Limb.AddOneJointBranch(rigRoot, joints)
+    #         elif limbType == 2:
+    #             limb = lmb.Limb.AddTwoJointBranch(rigRoot, joints)
+    #         elif limbType == 3:
+    #             limb = lmb.Limb.AddTwoJointChain(rigRoot, joints)
+    #         elif limbType == 4:
+    #             limb = lmb.Limb.AddThreeJointChain(rigRoot, joints)
+    #         for i in range(len(joints)):
+    #             joint = joints[i]
+    #             joint.pfrsName.set(pfrsNames[i])
+    #         limb.pfrsName.set(limbName)
+    #         if side.upper() == 'L':
+    #             limb.side.set(1)
+    #         elif side.upper() == 'R':
+    #             limb.side.set(2)
+    #         if limbName in allLimbs:
+    #             mirror = allLimbs[limbName]
+    #             pm.connectAttr(limb.mirrorLimb, mirror.mirrorLimb)
+    #             del(allLimbs[limbName])
+    #         genUtil.Name.UpdateLimbName(rigRoot, limb)
+    #         self._InitBehavior(rigRoot, limb)
+    #         allLimbs[limbName] = limb
+    #     self._LoadSkeletalHierarchy(rigRoot)
 
     def _LoadSkeletalHierarchy(self, rigRoot):
         log.funcFileDebug()

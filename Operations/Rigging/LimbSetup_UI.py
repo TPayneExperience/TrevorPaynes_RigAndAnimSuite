@@ -20,6 +20,8 @@ import Popups.LoadTemplates as ldTmp
 reload(ldTmp)
 import Data.Rig_Data as rigData
 reload(rigData)
+import Common.Rig_Utilities as rigUtil
+reload(rigUtil)
 
 class LimbSetup_UI(absOpUI.Abstract_OperationUI):
     uiName = 'Limb Setup'
@@ -34,14 +36,11 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
         self._selectedLimbs = []
 
     def Setup_UI(self, rigRoot, allRigRoots):  # Return nothing, parent should cleanup
+        self.operation.InitAutobuilders()
         self._Setup()
         self._rigRoot = rigRoot
         self._allRigRoots = allRigRoots
         self.Refresh(0)
-        # self.PopulateLimbHier()
-        
-        # self.PopulateSceneHier()
-        # pm.treeView(self.joint_tv, e=1, removeAll=1)
     
     def Teardown_UI(self, rigRoot, allRigRoots):
         pass
@@ -58,13 +57,17 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
                 with pm.popupMenu():
                     pm.menuItem(l='Refresh', c=self.Refresh)
                     self.buildHier_mi = pm.menuItem(l='Joint Tool',
-                                            c=pm.Callback(self.operation.JointTool)) 
-                    msg1 = 'Autobuild by JOINT HIERARCHY'
-                    msg2 = 'Autobuild by JOINT NAMES: [limb]_[L/M/R]_[joint]'
-                    self.buildHier_mi = pm.menuItem(l=msg1, en=0, 
-                                                    c=self.AutoBuildByHierarchy)
-                    self.buildNames_mi = pm.menuItem(l=msg2, en=0, 
-                                                    c=self.AutoBuildByName)
+                                            c=pm.Callback(self.operation.JointTool))
+                    self.add_mi = pm.menuItem(l='Add Joint Limb', 
+                                            en=0, c=self.AddJointLimb)
+                    pm.menuItem(l='AUTOBUILD LIMBS', d=1)
+                    order = {}
+                    for name, bld in self.operation._autobuilders.items():
+                        order[bld.orderIndex] = name
+                    for orderIndex in sorted(list(order.keys())):
+                        name = order[orderIndex]
+                        bld = self.operation._autobuilders[name]
+                        pm.menuItem(l=name, c=pm.Callback(self._Build, bld))
         with pm.verticalLayout():
             with pm.frameLayout('Limbs', bv=1):
                 tt = 'Double click to RENAME.'
@@ -74,10 +77,14 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
                 pm.treeView(self.limb_tv, e=1, scc=self.SelectedLimb,   
                                                 elc=self.RenameLimb)
                 with pm.popupMenu():
-                    self.add_mi = pm.menuItem(l='Add Joint Limb', 
-                                            en=0, c=self.AddJointLimb)
+                    # self.add_mi = pm.menuItem(l='Add Joint Limb', 
+                    #                         en=0, c=self.AddJointLimb)
                     self.flipSides_mi = pm.menuItem(l='Flip Sides', 
                                             en=0, c=self.FlipSides)
+                    ann = 'From User Settings (Edit > User Settings)'
+                    self.aimUp_mi = pm.menuItem(l='Apply Joint Aim + Up', 
+                                            en=0, ann=ann, 
+                                            c=self.ApplyJointAimUp)
                     pm.menuItem(d=1)
                     self.duplicate_mi = pm.menuItem(l='Duplicate Limbs', 
                                             en=0, c=self.DuplicateLimbs)
@@ -88,6 +95,10 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
                                     c=pm.Callback(self.MirrorLimbs, 'Y'))
                         pm.menuItem(l='Z Axis', 
                                     c=pm.Callback(self.MirrorLimbs, 'Z'))
+                    with pm.subMenuItem(l='Joint Rotation Order', en=0) as self.jro_mi:
+                        for i in range(6):
+                            rotOrder = rigData.JOINT_ROT_ORDER[i]
+                            pm.menuItem(l=rotOrder, c=pm.Callback(self.JointRotOrder, i))
                     pm.menuItem(d=1)
                     self.loadTemp_mi = pm.menuItem(l='Load Template', 
                                             c=self.LoadTemplate)
@@ -127,9 +138,9 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
             # if joint not in limbJoints:
             #     self.selectableJoints.append(longName)
             pm.treeView(self.scene_tv, e=1, dl=(longName, joint.shortName()))
-        hasJoints = bool(self.allJoints)
-        pm.menuItem(self.buildHier_mi, e=1, en=hasJoints)
-        pm.menuItem(self.buildNames_mi, e=1, en=hasJoints)
+        # hasJoints = bool(self.allJoints)
+        # pm.menuItem(self.buildHier_mi, e=1, en=hasJoints)
+        # pm.menuItem(self.buildNames_mi, e=1, en=hasJoints)
 
         totalJoints = pm.ls(type='joint')
         usedCount = 0
@@ -146,16 +157,23 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
         self.PopulateLimbHier()
         self.PopulateJointHier(None)
 
-    def AutoBuildByHierarchy(self, ignore):
-        log.funcFileInfo()
-        self.operation.AutoBuildByHierarchy(self._rigRoot)
-        self.PopulateSceneHier()
-        self.PopulateLimbHier()
-        self.PopulateJointHier(None)
+    # def AutoBuildByHierarchy(self, ignore):
+    #     log.funcFileInfo()
+    #     self.operation.AutoBuildByHierarchy(self._rigRoot)
+    #     self.PopulateSceneHier()
+    #     self.PopulateLimbHier()
+    #     self.PopulateJointHier(None)
 
-    def AutoBuildByName(self, ignore):
+    # def AutoBuildByName(self, ignore):
+    #     log.funcFileInfo()
+    #     self.operation.AutoBuildByName(self._rigRoot)
+    #     self.PopulateSceneHier()
+    #     self.PopulateLimbHier()
+    #     self.PopulateJointHier(None)
+
+    def _Build(self, autobuilder):
         log.funcFileInfo()
-        self.operation.AutoBuildByName(self._rigRoot)
+        self.operation.Autobuild(self._rigRoot, autobuilder)
         self.PopulateSceneHier()
         self.PopulateLimbHier()
         self.PopulateJointHier(None)
@@ -170,12 +188,12 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
     
     def SelectedSceneJoints(self):
         log.funcFileInfo()
-        selJoints = self.GetSelectedSceneJoints()
-        limbJoints = set()
+        self._selectedSceneJoints = self.GetSelectedSceneJoints()
 
         # Get all limb joints
-        for selJoint in selJoints:
-            log.debug('\t\t' + str(selJoint))
+        limbJoints = set()
+        for selJoint in self._selectedSceneJoints:
+            log.info('\t\t' + str(selJoint))
             if not selJoint.hasAttr('limb'):
                 continue
             limbs = pm.listConnections(selJoint.limb)
@@ -194,9 +212,8 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
                                             orc=(ln, 0, 1, 0))
 
         # Select + store selected joints
-        if selJoints:
-            pm.select(selJoints)
-            self._selectedSceneJoints = selJoints
+        if self._selectedSceneJoints:
+            pm.select(self._selectedSceneJoints)
             self.EvaluateSceneJoints()
         else:
             pm.select(d=1)
@@ -214,9 +231,9 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
         self._limbFunc = None
         if not self._selectedSceneJoints:
             return 
-        if not self.operation._AreJointsDisconnected(self._selectedSceneJoints):
+        if not rigUtil.Joint._AreJointsDisconnected(self._selectedSceneJoints):
             return
-        self._limbFunc = self.operation._GetLimbFuncForJoints(self._selectedSceneJoints)
+        self._limbFunc = self.operation.GetLimbFuncForJoints(self._selectedSceneJoints)
         b = bool(self._limbFunc)
         pm.menuItem(self.add_mi, e=1, en=b)
 
@@ -258,6 +275,7 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
         pm.menuItem(self.flipSides_mi, e=1, en=0)
         pm.menuItem(self.duplicate_mi, e=1, en=0)
         pm.menuItem(self.mirror_mi, e=1, en=0)
+        pm.menuItem(self.jro_mi, e=1, en=0)
         pm.menuItem(self.saveTemp_mi, e=1, en=0)
         self._selectedLimbs = None
         self.PopulateJointHier(None)
@@ -266,6 +284,7 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
         pm.menuItem(self.mirror_mi, e=1, en=1)
         pm.menuItem(self.duplicate_mi, e=1, en=1)
         pm.menuItem(self.saveTemp_mi, e=1, en=1)
+        pm.menuItem(self.jro_mi, e=1, en=1)
         self._selectedLimbs = [self._limbIDs[ID] for ID in limbIDStrs]
         for limb in self._selectedLimbs:
             log.debug('\t\t' + limb.pfrsName.get())
@@ -281,8 +300,20 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
 
     def AddJointLimb(self, ignore):
         log.funcFileInfo()
+        result = pm.promptDialog(
+                title='Add Joint Limb',
+                message='Limb Name:',
+                button=['OK', 'Cancel'],
+                defaultButton='OK',
+                cancelButton='Cancel',
+                dismissString='Cancel')
+        if result != 'OK':
+            return
+        limbName = pm.promptDialog(q=1, tx=1)
         limb = self._limbFunc(self._rigRoot, self._selectedSceneJoints)
         self.operation._InitBehavior(self._rigRoot, limb)
+        self.operation.RenameLimb(limb, limbName)
+        self.operation.SetupDefaultLimbParent(limb)
         self.PopulateLimbHier(limb)
         self.PopulateJointHier(limb)
         self.PopulateSceneHier()
@@ -300,6 +331,12 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
         self.PopulateLimbHier()
         self.PopulateSceneHier()
         self.PopulateJointHier(None)
+
+    def JointRotOrder(self, index):
+        log.funcFileInfo()
+        for limb in self._selectedLimbs:
+            for joint in pm.listConnections(limb.joints):
+                joint.rotateOrder.set(index)
 
     def SaveTemplate(self, ignore):
         log.funcFileInfo()
@@ -390,6 +427,10 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
         self.operation.FlipSides(limb)
         self.PopulateLimbHier(limb)
         self.PopulateJointHier(limb)
+
+    def ApplyJointAimUp(self, ignore):
+        log.funcFileInfo()
+        
 
 #=========== JOINT HIER ====================================
 

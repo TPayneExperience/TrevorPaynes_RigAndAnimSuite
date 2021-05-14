@@ -307,7 +307,7 @@ class RIG_Behavior_UI(absOpUI.Abstract_OperationUI):
                 index += 1
             if bhvType == limbBhvType:
                 pm.optionMenu(self.bhvType_om, e=1, sl=index)
-        self._currentBhv = bhvMng.bhvs[bhvFile]
+        self._currentBhv = self.operation.bhvMng.bhvs[bhvFile]
 
     def SetBhvType(self, bhvType):
         log.funcFileInfo()
