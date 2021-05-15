@@ -12,55 +12,40 @@ reload(genUtil)
 
 class Preset:
     @staticmethod
-    def Add(presetName, rigRoot, limbs):
+    def Add(rigRoot, limbs, presetName):
         log.funcFileDebug()
-        hide = genData.HIDE_ATTRS
-        presetParent = pm.createNode('network')
-        pm.addAttr(presetParent, ln='limbPresets', dt='string', h=hide)
-        pm.addAttr(presetParent, ln='presetName', dt='string', h=hide)
-        pm.addAttr(presetParent, ln='rigRoot', dt='string', h=hide)
-        presetParent.presetName.set(presetName)
+        presetID = rigRoot.nextPresetID.get()
+        rigRoot.nextPresetID.set(presetID + 1)
         for limb in limbs:
-            preset = Preset._AddLimbPreset(limb)
-            pm.connectAttr(presetParent.limbPresets, preset.presetParent)
-        pm.connectAttr(rigRoot.presets, presetParent.rigRoot)
-        return presetParent
+            preset = Preset._AddPreset(limb)
+            Preset._CopyLimbToPreset(limb, preset)
+            preset.ID.set(presetID)
+            preset.presetName.set(presetName)
+            pm.connectAttr(rigRoot.presets, preset.rigRoot)
+        return presetID
 
     @staticmethod
     def Remove(preset):
         log.funcFileDebug()
-        # pm.delete(rigRoot)
+        pm.delete(preset)
 
     @staticmethod
-    def _AddLimbPreset(limb):
+    def _AddPreset(limb):
         log.funcFileDebug()
         name = 'LimbPreset_%s_#' % limb.pfrsName.get()
-        limbPreset = pm.createNode('network', n=name)
-        genUtil.AbstractInitializer(limbPreset, 'LimbPreset')
-
-        # Copy Values
-        pm.connectAttr(limb.presets, limbPreset.limb)
-        limbPreset.bhvFile.set(limb.bhvFile.get())
-        limbPreset.enableLimb.set(limb.enableLimb.get())
-        limbPreset.limbParentJoint.set(limb.limbParentJoint.get())
-
-        # Connect parent
+        preset = pm.createNode('network', n=name)
+        genUtil.AbstractInitializer(preset, 'Preset')
+        pm.connectAttr(limb.presets, preset.limb)
+        return preset
+    
+    @staticmethod
+    def _CopyLimbToPreset(limb, preset):
+        preset.bhvFile.set(limb.bhvFile.get())
+        preset.enableLimb.set(limb.enableLimb.get())
+        preset.limbParentJoint.set(limb.limbParentJoint.get())
         limbParent = pm.listConnections(limb.limbParent)
         if limbParent:
-            pm.connectAttr(limbParent[0].presets, limbPreset.limbParent)
-
-        return limbPreset
-
-
-
-
-
-
-
-
-
-
-
-
+            parent = limbParent[0]
+            pm.connectAttr(parent.presetLimbChildren, preset.limbParent)
 
 

@@ -50,6 +50,7 @@ class InitRigRoot(absInit.Abstract_Initializer):
 
         # IDS
         pm.addAttr(rigRoot, ln='nextLimbID', at='short', dv=1, h=hide)
+        pm.addAttr(rigRoot, ln='nextPresetID', at='short', dv=1, h=hide)
         pm.addAttr(rigRoot, ln='nextJointID', at='short', dv=1, h=hide)
         pm.addAttr(rigRoot, ln='nextMeshID', at='short', dv=1, h=hide)
 

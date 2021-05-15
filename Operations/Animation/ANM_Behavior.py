@@ -17,11 +17,12 @@ class ANM_Behavior(absOp.Abstract_Operation):
     def __init__(self):
         self._rigBhv = rigBhv.RIG_Behavior()
 
-    def ApplyPreset(self, preset, keyframesOnly=True):
+    def ApplyPreset(self, rigRoot, presetID, keyframesOnly=True):
         log.funcFileDebug()
-        rigRoot = pm.listConnections(preset.rigRoot)[0]
-        limbPresets = pm.listConnections(preset.limbPresets)
-        limbs = [pm.listConnections(lp.limb)[0] for lp in limbPresets]
+        self._rigBhv.bhvMng = self.bhvMng
+        allPresets = pm.listConnections(rigRoot.presets)
+        presets = [p for p in allPresets if p.ID.get() == presetID]
+        limbs = [pm.listConnections(p.limb)[0] for p in presets]
         start = int(pm.playbackOptions(q=1, ast=1))
         end = int(pm.playbackOptions(q=1, aet=1))
         
@@ -47,18 +48,18 @@ class ANM_Behavior(absOp.Abstract_Operation):
 
         # Assign new Behaviors + new parents
         log.debug('Assign New Behaviors')
-        for limbPreset in limbPresets:
-            limb = pm.listConnections(limbPreset.limb)[0]
+        for preset in presets:
+            limb = pm.listConnections(preset.limb)[0]
             limb.bakeInternal.set(False)
             limb.bakeExternal.set(False)
-            if self._rigBhv._ApplyLimbPreset_Bhv(limbPreset):
+            if self._rigBhv._ApplyLimbPreset_Bhv(preset):
                 if limb.hasKeys.get():
                     limb.bakeInternal.set(True)
                     limb.bakeExternal.set(True)
         log.debug('Assign New Parents')
-        for limbPreset in limbPresets:
-            limb = pm.listConnections(limbPreset.limb)[0]
-            if self._rigBhv._ApplyLimbPreset_Parent(limbPreset):
+        for preset in presets:
+            limb = pm.listConnections(preset.limb)[0]
+            if self._rigBhv._ApplyLimbPreset_Parent(preset):
                 if limb.hasKeys.get():
                     limb.bakeExternal.set(True)
 

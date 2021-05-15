@@ -52,48 +52,45 @@ class RIG_Behavior(absOp.Abstract_Operation):
     
 #=========== PRESETS ====================================
 
-    def SavePreset(self, presetName, rigRoot, limbs):
+    def SavePreset(self, rigRoot, limbs, presetName):
         log.funcFileDebug()
-        preset = pst.Preset.Add(presetName, rigRoot, limbs)
-        self._UpdatePresetName(preset, rigRoot)
-        return preset
+        return pst.Preset.Add(rigRoot, limbs, presetName)
 
-    def ApplyPreset(self, preset):
+    def ApplyPreset(self, rigRoot, presetID):
         log.funcFileDebug()
-        for limbPreset in pm.listConnections(preset.limbPresets):
-            self._ApplyLimbPreset_Bhv(limbPreset)
-            self._ApplyLimbPreset_Parent(limbPreset)
-            self._ApplyLimbPreset_Enable(limbPreset)
+        allPresets = pm.listConnections(rigRoot.presets)
+        presets = [p for p in allPresets if p.ID.get() == presetID]
+        for preset in presets:
+            self._ApplyLimbPreset_Bhv(preset)
+            self._ApplyLimbPreset_Parent(preset)
+            self._ApplyLimbPreset_Enable(preset)
 
-    def DeletePreset(self, preset):
+    def DeletePreset(self, rigRoot, presetID):
         log.funcFileDebug()
-        limbPresets = pm.listConnections(preset.limbPresets)
-        pm.delete(preset)
-        pm.delete(limbPresets)
+        allPresets = pm.listConnections(rigRoot.presets)
+        presets = [p for p in allPresets if p.ID.get() == presetID]
+        for preset in presets:
+            pst.Preset.Remove(preset)
     
-    def RenamePreset(self, preset, newName, rigRoot):
+    def RenamePreset(self, rigRoot, presetID, newName):
         log.funcFileDebug()
-        preset.presetName.set(newName)
-        self._UpdatePresetName(preset, rigRoot)
+        allPresets = pm.listConnections(rigRoot.presets)
+        presets = [p for p in allPresets if p.ID.get() == presetID]
+        for preset in presets:
+            preset.presetName.set(newName)
 
-    def _UpdatePresetName(self, preset, rigRoot):
-        presetName = preset.presetName.get()
-        name = '%s_%s_Preset_#' % (rigRoot.pfrsName.get(), presetName)
-        preset.rename(name)
-
-    def _ApplyLimbPreset_Bhv(self, limbPreset):
-        limb = pm.listConnections(limbPreset.limb)[0]
-        # Check Behavior
-        newBhvFile = limbPreset.bhvFile.get()
+    def _ApplyLimbPreset_Bhv(self, preset):
+        limb = pm.listConnections(preset.limb)[0]
+        newBhvFile = preset.bhvFile.get()
         oldBhvFile = limb.bhvFile.get()
         if oldBhvFile != newBhvFile:
             self.SetLimbBehaviorFile(limb, newBhvFile)
         return oldBhvFile != newBhvFile
     
-    def _ApplyLimbPreset_Parent(self, limbPreset):
-        limb = pm.listConnections(limbPreset.limb)[0]
+    def _ApplyLimbPreset_Parent(self, preset):
+        limb = pm.listConnections(preset.limb)[0]
         oldLimbParent = pm.listConnections(limb.limbParent)
-        newLimbParent = pm.listConnections(limbPreset.limbParent)
+        newLimbParent = pm.listConnections(preset.limbParent)
         parentChanged = False
         if oldLimbParent != newLimbParent:
             parentChanged = True
@@ -103,38 +100,19 @@ class RIG_Behavior(absOp.Abstract_Operation):
                 self.ReparentLimb(limb, None)
             self._ls._UpdateParentControlEnum(limb)
         oldIndex = limb.limbParentJoint.get()
-        newIndex = limbPreset.limbParentJoint.get()
+        newIndex = preset.limbParentJoint.get()
         if oldIndex != newLimbParent:
             parentChanged = True
             limb.limbParentJoint.set(newIndex)
         return parentChanged
         
-    def _ApplyLimbPreset_Enable(self, limbPreset):
-        limb = pm.listConnections(limbPreset.limb)[0]
+    def _ApplyLimbPreset_Enable(self, preset):
+        limb = pm.listConnections(preset.limb)[0]
         oldEnable = limb.enableLimb.get()
-        newEnable = limbPreset.enableLimb.get()
+        newEnable = preset.enableLimb.get()
         if oldEnable != newEnable:
             limb.enableLimb.set(newEnable)
         return oldEnable != newEnable
-
-    # def _ApplyLimbPreset(self, limbPreset):
-    #     limb = pm.listConnections(limbPreset.limb)[0]
-    #     # Check Behavior
-    #     newBhvFile = limbPreset.bhvFile.get()
-    #     oldBhvFile = limb.bhvFile.get()
-    #     if oldBhvFile != newBhvFile:
-    #         self.SetLimbBehaviorFile(limb, newBhvFile)
-    #     # Check Parent
-    #     oldLimbParent = pm.listConnections(limb.limbParent)
-    #     newLimbParent = pm.listConnections(limbPreset.limbParent)
-    #     if oldLimbParent != newLimbParent:
-    #         if newLimbParent:
-    #             self.ReparentLimb(limb, newLimbParent[0])
-    #         else:
-    #             self.ReparentLimb(limb, None)
-    #         self._ls._UpdateParentControlEnum(limb)
-    #     limb.limbParentJoint.set(limbPreset.limbParentJoint.get())
-    #     limb.enableLimb.set(limbPreset.enableLimb.get())
 
 #=========== MISC ====================================
 

@@ -50,10 +50,9 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
     def _Setup(self):
         with pm.verticalLayout():
             with pm.frameLayout(l='---', bv=1) as self.sceneHier_fl:
-                self.scene_tv = pm.treeView(#adr=0, # sc=self.IsSceneJointSelectable, 
-                                                scc=self.SelectedSceneJoints,
-                                                dad=self.ReparentJoint,
-                                                elc=self.IgnoreRename)
+                self.scene_tv = pm.treeView(scc=self.SelectedSceneJoints,
+                                            dad=self.ReparentJoint,
+                                            elc=self.IgnoreRename)
                 with pm.popupMenu():
                     pm.menuItem(l='Refresh', c=self.Refresh)
                     self.buildHier_mi = pm.menuItem(l='Joint Tool',
@@ -77,34 +76,41 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
                 pm.treeView(self.limb_tv, e=1, scc=self.SelectedLimb,   
                                                 elc=self.RenameLimb)
                 with pm.popupMenu():
-                    # self.add_mi = pm.menuItem(l='Add Joint Limb', 
-                    #                         en=0, c=self.AddJointLimb)
-                    self.flipSides_mi = pm.menuItem(l='Flip Sides', 
-                                            en=0, c=self.FlipSides)
-                    ann = 'From User Settings (Edit > User Settings)'
-                    self.aimUp_mi = pm.menuItem(l='Apply Joint Aim + Up', 
-                                            en=0, ann=ann, 
-                                            c=self.ApplyJointAimUp)
-                    pm.menuItem(d=1)
-                    self.duplicate_mi = pm.menuItem(l='Duplicate Limbs', 
-                                            en=0, c=self.DuplicateLimbs)
-                    with pm.subMenuItem(l='Mirror Limbs', en=0) as self.mirror_mi:
-                        pm.menuItem(l='X Axis', 
-                                    c=pm.Callback(self.MirrorLimbs, 'X'))
-                        pm.menuItem(l='Y Axis', 
-                                    c=pm.Callback(self.MirrorLimbs, 'Y'))
-                        pm.menuItem(l='Z Axis', 
-                                    c=pm.Callback(self.MirrorLimbs, 'Z'))
+                    pm.menuItem(l='EDIT LIMB JOINTS', d=1)
                     with pm.subMenuItem(l='Joint Rotation Order', en=0) as self.jro_mi:
                         for i in range(6):
                             rotOrder = rigData.JOINT_ROT_ORDER[i]
                             pm.menuItem(l=rotOrder, c=pm.Callback(self.JointRotOrder, i))
-                    pm.menuItem(d=1)
+                    self.aimUp_mi = pm.menuItem(l='Apply Joint Aim + Up User Settings', 
+                                            en=0, c=self.ApplyJointAimUp)
+                    self.removeRot_mi = pm.menuItem(l='Remove Joint Rotations', 
+                                            en=0,
+                                            c=self.RemoveJointRotations)
+                    pm.menuItem(l='MORE LIMBS!', d=1)
+                    self.duplicate_mi = pm.menuItem(l='Duplicate Limbs', 
+                                            en=0, c=self.DuplicateLimbs)
+                    with pm.subMenuItem(l='Mirror Body Limbs', en=0) as self.mirrorBody_mi:
+                        pm.menuItem(l='X Axis', 
+                                    c=pm.Callback(self.MirrorBodyLimbs, 'X'))
+                        pm.menuItem(l='Y Axis', 
+                                    c=pm.Callback(self.MirrorBodyLimbs, 'Y'))
+                        pm.menuItem(l='Z Axis', 
+                                    c=pm.Callback(self.MirrorBodyLimbs, 'Z'))
+                    with pm.subMenuItem(l='Mirror Face Limbs', en=0) as self.mirrorFace_mi:
+                        pm.menuItem(l='X Axis', 
+                                    c=pm.Callback(self.MirrorFaceLimbs, 'X'))
+                        pm.menuItem(l='Y Axis', 
+                                    c=pm.Callback(self.MirrorFaceLimbs, 'Y'))
+                        pm.menuItem(l='Z Axis', 
+                                    c=pm.Callback(self.MirrorFaceLimbs, 'Z'))
+                    pm.menuItem(l='TEMPLATES', d=1)
                     self.loadTemp_mi = pm.menuItem(l='Load Template', 
                                             c=self.LoadTemplate)
                     self.saveTemp_mi = pm.menuItem(l='Save Template', 
                                             en=0, c=self.SaveTemplate)
-                    pm.menuItem(d=1)
+                    pm.menuItem(l='EDIT LIMBS', d=1)
+                    self.flipSides_mi = pm.menuItem(l='Flip Sides', 
+                                            en=0, c=self.FlipSides)
                     self.remove_mi = pm.menuItem(l='Remove Limbs', 
                                             en=0, c=self.RemoveLimbs)
             with pm.frameLayout(l='---', bv=1, en=0) as self.jntHier_fl:
@@ -157,20 +163,6 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
         self.PopulateLimbHier()
         self.PopulateJointHier(None)
 
-    # def AutoBuildByHierarchy(self, ignore):
-    #     log.funcFileInfo()
-    #     self.operation.AutoBuildByHierarchy(self._rigRoot)
-    #     self.PopulateSceneHier()
-    #     self.PopulateLimbHier()
-    #     self.PopulateJointHier(None)
-
-    # def AutoBuildByName(self, ignore):
-    #     log.funcFileInfo()
-    #     self.operation.AutoBuildByName(self._rigRoot)
-    #     self.PopulateSceneHier()
-    #     self.PopulateLimbHier()
-    #     self.PopulateJointHier(None)
-
     def _Build(self, autobuilder):
         log.funcFileInfo()
         self.operation.Autobuild(self._rigRoot, autobuilder)
@@ -182,10 +174,6 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
         log.funcFileInfo()
         return ''
 
-    # def IsSceneJointSelectable(self, name, state):
-    #     log.funcFileDebug()
-    #     return name in self.selectableJoints
-    
     def SelectedSceneJoints(self):
         log.funcFileInfo()
         self._selectedSceneJoints = self.GetSelectedSceneJoints()
@@ -274,22 +262,29 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
         pm.menuItem(self.remove_mi, e=1, en=0)
         pm.menuItem(self.flipSides_mi, e=1, en=0)
         pm.menuItem(self.duplicate_mi, e=1, en=0)
-        pm.menuItem(self.mirror_mi, e=1, en=0)
+        pm.menuItem(self.mirrorBody_mi, e=1, en=0)
+        pm.menuItem(self.mirrorFace_mi, e=1, en=0)
         pm.menuItem(self.jro_mi, e=1, en=0)
         pm.menuItem(self.saveTemp_mi, e=1, en=0)
+        pm.menuItem(self.aimUp_mi, e=1, en=0)
+        pm.menuItem(self.removeRot_mi, e=1, en=0)
         self._selectedLimbs = None
         self.PopulateJointHier(None)
         if not limbIDStrs:
             return
-        pm.menuItem(self.mirror_mi, e=1, en=1)
+        pm.menuItem(self.mirrorBody_mi, e=1, en=1)
+        pm.menuItem(self.mirrorFace_mi, e=1, en=1)
         pm.menuItem(self.duplicate_mi, e=1, en=1)
         pm.menuItem(self.saveTemp_mi, e=1, en=1)
         pm.menuItem(self.jro_mi, e=1, en=1)
+        pm.menuItem(self.aimUp_mi, e=1, en=1)
+        pm.menuItem(self.removeRot_mi, e=1, en=1)
         self._selectedLimbs = [self._limbIDs[ID] for ID in limbIDStrs]
         for limb in self._selectedLimbs:
             log.debug('\t\t' + limb.pfrsName.get())
             if pm.listConnections(limb.mirrorLimb):
-                pm.menuItem(self.mirror_mi, e=1, en=0)
+                pm.menuItem(self.mirrorBody_mi, e=1, en=0)
+                pm.menuItem(self.mirrorFace_mi, e=1, en=0)
         if len(self._selectedLimbs) == 1:
             limb = self._selectedLimbs[0]
             self.PopulateJointHier(limb)
@@ -325,9 +320,16 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
         self.PopulateSceneHier()
         self.PopulateJointHier(None)
 
-    def MirrorLimbs(self, axis):
+    def MirrorBodyLimbs(self, axis):
         log.funcFileInfo()
-        self.operation.MirrorLimbs(self._selectedLimbs, axis)
+        self.operation.MirrorBodyLimbs(self._selectedLimbs, axis)
+        self.PopulateLimbHier()
+        self.PopulateSceneHier()
+        self.PopulateJointHier(None)
+
+    def MirrorFaceLimbs(self, axis):
+        log.funcFileInfo()
+        self.operation.MirrorFaceLimbs(self._selectedLimbs, axis)
         self.PopulateLimbHier()
         self.PopulateSceneHier()
         self.PopulateJointHier(None)
@@ -364,6 +366,10 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
         self.operation.SaveTemplate(self._rigRoot, 
                                     self._selectedLimbs, 
                                     filePath)
+        
+        self._allRigRoots = genUtil.GetRigRoots()
+        self._rigRoot = self._allRigRoots[0]
+        self.Refresh(0)
 
     def LoadTemplate(self, ignore):
         log.funcFileInfo()
@@ -430,7 +436,12 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
 
     def ApplyJointAimUp(self, ignore):
         log.funcFileInfo()
-        
+        self.operation.ApplyAimUpToLimbJoints(self._selectedLimbs)
+    
+    def RemoveJointRotations(self, ignore):
+        for limb in self._selectedLimbs:
+            for joint in pm.listConnections(limb.joints):
+                self.operation.RemoveJointRotations(joint)
 
 #=========== JOINT HIER ====================================
 

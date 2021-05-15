@@ -23,9 +23,7 @@ class InitConfig(absInit.Abstract_Initializer):
 
                 # Joint Aim/Up axes, rigData.JOINT_AIM_UP_AXES
                 'jointAimAxis': 0,
-                'jointUpAxis': 2, 
-                'mirrorAimAxis': 1,
-                'mirrorUpAxis': 3, 
+                'jointUpAxis': 2,
 
                 # RigRoot naming
                 'showRootName': False,

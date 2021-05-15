@@ -47,13 +47,15 @@ class EditPresets:
         log.funcFileDebug()
         pm.button(self.delete_btn, e=1, en=0)
         pm.treeView(self.widget, e=1, ra=1)
-        self.presets = {}
-        for preset in pm.listConnections(self._rigRoot.presets):
-            name = preset.presetName.get()
-            ID = preset.shortName()
-            pm.treeView(self.widget, e=1, ai=(ID, ''))
-            pm.treeView(self.widget, e=1, dl=(ID, name))
-            self.presets[ID] = preset
+        allPresets = pm.listConnections(self._rigRoot.presets)
+        self.presetIDs = {} # presetID : presetName
+        for preset in allPresets:
+            self.presetIDs[preset.ID.get()] = preset.presetName.get()
+        for presetID in sorted(list(self.presetIDs.keys())):
+            presetName = self.presetIDs[presetID]
+            pm.treeView(self.widget, e=1, ai=(presetID, ''))
+            pm.treeView(self.widget, e=1, dl=(presetID, presetName))
+            # self.presets[ID] = preset
 
     def _SelectionChanged(self):
         log.funcFileDebug()
@@ -65,8 +67,8 @@ class EditPresets:
         log.funcFileDebug()
         if not presetIDStr:
             return ''
-        preset = self.presets[presetIDStr]
-        self._bhvOp.RenamePreset(preset, newName, self._rigRoot)
+        presetID = int(float(presetIDStr))
+        self._bhvOp.RenamePreset(self._rigRoot, presetID, newName)
         self.Populate()
         return ''
 
@@ -74,8 +76,8 @@ class EditPresets:
         log.funcFileDebug()
         presetIDStrs = pm.treeView(self.widget, q=1, selectItem=1)
         msg = 'Delete the following presets?'
-        for ID in presetIDStrs:
-            msg += '\n- %s' % ID
+        for presetID in presetIDStrs:
+            msg += '\n- %s' % self.presetIDs[int(float(presetID))]
         if (pm.confirmDialog(   t='Delete Preset', 
                                 icon='warning', 
                                 message=msg, 
@@ -84,9 +86,8 @@ class EditPresets:
                                 cancelButton='No', 
                                 dismissString='No') == 'No'):
             return
-        for ID in presetIDStrs:
-            preset = self.presets[ID]
-            self._bhvOp.DeletePreset(preset)
+        for presetID in presetIDStrs:
+            self._bhvOp.DeletePreset(self._rigRoot, int(float(presetID)))
         self.Populate()
 
 

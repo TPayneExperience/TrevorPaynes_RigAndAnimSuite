@@ -23,6 +23,8 @@ reload(rigUtil)
 # reload(auto)
 import Abstracts.Abstract_Autobuild as absBld
 reload(absBld)
+import SceneData.Preset as pst
+reload(pst)
 
 class LimbSetup(absOp.Abstract_Operation):
     isRigBuilt = False
@@ -97,6 +99,8 @@ class LimbSetup(absOp.Abstract_Operation):
     def DuplicateLimbs(self, limbs):
         oldNewLimbs = {}
         oldNewJoints = {}
+        oldNewPresetIDs = {}
+        oldNewPresets = {}
         newLimbs = []
         for oldLimb in limbs:
             oldJoints = pm.listConnections(oldLimb.joints)
@@ -133,7 +137,18 @@ class LimbSetup(absOp.Abstract_Operation):
                 pm.parent(group, newLimb)
                 pm.parent(control, group)
             
-            # MISSING NEW PRESET SYSTEM
+            # New Presets
+            for oldPreset in pm.listConnections(oldLimb.presets):
+                oldPresetID = oldPreset.ID.get()
+                if oldPresetID not in oldNewPresetIDs:
+                    ID = rigRoot.nextPresetID.get()
+                    rigRoot.nextPresetID.set(ID + 1)
+                    oldNewPresetIDs[oldPresetID] = ID
+                newPreset = pm.duplicate(oldPreset)[0]
+                newPreset.ID.set(oldNewPresetIDs[oldPresetID])
+                pm.connectAttr(newLimb.presets, newPreset.limb)
+                pm.connectAttr(rigRoot.presets, newPreset.rigRoot)
+                oldNewPresets[oldPreset] = newPreset
 
             # Old Joint Group Teardown
             for group in ojGroups:
@@ -146,7 +161,7 @@ class LimbSetup(absOp.Abstract_Operation):
             self.RenameLimb(newLimb, newLimb.pfrsName.get() + '_Copy')
             newLimbs.append(newLimb)
 
-        # Reparenting
+        # Reparenting Limbs
         for oldLimb, newLimb in oldNewLimbs.items():
             parent = pm.listConnections(oldLimb.limbParent)
             if parent:
@@ -165,15 +180,43 @@ class LimbSetup(absOp.Abstract_Operation):
                 newJoint = oldNewJoints[oldJoint]
                 newParent = oldNewJoints[oldParent]
                 pm.parent(newJoint, newParent)
+
+        # Reparenting presets
+        for oldPreset, newPreset in oldNewPresets.items():
+            oldParents = pm.listConnections(oldPreset.limbParent)
+            if not oldParents:
+                continue
+            oldParent = oldParents[0]
+            if oldParent not in oldNewLimbs:
+                pm.connectAttr( oldParent.presetLimbChildren, 
+                                newPreset.limbParent)
+            else:
+                newParent = oldNewLimbs[oldParent]
+                pm.connectAttr( newParent.presetLimbChildren, 
+                                newPreset.limbParent)
         return newLimbs
 
-    def MirrorLimbs(self, limbs, axisLetter):
-        scale = self.mirrorAxisScales[axisLetter.upper()]
+    def MirrorBodyLimbs(self, limbs, axisLetter):
         newLimbs = self.DuplicateLimbs(limbs)
-        for oldLimb, newLimb in zip(limbs, newLimbs):
+        newJoints = []
+        for newLimb in newLimbs:
+            newJoints += pm.listConnections(newLimb.joints)
+        self._MirrorBodyJoints(newJoints)
+        self._MirrorLimbs(limbs, newLimbs, axisLetter)
+    
+    def MirrorFaceLimbs(self, limbs, axisLetter):
+        newLimbs = self.DuplicateLimbs(limbs)
+        newJoints = []
+        for newLimb in newLimbs:
+            newJoints += pm.listConnections(newLimb.joints)
+        self._MirrorFaceJoints(newJoints)
+        self._MirrorLimbs(limbs, newLimbs, axisLetter)
+
+    def _MirrorLimbs(self, oldLimbs, newLimbs, axisLetter):
+        scale = self.mirrorAxisScales[axisLetter.upper()]
+        for oldLimb, newLimb in zip(oldLimbs, newLimbs):
             self.RenameLimb(newLimb, oldLimb.pfrsName.get())
-            toFlip = pm.listConnections(newLimb.joints)
-            toFlip += pm.listConnections(newLimb.limbGroups)
+            toFlip = pm.listConnections(newLimb.limbGroups)
             toFlip += pm.listConnections(newLimb.jointGroups)
             oldParents = {}
             for joint in toFlip:
@@ -300,7 +343,7 @@ class LimbSetup(absOp.Abstract_Operation):
                                     joints, nr=1)
         pm.editDisplayLayerMembers( rigData.CONTROLS_LAYER, 
                                     controls, nr=1)
-        
+    
 #============= JOINTS ============================
 
     def JointTool(self):
@@ -354,6 +397,147 @@ class LimbSetup(absOp.Abstract_Operation):
         # if not self._IsChildAParent(childLimb, parentLimb):
         #     self._ReparentLimb(childLimb, parentLimb)
 
+    def ApplyAimUpToLimbJoints(self, limbs):
+        folder = os.path.dirname(__file__)
+        folder = os.path.dirname(folder)
+        folder = os.path.dirname(folder)
+        folder = os.path.join(folder, 'Data')
+        filePath = os.path.join(folder, 'Config.json')
+        config = genUtil.Json.Load(filePath)
+
+        aimLM = rigData.JOINT_AIM_UP_VECTORS[config['jointAimAxis']]
+        upLM = rigData.JOINT_AIM_UP_VECTORS[config['jointUpAxis']]
+        aimR = (i*-1 for i in aimLM)
+        upR = (i*-1 for i in upLM)
+        for limb in limbs:
+            aim = aimLM
+            up = upLM
+            if limb.side.get() == 2: # Right side
+                aim = aimR
+                up = upR
+            for joint in pm.listConnections(limb.joints):
+                self._ApplyAimUpToJoint(joint, aim, up)
+                self.RemoveJointRotations(joint)
+
+    def RemoveJointRotations(self, joint):
+        temp = pm.group(em=1, p=joint)
+        parent = pm.listRelatives(joint, p=1)[0]
+        pm.parent(temp, parent)
+        rot = pm.xform(temp, q=1, ro=1)
+        joint.jointOrient.set(rot)
+        joint.r.set(0, 0, 0)
+        pm.delete(temp)
+
+    def _ApplyAimUpToJoint(self, joint, aimVector, upVector):
+        children = pm.listRelatives(joint, c=1)
+        if children:
+            pm.parent(children, w=1)
+            pm.select(d=1)
+            cst = pm.aimConstraint(children[0], joint, 
+                                    aim=aimVector, u=upVector) 
+            pm.delete(cst)
+            pm.parent(children, joint)
+        else:
+            joint.r.set(0, 0, 0)
+            joint.jointOrient.set(0, 0, 0)
+
+    def _MirrorFaceJoints(self, joints):
+        config = self._GetConfig()
+        index = config['jointUpAxis']
+        upVector = rigData.JOINT_AIM_UP_VECTORS[index]
+        rot = [abs(i*180) for i in upVector]
+        self._FlipJoints(joints, rot)
+
+    def _MirrorBodyJoints(self, joints):
+        config = self._GetConfig()
+        aimIndex = config['jointAimAxis']
+        upIndex = config['jointUpAxis']
+        aimVector = rigData.JOINT_AIM_UP_VECTORS[aimIndex]
+        upVector = rigData.JOINT_AIM_UP_VECTORS[upIndex]
+        rot = [1,1,1]
+        rot = [rot[i] - abs(aimVector[i]) for i in range(3)]
+        rot = [rot[i] - abs(upVector[i]) for i in range(3)]
+        rot = [rot[i] * 180 for i in range(3)]
+        self._FlipJoints(joints, rot)
+
+    def _FlipJoints(self, joints, jointRotation):
+        jointParents = {} # joint : parent
+        jointGroups = {} # joint : group
+
+        # Store parents + create joint group
+        for joint in joints:
+            jointParents[joint] = pm.listRelatives(joint, p=1)[0]
+            jointGroups[joint] = pm.group(em=1, p=joint)
+
+        # Group groups + flip
+        rootGroup = pm.group(em=1, w=1)
+        groups = list(jointGroups.values())
+        pm.parent(groups, rootGroup)
+        pm.xform(rootGroup, s=(-1, 1, 1))
+        pm.parent(groups, w=1)
+        pm.makeIdentity(groups, a=1, s=1)
+        pm.delete(rootGroup)
+
+        # Pos + rot joints
+        for joint, group in jointGroups.items():
+            pm.parent(joint, group)
+            joint.t.set(0,0,0)
+            joint.r.set(0,0,0)
+            joint.jointOrient.set(jointRotation)
+            
+        # Reparent joints
+        for child, parent in jointParents.items():
+            pm.parent(child, parent)
+
+        pm.delete(groups)
+
+    def UpdateMirrorJoints(self, sourceLimb, jointRotation):
+        sourceGroups = pm.listConnections(sourceLimb.jointGroups)
+        sourceGroups = rigUtil.SortGroups(sourceGroups)
+        sourceJoints = [pm.listConnections(g.joint)[0] for g in sourceGroups]
+        mirrorLimb = pm.listConnections(sourceLimb.mirrorLimb)[0]
+        mirrorGroups = pm.listConnections(mirrorLimb.jointGroups)
+        mirrorGroups = rigUtil.SortGroups(mirrorGroups)
+        mirrorJoints = [pm.listConnections(g.joint)[0] for g in mirrorGroups]
+        sourceTargetJoints = {}
+        for i in range(len(sourceJoints)):
+            s = sourceJoints[i]
+            m = mirrorJoints[i]
+            sourceTargetJoints[s] = m
+        self._UpdateMirrorJoints(sourceTargetJoints, jointRotation)
+
+    def _UpdateMirrorJoints(self, sourceTargetJoints, jointRotation):
+        jointParents = {} # joint : parent
+        jointGroups = {} # joint : group
+
+        # Store parents + create joint group
+        for sourceJoint, mirrorJoint in sourceTargetJoints.items():
+            jointParents[mirrorJoint] = pm.listRelatives(mirrorJoint, p=1)[0]
+            jointGroups[mirrorJoint] = pm.group(em=1, p=sourceJoint)
+
+        # Group groups + flip
+        rootGroup = pm.group(em=1, w=1)
+        groups = list(jointGroups.values())
+        pm.parent(groups, rootGroup)
+        pm.xform(rootGroup, s=(-1, 1, 1))
+        pm.parent(groups, w=1)
+        pm.makeIdentity(groups, a=1, s=1)
+        pm.delete(rootGroup)
+
+        # Pos + rot joints
+        for joint, group in jointGroups.items():
+            joint = sourceTargetJoints[joint]
+            pm.parent(joint, group)
+            joint.t.set(0,0,0)
+            joint.r.set(0,0,0)
+            joint.jointOrient.set(jointRotation)
+            
+        # Reparent joints
+        for child, parent in jointParents.items():
+            pm.parent(child, parent)
+
+        pm.delete(groups)
+
 #============= MISC ============================
 
     def _IsChildAParent(self, child, parent):
@@ -387,6 +571,14 @@ class LimbSetup(absOp.Abstract_Operation):
             if not parent or pm.objectType(parent[0]) != 'joint':
                 pm.parent(joint, jointGroup)
     
+    def _GetConfig(self):
+        folder = os.path.dirname(__file__)
+        folder = os.path.dirname(folder)
+        folder = os.path.dirname(folder)
+        folder = os.path.join(folder, 'Data')
+        filePath = os.path.join(folder, 'Config.json')
+        return genUtil.Json.Load(filePath)
+
 #============= RELATIONSHIP ============================
 
     def _BreakMirror(self, sourceLimb):
@@ -414,6 +606,7 @@ class LimbSetup(absOp.Abstract_Operation):
             limb.side.set(2)
             rigUtil.UpdateUsedControlMaterials(rigRoot, limb)
             rigUtil.UpdateUsedControlMaterials(rigRoot, mirrorLimb)
+            genUtil.Name.UpdateLimbName(rigRoot, mirrorLimb)
 
         # BREAK MIRROR
         else:
@@ -458,50 +651,6 @@ class LimbSetup(absOp.Abstract_Operation):
         for childLimb in pm.listConnections(limb.limbChildren):
             self._UpdateParentControlEnum(childLimb)
 
-    # def _AreJointsDisconnected(self, joints):
-    #     log.funcFileDebug()
-    #     if self._AreJointsChained(joints):
-    #         joints = self._GetCompleteJointChain(joints)
-    #     for joint in joints:
-    #         if joint.hasAttr('limb') and pm.listConnections(joint.limb):
-    #             return False
-    #     return True
-
-    # def _AreJointsSiblings(self, joints):
-    #     log.funcFileDebug()
-    #     isBranch = True
-    #     parent1 = pm.listRelatives(joints[0], p=1, type='joint')
-    #     for joint in joints[1:]:
-    #         parent2 = pm.listRelatives(joint, p=1, type='joint')
-    #         if (parent1 != parent2):
-    #             isBranch = False
-    #     return isBranch
-    
-    # def _AreJointsChained(self, joints):
-    #     log.funcFileDebug()
-    #     jointsCopy = self._GetSortedJoints(joints)
-    #     child = jointsCopy[-1]
-    #     jointsCopy.remove(child)
-    #     while (jointsCopy):
-    #         parent = pm.listRelatives(child, p=1, type='joint')
-    #         if not parent:
-    #             return False
-    #         parent = parent[0]
-    #         if not pm.objectType(parent, isa='joint'):
-    #             return False
-    #         if parent in jointsCopy:
-    #             jointsCopy.remove(parent)
-    #         child = parent
-    #     return True
-
-    # def _HasSibling(self, joint):
-    #     log.funcFileDebug()
-    #     parent = pm.listRelatives(joint, p=1, type='joint')
-    #     if not parent:
-    #         return False
-    #     children = pm.listRelatives(parent, c=1, type='joint')
-    #     return (len(children) > 1)
-    
     def SetupDefaultLimbParent(self, limb):
         jointGroups = pm.listConnections(limb.jointGroups)
         jointGroups = rigUtil.SortGroups(jointGroups)
@@ -557,243 +706,6 @@ class LimbSetup(absOp.Abstract_Operation):
         folder = os.path.join(folder, 'Data')
         filePath = os.path.join(folder, 'Config.json')
         return genUtil.Json.Load(filePath)
-
-#============= UTILS ============================
-
-    # def _GetLimbFuncForJoints(self, joints):
-    #     log.funcFileDebug()
-    #     if (len(joints) == 1):
-    #         return lmb.Limb.AddOneJointBranch
-    #     elif self._AreJointsSiblings(joints):
-    #         return lmb.Limb.AddTwoJointBranch
-    #     elif self._AreJointsChained(joints):
-    #         if (len(joints) == 2):
-    #             return lmb.Limb.AddTwoJointChain
-    #         else:
-    #             return lmb.Limb.AddThreeJointChain
-    #     return None
-
-    # def _GetCompleteJointChain(self, joints):
-    #     log.funcFileDebug()
-    #     sortedJoints = self._GetSortedJoints(joints)
-    #     parent = sortedJoints[-1]
-    #     rootParent = sortedJoints[0]
-    #     jointChain = [parent]
-    #     while(parent != rootParent):
-    #         parent = pm.listRelatives(parent, p=1, type='joint')[0]
-    #         jointChain.append(parent)
-    #     return jointChain
-
-    # def _GetSortedJoints(self, joints):
-    #     log.funcFileDebug()
-    #     temp = {}
-    #     for joint in joints:
-    #         temp[joint.longName()] = joint
-    #     return [temp[n] for n in sorted(list(temp.keys()))]
-
-    # def _GetLongestJointChain(self, startJoint):
-    #     log.funcFileDebug()
-    #     joints = [startJoint]
-    #     if self._HasSibling(startJoint):
-    #         return joints
-    #     lastPos = pm.xform(startJoint, q=1, t=1, ws=1)
-    #     parent = pm.listRelatives(startJoint, p=1, type='joint')
-    #     for i in range(99):
-    #         if not parent:
-    #             break
-    #         parent = parent[0]
-    #         curPos = pm.xform(parent, q=1, t=1, ws=1)
-    #         if self._RoundVector(curPos) == self._RoundVector(lastPos):
-    #             break
-    #         joints.append(parent)
-    #         if self._HasSibling(parent):
-    #             break
-    #         parent = pm.listRelatives(parent, p=1, type='joint')
-    #         lastPos = curPos[:]
-    #     return joints[::-1]
-    
-    # def _HasSibling(self, joint):
-    #     log.funcFileDebug()
-    #     parent = pm.listRelatives(joint, p=1, type='joint')
-    #     if not parent:
-    #         return False
-    #     children = pm.listRelatives(parent, c=1, type='joint')
-    #     return (len(children) > 1)
-        
-    # def _RoundVector(self, vec):
-    #     newVec = []
-    #     for i in range(3):
-    #         newVec.append(round(vec[i], 5))
-    #     return newVec
-
-    # def _GetJointBranch(self, startJoint):
-    #     log.funcFileDebug()
-    #     joints = [startJoint]
-    #     parent = pm.listRelatives(startJoint, p=1, type='joint')
-    #     if not parent:
-    #         return [startJoint]
-    #     for child in pm.listRelatives(parent[0], c=1, type='joint'):
-    #         if not pm.listRelatives(child, c=1, type='joint'):
-    #             if child not in joints:
-    #                 joints.append(child)
-    #     return joints
-
-#============= AUTOBUILD ============================
-
-    # def AutoBuildByHierarchy(self, rigRoot):
-    #     log.funcFileInfo()
-    #     # Build Joint Parent Dictionary
-    #     jointParents = {}   # childJoint : parentJoint
-    #     for joint in pm.ls(type='joint'):
-    #         parent = pm.listRelatives(joint, parent=1)
-    #         if parent:
-    #             jointParents[joint] = parent[0]
-    #         else:
-    #             jointParents[joint] = None
-    #     # Group joints by limb structure: one, chain or branch
-    #     disconnectJoints = {} # parent : [[j1, j2], [j3], ...]
-    #     newLimbJointSets = []  # [[jnt1, jnt2], [jnt3], ...]
-    #     limbTypes = []
-    #     for i in range(99):
-    #         children = set(jointParents.keys())
-    #         parents = set(jointParents.values())
-    #         # Iterate through all end children,
-    #         # solving for branches and end chains
-    #         for child in list(children - parents):
-    #             if child not in jointParents:
-    #                 continue
-    #             # Unparent CHAIN root joint + track
-    #             joints = self._GetLongestJointChain(child)
-                
-    #             if len(joints) >= 3:
-    #                 limbType = 4
-    #             elif len(joints) == 2:
-    #                 limbType = 3
-    #             else:
-    #                 joints = self._GetJointBranch(child)
-    #                 if len(joints) == 1:
-    #                     limbType = 1
-    #                 else:
-    #                     limbType = 2
-    #                 parent = pm.listRelatives(child, p=1, type='joint')
-    #                 if parent:
-    #                     parent = parent[0]
-    #                     if parent not in disconnectJoints:
-    #                         disconnectJoints[parent] = []
-    #                     disconnectJoints[parent] += joints
-    #                     if len(joints) == 1:
-    #                         pm.parent(joints[0], w=1)
-    #                     else:
-    #                         pm.parent(joints, w=1)
-    #             newLimbJointSets.append(joints)
-    #             limbTypes.append(limbType)
-    #             for joint in joints:
-    #                 del(jointParents[joint])
-    #     for parent, children in disconnectJoints.items():
-    #         pm.parent(children, parent)
-    #     for i in range(len(newLimbJointSets)):
-    #         newLimbJoints = newLimbJointSets[i]
-    #         limbType = limbTypes[i]
-    #         if limbType == 1:
-    #             limb = lmb.Limb.AddOneJointBranch(rigRoot, newLimbJoints)
-    #         elif limbType == 2:
-    #             limb = lmb.Limb.AddTwoJointBranch(rigRoot, newLimbJoints)
-    #         elif limbType == 3:
-    #             limb = lmb.Limb.AddTwoJointChain(rigRoot, newLimbJoints)
-    #         elif limbType == 4:
-    #             limb = lmb.Limb.AddThreeJointChain(rigRoot, newLimbJoints)
-    #         self._InitBehavior(rigRoot, limb)
-    #     self._LoadSkeletalHierarchy(rigRoot)
-    
-    # def AutoBuildByName(self, rigRoot):
-    #     log.funcFileInfo()
-    #     # GROUP JOINTS AND VALIDATE NAMES
-    #     freeJoints = []
-    #     for joint in pm.ls(type='joint'):
-    #         if joint.hasAttr('limb'):
-    #             if not pm.listConnections(joint.limb):
-    #                 freeJoints.append(joint)
-    #         else:
-    #             freeJoints.append(joint)
-    #     newLimbs = {} # limbName : jointList
-    #     for joint in freeJoints:
-    #         splitName = joint.shortName().split('_')
-    #         if len(splitName) != 3:
-    #             msg = 'Joints must be named as "LimbName_Side_JointName"'
-    #             msg += '\nJoint Misnamed: %s' % joint
-    #             pm.confirmDialog(   t='Breaking IK Connections!', 
-    #                                 m=msg, 
-    #                                 icon='error', 
-    #                                 b='Ok')
-    #             return
-    #         limbSideName = '_'.join(splitName[:-1])
-    #         if limbSideName not in newLimbs:
-    #             newLimbs[limbSideName] = []
-    #         newLimbs[limbSideName].append(joint)
-
-    #     # VALIDATE LIMBS
-    #     limbTypes = {}
-    #     for limbName, joints in newLimbs.items():
-    #         newLimbs[limbName] = self._GetSortedJoints(joints)
-    #         if self._AreJointsSiblings(joints):
-    #             if len(joints) == 1:
-    #                 limbTypes[limbName] = 1
-    #             else:
-    #                 limbTypes[limbName] = 2
-    #             continue
-    #         if self._AreJointsChained(joints):
-    #             if len(joints) == 2:
-    #                 limbTypes[limbName] = 3
-    #             else:
-    #                 limbTypes[limbName] = 4
-    #             continue
-    #         msg = 'Limbs may only have the following joint arrangements:\n'
-    #         msg += '\n- 1+ joints that are all the immediate children '
-    #         msg += 'of the same parent [BRANCH]'
-    #         msg += '\n- 2+ joints that are parented to one another [CHAIN]'
-    #         msg += '\n--------------------------'
-    #         msg += '\nLimb = ' + limbName
-    #         msg += '\nJoints = ' + str(joints)
-    #         pm.confirmDialog(   t='Limbs ERROR', 
-    #                             m=msg, 
-    #                             icon='error', 
-    #                             b='Ok')
-    #         return
-
-    #     # ADD LIMBS
-    #     allLimbs = {} # pfrsName : limb
-    #     for indexName, joints in newLimbs.items():
-    #         tempJoint = joints[0]
-    #         limbName, side, j = tempJoint.shortName().split('_')
-    #         pfrsNames = []
-    #         for joint in joints:
-    #             splitName = joint.shortName().split('_')
-    #             pfrsNames.append(splitName[-1])
-    #         limbType = limbTypes[indexName]
-    #         if limbType == 1:
-    #             limb = lmb.Limb.AddOneJointBranch(rigRoot, joints)
-    #         elif limbType == 2:
-    #             limb = lmb.Limb.AddTwoJointBranch(rigRoot, joints)
-    #         elif limbType == 3:
-    #             limb = lmb.Limb.AddTwoJointChain(rigRoot, joints)
-    #         elif limbType == 4:
-    #             limb = lmb.Limb.AddThreeJointChain(rigRoot, joints)
-    #         for i in range(len(joints)):
-    #             joint = joints[i]
-    #             joint.pfrsName.set(pfrsNames[i])
-    #         limb.pfrsName.set(limbName)
-    #         if side.upper() == 'L':
-    #             limb.side.set(1)
-    #         elif side.upper() == 'R':
-    #             limb.side.set(2)
-    #         if limbName in allLimbs:
-    #             mirror = allLimbs[limbName]
-    #             pm.connectAttr(limb.mirrorLimb, mirror.mirrorLimb)
-    #             del(allLimbs[limbName])
-    #         genUtil.Name.UpdateLimbName(rigRoot, limb)
-    #         self._InitBehavior(rigRoot, limb)
-    #         allLimbs[limbName] = limb
-    #     self._LoadSkeletalHierarchy(rigRoot)
 
     def _LoadSkeletalHierarchy(self, rigRoot):
         log.funcFileDebug()

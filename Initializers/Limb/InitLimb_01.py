@@ -55,6 +55,7 @@ class InitLimb(absInit.Abstract_Initializer):
         pm.addAttr(limb, ln='channelBoxLimbCtrScale', at='bool', dv=1, h=hide)
         
         pm.addAttr(limb, ln='presets', dt='string', h=hide)
+        pm.addAttr(limb, ln='presetLimbChildren', dt='string', h=hide)
 
         # BAKING
         pm.addAttr(limb, ln='hasKeys', at='bool', dv=1, h=hide)

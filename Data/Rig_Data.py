@@ -48,13 +48,16 @@ LIMB_TYPES = (  'Empty',
                 'TwoJointBranch',
                 'TwoJointChain',
                 'ThreeJointChain',
+
                 'Custom0',
                 'Custom1',
                 'Custom2',
                 'Custom3',
                 'Custom4',
                 'Custom5')
+
 LIMB_SIDES = ('M', 'L', 'R', '-')
+
 LIMB_JOINT_NAME_PRESETS = { # lowercase to for keycheck
                 'arm' : ['Shoulder', 'Elbow', 'Wrist'],
                 'leg' : ['Hip', 'Knee', 'Ankle']}
@@ -87,6 +90,13 @@ JOINT_AIM_UP_AXES = (   'X',
                         '-Y',
                         'Z',
                         '-Z')
+
+JOINT_AIM_UP_VECTORS = ((1, 0, 0),
+                        (-1, 0, 0),
+                        (0, 1, 0),
+                        (0, -1, 0),
+                        (0, 0, 1),
+                        (0, 0, -1))
 
 
 

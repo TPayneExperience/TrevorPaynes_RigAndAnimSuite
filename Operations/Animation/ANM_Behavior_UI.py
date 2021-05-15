@@ -26,7 +26,7 @@ class ANM_Behavior_UI(absOpUI.Abstract_OperationUI):
         self._rigRoot = rigRoot
         self._allRigRoots = allRigRoots
         self.PopulateLimbHier()
-        self.PopulatePresets(None)
+        self.PopulatePresets()
         
     def Teardown_UI(self, rigRoot, allRigRoots):
         self._presetsUI = []
@@ -85,31 +85,36 @@ class ANM_Behavior_UI(absOpUI.Abstract_OperationUI):
         self.PopulateLimbProperties(None)
         self.PopulateControlHier(None)
         self.PopulateBhvProperties(None)
-        self.PopulatePresets(None)
+        self.PopulatePresets()
+        self._rigRoot = None
         limbIDStrs = pm.treeView(self.limb_tv, q=1, selectItem=1)
+        self._selectedLimbs = None
         if not limbIDStrs:
             return
         self._selectedLimbs = [self._limbIDs[ID] for ID in limbIDStrs]
+        limb = self._selectedLimbs[0]
+        self._rigRoot = pm.listConnections(limb.rigRoot)[0]
+        self.PopulatePresets()
         for limb in self._selectedLimbs:
             log.debug('\t\t' + limb.pfrsName.get())
         if len(self._selectedLimbs) == 1:
             limb = self._selectedLimbs[0]
-            self._rigRoot = pm.listConnections(limb.rigRoot)[0]
-            self.PopulatePresets(self._rigRoot)
             bhvFile = limb.bhvFile.get()
-            self._currentBhv = self.bhvMng.bhvs[bhvFile]
+            self._currentBhv = self.operation.bhvMng.bhvs[bhvFile]
             self.PopulateLimbProperties(limb)
             self.PopulateControlHier(limb)
             self.PopulateBhvProperties(limb)
         pm.select(self._selectedLimbs)
 
-    def ApplyPreset(self, preset):
+    def ApplyPreset(self, presetID):
         log.funcFileInfo()
         # warn if going to lose data:
+        allPresets = pm.listConnections(self._rigRoot.presets)
+        presets = [p for p in allPresets if p.ID.get() == presetID]
         willLoseData = False
-        for limbPreset in pm.listConnections(preset.limbPresets):
-            bhvFile = limbPreset.bhvFile.get()
-            bhv = self.bhvMng.bhvs[bhvFile]
+        for preset in presets:
+            bhvFile = preset.bhvFile.get()
+            bhv = self.operation.bhvMng.bhvs[bhvFile]
             if bhv.bakeLosesData:
                 willLoseData = True
         if willLoseData:
@@ -126,25 +131,30 @@ class ANM_Behavior_UI(absOpUI.Abstract_OperationUI):
             if result == 'Cancel':
                 return
         kfOnly = pm.menuItem(self.kfOnly_mi, q=1, cb=1)
-        self.operation.ApplyPreset(preset, kfOnly)
+        self.operation.ApplyPreset(self._rigRoot, presetID, kfOnly)
         self._selectedLimbs = []
         self.PopulateLimbHier()
         self.PopulateControlHier(None)
         self.PopulateLimbProperties(None)
         self.PopulateBhvProperties(None)
 
-    def PopulatePresets(self, rigRoot):
+    def PopulatePresets(self):
         log.funcFileInfo()
         if self._presetsUI:
             pm.deleteUI(self._presetsUI)
             self._presetsUI = []
-        if not rigRoot:
+        if not self._selectedLimbs:
             return
-        for preset in sorted(pm.listConnections(rigRoot.presets)):
-            presetName = preset.presetName.get()
+        presetIDs = {}
+        for limb in self._selectedLimbs:
+            for preset in pm.listConnections(limb.presets):
+                presetIDs[preset.ID.get()] = preset.presetName.get()
+        for presetID in sorted(list(presetIDs.keys())):
+            presetName = presetIDs[presetID]
             item = pm.menuItem(l=presetName, p=self.rmb_ui, 
-                            c=pm.Callback(self.ApplyPreset, preset))
+                            c=pm.Callback(self.ApplyPreset, presetID))
             self._presetsUI.append(item)
+
 
 #=========== CONTROL HIER ====================================
 

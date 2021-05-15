@@ -88,16 +88,6 @@ class RIG_Behavior_UI(absOpUI.Abstract_OperationUI):
 
 #=========== LIMB HIER ====================================
 
-    def LoadSkeletalHierarchy(self, ignore):
-        log.funcFileDebug()
-        limb = self._selectedLimbs[0]
-        rigRoot = pm.listConnections(limb.rigRoot)[0]
-        self.operation.LoadSkeletalHierarchy(rigRoot)
-        self.PopulateLimbHier()
-        self.PopulateControlHier(None)
-        self.PopulateLimbProperties(None)
-        self.PopulateBhvProperties(None)
-
     def PopulateLimbHier(self, selectLimb=None):
         log.funcFileDebug()
         self._limbIDs = uiUtil.PopulateLimbHier(self.limb_tv, 
@@ -109,23 +99,55 @@ class RIG_Behavior_UI(absOpUI.Abstract_OperationUI):
             if limb == selectLimb:
                 pm.treeView(self.limb_tv, e=1, si=(limbID, 1))
 
+    def PopulatePresets(self):
+        log.funcFileInfo()
+        if self._presetsUI:
+            pm.deleteUI(self._presetsUI)
+            self._presetsUI = []
+        if not self._selectedLimbs:
+            return
+        presetIDs = {}
+        for limb in self._selectedLimbs:
+            for preset in pm.listConnections(limb.presets):
+                presetIDs[preset.ID.get()] = preset.presetName.get()
+        for presetID in sorted(list(presetIDs.keys())):
+            presetName = presetIDs[presetID]
+            item = pm.menuItem(l=presetName, p=self.rmb_ui, 
+                            c=pm.Callback(self.ApplyPreset, presetID))
+            self._presetsUI.append(item)
+
+    def LoadSkeletalHierarchy(self, ignore):
+        log.funcFileDebug()
+        limb = self._selectedLimbs[0]
+        rigRoot = pm.listConnections(limb.rigRoot)[0]
+        self.operation.LoadSkeletalHierarchy(rigRoot)
+        self.PopulateLimbHier()
+        self.PopulateControlHier(None)
+        self.PopulateLimbProperties(None)
+        self.PopulateBhvProperties(None)
+
     def SelectedLimb(self):
         log.funcFileInfo()
-        self._rigRoot = None
         pm.menuItem(self._savePreset_mi, e=1, en=0)
         limbIDStrs = pm.treeView(self.limb_tv, q=1, selectItem=1)
         self.PopulateLimbProperties(None)
         self.PopulateControlHier(None)
         self.PopulateBhvProperties(None)
+        self.PopulatePresets()
         pm.menuItem(self._addEmpty_mi, e=1, en=0)
         pm.menuItem(self._removeEmpty_mi, e=1, en=0)
         pm.menuItem(self._loadSkel_mi, e=1, en=0)
         pm.menuItem(self._savePreset_mi, e=1, en=0)
+        self._selectedLimbs = None
         # Depop Group Prop
         if not limbIDStrs:
+            self._rigRoot = None
             return
-        pm.menuItem(self._savePreset_mi, e=1, en=1)
         self._selectedLimbs = [self._limbIDs[ID] for ID in limbIDStrs]
+        pm.menuItem(self._savePreset_mi, e=1, en=1)
+        self.PopulatePresets()
+        limb = self._selectedLimbs[0]
+        self._rigRoot = pm.listConnections(limb.rigRoot)[0]
         for limb in self._selectedLimbs:
             log.debug('\t\t' + limb.pfrsName.get())
         if len(self._selectedLimbs) == 1:
@@ -133,7 +155,6 @@ class RIG_Behavior_UI(absOpUI.Abstract_OperationUI):
             pm.select(pm.listConnections(limb.usedGroups))
             self.PopulateLimbProperties(limb)
             self.PopulateControlHier(limb)
-            self._rigRoot = pm.listConnections(limb.rigRoot)[0]
             if self._rigRoot.rigMode.get() == 0: # Editable rig
                 pm.menuItem(self._addEmpty_mi, e=1, en=1)
                 self.PopulateBhvProperties(limb)
@@ -208,13 +229,14 @@ class RIG_Behavior_UI(absOpUI.Abstract_OperationUI):
             return
             
         presetName = pm.promptDialog(query=True, text=True)
-        self.operation.SavePreset(presetName, self._rigRoot, 
-                                        self._selectedLimbs)
+        self.operation.SavePreset(  self._rigRoot, 
+                                    self._selectedLimbs,
+                                    presetName)
         self.PopulatePresets()
 
-    def ApplyPreset(self, preset):
+    def ApplyPreset(self, presetID):
         log.funcFileInfo()
-        self.operation.ApplyPreset(preset)
+        self.operation.ApplyPreset(self._rigRoot, presetID)
         self._selectedLimbs = []
         self.PopulateLimbHier()
         self.PopulateControlHier(None)
@@ -225,17 +247,6 @@ class RIG_Behavior_UI(absOpUI.Abstract_OperationUI):
         log.funcFileDebug()
         editPst.EditPresets(self._rigRoot, self.operation)
         self.PopulatePresets()
-
-    def PopulatePresets(self):
-        log.funcFileInfo()
-        if self._presetsUI:
-            pm.deleteUI(self._presetsUI)
-            self._presetsUI = []
-        for preset in sorted(pm.listConnections(self._rigRoot.presets)):
-            presetName = preset.presetName.get()
-            item = pm.menuItem(l=presetName, p=self.rmb_ui, 
-                            c=pm.Callback(self.ApplyPreset, preset))
-            self._presetsUI.append(item)
 
 #=========== CONTROL HIER ====================================
 

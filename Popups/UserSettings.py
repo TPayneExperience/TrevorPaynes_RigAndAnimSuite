@@ -77,23 +77,23 @@ class UserSettings:
                 pm.menuItem(l=axis)
                 if i == self.config['jointUpAxis']:
                     pm.optionMenu(self.jUp_om, e=1, sl=(i+1))
-        with pm.optionMenu(l=' Mirror Aim Axis') as self.mAim_om:
-            for i in range(6):
-                axis = rigData.JOINT_AIM_UP_AXES[i]
-                pm.menuItem(l=axis)
-                if i == self.config['mirrorAimAxis']:
-                    pm.optionMenu(self.mAim_om, e=1, sl=(i+1))
-        with pm.optionMenu(l=' Mirror Up Axis') as self.mUp_om:
-            for i in range(6):
-                axis = rigData.JOINT_AIM_UP_AXES[i]
-                pm.menuItem(l=axis)
-                if i == self.config['mirrorUpAxis']:
-                    pm.optionMenu(self.mUp_om, e=1, sl=(i+1))
+        # with pm.optionMenu(l=' Mirror Aim Axis') as self.mAim_om:
+        #     for i in range(6):
+        #         axis = rigData.JOINT_AIM_UP_AXES[i]
+        #         pm.menuItem(l=axis)
+        #         if i == self.config['mirrorAimAxis']:
+        #             pm.optionMenu(self.mAim_om, e=1, sl=(i+1))
+        # with pm.optionMenu(l=' Mirror Up Axis') as self.mUp_om:
+        #     for i in range(6):
+        #         axis = rigData.JOINT_AIM_UP_AXES[i]
+        #         pm.menuItem(l=axis)
+        #         if i == self.config['mirrorUpAxis']:
+        #             pm.optionMenu(self.mUp_om, e=1, sl=(i+1))
 
         pm.optionMenu(self.jAim_om, e=1, cc=self.SetJAim)
         pm.optionMenu(self.jUp_om, e=1, cc=self.SetJUp)
-        pm.optionMenu(self.mAim_om, e=1, cc=self.SetMAim)
-        pm.optionMenu(self.mUp_om, e=1, cc=self.SetMUp)
+        # pm.optionMenu(self.mAim_om, e=1, cc=self.SetMAim)
+        # pm.optionMenu(self.mUp_om, e=1, cc=self.SetMUp)
         
     def _Setup_JointRotOrder(self):
         with pm.optionMenu(l=' Joint Rot Order') as self.jRotOrder_om:
@@ -324,11 +324,11 @@ class UserSettings:
     def SetJUp(self, axis):
         self.config['jointUpAxis'] = rigData.JOINT_AIM_UP_AXES.index(axis)
 
-    def SetMAim(self, axis):
-        self.config['mirrorAimAxis'] = rigData.JOINT_AIM_UP_AXES.index(axis)
+    # def SetMAim(self, axis):
+    #     self.config['mirrorAimAxis'] = rigData.JOINT_AIM_UP_AXES.index(axis)
 
-    def SetMUp(self, axis):
-        self.config['mirrorUpAxis'] = rigData.JOINT_AIM_UP_AXES.index(axis)
+    # def SetMUp(self, axis):
+    #     self.config['mirrorUpAxis'] = rigData.JOINT_AIM_UP_AXES.index(axis)
 
 #============ SHAPES ============================
 
