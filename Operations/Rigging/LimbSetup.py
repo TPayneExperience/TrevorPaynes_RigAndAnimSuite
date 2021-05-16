@@ -216,23 +216,42 @@ class LimbSetup(absOp.Abstract_Operation):
         scale = self.mirrorAxisScales[axisLetter.upper()]
         for oldLimb, newLimb in zip(oldLimbs, newLimbs):
             self.RenameLimb(newLimb, oldLimb.pfrsName.get())
-            toFlip = pm.listConnections(newLimb.limbGroups)
-            toFlip += pm.listConnections(newLimb.jointGroups)
+            groups = pm.listConnections(newLimb.limbGroups)
+            groups += pm.listConnections(newLimb.jointGroups)
             oldParents = {}
-            for joint in toFlip:
-                oldParents[joint] = pm.listRelatives(joint, p=1)
-            group = pm.group(em=1)
-            pm.parent(toFlip, group)
-            pm.xform(group, s=scale)
-            pm.makeIdentity(group, a=1, s=1)
-            for thing in toFlip:
-                parents = oldParents[thing]
+            for group in groups:
+                oldParents[group] = pm.listRelatives(group, p=1)
+            rootGroup = pm.group(em=1, w=1)
+            pm.parent(groups, rootGroup)
+            pm.xform(rootGroup, s=scale)
+            for group in groups:
+                parents = oldParents[group]
                 if parents: # Delete later, after limbsetup
                     parent = parents[0]
-                    pm.parent(thing, parent)
+                    pm.parent(group, parent)
                 else:
-                    pm.parent(thing, w=1)
-            pm.delete(group)
+                    pm.parent(group, w=1)
+            pm.makeIdentity(groups, a=1, s=1, pn=1)
+            pm.delete(rootGroup)
+
+    def UpdateMirrorBodyJoints(self, limb):
+        config = self._GetConfig()
+        aimIndex = config['jointAimAxis']
+        upIndex = config['jointUpAxis']
+        aimVector = rigData.JOINT_AIM_UP_VECTORS[aimIndex]
+        upVector = rigData.JOINT_AIM_UP_VECTORS[upIndex]
+        rot = [1,1,1]
+        rot = [rot[i] - abs(aimVector[i]) for i in range(3)]
+        rot = [rot[i] - abs(upVector[i]) for i in range(3)]
+        rot = [rot[i] * 180 for i in range(3)]
+        self._UpdateMirrorLimbJoints(limb, rot)
+
+    def UpdateMirrorFaceJoints(self, limb):
+        config = self._GetConfig()
+        index = config['jointUpAxis']
+        upVector = rigData.JOINT_AIM_UP_VECTORS[index]
+        rot = [abs(i*180) for i in upVector]
+        self._UpdateMirrorLimbJoints(limb, rot)
 
     def RemoveLimb(self, limb):
         if pm.listConnections(limb.mirrorLimb):
@@ -461,37 +480,12 @@ class LimbSetup(absOp.Abstract_Operation):
         self._FlipJoints(joints, rot)
 
     def _FlipJoints(self, joints, jointRotation):
-        jointParents = {} # joint : parent
-        jointGroups = {} # joint : group
-
-        # Store parents + create joint group
+        sourceTargetJoints = {}
         for joint in joints:
-            jointParents[joint] = pm.listRelatives(joint, p=1)[0]
-            jointGroups[joint] = pm.group(em=1, p=joint)
+            sourceTargetJoints[joint] = joint
+        self._UpdateMirrorJoints(sourceTargetJoints, jointRotation)
 
-        # Group groups + flip
-        rootGroup = pm.group(em=1, w=1)
-        groups = list(jointGroups.values())
-        pm.parent(groups, rootGroup)
-        pm.xform(rootGroup, s=(-1, 1, 1))
-        pm.parent(groups, w=1)
-        pm.makeIdentity(groups, a=1, s=1)
-        pm.delete(rootGroup)
-
-        # Pos + rot joints
-        for joint, group in jointGroups.items():
-            pm.parent(joint, group)
-            joint.t.set(0,0,0)
-            joint.r.set(0,0,0)
-            joint.jointOrient.set(jointRotation)
-            
-        # Reparent joints
-        for child, parent in jointParents.items():
-            pm.parent(child, parent)
-
-        pm.delete(groups)
-
-    def UpdateMirrorJoints(self, sourceLimb, jointRotation):
+    def _UpdateMirrorLimbJoints(self, sourceLimb, jointRotation):
         sourceGroups = pm.listConnections(sourceLimb.jointGroups)
         sourceGroups = rigUtil.SortGroups(sourceGroups)
         sourceJoints = [pm.listConnections(g.joint)[0] for g in sourceGroups]
@@ -525,12 +519,11 @@ class LimbSetup(absOp.Abstract_Operation):
         pm.delete(rootGroup)
 
         # Pos + rot joints
-        for joint, group in jointGroups.items():
-            joint = sourceTargetJoints[joint]
-            pm.parent(joint, group)
-            joint.t.set(0,0,0)
-            joint.r.set(0,0,0)
-            joint.jointOrient.set(jointRotation)
+        for targetJoint, group in jointGroups.items():
+            pm.parent(targetJoint, group)
+            targetJoint.t.set(0,0,0)
+            targetJoint.r.set(0,0,0)
+            targetJoint.jointOrient.set(jointRotation)
             
         # Reparent joints
         for child, parent in jointParents.items():

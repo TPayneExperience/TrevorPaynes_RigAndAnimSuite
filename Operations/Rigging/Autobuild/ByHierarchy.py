@@ -18,6 +18,9 @@ class ByHierarchy(absBld.Abstract_Autobuild):
         # Build Joint Parent Dictionary
         jointParents = {}   # childJoint : parentJoint
         for joint in pm.ls(type='joint'):
+            if joint.hasAttr('limb'):
+                if pm.listConnections(joint.limb):
+                    continue
             parent = pm.listRelatives(joint, parent=1)
             if parent:
                 jointParents[joint] = parent[0]
@@ -61,7 +64,8 @@ class ByHierarchy(absBld.Abstract_Autobuild):
                 newLimbJointSets.append(joints)
                 limbTypes.append(limbType)
                 for joint in joints:
-                    del(jointParents[joint])
+                    if joint in jointParents:
+                        del(jointParents[joint])
         for parent, children in disconnectJoints.items():
             pm.parent(children, parent)
         limbs = []

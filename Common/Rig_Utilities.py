@@ -49,6 +49,9 @@ class Joint:
             if not parent:
                 break
             parent = parent[0]
+            if parent.hasAttr('limb'):
+                if pm.listConnections(parent.limb):
+                    break
             curPos = pm.xform(parent, q=1, t=1, ws=1)
             if Joint._RoundVector(curPos) == Joint._RoundVector(lastPos):
                 break

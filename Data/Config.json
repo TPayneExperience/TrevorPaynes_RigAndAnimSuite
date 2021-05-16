@@ -2,7 +2,7 @@
     "rControlColor": [
         1.0, 
         0.0, 
-        1.0
+        0.0
     ], 
     "mirrorAimAxis": 1, 
     "ControlShape_Joint": "Cube_Poly", 
@@ -12,8 +12,8 @@
     "templateFolderPath": "", 
     "jointUpAxis": 2, 
     "windowPos": [
-        358, 
-        1408
+        518, 
+        1360
     ], 
     "limbIndex": 0, 
     "ControlShape_Empty": "Square_Wire", 

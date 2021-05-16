@@ -86,6 +86,12 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
                     self.removeRot_mi = pm.menuItem(l='Remove Joint Rotations', 
                                             en=0,
                                             c=self.RemoveJointRotations)
+                    self.updateBody_mi = pm.menuItem(l='Update Mirror Body Joints', 
+                                            en=0,
+                                            c=self.UpdateMirrorBodyJoints)
+                    self.updateFace_mi = pm.menuItem(l='Update Mirror Face Joints', 
+                                            en=0,
+                                            c=self.UpdateMirrorFaceJoints)
                     pm.menuItem(l='MORE LIMBS!', d=1)
                     self.duplicate_mi = pm.menuItem(l='Duplicate Limbs', 
                                             en=0, c=self.DuplicateLimbs)
@@ -268,6 +274,8 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
         pm.menuItem(self.saveTemp_mi, e=1, en=0)
         pm.menuItem(self.aimUp_mi, e=1, en=0)
         pm.menuItem(self.removeRot_mi, e=1, en=0)
+        pm.menuItem(self.updateBody_mi, e=1, en=0)
+        pm.menuItem(self.updateFace_mi, e=1, en=0)
         self._selectedLimbs = None
         self.PopulateJointHier(None)
         if not limbIDStrs:
@@ -285,6 +293,8 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
             if pm.listConnections(limb.mirrorLimb):
                 pm.menuItem(self.mirrorBody_mi, e=1, en=0)
                 pm.menuItem(self.mirrorFace_mi, e=1, en=0)
+                pm.menuItem(self.updateBody_mi, e=1, en=1)
+                pm.menuItem(self.updateFace_mi, e=1, en=1)
         if len(self._selectedLimbs) == 1:
             limb = self._selectedLimbs[0]
             self.PopulateJointHier(limb)
@@ -333,6 +343,16 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
         self.PopulateLimbHier()
         self.PopulateSceneHier()
         self.PopulateJointHier(None)
+
+    def UpdateMirrorBodyJoints(self, ignore):
+        log.funcFileInfo()
+        for limb in self._selectedLimbs:
+            self.operation.UpdateMirrorBodyJoints(limb)
+
+    def UpdateMirrorFaceJoints(self, ignore):
+        log.funcFileInfo()
+        for limb in self._selectedLimbs:
+            self.operation.UpdateMirrorFaceJoints(limb)
 
     def JointRotOrder(self, index):
         log.funcFileInfo()
