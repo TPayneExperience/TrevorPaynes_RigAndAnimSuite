@@ -27,8 +27,7 @@ class IK_Spline_01(absBhv.Abstract_Behavior):
             pm.addAttr(limb, ln='IKSCurve', dt='string')
             pm.addAttr(limb, ln='IKSTwist', at='float')
             pm.setAttr(limb.IKSTwist, cb=1)
-        limbGroups = pm.listConnections(limb.usedGroups)
-        limbGroups = rigUtil.SortGroups(limbGroups)
+        limbGroups = rigUtil.GetLimbGroups(limb, self.groupType)
         jointGroups = pm.listConnections(limb.jointGroups)
         jointGroups = rigUtil.SortGroups(jointGroups)
         joints = [pm.listConnections(g.joint)[0] for g in jointGroups]
@@ -69,18 +68,26 @@ class IK_Spline_01(absBhv.Abstract_Behavior):
     
     def Setup_Rig_External(self, limb):
         log.funcFileDebug()
+        limbGroups = rigUtil.GetLimbGroups(limb, self.groupType)
+        jointGroups = pm.listConnections(limb.jointGroups)
+        jointGroups = rigUtil.SortGroups(jointGroups)
+        joint = [pm.listConnections(g.joint)[0] for g in jointGroups][0]
+        parentJoints = pm.listRelatives(joint, p=1, type='joint')
+        if parentJoints:
+            parentJoint = parentJoints[0]
+            parentGroup = pm.listConnections(parentJoint.group)[0]
+            parentControl = pm.listConnections(parentGroup.control)[0]
+            pm.parentConstraint(parentControl, limbGroups[0], mo=1)
         parentControl = rigUtil.GetParentControl(limb)
-        groups = pm.listConnections(limb.usedGroups)
         if parentControl:
-            for group in groups:
+            for group in limbGroups[1:]:
                 pm.parentConstraint(parentControl, group, mo=1)
-        return groups
+        return limbGroups
     
     def Setup_Constraint_JointsToControls(self, limb):
         log.funcFileDebug()
         # Get Stuff
-        limbGroups = pm.listConnections(limb.usedGroups)
-        limbGroups = rigUtil.SortGroups(limbGroups)
+        limbGroups = rigUtil.GetLimbGroups(limb, self.groupType)
         jointGroups = pm.listConnections(limb.jointGroups)
         jointGroups = rigUtil.SortGroups(jointGroups)
         joints = [pm.listConnections(g.joint)[0] for g in jointGroups]
@@ -111,8 +118,7 @@ class IK_Spline_01(absBhv.Abstract_Behavior):
     
     def Setup_Constraint_ControlsToJoints(self, limb):
         log.funcFileDebug()
-        limbGroups = pm.listConnections(limb.usedGroups)
-        limbGroups = rigUtil.SortGroups(limbGroups)
+        limbGroups = rigUtil.GetLimbGroups(limb, self.groupType)
         limbControls = [pm.listConnections(g.control)[0] for g in limbGroups]
         jointGroups = pm.listConnections(limb.jointGroups)
         jointGroups = rigUtil.SortGroups(jointGroups)
@@ -130,7 +136,7 @@ class IK_Spline_01(absBhv.Abstract_Behavior):
     def Teardown_Rig_External(self, limb):
         log.funcFileDebug()
         if pm.listConnections(limb.limbParent):
-            for group in pm.listConnections(limb.usedGroups):
+            for group in rigUtil.GetLimbGroups(limb, self.groupType):
                 cst = pm.listRelatives(group, c=1, type='parentConstraint')
                 pm.delete(cst)
 
@@ -149,8 +155,7 @@ class IK_Spline_01(absBhv.Abstract_Behavior):
             pm.delete(cst)
 
         # Delete Limb Group Constraints
-        limbGroups = pm.listConnections(limb.usedGroups)
-        limbGroups = rigUtil.SortGroups(limbGroups)
+        limbGroups = rigUtil.GetLimbGroups(limb, self.groupType)
         if pm.listConnections(limb.limbParent):
             for group in limbGroups:
                 cst = pm.listRelatives(group, c=1, type='parentConstraint')
@@ -166,7 +171,7 @@ class IK_Spline_01(absBhv.Abstract_Behavior):
 
     def Teardown_Constraint_ControlsToJoints(self, limb):
         log.funcFileDebug()
-        groups = pm.listConnections(limb.usedGroups)
+        groups = rigUtil.GetLimbGroups(limb, self.groupType)
         controls = [pm.listConnections(g.control)[0] for g in groups]
         for control in controls:
             cst = pm.listRelatives(control, c=1, type='parentConstraint')
@@ -176,7 +181,10 @@ class IK_Spline_01(absBhv.Abstract_Behavior):
 
     def Setup_Editable_Limb_UI(self, limb):
         log.funcFileDebug()
-        return False
+        group = rigUtil.GetLimbGroups(limb, self.groupType)[0]
+        with pm.columnLayout(co=('left', -100)):
+            pm.attrControlGrp( l='Show Start Control', a=group.v)
+        return True
     
 #============= ANIMATION UI ============================
 

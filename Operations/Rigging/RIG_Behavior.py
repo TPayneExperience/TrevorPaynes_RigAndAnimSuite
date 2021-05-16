@@ -11,6 +11,8 @@ reload(rigUtil)
 # reload(rigData)
 import SceneData.Limb as lmb
 reload(lmb)
+import SceneData.Group as grp
+reload(grp)
 import LimbSetup as ls
 reload(ls)
 import Common.General_Utilities as genUtil
@@ -115,6 +117,30 @@ class RIG_Behavior(absOp.Abstract_Operation):
         return oldEnable != newEnable
 
 #=========== MISC ====================================
+
+    def ResetJointControlPositions(self, limb):
+        for group in pm.listConnections(limb.jointGroups):
+            joint = pm.listConnections(group.joint)[0]
+            control = pm.listConnections(group.control)[0]
+            pm.parent(group, joint)
+            rigUtil.ResetAttrs(group)
+            # Center control pivot
+            c = pm.objectCenter(control, gl=1)
+            pm.move(c[0], c[1], c[2], 
+                    control.scalePivot, 
+                    control.rotatePivot, ws=1)
+            rigUtil.ResetAttrs(control)
+            pm.parent(group, limb)
+
+    def RemoveUnusedGroups(self, limb):
+        usedGroups = set(pm.listConnections(limb.usedGroups))
+        for preset in pm.listConnections(limb.presets):
+            bhv = self.bhvMng.bhvs[preset.bhvFile.get()]
+            for g in rigUtil.GetLimbGroups(limb, bhv.groupType):
+                usedGroups.add(g)
+        for group in pm.listConnections(limb.limbGroups):
+            if group not in usedGroups:
+                grp.Group.Remove(group)
 
     def EnableLimb(self, limb, isEnabled):
         log.funcFileDebug()

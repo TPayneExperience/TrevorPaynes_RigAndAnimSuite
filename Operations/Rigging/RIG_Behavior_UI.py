@@ -51,20 +51,25 @@ class RIG_Behavior_UI(absOpUI.Abstract_OperationUI):
                 tt += '\n- Double Click to rename Empty Limbs'
                 self.limb_tv = pm.treeView(nb=1, ann=tt, enk=1)
                 pm.treeView(self.limb_tv, e=1, scc=self.SelectedLimb,
-                                                # sc=self.ValidateSelection,
                                                 elc=self.RenameLimb,
                                                 dad=self.ReparentLimb)
                 with pm.popupMenu() as self.rmb_ui:
                     self._addEmpty_mi = pm.menuItem(l='Add Empty Limb', 
-                                                en=0, c=self.AddEmptyLimb)
+                                        en=0, c=self.AddEmptyLimb)
                     self._removeEmpty_mi = pm.menuItem(l='Remove Empty Limb', 
-                                                en=0, c=self.RemoveEmptyLimb)
+                                        en=0, c=self.RemoveEmptyLimb)
                     pm.menuItem(d=1)
                     self._loadSkel_mi = pm.menuItem(l='Load Skeletal Hierarchy', 
-                                                en=0, c=self.LoadSkeletalHierarchy)
+                                        en=0, c=self.LoadSkeletalHierarchy)
+                    self._resetJointGroup_mi = pm.menuItem(
+                                        l='Reset Joint Control Positions', 
+                                        en=0, c=self.ResetJointControlPositions)
+                    self._removeUnusedGroups_mi = pm.menuItem(
+                                        l='Removed Unused Groups', 
+                                        en=0, c=self.RemoveUnusedGroups)
                     pm.menuItem(l='PRESETS', d=1)
                     self._savePreset_mi = pm.menuItem(l='Save Preset', 
-                                                en=0, c=self.SavePreset)
+                                        en=0, c=self.SavePreset)
                     pm.menuItem(l='Edit Presets', c=self.EditPresets)
                     pm.menuItem(l='APPLY PRESET', en=0, d=1)
             with pm.frameLayout('Controls (select + move pivots)', bv=1):
@@ -138,6 +143,8 @@ class RIG_Behavior_UI(absOpUI.Abstract_OperationUI):
         pm.menuItem(self._removeEmpty_mi, e=1, en=0)
         pm.menuItem(self._loadSkel_mi, e=1, en=0)
         pm.menuItem(self._savePreset_mi, e=1, en=0)
+        pm.menuItem(self._resetJointGroup_mi, e=1, en=0)
+        pm.menuItem(self._removeUnusedGroups_mi, e=1, en=0)
         self._selectedLimbs = None
         # Depop Group Prop
         if not limbIDStrs:
@@ -145,6 +152,8 @@ class RIG_Behavior_UI(absOpUI.Abstract_OperationUI):
             return
         self._selectedLimbs = [self._limbIDs[ID] for ID in limbIDStrs]
         pm.menuItem(self._savePreset_mi, e=1, en=1)
+        pm.menuItem(self._resetJointGroup_mi, e=1, en=1)
+        pm.menuItem(self._removeUnusedGroups_mi, e=1, en=1)
         self.PopulatePresets()
         limb = self._selectedLimbs[0]
         self._rigRoot = pm.listConnections(limb.rigRoot)[0]
@@ -247,6 +256,17 @@ class RIG_Behavior_UI(absOpUI.Abstract_OperationUI):
         log.funcFileDebug()
         editPst.EditPresets(self._rigRoot, self.operation)
         self.PopulatePresets()
+
+    def ResetJointControlPositions(self, ignore):
+        log.funcFileDebug()
+        for limb in self._selectedLimbs:
+            self.operation.ResetJointControlPositions(limb)
+
+    def RemoveUnusedGroups(self, ignore):
+        log.funcFileDebug()
+        for limb in self._selectedLimbs:
+            self.operation.RemoveUnusedGroups(limb)
+
 
 #=========== CONTROL HIER ====================================
 

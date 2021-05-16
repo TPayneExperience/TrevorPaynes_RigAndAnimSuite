@@ -13,7 +13,7 @@ reload(log)
 
 class FK_Chain_01(absBhv.Abstract_Behavior):
     bhvType = 'FK Chain'
-    validLimbTypes = (3, 4) # rigData.LIMB_TYPES
+    validLimbTypes = (2, 3, 4) # rigData.LIMB_TYPES
     groupType = ''        # LookAt, IKPV...
     groupShape = ''
     groupCount = 0

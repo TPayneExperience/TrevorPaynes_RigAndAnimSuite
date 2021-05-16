@@ -14,7 +14,7 @@ class IK_PoleVector_01(absBhv.Abstract_Behavior):
     validLimbTypes = (4,)   # rigData.LIMB_TYPES
     groupType = 'IKPV'  # LookAt, IKPV...
     groupShape = 'Sphere_Poly'
-    groupCount = 2
+    groupCount = 3
     groupMoveable = False    # for moving control pivots
     orderIndex = 310  
     usesJointControls = False
@@ -25,19 +25,22 @@ class IK_PoleVector_01(absBhv.Abstract_Behavior):
         log.funcFileDebug()
         if not limb.hasAttr('ikpvDistance'):
             pm.addAttr(limb, ln='ikpvDistance', at='float', 
-                                                min=0, dv=1)
+                                                min=0, dv=10)
         jointGroups = pm.listConnections(limb.jointGroups)
         jointGroups = rigUtil.SortGroups(jointGroups)
         joints = [pm.listConnections(g.joint)[0] for g in jointGroups]
-        limbGroups = pm.listConnections(limb.usedGroups)
-        limbGroups = rigUtil.SortGroups(limbGroups)
+        limbGroups = rigUtil.GetLimbGroups(limb, self.groupType)
         ikpv1 = limbGroups[0]
         ikpv2 = limbGroups[1]
-        pm.parent(ikpv2, joints[-1])
-        rigUtil.ResetAttrs(ikpv2)
-        pm.parent(ikpv2, limb)
-        self._InitIKPV1(limb, ikpv1)
-        self._UpdateIKPV1(limb)
+        ikpv3 = limbGroups[2]
+        pm.parent(ikpv1, joints[0])
+        rigUtil.ResetAttrs(ikpv1)
+        pm.parent(ikpv1, limb)
+        pm.parent(ikpv3, joints[-1])
+        rigUtil.ResetAttrs(ikpv3)
+        pm.parent(ikpv3, limb)
+        self._InitIKPV2(limb, ikpv2)
+        self._UpdateIKPV2(limb)
     
     def CleanupLimb(self, limb):
         log.funcFileDebug()
@@ -50,12 +53,25 @@ class IK_PoleVector_01(absBhv.Abstract_Behavior):
     
     def Setup_Rig_External(self, limb):
         log.funcFileDebug()
-        groups = pm.listConnections(limb.usedGroups)
+        limbGroups = rigUtil.GetLimbGroups(limb, self.groupType)
+        ikpv1 = limbGroups[0]
+        ikpv2 = limbGroups[1]
+        ikpv3 = limbGroups[2]
+        ikpv1.v.set(0)
+        jointGroups = pm.listConnections(limb.jointGroups)
+        jointGroups = rigUtil.SortGroups(jointGroups)
+        joint = [pm.listConnections(g.joint)[0] for g in jointGroups][0]
+        parentJoints = pm.listRelatives(joint, p=1, type='joint')
+        if parentJoints:
+            parentJoint = parentJoints[0]
+            parentGroup = pm.listConnections(parentJoint.group)[0]
+            parentControl = pm.listConnections(parentGroup.control)[0]
+            pm.parentConstraint(parentControl, ikpv1, mo=1)
         parentControl = rigUtil.GetParentControl(limb)
         if parentControl:
-            for group in groups:
-                pm.parentConstraint(parentControl, group, mo=1)
-        return groups
+            pm.parentConstraint(parentControl, ikpv2, mo=1)
+            pm.parentConstraint(parentControl, ikpv3, mo=1)
+        return limbGroups
     
     def Setup_Constraint_JointsToControls(self, limb):
         log.funcFileDebug()
@@ -69,12 +85,16 @@ class IK_PoleVector_01(absBhv.Abstract_Behavior):
         handle.v.set(0)
 
         # IK Groups + Controls
-        groups = pm.listConnections(limb.usedGroups)
-        groups = rigUtil.SortGroups(groups)
-        midGroup = groups[0]
-        endGroup = groups[1]
+        groups = rigUtil.GetLimbGroups(limb, self.groupType)
+        startGroup = groups[0]
+        midGroup = groups[1]
+        endGroup = groups[2]
+        startControl = pm.listConnections(startGroup.control)[0]
         midControl = pm.listConnections(midGroup.control)[0]
         endControl = pm.listConnections(endGroup.control)[0]
+
+        # point cst start joint to control
+        pm.pointConstraint(startControl, startJoint)
 
         # Move Mid Group to Mid control position
         pos = pm.xform(midControl, q=1, t=1, ws=1)
@@ -96,13 +116,14 @@ class IK_PoleVector_01(absBhv.Abstract_Behavior):
         jointGroups = pm.listConnections(limb.jointGroups)
         jointGroups = rigUtil.SortGroups(jointGroups)
         joints = [pm.listConnections(g.joint)[0] for g in jointGroups]
-        limbGroups = pm.listConnections(limb.usedGroups)
-        limbGroups = rigUtil.SortGroups(limbGroups)
+        limbGroups = rigUtil.GetLimbGroups(limb, self.groupType)
         controls = [pm.listConnections(g.control)[0] for g in limbGroups]
-        ikpvMid = controls[0]
-        ikpvEnd = controls[1]
+        ikpvStart = controls[0]
+        ikpvMid = controls[1]
+        ikpvEnd = controls[2]
+        pm.parentConstraint(joints[0], ikpvStart)
         pm.parentConstraint(joints[-1], ikpvEnd)
-        self._UpdateIKPV1(limb)
+        self._UpdateIKPV2(limb)
         pm.parentConstraint(joints[1], ikpvMid, mo=1)
 
     
@@ -114,7 +135,7 @@ class IK_PoleVector_01(absBhv.Abstract_Behavior):
     def Teardown_Rig_External(self, limb):
         log.funcFileDebug()
         if pm.listConnections(limb.limbParent):
-            groups = pm.listConnections(limb.usedGroups)
+            groups = rigUtil.GetLimbGroups(limb, self.groupType)
             for group in groups:
                 cst = pm.listRelatives(group, c=1, type='parentConstraint')
                 pm.delete(cst)
@@ -126,13 +147,14 @@ class IK_PoleVector_01(absBhv.Abstract_Behavior):
         joints = [pm.listConnections(g.joint)[0] for g in jointGroups]
 
         # Delete ikHandle
-        limbGroups = pm.listConnections(limb.usedGroups)
-        endGroup = rigUtil.SortGroups(limbGroups)[1]
+        limbGroups = rigUtil.GetLimbGroups(limb, self.groupType)
+        endGroup = rigUtil.SortGroups(limbGroups)[2]
         endControl = pm.listConnections(endGroup.control)[0]
         handle = pm.listRelatives(endControl, c=1, type='ikHandle')
         pm.delete(handle)
 
         # Delete joint constraints
+        pm.delete(pm.listRelatives(joints[0], c=1, type='pointConstraint'))
         pm.delete(pm.listRelatives(joints[-1], c=1, type='orientConstraint'))
         for group in jointGroups:
             cst = pm.listRelatives(group, c=1, type='parentConstraint')
@@ -145,16 +167,14 @@ class IK_PoleVector_01(absBhv.Abstract_Behavior):
                 pm.delete(cst)
 
         # Reposition group to second joint
-        groups = pm.listConnections(limb.usedGroups)
-        groups = rigUtil.SortGroups(groups)
-        midGroup = groups[0]
+        midGroup = limbGroups[1]
         jointPos = pm.xform(joints[1], q=1, t=1, ws=1)
         pm.xform(midGroup, t=jointPos, ws=1)
-        self._UpdateIKPV1(limb)
+        self._UpdateIKPV2(limb)
 
     def Teardown_Constraint_ControlsToJoints(self, limb):
         log.funcFileDebug()
-        limbGroups = pm.listConnections(limb.usedGroups)
+        limbGroups = rigUtil.GetLimbGroups(limb, self.groupType)
         controls = [pm.listConnections(g.control)[0] for g in limbGroups]
         for control in controls:
             pm.delete(pm.listRelatives(control, c=1, type='parentConstraint'))
@@ -163,8 +183,12 @@ class IK_PoleVector_01(absBhv.Abstract_Behavior):
 
     def Setup_Editable_Limb_UI(self, limb):
         log.funcFileDebug()
-        pm.attrControlGrp( l='Control Distance', a=limb.ikpvDistance,
-                            cc=pm.Callback(self._UpdateIKPV1, limb))
+        group = rigUtil.GetLimbGroups(limb, self.groupType)[0]
+        with pm.columnLayout(co=('left', -50)):
+            pm.attrControlGrp( l='Control Distance', a=limb.ikpvDistance,
+                                cc=pm.Callback(self._UpdateIKPV2, limb))
+        with pm.columnLayout(co=('left', -100)):
+            pm.attrControlGrp( l='Show Start Control', a=group.v)
         return True
     
 #============= ANIMATION UI ============================
@@ -172,15 +196,17 @@ class IK_PoleVector_01(absBhv.Abstract_Behavior):
     def Setup_Animation_Limb_UI(self, limb):
         return False # return if UI is enabled
     
-    def _UpdateIKPV1(self, limb):
+#============= UTIL ============================
+
+    def _UpdateIKPV2(self, limb):
         dist = limb.ikpvDistance.get()
-        ikpv1 = rigUtil.GetLimbGroups(limb, self.groupType)[0]
-        control = pm.listConnections(ikpv1.control)[0]
+        ikpv2 = rigUtil.GetLimbGroups(limb, self.groupType)[1]
+        control = pm.listConnections(ikpv2.control)[0]
         control.tx.set(dist)
         control.ty.set(0)
         control.tz.set(0)
 
-    def _InitIKPV1(self, limb, ikpv1):
+    def _InitIKPV2(self, limb, ikpv2):
         jointGroups = pm.listConnections(limb.jointGroups)
         jointGroups = rigUtil.SortGroups(jointGroups)
         j1 = pm.listConnections(jointGroups[0].joint)[0]
@@ -207,7 +233,7 @@ class IK_PoleVector_01(absBhv.Abstract_Behavior):
         posPOffset = (posP[0]+pos1[0], posP[1]+pos1[1], posP[2]+pos1[2])
 
         # pos/rot group
-        pm.xform(ikpv1, t=posPOffset, ws=1)
-        a = pm.aimConstraint(j2, ikpv1)
+        pm.xform(ikpv2, t=posPOffset, ws=1)
+        a = pm.aimConstraint(j2, ikpv2)
         pm.delete(a)
-        pm.xform(ikpv1, t=pos2, ws=1)
+        pm.xform(ikpv2, t=pos2, ws=1)
