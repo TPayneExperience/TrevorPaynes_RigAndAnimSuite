@@ -16,7 +16,7 @@ class LookAt_01(absBhv.Abstract_Behavior):
     groupShape = 'Circle_Wire'
     groupCount = 1
     groupMoveable = False    # for moving control pivots
-    orderIndex = 410
+    orderIndex = 510
     usesJointControls = False
     usesLimbControls = True
     bakeLosesData = False
@@ -30,7 +30,7 @@ class LookAt_01(absBhv.Abstract_Behavior):
             pm.addAttr(limb, ln='lookAtOffsetY', at='float')
             pm.addAttr(limb, ln='lookAtOffsetZ', at='float')
         joint = pm.listConnections(limb.joints)[0]
-        group = pm.listConnections(limb.usedGroups)[0]
+        group = rigUtil.GetLimbGroups(limb, self.groupType)[0]
         pm.parent(group, joint)
         rigUtil.ResetAttrs(group)
         pm.parent(group, limb)
@@ -43,7 +43,7 @@ class LookAt_01(absBhv.Abstract_Behavior):
 
     def Setup_Rig_Internal(self, limb):
         log.funcFileDebug()
-        limbGroup = pm.listConnections(limb.usedGroups)[0]
+        limbGroup = rigUtil.GetLimbGroups(limb, self.groupType)[0]
         control = pm.listConnections(limbGroup.control)[0]
 
         # Move Mid Group to Mid control position
@@ -55,7 +55,7 @@ class LookAt_01(absBhv.Abstract_Behavior):
     def Setup_Rig_External(self, limb):
         log.funcFileDebug()
         parentControl = rigUtil.GetParentControl(limb)
-        group = pm.listConnections(limb.usedGroups)[0]
+        group = rigUtil.GetLimbGroups(limb, self.groupType)[0]
         if parentControl:
             pm.parentConstraint(parentControl, group, mo=1)
         return [group]
@@ -63,7 +63,7 @@ class LookAt_01(absBhv.Abstract_Behavior):
     def Setup_Constraint_JointsToControls(self, limb):
         log.funcFileDebug()
         joint = pm.listConnections(limb.joints)[0]
-        limbGroup = pm.listConnections(limb.usedGroups)[0]
+        limbGroup = rigUtil.GetLimbGroups(limb, self.groupType)[0]
         control = pm.listConnections(limbGroup.control)[0]
         # Aim Constraint
         cst = pm.aimConstraint(control, joint, mo=1)
@@ -77,7 +77,7 @@ class LookAt_01(absBhv.Abstract_Behavior):
     def Setup_Constraint_ControlsToJoints(self, limb):
         log.funcFileDebug()
         joint = pm.listConnections(limb.joints)[0]
-        limbGroup = pm.listConnections(limb.usedGroups)[0]
+        limbGroup = rigUtil.GetLimbGroups(limb, self.groupType)[0]
         control = pm.listConnections(limbGroup.control)[0]
         pm.parentConstraint(joint, control, mo=1)
 
@@ -85,7 +85,7 @@ class LookAt_01(absBhv.Abstract_Behavior):
 
     def Teardown_Rig_Internal(self, limb):
         log.funcFileDebug()
-        limbGroup = pm.listConnections(limb.usedGroups)[0]
+        limbGroup = rigUtil.GetLimbGroups(limb, self.groupType)[0]
         joint = pm.listConnections(limb.joints)[0]
         jointPos = pm.xform(joint, q=1, t=1, ws=1)
         pm.xform(limbGroup, t=jointPos, ws=1)
@@ -94,7 +94,7 @@ class LookAt_01(absBhv.Abstract_Behavior):
     def Teardown_Rig_External(self, limb):
         log.funcFileDebug()
         if pm.listConnections(limb.limbParent):
-            group = pm.listConnections(limb.usedGroups)[0]
+            group = rigUtil.GetLimbGroups(limb, self.groupType)[0]
             cst = pm.listRelatives(group, c=1, type='parentConstraint')
             pm.delete(cst)
 
@@ -109,7 +109,7 @@ class LookAt_01(absBhv.Abstract_Behavior):
     
     def Teardown_Constraint_ControlsToJoints(self, limb):
         log.funcFileDebug()
-        group = pm.listConnections(limb.usedGroups)[0]
+        group = rigUtil.GetLimbGroups(limb, self.groupType)[0]
         control = pm.listConnections(group.control)[0]
         cst = pm.listRelatives(control, c=1, type='parentConstraint')
         pm.delete(cst)
@@ -133,7 +133,7 @@ class LookAt_01(absBhv.Abstract_Behavior):
     
     def _UpdateControl(self, limb):
         dist = limb.lookAtDistance.get()
-        group = pm.listConnections(limb.usedGroups)[0]
+        group = rigUtil.GetLimbGroups(limb, self.groupType)[0]
         control = pm.listConnections(group.control)[0]
         control.tx.set(dist)
         control.ty.set(0)

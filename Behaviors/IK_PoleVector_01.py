@@ -26,10 +26,19 @@ class IK_PoleVector_01(absBhv.Abstract_Behavior):
         if not limb.hasAttr('ikpvDistance'):
             pm.addAttr(limb, ln='ikpvDistance', at='float', 
                                                 min=0, dv=10)
-        jointGroups = pm.listConnections(limb.jointGroups)
-        jointGroups = rigUtil.SortGroups(jointGroups)
-        joints = [pm.listConnections(g.joint)[0] for g in jointGroups]
+            pm.addAttr(limb, ln='IKPVCurve', dt='string')
+            pm.addAttr(limb, ln='ikJoints', dt='string')
+        # jointGroups = pm.listConnections(limb.jointGroups)
+        # jointGroups = rigUtil.SortGroups(jointGroups)
+        # joints = [pm.listConnections(g.joint)[0] for g in jointGroups]
+        joints = pm.listConnections(limb.joints)
+        joints = rigUtil.Joint._GetSortedJoints(joints)
+        pm.disconnectAttr(limb.ikJoints)
+        for joint in joints:
+            pm.connectAttr(limb.ikJoints, joint.limbExtra)
         limbGroups = rigUtil.GetLimbGroups(limb, self.groupType)
+
+        # Position IK Controls
         ikpv1 = limbGroups[0]
         ikpv2 = limbGroups[1]
         ikpv3 = limbGroups[2]
@@ -41,14 +50,38 @@ class IK_PoleVector_01(absBhv.Abstract_Behavior):
         pm.parent(ikpv3, limb)
         self._InitIKPV2(limb, ikpv2)
         self._UpdateIKPV2(limb)
+
+        # Create IK PV Curve
+        if not pm.listConnections(limb.IKPVCurve):
+            curve = pm.curve(d=1, p=((0,0,0), (1,0,0)), k=(0, 1))
+            cluster1 = pm.cluster(curve.cv[0])
+            cluster2 = pm.cluster(curve.cv[1])
+            xform1 = cluster1[1]
+            xform2 = cluster2[1]
+            control = pm.listConnections(ikpv2.control)[0]
+            pm.parent(xform1, xform2, curve, limb)
+            pm.parentConstraint(control, xform1)
+            pm.parentConstraint(joints[1], xform2)
+
+            # Curve Cleanup
+            curve.template.set(1)
+            pm.addAttr(curve, ln='limb', dt='string')
+            pm.connectAttr(limb.IKPVCurve, curve.limb)
+            curve.v.set(0)
+            xform1.v.set(0)
+            xform2.v.set(0)
+            pm.select(d=1)
     
     def CleanupLimb(self, limb):
         log.funcFileDebug()
+        pm.delete(pm.listConnections(limb.IKPVCurve))
     
 #============= SETUP ============================
 
     def Setup_Rig_Internal(self, limb):
         log.funcFileDebug()
+        curve = pm.listConnections(limb.IKPVCurve)[0]
+        curve.v.set(1)
         return []
     
     def Setup_Rig_External(self, limb):
@@ -58,9 +91,8 @@ class IK_PoleVector_01(absBhv.Abstract_Behavior):
         ikpv2 = limbGroups[1]
         ikpv3 = limbGroups[2]
         ikpv1.v.set(0)
-        jointGroups = pm.listConnections(limb.jointGroups)
-        jointGroups = rigUtil.SortGroups(jointGroups)
-        joint = [pm.listConnections(g.joint)[0] for g in jointGroups][0]
+        joints = pm.listConnections(limb.joints)
+        joint = rigUtil.Joint._GetSortedJoints(joints)[0]
         parentJoints = pm.listRelatives(joint, p=1, type='joint')
         if parentJoints:
             parentJoint = parentJoints[0]
@@ -131,6 +163,8 @@ class IK_PoleVector_01(absBhv.Abstract_Behavior):
 
     def Teardown_Rig_Internal(self, limb):
         log.funcFileDebug()
+        curve = pm.listConnections(limb.IKPVCurve)[0]
+        curve.v.set(0)
 
     def Teardown_Rig_External(self, limb):
         log.funcFileDebug()
