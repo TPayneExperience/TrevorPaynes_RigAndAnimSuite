@@ -42,7 +42,7 @@ class FK_Chain_01(absBhv.Abstract_Behavior):
 
     def Setup_Rig_Internal(self, limb):
         log.funcFileDebug()
-        groups = pm.listConnections(limb.usedGroups)
+        groups = rigUtil.GetLimbGroups(limb, self.groupType)
         groups = rigUtil.SortGroups(groups)
         for i in range(len(groups)-1):
             group = groups[i+1]
@@ -53,7 +53,7 @@ class FK_Chain_01(absBhv.Abstract_Behavior):
     def Setup_Rig_External(self, limb):
         log.funcFileDebug()
         parentControl = rigUtil.GetParentControl(limb)
-        groups = pm.listConnections(limb.usedGroups)
+        groups = rigUtil.GetLimbGroups(limb, self.groupType)
         group = rigUtil.SortGroups(groups)[0]
         if parentControl:
             pm.parentConstraint(parentControl, group, mo=1)
@@ -61,14 +61,14 @@ class FK_Chain_01(absBhv.Abstract_Behavior):
     
     def Setup_Constraint_JointsToControls(self, limb):
         log.funcFileDebug()
-        for group in pm.listConnections(limb.usedGroups):
+        for group in rigUtil.GetLimbGroups(limb, self.groupType):
             joint = pm.listConnections(group.joint)[0]
             control = pm.listConnections(group.control)[0]
             pm.parentConstraint(control, joint, mo=1)
     
     def Setup_Constraint_ControlsToJoints(self, limb):
         log.funcFileDebug()
-        for group in pm.listConnections(limb.usedGroups):
+        for group in rigUtil.GetLimbGroups(limb, self.groupType):
             joint = pm.listConnections(group.joint)[0]
             control = pm.listConnections(group.control)[0]
             pm.parentConstraint(joint, control)
@@ -77,14 +77,14 @@ class FK_Chain_01(absBhv.Abstract_Behavior):
 
     def Teardown_Rig_Internal(self, limb):
         log.funcFileDebug()
-        groups = pm.listConnections(limb.usedGroups)
+        groups = rigUtil.GetLimbGroups(limb, self.groupType)
         groups = rigUtil.SortGroups(groups)[1:]
         pm.parent(groups, limb)
 
     def Teardown_Rig_External(self, limb):
         log.funcFileDebug()
         if pm.listConnections(limb.limbParent):
-            jointGroups = pm.listConnections(limb.usedGroups)
+            jointGroups = rigUtil.GetLimbGroups(limb, self.groupType)
             jointGroup = rigUtil.SortGroups(jointGroups)[0]
             cst = pm.listRelatives(jointGroup, c=1, type='parentConstraint')
             pm.delete(cst)
@@ -98,7 +98,7 @@ class FK_Chain_01(absBhv.Abstract_Behavior):
     
     def Teardown_Constraint_ControlsToJoints(self, limb):
         log.funcFileDebug()
-        jointGroups = pm.listConnections(limb.usedGroups)
+        jointGroups = rigUtil.GetLimbGroups(limb, self.groupType)
         controls = [pm.listConnections(g.control)[0] for g in jointGroups]
         for control in controls:
             cst = pm.listRelatives(control, c=1, type='parentConstraint')
