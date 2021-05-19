@@ -10,11 +10,11 @@
     "showRootName": false, 
     "ControlShape_IKS": "Cylinder_Poly", 
     "templateFolderPath": "", 
-    "jointUpAxis": 2, 
     "windowPos": [
-        351, 
-        1289
+        440, 
+        1246
     ], 
+    "jointUpAxis": 2, 
     "limbIndex": 0, 
     "ControlShape_Empty": "Square_Wire", 
     "lControlTransparency": 0.8, 

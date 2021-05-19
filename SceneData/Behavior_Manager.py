@@ -275,6 +275,22 @@ class Behavior_Manager(object):
         index = sorted(list(orderedFiles.keys()))[0]
         return orderedFiles[index]
 
+    # @staticmethod
+    # def _InitRigRootBhv(rigRoot, behavior):
+    #     log.funcFileDebug()
+    #     if not behavior.groupCount:
+    #         return
+    #     attr = behavior.groupType + 'Shape'
+    #     if rigRoot.hasAttr(attr):
+    #         return
+    #     groupShape = behavior.groupShape
+    #     pm.addAttr(rigRoot, ln=attr, dt='string', h=genData.HIDE_ATTRS)
+    #     tempParent = pm.listConnections(rigRoot.controlTemplates)[0]
+    #     for ctr in pm.listRelatives(tempParent, c=1):
+    #         if groupShape in ctr.shortName():
+    #             pm.connectAttr(ctr.rigRoot, rigRoot + '.' + attr)
+    #             return
+
     def InitRigRootControlShapeAttrs(self, rigRoot):
         folder = os.path.dirname(__file__)
         folder = os.path.dirname(folder)

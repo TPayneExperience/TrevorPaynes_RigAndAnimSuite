@@ -31,7 +31,7 @@ class Empty_01(absBhv.Abstract_Behavior):
         jnt.Joint.Add(rigRoot, 0, limb, joint)
         joint.pfrsName.set('Empty')
         joint.v.set(0)
-        limbGroup = rigUtil.GetLimbGroups(limb, self.groupType)[0]
+        limbGroup = pm.listConnections(limb.usedGroups)[0]
         limbControl = pm.listConnections(limbGroup.control)[0]
         jointGroup = pm.listConnections(joint.group)[0]
         jointGroup.v.set(0)
@@ -51,21 +51,21 @@ class Empty_01(absBhv.Abstract_Behavior):
     def Setup_Rig_External(self, limb):
         log.funcFileDebug()
         parentControl = rigUtil.GetParentControl(limb)
-        group = rigUtil.GetLimbGroups(limb, self.groupType)[0]
+        group = pm.listConnections(limb.usedGroups)[0]
         if parentControl:
             pm.parentConstraint(parentControl, group, mo=1)
         return [group]
     
     def Setup_Constraint_JointsToControls(self, limb):
         log.funcFileDebug()
-        group = rigUtil.GetLimbGroups(limb, self.groupType)[0]
+        group = pm.listConnections(limb.usedGroups)[0]
         joint = pm.listConnections(limb.joints)[0]
         control = pm.listConnections(group.control)[0]
         pm.parentConstraint(control, joint)
     
     def Setup_Constraint_ControlsToJoints(self, limb):
         log.funcFileDebug()
-        group = rigUtil.GetLimbGroups(limb, self.groupType)[0]
+        group = pm.listConnections(limb.usedGroups)[0]
         joint = pm.listConnections(limb.joints)[0]
         control = pm.listConnections(group.control)[0]
         pm.parentConstraint(joint, control)
@@ -90,7 +90,7 @@ class Empty_01(absBhv.Abstract_Behavior):
     
     def Teardown_Constraint_ControlsToJoints(self, limb):
         log.funcFileDebug()
-        group = rigUtil.GetLimbGroups(limb, self.groupType)[0]
+        group = pm.listConnections(limb.usedGroups)[0]
         control = pm.listConnections(group.control)[0]
         cst = pm.listRelatives(control, c=1, type='parentConstraint')
         pm.delete(cst)
