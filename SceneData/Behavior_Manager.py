@@ -106,8 +106,7 @@ class Behavior_Manager(object):
             bhv.Setup_Constraint_ControlsToJoints(limb)
         pm.refresh()
         if controls:
-            self._BakeJointDataToControls(
-                                            self.bakeData, 
+            self._BakeJointDataToControls(  self.bakeData, 
                                             controls)
         for limb in limbs:
             bhv = self.bhvs[limb.bhvFile.get()]
@@ -223,6 +222,7 @@ class Behavior_Manager(object):
             pm.parentConstraint(group, joint)
         pm.cutKey(controls)
         pm.bakeResults(controls, sm=1, t=(start, end))
+
         if tempGroups:
             pm.delete(list(tempGroups.values()))
 
@@ -268,7 +268,8 @@ class Behavior_Manager(object):
             orderIndex = bhv.orderIndex
             if orderIndex in orderedFiles:
                 msg = 'All behavior orderIndex values must be unique!'
-                msg = '\n"%s" is conflicting.' % bhv.bhvType
+                msg += '\n"%s" conflicting with ' % bhv.bhvType
+                msg += '"%s"' % orderedFiles[orderIndex].bhvType
                 raise ValueError(msg)
             if limbType in bhv.validLimbTypes:
                 orderedFiles[orderIndex] = bhvFile

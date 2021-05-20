@@ -16,7 +16,7 @@ class LookAt_01(absBhv.Abstract_Behavior):
     groupShape = 'Circle_Wire'
     groupCount = 1
     groupMoveable = False    # for moving control pivots
-    orderIndex = 410
+    orderIndex = 510
     usesJointControls = False
     usesLimbControls = True
     bakeLosesData = False

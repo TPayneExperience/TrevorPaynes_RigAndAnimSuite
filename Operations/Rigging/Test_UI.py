@@ -61,15 +61,16 @@ class Test_UI(absOpUI.Abstract_OperationUI):
             pm.select(d=1)
             return
         self._selectedLimbs = [self._limbIDs[ID] for ID in limbIDStrs]
-        controls = []
+        # controls = []
         for limb in self._selectedLimbs:
             log.debug('\t\t' + limb.pfrsName.get())
-            for group in pm.listConnections(limb.usedGroups):
-                controls += pm.listConnections(group.control)
+            # for group in pm.listConnections(limb.usedGroups):
+            #     controls += pm.listConnections(group.control)
         if len(self._selectedLimbs) == 1:
             limb = self._selectedLimbs[0]
             self.PopulateControlHier(limb)
-        pm.select(controls)
+        # pm.select(controls)
+        pm.select(self._selectedLimbs)
 
 #=========== CONTROL HIER ====================================
 

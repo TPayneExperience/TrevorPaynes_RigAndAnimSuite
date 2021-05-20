@@ -125,7 +125,7 @@ class ANM_Behavior_UI(absOpUI.Abstract_OperationUI):
                             icon='warning', 
                             m=msg, 
                             b=['Ok', 'Cancel'], 
-                            db='Cancel', 
+                            db='Ok', 
                             cb='Cancel', 
                             ds='Cancel')
             if result == 'Cancel':

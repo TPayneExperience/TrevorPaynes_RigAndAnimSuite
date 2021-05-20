@@ -138,9 +138,8 @@ class IK_PoleVector_01(absBhv.Abstract_Behavior):
     
     def Setup_Constraint_ControlsToJoints(self, limb):
         log.funcFileDebug()
-        jointGroups = pm.listConnections(limb.jointGroups)
-        jointGroups = rigUtil.SortGroups(jointGroups)
-        joints = [pm.listConnections(g.joint)[0] for g in jointGroups]
+        joints = pm.listConnections(limb.joints)
+        joints = rigUtil.Joint._GetSortedJoints(joints)
         limbGroups = rigUtil.GetLimbGroups(limb, self.groupType)
         controls = [pm.listConnections(g.control)[0] for g in limbGroups]
         ikpvStart = controls[0]
@@ -187,11 +186,11 @@ class IK_PoleVector_01(absBhv.Abstract_Behavior):
             cst = pm.listRelatives(group, c=1, type='parentConstraint')
             pm.delete(cst)
         
-        # Delete limb groups constraints
-        if pm.listConnections(limb.limbParent):
-            for group in limbGroups:
-                cst = pm.listRelatives(group, c=1, type='parentConstraint')
-                pm.delete(cst)
+        # # Delete limb groups constraints
+        # if pm.listConnections(limb.limbParent):
+        #     for group in limbGroups:
+        #         cst = pm.listRelatives(group, c=1, type='parentConstraint')
+        #         pm.delete(cst)
 
         # Reposition group to second joint
         midGroup = limbGroups[1]
