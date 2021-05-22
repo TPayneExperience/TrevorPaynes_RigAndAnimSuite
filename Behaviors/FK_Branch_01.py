@@ -72,9 +72,7 @@ class FK_Branch_01(absBhv.Abstract_Behavior):
                 pm.delete(cst)
 
     def Teardown_Constraint_JointsToControls(self, limb):
-        jointGroups = pm.listConnections(limb.jointGroups)
-        joints = [pm.listConnections(g.joint)[0] for g in jointGroups]
-        for joint in joints:
+        for joint in pm.listConnections(limb.joints):
             cst = pm.listRelatives(joint, c=1, type='parentConstraint')
             pm.delete(cst)
     
