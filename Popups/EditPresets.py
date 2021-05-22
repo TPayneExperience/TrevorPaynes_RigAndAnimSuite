@@ -28,7 +28,7 @@ class EditPresets:
                                     c=self.DeletePreset)
         self.close_btn = pm.button(l='Close', p=form, 
                                     c=lambda x: pm.layoutDialog(dis='close'))
-        pm.formLayout(form, edit=True, width=430, height=320,
+        pm.formLayout(form, e=1, width=430, height=320,
                         attachForm=[(temp_fl, 'top', 5), 
                                     (temp_fl, 'left', 5), 
                                     (temp_fl, 'right', 5),  
