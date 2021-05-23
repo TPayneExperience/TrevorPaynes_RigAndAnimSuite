@@ -6,9 +6,12 @@ RIG_MODES = (   'Setup Rig',
 
 CONTROL_TEMPLATE_GROUP = 'CONTROL_SHAPE_TEMPLATES'
 
-CONTROLS_LAYER = 'Controls'
-MESHES_LAYER = 'Meshes'
-JOINTS_LAYER = 'Joints'
+CONTROL_DISP_LAYER = 'Control_Disp'
+MESHES_DISP_LAYER = 'Meshe_Disp'
+JOINTS_DISP_LAYER = 'Joint_Disp'
+
+# CONTROL_ANIM_LAYER = 'Control_Anim'
+JOINTS_ANIM_LAYER = 'Joint_Anim'
 
 # ============= BEHAVIORS =============
 
@@ -55,6 +58,7 @@ LIMB_TYPES = (  'Empty',
                 'Custom3',
                 'Custom4',
                 'Custom5')
+LIMB_LOCATIONS = ('Body', 'Face')
 
 LIMB_SIDES = ('M', 'L', 'R', '-')
 

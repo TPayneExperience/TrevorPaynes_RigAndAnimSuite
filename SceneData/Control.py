@@ -20,7 +20,7 @@ class Control:
         genUtil.AbstractInitializer(control, 'Control')
         pm.disconnectAttr(control.rigRoot)
         rigUtil.ChannelBoxAttrs(control, 1, 1, 1, 0)
-        pm.editDisplayLayerMembers( rigData.CONTROLS_LAYER, 
+        pm.editDisplayLayerMembers( rigData.CONTROL_DISP_LAYER, 
                                     control, nr=1)
         pm.connectAttr(group.control, control.group)
         pm.parent(control, group)

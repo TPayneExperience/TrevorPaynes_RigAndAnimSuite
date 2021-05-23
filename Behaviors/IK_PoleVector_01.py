@@ -81,9 +81,6 @@ class IK_PoleVector_01(absBhv.Abstract_Behavior):
         ikpv2 = limbGroups[1]
         ikpv3 = limbGroups[2]
         ikpv1.v.set(0)
-        # jointGroups = pm.listConnections(limb.jointGroups)
-        # jointGroups = rigUtil.SortGroups(jointGroups)
-        # joint = [pm.listConnections(g.joint)[0] for g in jointGroups][0]
         joints = pm.listConnections(limb.joints)
         joint = rigUtil.Joint._GetSortedJoints(joints)[0]
         parentJoints = pm.listRelatives(joint, p=1, type='joint')
@@ -101,6 +98,7 @@ class IK_PoleVector_01(absBhv.Abstract_Behavior):
     def Setup_Constraint_JointsToControls(self, limb):
         log.funcFileDebug()
         # IK Handle
+        pm.refresh()
         jointGroups = pm.listConnections(limb.jointGroups)
         jointGroups = rigUtil.SortGroups(jointGroups)
         joints = [pm.listConnections(g.joint)[0] for g in jointGroups]
@@ -149,6 +147,10 @@ class IK_PoleVector_01(absBhv.Abstract_Behavior):
         pm.parentConstraint(joints[-1], ikpvEnd)
         self._UpdateIKPV2(limb)
         pm.parentConstraint(joints[1], ikpvMid, mo=1)
+        # Bind 
+        for group in pm.listConnections(limb.jointGroups):
+            joint = pm.listConnections(group.joint)[0]
+            pm.parentConstraint(joint, group)
 
     
 #============= TEARDOWN ============================
@@ -204,6 +206,8 @@ class IK_PoleVector_01(absBhv.Abstract_Behavior):
         controls = [pm.listConnections(g.control)[0] for g in limbGroups]
         for control in controls:
             pm.delete(pm.listRelatives(control, c=1, type='parentConstraint'))
+        for group in pm.listConnections(limb.jointGroups):
+            pm.delete(pm.listRelatives(group, c=1, type='parentConstraint'))
     
 #============= EDITABLE UI ============================
 

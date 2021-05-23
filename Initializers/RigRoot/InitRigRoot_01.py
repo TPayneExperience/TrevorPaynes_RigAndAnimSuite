@@ -89,15 +89,16 @@ class InitRigRoot(absInit.Abstract_Initializer):
         pm.connectAttr(rigRoot.bakedDataGroup, group.rigRoot)
         rigUtil.ChannelBoxAttrs(group, 0, 0, 0, 0)
         
-        # CONTROLS
-        # pm.addAttr(rigRoot, ln=rigData.JOINT_SHAPE_ATTR, dt='string', h=hide)
+        #============= DISPLAY LAYERS ============================
 
-        #============= LAYERS ============================
-
-        controlDL = pm.createDisplayLayer(n=rigData.CONTROLS_LAYER, empty=1)
-        jointDL = pm.createDisplayLayer(n=rigData.JOINTS_LAYER, empty=1)
-        meshDL = pm.createDisplayLayer(n=rigData.MESHES_LAYER, empty=1)
+        controlDL = pm.createDisplayLayer(n=rigData.CONTROL_DISP_LAYER, empty=1)
+        jointDL = pm.createDisplayLayer(n=rigData.JOINTS_DISP_LAYER, empty=1)
+        meshDL = pm.createDisplayLayer(n=rigData.MESHES_DISP_LAYER, empty=1)
         controlDL.visibility.set(0)
         controlDL.displayType.set(2)
         jointDL.displayType.set(2)
         meshDL.displayType.set(2)
+
+        #============= ANIM LAYERS ============================
+
+        pm.animLayer(rigData.JOINTS_ANIM_LAYER, override=1, mute=1)

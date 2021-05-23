@@ -17,7 +17,7 @@ class Joint:
     @staticmethod
     def Add(rigRoot, index, limb, joint):
         log.funcFileDebug()
-        pm.editDisplayLayerMembers(rigData.JOINTS_LAYER, 
+        pm.editDisplayLayerMembers(rigData.JOINTS_DISP_LAYER, 
                                         joint, nr=1)
         genUtil.AbstractInitializer(joint, 'Joint')
         nextJointID = rigRoot.nextJointID.get()

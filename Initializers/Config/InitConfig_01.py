@@ -47,7 +47,9 @@ class InitConfig(absInit.Abstract_Initializer):
                 'rControlTransparency': 0.8,
 
                 # Control Shapes
-                'ControlShape_Joint': 'Cube_Poly'
+                'controlShape_Joint': 'Cube_Poly',
+
+                'debug' : False
                 }
 
 

@@ -60,10 +60,26 @@ class LimbSetup(absOp.Abstract_Operation):
                             setattr(self, fName, inst.Execute) #Untested
     
     def Autobuild(self, rigRoot, autobuilder):
+        config = self._GetConfig()
+        upAxis = rigData.JOINT_AIM_UP_VECTORS[config['jointUpAxis']]
         limbs = autobuilder.Execute(rigRoot)
         for limb in limbs:
             self._InitBehavior(rigRoot, limb)
+            # Set Preferred angles for IK Bhv, else straight arms break
+            bendAxis = upAxis[:]
+            side = limb.side.get() 
+            if limb.shortName() == 'Arm_Limb_L_NODE':
+                pass
+            if side in (0, 1):
+                bendAxis = [a*-1 for a in bendAxis]
+            for joint in pm.listConnections(limb.joints):
+                angles = tuple(joint.preferredAngle.get())
+                if angles == (0,0,0):
+                    joint.preferredAngle.set(bendAxis)
         self._LoadSkeletalHierarchy(rigRoot)
+        # # Zeroing out joint rotations, breaks animations though...
+        # for joint in pm.ls(type='joint'):
+        #     self.RemoveJointRotations(joint)
         
 #============= LIMBS ============================
 
@@ -203,6 +219,8 @@ class LimbSetup(absOp.Abstract_Operation):
             newJoints += pm.listConnections(newLimb.joints)
         self._MirrorBodyJoints(newJoints)
         self._MirrorLimbs(limbs, newLimbs, axisLetter)
+        for limb in newLimbs + limbs:
+            limb.limbLocation.set(0) # Body
     
     def MirrorFaceLimbs(self, limbs, axisLetter):
         newLimbs = self.DuplicateLimbs(limbs)
@@ -211,6 +229,8 @@ class LimbSetup(absOp.Abstract_Operation):
             newJoints += pm.listConnections(newLimb.joints)
         self._MirrorFaceJoints(newJoints)
         self._MirrorLimbs(limbs, newLimbs, axisLetter)
+        for limb in newLimbs + limbs:
+            limb.limbLocation.set(1) # Face
 
     def _MirrorLimbs(self, oldLimbs, newLimbs, axisLetter):
         scale = self.mirrorAxisScales[axisLetter.upper()]
@@ -358,9 +378,9 @@ class LimbSetup(absOp.Abstract_Operation):
             nextJointID = rigRoot.nextJointID.get()
             rigRoot.nextJointID.set(nextJointID + 1)
             joint.ID.set(nextJointID)
-        pm.editDisplayLayerMembers( rigData.JOINTS_LAYER, 
+        pm.editDisplayLayerMembers( rigData.JOINTS_DISP_LAYER, 
                                     joints, nr=1)
-        pm.editDisplayLayerMembers( rigData.CONTROLS_LAYER, 
+        pm.editDisplayLayerMembers( rigData.CONTROL_DISP_LAYER, 
                                     controls, nr=1)
     
 #============= JOINTS ============================
@@ -559,10 +579,17 @@ class LimbSetup(absOp.Abstract_Operation):
         log.funcFileInfo()
         jointGroup = pm.listConnections(rigRoot.jointsParentGroup)[0]
         joints = pm.ls(type='joint')
+        newJoints = []
         for joint in joints:
             parent = pm.listRelatives(joint, p=1)
             if not parent or pm.objectType(parent[0]) != 'joint':
                 pm.parent(joint, jointGroup)
+            if not pm.listConnections(joint.tx, type='animLayer'):
+                newJoints.append(joint)
+        if newJoints:
+            pm.select(newJoints)
+            pm.animLayer(rigData.JOINTS_ANIM_LAYER, e=1, 
+                                    aso=1, ea='BaseAnimation')
     
     def _GetConfig(self):
         folder = os.path.dirname(__file__)

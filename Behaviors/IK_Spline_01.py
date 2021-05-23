@@ -120,13 +120,16 @@ class IK_Spline_01(absBhv.Abstract_Behavior):
         log.funcFileDebug()
         limbGroups = rigUtil.GetLimbGroups(limb, self.groupType)
         limbControls = [pm.listConnections(g.control)[0] for g in limbGroups]
-        jointGroups = pm.listConnections(limb.jointGroups)
-        jointGroups = rigUtil.SortGroups(jointGroups)
-        joints = [pm.listConnections(g.joint) for g in jointGroups]
+        joints = pm.listConnections(limb.joints)
+        joints = rigUtil.Joint._GetSortedJoints(joints)
 
         # Constrain end controls
         for i in (-2, -1, 0, 1):
             pm.parentConstraint(joints[i], limbControls[i])
+
+        for group in pm.listConnections(limb.jointGroups):
+            joint = pm.listConnections(group.joint)[0]
+            pm.parentConstraint(joint, group, mo=1)
         
 #============= TEARDOWN ============================
 
@@ -176,6 +179,8 @@ class IK_Spline_01(absBhv.Abstract_Behavior):
         for control in controls:
             cst = pm.listRelatives(control, c=1, type='parentConstraint')
             pm.delete(cst)
+        for group in pm.listConnections(limb.jointGroups):
+            pm.delete(pm.listRelatives(group, c=1, type='parentConstraint'))
     
 #============= EDITABLE UI ============================
 

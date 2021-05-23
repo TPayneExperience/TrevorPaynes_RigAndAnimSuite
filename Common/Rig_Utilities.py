@@ -192,6 +192,16 @@ def GetLimbCreationOrder(rootLimb):
         orderedLimbs += children[:]
     return orderedLimbs
 
+def GetSortedLimbs(rigRoot):
+    rootLimbs = []
+    allLimbs = []
+    for limb in pm.listConnections(rigRoot.limbs):
+        if not pm.listConnections(limb.limbParent):
+            rootLimbs.append(limb)
+    for rootLimb in rootLimbs[::-1]:
+        allLimbs += GetLimbCreationOrder(rootLimb)
+    return allLimbs
+
 def GetLimbGroups(limb, groupType):
     groups = {} # order index : group
     for group in pm.listConnections(limb.limbGroups):

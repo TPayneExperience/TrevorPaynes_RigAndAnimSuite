@@ -32,6 +32,8 @@ import Popups.UserSettings as usr
 reload(usr)
 import Popups.UsefulScripts as usfScr
 reload(usfScr)
+import Popups.Share as shr
+reload(shr)
 
 import payneFreeRigSuite as pfrs
 reload(pfrs)
@@ -119,12 +121,14 @@ class PayneFreeRigSuite_UI:
                     # pm.menuItem(l='ANIMATING', d=1)
                     # pm.menuItem(l='Poses', en=0)
                     
-                pm.menuItem(divider=1)
+                pm.menuItem(d=1)
                 pm.menuItem(l='Useful Scripts for hotkeys', c=self._UsefulScripts)
-                pm.menuItem(divider=1)
+                pm.menuItem(d=1)
                 pm.menuItem(l='Submit Feedback...', c=self.SubmitFeedback)
-                pm.menuItem(l="Share (You're My Hero!)", en=0)
-                pm.menuItem(divider=1)
+                pm.menuItem(l="Share (You're My Hero!)", c=self._Share)
+                pm.menuItem(l='LOGGING', d=1)
+                config = self._GetConfig()
+                pm.menuItem(l='Debug (Requires Restart!)', cb=config['debug'], c=self._SetDebug)
                 pm.menuItem(l='Open Log', c=self.pfrs.OpenLog)
 
             # ADD BACK LATER
@@ -241,10 +245,7 @@ class PayneFreeRigSuite_UI:
 
     def OpenDocumentation(self, ignore):
         log.funcFileInfo()
-        # self.logger.debug('\tPFRS_UI > OpenDocumentation')
-        url = 'https://docs.google.com/document/d/1KxdOnofyA2Bxz'
-        url += 'QHInxrmWjFJK_Q1hCwvnAP0-0SgMRE/edit?usp=sharing'
-        webbrowser.open(url)
+        webbrowser.open(genData.DOC_URL)
 
     def OpenWebsite(self, ignore):
         log.funcFileInfo()
@@ -283,10 +284,19 @@ class PayneFreeRigSuite_UI:
         log.funcFileInfo()
         usfScr.UsefulScripts()
 
+    def _Share(self, ignore):
+        log.funcFileInfo()
+        shr.Share()
+
+    def _SetDebug(self, isOn):
+        self.pfrs.SetDebug(isOn)
+        cmd = 'import pymel.core as pm;'
+        cmd += 'pm.deleteUI("' + self.win + '", window=1)'
+        pm.evalDeferred(cmd)
+
 #=========== MISC ====================================
 
     def _SaveWindowPos(self):
-        # Save Config File
         folder = os.path.dirname(__file__)
         folder = os.path.join(folder, 'Data')
         filePath = os.path.join(folder, 'Config.json')
@@ -297,8 +307,11 @@ class PayneFreeRigSuite_UI:
 
     def _LoadWindowPos(self):
         # Load Config File
+        config = self._GetConfig()
+        pm.window(self.win, e=1, tlc=config['windowPos'])
+
+    def _GetConfig(self):
         folder = os.path.dirname(__file__)
         folder = os.path.join(folder, 'Data')
         filePath = os.path.join(folder, 'Config.json')
-        config = genUtil.Json.Load(filePath)
-        pm.window(self.win, e=1, tlc=config['windowPos'])
+        return genUtil.Json.Load(filePath)

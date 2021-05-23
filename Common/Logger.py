@@ -9,14 +9,18 @@ import subprocess
 import sys
 import time
 
+import Common.General_Utilities as genUtil
+reload(genUtil)
+
 # ---- USES ------
 # log.funcFileInfo()
 # log.funcFileDebug()
 # log.debug(msg)
 # log.info(msg)
 
+LOGGING_LEVEL = None
 # LOGGING_LEVEL = logging.DEBUG
-LOGGING_LEVEL = logging.INFO
+# LOGGING_LEVEL = logging.INFO
 
 def info(msg):
     logger_obj = _General_Logger.Get()
@@ -45,6 +49,11 @@ def funcFileInfo():
     logger_obj.info('', extra=extra_args)
 
 def funcFileDebug():
+    config = _GetConfig()
+    if config['debug']:
+        LOGGING_LEVEL = logging.DEBUG
+    else:
+        LOGGING_LEVEL = logging.INFO
     if LOGGING_LEVEL != logging.DEBUG:
         return
     logger_obj = _FuncFile_Logger.Get()
@@ -65,6 +74,13 @@ def OpenLog():
     else:                                   # linux variants
         subprocess.call(('xdg-open', logFile))
 
+def _GetConfig():
+    folder = os.path.dirname(__file__)
+    folder = os.path.dirname(folder)
+    folder = os.path.join(folder, 'Data')
+    filePath = os.path.join(folder, 'Config.json')
+    return genUtil.Json.Load(filePath)
+
 #=========== LOGGER ====================================
    
 def _GetLogPath():
@@ -77,7 +93,7 @@ def _GetLogPath():
 
 class _General_Logger:
     logger = None
-    loggingLevel = LOGGING_LEVEL # INFO
+    # loggingLevel = LOGGING_LEVEL # INFO
 
     @staticmethod
     def Get():
@@ -91,13 +107,19 @@ class _General_Logger:
         formatter = _CustomFormatter(f)
         hdlr.setFormatter(formatter)
         logger.addHandler(hdlr) 
-        logger.setLevel(_General_Logger.loggingLevel)
+        # logger.setLevel(_General_Logger.loggingLevel)
+        config = _GetConfig()
+        if config['debug']:
+            LOGGING_LEVEL = logging.DEBUG
+        else:
+            LOGGING_LEVEL = logging.INFO
+        logger.setLevel(LOGGING_LEVEL)
         _General_Logger.logger = logger
         return logger
 
 class _FuncFile_Logger:
     logger = None
-    loggingLevel = LOGGING_LEVEL # INFO
+    # loggingLevel = LOGGING_LEVEL # INFO
 
     @staticmethod
     def Get():
@@ -111,7 +133,13 @@ class _FuncFile_Logger:
         formatter = _CustomFormatter(f)
         hdlr.setFormatter(formatter)
         logger.addHandler(hdlr) 
-        logger.setLevel(_FuncFile_Logger.loggingLevel)
+        # logger.setLevel(_FuncFile_Logger.loggingLevel)
+        config = _GetConfig()
+        if config['debug']:
+            LOGGING_LEVEL = logging.DEBUG
+        else:
+            LOGGING_LEVEL = logging.INFO
+        logger.setLevel(LOGGING_LEVEL)
         _FuncFile_Logger.logger = logger
         return logger
 

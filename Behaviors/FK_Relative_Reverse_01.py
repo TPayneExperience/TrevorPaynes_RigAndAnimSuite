@@ -80,6 +80,10 @@ class FK_Relative_01(absBhv.Abstract_Behavior):
         jointGroup = rigUtil.SortGroups(jointGroups)[-1]
         joint = pm.listConnections(jointGroup.joint)[0]
         pm.parentConstraint(joint, limbControl, mo=1)
+        # Bind 
+        for group in pm.listConnections(limb.jointGroups):
+            joint = pm.listConnections(group.joint)[0]
+            pm.parentConstraint(joint, group, mo=1)
     
 #============= TEARDOWN ============================
 
@@ -115,6 +119,8 @@ class FK_Relative_01(absBhv.Abstract_Behavior):
         control = pm.listConnections(group.control)[0]
         cst = pm.listRelatives(control, c=1, type='parentConstraint')
         pm.delete(cst)
+        for group in pm.listConnections(limb.jointGroups):
+            pm.delete(pm.listRelatives(group, c=1, type='parentConstraint'))
     
 #============= EDITABLE UI ============================
 

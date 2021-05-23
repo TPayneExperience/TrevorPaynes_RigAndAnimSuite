@@ -162,7 +162,7 @@ class UserSettings:
                                             cc=self.SetRTrans)
 
     def _Setup_ControlShapes(self):
-        configAttrs = [k for k in list(self.config.keys()) if 'ControlShape_' in k]
+        configAttrs = [k for k in list(self.config.keys()) if 'controlShape_' in k]
         rigRoot = genUtil.GetRigRoots()[0]
         group = pm.listConnections(rigRoot.controlTemplates)[0]
         controlShapes = pm.listRelatives(group, c=1)

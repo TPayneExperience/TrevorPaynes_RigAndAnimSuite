@@ -31,7 +31,17 @@ def SelectMirrorLimbControl():
             control = pm.listConnections(group.control)[0]
             pm.select(control)
             return
-SelectMirrorLimbControl()'''
+SelectMirrorLimbControl()''',
+# -------------------------
+'Select Hierarchy':
+'''import pymel.core as pm
+sl=pm.ls(sl=1)
+pm.select(sl, hi=1)''',
+# -------------------------
+'Toggle Control Visibility':
+'''import pymel.core as pm
+val = pm.getAttr('Control_Disp.v')
+pm.setAttr('Control_Disp.v', not val)'''
         }
 
     def __init__(self):
@@ -61,13 +71,3 @@ SelectMirrorLimbControl()'''
                                             self.close_btn)])
         
         
-
-
-
-
-
-
-
-
-
-

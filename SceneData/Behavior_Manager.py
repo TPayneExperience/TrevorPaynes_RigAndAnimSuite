@@ -99,7 +99,9 @@ class Behavior_Manager(object):
 
     def Setup_Anim_Rig(self, rigRoot):
         log.funcFileDebug()
-        limbs = pm.listConnections(rigRoot.limbs)
+        if pm.objExists(rigData.JOINTS_ANIM_LAYER):
+            pm.animLayer(rigData.JOINTS_ANIM_LAYER, e=1, mute=0)
+        limbs = rigUtil.GetSortedLimbs(rigRoot)[::-1]
         controls = self._SetupRig(limbs)
         for limb in limbs:
             bhv = self.bhvs[limb.bhvFile.get()]
@@ -111,11 +113,15 @@ class Behavior_Manager(object):
         for limb in limbs:
             bhv = self.bhvs[limb.bhvFile.get()]
             bhv.Teardown_Constraint_ControlsToJoints(limb)
+        pm.refresh()
         for limb in limbs:
             bhv = self.bhvs[limb.bhvFile.get()]
             bhv.Setup_Constraint_JointsToControls(limb)
+        # Lock hide channelbox
         for limb in limbs:
             self._LockHideLimbControls(limb)
+        if pm.objExists(rigData.JOINTS_ANIM_LAYER):
+            pm.delete(rigData.JOINTS_ANIM_LAYER)
         
     def _LockHideLimbControls(self, limb):
         log.funcFileDebug()
@@ -139,9 +145,8 @@ class Behavior_Manager(object):
         log.funcFileDebug()
         limbs = pm.listConnections(rigRoot.limbs)
         bakeDataParent = pm.listConnections(rigRoot.bakedDataGroup)[0]
-        temp = self._BakeControlsToJointData(limbs, 
+        self.bakeData = self._BakeControlsToJointData(limbs, 
                                                 bakeDataParent)
-        self.bakeData = temp
         for limb in limbs:
             self._TeardownLimb(limb)
 
@@ -192,7 +197,6 @@ class Behavior_Manager(object):
         bhv.Teardown_Constraint_JointsToControls(limb)
         bhv.Teardown_Rig_External(limb)
         bhv.Teardown_Rig_Internal(limb)
-
 
     def _SetupRig(self, limbs):
         log.funcFileDebug()
@@ -305,7 +309,7 @@ class Behavior_Manager(object):
             if not rigRoot.hasAttr(attr):
                 pm.addAttr(rigRoot, ln=attr, dt='string', h=hide)
                 fullAttr = '%s.%s' % (rigRoot, attr)
-                configAttr = 'ControlShape_' + groupType
+                configAttr = 'controlShape_' + groupType
                 pm.setAttr(fullAttr, config[configAttr])
 
     def _SetupLimbGroups(self, rigRoot, limb, behavior):

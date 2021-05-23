@@ -38,15 +38,16 @@ class Abstract_Operation:
 
     def Setup(self, allRigRoots):
         toBeBuilt = self.isRigBuilt
-        # TEARDOWN
         for rigRoot in allRigRoots:
             rigMode = rigRoot.rigMode.get()
+            # TEARDOWN
             if not toBeBuilt:
                 if rigRoot.isBuilt.get():
                     if rigMode == 0:
                         self.bhvMng.Teardown_Edit_Rig(rigRoot)
                     elif rigMode == 1:
                         self.bhvMng.Teardown_Anim_Rig(rigRoot)
+            # SETUP
             else:
                 if not rigRoot.isBuilt.get():
                     if rigMode == 0:
@@ -59,9 +60,9 @@ class Abstract_Operation:
         c = self.controlLayerState
         j = self.jointLayerState
         m = self.meshLayerState
-        rigUtil.SetLayerState(rigData.CONTROLS_LAYER, c[0], c[1])
-        rigUtil.SetLayerState(rigData.JOINTS_LAYER, j[0], j[1])
-        rigUtil.SetLayerState(rigData.MESHES_LAYER, m[0], m[1])
+        rigUtil.SetLayerState(rigData.CONTROL_DISP_LAYER, c[0], c[1])
+        rigUtil.SetLayerState(rigData.JOINTS_DISP_LAYER, j[0], j[1])
+        rigUtil.SetLayerState(rigData.MESHES_DISP_LAYER, m[0], m[1])
     
 
 

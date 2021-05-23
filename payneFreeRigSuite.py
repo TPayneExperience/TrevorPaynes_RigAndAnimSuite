@@ -41,9 +41,9 @@ class PayneFreeRigSuite:
         self._StartLogger()
         self.bhvMng = bMng.Behavior_Manager()
         self.bhvMng.InitBehaviors()
+        self._InitConfigFile()
         self._InitOperations()
 
-        self._InitConfigFile()
 
     def __del__(self):
         self._EndLogger()
@@ -54,6 +54,15 @@ class PayneFreeRigSuite:
         log.funcFileInfo()
         log.OpenLog()
 
+    def SetDebug(self, isOn):
+        log.funcFileInfo()
+        folder = os.path.dirname(__file__)
+        folder = os.path.join(folder, 'Data')
+        filePath = os.path.join(folder, 'Config.json')
+        config = genUtil.Json.Load(filePath)
+        config['debug'] = isOn
+        genUtil.Json.Save(filePath, config)
+
 #=========== RIG ROOT ====================================
 
     def GetRigRoots(self):
@@ -61,14 +70,15 @@ class PayneFreeRigSuite:
         return genUtil.GetRigRoots()
         # return [r for r in pm.ls(tr=1) if r.hasAttr('limbs')]
 
-    def AddRigRoot(self):
-        rigRoot = rrt.RigRoot.Add()
-
-        # Get Config Data
+    def _GetConfig(self):
         folder = os.path.dirname(__file__)
         folder = os.path.join(folder, 'Data')
         filePath = os.path.join(folder, 'Config.json')
-        config = genUtil.Json.Load(filePath)
+        return genUtil.Json.Load(filePath)
+
+    def AddRigRoot(self):
+        rigRoot = rrt.RigRoot.Add()
+        config = self._GetConfig()
 
         # Set Defaults
         rigRoot.pfrsName.set(config['rigRootName'])
@@ -134,12 +144,7 @@ class PayneFreeRigSuite:
 #=========== PRIVATE ====================================
 
     def _AddRigRootMaterials(self, rigRoot):
-
-        # Get Config Data
-        folder = os.path.dirname(__file__)
-        folder = os.path.join(folder, 'Data')
-        filePath = os.path.join(folder, 'Config.json')
-        config = genUtil.Json.Load(filePath)
+        config = self._GetConfig()
 
         colors = [config['lControlColor']]
         colors.append(config['mControlColor'])
@@ -223,7 +228,7 @@ class PayneFreeRigSuite:
             bhv = self.bhvMng.bhvs[bhvFiles[-1]]
             if not bhv.groupType:
                 continue
-            controlShapeName = 'ControlShape_' + bhv.groupType
+            controlShapeName = 'controlShape_' + bhv.groupType
             if controlShapeName in temp.data:
                 continue
             temp.data[controlShapeName] = bhv.groupShape
@@ -231,7 +236,9 @@ class PayneFreeRigSuite:
 
 #=========== LOGGER ====================================
    
+
     def _StartLogger(self):
+        
         startTxt = '\n'
         startTxt += '='*40
         startTxt += '\n'

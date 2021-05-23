@@ -80,6 +80,8 @@ class LookAt_01(absBhv.Abstract_Behavior):
         limbGroup = rigUtil.GetLimbGroups(limb, self.groupType)[0]
         control = pm.listConnections(limbGroup.control)[0]
         pm.parentConstraint(joint, control, mo=1)
+        jointGroup = pm.listConnections(limb.jointGroups)[0]
+        pm.parentConstraint(joint, jointGroup, mo=1)
 
 #============= TEARDOWN ============================
 
@@ -113,6 +115,8 @@ class LookAt_01(absBhv.Abstract_Behavior):
         control = pm.listConnections(group.control)[0]
         cst = pm.listRelatives(control, c=1, type='parentConstraint')
         pm.delete(cst)
+        jGroup = pm.listConnections(limb.jointGroups)[0]
+        pm.delete(pm.listRelatives(jGroup, c=1, type='parentConstraint'))
 
 #============= EDITABLE UI ============================
 
