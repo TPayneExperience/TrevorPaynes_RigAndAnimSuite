@@ -16,15 +16,15 @@ reload(SceneData)
 import Popups
 reload(Popups)
 
-import Common.Logger as log
+import Utilities.Logger as log
 reload(log)
 import SceneData.RigRoot as rrt
 reload(rrt)
 import Data.Rig_Data as rigData
 reload(rigData)
-import Common.Rig_Utilities as rigUtil
+import Utilities.Rig_Utilities as rigUtil
 reload(rigUtil)
-import Common.General_Utilities as genUtil
+import Utilities.General_Utilities as genUtil
 reload(genUtil)
 import Popups.EditRigRoot as edRt
 reload(edRt)
@@ -38,7 +38,7 @@ reload(shr)
 import payneFreeRigSuite as pfrs
 reload(pfrs)
 
-import PFRS_Debug_UI as debug_ui
+import Debug.PFRS_Debug_UI as debug_ui
 reload(debug_ui)
 
 class PayneFreeRigSuite_UI:

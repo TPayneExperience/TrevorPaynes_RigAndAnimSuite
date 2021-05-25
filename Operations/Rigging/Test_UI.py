@@ -5,9 +5,9 @@ import Abstracts.Abstract_OperationUI as absOpUI
 reload(absOpUI)
 import Test as tst
 reload (tst)
-import Common.UI_Utilities as uiUtil
+import Utilities.UI_Utilities as uiUtil
 reload(uiUtil)
-import Common.Logger as log
+import Utilities.Logger as log
 reload(log)
 
 class Test_UI(absOpUI.Abstract_OperationUI):

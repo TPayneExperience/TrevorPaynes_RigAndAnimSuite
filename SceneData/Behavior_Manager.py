@@ -5,17 +5,17 @@ import sys
 
 import pymel.core as pm
 
-import Common.Logger as log
+import Utilities.Logger as log
 reload(log)
 import Abstracts.Abstract_Behavior as absBhv
 reload(absBhv)
 import Data.Rig_Data as rigData
 reload(rigData)
-import Common.Rig_Utilities as rigUtil
+import Utilities.Rig_Utilities as rigUtil
 reload(rigUtil)
 import SceneData.Group as grp
 reload(grp)
-import Common.General_Utilities as genUtil
+import Utilities.General_Utilities as genUtil
 reload(genUtil)
 import Data.General_Data as genData
 reload(genUtil)

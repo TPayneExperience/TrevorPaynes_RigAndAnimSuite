@@ -9,7 +9,7 @@ import subprocess
 import sys
 import time
 
-import Common.General_Utilities as genUtil
+import Utilities.General_Utilities as genUtil
 reload(genUtil)
 
 # ---- USES ------

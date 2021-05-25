@@ -3,10 +3,10 @@ import pymel.core as pm
 
 import Abstracts.Abstract_Behavior as absBhv
 reload(absBhv)
-import Common.Rig_Utilities as rigUtil
+import Utilities.Rig_Utilities as rigUtil
 reload(rigUtil)
 
-import Common.Logger as log
+import Utilities.Logger as log
 reload(log)
 
 class FK_Relative_01(absBhv.Abstract_Behavior):

@@ -1,7 +1,7 @@
 
 import pymel.core as pm
 
-import Common.Logger as log
+import Utilities.Logger as log
 reload(log)
 import Data.General_Data as genData
 reload(genData)

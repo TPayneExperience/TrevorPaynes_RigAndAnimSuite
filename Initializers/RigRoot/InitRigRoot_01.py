@@ -7,9 +7,9 @@ import Data.General_Data as genData
 reload(genData)
 import Data.Rig_Data as rigData
 reload(rigData)
-import Common.Logger as log
+import Utilities.Logger as log
 reload(log)
-import Common.Rig_Utilities as rigUtil
+import Utilities.Rig_Utilities as rigUtil
 reload(rigUtil)
 
 class InitRigRoot(absInit.Abstract_Initializer):

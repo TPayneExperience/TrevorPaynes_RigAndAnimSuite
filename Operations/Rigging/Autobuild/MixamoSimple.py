@@ -3,13 +3,13 @@ import pymel.core as pm
 
 import Abstracts.Abstract_Autobuild as absBld
 reload(absBld)
-import Common.Logger as log
+import Utilities.Logger as log
 reload(log)
 import SceneData.Limb as lmb
 reload(lmb)
-import Common.Rig_Utilities as rigUtil
+import Utilities.Rig_Utilities as rigUtil
 reload(rigUtil)
-import Common.General_Utilities as genUtil
+import Utilities.General_Utilities as genUtil
 reload(genUtil)
 import Operations.Rigging.Autobuild.ByNames as autoBld
 reload(autoBld)

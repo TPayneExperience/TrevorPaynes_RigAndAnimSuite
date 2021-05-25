@@ -5,9 +5,9 @@ import Abstracts.Abstract_OperationUI as absOpUI
 reload(absOpUI)
 import ANM_Behavior as bhv
 reload(bhv)
-import Common.UI_Utilities as uiUtil
+import Utilities.UI_Utilities as uiUtil
 reload(uiUtil)
-import Common.Logger as log
+import Utilities.Logger as log
 reload(log)
 
 class ANM_Behavior_UI(absOpUI.Abstract_OperationUI):

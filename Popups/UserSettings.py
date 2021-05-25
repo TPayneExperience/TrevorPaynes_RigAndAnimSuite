@@ -3,9 +3,9 @@ import os
 
 import pymel.core as pm
 
-import Common.General_Utilities as genUtil
+import Utilities.General_Utilities as genUtil
 reload(genUtil)
-import Common.Logger as log
+import Utilities.Logger as log
 reload(log)
 import Data.Rig_Data as rigData
 reload(rigData)

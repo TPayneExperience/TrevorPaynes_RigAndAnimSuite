@@ -1,7 +1,7 @@
 
 import pymel.core as pm
 
-import Common.Utilities as util
+import Utilities.Utilities as util
 reload(util)
 
 class PW_Joint_Hierarchy_UI:

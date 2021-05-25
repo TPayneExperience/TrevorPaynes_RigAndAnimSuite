@@ -16,7 +16,7 @@ import Abstracts.Abstract_OperationUI as absOpUI
 reload(absOpUI)
 import Abstracts.Abstract_Operation as absOp
 reload(absOp)
-import Common.Logger as log
+import Utilities.Logger as log
 reload(log)
 import SceneData.RigRoot as rrt
 reload(rrt)
@@ -24,7 +24,7 @@ import SceneData.Behavior_Manager as bMng
 reload(bMng)
 import Data.Rig_Data as rigData
 reload(rigData)
-import Common.General_Utilities as genUtil
+import Utilities.General_Utilities as genUtil
 reload(genUtil)
 import Operations.Rigging.Appearance as app
 reload(app)

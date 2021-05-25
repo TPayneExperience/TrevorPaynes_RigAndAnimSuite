@@ -5,7 +5,7 @@ import pymel.core as pm
 
 import Data.Rig_Data as rigData
 reload(rigData)
-import Common.Utilities as util
+import Utilities.Utilities as util
 reload(util)
 
 class Skin_Mananger:

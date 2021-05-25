@@ -3,7 +3,7 @@
 import pymel.core as pm
 # from maya import mel
 
-import Common.Utilities as util
+import Utilities.Utilities as util
 reload(util)
 
 import PW_Meshes_Hierarchy_UI as mesh_ui

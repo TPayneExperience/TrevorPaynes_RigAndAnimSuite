@@ -5,13 +5,13 @@ import Abstracts.Abstract_OperationUI as absOpUI
 reload(absOpUI)
 import Appearance as app
 reload(app)
-import Common.UI_Utilities as uiUtil
+import Utilities.UI_Utilities as uiUtil
 reload(uiUtil)
-import Common.Rig_Utilities as rigUtil
+import Utilities.Rig_Utilities as rigUtil
 reload(rigUtil)
-# import Common.General_Utilities as genUtil
+# import Utilities.General_Utilities as genUtil
 # reload(genUtil)
-import Common.Logger as log
+import Utilities.Logger as log
 reload(log)
 # import Data.Rig_Data as rigData
 # reload(rigData)

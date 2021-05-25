@@ -1,7 +1,7 @@
 
 import pymel.core as pm
 
-import Common.Logger as log
+import Utilities.Logger as log
 reload(log)
 
 class EditPresets:

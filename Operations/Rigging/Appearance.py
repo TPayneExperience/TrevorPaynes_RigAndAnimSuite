@@ -5,11 +5,11 @@ import pymel.core as pm
 
 import Abstracts.Abstract_Operation as absOp
 reload(absOp)
-import Common.Logger as log
+import Utilities.Logger as log
 reload(log)
 import SceneData.Control as ctr
 reload(ctr)
-import Common.Rig_Utilities as rigUtil
+import Utilities.Rig_Utilities as rigUtil
 reload(rigUtil)
 import Data.Rig_Data as rigData
 reload(rigData)
@@ -17,7 +17,7 @@ reload(rigData)
 # reload(lmb)
 # import LimbSetup as ls
 # reload(ls)
-import Common.General_Utilities as genUtil
+import Utilities.General_Utilities as genUtil
 reload(genUtil)
 # import SceneData.RigRoot as rrtp
 # reload(rrt)

@@ -3,19 +3,15 @@ import os
 
 import pymel.core as pm
 
-import Common.Logger as log
+import Utilities.Logger as log
 reload(log)
-import SceneData.RigRoot as rrt
-reload(rrt)
 
 class PFRS_Debug:
     def __init__(self, parent):
         self.pfrs = parent.pfrs
-        # self.limbMng = parent.limbMng
-        # self.rigLS = parent.rigLS
-        # self.logger = parent.logger
 
         folder = os.path.dirname(__file__)
+        folder = os.path.dirname(folder)
         self.folder = os.path.join(folder,'TESTING_FILES')
 
         if not os.path.isfile(__file__.replace('.pyc', '.py')):

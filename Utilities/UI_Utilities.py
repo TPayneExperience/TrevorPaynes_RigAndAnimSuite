@@ -3,7 +3,7 @@ import pymel.core as pm
 
 import Data.Rig_Data as rigData
 reload(rigData)
-import Common.Rig_Utilities as rigUtil
+import Utilities.Rig_Utilities as rigUtil
 reload(rigUtil)
 
 import SceneData.RigRoot as rrt

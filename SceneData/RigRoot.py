@@ -5,9 +5,9 @@ import pymel.core as pm
 
 import Data.Rig_Data as rigData
 reload(rigData)
-import Common.Logger as log
+import Utilities.Logger as log
 reload(log)
-import Common.General_Utilities as genUtil
+import Utilities.General_Utilities as genUtil
 reload(genUtil)
 
 class RigRoot:

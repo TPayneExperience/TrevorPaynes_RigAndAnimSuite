@@ -1,7 +1,7 @@
 
 from abc import ABCMeta, abstractmethod, abstractproperty
 
-# import Common.Utilities as util
+# import Utilities.Utilities as util
 # reload(util)
 
 class Abstract_Behavior:

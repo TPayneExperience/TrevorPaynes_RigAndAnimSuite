@@ -7,7 +7,7 @@ import Data.General_Data as genData
 reload(genData)
 import Data.Rig_Data as rigData
 reload(rigData)
-import Common.Logger as log
+import Utilities.Logger as log
 reload(log)
 
 class InitPreset(absInit.Abstract_Initializer):

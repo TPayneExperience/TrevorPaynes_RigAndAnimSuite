@@ -7,11 +7,11 @@ import Abstracts.Abstract_OperationUI as absOpUI
 reload(absOpUI)
 import LimbSetup as ls
 reload(ls)
-import Common.UI_Utilities as uiUtil
+import Utilities.UI_Utilities as uiUtil
 reload(uiUtil)
-import Common.General_Utilities as genUtil
+import Utilities.General_Utilities as genUtil
 reload(genUtil)
-import Common.Logger as log
+import Utilities.Logger as log
 reload(log)
 
 import SceneData.RigRoot as rrt
@@ -20,7 +20,7 @@ import Popups.LoadTemplates as ldTmp
 reload(ldTmp)
 import Data.Rig_Data as rigData
 reload(rigData)
-import Common.Rig_Utilities as rigUtil
+import Utilities.Rig_Utilities as rigUtil
 reload(rigUtil)
 
 class LimbSetup_UI(absOpUI.Abstract_OperationUI):
