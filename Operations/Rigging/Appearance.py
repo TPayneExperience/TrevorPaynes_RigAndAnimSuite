@@ -24,7 +24,7 @@ reload(genUtil)
 
 class Appearance(absOp.Abstract_Operation):
     isRigBuilt = False
-    validRigStates = (0, 1)     # 0 = Setup, 1 = Anim
+    validRigStates = (0,)     # 0 = Setup, 1 = Anim
     controlLayerState = (1, 0)  # isVis, isRef
     jointLayerState = (1, 1)    # isVis, isRef
     meshLayerState = (1, 1)    # isVis, isRef
@@ -84,7 +84,7 @@ class Appearance(absOp.Abstract_Operation):
     def SetControlShape(self, rigRoot, groupType, shapeTemplate):
         attr = '%s.%sShape' %(rigRoot, groupType)
         pm.disconnectAttr(attr)
-        pm.connectAttr(attr, shapeTemplate.rigRoot)
+        pm.connectAttr(shapeTemplate.rigRoot, attr)
         groups = []
         if groupType == 'Joint':
             for limb in pm.listConnections(rigRoot.limbs):

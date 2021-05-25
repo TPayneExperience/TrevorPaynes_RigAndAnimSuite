@@ -71,7 +71,7 @@ class FK_Chain_01(absBhv.Abstract_Behavior):
         for group in pm.listConnections(limb.jointGroups):
             joint = pm.listConnections(group.joint)[0]
             control = pm.listConnections(group.control)[0]
-            pm.parentConstraint(joint, control)
+            pm.parentConstraint(joint, control, mo=1)
     
 #============= TEARDOWN ============================
 

@@ -96,6 +96,35 @@ class Poses(absOp.Abstract_Operation):
             raise ValueError('Limb has no mirror')
         mirrorLimb = mirrorLimbs[0]
         pose = self._CopyPose(limb)
+
+        # Config
+        folder = os.path.dirname(__file__)
+        folder = os.path.dirname(folder)
+        folder = os.path.dirname(folder)
+        folder = os.path.join(folder, 'Data')
+        filePath = os.path.join(folder, 'Config.json')
+        config = genUtil.Json.Load(filePath)
+
+        aimVec = rigData.JOINT_AIM_UP_VECTORS[config['jointAimAxis']]
+        upVec = rigData.JOINT_AIM_UP_VECTORS[config['jointUpAxis']]
+        # Body
+        if limb.limbLocation.get() == 0:
+            rotFix = [(abs(i)*-2)+1 for i in upVec] # (1, -1,1)
+            posFix = [(2*abs(aimVec[i] + upVec[i]))-1 for i in range(3)] # (1,1,-1)
+        # Face
+        elif limb.limbLocation.get() == 1:
+            rotFix = [(abs(i)*-2)+1 for i in aimVec] # (1, -1,1)
+            posFix = [(2*abs(aimVec[i] + upVec[i]))-1 for i in range(3)] # (1,1,-1)
+        
+        # Fix Pos + Rot
+        for i in range(len(pose.controls)):
+            for j in range(3):
+                val = pose.controls[i][0][j]
+                pose.controls[i][0][j] = val * posFix[j]
+            for j in range(3):
+                val = pose.controls[i][1][j]
+                pose.controls[i][1][j] = val * rotFix[j]
+        self.ResetLimbControls(mirrorLimb)
         self._PastePose(pose, mirrorLimb)
     
     def FlipPose(self, limb):
@@ -112,6 +141,7 @@ class Poses(absOp.Abstract_Operation):
     def _PastePose(self, pose, limb):
         log.funcFileInfo()
         groups = pm.listConnections(limb.usedGroups)
+        groups = rigUtil.SortGroups(groups)
         controls = [pm.listConnections(g.control)[0] for g in groups]
         for i in range(len(controls)):
             self._PoseControl(controls[i], [pose], i)
@@ -259,7 +289,8 @@ class Poses(absOp.Abstract_Operation):
         groups = rigUtil.SortGroups(groups)
         for group in groups:
             control = pm.listConnections(group.control)[0]
-            pose.controls.append(self._GetControlData(control))
+            data = self._GetControlData(control)
+            pose.controls.append(data)
         return pose
 
 #============= UTIL ============================
@@ -314,7 +345,7 @@ class Poses(absOp.Abstract_Operation):
 
     def _GetControlData(self, control):
         log.funcFileDebug()
-        hasValue = False
+        # hasValue = False
         pos = pm.xform(control, q=1, t=1)
         rot = pm.xform(control, q=1, ro=1)
         newRot = []
@@ -325,13 +356,14 @@ class Poses(absOp.Abstract_Operation):
                 r -= 360
             newRot.append(r)
         scale = pm.xform(control, q=1, s=1, r=1)
-        for i in pos + rot:
-            if i != 0:
-                hasValue = True
-        for i in scale:
-            if i != 1:
-                hasValue = True
-        if hasValue:
-            data = [pos, newRot, scale]
-            return data
-        return []
+        return [pos, newRot, scale]
+        # for i in pos + rot:
+        #     if i != 0:
+        #         hasValue = True
+        # for i in scale:
+        #     if i != 1:
+        #         hasValue = True
+        # if hasValue:
+        #     data = [pos, newRot, scale]
+        #     return data
+        # return []

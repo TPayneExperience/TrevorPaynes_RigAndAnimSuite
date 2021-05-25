@@ -150,7 +150,7 @@ class IK_PoleVector_01(absBhv.Abstract_Behavior):
         # Bind 
         for group in pm.listConnections(limb.jointGroups):
             joint = pm.listConnections(group.joint)[0]
-            pm.parentConstraint(joint, group)
+            pm.parentConstraint(joint, group, mo=1)
 
     
 #============= TEARDOWN ============================

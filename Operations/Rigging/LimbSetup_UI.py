@@ -117,6 +117,9 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
                     pm.menuItem(l='EDIT LIMBS', d=1)
                     self.flipSides_mi = pm.menuItem(l='Flip Sides', 
                                             en=0, c=self.FlipSides)
+                    with pm.subMenuItem(l='Set Limb Location...', en=0) as self.limbLoc_mi:
+                        pm.menuItem(l='As Body', c=self.SetLimbLocationAsBody)
+                        pm.menuItem(l='As Face', c=self.SetLimbLocationAsFace)
                     self.remove_mi = pm.menuItem(l='Remove Limbs', 
                                             en=0, c=self.RemoveLimbs)
             with pm.frameLayout(l='---', bv=1, en=0) as self.jntHier_fl:
@@ -276,6 +279,7 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
         pm.menuItem(self.removeRot_mi, e=1, en=0)
         pm.menuItem(self.updateBody_mi, e=1, en=0)
         pm.menuItem(self.updateFace_mi, e=1, en=0)
+        pm.menuItem(self.limbLoc_mi, e=1, en=0)
         self._selectedLimbs = None
         self.PopulateJointHier(None)
         if not limbIDStrs:
@@ -287,6 +291,7 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
         pm.menuItem(self.jro_mi, e=1, en=1)
         pm.menuItem(self.aimUp_mi, e=1, en=1)
         pm.menuItem(self.removeRot_mi, e=1, en=1)
+        pm.menuItem(self.limbLoc_mi, e=1, en=1)
         self._selectedLimbs = [self._limbIDs[ID] for ID in limbIDStrs]
         for limb in self._selectedLimbs:
             log.debug('\t\t' + limb.pfrsName.get())
@@ -462,6 +467,14 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
         for limb in self._selectedLimbs:
             for joint in pm.listConnections(limb.joints):
                 self.operation.RemoveJointRotations(joint)
+
+    def SetLimbLocationAsBody(self, value):
+        for limb in self._selectedLimbs:
+            self.operation.SetLimbLocationAsBody(limb)
+
+    def SetLimbLocationAsFace(self, value):
+        for limb in self._selectedLimbs:
+            self.operation.SetLimbLocationAsFace(limb)
 
 #=========== JOINT HIER ====================================
 

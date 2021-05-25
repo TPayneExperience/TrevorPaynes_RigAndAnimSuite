@@ -383,6 +383,18 @@ class LimbSetup(absOp.Abstract_Operation):
         pm.editDisplayLayerMembers( rigData.CONTROL_DISP_LAYER, 
                                     controls, nr=1)
     
+    def SetLimbLocationAsBody(self, limb):
+        log.funcFileInfo()
+        self._SetLimbLocation(limb, 0)
+
+    def SetLimbLocationAsFace(self, limb):
+        log.funcFileInfo()
+        self._SetLimbLocation(limb, 1)
+
+    def _SetLimbLocation(self, limb, value):
+        log.funcFileInfo()
+        limb.limbLocation.set(value)
+
 #============= JOINTS ============================
 
     def JointTool(self):

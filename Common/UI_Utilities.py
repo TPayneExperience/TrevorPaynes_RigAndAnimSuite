@@ -58,7 +58,8 @@ def PopulateControlHier(widget, limb):
         groupID = str(group.groupIndex.get())
         groups[groupID] = group
     
-    for index, group in groups.items():
+    for index in sorted(list(groups.keys())):
+        group = groups[index]
         control = pm.listConnections(group.control)[0]
         name = control.shortName()
         pm.treeView(widget, e=1, addItem=(index, ''))

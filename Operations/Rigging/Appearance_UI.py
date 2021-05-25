@@ -219,20 +219,21 @@ class Appearance_UI(absOpUI.Abstract_OperationUI):
                     groupTypes.append(groupType)
         # Populate
         with pm.columnLayout(adj=1, p=self.ctrShapes_fl) as self.ctrShapes_cl:
-            for groupType in groupTypes:
-                i = 1
+            # i = 1
+            # for groupType in groupTypes:
+            for i in range(len(groupTypes)):
+                groupType = groupTypes[i]
                 label = '\t%s Shape' % groupType
                 with pm.optionMenu(l=label, 
                                     cc=pm.Callback( self.SetControlShape, 
                                                     groupType,
-                                                    i-1)) as om:
+                                                    i)) as om:
                     attr = '%s.%sShape' % (rigRoot, groupType)
                     curShape = pm.listConnections(attr)[0]
                     for shapeName, shape in self._controlTemplates.items():
                         pm.menuItem(l=shapeName)
                         if curShape == shape:
-                            pm.optionMenu(om, e=1, sl=i)
-                        i += 1
+                            pm.optionMenu(om, e=1, sl=i+1)
                 self._shapes_om.append(om)
 
     def SetControlShape(self, groupType, omIndex):

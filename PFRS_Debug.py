@@ -65,8 +65,15 @@ class PFRS_Debug:
         pm.importFile(path)
         rigRoot = self.pfrs.AddRigRoot()
         rigRoot.operation.set('Behavior')
-        # self.pfrs.LimbSetup.AutoBuildByHierarchy(rigRoot)
-        self.pfrs.LimbSetup.AutoBuildByName(rigRoot)
+        # self.pfrs.LimbSetup.AutoBuildByName(rigRoot)
+
+    def FaceTest(self):
+        self.NewScene()
+        path = os.path.join(self.folder, 'TEST_Face_01.ma')
+        pm.importFile(path)
+        rigRoot = self.pfrs.AddRigRoot()
+        # rigRoot.operation.set('Behavior')
+        # self.pfrs.LimbSetup.AutoBuildByName(rigRoot)
 
     def SpineTest(self):
         self.NewScene()

@@ -219,7 +219,6 @@ class Poses_UI(absOpUI.Abstract_OperationUI):
             log.info('\t%s' % control.shortName())
             pm.select(control)
 
-
 #=========== POSE LIBRARY ====================================
 
     def PopulatePoseLibrary(self):
@@ -234,7 +233,7 @@ class Poses_UI(absOpUI.Abstract_OperationUI):
         self.poseNames = self.operation.GetPoseNames(self._selectedLimbs)
         for i in range(len(self.poseNames)):
             poseName = self.poseNames[i]
-            ui = pm.floatSliderGrp(l=poseName, f=1, cw3=(50, 40, 100),
+            ui = pm.floatSliderGrp(l=poseName, f=1, cw3=(100, 40, 50),
                             max=1, p=self.poses_cl, pre=3,
                             dc=pm.Callback(self._SetPoseWeight, i))
             self.poses_ui.append(ui)

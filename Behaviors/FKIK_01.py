@@ -248,8 +248,7 @@ class FKIK_01(absBhv.Abstract_Behavior):
         for joint in joints:
             group = pm.listConnections(joint.group)[0]
             control = pm.listConnections(group.control)[0]
-            pm.parentConstraint(joint, control)
-    
+            pm.parentConstraint(joint, control, mo=1)
 
 #============= TEARDOWN ============================
 
