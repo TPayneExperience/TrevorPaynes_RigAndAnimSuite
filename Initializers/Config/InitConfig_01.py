@@ -13,15 +13,18 @@ reload(log)
 class InitConfig(absInit.Abstract_Initializer):
     @staticmethod
     def Initialize(temp):
-        log.funcFileDebug()
         if temp.data:
             return 
         temp.data = {
                 'version': 100,
                 'windowPos': [200, 200],
-                'jointRotOrder': 0,
+
+                # Popups
+                'welcomePopupSeen' : False,
+                'lastVersionViewed' : 0,
 
                 # Joint Aim/Up axes, rigData.JOINT_AIM_UP_AXES
+                'jointRotOrder': 0,
                 'jointAimAxis': 0,
                 'jointUpAxis': 2,
 

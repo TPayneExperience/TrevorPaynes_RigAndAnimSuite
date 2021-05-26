@@ -8,15 +8,16 @@
     "rigRootName": "TEMP", 
     "showRootName": false, 
     "templateFolderPath": "", 
-    "jointUpAxis": 2, 
     "windowPos": [
-        323, 
-        995
+        208, 
+        576
     ], 
+    "jointUpAxis": 2, 
     "limbIndex": 1, 
     "lControlTransparency": 0.8, 
     "controlShape_IKPV": "Sphere_Poly", 
     "version": 100, 
+    "lastVersionViewed": 100, 
     "rigRootIndex": 0, 
     "jointAimAxis": 0, 
     "sideIndex": 3, 
@@ -28,6 +29,7 @@
         1
     ], 
     "controlShape_FKR": "Cube_Poly", 
+    "welcomePopupSeen": true, 
     "mControlColor": [
         1, 
         1, 

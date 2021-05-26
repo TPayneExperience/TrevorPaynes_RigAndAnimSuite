@@ -85,6 +85,7 @@ class Behavior_Manager(object):
             self._Setup_ControlPivot(limb)
         # Setup Rig
         for limb in limbs:
+            limb.v.set(limb.enableLimb.get())
             bhv = self.bhvs[limb.bhvFile.get()]
             bhv.Setup_Rig_Internal(limb)
             bhv.Setup_Rig_External(limb)
@@ -104,6 +105,7 @@ class Behavior_Manager(object):
         limbs = rigUtil.GetSortedLimbs(rigRoot)[::-1]
         controls = self._SetupRig(limbs)
         for limb in limbs:
+            limb.v.set(limb.enableLimb.get())
             bhv = self.bhvs[limb.bhvFile.get()]
             bhv.Setup_Constraint_ControlsToJoints(limb)
         pm.refresh()
@@ -148,6 +150,7 @@ class Behavior_Manager(object):
         self.bakeData = self._BakeControlsToJointData(limbs, 
                                                 bakeDataParent)
         for limb in limbs:
+            limb.v.set(1)
             self._TeardownLimb(limb)
 
     def Teardown_Edit_Rig(self, rigRoot):
@@ -156,6 +159,7 @@ class Behavior_Manager(object):
 
         # Reset Controls
         for limb in limbs:
+            limb.v.set(1)
             for group in pm.listConnections(limb.usedGroups):
                 control = pm.listConnections(group.control)[0]
                 pm.cutKey(control)
@@ -279,22 +283,6 @@ class Behavior_Manager(object):
                 orderedFiles[orderIndex] = bhvFile
         index = sorted(list(orderedFiles.keys()))[0]
         return orderedFiles[index]
-
-    # @staticmethod
-    # def _InitRigRootBhv(rigRoot, behavior):
-    #     log.funcFileDebug()
-    #     if not behavior.groupCount:
-    #         return
-    #     attr = behavior.groupType + 'Shape'
-    #     if rigRoot.hasAttr(attr):
-    #         return
-    #     groupShape = behavior.groupShape
-    #     pm.addAttr(rigRoot, ln=attr, dt='string', h=genData.HIDE_ATTRS)
-    #     tempParent = pm.listConnections(rigRoot.controlTemplates)[0]
-    #     for ctr in pm.listRelatives(tempParent, c=1):
-    #         if groupShape in ctr.shortName():
-    #             pm.connectAttr(ctr.rigRoot, rigRoot + '.' + attr)
-    #             return
 
     def InitRigRootControlShapeAttrs(self, rigRoot):
         folder = os.path.dirname(__file__)

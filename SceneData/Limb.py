@@ -26,6 +26,7 @@ class Limb:
         limb.pfrsName.set(pfrsName)
         limb.ID.set(limbID)
         rigUtil.ChannelBoxAttrs(limb, 0, 0, 0, 0)
+        pm.setAttr(limb.v, l=0)
         pm.connectAttr(rigRoot.limbs, limb.rigRoot)
         return limb
     

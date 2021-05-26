@@ -96,7 +96,14 @@ class Poses(absOp.Abstract_Operation):
             raise ValueError('Limb has no mirror')
         mirrorLimb = mirrorLimbs[0]
         pose = self._CopyPose(limb)
+        self._CorrectMirrorPose(limb, pose)
 
+        self.ResetLimbControls(mirrorLimb)
+        self._StoreLimbControlValues(limb)
+        self._StoreLimbControlValues(mirrorLimb)
+        self._PastePose(pose, mirrorLimb)
+    
+    def _CorrectMirrorPose(self, limb, pose):
         # Config
         folder = os.path.dirname(__file__)
         folder = os.path.dirname(folder)
@@ -124,9 +131,7 @@ class Poses(absOp.Abstract_Operation):
             for j in range(3):
                 val = pose.controls[i][1][j]
                 pose.controls[i][1][j] = val * rotFix[j]
-        self.ResetLimbControls(mirrorLimb)
-        self._PastePose(pose, mirrorLimb)
-    
+
     def FlipPose(self, limb):
         log.funcFileInfo()
         mirrorLimbs = pm.listConnections(limb.mirrorLimb)
@@ -135,6 +140,12 @@ class Poses(absOp.Abstract_Operation):
         mirrorLimb = mirrorLimbs[0]
         pose1 = self._CopyPose(limb)
         pose2 = self._CopyPose(mirrorLimb)
+        self._CorrectMirrorPose(limb, pose1)
+        self._CorrectMirrorPose(mirrorLimb, pose2)
+        self.ResetLimbControls(limb)
+        self.ResetLimbControls(mirrorLimb)
+        self._StoreLimbControlValues(limb)
+        self._StoreLimbControlValues(mirrorLimb)
         self._PastePose(pose1, mirrorLimb)
         self._PastePose(pose2, limb)
     
@@ -272,8 +283,7 @@ class Poses(absOp.Abstract_Operation):
         xform = self.controlData[control.longName()][:]
         for pose in poses:
             controlData = pose.controls[ctrIndex]
-            if controlData:
-                xform = self._AddXforms(xform, controlData, pose.weight)
+            xform = self._AddXforms(xform, controlData, pose.weight)
         pm.xform(control, t=xform[0], ro=xform[1], s=xform[2])
 
     def _CopyPose(self, limb):

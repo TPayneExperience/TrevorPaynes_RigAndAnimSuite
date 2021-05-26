@@ -6,7 +6,9 @@ reload(log)
 
 class UsefulScripts:
     scripts = {
-'Reset Selected Controls':
+# ====== RIG + ANIM ======================
+# -------------------------
+'RESET SELECTED CONTROLS':
 '''import pymel.core as pm
 ctrs = pm.ls(sl=1)
 for ctr in ctrs:
@@ -14,8 +16,23 @@ for ctr in ctrs:
         for axis in ['X', 'Y', 'Z']:
             if not pm.getAttr(ctr + role + axis, l=1):
                 pm.setAttr(ctr + role + axis, v)''',
+
 # -------------------------
-'Select Mirror Limb Control':
+'TOGGLE CONTROL VISIBILITY':
+'''import pymel.core as pm
+val = pm.getAttr('Control_Disp.v')
+pm.setAttr('Control_Disp.v', not val)''',
+
+# ====== RIGGING ======================
+# -------------------------
+'SELECT HIERARCHY':
+'''import pymel.core as pm
+sl=pm.ls(sl=1)
+pm.select(sl, hi=1)''',
+
+# ====== ANIMATION ======================
+# -------------------------
+'SELECT MIRROR LIMB CONTROL':
 '''import pymel.core as pm
 def SelectMirrorLimbControl():
     control = pm.ls(sl=1)[0]
@@ -32,16 +49,32 @@ def SelectMirrorLimbControl():
             pm.select(control)
             return
 SelectMirrorLimbControl()''',
+
 # -------------------------
-'Select Hierarchy':
+'MIRROR POSE':
 '''import pymel.core as pm
-sl=pm.ls(sl=1)
-pm.select(sl, hi=1)''',
+import Operations.Animation.Poses as pss
+reload(pss)
+control = pm.ls(sl=1)[0]
+group = pm.listConnections(control.group)[0]
+limb = pm.listConnections(group.limb)[0]
+rigRoot = pm.listConnections(limb.rigRoot)[0]
+poseMng = pss.Poses()
+poseMng.InitPoses(rigRoot)
+poseMng.MirrorPose(limb)''',
+
 # -------------------------
-'Toggle Control Visibility':
+'FLIP POSE':
 '''import pymel.core as pm
-val = pm.getAttr('Control_Disp.v')
-pm.setAttr('Control_Disp.v', not val)'''
+import Operations.Animation.Poses as pss
+reload(pss)
+control = pm.ls(sl=1)[0]
+group = pm.listConnections(control.group)[0]
+limb = pm.listConnections(group.limb)[0]
+rigRoot = pm.listConnections(limb.rigRoot)[0]
+poseMng = pss.Poses()
+poseMng.InitPoses(rigRoot)
+poseMng.FlipPose(limb)'''
         }
 
     def __init__(self):
@@ -52,10 +85,10 @@ pm.setAttr('Control_Disp.v', not val)'''
     def _Setup(self):
         form = pm.setParent(q=1)
         with pm.scrollLayout() as self._sl:
-            with pm.frameLayout(lv=0, w=555, h=444):
+            with pm.columnLayout(adj=1):
                 for name in sorted(list(self.scripts.keys())):
                     text = self.scripts[name]
-                    with pm.frameLayout(l=name, bv=1):
+                    with pm.frameLayout(l=name, bv=1, w=550, h=150):
                         pm.scrollField(ed=0, ww=0, text=text)
         self.close_btn = pm.button('Close', 
                 c=lambda x: pm.layoutDialog(dis='close'))

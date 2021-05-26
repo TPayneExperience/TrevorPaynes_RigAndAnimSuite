@@ -38,10 +38,11 @@ class PayneFreeRigSuite:
         self.catOps = {} # {categoryName : {fileName : classObj}}
         self.categories = []
 
+        self._InitConfigFile()
         self._StartLogger()
         self.bhvMng = bMng.Behavior_Manager()
         self.bhvMng.InitBehaviors()
-        self._InitConfigFile()
+        self._AddShapesToConfig()
         self._InitOperations()
 
 
@@ -211,7 +212,6 @@ class PayneFreeRigSuite:
                             setattr(self, name, obj())
 
     def _InitConfigFile(self):
-        log.funcFileDebug()
         folder = os.path.dirname(__file__)
         folder = os.path.join(folder, 'Data')
         filePath = os.path.join(folder, 'Config.json')
@@ -222,17 +222,22 @@ class PayneFreeRigSuite:
         temp = type('tempClass', (), {'data':{}})
         temp.data = genUtil.Json.Load(filePath)
         genUtil.AbstractInitializer(temp, 'Config')
+        genUtil.Json.Save(filePath, temp.data)
 
-        # Setup Control Shape Defaults
+    def _AddShapesToConfig(self):
+        folder = os.path.dirname(__file__)
+        folder = os.path.join(folder, 'Data')
+        filePath = os.path.join(folder, 'Config.json')
+        config = self._GetConfig()
         for bhvFiles in list(self.bhvMng.bhvFiles.values()):
             bhv = self.bhvMng.bhvs[bhvFiles[-1]]
             if not bhv.groupType:
                 continue
             controlShapeName = 'controlShape_' + bhv.groupType
-            if controlShapeName in temp.data:
+            if controlShapeName in config:
                 continue
-            temp.data[controlShapeName] = bhv.groupShape
-        genUtil.Json.Save(filePath, temp.data)
+            config[controlShapeName] = bhv.groupShape
+        genUtil.Json.Save(filePath, config)
 
 #=========== LOGGER ====================================
    

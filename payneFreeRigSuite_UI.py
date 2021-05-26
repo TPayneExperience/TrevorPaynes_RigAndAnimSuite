@@ -34,6 +34,10 @@ import Popups.UsefulScripts as usfScr
 reload(usfScr)
 import Popups.Share as shr
 reload(shr)
+import Popups.Welcome as wlc
+reload(wlc)
+import Popups.Updates as upd
+reload(upd)
 
 import payneFreeRigSuite as pfrs
 reload(pfrs)
@@ -56,6 +60,8 @@ class PayneFreeRigSuite_UI:
         debug_ui.PFRS_Debug_UI(self)
         self.InitRigRoots()
         self.InitOptionMenues()
+        self.InitWelcomePopup()
+        self.InitUpdatesPopup()
 
 
 #=========== SETUP ====================================
@@ -93,7 +99,7 @@ class PayneFreeRigSuite_UI:
                 pm.menuItem(divider=1)
                 pm.menuItem(l='Export Animation Rig', c=self.ExportAnimationRig)
                 pm.menuItem(divider=1)
-                pm.menuItem(l='Quit', en=0)
+                pm.menuItem(l='Close', c=self._CloseWindow)
                 
             with pm.menu('Help'):
                 pm.menuItem(l='Documentation', c=self.OpenDocumentation)
@@ -157,6 +163,16 @@ class PayneFreeRigSuite_UI:
         self.PopulateOperations(category)
         self.UpdateOperationOptionMenu(operationName)
     
+    def InitWelcomePopup(self):
+        config = self._GetConfig()
+        if not config['welcomePopupSeen']:
+            wlc.Welcome()
+
+    def InitUpdatesPopup(self):
+        config = self._GetConfig()
+        if config['lastVersionViewed'] != config['version']:
+            upd.Updates()
+
     def UpdateOperationOptionMenu(self, operationName):
         if operationName in self.operationNames:
             index = self.operationNames.index(operationName) + 2
@@ -185,6 +201,8 @@ class PayneFreeRigSuite_UI:
                 pm.text(l=msg)
                 return
         index = self.operationNames.index(operationName)
+        op = self.operations[index]
+
         self._rigRoot.operation.set(operationName)
         self.currentOp = self.operations[index]
         self._allRigRoots = self.pfrs.GetRigRoots()
@@ -206,11 +224,14 @@ class PayneFreeRigSuite_UI:
         self.operations = []
         pm.optionMenu(self.op_op, e=1, dai=1)
         pm.menuItem(l=' ', p=self.op_op) # Empty
+        rigMode = self._rigRoot.rigMode.get()
         opPriorities = {}
         for operation in list(self.pfrs.catOps[category].values()):
             opPriorities[operation.orderIndex] = operation
         for index in sorted(list(opPriorities.keys())):
             operation = opPriorities[index]
+            if rigMode not in operation.operation.validRigStates:
+                continue
             operationName = operation.uiName
             pm.menuItem(l=operationName, p=self.op_op)
             self.operationNames.append(operationName)
@@ -290,6 +311,9 @@ class PayneFreeRigSuite_UI:
 
     def _SetDebug(self, isOn):
         self.pfrs.SetDebug(isOn)
+        self._CloseWindow(1)
+    
+    def _CloseWindow(self, ignore):
         cmd = 'import pymel.core as pm;'
         cmd += 'pm.deleteUI("' + self.win + '", window=1)'
         pm.evalDeferred(cmd)
