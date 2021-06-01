@@ -17,6 +17,8 @@ import SceneData.Group as grp
 reload(grp)
 import Utilities.General_Utilities as genUtil
 reload(genUtil)
+import Utilities.Anim_Utilities as animUtil
+reload(animUtil)
 import Data.General_Data as genData
 reload(genUtil)
 
@@ -77,18 +79,19 @@ class Behavior_Manager(object):
 
 #============= SETUP / TEARDOWN RIG ============================
 
-    def Setup_Edit_Rig(self, rigRoot):
+    # def Setup_Edit_Rig(self, rigRoot):
+    def Setup_Rig(self, rigRoot):
         log.funcFileDebug()
         limbs = pm.listConnections(rigRoot.limbs)
+
         # Setup Control Pivots
         for limb in limbs:
-            self._Setup_ControlPivot(limb)
-        # Setup Rig
-        for limb in limbs:
             limb.v.set(limb.enableLimb.get())
+            self._Setup_ControlPivot(limb)
             bhv = self.bhvs[limb.bhvFile.get()]
-            bhv.Setup_Rig_Internal(limb)
-            bhv.Setup_Rig_External(limb)
+            bhv.Setup_Rig_Controls(limb)
+        for limb in limbs:
+            bhv = self.bhvs[limb.bhvFile.get()]
             bhv.Setup_Constraint_JointsToControls(limb)
             if pm.listConnections(limb.limbParent):
                 rigUtil.Setup_ControllersToParent(limb)
@@ -97,34 +100,8 @@ class Behavior_Manager(object):
         # Lock hide channelbox
         for limb in limbs:
             self._LockHideLimbControls(limb)
+        rigRoot.isBuilt.set(1)
 
-    def Setup_Anim_Rig(self, rigRoot):
-        log.funcFileDebug()
-        if pm.objExists(rigData.JOINTS_ANIM_LAYER):
-            pm.animLayer(rigData.JOINTS_ANIM_LAYER, e=1, mute=0)
-        limbs = rigUtil.GetSortedLimbs(rigRoot)[::-1]
-        controls = self._SetupRig(limbs)
-        for limb in limbs:
-            limb.v.set(limb.enableLimb.get())
-            bhv = self.bhvs[limb.bhvFile.get()]
-            bhv.Setup_Constraint_ControlsToJoints(limb)
-        pm.refresh()
-        if controls:
-            self._BakeJointDataToControls(  self.bakeData, 
-                                            controls)
-        for limb in limbs:
-            bhv = self.bhvs[limb.bhvFile.get()]
-            bhv.Teardown_Constraint_ControlsToJoints(limb)
-        pm.refresh()
-        for limb in limbs:
-            bhv = self.bhvs[limb.bhvFile.get()]
-            bhv.Setup_Constraint_JointsToControls(limb)
-        # Lock hide channelbox
-        for limb in limbs:
-            self._LockHideLimbControls(limb)
-        if pm.objExists(rigData.JOINTS_ANIM_LAYER):
-            pm.delete(rigData.JOINTS_ANIM_LAYER)
-        
     def _LockHideLimbControls(self, limb):
         log.funcFileDebug()
         bhv = self.bhvs[limb.bhvFile.get()]
@@ -143,17 +120,7 @@ class Behavior_Manager(object):
                 scale = limb.channelBoxLimbCtrScale.get()
                 rigUtil.ChannelBoxAttrs(control, pos, rot, scale, 0)
         
-    def Teardown_Anim_Rig(self, rigRoot):
-        log.funcFileDebug()
-        limbs = pm.listConnections(rigRoot.limbs)
-        bakeDataParent = pm.listConnections(rigRoot.bakedDataGroup)[0]
-        self.bakeData = self._BakeControlsToJointData(limbs, 
-                                                bakeDataParent)
-        for limb in limbs:
-            limb.v.set(1)
-            self._TeardownLimb(limb)
-
-    def Teardown_Edit_Rig(self, rigRoot):
+    def Teardown_Rig(self, rigRoot):
         log.funcFileDebug()
         limbs = pm.listConnections(rigRoot.limbs)
 
@@ -167,72 +134,106 @@ class Behavior_Manager(object):
                 rigUtil.ResetAttrs(control)
         pm.refresh()
         for limb in limbs:
-            self._TeardownLimb(limb)
+            bhvFile = limb.bhvFile.get()
+            bhv = self.bhvs[bhvFile]
+            rigUtil.Teardown_Controllers(limb)
+            bhv.Teardown_Constraint_JointsToControls(limb)
+            bhv.Teardown_Rig_Controls(limb)
         for limb in limbs:
             for group in pm.listConnections(limb.usedGroups):
                 self._Teardown_ControlPivot(group)
+        rigRoot.isBuilt.set(0)
     
 #============= ANIMATION TRANSFER (BAKING) ============================
    
-    def _BakeControlsToJointData(self, limbs, bakeDataParent):
+    def BakeJointAnimation(self, limbs, animName):
         log.funcFileDebug()
-        bakeData = {} # joint : tempGroup
-        allJoints = []
-        tempCsts = []
-        start = pm.playbackOptions(q=1, ast=1)
-        end = pm.playbackOptions(q=1, aet=1)
+        animLimbs = []
+        pm.delete(all=1, staticChannels=1)
+        # Setup
         for limb in limbs:
-            allJoints += pm.listConnections(limb.joints)
-        for joint in allJoints:
-            group = pm.spaceLocator()
-            pm.parent(group, bakeDataParent)
-            tempCsts.append(pm.parentConstraint(joint, group))
-            bakeData[joint] = group
-        groups = list(bakeData.values())
-        pm.bakeResults(groups, sm=1, t=(start, end))
-        pm.delete(tempCsts)
-        return bakeData
-
-    def _TeardownLimb(self, limb):
-        log.funcFileDebug()
-        bhvFile = limb.bhvFile.get()
-        bhv = self.bhvs[bhvFile]
-        rigUtil.Teardown_Controllers(limb)
-        bhv.Teardown_Constraint_JointsToControls(limb)
-        bhv.Teardown_Rig_External(limb)
-        bhv.Teardown_Rig_Internal(limb)
-
-    def _SetupRig(self, limbs):
-        log.funcFileDebug()
-        controls = []
-        data = bool(self.bakeData)
-        for limb in limbs:
-            # if joints have keys or there's baked data
             joints = pm.listConnections(limb.joints)
-            keys = any([pm.keyframe(j, q=1, kc=1) for j in joints])
-            hasKeys = (data or keys)
-            bhvFile = limb.bhvFile.get()
-            bhv = self.bhvs[bhvFile]
-            # Setup rig and store controls
-            groups = bhv.Setup_Rig_Internal(limb)
-            if limb.bakeInternal.get() and hasKeys:
-                controls += [pm.listConnections(g.control)[0] for g in groups]
-            groups = bhv.Setup_Rig_External(limb)
-            if limb.bakeExternal.get() and hasKeys:
-                controls += [pm.listConnections(g.control)[0] for g in groups]
-        return controls
 
-    def _BakeJointDataToControls(self, tempGroups, controls):
+            # if no keys, skip
+            if any([pm.keyframe(j, q=1, kc=1) for j in joints]):
+                animLimbs.append(limb)
+        
+        self._BakeAnimation(animLimbs, animName)
+        return animLimbs
+
+    def BakeControlAnimation(self, limbs, animName):
+        log.funcFileDebug()
+        animLimbs = []
+        pm.delete(all=1, staticChannels=1)
+        # Setup
+        for limb in limbs:
+            groups = pm.listConnections(limb.usedGroups)
+            controls = [pm.listConnections(g.control)[0] for g in groups]
+
+            # if no keys, skip
+            if any([pm.keyframe(c, q=1, kc=1) for c in controls]):
+                animLimbs.append(limb)
+        
+        self._BakeAnimation(animLimbs, animName)
+        return animLimbs
+
+    def _BakeAnimation(self, animLimbs, animName):
+        tempCsts = []
+        locators = []
         start = pm.playbackOptions(q=1, ast=1)
         end = pm.playbackOptions(q=1, aet=1)
+
+        for limb in animLimbs:
+            # Create loc group + cst
+            joints = pm.listConnections(limb.joints)
+            joints = rigUtil.Joint._GetSortedJoints(joints)
+            jointParent = pm.listRelatives(joints[0], p=1)
+            group = grp.Group.AddAnimGroup(limb, animName)
+            group.v.set(0)
+            tempCsts.append(pm.parentConstraint(jointParent, group))
+            # create locs + cst
+            for joint in joints:
+                loc = pm.spaceLocator()
+                tempCsts.append(pm.parentConstraint(joint, loc))
+                tempCsts.append(pm.scaleConstraint(joint, loc))
+                pm.parent(loc, group)
+                locators.append(loc)
+
+        pm.bakeResults(locators, sm=1, t=(start, end))
+        pm.delete(tempCsts)
+
+    def ApplyControlAnimation(self, limbs, animName, 
+            hasPosCst, hasRotCst, hasScaleCs):
         log.funcFileDebug()
-        for joint, group in tempGroups.items():
-            pm.parentConstraint(group, joint)
+        start = pm.playbackOptions(q=1, ast=1)
+        end = pm.playbackOptions(q=1, aet=1)
+        controls = []
+        constraints = []
+        for limb in limbs:
+            joints = pm.listConnections(limb.joints)
+            joints = rigUtil.Joint._GetSortedJoints(joints)
+            jointParent = pm.listRelatives(joints[0], p=1)
+            animGroup = animUtil.GetLimbAnim(limb, animName)
+            locs = pm.listRelatives(animGroup, c=1)
+            constraints.append(pm.parentConstraint(jointParent, animGroup))
+            bhv = self.bhvs[limb.bhvFile.get()]
+            ctrs = bhv.Setup_Constraint_ControlsToXforms(limb, locs, 
+                            hasPosCst, hasRotCst, hasScaleCs)
+            controls.append(ctrs)
+
         pm.cutKey(controls)
         pm.bakeResults(controls, sm=1, t=(start, end))
+        pm.delete(constraints)
 
-        if tempGroups:
-            pm.delete(list(tempGroups.values()))
+        for limb in limbs:
+            bhv = self.bhvs[limb.bhvFile.get()]
+            bhv.Teardown_Constraint_ControlsToXforms(limb)
+
+    def DeleteAnimation(self, limbs, animName):
+        log.funcFileDebug()
+        for limb in limbs:
+            group = animUtil.GetLimbAnim(limb, animName)
+            grp.Group.Remove(group)
 
 #============= UTIL ============================
 
@@ -273,14 +274,14 @@ class Behavior_Manager(object):
         for bhvFiles in list(self.bhvFiles.values()):
             bhvFile = bhvFiles[-1]
             bhv = self.bhvs[bhvFile]
-            orderIndex = bhv.orderIndex
-            if orderIndex in orderedFiles:
-                msg = 'All behavior orderIndex values must be unique!'
+            uiOrderIndex = bhv.uiOrderIndex
+            if uiOrderIndex in orderedFiles:
+                msg = 'All behavior uiOrderIndex values must be unique!'
                 msg += '\n"%s" conflicting with ' % bhv.bhvType
-                msg += '"%s"' % orderedFiles[orderIndex].bhvType
+                msg += '"%s"' % orderedFiles[uiOrderIndex].bhvType
                 raise ValueError(msg)
             if limbType in bhv.validLimbTypes:
-                orderedFiles[orderIndex] = bhvFile
+                orderedFiles[uiOrderIndex] = bhvFile
         index = sorted(list(orderedFiles.keys()))[0]
         return orderedFiles[index]
 

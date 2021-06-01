@@ -13,12 +13,18 @@ import Data.Rig_Data as rigData
 reload(rigData)
 import SceneData.Limb as lmb
 reload(lmb)
+import SceneData.Joint as jnt
+reload(jnt)
+import SceneData.Group as grp
+reload(grp)
 import Utilities.General_Utilities as genUtil
 reload(genUtil)
 import SceneData.RigRoot as rrt
 reload(rrt)
 import Utilities.Rig_Utilities as rigUtil
 reload(rigUtil)
+import Utilities.Anim_Utilities as animUtil
+reload(animUtil)
 # import Operations.Rigging.Autobuild as auto
 # reload(auto)
 import Abstracts.Abstract_Autobuild as absBld
@@ -79,7 +85,7 @@ class LimbSetup(absOp.Abstract_Operation):
         self._LoadSkeletalHierarchy(rigRoot)
         # # Zeroing out joint rotations, breaks animations though...
         # for joint in pm.ls(type='joint'):
-        #     self.RemoveJointRotations(joint)
+        #     self.TransferRotationsToJointOrient(joint)
         
 #============= LIMBS ============================
 
@@ -319,26 +325,22 @@ class LimbSetup(absOp.Abstract_Operation):
         curFile = pm.sceneName()
         pm.saveFile()
 
-        # Unparent limbs
-        joints = []
-        for limb in limbs:
-            joints += pm.listConnections(limb.joints)
-            pm.parent(limb, w=1)
-
-        # Unparent joints
-        for joint in joints:
-            parents = pm.listRelatives(joint, p=1)
-            if parents and parents[0] not in joints:
-                pm.parent(joint, w=1)
-            for child in pm.listRelatives(joint, c=1):
-                if child in joints:
-                    continue
-                pm.delete(child)
-
-        # Delete unused stuff
+        # Delete Layers
         layers = [l for l in pm.ls(type='displayLayer') if str(l) != 'defaultLayer']
         pm.delete(layers)
-        pm.delete(rigRoot)
+
+        # Delete Extra Limbs / Joints
+        jointGroup = pm.listConnections(rigRoot.jointsParentGroup)
+        for limb in pm.listConnections(rigRoot.limbs):
+            if limb not in limbs:
+                joints = pm.listConnections(limb.joints)
+                lmb.Limb.Remove(limb)
+                for joint in joints:
+                    for child in pm.listRelatives(joint, c=1):
+                        pm.parent(child, jointGroup)
+                    jnt.Joint.Remove(joint)
+
+        rigRoot.rigMode.set(2) # To Template
         pm.saveAs(filePath, f=1)
         pm.openFile(curFile, f=1)
 
@@ -346,25 +348,22 @@ class LimbSetup(absOp.Abstract_Operation):
         log.funcFileInfo()
         limbsParent = pm.listConnections(rigRoot.limbsParentGroup)[0]
         jointsParent = pm.listConnections(rigRoot.jointsParentGroup)[0]
-        nodes = pm.importFile(filePath, rnn=1)
+        pm.importFile(filePath, rnn=1)
+        roots = genUtil.GetRigRoots()
+        tempRoot = [r for r in roots if r.rigMode.get()==2][0]
 
-        # Get limbs, joints
-        limbs = []
-        joints = []
-        for node in nodes:
-            if node.hasAttr('limbType'):
-                limbs.append(node)
-            elif pm.objectType(node) == 'joint':
-                parents = pm.listRelatives(node, p=1)
-                if not parents:
-                    joints.append(node)
-                    continue
-
-        # Setup limbs, joints
-        pm.parent(limbs, limbsParent)
-        pm.parent(joints, jointsParent)
+        # Reparent Limbs + Joints
+        tempLimbs = pm.listConnections(tempRoot.limbs)
+        tempJointGrp = pm.listConnections(tempRoot.jointsParentGroup)[0]
+        for limb in tempLimbs:
+            pm.parent(limb, limbsParent)
+        for joint in pm.listRelatives(tempJointGrp, c=1):
+            pm.parent(joint, jointsParent)
+        pm.delete(tempRoot)
+        
+        # Setup limbs, joints IDs / Names
         controls = []
-        for limb in limbs:
+        for limb in tempLimbs:
             pm.connectAttr(rigRoot.limbs, limb.rigRoot)
             for group in pm.listConnections(limb.jointGroups):
                 controls += pm.listConnections(group.control)
@@ -374,12 +373,13 @@ class LimbSetup(absOp.Abstract_Operation):
             rigRoot.nextLimbID.set(nextLimbID + 1)
             limb.ID.set(nextLimbID)
             genUtil.Name.UpdateLimbName(rigRoot, limb)
-        for joint in joints:
-            nextJointID = rigRoot.nextJointID.get()
-            rigRoot.nextJointID.set(nextJointID + 1)
-            joint.ID.set(nextJointID)
-        pm.editDisplayLayerMembers( rigData.JOINTS_DISP_LAYER, 
-                                    joints, nr=1)
+            joints = pm.listConnections(limb.joints)
+            for joint in joints:
+                nextJointID = rigRoot.nextJointID.get()
+                rigRoot.nextJointID.set(nextJointID + 1)
+                joint.ID.set(nextJointID)
+            pm.editDisplayLayerMembers( rigData.JOINTS_DISP_LAYER, 
+                                        joints, nr=1)
         pm.editDisplayLayerMembers( rigData.CONTROL_DISP_LAYER, 
                                     controls, nr=1)
     
@@ -468,9 +468,9 @@ class LimbSetup(absOp.Abstract_Operation):
                 up = upR
             for joint in pm.listConnections(limb.joints):
                 self._ApplyAimUpToJoint(joint, aim, up)
-                self.RemoveJointRotations(joint)
+                self.TransferRotationsToJointOrient(joint)
 
-    def RemoveJointRotations(self, joint):
+    def TransferRotationsToJointOrient(self, joint):
         temp = pm.group(em=1, p=joint)
         parent = pm.listRelatives(joint, p=1)[0]
         pm.parent(temp, parent)
@@ -478,6 +478,86 @@ class LimbSetup(absOp.Abstract_Operation):
         joint.jointOrient.set(rot)
         joint.r.set(0, 0, 0)
         pm.delete(temp)
+
+    def ExportJointAnimation(self, rigRoot, animName):
+        log.funcFileDebug()
+        curFile = pm.sceneName()
+        animUtil.UpdateAnimFolder(rigRoot, curFile)
+        pm.saveFile()
+        limbs = pm.listConnections(rigRoot.limbs)
+        animLimbs = self.bhvMng.BakeJointAnimation(limbs, animName)
+        self._ExportAnimation(rigRoot, animLimbs, animName)
+        pm.openFile(curFile, f=1)
+    
+    def _ExportAnimation(self, rigRoot, animLimbs, animName):
+        # File paths
+        jsonFileName = '%s.json' % animName
+        mayaFileName = '%s.ma' % animName
+        folder = rigRoot.animationFolderPath.get()
+        jsonFilePath = os.path.join(folder, jsonFileName)
+        mayaFilePath = os.path.join(folder, mayaFileName)
+
+        # Anim Stuff
+        start = pm.playbackOptions(q=1, ast=1)
+        end = pm.playbackOptions(q=1, aet=1)
+
+        # Delete layers, joints, unused limbs, groups
+        layers = [l for l in pm.ls(type='displayLayer') if str(l) != 'defaultLayer']
+        pm.delete(layers)
+        pm.delete(pm.listConnections(rigRoot.jointsParentGroup))
+        pm.delete(pm.listConnections(rigRoot.meshesParentGroup))
+        pm.delete(pm.listConnections(rigRoot.controlTemplates))
+        
+        # DELETE LATER, MESH CLEANUP
+        pm.delete([pm.listRelatives(m, p=1)[0] for m in pm.ls(type='mesh')])
+        limbs = pm.listConnections(rigRoot.limbs)
+        delLimbs = [l for l in limbs if l not in animLimbs]
+        for limb in delLimbs:
+            lmb.Limb.Remove(limb)
+        for limb in animLimbs:
+            for child in pm.listRelatives(limb, c=1):
+                if not child.hasAttr('pfrsName'):
+                    pm.delete(child)
+                elif child.pfrsName.get() != animName:
+                    pm.delete(child)
+                else:
+                    child.v.set(1)
+        rigRoot.rigMode.set(3) # Baked Animations
+        
+        # Json file
+        data = {}
+        data['limbs'] = []
+        for limb in animLimbs:
+            data['limbs'].append([limb.pfrsName.get(), limb.side.get()])
+        data['startFrame'] = start
+        data['frameCount'] = end-start
+        genUtil.Json.Save(jsonFilePath, data)
+
+        # Save, Reopen, disable window
+        pm.saveAs(mayaFilePath, f=1)
+
+    def RemoveJointAnimation(self, rigRoot):
+        log.funcFileDebug()
+        for limb in pm.listConnections(rigRoot.limbs):
+            pm.cutKey(pm.listConnections(limb.joints))
+
+    def SetJointRotationToZero(self, limb):
+        for joint in pm.listConnections(limb.joints):
+            joint.r.set(0,0,0)
+
+    def ResetControlTransforms(self, limb):
+        for group in pm.listConnections(limb.jointGroups):
+            joint = pm.listConnections(group.joint)[0]
+            control = pm.listConnections(group.control)[0]
+            pm.parent(group, joint)
+            rigUtil.ResetAttrs(group)
+            # Center control pivot
+            c = pm.objectCenter(control, gl=1)
+            pm.move(c[0], c[1], c[2], 
+                    control.scalePivot, 
+                    control.rotatePivot, ws=1)
+            rigUtil.ResetAttrs(control)
+            pm.parent(group, limb)
 
     def _ApplyAimUpToJoint(self, joint, aimVector, upVector):
         children = pm.listRelatives(joint, c=1)
@@ -600,8 +680,8 @@ class LimbSetup(absOp.Abstract_Operation):
                 newJoints.append(joint)
         if newJoints:
             pm.select(newJoints)
-            pm.animLayer(rigData.JOINTS_ANIM_LAYER, e=1, 
-                                    aso=1, ea='BaseAnimation')
+            # pm.animLayer(rigData.JOINTS_ANIM_LAYER, e=1, 
+            #                         aso=1, ea='BaseAnimation')
     
     def _GetConfig(self):
         folder = os.path.dirname(__file__)

@@ -12,7 +12,7 @@ reload(log)
 
 class ANM_Behavior_UI(absOpUI.Abstract_OperationUI):
     uiName = 'Behavior'
-    orderIndex = 110
+    uiOrderIndex = 110
     operation = bhv.ANM_Behavior()
     def __init__(self):
         self._bhvTypes = []

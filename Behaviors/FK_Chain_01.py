@@ -18,7 +18,7 @@ class FK_Chain_01(absBhv.Abstract_Behavior):
     groupShape = ''
     groupCount = 0
     groupMoveable = True   # for moving control pivots
-    orderIndex = 210  
+    uiOrderIndex = 210  
     usesJointControls = True
     usesLimbControls = False
     bakeLosesData = False
@@ -32,6 +32,7 @@ class FK_Chain_01(absBhv.Abstract_Behavior):
         groups = rigUtil.SortGroups(groups)
         if not limb.enableEndControl.get():
             groups = groups[:-1]
+        pm.disconnectAttr(limb.usedGroups)
         for group in groups:
             pm.connectAttr(limb.usedGroups, group.used)
     
@@ -40,7 +41,7 @@ class FK_Chain_01(absBhv.Abstract_Behavior):
     
 #============= SETUP ============================
 
-    def Setup_Rig_Internal(self, limb):
+    def Setup_Rig_Controls(self, limb):
         log.funcFileDebug()
         groups = pm.listConnections(limb.jointGroups)
         groups = rigUtil.SortGroups(groups)
@@ -48,16 +49,10 @@ class FK_Chain_01(absBhv.Abstract_Behavior):
             group = groups[i+1]
             parentCtr = pm.listConnections(groups[i].control)[0]
             pm.parent(group, parentCtr)
-        return groups[1:]
-    
-    def Setup_Rig_External(self, limb):
-        log.funcFileDebug()
+        # External
         parentControl = rigUtil.GetParentControl(limb)
-        groups = pm.listConnections(limb.jointGroups)
-        group = rigUtil.SortGroups(groups)[0]
         if parentControl:
-            pm.parentConstraint(parentControl, group, mo=1)
-        return [group]
+            pm.parentConstraint(parentControl, groups[0], mo=1)
     
     def Setup_Constraint_JointsToControls(self, limb):
         log.funcFileDebug()
@@ -66,23 +61,28 @@ class FK_Chain_01(absBhv.Abstract_Behavior):
             control = pm.listConnections(group.control)[0]
             pm.parentConstraint(control, joint, mo=1)
     
-    def Setup_Constraint_ControlsToJoints(self, limb):
+    def Setup_Constraint_ControlsToXforms(self, limb, 
+            xforms, hasPosCst, hasRotCst, hasScaleCst):
         log.funcFileDebug()
-        for group in pm.listConnections(limb.jointGroups):
-            joint = pm.listConnections(group.joint)[0]
-            control = pm.listConnections(group.control)[0]
-            pm.parentConstraint(joint, control, mo=1)
-    
+        groups = pm.listConnections(limb.jointGroups)
+        groups = rigUtil.SortGroups(groups)
+        controls = [pm.listConnections(g.control)[0] for g in groups]
+        for xform, control in zip(xforms, controls):
+            if hasPosCst:
+                pm.pointConstraint(xform, control)
+            if hasRotCst:
+                pm.orientConstraint(xform, control)
+            if hasScaleCst:
+                pm.scaleConstraint(xform, control)
+        return controls
+                
 #============= TEARDOWN ============================
 
-    def Teardown_Rig_Internal(self, limb):
+    def Teardown_Rig_Controls(self, limb):
         log.funcFileDebug()
         groups = pm.listConnections(limb.jointGroups)
         groups = rigUtil.SortGroups(groups)[1:]
         pm.parent(groups, limb)
-
-    def Teardown_Rig_External(self, limb):
-        log.funcFileDebug()
         if pm.listConnections(limb.limbParent):
             jointGroups = pm.listConnections(limb.jointGroups)
             jointGroup = rigUtil.SortGroups(jointGroups)[0]
@@ -96,13 +96,12 @@ class FK_Chain_01(absBhv.Abstract_Behavior):
             cst = pm.listRelatives(joint, c=1, type='parentConstraint')
             pm.delete(cst)
     
-    def Teardown_Constraint_ControlsToJoints(self, limb):
+    def Teardown_Constraint_ControlsToXforms(self, limb):
         log.funcFileDebug()
         jointGroups = pm.listConnections(limb.jointGroups)
         controls = [pm.listConnections(g.control)[0] for g in jointGroups]
         for control in controls:
-            cst = pm.listRelatives(control, c=1, type='parentConstraint')
-            pm.delete(cst)
+            pm.delete(pm.listRelatives(control, c=1, type='constraint'))
     
 #============= EDITABLE UI ============================
 

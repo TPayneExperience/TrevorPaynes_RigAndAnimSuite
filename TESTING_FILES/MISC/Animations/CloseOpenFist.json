@@ -1,0 +1,22 @@
+{
+    "startFrame": 0.0, 
+    "limbs": [
+        [
+            "Pinky", 
+            1
+        ], 
+        [
+            "Middle", 
+            1
+        ], 
+        [
+            "Ring", 
+            1
+        ], 
+        [
+            "Index", 
+            1
+        ]
+    ], 
+    "frameCount": 136.0
+}

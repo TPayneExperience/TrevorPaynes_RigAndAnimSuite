@@ -118,19 +118,8 @@ class RIG_Behavior(absOp.Abstract_Operation):
 
 #=========== MISC ====================================
 
-    def ResetJointControlPositions(self, limb):
-        for group in pm.listConnections(limb.jointGroups):
-            joint = pm.listConnections(group.joint)[0]
-            control = pm.listConnections(group.control)[0]
-            pm.parent(group, joint)
-            rigUtil.ResetAttrs(group)
-            # Center control pivot
-            c = pm.objectCenter(control, gl=1)
-            pm.move(c[0], c[1], c[2], 
-                    control.scalePivot, 
-                    control.rotatePivot, ws=1)
-            rigUtil.ResetAttrs(control)
-            pm.parent(group, limb)
+    def ResetControlTransforms(self, limb):
+        self._ls.ResetControlTransforms(limb)
 
     def RemoveUnusedGroups(self, limb):
         usedGroups = set(pm.listConnections(limb.usedGroups))

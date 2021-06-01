@@ -21,7 +21,7 @@ reload(rrt)
 
 class RIG_Behavior_UI(absOpUI.Abstract_OperationUI):
     uiName = 'Behavior'
-    orderIndex = 200
+    uiOrderIndex = 200
     operation = bhv.RIG_Behavior()
     def __init__(self):
         self._bhvTypes = []
@@ -62,8 +62,8 @@ class RIG_Behavior_UI(absOpUI.Abstract_OperationUI):
                     self._loadSkel_mi = pm.menuItem(l='Load Skeletal Hierarchy', 
                                         en=0, c=self.LoadSkeletalHierarchy)
                     self._resetJointGroup_mi = pm.menuItem(
-                                        l='Reset Joint Control Positions', 
-                                        en=0, c=self.ResetJointControlPositions)
+                                        l='Reset Control Transforms', 
+                                        en=0, c=self.ResetControlTransforms)
                     self._removeUnusedGroups_mi = pm.menuItem(
                                         l='Removed Unused Groups', 
                                         en=0, c=self.RemoveUnusedGroups)
@@ -257,10 +257,10 @@ class RIG_Behavior_UI(absOpUI.Abstract_OperationUI):
         editPst.EditPresets(self._rigRoot, self.operation)
         self.PopulatePresets()
 
-    def ResetJointControlPositions(self, ignore):
+    def ResetControlTransforms(self, ignore):
         log.funcFileDebug()
         for limb in self._selectedLimbs:
-            self.operation.ResetJointControlPositions(limb)
+            self.operation.ResetControlTransforms(limb)
 
     def RemoveUnusedGroups(self, ignore):
         log.funcFileDebug()
@@ -327,7 +327,7 @@ class RIG_Behavior_UI(absOpUI.Abstract_OperationUI):
         orderedBhvs = {}
         for bhvFiles in list(self.operation.bhvMng.bhvFiles.values()):
             bhv = self.operation.bhvMng.bhvs[bhvFiles[-1]]
-            orderedBhvs[bhv.orderIndex] = bhv
+            orderedBhvs[bhv.uiOrderIndex] = bhv
         index = 0
         for priority in sorted(list(orderedBhvs.keys())):
             bhv = orderedBhvs[priority]

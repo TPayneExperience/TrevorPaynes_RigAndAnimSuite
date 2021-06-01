@@ -2,12 +2,19 @@
 # ============= ROOT =============
 
 RIG_MODES = (   'Setup Rig',
-                'Animate Rig')  # Maybe post anim rig later???
+                'Animate Rig',
+                'Template',
+                'Baked Animations',
+                'Ghost',
+                'Misc1',
+                'Misc2',
+                'Misc3',
+                'Misc4')
 
 CONTROL_TEMPLATE_GROUP = 'CONTROL_SHAPE_TEMPLATES'
 
 CONTROL_DISP_LAYER = 'Control_Disp'
-MESHES_DISP_LAYER = 'Meshe_Disp'
+MESHES_DISP_LAYER = 'Meshes_Disp'
 JOINTS_DISP_LAYER = 'Joint_Disp'
 
 # CONTROL_ANIM_LAYER = 'Control_Anim'

@@ -7,10 +7,8 @@ import Utilities.General_Utilities as genUtil
 reload(genUtil)
 import Control as ctr
 reload(ctr)
-# import Utilities.Rig_Utilities as rigUtil
-# reload(rigUtil)
-# import Data.Rig_Data as rigData
-# reload(rigData)
+import Data.General_Data as genData
+reload(genData)
 
 class Group:
     @staticmethod
@@ -39,7 +37,21 @@ class Group:
         pm.connectAttr(limb.limbGroups, group.limb)
         pm.parent(group, limb)
         return group
-    
+
+    @staticmethod
+    def AddAnimGroup(limb, animName):
+        log.funcFileDebug()
+        hide = genData.HIDE_ATTRS
+
+        group = pm.group(n='AnimGroup_%s_#' % animName, em=1, w=1)
+        pm.addAttr(group, ln='pfrsName', dt='string', h=hide)
+        pm.addAttr(group, ln='limb', dt='string', h=hide)
+
+        group.pfrsName.set(animName)
+        pm.connectAttr(limb.animGroups, group.limb)
+        pm.parent(group, limb)
+        return group
+
     @staticmethod
     def Remove(group):
         log.funcFileDebug()

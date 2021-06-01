@@ -59,6 +59,7 @@ class InitRigRoot(absInit.Abstract_Initializer):
 
         # ANIMATION
         pm.addAttr(rigRoot, ln='posesFolderPath', dt='string', h=hide)
+        pm.addAttr(rigRoot, ln='animationFolderPath', dt='string', h=hide)
 
         #============= GROUPS ============================
 
@@ -84,11 +85,6 @@ class InitRigRoot(absInit.Abstract_Initializer):
         pm.connectAttr(rigRoot.meshesParentGroup, group.rigRoot)
         rigUtil.ChannelBoxAttrs(group, 0, 0, 0, 0)
         
-        group = pm.group(name='BAKED_DATA', em=1, p=rigRoot)
-        pm.addAttr(group, ln='rigRoot', dt='string')
-        pm.connectAttr(rigRoot.bakedDataGroup, group.rigRoot)
-        rigUtil.ChannelBoxAttrs(group, 0, 0, 0, 0)
-        
         #============= DISPLAY LAYERS ============================
 
         controlDL = pm.createDisplayLayer(n=rigData.CONTROL_DISP_LAYER, empty=1)
@@ -99,6 +95,6 @@ class InitRigRoot(absInit.Abstract_Initializer):
         jointDL.displayType.set(2)
         meshDL.displayType.set(2)
 
-        #============= ANIM LAYERS ============================
+        # #============= ANIM LAYERS ============================
 
-        pm.animLayer(rigData.JOINTS_ANIM_LAYER, override=1, mute=1)
+        # pm.animLayer(rigData.JOINTS_ANIM_LAYER, override=1, mute=1)

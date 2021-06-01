@@ -25,7 +25,7 @@ reload(rigUtil)
 
 class LimbSetup_UI(absOpUI.Abstract_OperationUI):
     uiName = 'Limb Setup'
-    orderIndex = 100
+    uiOrderIndex = 100
     operation = ls.LimbSetup()
     def __init__(self):
         self._limbFunc = None
@@ -62,13 +62,13 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
                     pm.menuItem(l='AUTOBUILD LIMBS', d=1)
                     order = {}
                     for name, bld in self.operation._autobuilders.items():
-                        order[bld.orderIndex] = name
-                    for orderIndex in sorted(list(order.keys())):
-                        name = order[orderIndex]
+                        order[bld.uiOrderIndex] = name
+                    for uiOrderIndex in sorted(list(order.keys())):
+                        name = order[uiOrderIndex]
                         bld = self.operation._autobuilders[name]
                         pm.menuItem(l=name, c=pm.Callback(self._Build, bld))
         with pm.verticalLayout():
-            with pm.frameLayout('Limbs', bv=1):
+            with pm.frameLayout('Limbs', bv=1) as self.limbHier_fl:
                 tt = 'Double click to RENAME.'
                 tt += '\nTo set a limb as a MIRROR,'
                 tt += '\nname BOTH LIMBS with the SAME NAME.'
@@ -83,15 +83,26 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
                             pm.menuItem(l=rotOrder, c=pm.Callback(self.JointRotOrder, i))
                     self.aimUp_mi = pm.menuItem(l='Apply Joint Aim + Up User Settings', 
                                             en=0, c=self.ApplyJointAimUp)
-                    self.removeRot_mi = pm.menuItem(l='Remove Joint Rotations', 
+                    msg = 'Transfer Rotations To Joint Orient'
+                    self.xferToJntOri_mi = pm.menuItem(l=msg, 
                                             en=0,
-                                            c=self.RemoveJointRotations)
+                                            c=self.TransferRotationsToJointOrient)
                     self.updateBody_mi = pm.menuItem(l='Update Mirror Body Joints', 
                                             en=0,
                                             c=self.UpdateMirrorBodyJoints)
                     self.updateFace_mi = pm.menuItem(l='Update Mirror Face Joints', 
                                             en=0,
                                             c=self.UpdateMirrorFaceJoints)
+                    self.zeroRot_mi = pm.menuItem(l='Set Joint Rotation to Zero', 
+                                            en=0,
+                                            c=self.SetJointRotationToZero)
+                    pm.menuItem(l='JOINT ANIMATIONS', d=1)
+                    self.exportAnim_mi = pm.menuItem(l='Export Joint Animation', 
+                                            en=0,
+                                            c=self.ExportJointAnim)
+                    self.removeAnim_mi = pm.menuItem(l='Remove Joint Animation', 
+                                            en=0,
+                                            c=self.RemoveJointAnim)
                     pm.menuItem(l='MORE LIMBS!', d=1)
                     self.duplicate_mi = pm.menuItem(l='Duplicate Limbs', 
                                             en=0, c=self.DuplicateLimbs)
@@ -276,10 +287,13 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
         pm.menuItem(self.jro_mi, e=1, en=0)
         pm.menuItem(self.saveTemp_mi, e=1, en=0)
         pm.menuItem(self.aimUp_mi, e=1, en=0)
-        pm.menuItem(self.removeRot_mi, e=1, en=0)
+        pm.menuItem(self.xferToJntOri_mi, e=1, en=0)
         pm.menuItem(self.updateBody_mi, e=1, en=0)
         pm.menuItem(self.updateFace_mi, e=1, en=0)
         pm.menuItem(self.limbLoc_mi, e=1, en=0)
+        pm.menuItem(self.exportAnim_mi, e=1, en=0)
+        pm.menuItem(self.removeAnim_mi, e=1, en=0)
+        pm.menuItem(self.zeroRot_mi, e=1, en=0)
         self._selectedLimbs = None
         self.PopulateJointHier(None)
         if not limbIDStrs:
@@ -290,8 +304,9 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
         pm.menuItem(self.saveTemp_mi, e=1, en=1)
         pm.menuItem(self.jro_mi, e=1, en=1)
         pm.menuItem(self.aimUp_mi, e=1, en=1)
-        pm.menuItem(self.removeRot_mi, e=1, en=1)
+        pm.menuItem(self.xferToJntOri_mi, e=1, en=1)
         pm.menuItem(self.limbLoc_mi, e=1, en=1)
+        pm.menuItem(self.zeroRot_mi, e=1, en=1)
         self._selectedLimbs = [self._limbIDs[ID] for ID in limbIDStrs]
         for limb in self._selectedLimbs:
             log.debug('\t\t' + limb.pfrsName.get())
@@ -300,6 +315,12 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
                 pm.menuItem(self.mirrorFace_mi, e=1, en=0)
                 pm.menuItem(self.updateBody_mi, e=1, en=1)
                 pm.menuItem(self.updateFace_mi, e=1, en=1)
+        for limb in pm.listConnections(self._rigRoot.limbs):
+            for joint in pm.listConnections(limb.joints):
+                if pm.keyframe(joint, q=1, kc=1):
+                    pm.menuItem(self.exportAnim_mi, e=1, en=1)
+                    pm.menuItem(self.removeAnim_mi, e=1, en=1)
+                    break
         if len(self._selectedLimbs) == 1:
             limb = self._selectedLimbs[0]
             self.PopulateJointHier(limb)
@@ -463,10 +484,10 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
         log.funcFileInfo()
         self.operation.ApplyAimUpToLimbJoints(self._selectedLimbs)
     
-    def RemoveJointRotations(self, ignore):
+    def TransferRotationsToJointOrient(self, ignore):
         for limb in self._selectedLimbs:
             for joint in pm.listConnections(limb.joints):
-                self.operation.RemoveJointRotations(joint)
+                self.operation.TransferRotationsToJointOrient(joint)
 
     def SetLimbLocationAsBody(self, value):
         for limb in self._selectedLimbs:
@@ -475,6 +496,55 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
     def SetLimbLocationAsFace(self, value):
         for limb in self._selectedLimbs:
             self.operation.SetLimbLocationAsFace(limb)
+
+    def ExportJointAnim(self, ignore):
+        log.funcFileInfo()
+        if not str(pm.sceneName()):
+            msg = 'Please SAVE current scene before '
+            msg += '\nsaving a template'
+            pm.confirmDialog(   t='Save Current Scene', 
+                                m=msg, 
+                                icon='warning', 
+                                b='Ok')
+            return
+        result = pm.promptDialog(
+                title='Name New Animation',
+                message='Animation Name: ',
+                button=['Save', 'Cancel'],
+                defaultButton='Save',
+                cancelButton='Cancel',
+                dismissString='Cancel')
+        if result != 'Save':
+            return
+        animName = pm.promptDialog(q=1, tx=1)
+        self.operation.ExportJointAnimation(self._rigRoot, animName)
+        pm.frameLayout(self.sceneHier_fl, e=1, en=0)
+        pm.frameLayout(self.limbHier_fl, e=1, en=0)
+        pm.frameLayout(self.jntHier_fl, e=1, en=0)
+
+    def RemoveJointAnim(self, ignore):
+        log.funcFileInfo()
+        result = pm.confirmDialog(
+                title='Remove Joint Animation',
+                message='Are you sure?',
+                button=['No', 'Yes, super sure'],
+                defaultButton='Yes, super sure',
+                cancelButton='No',
+                dismissString='No')
+        if result != 'Yes, super sure':
+            return
+        self.operation.RemoveJointAnimation(self._rigRoot)
+        pm.menuItem(self.exportAnim_mi, e=1, en=0)
+        pm.menuItem(self.removeAnim_mi, e=1, en=0)
+
+    def SetJointRotationToZero(self, ignore):
+        log.funcFileInfo()
+        for limb in self._selectedLimbs:
+            self.operation.SetJointRotationToZero(limb)
+        for limb in self._selectedLimbs:
+            self.operation.ResetControlTransforms(limb)
+            bhv = self.operation.bhvMng.bhvs[limb.bhvFile.get()]
+            bhv.InitLimb(limb)
 
 #=========== JOINT HIER ====================================
 

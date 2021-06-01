@@ -12,7 +12,7 @@ reload(rigUtil)
 
 class ByHierarchy(absBld.Abstract_Autobuild):
     uiName = 'By Hierarchy'
-    orderIndex = 200
+    uiOrderIndex = 200
     def Execute(self, rigRoot):
         log.funcFileInfo()
         # Build Joint Parent Dictionary

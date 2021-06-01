@@ -1,5 +1,6 @@
 
 from abc import ABCMeta, abstractmethod, abstractproperty
+import os
 
 import pymel.core as pm
 
@@ -9,6 +10,10 @@ import Data.Rig_Data as rigData
 reload(rigData)
 import Utilities.Rig_Utilities as rigUtil
 reload(rigUtil)
+import Utilities.General_Utilities as genUtil
+reload(genUtil)
+import Utilities.Anim_Utilities as animUtil
+reload(animUtil)
 
 
 class Abstract_Operation:
@@ -37,24 +42,32 @@ class Abstract_Operation:
         pass
 
     def Setup(self, allRigRoots):
+        folder = os.path.dirname(__file__)
+        folder = os.path.dirname(folder)
+        folder = os.path.join(folder, 'Data')
+        filePath = os.path.join(folder, 'Config.json')
+        config = genUtil.Json.Load(filePath)
+        scl = config['useScaleConstraints']
+        
         toBeBuilt = self.isRigBuilt
+        limbs = []
         for rigRoot in allRigRoots:
-            rigMode = rigRoot.rigMode.get()
-            # TEARDOWN
-            if not toBeBuilt:
-                if rigRoot.isBuilt.get():
-                    if rigMode == 0:
-                        self.bhvMng.Teardown_Edit_Rig(rigRoot)
-                    elif rigMode == 1:
-                        self.bhvMng.Teardown_Anim_Rig(rigRoot)
-            # SETUP
-            else:
-                if not rigRoot.isBuilt.get():
-                    if rigMode == 0:
-                        self.bhvMng.Setup_Edit_Rig(rigRoot)
-                    elif rigMode == 1:
-                        self.bhvMng.Setup_Anim_Rig(rigRoot)
-            rigRoot.isBuilt.set(toBeBuilt)
+            limbs += pm.listConnections(rigRoot.limbs)
+        if not toBeBuilt and rigRoot.isBuilt.get():
+            if rigRoot.rigMode.get() == 1: # Anim Mode
+                if animUtil.GetLimbAnim(limbs[0], 'TEMP'):
+                    self.bhvMng.BakeJointAnimation(limbs, 
+                                        'TEMP', 1, 1, scl)
+            for rigRoot in allRigRoots:
+                self.bhvMng.Teardown_Rig(rigRoot)
+        elif toBeBuilt and not rigRoot.isBuilt.get():
+            for rigRoot in allRigRoots:
+                self.bhvMng.Setup_Rig(rigRoot)
+            if rigRoot.rigMode.get() == 1: # Anim Mode
+                if animUtil.GetLimbAnim(limbs[0], 'TEMP'):
+                    self.bhvMng.ApplyControlAnimation(limbs, 
+                                            'TEMP', 1, 1, scl)
+                    self.bhvMng.DeleteAnimation(limbs, 'TEMP')
         
         # LAYERS
         c = self.controlLayerState

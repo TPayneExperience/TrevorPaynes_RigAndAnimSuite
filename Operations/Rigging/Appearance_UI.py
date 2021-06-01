@@ -23,7 +23,7 @@ reload(log)
 
 class Appearance_UI(absOpUI.Abstract_OperationUI):
     uiName = 'Appearance'
-    orderIndex = 300
+    uiOrderIndex = 300
     operation = app.Appearance()
     def __init__(self):
         self._bhvNames = []

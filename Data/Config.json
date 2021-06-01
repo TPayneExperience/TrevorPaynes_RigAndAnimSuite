@@ -9,8 +9,8 @@
     "showRootName": false, 
     "templateFolderPath": "", 
     "windowPos": [
-        208, 
-        576
+        130, 
+        413
     ], 
     "jointUpAxis": 2, 
     "limbIndex": 1, 
@@ -23,6 +23,7 @@
     "sideIndex": 3, 
     "rControlTransparency": 0.8, 
     "mControlTransparency": 0.8, 
+    "useScaleConstraints": false, 
     "lControlColor": [
         0, 
         0, 

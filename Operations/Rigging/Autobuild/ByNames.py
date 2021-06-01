@@ -14,7 +14,7 @@ reload(genUtil)
 
 class ByNames(absBld.Abstract_Autobuild):
     uiName = 'By Names | [limb]_[L/M/R]_[joint]'
-    orderIndex = 100
+    uiOrderIndex = 100
     def Execute(self, rigRoot):
         log.funcFileInfo()
         # GROUP JOINTS AND VALIDATE NAMES

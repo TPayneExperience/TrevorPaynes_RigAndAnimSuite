@@ -16,7 +16,7 @@ class IK_Spline_01(absBhv.Abstract_Behavior):
     groupShape = 'Cylinder_Poly'
     groupCount = 4
     groupMoveable = False    # for moving control pivots
-    orderIndex = 320  
+    uiOrderIndex = 320  
     usesJointControls = False
     usesLimbControls = True
     bakeLosesData = True
@@ -62,11 +62,7 @@ class IK_Spline_01(absBhv.Abstract_Behavior):
     
 #============= RIG ============================
 
-    def Setup_Rig_Internal(self, limb):
-        log.funcFileDebug()
-        return []
-    
-    def Setup_Rig_External(self, limb):
+    def Setup_Rig_Controls(self, limb):
         log.funcFileDebug()
         limbGroups = rigUtil.GetLimbGroups(limb, self.groupType)
         jointGroups = pm.listConnections(limb.jointGroups)
@@ -82,7 +78,6 @@ class IK_Spline_01(absBhv.Abstract_Behavior):
         if parentControl:
             for group in limbGroups[1:]:
                 pm.parentConstraint(parentControl, group, mo=1)
-        return limbGroups
     
     def Setup_Constraint_JointsToControls(self, limb):
         log.funcFileDebug()
@@ -116,27 +111,25 @@ class IK_Spline_01(absBhv.Abstract_Behavior):
             joint = pm.listConnections(group.joint)[0]
             pm.parentConstraint(joint, group, mo=1)
     
-    def Setup_Constraint_ControlsToJoints(self, limb):
+    def Setup_Constraint_ControlsToXforms(self, limb, 
+            xforms, hasPosCst, hasRotCst, hasScaleCst):
         log.funcFileDebug()
         limbGroups = rigUtil.GetLimbGroups(limb, self.groupType)
         limbControls = [pm.listConnections(g.control)[0] for g in limbGroups]
-        joints = pm.listConnections(limb.joints)
-        joints = rigUtil.Joint._GetSortedJoints(joints)
 
         # Constrain end controls
         for i in (-2, -1, 0, 1):
-            pm.parentConstraint(joints[i], limbControls[i])
+            if hasPosCst:
+                pm.pointConstraint(xforms[i], limbControls[i])
+            if hasRotCst:
+                pm.orientConstraint(xforms[i], limbControls[i])
+            if hasScaleCst:
+                pm.scaleConstraint(xforms[i], limbControls[i])
+        return limbControls
 
-        for group in pm.listConnections(limb.jointGroups):
-            joint = pm.listConnections(group.joint)[0]
-            pm.parentConstraint(joint, group, mo=1)
-        
 #============= TEARDOWN ============================
 
-    def Teardown_Rig_Internal(self, limb):
-        log.funcFileDebug()
-
-    def Teardown_Rig_External(self, limb):
+    def Teardown_Rig_Controls(self, limb):
         log.funcFileDebug()
         if pm.listConnections(limb.limbParent):
             for group in rigUtil.GetLimbGroups(limb, self.groupType):
@@ -172,15 +165,12 @@ class IK_Spline_01(absBhv.Abstract_Behavior):
                 toDelete += pm.listRelatives(child, c=1, type='clusterHandle')
         pm.delete(toDelete)
 
-    def Teardown_Constraint_ControlsToJoints(self, limb):
+    def Teardown_Constraint_ControlsToXforms(self, limb):
         log.funcFileDebug()
         groups = rigUtil.GetLimbGroups(limb, self.groupType)
         controls = [pm.listConnections(g.control)[0] for g in groups]
         for control in controls:
-            cst = pm.listRelatives(control, c=1, type='parentConstraint')
-            pm.delete(cst)
-        for group in pm.listConnections(limb.jointGroups):
-            pm.delete(pm.listRelatives(group, c=1, type='parentConstraint'))
+            pm.delete(pm.listRelatives(control, c=1, type='constraint'))
     
 #============= EDITABLE UI ============================
 

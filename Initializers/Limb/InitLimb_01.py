@@ -49,6 +49,9 @@ class InitLimb(absInit.Abstract_Initializer):
         pm.addAttr(limb, ln='limbGroups', dt='string', h=hide)
         pm.addAttr(limb, ln='usedGroups', dt='string', h=hide)
 
+        # ANIMATION
+        pm.addAttr(limb, ln='animGroups', dt='string', h=hide)
+
         # CHANNEL BOX
         pm.addAttr(limb, ln='channelBoxJointCtrPos', at='bool', dv=1, h=hide)
         pm.addAttr(limb, ln='channelBoxJointCtrRot', at='bool', dv=1, h=hide)

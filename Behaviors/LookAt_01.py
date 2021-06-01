@@ -16,7 +16,7 @@ class LookAt_01(absBhv.Abstract_Behavior):
     groupShape = 'Circle_Wire'
     groupCount = 1
     groupMoveable = False    # for moving control pivots
-    orderIndex = 510
+    uiOrderIndex = 510
     usesJointControls = False
     usesLimbControls = True
     bakeLosesData = False
@@ -41,7 +41,7 @@ class LookAt_01(absBhv.Abstract_Behavior):
     
 #============= SETUP ============================
 
-    def Setup_Rig_Internal(self, limb):
+    def Setup_Rig_Controls(self, limb):
         log.funcFileDebug()
         limbGroup = rigUtil.GetLimbGroups(limb, self.groupType)[0]
         control = pm.listConnections(limbGroup.control)[0]
@@ -50,15 +50,11 @@ class LookAt_01(absBhv.Abstract_Behavior):
         pos = pm.xform(control, q=1, t=1, ws=1)
         pm.xform(limbGroup, t=pos, ws=1)
         rigUtil.ResetAttrs(control)
-        return []
 
-    def Setup_Rig_External(self, limb):
-        log.funcFileDebug()
+        # External
         parentControl = rigUtil.GetParentControl(limb)
-        group = rigUtil.GetLimbGroups(limb, self.groupType)[0]
         if parentControl:
-            pm.parentConstraint(parentControl, group, mo=1)
-        return [group]
+            pm.parentConstraint(parentControl, limbGroup, mo=1)
     
     def Setup_Constraint_JointsToControls(self, limb):
         log.funcFileDebug()
@@ -74,27 +70,25 @@ class LookAt_01(absBhv.Abstract_Behavior):
         jointGroup = pm.listConnections(joint.group)[0]
         pm.parentConstraint(joint, jointGroup, mo=1)
     
-    def Setup_Constraint_ControlsToJoints(self, limb):
+    def Setup_Constraint_ControlsToXforms(self, limb, 
+            xforms, hasPosCst, hasRotCst, hasScaleCst):
         log.funcFileDebug()
-        joint = pm.listConnections(limb.joints)[0]
         limbGroup = rigUtil.GetLimbGroups(limb, self.groupType)[0]
         control = pm.listConnections(limbGroup.control)[0]
-        pm.parentConstraint(joint, control, mo=1)
-        jointGroup = pm.listConnections(limb.jointGroups)[0]
-        pm.parentConstraint(joint, jointGroup, mo=1)
+        xform = xforms[0]
+        if hasPosCst or hasRotCst:
+            pm.parentConstraint(xform, control, mo=1)
+        return [control]
 
 #============= TEARDOWN ============================
 
-    def Teardown_Rig_Internal(self, limb):
+    def Teardown_Rig_Controls(self, limb):
         log.funcFileDebug()
         limbGroup = rigUtil.GetLimbGroups(limb, self.groupType)[0]
         joint = pm.listConnections(limb.joints)[0]
         jointPos = pm.xform(joint, q=1, t=1, ws=1)
         pm.xform(limbGroup, t=jointPos, ws=1)
         self._UpdateControl(limb)
-
-    def Teardown_Rig_External(self, limb):
-        log.funcFileDebug()
         if pm.listConnections(limb.limbParent):
             group = rigUtil.GetLimbGroups(limb, self.groupType)[0]
             cst = pm.listRelatives(group, c=1, type='parentConstraint')
@@ -109,14 +103,11 @@ class LookAt_01(absBhv.Abstract_Behavior):
         cst = pm.listRelatives(group, c=1, type='parentConstraint')
         pm.delete(cst)
     
-    def Teardown_Constraint_ControlsToJoints(self, limb):
+    def Teardown_Constraint_ControlsToXforms(self, limb):
         log.funcFileDebug()
         group = rigUtil.GetLimbGroups(limb, self.groupType)[0]
         control = pm.listConnections(group.control)[0]
-        cst = pm.listRelatives(control, c=1, type='parentConstraint')
-        pm.delete(cst)
-        jGroup = pm.listConnections(limb.jointGroups)[0]
-        pm.delete(pm.listRelatives(jGroup, c=1, type='parentConstraint'))
+        pm.delete(pm.listRelatives(control, c=1, type='constraint'))
 
 #============= EDITABLE UI ============================
 

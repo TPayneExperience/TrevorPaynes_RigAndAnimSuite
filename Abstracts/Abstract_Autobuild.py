@@ -8,7 +8,7 @@ class Abstract_Autobuild:
         pass 
 
     @abstractproperty
-    def orderIndex(self):           # int | 100, 200
+    def uiOrderIndex(self):           # int | 100, 200
         pass 
 
     @abstractmethod

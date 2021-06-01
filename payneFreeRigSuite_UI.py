@@ -58,8 +58,7 @@ class PayneFreeRigSuite_UI:
         self._Setup()
         self.PopulateCategories()
         debug_ui.PFRS_Debug_UI(self)
-        self.InitRigRoots()
-        self.InitOptionMenues()
+        self.LoadRig()
         self.InitWelcomePopup()
         self.InitUpdatesPopup()
 
@@ -93,7 +92,7 @@ class PayneFreeRigSuite_UI:
     def _Setup_MenuBar(self):
         with self.win:
             with pm.menu('File'):
-                # pm.menuItem(l='New Rig...', c=self.NewRig_Dialog)
+                pm.menuItem(l='New / Update Rig Root', c=self.NewLoadRig)
                 pm.menuItem(l='Edit Rig...', c=self.EditRig_Dialog)
                 pm.menuItem(l='User Settings', c=self.UserSettings_Dialog)
                 pm.menuItem(divider=1)
@@ -145,15 +144,6 @@ class PayneFreeRigSuite_UI:
             
 #=========== COMBOBOX SWITCHING ====================================
 
-    def InitRigRoots(self):
-        rigRoots = self.pfrs.GetRigRoots()
-        if rigRoots:
-            self._rigRoot = rigRoots[0]
-            self._allRigRoots = rigRoots
-        else:
-            self._rigRoot = self.pfrs.AddRigRoot()
-            self._allRigRoots = [self._rigRoot]
-
     def InitOptionMenues(self):
         log.funcFileDebug()
         category = self._rigRoot.category.get()
@@ -185,6 +175,7 @@ class PayneFreeRigSuite_UI:
     def SetCategory(self, category):
         log.funcFileInfo()
         self.PopulateOperations(category)
+        self._rigRoot.category.set(category)
         operationName = self._rigRoot.operation.get()
         self.SetOperation(operationName)
         self.UpdateOperationOptionMenu(operationName)
@@ -227,7 +218,7 @@ class PayneFreeRigSuite_UI:
         rigMode = self._rigRoot.rigMode.get()
         opPriorities = {}
         for operation in list(self.pfrs.catOps[category].values()):
-            opPriorities[operation.orderIndex] = operation
+            opPriorities[operation.uiOrderIndex] = operation
         for index in sorted(list(opPriorities.keys())):
             operation = opPriorities[index]
             if rigMode not in operation.operation.validRigStates:
@@ -279,18 +270,24 @@ class PayneFreeRigSuite_UI:
         
         # Get Config Data
 
-    # def NewRig_Dialog(self, ignore):
-    #     log.funcFileInfo()
-    #     pass
-        # self.logger.debug('\tPFRS_UI > NewRig_Dialog')
-        # roots = self.pfrs.rootMng.GetSceneRoots()
-        # if roots:
-        #     pm.confirmDialog(
-        #         t='Rig Already Exists',
-        #         m='Rig Root already exists in scene.',
-        #         button=['Ok'])
-        # else:
-        #     self.pfrs.InitScene()
+    def NewLoadRig(self, ignore):
+        log.funcFileInfo()
+        self._rigRoot = None
+        self.LoadRig()
+        if not self._rigRoot:
+            self._rigRoot = self.pfrs.AddRigRoot()
+            self._allRigRoots = [self._rigRoot]
+            self.InitOptionMenues()
+        # Read scene
+        # If not, create new rig
+        # if exists, just refresh ui
+
+    def LoadRig(self):
+        rigRoots = self.pfrs.GetRigRoots()
+        if rigRoots:
+            self._rigRoot = rigRoots[0]
+            self._allRigRoots = rigRoots
+            self.InitOptionMenues()
 
     def EditRig_Dialog(self, ignore):
         log.funcFileInfo()

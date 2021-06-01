@@ -16,7 +16,7 @@ class IK_PoleVector_01(absBhv.Abstract_Behavior):
     groupShape = 'Sphere_Poly'
     groupCount = 3
     groupMoveable = False    # for moving control pivots
-    orderIndex = 310  
+    uiOrderIndex = 310  
     usesJointControls = False
     usesLimbControls = True
     bakeLosesData = True
@@ -27,9 +27,8 @@ class IK_PoleVector_01(absBhv.Abstract_Behavior):
             pm.addAttr(limb, ln='ikpvDistance', at='float', 
                                                 min=0, dv=10)
             pm.addAttr(limb, ln='ikpvCurve', dt='string')
-        jointGroups = pm.listConnections(limb.jointGroups)
-        jointGroups = rigUtil.SortGroups(jointGroups)
-        joints = [pm.listConnections(g.joint)[0] for g in jointGroups]
+        joints = pm.listConnections(limb.joints)
+        joints = rigUtil.Joint._GetSortedJoints(joints)
         limbGroups = rigUtil.GetLimbGroups(limb, self.groupType)
         ikpv1 = limbGroups[0]
         ikpv2 = limbGroups[1]
@@ -68,14 +67,10 @@ class IK_PoleVector_01(absBhv.Abstract_Behavior):
     
 #============= SETUP ============================
 
-    def Setup_Rig_Internal(self, limb):
+    def Setup_Rig_Controls(self, limb):
         log.funcFileDebug()
         curve = pm.listConnections(limb.ikpvCurve)[0]
         curve.v.set(1)
-        return []
-    
-    def Setup_Rig_External(self, limb):
-        log.funcFileDebug()
         limbGroups = rigUtil.GetLimbGroups(limb, self.groupType)
         ikpv1 = limbGroups[0]
         ikpv2 = limbGroups[1]
@@ -93,7 +88,6 @@ class IK_PoleVector_01(absBhv.Abstract_Behavior):
         if parentControl:
             pm.parentConstraint(parentControl, ikpv2, mo=1)
             pm.parentConstraint(parentControl, ikpv3, mo=1)
-        return limbGroups
     
     def Setup_Constraint_JointsToControls(self, limb):
         log.funcFileDebug()
@@ -134,34 +128,33 @@ class IK_PoleVector_01(absBhv.Abstract_Behavior):
             joint = pm.listConnections(group.joint)[0]
             pm.parentConstraint(joint, group, mo=1)
     
-    def Setup_Constraint_ControlsToJoints(self, limb):
+    def Setup_Constraint_ControlsToXforms(self, limb, 
+            xforms, hasPosCst, hasRotCst, hasScaleCst):
         log.funcFileDebug()
-        joints = pm.listConnections(limb.joints)
-        joints = rigUtil.Joint._GetSortedJoints(joints)
         limbGroups = rigUtil.GetLimbGroups(limb, self.groupType)
         controls = [pm.listConnections(g.control)[0] for g in limbGroups]
         ikpvStart = controls[0]
         ikpvMid = controls[1]
         ikpvEnd = controls[2]
-        pm.parentConstraint(joints[0], ikpvStart)
-        pm.parentConstraint(joints[-1], ikpvEnd)
+        if hasPosCst:
+            pm.pointConstraint(xforms[0], ikpvStart)
+            pm.pointConstraint(xforms[-1], ikpvEnd)
+        if hasRotCst:
+            pm.orientConstraint(xforms[-1], ikpvEnd)
+        if hasScaleCst:
+            pm.scaleConstraint(xforms[0], ikpvStart)
+            pm.scaleConstraint(xforms[-1], ikpvEnd)
         self._UpdateIKPV2(limb)
-        pm.parentConstraint(joints[1], ikpvMid, mo=1)
-        # Bind 
-        for group in pm.listConnections(limb.jointGroups):
-            joint = pm.listConnections(group.joint)[0]
-            pm.parentConstraint(joint, group, mo=1)
+        if hasPosCst or hasRotCst:
+            pm.parentConstraint(xforms[1], ikpvMid, mo=1)
+        return controls
 
-    
 #============= TEARDOWN ============================
 
-    def Teardown_Rig_Internal(self, limb):
+    def Teardown_Rig_Controls(self, limb):
         log.funcFileDebug()
         curve = pm.listConnections(limb.ikpvCurve)[0]
         curve.v.set(0)
-
-    def Teardown_Rig_External(self, limb):
-        log.funcFileDebug()
         if pm.listConnections(limb.limbParent):
             groups = rigUtil.GetLimbGroups(limb, self.groupType)
             for group in groups:
@@ -188,26 +181,18 @@ class IK_PoleVector_01(absBhv.Abstract_Behavior):
             cst = pm.listRelatives(group, c=1, type='parentConstraint')
             pm.delete(cst)
         
-        # # Delete limb groups constraints
-        # if pm.listConnections(limb.limbParent):
-        #     for group in limbGroups:
-        #         cst = pm.listRelatives(group, c=1, type='parentConstraint')
-        #         pm.delete(cst)
-
         # Reposition group to second joint
         midGroup = limbGroups[1]
         jointPos = pm.xform(joints[1], q=1, t=1, ws=1)
         pm.xform(midGroup, t=jointPos, ws=1)
         self._UpdateIKPV2(limb)
 
-    def Teardown_Constraint_ControlsToJoints(self, limb):
+    def Teardown_Constraint_ControlsToXforms(self, limb):
         log.funcFileDebug()
         limbGroups = rigUtil.GetLimbGroups(limb, self.groupType)
         controls = [pm.listConnections(g.control)[0] for g in limbGroups]
         for control in controls:
-            pm.delete(pm.listRelatives(control, c=1, type='parentConstraint'))
-        for group in pm.listConnections(limb.jointGroups):
-            pm.delete(pm.listRelatives(group, c=1, type='parentConstraint'))
+            pm.delete(pm.listRelatives(control, c=1, type='constraint'))
     
 #============= EDITABLE UI ============================
 

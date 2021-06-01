@@ -52,6 +52,9 @@ class InitConfig(absInit.Abstract_Initializer):
                 # Control Shapes
                 'controlShape_Joint': 'Cube_Poly',
 
+                # Animation
+                'useScaleConstraints': False,
+
                 'debug' : False
                 }
 

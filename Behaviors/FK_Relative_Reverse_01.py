@@ -16,7 +16,7 @@ class FK_Relative_01(absBhv.Abstract_Behavior):
     groupShape = 'Cube_Poly'
     groupCount = 1
     groupMoveable = False    # for moving control pivots
-    orderIndex = 250  
+    uiOrderIndex = 250  
     usesJointControls = False
     usesLimbControls = True
     bakeLosesData = True
@@ -36,7 +36,7 @@ class FK_Relative_01(absBhv.Abstract_Behavior):
     
 #============= SETUP ============================
 
-    def Setup_Rig_Internal(self, limb):
+    def Setup_Rig_Controls(self, limb):
         log.funcFileDebug()
         limbGroup = rigUtil.GetLimbGroups(limb, self.groupType)[0]
         limbControl = pm.listConnections(limbGroup.control)[0]
@@ -55,15 +55,11 @@ class FK_Relative_01(absBhv.Abstract_Behavior):
         multNode.input2.set(scalar, scalar, scalar)
         for childControl in controls: #[1:]:
             pm.connectAttr(multNode.output, childControl.rotate)
-        return []
         
-    def Setup_Rig_External(self, limb):
-        log.funcFileDebug()
+        # External
         parentControl = rigUtil.GetParentControl(limb)
-        group = rigUtil.GetLimbGroups(limb, self.groupType)[0]
         if parentControl:
-            pm.parentConstraint(parentControl, group, mo=1)
-        return [group]
+            pm.parentConstraint(parentControl, limbGroup, mo=1)
     
     def Setup_Constraint_JointsToControls(self, limb):
         log.funcFileDebug()
@@ -72,22 +68,23 @@ class FK_Relative_01(absBhv.Abstract_Behavior):
             control = pm.listConnections(group.control)[0]
             pm.parentConstraint(control, joint, mo=1)
     
-    def Setup_Constraint_ControlsToJoints(self, limb):
+    def Setup_Constraint_ControlsToXforms(self, limb, 
+            xforms, hasPosCst, hasRotCst, hasScaleCst):
         log.funcFileDebug()
         limbGroup = rigUtil.GetLimbGroups(limb, self.groupType)[0]
         limbControl = pm.listConnections(limbGroup.control)[0]
-        jointGroups = pm.listConnections(limb.jointGroups)
-        jointGroup = rigUtil.SortGroups(jointGroups)[-1]
-        joint = pm.listConnections(jointGroup.joint)[0]
-        pm.parentConstraint(joint, limbControl, mo=1)
-        # Bind 
-        for group in pm.listConnections(limb.jointGroups):
-            joint = pm.listConnections(group.joint)[0]
-            pm.parentConstraint(joint, group, mo=1)
+        xform = xforms[-1]
+        if hasPosCst:
+            pm.pointConstraint(xform, limbControl, mo=1)
+        if hasRotCst:
+            pm.orientConstraint(xform, limbControl, mo=1)
+        if hasScaleCst:
+            pm.scaleConstraint(xform, limbControl)
+        return [limbControl]
     
 #============= TEARDOWN ============================
 
-    def Teardown_Rig_Internal(self, limb):
+    def Teardown_Rig_Controls(self, limb):
         log.funcFileDebug()
         limbGroup = rigUtil.GetLimbGroups(limb, self.groupType)[0]
         limbControl = pm.listConnections(limbGroup.control)[0]
@@ -97,9 +94,6 @@ class FK_Relative_01(absBhv.Abstract_Behavior):
         groups = pm.listConnections(limb.jointGroups)
         groups = rigUtil.SortGroups(groups)[:-1]
         pm.parent(groups, limb)
-
-    def Teardown_Rig_External(self, limb):
-        log.funcFileDebug()
         if pm.listConnections(limb.limbParent):
             group = rigUtil.GetLimbGroups(limb, self.groupType)[0]
             cst = pm.listRelatives(group, c=1, type='parentConstraint')
@@ -113,14 +107,11 @@ class FK_Relative_01(absBhv.Abstract_Behavior):
             cst = pm.listRelatives(joint, c=1, type='parentConstraint')
             pm.delete(cst)
     
-    def Teardown_Constraint_ControlsToJoints(self, limb):
+    def Teardown_Constraint_ControlsToXforms(self, limb):
         log.funcFileDebug()
         group = rigUtil.GetLimbGroups(limb, self.groupType)[0]
         control = pm.listConnections(group.control)[0]
-        cst = pm.listRelatives(control, c=1, type='parentConstraint')
-        pm.delete(cst)
-        for group in pm.listConnections(limb.jointGroups):
-            pm.delete(pm.listRelatives(group, c=1, type='parentConstraint'))
+        pm.delete(pm.listRelatives(control, c=1, type='constraint'))
     
 #============= EDITABLE UI ============================
 

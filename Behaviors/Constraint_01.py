@@ -20,7 +20,7 @@ class Constraint_01(absBhv.Abstract_Behavior):
     groupShape = ''
     groupCount = 0
     groupMoveable = True   # for moving control pivots
-    orderIndex = 520  
+    uiOrderIndex = 520  
     usesJointControls = True
     usesLimbControls = False
     bakeLosesData = False
@@ -62,18 +62,13 @@ class Constraint_01(absBhv.Abstract_Behavior):
     
 #============= SETUP ============================
 
-    def Setup_Rig_Internal(self, limb):
-        log.funcFileDebug()
-        return []
-    
-    def Setup_Rig_External(self, limb):
+    def Setup_Rig_Controls(self, limb):
         log.funcFileDebug()
         parentControl = rigUtil.GetParentControl(limb)
         if parentControl:
             groups = pm.listConnections(limb.jointGroups)
             extraGroup = pm.group(groups)
             pm.parentConstraint(parentControl, extraGroup, mo=1)
-        return groups
     
     def Setup_Constraint_JointsToControls(self, limb):
         log.funcFileDebug()
@@ -142,19 +137,25 @@ class Constraint_01(absBhv.Abstract_Behavior):
                 pm.setAttr('%s.%sW0' % (cst, sourceControl), 1-weight)
                 pm.setAttr('%s.%sW1' % (cst, targetControl), weight)
             
-    def Setup_Constraint_ControlsToJoints(self, limb):
+    def Setup_Constraint_ControlsToXforms(self, limb, 
+            xforms, hasPosCst, hasRotCst, hasScaleCst):
         log.funcFileDebug()
-        for group in pm.listConnections(limb.jointGroups):
-            joint = pm.listConnections(group.joint)[0]
-            control = pm.listConnections(group.control)[0]
-            pm.parentConstraint(joint, control, mo=1)
+        groups = pm.listConnections(limb.jointGroups)
+        groups = rigUtil.SortGroups(groups)
+        controls = [pm.listConnections(g.control)[0] for g in groups]
+        for xform, control in zip(xforms, controls):
+            if hasPosCst:
+                pm.pointConstraint(xform, control)
+            if hasRotCst:
+                pm.orientConstraint(xform, control)
+            if hasScaleCst:
+                pm.scaleConstraint(xform, control)
+            controls.append(control)
+        return controls
     
 #============= TEARDOWN ============================
 
-    def Teardown_Rig_Internal(self, limb):
-        log.funcFileDebug()
-
-    def Teardown_Rig_External(self, limb):
+    def Teardown_Rig_Controls(self, limb):
         log.funcFileDebug()
         if pm.listConnections(limb.limbParent):
             groups = pm.listConnections(limb.jointGroups)
@@ -175,12 +176,11 @@ class Constraint_01(absBhv.Abstract_Behavior):
             csts += pm.listRelatives(group, c=1, type='scaleConstraint')
             pm.delete(csts)
     
-    def Teardown_Constraint_ControlsToJoints(self, limb):
-        jointGroups = pm.listConnections(limb.jointGroups)
-        controls = [pm.listConnections(g.control)[0] for g in jointGroups]
+    def Teardown_Constraint_ControlsToXforms(self, limb):
+        groups = pm.listConnections(limb.jointGroups)
+        controls = [pm.listConnections(g.control)[0] for g in groups]
         for control in controls:
-            cst = pm.listRelatives(control, c=1, type='parentConstraint')
-            pm.delete(cst)
+            pm.delete(pm.listRelatives(control, c=1, type='constraint'))
     
 #============= EDITABLE UI ============================
 

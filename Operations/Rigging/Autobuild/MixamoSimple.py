@@ -16,7 +16,7 @@ reload(autoBld)
 
 class MixamoSimple(absBld.Abstract_Autobuild):
     uiName = 'Mixamo | Simple'
-    orderIndex = 300
+    uiOrderIndex = 300
     def Execute(self, rigRoot):
         namespaceToRemove = 'mixamorig:'
         toRename = {

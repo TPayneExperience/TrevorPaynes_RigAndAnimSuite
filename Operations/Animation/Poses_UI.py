@@ -21,7 +21,7 @@ reload(log)
 
 class Poses_UI(absOpUI.Abstract_OperationUI):
     uiName = 'Poses'
-    orderIndex = 210
+    uiOrderIndex = 210
     operation = pss.Poses()
     def __init__(self):
         self._limbIDs = []

@@ -12,7 +12,7 @@ reload(log)
 
 class Test_UI(absOpUI.Abstract_OperationUI):
     uiName = 'Test'
-    orderIndex = 500
+    uiOrderIndex = 500
     operation = tst.Test()
     
     def Setup_UI(self, rigRoot, allRigRoots):

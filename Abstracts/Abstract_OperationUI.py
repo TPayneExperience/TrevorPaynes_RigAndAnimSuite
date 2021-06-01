@@ -9,7 +9,7 @@ class Abstract_OperationUI:
         pass 
 
     @abstractproperty
-    def orderIndex(self):   # int | 0, 100, 200...
+    def uiOrderIndex(self):   # int | 0, 100, 200...
         pass 
 
     @abstractproperty

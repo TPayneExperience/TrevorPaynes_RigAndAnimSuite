@@ -42,7 +42,7 @@ class Abstract_Behavior:
         pass 
 
     @abstractproperty
-    def orderIndex(self):       # int | 0, 100, 200...
+    def uiOrderIndex(self):       # int | 0, 100, 200...
         pass 
 
     @abstractproperty
@@ -53,7 +53,6 @@ class Abstract_Behavior:
 
     @abstractmethod
     def InitLimb(self, limb):
-        # LIMB GROUPS MUST BE CREATED BEFORE CALLING THIS
         # Add limb Attrs
         # Add Group Attrs
         # POSITION Limb groups (NO PARENTING)
@@ -67,37 +66,30 @@ class Abstract_Behavior:
 #============= SETUP ============================
 
     @abstractmethod
-    def Setup_Rig_Internal(self, limb):
-        return [] # Return internal groups to be baked
-    
-    @abstractmethod
-    def Setup_Rig_External(self, limb):
-        return []  # Return external groups to be baked
+    def Setup_Rig_Controls(self, limb):
+        pass
     
     @abstractmethod
     def Setup_Constraint_JointsToControls(self, limb):
         pass
     
     @abstractmethod
-    def Setup_Constraint_ControlsToJoints(self, limb):
-        pass
+    def Setup_Constraint_ControlsToXforms(self, limb, 
+            xforms, hasPosCst, hasRotCst, hasScaleCst):
+        return []
     
 #============= TEARDOWN ============================
 
     @abstractmethod
-    def Teardown_Rig_Internal(self, limb):
+    def Teardown_Rig_Controls(self, limb):
         pass
 
-    @abstractmethod
-    def Teardown_Rig_External(self, limb):
-        pass
-    
     @abstractmethod
     def Teardown_Constraint_JointsToControls(self, limb):
         pass
     
     @abstractmethod
-    def Teardown_Constraint_ControlsToJoints(self, limb):
+    def Teardown_Constraint_ControlsToXforms(self, limb):
         pass
     
 #============= EDITABLE UI ============================
