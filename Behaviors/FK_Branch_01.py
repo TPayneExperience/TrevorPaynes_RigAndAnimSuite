@@ -33,7 +33,7 @@ class FK_Branch_01(absBhv.Abstract_Behavior):
 #============= SETUP ============================
 
     def Setup_Rig_Controls(self, limb):
-        parentControl = rigUtil.GetParentLoc(limb)
+        parentControl = rigUtil.GetParentControl(limb)
         groups = pm.listConnections(limb.jointGroups)
         if parentControl:
             for group in groups:

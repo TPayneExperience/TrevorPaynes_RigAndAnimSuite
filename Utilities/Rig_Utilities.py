@@ -169,16 +169,16 @@ def GetJointGroupsOfParent(childLimb):
     groups = pm.listConnections(parent.jointGroups)
     return SortGroups(groups)
 
-def GetParentLoc(childLimb):
+def GetParentControl(childLimb):
     parents = pm.listConnections(childLimb.limbParent)
     if not parents:
         return None
-    index = childLimb.limbParentJoint.get()
     parent = parents[0]
-    parentJoints = pm.listConnections(parent.joints)
-    parentJoints = Joint._GetSortedJoints(parentJoints)
-    parentJoint = parentJoints[index]
-    return pm.listConnections(parentJoint.loc)[0]
+    parentGroups = pm.listConnections(parent.jointGroups)
+    parentGroups = SortGroups(parentGroups)
+    index = childLimb.limbParentJoint.get()
+    parentGroup = parentGroups[index]
+    return pm.listConnections(parentGroup.control)[0]
 
 def GetLimbCreationOrder(rootLimb):
     '''Returns ordered list of limbs: ROOT TO bottom most CHILD'''

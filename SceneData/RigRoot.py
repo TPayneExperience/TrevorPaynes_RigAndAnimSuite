@@ -17,7 +17,7 @@ class RigRoot:
         rigRoot = pm.group(name='ROOT_tempName', em=True)
         genUtil.AbstractInitializer(rigRoot, 'RigRoot')
         rigRoot.pfrsName.set('TEMP')
-        rigRoot.category.set('Rigging_Setup')
+        rigRoot.category.set('Rigging')
         rigRoot.operation.set('Limb Setup')
 
         return rigRoot

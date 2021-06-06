@@ -5,7 +5,7 @@ import Abstracts.Abstract_Operation as absOp
 reload(absOp)
 import Utilities.Logger as log
 reload(log)
-import Operations.Rigging_Setup.RIG_Behavior as rigBhv
+import Operations.Rigging.RIG_Behavior as rigBhv
 reload(rigBhv)
 
 class ANM_Behavior(absOp.Abstract_Operation):

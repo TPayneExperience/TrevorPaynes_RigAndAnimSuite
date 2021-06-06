@@ -46,7 +46,7 @@ class Empty_01(absBhv.Abstract_Behavior):
 
     def Setup_Rig_Controls(self, limb):
         log.funcFileDebug()
-        parentControl = rigUtil.GetParentLoc(limb)
+        parentControl = rigUtil.GetParentControl(limb)
         group = rigUtil.GetLimbGroups(limb, self.groupType)[0]
         if parentControl:
             pm.parentConstraint(parentControl, group, mo=1)

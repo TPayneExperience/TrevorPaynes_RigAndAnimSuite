@@ -52,7 +52,7 @@ class LookAt_01(absBhv.Abstract_Behavior):
         rigUtil.ResetAttrs(control)
 
         # External
-        parentControl = rigUtil.GetParentLoc(limb)
+        parentControl = rigUtil.GetParentControl(limb)
         if parentControl:
             pm.parentConstraint(parentControl, limbGroup, mo=1)
     

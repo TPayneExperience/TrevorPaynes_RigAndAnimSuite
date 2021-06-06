@@ -64,7 +64,7 @@ class Constraint_01(absBhv.Abstract_Behavior):
 
     def Setup_Rig_Controls(self, limb):
         log.funcFileDebug()
-        parentControl = rigUtil.GetParentLoc(limb)
+        parentControl = rigUtil.GetParentControl(limb)
         if parentControl:
             groups = pm.listConnections(limb.jointGroups)
             extraGroup = pm.group(groups)

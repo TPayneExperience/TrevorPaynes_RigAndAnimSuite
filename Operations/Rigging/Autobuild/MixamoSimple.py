@@ -11,7 +11,7 @@ import Utilities.Rig_Utilities as rigUtil
 reload(rigUtil)
 import Utilities.General_Utilities as genUtil
 reload(genUtil)
-import Operations.Rigging_Setup.Autobuild.ByNames as autoBld
+import Operations.Rigging.Autobuild.ByNames as autoBld
 reload(autoBld)
 
 class MixamoSimple(absBld.Abstract_Autobuild):

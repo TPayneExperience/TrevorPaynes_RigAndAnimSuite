@@ -58,7 +58,7 @@ class FK_Relative_01(absBhv.Abstract_Behavior):
             pm.connectAttr(multNode.output, childControl.rotate)
         
         # External
-        parentControl = rigUtil.GetParentLoc(limb)
+        parentControl = rigUtil.GetParentControl(limb)
         if parentControl:
             pm.parentConstraint(parentControl, limbGroup, mo=1)
     

@@ -17,8 +17,6 @@ class Joint:
     @staticmethod
     def Add(rigRoot, index, limb, joint):
         log.funcFileDebug()
-
-        # Joint Setup
         pm.editDisplayLayerMembers(rigData.JOINTS_DISP_LAYER, 
                                         joint, nr=1)
         genUtil.AbstractInitializer(joint, 'Joint')
@@ -26,8 +24,6 @@ class Joint:
         rigRoot.nextJointID.set(nextJointID + 1)
         joint.ID.set(nextJointID)
         pm.connectAttr(limb.joints, joint.limb)
-
-        # Group Setup
         groups = pm.listConnections(joint.group)
         if groups:
             group = groups[0]
@@ -39,18 +35,6 @@ class Joint:
             group = grp.Group.AddJointGroup(rigRoot, index, limb, joint)
         pm.connectAttr(limb.jointGroups, group.limb)
         joint.pfrsName.set('Joint%03d' % (index))
-
-        # Loc Setup
-        locs = pm.listConnections(joint.loc)
-        if not locs:
-            loc = pm.spaceLocator()
-            pm.addAttr(loc, ln='joint', dt='string')
-            pm.connectAttr(joint.loc, loc.joint)
-            loc.v.set(0)
-        else:
-            loc = locs[0]
-        pm.parent(loc, limb)
-        
     
     @staticmethod
     def Remove(joint):
