@@ -26,7 +26,7 @@ import Data.Rig_Data as rigData
 reload(rigData)
 import Utilities.General_Utilities as genUtil
 reload(genUtil)
-import Operations.Rigging.Appearance as app
+import Operations.Rigging_Setup.Appearance as app
 reload(app)
 # import Data.Config as cnfg
 # reload(cnfg)
@@ -175,7 +175,7 @@ class PayneFreeRigSuite:
         self.catOps = {}
         rootPath = os.path.dirname(__file__)
         rootPath = os.path.join(rootPath, 'Operations')
-        self.categories = ['Rigging', 'Skinning', 'Animation']
+        self.categories = ['Rigging_Setup', 'Skinning', 'Rigging_Extras', 'Animation']
         for f in os.listdir(rootPath):
             filePath = os.path.join(rootPath, f)
             if os.path.isfile(filePath):

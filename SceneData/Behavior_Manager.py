@@ -84,6 +84,12 @@ class Behavior_Manager(object):
         log.funcFileDebug()
         limbs = pm.listConnections(rigRoot.limbs)
 
+        # Setup Joint Locs
+        for limb in limbs:
+            for joint in pm.listConnections(limb.joints):
+                loc = pm.listConnections(joint.loc)[0]
+                pm.parentConstraint(joint, loc)
+
         # Setup Control Pivots
         for limb in limbs:
             limb.v.set(limb.enableLimb.get())
@@ -143,6 +149,13 @@ class Behavior_Manager(object):
             for group in pm.listConnections(limb.usedGroups):
                 self._Teardown_ControlPivot(group)
         rigRoot.isBuilt.set(0)
+
+        # Teardown Joint Locs
+        for limb in limbs:
+            for joint in pm.listConnections(limb.joints):
+                loc = pm.listConnections(joint.loc)[0]
+                pm.delete(pm.listRelatives(loc, c=1, type='constraint'))
+
     
 #============= ANIMATION TRANSFER (BAKING) ============================
    

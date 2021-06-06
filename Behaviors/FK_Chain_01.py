@@ -50,7 +50,7 @@ class FK_Chain_01(absBhv.Abstract_Behavior):
             parentCtr = pm.listConnections(groups[i].control)[0]
             pm.parent(group, parentCtr)
         # External
-        parentControl = rigUtil.GetParentControl(limb)
+        parentControl = rigUtil.GetParentLoc(limb)
         if parentControl:
             pm.parentConstraint(parentControl, groups[0], mo=1)
     

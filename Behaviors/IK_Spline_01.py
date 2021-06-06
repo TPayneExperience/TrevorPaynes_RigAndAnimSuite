@@ -74,7 +74,7 @@ class IK_Spline_01(absBhv.Abstract_Behavior):
             parentGroup = pm.listConnections(parentJoint.group)[0]
             parentControl = pm.listConnections(parentGroup.control)[0]
             pm.parentConstraint(parentControl, limbGroups[0], mo=1)
-        parentControl = rigUtil.GetParentControl(limb)
+        parentControl = rigUtil.GetParentLoc(limb)
         if parentControl:
             for group in limbGroups[1:]:
                 pm.parentConstraint(parentControl, group, mo=1)

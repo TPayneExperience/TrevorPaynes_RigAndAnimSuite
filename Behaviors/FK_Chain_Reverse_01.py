@@ -48,7 +48,7 @@ class FK_Chain_Reverse_01(absBhv.Abstract_Behavior):
             pm.parent(group, parentCtr)
 
         # External
-        parentControl = rigUtil.GetParentControl(limb)
+        parentControl = rigUtil.GetParentLoc(limb)
         if parentControl:
             pm.parentConstraint(parentControl, groups[0], mo=1)
     

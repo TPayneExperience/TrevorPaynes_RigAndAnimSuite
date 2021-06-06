@@ -147,7 +147,7 @@ class FKIK_01(absBhv.Abstract_Behavior):
             pm.parentConstraint(parentControl, ikpv1, mo=1)
             pm.parentConstraint(parentControl, fkGroup, mo=1)
         # ------- IK Other Parenting ---------
-        ikParentControl = rigUtil.GetParentControl(limb)
+        ikParentControl = rigUtil.GetParentLoc(limb)
         if ikParentControl:
             pm.parentConstraint(ikParentControl, ikpv2, mo=1)
             pm.parentConstraint(ikParentControl, ikpv3, mo=1)

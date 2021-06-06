@@ -84,7 +84,7 @@ class IK_PoleVector_01(absBhv.Abstract_Behavior):
             parentGroup = pm.listConnections(parentJoint.group)[0]
             parentControl = pm.listConnections(parentGroup.control)[0]
             pm.parentConstraint(parentControl, ikpv1, mo=1)
-        parentControl = rigUtil.GetParentControl(limb)
+        parentControl = rigUtil.GetParentLoc(limb)
         if parentControl:
             pm.parentConstraint(parentControl, ikpv2, mo=1)
             pm.parentConstraint(parentControl, ikpv3, mo=1)
