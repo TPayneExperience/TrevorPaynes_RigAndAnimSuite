@@ -50,54 +50,54 @@ class PFRS_Debug_UI:
     def LimbTypesTest(self, ignore):
         log.funcFileDebug()
         self.debug.LimbTypesTest()
-        self.parent.InitRigRoots()
+        self.parent.NewLoadRig(1)
         self.parent.InitOptionMenues()
 
     def MirrorTest(self, ignore):
         log.funcFileDebug()
         self.debug.MirrorTest()
-        self.parent.InitRigRoots()
+        self.parent.NewLoadRig(1)
         self.parent.InitOptionMenues()
 
     def RigBehaviorTest(self, ignore):
         log.funcFileDebug()
         self.debug.RigBehaviorTest()
-        self.parent.InitRigRoots()
+        self.parent.NewLoadRig(1)
         self.parent.InitOptionMenues()
 
     def AnimBehaviorTest(self, ignore):
         log.funcFileDebug()
         self.debug.AnimBehaviorTest()
-        self.parent.InitRigRoots()
+        self.parent.NewLoadRig(1)
         self.parent.InitOptionMenues()
 
     def LegTest(self, ignore):
         log.funcFileDebug()
         self.debug.LegTest()
-        self.parent.InitRigRoots()
+        self.parent.NewLoadRig(1)
         self.parent.InitOptionMenues()
 
     def FaceTest(self, ignore):
         log.funcFileDebug()
         self.debug.FaceTest()
-        self.parent.InitRigRoots()
+        self.parent.NewLoadRig(1)
         self.parent.InitOptionMenues()
 
     def ArmTest(self, ignore):
         log.funcFileDebug()
         self.debug.ArmTest()
-        self.parent.InitRigRoots()
+        self.parent.NewLoadRig(1)
         self.parent.InitOptionMenues()
         
     def SpineTest(self, ignore):
         log.funcFileDebug()
         self.debug.SpineTest()
-        self.parent.InitRigRoots()
+        self.parent.NewLoadRig(1)
         self.parent.InitOptionMenues()
 
     def SkeletonTest(self, ignore):
         log.funcFileDebug()
         self.debug.SkeletonTest()
-        self.parent.InitRigRoots()
+        self.parent.NewLoadRig(1)
         self.parent.InitOptionMenues()
 
