@@ -5,7 +5,7 @@ import pymel.core as pm
 
 import Utilities.Logger as log
 reload(log)
-import Operations.Rigging.LimbSetup as ls
+import Operations.Rigging_Setup.LimbSetup as ls
 reload(ls)
 
 class LoadTemplates:

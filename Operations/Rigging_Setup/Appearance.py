@@ -35,7 +35,7 @@ class Appearance(absOp.Abstract_Operation):
         pm.delete(pm.listConnections(rigRoot.controlTemplates))
 
         # Import Control Shapes
-        rootFolder = os.path.dirname(__file__)  # Rigging
+        rootFolder = os.path.dirname(__file__)  # Rigging_Setup
         rootFolder = os.path.dirname(rootFolder)  # Operations
         rootFolder = os.path.dirname(rootFolder)  # Main
         folder = os.path.join(rootFolder, 'Data')

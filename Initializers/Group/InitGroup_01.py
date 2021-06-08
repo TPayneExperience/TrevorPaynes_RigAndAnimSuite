@@ -23,6 +23,7 @@ class InitGroup(absInit.Abstract_Initializer):
         pm.addAttr(group, ln='control', dt='string', h=hide)
         pm.addAttr(group, ln='joint', dt='string', h=hide)
         pm.addAttr(group, ln='limb', dt='string', h=hide)
+        pm.addAttr(group, ln='constraintGroups', dt='string', h=hide)
             # >>> TO IMPLEMENT
         pm.addAttr(group, ln='used', dt='string', h=hide)
         pm.addAttr(group, ln='groupType', dt='string', h=hide)

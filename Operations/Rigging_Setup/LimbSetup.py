@@ -25,7 +25,7 @@ import Utilities.Rig_Utilities as rigUtil
 reload(rigUtil)
 import Utilities.Anim_Utilities as animUtil
 reload(animUtil)
-# import Operations.Rigging.Autobuild as auto
+# import Operations.Rigging_Setup.Autobuild as auto
 # reload(auto)
 import Abstracts.Abstract_Autobuild as absBld
 reload(absBld)
@@ -51,7 +51,7 @@ class LimbSetup(absOp.Abstract_Operation):
             if '__init__.py' in buildFile:
                 continue
             fileName = os.path.splitext(buildFile)[0]
-            moduleName = 'Operations.Rigging.Autobuild.%s' % fileName
+            moduleName = 'Operations.Rigging_Setup.Autobuild.%s' % fileName
             exec('import %s' % moduleName)
             exec('reload (%s)' % moduleName)
             module = sys.modules[moduleName]

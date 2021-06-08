@@ -5,6 +5,10 @@ import Utilities.Logger as log
 reload(log)
 import Utilities.General_Utilities as genUtil
 reload(genUtil)
+import Utilities.Rig_Utilities as rigUtil
+reload(rigUtil)
+import Data.Rig_Data as rigData
+reload(rigData)
 import Control as ctr
 reload(ctr)
 import Data.General_Data as genData
@@ -50,6 +54,34 @@ class Group:
         group.pfrsName.set(animName)
         pm.connectAttr(limb.animGroups, group.limb)
         pm.parent(group, limb)
+        return group
+
+    @staticmethod
+    def AddConstraintGroup(control):
+        log.funcFileDebug()
+        hide = genData.HIDE_ATTRS
+        limbGroup = pm.listConnections(control.group)[0]
+        # limb = pm.listConnections(limbGroup.limb)[0]
+        group = pm.group(n='CstGroup_#', em=1, w=1)
+        pm.addAttr(group, ln='limbGroup', dt='string', h=hide)
+        pm.addAttr(group, ln='target', dt='string', h=hide)
+        cstTypes = ':'.join(rigData.CST_TYPES)
+        pm.addAttr(group, ln='cstType', at='enum', 
+                                en=cstTypes, h=hide)
+        pm.addAttr(group, ln='cstWeight', at='float', k=1,
+                                dv=0.5, min=0, max=1, h=hide)
+        pm.addAttr(group, ln='maintainOffset', at='bool', dv=1, h=hide)
+        pm.addAttr(group, ln='lockX', at='bool', h=hide)
+        pm.addAttr(group, ln='lockY', at='bool', h=hide)
+        pm.addAttr(group, ln='lockZ', at='bool', h=hide)
+
+        pm.connectAttr(limbGroup.constraintGroups, group.limbGroup)
+        attrs = ('.tx', '.ty', '.tz',
+                '.rx', '.ry', '.rz',
+                '.sx', '.sy', '.sz',
+                '.v')
+        for attr in attrs:
+            pm.setAttr(group + attr, k=0)
         return group
 
     @staticmethod

@@ -60,7 +60,7 @@ class PFRS_Debug:
         path = os.path.join(self.folder, 'TEST_LegFoot_01.ma')
         pm.importFile(path)
         rigRoot = self.pfrs.AddRigRoot()
-        rigRoot.operation.set('Behavior')
+        # rigRoot.operation.set('Behavior')
         # self.pfrs.LimbSetup.AutoBuildByName(rigRoot)
 
     def FaceTest(self):

@@ -18,7 +18,7 @@ reload(animUtil)
 # reload(animData)
 # import Data.Rig_Data as rigData
 # reload(rigData)
-import Operations.Rigging.LimbSetup as ls
+import Operations.Rigging_Setup.LimbSetup as ls
 reload(ls)
 import SceneData.Limb as lmb
 reload(lmb)
