@@ -33,7 +33,7 @@ class Behavior_Manager(object):
         log.funcFileDebug()
         self.bhvFiles = {}
         self.bhvs = {}
-        self.groupTypes = set(['Joint'])
+        self.groupTypes = set(['Joint', 'FK'])
         rootPath = os.path.dirname(__file__)
         rootPath = os.path.dirname(rootPath)
         bhvPath = os.path.join(rootPath, 'Behaviors')
@@ -84,11 +84,19 @@ class Behavior_Manager(object):
         limbs = pm.listConnections(rigRoot.limbs)
 
         # Setup Control Hier
+        joints = []
         for limb in limbs:
             limb.v.set(limb.enableLimb.get())
             self._Setup_ControlPivot(limb)
             bhv = self.bhvs[limb.bhvFile.get()]
             bhv.Setup_Rig_Controls(limb)
+            if limb.limbType.get() != 0: # Not Empty
+                joints += pm.listConnections(limb.joints)
+            
+        # Skin meshes
+        for mesh in pm.listConnections(rigRoot.meshes):
+            pm.skinCluster(joints, mesh)
+
         # Constrain Joints to Controls
         for limb in limbs:
             bhv = self.bhvs[limb.bhvFile.get()]
@@ -102,9 +110,10 @@ class Behavior_Manager(object):
             for group in pm.listConnections(limb.usedGroups):
                 for cstGroup in pm.listConnections(group.constraintGroups):
                     self._SetupConstraintGroup(cstGroup)
-        # Lock hide channelbox
+        # Lock hide channelbox + joint list
         for limb in limbs:
             self._LockHideLimbControls(limb)
+        
         rigRoot.isBuilt.set(1)
 
     def Teardown_Rig(self, rigRoot):
@@ -122,8 +131,9 @@ class Behavior_Manager(object):
 
         # Constrain Controls to Controls
         for limb in limbs:
-            for cstGroup in pm.listConnections(limb.constraintGroups):
-                self._TeardownConstraintGroup(cstGroup)
+            for group in pm.listConnections(limb.usedGroups):
+                for cstGroup in pm.listConnections(group.constraintGroups):
+                    self._TeardownConstraintGroup(cstGroup)
 
         # Joint Constraints
         pm.refresh()
@@ -135,6 +145,8 @@ class Behavior_Manager(object):
 
         # Controls
         for limb in limbs:
+            bhvFile = limb.bhvFile.get()
+            bhv = self.bhvs[bhvFile]
             bhv.Teardown_Rig_Controls(limb)
         
         # Fix Pivots
@@ -143,6 +155,10 @@ class Behavior_Manager(object):
                 self._Teardown_ControlPivot(group)
         rigRoot.isBuilt.set(0)
     
+        # Skin meshes
+        for mesh in pm.listConnections(rigRoot.meshes):
+            pm.skinCluster(mesh, e=1, unbind=1)
+
     def _LockHideLimbControls(self, limb):
         log.funcFileDebug()
         bhv = self.bhvs[limb.bhvFile.get()]
@@ -178,7 +194,7 @@ class Behavior_Manager(object):
         self._BakeAnimation(animLimbs, animName)
         return animLimbs
 
-    def BakeControlAnimation(self, limbs, animName):
+    def BakeControlAnimation(self, limbs, animName, force=0):
         log.funcFileDebug()
         animLimbs = []
         pm.delete(all=1, staticChannels=1)
@@ -189,6 +205,8 @@ class Behavior_Manager(object):
 
             # if no keys, skip
             if any([pm.keyframe(c, q=1, kc=1) for c in controls]):
+                animLimbs.append(limb)
+            elif force:
                 animLimbs.append(limb)
         
         self._BakeAnimation(animLimbs, animName)
@@ -324,18 +342,41 @@ class Behavior_Manager(object):
         groupCount = behavior.groupCount
         pm.disconnectAttr(limb.usedGroups)
         limbGroups = pm.listConnections(limb.limbGroups)
+        # Build limb group dict
         limbGroupDict = {} # groupType : Group
         for group in limbGroups:
             name = group.groupType.get()
             if name not in limbGroupDict:
                 limbGroupDict[name] = []
             limbGroupDict[name].append(group)
+
         if groupType not in limbGroupDict:
             limbGroupDict[groupType] = []
+
+        # Create Limb Groups
         toCreate = max(groupCount - len(limbGroupDict[groupType]), 0)
         for i in range(toCreate):
             group = grp.Group.AddLimbGroup(rigRoot, i, groupType, limb)
             limbGroupDict[groupType].append(group)
+
+        # Create FK Groups
+        if behavior.duplicateJointGroups:
+            joints = pm.listConnections(limb.joints)
+            joints = rigUtil.Joint._GetSortedJoints(joints)
+            if 'FK' not in limbGroupDict:
+                limbGroupDict['FK'] = []
+                for i in range(len(joints)):
+                    group = grp.Group.AddLimbGroup(rigRoot, i, 'FK', limb) 
+                    limbGroupDict['FK'].append(group)
+            for i in range(len(joints)):
+                group = limbGroupDict['FK'][i]
+                pm.connectAttr(limb.usedGroups, group.used)
+                genUtil.Name.UpdateLimbGroupName(rigRoot, limb, group)
+                pm.parent(group, joints[i])
+                rigUtil.ResetAttrs(group)
+                pm.parent(group, limb)
+
+        # Connect Groups to Used
         for i in range(groupCount):
             group = limbGroupDict[groupType][i]
             pm.connectAttr(limb.usedGroups, group.used)
@@ -344,7 +385,8 @@ class Behavior_Manager(object):
 #=========== CONSTRAINTS ====================================
 
     def _SetupConstraintGroup(self, cstGroup):
-        target = pm.listConnections(cstGroup.target)[0]
+        target1 = pm.listConnections(cstGroup.target1)[0]
+        target2 = pm.listConnections(cstGroup.target2)[0]
         limbGroup = pm.listConnections(cstGroup.limbGroup)[0]
         control = pm.listConnections(limbGroup.control)[0]
         parent = pm.listRelatives(control, p=1)[0]
@@ -354,45 +396,46 @@ class Behavior_Manager(object):
         rigUtil.ResetAttrs(cstGroup)
         pm.parent(control, cstGroup)
 
+        # Set Default weight
+        pos1 = pm.xform(target1, q=1, t=1, ws=1)
+        pos2 = pm.xform(target2, q=1, t=1, ws=1)
+        posC = pm.xform(control, q=1, t=1, ws=1)
+        vec1C = [pos1[i] - posC[i] for i in range(3)]
+        vec12 = [pos1[i] - pos2[i] for i in range(3)]
+        mag1C = sum([i**2 for i in vec1C]) **0.5
+        mag12 = sum([i**2 for i in vec12]) **0.5
+        newWeight = mag1C / mag12
+        cstGroup.cstWeight.set(newWeight)
+
         mo = cstGroup.maintainOffset.get()
-        lockX = cstGroup.lockX.get()
-        lockY = cstGroup.lockY.get()
-        lockZ = cstGroup.lockZ.get()
+        skip = []
+        if cstGroup.lockX.get(): skip.append('x')
+        if cstGroup.lockY.get(): skip.append('y')
+        if cstGroup.lockZ.get(): skip.append('z')
 
         # Orient
         if cstGroup.cstType.get() == 0:
-            cst = pm.orientConstraint(parent, target, cstGroup, mo=mo)
-            if lockX: pm.orientConstraint(cst, e=1, sk='x')
-            if lockY: pm.orientConstraint(cst, e=1, sk='y')
-            if lockZ: pm.orientConstraint(cst, e=1, sk='z')
+            cst = pm.orientConstraint(target1, target2, cstGroup, 
+                                                    mo=mo, sk=skip)
         # Parent
         elif cstGroup.cstType.get() == 1:
-            cst = pm.parentConstraint(parent, target, cstGroup, mo=mo)
-            if lockX: pm.parentConstraint(cst, e=1, st='x')
-            if lockY: pm.parentConstraint(cst, e=1, st='y')
-            if lockZ: pm.parentConstraint(cst, e=1, st='z')
-            if lockX: pm.parentConstraint(cst, e=1, sr='x')
-            if lockY: pm.parentConstraint(cst, e=1, sr='y')
-            if lockZ: pm.parentConstraint(cst, e=1, sr='z')
+            cst = pm.parentConstraint(target1, target2, cstGroup, mo=mo,
+                                                    st=skip, sr=skip)
         # Point
         elif cstGroup.cstType.get() == 2:
-            cst = pm.pointConstraint(parent, target, cstGroup, mo=mo)
-            if lockX: pm.pointConstraint(cst, e=1, sk='x')
-            if lockY: pm.pointConstraint(cst, e=1, sk='y')
-            if lockZ: pm.pointConstraint(cst, e=1, sk='z')
+            cst = pm.pointConstraint(target1, target2, cstGroup, 
+                                                    mo=mo, sk=skip)
         # Scale
         elif cstGroup.cstType.get() == 3:
-            cst = pm.scaleConstraint(parent, target, cstGroup, mo=mo)
-            if lockX: pm.scaleConstraint(cst, e=1, sk='x')
-            if lockY: pm.scaleConstraint(cst, e=1, sk='y')
-            if lockZ: pm.scaleConstraint(cst, e=1, sk='z')
+            cst = pm.scaleConstraint(target1, target2, cstGroup, 
+                                                    mo=mo, sk=skip)
 
         # Invert Weight Node
         invertNode = pm.createNode('plusMinusAverage')
         invertNode.operation.set(2) # Subtract
         invertNode.input1D[0].set(1)
-        attr1 = '%s.%sW0' % (cst, parent)
-        attr2 = '%s.%sW1' % (cst, target)
+        attr1 = '%s.%sW0' % (cst, target1)
+        attr2 = '%s.%sW1' % (cst, target2)
 
         # Connections
         pm.connectAttr(cstGroup.cstWeight, invertNode.input1D[1])
@@ -401,11 +444,12 @@ class Behavior_Manager(object):
 
     def _TeardownConstraintGroup(self, cstGroup):
         # Delete cst + invert node
-        weight = cstGroup.cstWeight.get()
-        cstGroup.cstWeight.set(0)
+        # weight = cstGroup.cstWeight.get()
+        # cstGroup.cstWeight.set(0)
         pm.delete(pm.listRelatives(cstGroup, c=1, type='constraint'))
+        rigUtil.ResetAttrs(cstGroup)
         pm.delete(pm.listConnections(cstGroup.cstWeight))
-        cstGroup.cstWeight.set(weight)
+        # cstGroup.cstWeight.set(weight)
         
         limbGroup = pm.listConnections(cstGroup.limbGroup)[0]
         control = pm.listConnections(limbGroup.control)[0]

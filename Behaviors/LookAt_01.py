@@ -20,6 +20,7 @@ class LookAt_01(absBhv.Abstract_Behavior):
     usesJointControls = False
     usesLimbControls = True
     bakeLosesData = False
+    duplicateJointGroups = False
     
     def InitLimb(self, limb):
         log.funcFileDebug()

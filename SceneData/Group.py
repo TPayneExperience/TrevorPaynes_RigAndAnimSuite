@@ -64,7 +64,8 @@ class Group:
         # limb = pm.listConnections(limbGroup.limb)[0]
         group = pm.group(n='CstGroup_#', em=1, w=1)
         pm.addAttr(group, ln='limbGroup', dt='string', h=hide)
-        pm.addAttr(group, ln='target', dt='string', h=hide)
+        pm.addAttr(group, ln='target1', dt='string', h=hide)
+        pm.addAttr(group, ln='target2', dt='string', h=hide)
         cstTypes = ':'.join(rigData.CST_TYPES)
         pm.addAttr(group, ln='cstType', at='enum', 
                                 en=cstTypes, h=hide)

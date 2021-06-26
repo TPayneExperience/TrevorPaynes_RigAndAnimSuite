@@ -63,6 +63,9 @@ class Animation_UI(absOpUI.Abstract_OperationUI):
                 self.animations_tv = pm.treeView(arp=0, adr=0, ams=0,
                                             elc=self.IgnoreRename)
                 pm.treeView(self.animations_tv, e=1, scc=self.SelectedAnimation)
+                with pm.popupMenu() as self.rmb_ui:
+                    self.delete_mi = pm.menuItem(l='Delete Animation', en=0, 
+                                                c=self.DeleteAnimation)
         with pm.verticalLayout():
             # Limbs
             with pm.frameLayout('Limbs', bv=1) as self.limbs_fl:
@@ -139,6 +142,16 @@ class Animation_UI(absOpUI.Abstract_OperationUI):
 
     def RemoveControlAnimation(self, ignore):
         log.funcFileInfo()
+        result = pm.confirmDialog(
+                        t='Delete Animation', 
+                        icon='warning', 
+                        m='Remove control animation?', 
+                        b=['Ok', 'Cancel'], 
+                        db='Ok', 
+                        cb='Cancel', 
+                        ds='Cancel')
+        if result == 'Cancel':
+            return
         self.operation.RemoveControlAnimation(self._rigRoot)
 
     def SetAnimationFolder(self, ignore):
@@ -158,6 +171,7 @@ class Animation_UI(absOpUI.Abstract_OperationUI):
         self.animData = None
         self.PopulateLimbHier()
         self.PopulateProperties()
+        pm.menuItem(self.delete_mi, e=1, en=0)
         pm.treeView(self.animations_tv, e=1, removeAll=1)
         if not self._rigRoot:
             return
@@ -170,14 +184,34 @@ class Animation_UI(absOpUI.Abstract_OperationUI):
         self.animData = None
         self.PopulateLimbHier()
         self.PopulateProperties()
+        pm.menuItem(self.delete_mi, e=1, en=0)
         animStrs = pm.treeView(self.animations_tv, q=1, selectItem=1)
         if not animStrs:
             return
+        pm.menuItem(self.delete_mi, e=1, en=1)
         animFile = self.anims[animStrs[0]]
         self.animData = genUtil.Json.Load(animFile)
         self.animData['filePath'] = animFile
         self.PopulateLimbHier()
         self.PopulateProperties()
+
+    def DeleteAnimation(self, ignore):
+        log.funcFileInfo()
+        animStrs = pm.treeView(self.animations_tv, q=1, selectItem=1)
+        msg = 'Delete animation "%s"?' % animStrs[0]
+        result = pm.confirmDialog(
+                        t='Delete Animation', 
+                        icon='warning', 
+                        m=msg, 
+                        b=['Ok', 'Cancel'], 
+                        db='Ok', 
+                        cb='Cancel', 
+                        ds='Cancel')
+        if result == 'Cancel':
+            return
+        animFile = self.anims[animStrs[0]]
+        self.operation.DeleteAnimation(animFile)
+        self.PopulateAnimationHier()
 
 #=========== LIMB HIER ====================================
 

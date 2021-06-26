@@ -28,6 +28,10 @@ import Utilities.General_Utilities as genUtil
 reload(genUtil)
 import Operations.Rigging_Setup.Appearance as app
 reload(app)
+import Operations.Rigging_Setup.LimbSetup as ls
+reload(ls)
+import Operations.Skinning.MeshSetup as msh
+reload(msh)
 # import Data.Config as cnfg
 # reload(cnfg)
 
@@ -90,6 +94,8 @@ class PayneFreeRigSuite:
         rigRoot.sideIndex.set(config['sideIndex'])
         rigRoot.typeIndex.set(config['typeIndex'])
 
+        ls.LimbSetup().InitSceneJoints(rigRoot)
+        msh.MeshSetup().InitSceneMeshes(rigRoot)
         self.bhvMng.InitRigRootControlShapeAttrs(rigRoot)
         app.Appearance.bhvMng = self.bhvMng
         app.Appearance.ReimportControlShapes(rigRoot)

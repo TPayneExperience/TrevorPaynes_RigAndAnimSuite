@@ -41,7 +41,6 @@ class InitLimb(absInit.Abstract_Initializer):
         pm.addAttr(limb, ln='limbParentJoint', at='enum', en='None', 
                                         h=hide)
         pm.addAttr(limb, ln='jointGroups', dt='string', h=hide)
-        # pm.addAttr(limb, ln='constraintGroups', dt='string', h=hide)
         pm.addAttr(limb, ln='mirrorLimb', at='long', h=hide)
 
         # BEHAVIORS

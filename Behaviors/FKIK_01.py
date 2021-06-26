@@ -22,6 +22,7 @@ class FKIK_01(absBhv.Abstract_Behavior):
     usesJointControls = True
     usesLimbControls = True
     bakeLosesData = True
+    duplicateJointGroups = True
 
     def InitLimb(self, limb):
         log.funcFileDebug()
@@ -37,7 +38,6 @@ class FKIK_01(absBhv.Abstract_Behavior):
             pm.addAttr(limb, ln='ikpvDistance', at='float', 
                                                 min=0, dv=10)
             pm.addAttr(limb, ln='ikpvCurve', dt='string')
-        # pm.disconnectAttr(limb.usedGroups)
         joints = pm.listConnections(limb.joints)
         joints = rigUtil.Joint._GetSortedJoints(joints)
         limbGroups = rigUtil.GetLimbGroups(limb, self.groupType)
@@ -80,8 +80,6 @@ class FKIK_01(absBhv.Abstract_Behavior):
             xform1.v.set(0)
             xform2.v.set(0)
             pm.select(d=1)
-        for group in pm.listConnections(limb.jointGroups):
-            pm.connectAttr(limb.usedGroups, group.used)
         
     def CleanupLimb(self, limb):
         log.funcFileDebug()
@@ -93,42 +91,21 @@ class FKIK_01(absBhv.Abstract_Behavior):
 
     def Setup_Rig_Controls(self, limb):
         log.funcFileDebug()
-        
+        # Internal
         # ------- IK ---------
         curve = pm.listConnections(limb.ikpvCurve)[0]
         curve.v.set(1)
 
         # ------- FK ---------
-        joints = pm.listConnections(limb.joints)
-        joints = rigUtil.Joint._GetSortedJoints(joints)
-        jointGroups = [pm.listConnections(j.group)[0] for j in joints]
-        for i in range(len(jointGroups)-1):
-            group = jointGroups[i+1]
-            parentCtr = pm.listConnections(jointGroups[i].control)[0]
+        fkGroups = rigUtil.GetLimbGroups(limb, 'FK')
+        for i in range(len(fkGroups)-1):
+            group = fkGroups[i+1]
+            parentCtr = pm.listConnections(fkGroups[i].control)[0]
             pm.parent(group, parentCtr)
 
-        # ------- EXTERNAL GROUP PARENTS ---------
-        pm.disconnectAttr(limb.jointGroups)
-        for joint in joints:
-            jointGroup = pm.listConnections(joint.group)[0]
-            index = jointGroup.groupIndex.get()
-            group = pm.group(em=1, p=joint)
-            control = pm.group(em=1, p=group)
-
-            pm.addAttr(group, ln='control', dt='string')
-            pm.addAttr(group, ln='limb', dt='string')
-            pm.addAttr(group, ln='groupIndex', at='long', dv=index)
-            pm.addAttr(control, ln='group', dt='string')
-
-            pm.connectAttr(group.control, control.group)
-            pm.connectAttr(limb.jointGroups, group.limb)
-
-            pm.parent(group, limb)
-            pm.parent(control, group)
-            pm.parentConstraint(joint, group)
-    
         # External
-        joint = joints[0]
+        joints = pm.listConnections(limb.joints)
+        joint = rigUtil.Joint._GetSortedJoints(joints)[0]
         
         # ------- IK ---------
         limbGroups = rigUtil.GetLimbGroups(limb, self.groupType)
@@ -137,7 +114,7 @@ class FKIK_01(absBhv.Abstract_Behavior):
         ikpv3 = limbGroups[2]
         ikpv1.v.set(0)
         # ------- FK ---------
-        fkGroup = pm.listConnections(joint.group)[0]
+        fkGroup = fkGroups[0]
         # ------- FK + IK Root Parenting ---------
         parentJoints = pm.listRelatives(joint, p=1, type='joint')
         if parentJoints:
@@ -156,9 +133,6 @@ class FKIK_01(absBhv.Abstract_Behavior):
         log.funcFileDebug()
         joints = pm.listConnections(limb.joints)
         joints = rigUtil.Joint._GetSortedJoints(joints)
-        fkGroups = [pm.listConnections(j.group)[0] for j in joints]
-        fkControls = [pm.listConnections(g.control)[0] for g in fkGroups]
-        ikGroups = rigUtil.GetLimbGroups(limb, self.groupType)
 
         # ------- JOINTS ---------
         ikJoints = pm.duplicate(joints, po=1, rc=1)
@@ -178,6 +152,7 @@ class FKIK_01(absBhv.Abstract_Behavior):
         handle.v.set(0)
 
         # IK Groups + Controls
+        ikGroups = rigUtil.GetLimbGroups(limb, self.groupType)
         startGroup = ikGroups[0]
         midGroup = ikGroups[1]
         endGroup = ikGroups[2]
@@ -199,6 +174,8 @@ class FKIK_01(absBhv.Abstract_Behavior):
         pm.poleVectorConstraint(midControl, handle)
 
         # ------- FK ---------
+        fkGroups = rigUtil.GetLimbGroups(limb, 'FK')
+        fkControls = [pm.listConnections(g.control)[0] for g in fkGroups]
         for joint, control in zip(fkJoints, fkControls):
             pm.parentConstraint(control, joint, mo=1)
 
@@ -222,18 +199,19 @@ class FKIK_01(absBhv.Abstract_Behavior):
         ikJoints[0].v.set(0)
         for group in fkGroups:
             pm.connectAttr(invertNode.output1D, group.v)
-            # pm.connectAttr(limb.usedGroups, group.used)
         for group in ikGroups:
             pm.connectAttr(limb.fkik, group.v)
-            # pm.connectAttr(limb.usedGroups, group.used)
         curve = pm.listConnections(limb.ikpvCurve)[0]
         pm.connectAttr(limb.fkik, curve.v)
+
+        # ------- JOINT GROUPS ---------
+        for joint in joints:
+            jointGroup = pm.listConnections(joint.group)[0]
+            pm.parentConstraint(joint, jointGroup, mo=1)
 
     def Setup_Constraint_ControlsToXforms(self, limb, 
             xforms, hasPosCst, hasRotCst, hasScaleCst):
         log.funcFileDebug()
-        joints = pm.listConnections(limb.joints)
-        joints = rigUtil.Joint._GetSortedJoints(joints)
         # ------- IK ---------
         limbGroups = rigUtil.GetLimbGroups(limb, self.groupType)
         limbControls = [pm.listConnections(g.control)[0] for g in limbGroups]
@@ -253,17 +231,16 @@ class FKIK_01(absBhv.Abstract_Behavior):
             pm.parentConstraint(xforms[1], ikpvMid, mo=1)
         
         # ------- FK ---------
-        jointGroups = pm.listConnections(limb.jointGroups)
-        jointGroups = rigUtil.SortGroups(jointGroups)
-        jointControls = [pm.listConnections(g.control)[0] for g in jointGroups]
-        for xform, control in zip(xforms, jointControls):
+        fkGroups = rigUtil.GetLimbGroups(limb, 'FK')
+        fkControls = [pm.listConnections(g.control)[0] for g in fkGroups]
+        for xform, control in zip(xforms, fkControls):
             if hasPosCst:
                 pm.pointConstraint(xform, control)
             if hasRotCst:
                 pm.orientConstraint(xform, control)
             if hasScaleCst:
                 pm.scaleConstraint(xform, control)
-        return limbControls + jointControls
+        return limbControls + fkControls
 
 #============= TEARDOWN ============================
 
@@ -274,15 +251,8 @@ class FKIK_01(absBhv.Abstract_Behavior):
         curve.v.set(0)
 
         # ------- FK ---------
-        joints = pm.listConnections(limb.joints)
-        joints = rigUtil.Joint._GetSortedJoints(joints)
-        jointGroups = [pm.listConnections(j.group)[0] for j in joints]
-        pm.parent(jointGroups[1:], limb)
-
-        # ------- Cleanup ---------
-        pm.delete(pm.listConnections(limb.jointGroups))
-        for jointGroup in jointGroups:
-            pm.connectAttr(limb.jointGroups, jointGroup.limb)
+        fkGroups = rigUtil.GetLimbGroups(limb, 'FK')
+        pm.parent(fkGroups[1:], limb)
 
         # EXTERNAL
 
@@ -290,20 +260,14 @@ class FKIK_01(absBhv.Abstract_Behavior):
         if pm.listConnections(limb.limbParent):
             ikGroups = rigUtil.GetLimbGroups(limb, self.groupType)
             for group in ikGroups:
-                cst = pm.listRelatives(group, c=1, type='parentConstraint')
-                pm.delete(cst)
+                pm.delete(pm.listRelatives(group, c=1, type='constraint'))
                 
         # ------- FK ---------
-            joints = pm.listConnections(limb.joints)
-            joints = rigUtil.Joint._GetSortedJoints(joints)
-            jointGroup = pm.listConnections(joints[0].group)[0]
-            cst = pm.listRelatives(jointGroup, c=1, type='parentConstraint')
-            pm.delete(cst)
+            pm.delete(pm.listRelatives(fkGroups[0], c=1, type='constraint'))
 
     def Teardown_Constraint_JointsToControls(self, limb):
         log.funcFileDebug()
         # ------- IK ---------
-        log.funcFileDebug()
 
         # Reposition group to second joint
         joints = pm.listConnections(limb.joints)
@@ -319,11 +283,9 @@ class FKIK_01(absBhv.Abstract_Behavior):
         pm.delete(pm.listConnections(limb.fkJoints))
         pm.delete(pm.listConnections(limb.ikJoints))
         pm.disconnectAttr(limb.fkik)
-        # pm.disconnectAttr(limb.usedGroups)
     
     def Teardown_Constraint_ControlsToXforms(self, limb):
         log.funcFileDebug()
-
         # ------- IK ---------
         limbGroups = rigUtil.GetLimbGroups(limb, self.groupType)
         controls = [pm.listConnections(g.control)[0] for g in limbGroups]
@@ -331,8 +293,8 @@ class FKIK_01(absBhv.Abstract_Behavior):
             pm.delete(pm.listRelatives(control, c=1, type='constraint'))
 
         # ------- FK ---------
-        jointGroups = pm.listConnections(limb.jointGroups)
-        controls = [pm.listConnections(g.control)[0] for g in jointGroups]
+        fkGroups = rigUtil.GetLimbGroups(limb, 'FK')
+        controls = [pm.listConnections(g.control)[0] for g in fkGroups]
         for control in controls:
             pm.delete(pm.listRelatives(control, c=1, type='constraint'))
     

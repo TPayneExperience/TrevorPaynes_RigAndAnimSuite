@@ -20,6 +20,7 @@ class FK_Branch_01(absBhv.Abstract_Behavior):
     usesJointControls = True
     usesLimbControls = False
     bakeLosesData = False
+    duplicateJointGroups = False
     
     def InitLimb(self, limb):
         log.funcFileDebug()

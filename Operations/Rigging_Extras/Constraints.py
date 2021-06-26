@@ -14,39 +14,55 @@ class Constraints(absOp.Abstract_Operation):
     isRigBuilt = True
     validRigStates = (0, 1)      # 0 = Setup, 1 = Anim
     controlLayerState = (1, 0)  # isVis, isRef
-    jointLayerState = (1, 0)    # isVis, isRef
+    jointLayerState = (1, 1)    # isVis, isRef
     meshLayerState = (1, 1)    # isVis, isRef
 
-    def ApplyOrientConstraint(self, affectedControl, target, 
+    def ApplyOrientConstraint(self, affectedControl, target1, target2,
                     hasMaintainOffset, lockX, lockY, lockZ):
-        self._ApplyConstraint(affectedControl, target, 
+        self._ApplyConstraint(affectedControl, target1, target2,
                     hasMaintainOffset, lockX, lockY, lockZ, 0)
 
-    def ApplyParentConstraint(self, affectedControl, target, 
+    def ApplyParentConstraint(self, affectedControl, target1, target2,
                     hasMaintainOffset, lockX, lockY, lockZ):
-        self._ApplyConstraint(affectedControl, target, 
+        self._ApplyConstraint(affectedControl, target1, target2,
                     hasMaintainOffset, lockX, lockY, lockZ, 1)
 
-    def ApplyPointConstraint(self, affectedControl, target, 
+    def ApplyPointConstraint(self, affectedControl, target1, target2,
                     hasMaintainOffset, lockX, lockY, lockZ):
-        self._ApplyConstraint(affectedControl, target, 
+        self._ApplyConstraint(affectedControl, target1, target2,
                     hasMaintainOffset, lockX, lockY, lockZ, 2)
 
-    def ApplyScaleConstraint(self, affectedControl, target, 
+    def ApplyScaleConstraint(self, affectedControl, target1, target2,
                     hasMaintainOffset, lockX, lockY, lockZ):
-        self._ApplyConstraint(affectedControl, target, 
+        self._ApplyConstraint(affectedControl, target1, target2,
                     hasMaintainOffset, lockX, lockY, lockZ, 3)
 
-    def RemoveConstraintGroup(self, constraintGroup):
-        self.bhvMng._TeardownConstraintGroup(constraintGroup)
-        grp.Group.Remove(constraintGroup)
+    def BakeAndRemoveConstraintGroups(self, constraintGroups):
+        limbs = set()
+        for cstGroup in constraintGroups:
+            limbGroup = pm.listConnections(cstGroup.limbGroup)[0]
+            limbs.add(pm.listConnections(limbGroup.limb)[0])
+        limbs = list(limbs)
+        self.bhvMng.BakeControlAnimation(limbs, 'CstTemp', 1)
+        self.RemoveConstraintGroups(constraintGroups)
+        self.bhvMng.ApplyControlAnimation(limbs, 'CstTemp', 1, 1, 1)
+        self.bhvMng.DeleteAnimation(limbs, 'CstTemp')
+        
+    def RemoveConstraintGroups(self, constraintGroups):
+        for cstGroup in constraintGroups:
+            self.bhvMng._TeardownConstraintGroup(cstGroup)
+            grp.Group.Remove(cstGroup)
 
 #============= PRIVATE ============================
 
-    def _ApplyConstraint(self, affectedControl, target, 
+    def _ApplyConstraint(self, affectedControl, target1, target2, 
                     hasMaintainOffset, lockX, lockY, lockZ, index):
-        if not target.hasAttr('cstSources'):
-            pm.addAttr(target, ln='cstSources', dt='string')
+        if not target2:
+            target2 = pm.listRelatives(affectedControl, p=1)[0]
+        if not target1.hasAttr('cstSources'):
+            pm.addAttr(target1, ln='cstSources', dt='string')
+        if not target2.hasAttr('cstSources'):
+            pm.addAttr(target2, ln='cstSources', dt='string')
 
         group = grp.Group.AddConstraintGroup(affectedControl)
         group.cstType.set(index)
@@ -54,7 +70,8 @@ class Constraints(absOp.Abstract_Operation):
         group.lockX.set(lockX)
         group.lockY.set(lockY)
         group.lockZ.set(lockZ)
-        pm.connectAttr(target.cstSources, group.target)
+        pm.connectAttr(target1.cstSources, group.target1)
+        pm.connectAttr(target2.cstSources, group.target2)
 
         self.bhvMng._SetupConstraintGroup(group)
         

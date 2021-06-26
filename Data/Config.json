@@ -10,8 +10,8 @@
     "templateFolderPath": "", 
     "jointUpAxis": 2, 
     "windowPos": [
-        431, 
-        834
+        290, 
+        1045
     ], 
     "limbIndex": 1, 
     "lControlTransparency": 0.8, 
@@ -29,6 +29,7 @@
         0, 
         1
     ], 
+    "controlShape_FK": "Cube_Poly", 
     "controlShape_FKR": "Cube_Poly", 
     "welcomePopupSeen": true, 
     "mControlColor": [

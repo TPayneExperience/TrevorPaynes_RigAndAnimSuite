@@ -49,6 +49,10 @@ class Abstract_Behavior:
     def bakeLosesData(self):       # bool | False
         pass 
 
+    @abstractproperty
+    def duplicateJointGroups(self):       # bool | False
+        pass 
+
 #============= METHODS ============================
 
     @abstractmethod

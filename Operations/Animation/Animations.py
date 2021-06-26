@@ -32,30 +32,6 @@ class Animations(absOp.Abstract_Operation):
     def __init__(self):
         self._ls = ls.LimbSetup()
 
-    def SetAnimationFolder(self, rigRoot, folderPath):
-        rigRoot.animationFolderPath.set(folderPath)
-
-    def GetRigRootAnimations(self, rigRoot):
-        curFile = pm.sceneName()
-        animUtil.UpdateAnimFolder(rigRoot, curFile)
-        folder = rigRoot.animationFolderPath.get()
-        files = [f for f in os.listdir(folder) if '.json' in f]
-        filePaths = {}
-        for f in files:
-            anim = os.path.splitext(f)[0]
-            filePaths[anim] = os.path.join(folder, f)
-        return filePaths
-
-    def ExportControlAnimation(self, rigRoot, animName):
-        log.funcFileDebug()
-        curFile = pm.sceneName()
-        animUtil.UpdateAnimFolder(rigRoot, curFile)
-        pm.saveFile()
-        limbs = pm.listConnections(rigRoot.limbs)
-        animLimbs = self.bhvMng.BakeControlAnimation(limbs, animName)
-        self._ls._ExportAnimation(rigRoot, animLimbs, animName)
-        pm.openFile(curFile, f=1)
-
     def RemoveControlAnimation(self, rigRoot):
         log.funcFileInfo()
         for limb in pm.listConnections(rigRoot.limbs):
@@ -119,5 +95,33 @@ class Animations(absOp.Abstract_Operation):
         pm.bakeResults(controls, sm=1, t=(newStartFrame, newEndFrame))
         pm.delete(allNodes)
 
+#=========== FILES ====================================
 
+    def SetAnimationFolder(self, rigRoot, folderPath):
+        rigRoot.animationFolderPath.set(folderPath)
+
+    def GetRigRootAnimations(self, rigRoot):
+        curFile = pm.sceneName()
+        animUtil.UpdateAnimFolder(rigRoot, curFile)
+        folder = rigRoot.animationFolderPath.get()
+        files = [f for f in os.listdir(folder) if '.json' in f]
+        filePaths = {}
+        for f in files:
+            anim = os.path.splitext(f)[0]
+            filePaths[anim] = os.path.join(folder, f)
+        return filePaths
+
+    def ExportControlAnimation(self, rigRoot, animName):
+        log.funcFileDebug()
+        curFile = pm.sceneName()
+        animUtil.UpdateAnimFolder(rigRoot, curFile)
+        pm.saveFile()
+        limbs = pm.listConnections(rigRoot.limbs)
+        animLimbs = self.bhvMng.BakeControlAnimation(limbs, animName)
+        self._ls._ExportAnimation(rigRoot, animLimbs, animName)
+        pm.openFile(curFile, f=1)
+
+    def DeleteAnimation(self, filePath):
+        if os.path.isfile(filePath):
+            os.remove(filePath)
 
