@@ -34,6 +34,7 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
         self._limbJoints = {}
         self._limbIDs = {} # limbID : limb
         self._selectedLimbs = []
+        self._autobuild_mis = []
 
     def Setup_UI(self, rigRoot, allRigRoots):  # Return nothing, parent should cleanup
         self.operation.InitAutobuilders()
@@ -48,6 +49,7 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
 #=========== SETUP UI ====================================
 
     def _Setup(self):
+        self._autobuild_mis = []
         with pm.verticalLayout():
             with pm.frameLayout(l='---', bv=1) as self.sceneHier_fl:
                 self.scene_tv = pm.treeView(scc=self.SelectedSceneJoints,
@@ -66,7 +68,8 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
                     for uiOrderIndex in sorted(list(order.keys())):
                         name = order[uiOrderIndex]
                         bld = self.operation._autobuilders[name]
-                        pm.menuItem(l=name, c=pm.Callback(self._Build, bld))
+                        item = pm.menuItem(l=name, c=pm.Callback(self._Build, bld))
+                        self._autobuild_mis.append(item)
         with pm.verticalLayout():
             with pm.frameLayout('Limbs', bv=1) as self.limbHier_fl:
                 tt = 'Double click to RENAME.'
@@ -76,6 +79,7 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
                 pm.treeView(self.limb_tv, e=1, scc=self.SelectedLimb,   
                                                 elc=self.RenameLimb)
                 with pm.popupMenu():
+                    # Edit Limb Joints
                     pm.menuItem(l='EDIT LIMB JOINTS', d=1)
                     with pm.subMenuItem(l='Joint Rotation Order', en=0) as self.jro_mi:
                         for i in range(6):
@@ -96,13 +100,15 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
                     self.zeroRot_mi = pm.menuItem(l='Set Joint Rotation to Zero', 
                                             en=0,
                                             c=self.SetJointRotationToZero)
-                    pm.menuItem(l='JOINT ANIMATIONS', d=1)
-                    self.exportAnim_mi = pm.menuItem(l='Export Joint Animation', 
-                                            en=0,
-                                            c=self.ExportJointAnim)
-                    self.removeAnim_mi = pm.menuItem(l='Remove Joint Animation', 
-                                            en=0,
-                                            c=self.RemoveJointAnim)
+
+                    # Templates
+                    pm.menuItem(l='TEMPLATES', d=1)
+                    self.loadTemp_mi = pm.menuItem(l='Load Template', 
+                                            c=self.LoadTemplate)
+                    self.saveTemp_mi = pm.menuItem(l='Save Template', 
+                                            en=0, c=self.SaveTemplate)
+                           
+                    # More Limbs
                     pm.menuItem(l='MORE LIMBS!', d=1)
                     self.duplicate_mi = pm.menuItem(l='Duplicate Limbs', 
                                             en=0, c=self.DuplicateLimbs)
@@ -120,19 +126,31 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
                                     c=pm.Callback(self.MirrorFaceLimbs, 'Y'))
                         pm.menuItem(l='Z Axis', 
                                     c=pm.Callback(self.MirrorFaceLimbs, 'Z'))
-                    pm.menuItem(l='TEMPLATES', d=1)
-                    self.loadTemp_mi = pm.menuItem(l='Load Template', 
-                                            c=self.LoadTemplate)
-                    self.saveTemp_mi = pm.menuItem(l='Save Template', 
-                                            en=0, c=self.SaveTemplate)
+
+                    # Less Limbs
+                    pm.menuItem(l='LESS LIMBS', d=1)
+                    self.removeLimbs_mi = pm.menuItem(l='Remove Limbs', 
+                                            en=0, c=self.RemoveLimbs)
+                    self.removeLimbsAndJoints_mi = pm.menuItem(l='Remove Limbs + Joints', 
+                                            en=0, c=self.RemoveLimbsAndJoints)
+                                     
+                    # Edit Limbs
                     pm.menuItem(l='EDIT LIMBS', d=1)
                     self.flipSides_mi = pm.menuItem(l='Flip Sides', 
                                             en=0, c=self.FlipSides)
                     with pm.subMenuItem(l='Set Limb Location...', en=0) as self.limbLoc_mi:
                         pm.menuItem(l='As Body', c=self.SetLimbLocationAsBody)
                         pm.menuItem(l='As Face', c=self.SetLimbLocationAsFace)
-                    self.remove_mi = pm.menuItem(l='Remove Limbs', 
-                                            en=0, c=self.RemoveLimbs)
+                        
+                    # Joint Anims
+                    pm.menuItem(l='JOINT ANIMATIONS', d=1)
+                    self.exportAnim_mi = pm.menuItem(l='Export Joint Animation', 
+                                            en=0,
+                                            c=self.ExportJointAnim)
+                    self.removeAnim_mi = pm.menuItem(l='Remove Joint Animation', 
+                                            en=0,
+                                            c=self.RemoveJointAnim)
+                    
             with pm.frameLayout(l='---', bv=1, en=0) as self.jntHier_fl:
                 tt = 'BRANCH limbs may reorder joints'
                 tt += '\nDouble LMB Click to RENAME'
@@ -144,15 +162,16 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
 
     def PopulateSceneHier(self):
         log.funcFileDebug()
-        # self.selectableJoints = []
         pm.treeView(self.scene_tv, e=1, removeAll=1)
         self.allJoints = {} # longName : joint
         limbJoints = []
+        # Get Limb Joints
         for joint in pm.ls(type='joint'):
             self.allJoints[joint.longName()] = joint
             if joint.hasAttr('limb'):
                 if pm.listConnections(joint.limb):
                     limbJoints.append(joint)
+        # Populate Items
         for longName in sorted(list(self.allJoints.keys())):
             joint = self.allJoints[longName]
             parent = pm.listRelatives(joint, parent=1)
@@ -161,13 +180,9 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
             else:
                 pm.treeView(self.scene_tv, e=1, ai=(longName, ''))
             pm.treeView(self.scene_tv, e=1, enl=(longName, joint not in limbJoints))
-            # if joint not in limbJoints:
-            #     self.selectableJoints.append(longName)
             pm.treeView(self.scene_tv, e=1, dl=(longName, joint.shortName()))
-        # hasJoints = bool(self.allJoints)
-        # pm.menuItem(self.buildHier_mi, e=1, en=hasJoints)
-        # pm.menuItem(self.buildNames_mi, e=1, en=hasJoints)
 
+        # Update frame
         totalJoints = pm.ls(type='joint')
         usedCount = 0
         for joint in totalJoints:
@@ -177,6 +192,11 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
         txt = 'Scene Joints (%d of %d used)' % (usedCount, len(totalJoints))
         pm.frameLayout(self.sceneHier_fl, e=1, l=txt)
 
+        # Enable Autobuilds
+        hasJoints = (usedCount != len(totalJoints))
+        for item in self._autobuild_mis:
+            pm.menuItem(item, e=1, en=hasJoints)
+            
     def Refresh(self, ignore):
         self.operation.InitSceneJoints(self._rigRoot)
         self.PopulateSceneHier()
@@ -185,6 +205,7 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
 
     def _Build(self, autobuilder):
         log.funcFileInfo()
+        self.operation.InitSceneJoints(self._rigRoot)
         self.operation.Autobuild(self._rigRoot, autobuilder)
         self.PopulateSceneHier()
         self.PopulateLimbHier()
@@ -279,7 +300,8 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
     def SelectedLimb(self):
         log.funcFileInfo()
         limbIDStrs = pm.treeView(self.limb_tv, q=1, selectItem=1)
-        pm.menuItem(self.remove_mi, e=1, en=0)
+        pm.menuItem(self.removeLimbs_mi, e=1, en=0)
+        pm.menuItem(self.removeLimbsAndJoints_mi, e=1, en=0)
         pm.menuItem(self.flipSides_mi, e=1, en=0)
         pm.menuItem(self.duplicate_mi, e=1, en=0)
         pm.menuItem(self.mirrorBody_mi, e=1, en=0)
@@ -327,7 +349,8 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
             if pm.listConnections(limb.mirrorLimb):
                 pm.menuItem(self.flipSides_mi, e=1, en=1)
             pm.select(pm.listConnections(limb.joints))
-        pm.menuItem(self.remove_mi, e=1, en=1)
+        pm.menuItem(self.removeLimbs_mi, e=1, en=1)
+        pm.menuItem(self.removeLimbsAndJoints_mi, e=1, en=1)
 
     def AddJointLimb(self, ignore):
         log.funcFileInfo()
@@ -441,9 +464,10 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
 
     def RemoveLimbs(self, ignore):
         log.funcFileInfo()
+        msg = 'Remove %d limb(s)?' % len(self._selectedLimbs)
         if (pm.confirmDialog(   t='Remove Limbs', 
                                 icon='warning', 
-                                m='Remove limbs?', 
+                                m=msg, 
                                 b=['Yes','No'], 
                                 db='Yes', 
                                 cb='No', 
@@ -456,6 +480,24 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
         self.PopulateSceneHier()
         self.SelectedLimb()
     
+    def RemoveLimbsAndJoints(self, ignore):
+        log.funcFileInfo()
+        msg = 'Remove %d limb(s) + Delete Joints?' % len(self._selectedLimbs)
+        if (pm.confirmDialog(   t='Remove Limbs + Delete Joints', 
+                                icon='warning', 
+                                m=msg, 
+                                b=['Yes','No'], 
+                                db='Yes', 
+                                cb='No', 
+                                ds='No') == 'No'):
+            return
+        for limb in self._selectedLimbs:
+            self.operation.RemoveLimbAndJoints(limb)
+        self.PopulateLimbHier()
+        self.PopulateJointHier(None)
+        self.PopulateSceneHier()
+        self.SelectedLimb()
+
     def RenameLimb(self, limbIDStr, newName):
         log.funcFileInfo()
         limb = self._limbIDs[limbIDStr]

@@ -59,8 +59,8 @@ class RIG_Behavior_UI(absOpUI.Abstract_OperationUI):
                     self._removeEmpty_mi = pm.menuItem(l='Remove Empty Limb', 
                                         en=0, c=self.RemoveEmptyLimb)
                     pm.menuItem(d=1)
-                    self._loadSkel_mi = pm.menuItem(l='Load Skeletal Hierarchy', 
-                                        en=0, c=self.LoadSkeletalHierarchy)
+                    self._resetParent_mi = pm.menuItem(l='Reset To Default Parent', 
+                                        en=0, c=self.ResetToDefaultParent)
                     self._resetJointGroup_mi = pm.menuItem(
                                         l='Reset Control Transforms', 
                                         en=0, c=self.ResetControlTransforms)
@@ -121,11 +121,9 @@ class RIG_Behavior_UI(absOpUI.Abstract_OperationUI):
                             c=pm.Callback(self.ApplyPreset, presetID))
             self._presetsUI.append(item)
 
-    def LoadSkeletalHierarchy(self, ignore):
+    def ResetToDefaultParent(self, ignore):
         log.funcFileDebug()
-        limb = self._selectedLimbs[0]
-        rigRoot = pm.listConnections(limb.rigRoot)[0]
-        self.operation.LoadSkeletalHierarchy(rigRoot)
+        self.operation.ResetToDefaultParent(self._selectedLimbs)
         self.PopulateLimbHier()
         self.PopulateControlHier(None)
         self.PopulateLimbProperties(None)
@@ -141,7 +139,7 @@ class RIG_Behavior_UI(absOpUI.Abstract_OperationUI):
         self.PopulatePresets()
         pm.menuItem(self._addEmpty_mi, e=1, en=0)
         pm.menuItem(self._removeEmpty_mi, e=1, en=0)
-        pm.menuItem(self._loadSkel_mi, e=1, en=0)
+        pm.menuItem(self._resetParent_mi, e=1, en=0)
         pm.menuItem(self._savePreset_mi, e=1, en=0)
         pm.menuItem(self._resetJointGroup_mi, e=1, en=0)
         pm.menuItem(self._removeUnusedGroups_mi, e=1, en=0)
@@ -167,7 +165,7 @@ class RIG_Behavior_UI(absOpUI.Abstract_OperationUI):
             if self._rigRoot.rigMode.get() == 0: # Editable rig
                 pm.menuItem(self._addEmpty_mi, e=1, en=1)
                 self.PopulateBhvProperties(limb)
-            pm.menuItem(self._loadSkel_mi, e=1, en=1)
+            pm.menuItem(self._resetParent_mi, e=1, en=1)
             if limb.limbType.get() == 0: # Empty
                 pm.menuItem(self._removeEmpty_mi, e=1, en=1)
 

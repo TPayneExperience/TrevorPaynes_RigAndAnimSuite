@@ -8,18 +8,18 @@
     "rigRootName": "TEMP", 
     "showRootName": false, 
     "templateFolderPath": "", 
-    "jointUpAxis": 2, 
     "windowPos": [
-        290, 
-        1045
+        303, 
+        1065
     ], 
+    "jointUpAxis": 0, 
     "limbIndex": 1, 
     "lControlTransparency": 0.8, 
     "controlShape_IKPV": "Sphere_Poly", 
     "version": 100, 
     "lastVersionViewed": 100, 
     "rigRootIndex": 0, 
-    "jointAimAxis": 0, 
+    "jointAimAxis": 2, 
     "sideIndex": 3, 
     "rControlTransparency": 0.8, 
     "mControlTransparency": 0.8, 

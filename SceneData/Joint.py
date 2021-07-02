@@ -43,4 +43,21 @@ class Joint:
         pm.parent(group, joint)
         pm.disconnectAttr(joint.limb)
     
+    @staticmethod
+    def Delete(joint):
+        log.funcFileDebug()
+        groups = pm.listConnections(joint.group)
+        if groups:
+            group = groups[0]
+            grp.Group.Remove(group)
+        children = pm.listRelatives(joint, c=1, type='joint')
+        if children:
+            parents = pm.listRelatives(joint, p=1)
+            if parents:
+                parent = parents[0]
+                pm.parent(children, parent)
+            else:
+                pm.parent(children, w=1)
+        pm.delete(joint)
+    
     

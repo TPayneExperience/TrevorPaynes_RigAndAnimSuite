@@ -126,9 +126,9 @@ class Json:
 
 #=========== MISC ====================================
 
-def GetDefaultLimbHier(rigRoot):
+def GetDefaultLimbHier(limbs):
     limbParents = {} # childLimb : parentLimb
-    for childLimb in pm.listConnections(rigRoot.limbs):
+    for childLimb in limbs:
         limbParents[childLimb] = None
         if childLimb.limbType.get() == 0:
             continue

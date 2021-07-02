@@ -48,9 +48,9 @@ class RIG_Behavior(absOp.Abstract_Operation):
     def RenameLimb(self, limb, newName):
         return self._ls.RenameLimb(limb, newName)
 
-    def LoadSkeletalHierarchy(self, rigRoot):
+    def ResetToDefaultParent(self, limbs):
         log.funcFileDebug()
-        self._ls._LoadSkeletalHierarchy(rigRoot)
+        self._ls._ResetToDefaultParent(limbs)
     
 #=========== PRESETS ====================================
 

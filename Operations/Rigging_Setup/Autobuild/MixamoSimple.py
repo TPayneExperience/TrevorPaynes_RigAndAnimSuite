@@ -119,7 +119,8 @@ class MixamoSimple(absBld.Abstract_Autobuild):
 
         # Rename joints
         for k, v in toRename.items():
-            pm.rename(k,v)
+            if pm.objExists(k):
+                pm.rename(k,v)
 
         inst = autoBld.ByNames()
         return inst.Execute(rigRoot)

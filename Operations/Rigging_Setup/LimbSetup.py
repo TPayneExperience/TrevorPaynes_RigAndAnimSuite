@@ -82,7 +82,7 @@ class LimbSetup(absOp.Abstract_Operation):
                 angles = tuple(joint.preferredAngle.get())
                 if angles == (0,0,0):
                     joint.preferredAngle.set(bendAxis)
-        self._LoadSkeletalHierarchy(rigRoot)
+        self._ResetToDefaultParent(limbs)
         # # Zeroing out joint rotations, breaks animations though...
         # for joint in pm.ls(type='joint'):
         #     self.TransferRotationsToJointOrient(joint)
@@ -283,6 +283,15 @@ class LimbSetup(absOp.Abstract_Operation):
         if pm.listConnections(limb.mirrorLimb):
             self._BreakMirror(limb)
         lmb.Limb.Remove(limb)
+        
+    def RemoveLimbAndJoints(self, limb):
+        if pm.listConnections(limb.mirrorLimb):
+            self._BreakMirror(limb)
+        joints = pm.listConnections(limb.joints)
+
+        lmb.Limb.Remove(limb)
+        for joint in joints:
+            jnt.Joint.Delete(joint)
         
     def RenameLimb(self, limb, newName):
         if not genUtil.Name.IsValidCharacterLength(newName):
@@ -819,10 +828,11 @@ class LimbSetup(absOp.Abstract_Operation):
         filePath = os.path.join(folder, 'Config.json')
         return genUtil.Json.Load(filePath)
 
-    def _LoadSkeletalHierarchy(self, rigRoot):
+    def _ResetToDefaultParent(self, limbs):
         log.funcFileDebug()
-        limbParents = genUtil.GetDefaultLimbHier(rigRoot)
-        for child, parent in limbParents.items():
+        limbParents = genUtil.GetDefaultLimbHier(limbs)
+        for child in limbs:
+            parent = limbParents[child]
             self._ReparentLimb(child, parent)
 
     def _ReparentLimb(self, childLimb, parentLimb):

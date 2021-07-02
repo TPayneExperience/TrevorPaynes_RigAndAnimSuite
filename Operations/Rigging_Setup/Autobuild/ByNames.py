@@ -35,7 +35,7 @@ class ByNames(absBld.Abstract_Autobuild):
                                     m=msg, 
                                     icon='error', 
                                     b='Ok')
-                return
+                raise ValueError(msg)
             limbSideName = '_'.join(splitName[:-1])
             if limbSideName not in newLimbs:
                 newLimbs[limbSideName] = []
@@ -68,7 +68,7 @@ class ByNames(absBld.Abstract_Autobuild):
                                 m=msg, 
                                 icon='error', 
                                 b='Ok')
-            return
+            raise ValueError(msg)
 
         # ADD LIMBS
         unpairedLimbs = {} # pfrsName : limb

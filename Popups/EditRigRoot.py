@@ -59,7 +59,7 @@ class EditRigRoot:
         # ASSET DETAILS
         ass_fl = pm.frameLayout(l='Asset Details', 
                                     bv=1, mh=5, mw=5, p=form)
-        self.rootName_grp = pm.textFieldGrp(  l='ASSET PREFIX', adj=1, pht='CAT...', 
+        self.rootName_grp = pm.textFieldGrp(  l='Rig Root Name', adj=1, pht='CAT...', 
                                             tcc=self.RootNameChanged, 
                                             text=self.startRootName,
                                             cw=(2,80), cal=(1,'left'))
@@ -91,7 +91,7 @@ class EditRigRoot:
         # BUTTONS + LAYOUT
         self.cancel_btn = pm.button(l='Cancel', parent=form, c=self.Cancel)
         self.save_btn = pm.button(l='Save', parent=form, c=self.Save)
-        pm.formLayout(form, edit=True, width=340, height=250,
+        pm.formLayout(form, edit=True, width=370, height=250,
                         attachForm=[(ass_fl, 'top', 5), 
                                     (ass_fl, 'left', 5), 
                                     (ass_fl, 'right', 5), 
@@ -151,7 +151,7 @@ class EditRigRoot:
         self.rootName = text
         self.rootNameValid = False
         pm.button(self.save_btn, e=1, en=0)
-        msg = 'ASSET PREFIX'
+        msg = 'Rig Root Name'
         if not genUtil.Name.IsValidCharacterLength(text):
             msg += ' | Must be 2 or more characters'
             return pm.textFieldGrp(self.rootName_grp, e=1, l=msg)

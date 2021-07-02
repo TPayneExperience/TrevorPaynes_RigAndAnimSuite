@@ -317,6 +317,9 @@ class Behavior_Manager(object):
                 raise ValueError(msg)
             if limbType in bhv.validLimbTypes:
                 orderedFiles[uiOrderIndex] = bhvFile
+            # Set Branch limb to fk Branch
+            if bhv.bhvType == 'FK Branch' and limbType == 2:
+                orderedFiles[0] = bhvFile
         index = sorted(list(orderedFiles.keys()))[0]
         return orderedFiles[index]
 
