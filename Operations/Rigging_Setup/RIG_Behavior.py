@@ -34,6 +34,7 @@ class RIG_Behavior(absOp.Abstract_Operation):
     def AddEmptyLimb(self, rigRoot):
         log.funcFileDebug()
         limb = lmb.Limb.AddEmpty(rigRoot)
+        self._ls.bhvMng = self.bhvMng
         self._ls._InitBehavior(rigRoot, limb)
         return limb
 

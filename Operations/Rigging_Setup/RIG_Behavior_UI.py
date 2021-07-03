@@ -35,6 +35,7 @@ class RIG_Behavior_UI(absOpUI.Abstract_OperationUI):
         self._Setup()
         self._rigRoot = rigRoot
         self._allRigRoots = allRigRoots
+        self._selectedLimbs = []
         self.PopulateLimbHier()
         self.PopulatePresets()
         
@@ -121,16 +122,9 @@ class RIG_Behavior_UI(absOpUI.Abstract_OperationUI):
                             c=pm.Callback(self.ApplyPreset, presetID))
             self._presetsUI.append(item)
 
-    def ResetToDefaultParent(self, ignore):
-        log.funcFileDebug()
-        self.operation.ResetToDefaultParent(self._selectedLimbs)
-        self.PopulateLimbHier()
-        self.PopulateControlHier(None)
-        self.PopulateLimbProperties(None)
-        self.PopulateBhvProperties(None)
-
     def SelectedLimb(self):
         log.funcFileInfo()
+        self._selectedLimbs = None
         pm.menuItem(self._savePreset_mi, e=1, en=0)
         limbIDStrs = pm.treeView(self.limb_tv, q=1, selectItem=1)
         self.PopulateLimbProperties(None)
@@ -143,7 +137,6 @@ class RIG_Behavior_UI(absOpUI.Abstract_OperationUI):
         pm.menuItem(self._savePreset_mi, e=1, en=0)
         pm.menuItem(self._resetJointGroup_mi, e=1, en=0)
         pm.menuItem(self._removeUnusedGroups_mi, e=1, en=0)
-        self._selectedLimbs = None
         # Depop Group Prop
         if not limbIDStrs:
             self._rigRoot = None
@@ -168,6 +161,14 @@ class RIG_Behavior_UI(absOpUI.Abstract_OperationUI):
             pm.menuItem(self._resetParent_mi, e=1, en=1)
             if limb.limbType.get() == 0: # Empty
                 pm.menuItem(self._removeEmpty_mi, e=1, en=1)
+
+    def ResetToDefaultParent(self, ignore):
+        log.funcFileDebug()
+        self.operation.ResetToDefaultParent(self._selectedLimbs)
+        self.PopulateLimbHier()
+        self.PopulateControlHier(None)
+        self.PopulateLimbProperties(None)
+        self.PopulateBhvProperties(None)
 
     def ReparentLimb(self, limbIDsStr, oldParents, i2, newParentIDStr, i3, i4, i5):
         log.funcFileInfo()

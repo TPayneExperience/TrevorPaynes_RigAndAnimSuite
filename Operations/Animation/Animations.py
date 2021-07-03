@@ -73,7 +73,7 @@ class Animations(absOp.Abstract_Operation):
             # Control limb
             controlLimb = controlLimbs[limbID]
             joints = pm.listConnections(controlLimb.joints)
-            joints = rigUtil.Joint._GetSortedJoints(joints)
+            joints = rigUtil.GetSortedJoints(joints)
             groups = pm.listConnections(controlLimb.usedGroups)
             controls += [pm.listConnections(g.control)[0] for g in groups]
             # Bake Limb

@@ -162,8 +162,10 @@ class Constraints_UI(absOpUI.Abstract_OperationUI):
         if groupIDStrs:
             groups = [self._limbGroups[s] for s in groupIDStrs]
             self._selectedControls = [pm.listConnections(g.control)[0] for g in groups]
+            pm.select(self._selectedControls)
         else:
             self._selectedControls = None
+            pm.select(d=1)
         self.UpdateApplyButton()
 
 #=========== GROUP HIER ====================================
@@ -194,6 +196,7 @@ class Constraints_UI(absOpUI.Abstract_OperationUI):
         pm.menuItem(self.remove_mi, e=1, en=0)
         pm.menuItem(self.bakeRemove_mi, e=1, en=0)
         if not groupIDStrs:
+            pm.select(d=1)
             return 
         self._selectedGroups = []
         for ID in groupIDStrs:
@@ -279,8 +282,10 @@ class Constraints_UI(absOpUI.Abstract_OperationUI):
         pm.menuItem(self.setTarget2_mi, e=1, en=0)
         groupIDStrs = pm.treeView(self.targetable_tv, q=1, si=1)
         if not groupIDStrs:
+            pm.select(d=1)
             return 
         self._selectedTarget = self._targetables[groupIDStrs[0]]
+        pm.select(self._selectedTarget)
         pm.menuItem(self.setTarget1_mi, e=1, en=1)
         if self._selectedTarget != self._target1:
             pm.menuItem(self.setTarget2_mi, e=1, en=1)

@@ -13,14 +13,8 @@ import Utilities.Rig_Utilities as rigUtil
 reload(rigUtil)
 import Data.Rig_Data as rigData
 reload(rigData)
-# import SceneData.Limb as lmb
-# reload(lmb)
-# import LimbSetup as ls
-# reload(ls)
 import Utilities.General_Utilities as genUtil
 reload(genUtil)
-# import SceneData.RigRoot as rrtp
-# reload(rrt)
 
 class Appearance(absOp.Abstract_Operation):
     isRigBuilt = False
@@ -98,10 +92,15 @@ class Appearance(absOp.Abstract_Operation):
         for group in groups:
             oldControl = pm.listConnections(group.control)[0]
             pm.disconnectAttr(group.control)
+            
+            # Pos new control
             newControl = ctr.Control.Add(rigRoot, group)
             pm.parent(newControl, oldControl)
             pm.xform(newControl, t=(0,0,0), ro=(0,0,0), s=(1,1,1))
-            pm.parent(newControl, group)
+
+            # Remove old control
+            oldParent = pm.listRelatives(oldControl, p=1)[0]
+            pm.parent(newControl, oldParent)
             ctr.Control.Remove(oldControl)
     
     def SetControlChannelboxes(self, limb, 

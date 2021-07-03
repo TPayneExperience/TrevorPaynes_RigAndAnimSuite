@@ -30,7 +30,7 @@ import Operations.Rigging_Setup.Appearance as app
 reload(app)
 import Operations.Rigging_Setup.LimbSetup as ls
 reload(ls)
-import Operations.Skinning.MeshSetup as msh
+import Operations.Skinning_Setup.MeshSetup as msh
 reload(msh)
 # import Data.Config as cnfg
 # reload(cnfg)
@@ -182,8 +182,9 @@ class PayneFreeRigSuite:
         rootPath = os.path.dirname(__file__)
         rootPath = os.path.join(rootPath, 'Operations')
         self.categories = [ 'Rigging_Setup', 
-                            'Skinning', 
-                            'Rigging_Extras', 
+                            'Rigging_Extras',
+                            'Skinning_Setup', 
+                            'Skinning_Extras', 
                             'Animation']
         for f in os.listdir(rootPath):
             filePath = os.path.join(rootPath, f)

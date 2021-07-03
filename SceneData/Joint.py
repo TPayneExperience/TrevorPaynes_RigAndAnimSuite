@@ -30,7 +30,7 @@ class Joint:
             genUtil.AbstractInitializer(group, 'Group')
             group.groupIndex.set(index)
             pm.disconnectAttr(group.limb)
-            pm.parent(group, limb)
+            # pm.parent(group, limb)
         else:
             group = grp.Group.AddJointGroup(rigRoot, index, limb, joint)
         pm.connectAttr(limb.jointGroups, group.limb)

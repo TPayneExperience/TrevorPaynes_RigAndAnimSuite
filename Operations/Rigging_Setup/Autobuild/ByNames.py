@@ -44,7 +44,7 @@ class ByNames(absBld.Abstract_Autobuild):
         # VALIDATE LIMBS
         limbTypes = {}
         for limbName, joints in newLimbs.items():
-            newLimbs[limbName] = rigUtil.Joint._GetSortedJoints(joints)
+            newLimbs[limbName] = rigUtil.GetSortedJoints(joints)
             if rigUtil.Joint._AreJointsSiblings(joints):
                 if len(joints) == 1:
                     limbTypes[limbName] = 1

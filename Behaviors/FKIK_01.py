@@ -39,7 +39,7 @@ class FKIK_01(absBhv.Abstract_Behavior):
                                                 min=0, dv=10)
             pm.addAttr(limb, ln='ikpvCurve', dt='string')
         joints = pm.listConnections(limb.joints)
-        joints = rigUtil.Joint._GetSortedJoints(joints)
+        joints = rigUtil.GetSortedJoints(joints)
         limbGroups = rigUtil.GetLimbGroups(limb, self.groupType)
         for limbGroup in limbGroups:
             limbGroup.v.set(0)
@@ -105,7 +105,7 @@ class FKIK_01(absBhv.Abstract_Behavior):
 
         # External
         joints = pm.listConnections(limb.joints)
-        joint = rigUtil.Joint._GetSortedJoints(joints)[0]
+        joint = rigUtil.GetSortedJoints(joints)[0]
         
         # ------- IK ---------
         limbGroups = rigUtil.GetLimbGroups(limb, self.groupType)
@@ -132,7 +132,7 @@ class FKIK_01(absBhv.Abstract_Behavior):
     def Setup_Constraint_JointsToControls(self, limb):
         log.funcFileDebug()
         joints = pm.listConnections(limb.joints)
-        joints = rigUtil.Joint._GetSortedJoints(joints)
+        joints = rigUtil.GetSortedJoints(joints)
 
         # ------- JOINTS ---------
         ikJoints = pm.duplicate(joints, po=1, rc=1)
@@ -271,7 +271,7 @@ class FKIK_01(absBhv.Abstract_Behavior):
 
         # Reposition group to second joint
         joints = pm.listConnections(limb.joints)
-        joints = rigUtil.Joint._GetSortedJoints(joints)
+        joints = rigUtil.GetSortedJoints(joints)
         limbGroups = rigUtil.GetLimbGroups(limb, self.groupType)
         midGroup = limbGroups[1]
         jointPos = pm.xform(joints[1], q=1, t=1, ws=1)
@@ -322,7 +322,7 @@ class FKIK_01(absBhv.Abstract_Behavior):
 
     def _InitIKPV2(self, limb, ikpv2):
         joints = pm.listConnections(limb.joints)
-        joints = rigUtil.Joint._GetSortedJoints(joints)
+        joints = rigUtil.GetSortedJoints(joints)
         j1 = joints[0]
         j2 = joints[1]
         j3 = joints[-1]

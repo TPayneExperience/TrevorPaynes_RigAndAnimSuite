@@ -87,11 +87,16 @@ class Behavior_Manager(object):
         joints = []
         for limb in limbs:
             limb.v.set(limb.enableLimb.get())
+            # Parent joint groups to limbs
+            limbJoints = pm.listConnections(limb.joints)
+            for joint in limbJoints:
+                group = pm.listConnections(joint.group)[0]
+                pm.parent(group, limb)
             self._Setup_ControlPivot(limb)
             bhv = self.bhvs[limb.bhvFile.get()]
             bhv.Setup_Rig_Controls(limb)
             if limb.limbType.get() != 0: # Not Empty
-                joints += pm.listConnections(limb.joints)
+                joints += limbJoints
             
         # Skin meshes
         for mesh in pm.listConnections(rigRoot.meshes):
@@ -153,6 +158,10 @@ class Behavior_Manager(object):
         for limb in limbs:
             for group in pm.listConnections(limb.usedGroups):
                 self._Teardown_ControlPivot(group)
+            # Parent joint groups to joint
+            for joint in pm.listConnections(limb.joints):
+                group = pm.listConnections(joint.group)[0]
+                pm.parent(group, joint)
         rigRoot.isBuilt.set(0)
     
         # Skin meshes
@@ -221,7 +230,7 @@ class Behavior_Manager(object):
         for limb in animLimbs:
             # Create loc group + cst
             joints = pm.listConnections(limb.joints)
-            joints = rigUtil.Joint._GetSortedJoints(joints)
+            joints = rigUtil.GetSortedJoints(joints)
             jointParent = pm.listRelatives(joints[0], p=1)
             group = grp.Group.AddAnimGroup(limb, animName)
             group.v.set(0)
@@ -246,7 +255,7 @@ class Behavior_Manager(object):
         constraints = []
         for limb in limbs:
             joints = pm.listConnections(limb.joints)
-            joints = rigUtil.Joint._GetSortedJoints(joints)
+            joints = rigUtil.GetSortedJoints(joints)
             jointParent = pm.listRelatives(joints[0], p=1)
             animGroup = animUtil.GetLimbAnim(limb, animName)
             locs = pm.listRelatives(animGroup, c=1)
@@ -365,7 +374,7 @@ class Behavior_Manager(object):
         # Create FK Groups
         if behavior.duplicateJointGroups:
             joints = pm.listConnections(limb.joints)
-            joints = rigUtil.Joint._GetSortedJoints(joints)
+            joints = rigUtil.GetSortedJoints(joints)
             if 'FK' not in limbGroupDict:
                 limbGroupDict['FK'] = []
                 for i in range(len(joints)):

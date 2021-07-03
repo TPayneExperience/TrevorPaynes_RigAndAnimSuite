@@ -29,7 +29,7 @@ class IK_PoleVector_01(absBhv.Abstract_Behavior):
                                                 min=0, dv=10)
             pm.addAttr(limb, ln='ikpvCurve', dt='string')
         joints = pm.listConnections(limb.joints)
-        joints = rigUtil.Joint._GetSortedJoints(joints)
+        joints = rigUtil.GetSortedJoints(joints)
         limbGroups = rigUtil.GetLimbGroups(limb, self.groupType)
         ikpv1 = limbGroups[0]
         ikpv2 = limbGroups[1]
@@ -78,7 +78,7 @@ class IK_PoleVector_01(absBhv.Abstract_Behavior):
         ikpv3 = limbGroups[2]
         ikpv1.v.set(0)
         joints = pm.listConnections(limb.joints)
-        joint = rigUtil.Joint._GetSortedJoints(joints)[0]
+        joint = rigUtil.GetSortedJoints(joints)[0]
         parentJoints = pm.listRelatives(joint, p=1, type='joint')
         if parentJoints:
             parentJoint = parentJoints[0]

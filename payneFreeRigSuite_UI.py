@@ -105,10 +105,9 @@ class PayneFreeRigSuite_UI:
                 with pm.subMenuItem(l='Tutorials'):
                     pm.menuItem(l='QUICK STARTS', d=1)
                     pm.menuItem(l='Basics', en=0)
-                    pm.menuItem(l='Artists', en=0)
-                    pm.menuItem(l='Rigging_Setup', en=0)
-                    # pm.menuItem(l='Skinning', en=0)
-                    pm.menuItem(l='Animating', en=0)
+                    pm.menuItem(l='Rigging', en=0)
+                    pm.menuItem(l='Skinning', en=0)
+                    pm.menuItem(l='Animation', en=0)
 
                     # pm.menuItem(l='RIGGING', d=1)
                     # pm.menuItem(l='New / Edit Rig Setup', en=0)

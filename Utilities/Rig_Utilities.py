@@ -74,7 +74,7 @@ class Joint:
     
     @staticmethod
     def _AreJointsChained(joints):
-        jointsCopy = Joint._GetSortedJoints(joints)
+        jointsCopy = GetSortedJoints(joints)
         child = jointsCopy[-1]
         jointsCopy.remove(child)
         while (jointsCopy):
@@ -99,7 +99,7 @@ class Joint:
     
     @staticmethod
     def _GetCompleteJointChain(joints):
-        sortedJoints = Joint._GetSortedJoints(joints)
+        sortedJoints = GetSortedJoints(joints)
         parent = sortedJoints[-1]
         rootParent = sortedJoints[0]
         jointChain = [parent]
@@ -109,13 +109,6 @@ class Joint:
         return jointChain
 
     @staticmethod
-    def _GetSortedJoints(joints):
-        temp = {}
-        for joint in joints:
-            temp[joint.longName()] = joint
-        return [temp[n] for n in sorted(list(temp.keys()))]
-
-    @staticmethod
     def _AreJointsDisconnected(joints):
         if Joint._AreJointsChained(joints):
             joints = Joint._GetCompleteJointChain(joints)
@@ -123,6 +116,12 @@ class Joint:
             if joint.hasAttr('limb') and pm.listConnections(joint.limb):
                 return False
         return True
+
+def GetSortedJoints(joints):
+    temp = {}
+    for joint in joints:
+        temp[joint.longName()] = joint
+    return [temp[n] for n in sorted(list(temp.keys()))]
 
     
 #=========== LAYERS ====================================
