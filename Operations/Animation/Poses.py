@@ -187,7 +187,22 @@ class Poses(absOp.Abstract_Operation):
         self._DeleteLimbPose(poseName, folder, limb)
         self.InitPoses(rigRoot)
 
-    def GetPoseNames(self, limbs):
+    def GetPoseNamesUnion(self, limbs):
+        log.funcFileDebug()
+        posesByNames = {}
+        poseNames = set()
+        for limb in limbs:
+            limbName = self._GetLimbNameFromLimb(limb)
+            poses = self.posesByLimbName[limbName]
+            for pose in poses:
+                if pose.poseName not in posesByNames:
+                    posesByNames[pose.poseName] = []
+                posesByNames[pose.poseName].append(pose)
+            tempPoseNames = set([pose.poseName for pose in poses])
+            poseNames = poseNames.union(tempPoseNames)
+        return list(poseNames)
+
+    def GetPoseNamesIntersection(self, limbs):
         log.funcFileDebug()
         # Make sure all limbs have poses
         for limb in limbs:
@@ -210,11 +225,6 @@ class Poses(absOp.Abstract_Operation):
                     posesByNames[pose.poseName].append(pose)
             tempPoseNames = set([pose.poseName for pose in poses])
             poseNames = poseNames.intersection(tempPoseNames)
-        # Return final common pose names
-        allPoses = []
-        for poseName in poseNames:
-            allPoses += posesByNames[poseName]
-        poseNames = set([pose.poseName for pose in allPoses])
         return list(poseNames)
 
 #============= POSES ============================

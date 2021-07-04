@@ -49,13 +49,15 @@ class Poses_UI(absOpUI.Abstract_OperationUI):
                 with pm.popupMenu() as self.rmb_ui:
                     self.reset_mi = pm.menuItem(l='Reset Limb Controls', en=0, 
                                                 c=self.ResetLimbControls)
-                    pm.menuItem(l='Pose Tools', d=1)
+                    self.showAll_mi = pm.menuItem(l='Show All Poses', cb=1, 
+                                                c=self.ShowAllPoses)
+                    pm.menuItem(l='POSE TOOLS', d=1)
                     self.save_mi = pm.menuItem(l='Save Pose', en=0, c=self.SavePose)
                     self.copy_mi = pm.menuItem(l='Copy Pose', en=0, c=self.CopyPose)
                     self.paste_mi = pm.menuItem(l='Paste Pose', en=0, c=self.PastePose)
                     self.mirror_mi = pm.menuItem(l='Mirror Pose', en=0, c=self.MirrorPose)
                     self.flip_mi = pm.menuItem(l='Flip With Mirror', en=0, c=self.FlipPose)
-                    pm.menuItem(l='Pose Library', d=1)
+                    pm.menuItem(l='POSE LIBRARY', d=1)
                     pm.menuItem(l='Open Poses Folder', c=self.OpenPosesFolder)
                     pm.menuItem(l='Set Poses Folder', c=self.SetPosesFolder)
                 pm.treeView(self.limb_tv, e=1, scc=self.SelectedLimb,
@@ -73,9 +75,6 @@ class Poses_UI(absOpUI.Abstract_OperationUI):
    
     def PopulateLimbHier(self):
         log.funcFileDebug()
-        # self.PopulateControlHier(None)
-        # self.PopulateLimbProperties(None)
-        # pm.frameLayout(self.ctrShapes_fl, e=1, en=0)
         self._limbIDs = uiUtil.PopulateLimbHier(self.limb_tv, 
                                                 self._rigRoot,
                                                 self._allRigRoots)
@@ -95,13 +94,15 @@ class Poses_UI(absOpUI.Abstract_OperationUI):
             self._selectedLimbs = []
             pm.select(d=1)
             return
+
         # Only allow single common root
         self._selectedLimbs = [self._limbIDs[limbStr] for limbStr in limbIDStrs]
+        self.operation.SelectedLimbs(self._selectedLimbs)
         rigRoot = pm.listConnections(self._selectedLimbs[0].rigRoot)[0]
         for limb in self._selectedLimbs[1:]:
             if rigRoot != pm.listConnections(limb.rigRoot)[0]:
-                # self.parent.LimbsSelected(None)
                 return
+
         self._rigRoot = rigRoot
         # Enable RMB
         pm.menuItem(self.save_mi, e=1, en=1)
@@ -138,6 +139,11 @@ class Poses_UI(absOpUI.Abstract_OperationUI):
         log.funcFileDebug()
         for limb in self._selectedLimbs:
             self.operation.ResetLimbControls(limb)
+        self.operation.SelectedLimbs(self._selectedLimbs)
+        self.PopulatePoseLibrary()
+
+    def ShowAllPoses(self, ignore):
+        log.funcFileDebug()
         self.PopulatePoseLibrary()
 
     def OpenPosesFolder(self, ignore):
@@ -230,7 +236,13 @@ class Poses_UI(absOpUI.Abstract_OperationUI):
         self.poses_ui = []
         if not self._selectedLimbs:
             return
-        self.poseNames = self.operation.GetPoseNames(self._selectedLimbs)
+        showAll = pm.menuItem(self.showAll_mi, q=1, cb=1)
+        if showAll:
+            self.poseNames = self.operation.GetPoseNamesUnion(
+                                        self._selectedLimbs)
+        else:
+            self.poseNames = self.operation.GetPoseNamesIntersection(
+                                        self._selectedLimbs)
         for i in range(len(self.poseNames)):
             poseName = self.poseNames[i]
             ui = pm.floatSliderGrp(l=poseName, f=1, cw3=(100, 40, 50),
