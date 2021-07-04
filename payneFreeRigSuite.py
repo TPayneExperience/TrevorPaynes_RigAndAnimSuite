@@ -127,14 +127,14 @@ class PayneFreeRigSuite:
 
         # Set rigmode, export, revert
         if rigRoot.isBuilt.get():
-            self.bhvMng.Teardown_Edit_Rig(rigRoot)
+            self.bhvMng.Teardown_Rig(rigRoot)
         rigMode = rigRoot.rigMode.get()
         if rigMode == 0:
             rigRoot.rigMode.set(1)
         oldMain = rigRoot.category.get()
         oldSub = rigRoot.operation.get()
         rigRoot.category.set('Animation')
-        rigRoot.operation.set('Behavior')
+        rigRoot.operation.set('Poses')
         setupFile = pm.sceneName()
         
         pm.saveAs(filePath)
@@ -143,7 +143,7 @@ class PayneFreeRigSuite:
         rigRoot.category.set(oldMain)
         rigRoot.operation.set(oldSub)
         if rigRoot.isBuilt.get():
-            self.bhvMng.Setup_Edit_Rig(rigRoot)
+            self.bhvMng.Setup_Rig(rigRoot)
 
         if setupFile:
             pm.saveAs(setupFile)

@@ -29,13 +29,16 @@ class Poses_UI(absOpUI.Abstract_OperationUI):
         self._copiedPoses = {} # pfrsName : Pose
         self._rigRoot = None
         self._allRigRoots = []
+        self._selectedLimbs = []
 
     def Setup_UI(self, rigRoot, allRigRoots): 
         self._Setup()
         self._rigRoot = rigRoot
         self._allRigRoots = allRigRoots
+        self._selectedLimbs = []
         self.PopulateLimbHier()
         self.operation.InitPoses(rigRoot)
+        self.operation.SelectedLimbs([])
         
     def Teardown_UI(self, rigRoot, allRigRoots):
         pass

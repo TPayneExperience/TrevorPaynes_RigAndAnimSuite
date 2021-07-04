@@ -39,8 +39,12 @@ class Joint:
     @staticmethod
     def Remove(joint):
         log.funcFileDebug()
-        group = pm.listConnections(joint.group)[0]
-        pm.parent(group, joint)
+        limb = pm.listConnections(joint.limb)[0]
+        limbName = limb.pfrsName.get()
+        jointName = joint.pfrsName.get()
+        side = rigData.LIMB_SIDES[limb.side.get()]
+        name = '%s_%s_%s' % (limbName, side, jointName)
+        joint.rename(name)
         pm.disconnectAttr(joint.limb)
     
     @staticmethod

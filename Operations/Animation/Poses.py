@@ -116,7 +116,8 @@ class Poses(absOp.Abstract_Operation):
         upVec = rigData.JOINT_AIM_UP_VECTORS[config['jointUpAxis']]
         # Body
         if limb.limbLocation.get() == 0:
-            rotFix = [(abs(i)*-2)+1 for i in upVec] # (1, -1,1)
+            vec = [upVec[i]+aimVec[i] for i in range(3)]
+            rotFix = [(abs(i)*-2)+1 for i in vec] # (1, -1,1)
             posFix = [(2*abs(aimVec[i] + upVec[i]))-1 for i in range(3)] # (1,1,-1)
         # Face
         elif limb.limbLocation.get() == 1:
@@ -193,6 +194,8 @@ class Poses(absOp.Abstract_Operation):
         poseNames = set()
         for limb in limbs:
             limbName = self._GetLimbNameFromLimb(limb)
+            if limbName not in self.posesByLimbName:
+                continue
             poses = self.posesByLimbName[limbName]
             for pose in poses:
                 if pose.poseName not in posesByNames:

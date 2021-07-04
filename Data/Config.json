@@ -8,11 +8,11 @@
     "rigRootName": "TEMP", 
     "showRootName": false, 
     "templateFolderPath": "", 
-    "windowPos": [
-        306, 
-        1083
-    ], 
     "jointUpAxis": 0, 
+    "windowPos": [
+        275, 
+        944
+    ], 
     "limbIndex": 1, 
     "lControlTransparency": 0.8, 
     "controlShape_IKPV": "Sphere_Poly", 

@@ -52,9 +52,11 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
         self._autobuild_mis = []
         with pm.verticalLayout():
             with pm.frameLayout(l='---', bv=1) as self.sceneHier_fl:
+                msg = 'Middle Mouse Button (MMB) + DRAG to reparent'
                 self.scene_tv = pm.treeView(scc=self.SelectedSceneJoints,
                                             dad=self.ReparentJoint,
-                                            elc=self.IgnoreRename)
+                                            elc=self.IgnoreRename,
+                                            ann=msg)
                 with pm.popupMenu():
                     pm.menuItem(l='Refresh', c=self.Refresh)
                     self.buildHier_mi = pm.menuItem(l='Joint Tool',
@@ -153,7 +155,7 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
                     
             with pm.frameLayout(l='---', bv=1, en=0) as self.jntHier_fl:
                 tt = 'BRANCH limbs may reorder joints'
-                tt += '\nDouble LMB Click to RENAME'
+                tt += '\nDouble Click to RENAME'
                 self.joint_tv = pm.treeView(ams=0, arp=0, ann=tt)
                 pm.treeView(self.joint_tv, e=1, dad=self.ReorderJoints,
                                                 elc=self.RenameJoint)

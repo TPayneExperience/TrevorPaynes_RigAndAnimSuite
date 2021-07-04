@@ -94,7 +94,3 @@ class InitRigRoot(absInit.Abstract_Initializer):
         controlDL.displayType.set(2)
         jointDL.displayType.set(2)
         meshDL.displayType.set(2)
-
-        # #============= ANIM LAYERS ============================
-
-        # pm.animLayer(rigData.JOINTS_ANIM_LAYER, override=1, mute=1)

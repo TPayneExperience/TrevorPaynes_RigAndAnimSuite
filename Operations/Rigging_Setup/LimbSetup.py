@@ -437,25 +437,18 @@ class LimbSetup(absOp.Abstract_Operation):
         self._RenameJoint(rigRoot, limb, joint, newName)
 
     def ReparentJoint(self, rigRoot, childJoint, parentJoint):
-        # Disconnect child limb
+        if parentJoint:
+            pm.parent(childJoint, parentJoint)
+        if not parentJoint:
+            jointGroup = pm.listConnections(rigRoot.jointsParentGroup)[0]
+            pm.parent(childJoint, jointGroup)
         if not childJoint.hasAttr('limb'):
             return
         childLimbs = pm.listConnections(childJoint.limb)
         if not childLimbs:
             return
         childLimb = childLimbs[0]
-
-        # Setup Parent joint / connection
-        if not parentJoint:
-            jointGroup = pm.listConnections(rigRoot.jointsParentGroup)[0]
-            pm.parent(childJoint, jointGroup)
-            self.SetupDefaultLimbParent(childLimb)
-            return
-        pm.parent(childJoint, parentJoint)
         self.SetupDefaultLimbParent(childLimb)
-        # Reparent limb
-        # if not self._IsChildAParent(childLimb, parentLimb):
-        #     self._ReparentLimb(childLimb, parentLimb)
 
     def ApplyAimUpToLimbJoints(self, limbs):
         folder = os.path.dirname(__file__)
@@ -689,9 +682,7 @@ class LimbSetup(absOp.Abstract_Operation):
                 newJoints.append(joint)
         if newJoints:
             pm.select(newJoints)
-            # pm.animLayer(rigData.JOINTS_ANIM_LAYER, e=1, 
-            #                         aso=1, ea='BaseAnimation')
-    
+
     def _GetConfig(self):
         folder = os.path.dirname(__file__)
         folder = os.path.dirname(folder)

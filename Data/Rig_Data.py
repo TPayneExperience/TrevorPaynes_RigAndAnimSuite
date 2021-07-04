@@ -17,29 +17,11 @@ CONTROL_DISP_LAYER = 'Control_Disp'
 MESHES_DISP_LAYER = 'Meshes_Disp'
 JOINTS_DISP_LAYER = 'Joint_Disp'
 
-# CONTROL_ANIM_LAYER = 'Control_Anim'
-JOINTS_ANIM_LAYER = 'Joint_Anim'
+# JOINTS_ANIM_LAYER = 'Joint_Anim'
 
 # ============= BEHAVIORS =============
 
 CST_TYPES = ('Orient', 'Parent', 'Point',  'Scale')
-# BHV_TYPES = (   'FK - Chain',           # 200
-
-#                 'IK - Pole Vector',     # 500
-#                 'Empty - Anim',         # 100
-#                 'Constraint',           # 3
-#                 'Look At',              # 800
-#                 'DEPRICATED: IK - Chain',# 5
-
-#                 'FK - Branch',          # 400
-#                 'Empty - Rig',          # 7
-#                 'FK - Chain Reversed',  # 300
-#                 'FK - Relative Reversed',# 700
-#                 'FK - Relative',        # 600
-
-#                 'DEPRICATED - FK - Chain (2 Joints)',# 11
-#                 'DEPRICATED - FK - Reverse Chain (2 Joints)' # 12
-#                 )
                 
 AXES_NAMES = ('X', '-X', 'Y', '-Y', 'Z', '-Z')
 AXES_XFORMS =   ((0,0,0),
