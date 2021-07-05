@@ -55,45 +55,53 @@ class Animations(absOp.Abstract_Operation):
             raise ValueError('Imported file missing animation nodes!')
         
         # Pair Limbs
-        controlLimbs = {}
-        bakeLimbs = {}
-        limbIDs = []
+        rigLimbs = {}
+        animLimbs = {}
         for limb in limbs:
             limbID = '%s_%d' % (limb.pfrsName.get(), limb.side.get())
-            controlLimbs[limbID] = limb
-            limbIDs.append(limbID)
+            rigLimbs[limbID] = limb
         for limb in pm.listConnections(rigRoot.limbs):
             limbID = '%s_%d' % (limb.pfrsName.get(), limb.side.get())
-            bakeLimbs[limbID] = limb
+            animLimbs[limbID] = limb
+        
+        # Setup Anim Joints
+        bakeLimbs = []
+        allAnimJoints = []
+        for limbID in list(rigLimbs.keys()):
+            if limbID not in animLimbs:
+                continue
 
-        # bind limb anim groups to joints
-        controls = []
-        bakeLocs = []
-        for limbID in limbIDs:
-            # Control limb
-            controlLimb = controlLimbs[limbID]
-            joints = pm.listConnections(controlLimb.joints)
-            joints = rigUtil.GetSortedJoints(joints)
-            groups = pm.listConnections(controlLimb.usedGroups)
-            controls += [pm.listConnections(g.control)[0] for g in groups]
-            # Bake Limb
-            bakeLimb = bakeLimbs[limbID]
-            bakeGroup = pm.listConnections(bakeLimb.animGroups)[0]
-            locs = pm.listRelatives(bakeGroup, c=1)
-            bhv = self.bhvMng.bhvs[controlLimb.bhvFile.get()]
-            # Constrain
-            bhv.Setup_Constraint_ControlsToXforms(controlLimb, locs,
-                                    hasPosCst, hasRotCst, hasScaleCst)
-            bakeLocs += locs
+            # Get joints and group data
+            rigLimb = rigLimbs[limbID]
+            animLimb = animLimbs[limbID]
+            animGroups = pm.listConnections(animLimb.jointGroups)
+            animGroups = rigUtil.SortGroups(animGroups)
+            animJoints = [pm.listConnections(g.animJoint)[0] for g in animGroups]
+            rigGroups = pm.listConnections(rigLimb.jointGroups)
+            rigGroups = rigUtil.SortGroups(rigGroups)
 
-        # Offset loc animation
+            # Connect Anim Limb joints to rig limbs
+            for i in range(len(rigGroups)):
+                rigGroup = rigGroups[i]
+                animJoint = animJoints[i]
+                pm.disconnectAttr(animJoint.group)
+                pm.disconnectAttr(animJoint.limb)
+                pm.connectAttr(rigLimb.animJoints, animJoint.limb)
+                pm.connectAttr(rigGroup.animJoint, animJoint.group)
+                allAnimJoints.append(animJoint)
+            bakeLimbs.append(rigLimb)
+        
+        # Shift all joint keyframes to new offset
         start = animData['startFrame']
         end = start + animData['frameCount']
         offset = newStartFrame - start
-        newEndFrame = newStartFrame + animData['frameCount']
-        pm.keyframe(bakeLocs, r=1, tc=offset, t=(start, end))
-        pm.bakeResults(controls, sm=1, t=(newStartFrame, newEndFrame))
+        pm.keyframe(allAnimJoints, r=1, tc=offset, t=(start, end))
+
+        # Bake and Delete
+        self.bhvMng.ApplyAnimJoints(bakeLimbs, hasPosCst, hasRotCst, hasScaleCst)
         pm.delete(allNodes)
+        pm.delete(all=1, staticChannels=1)
+
 
 #=========== FILES ====================================
 
@@ -116,9 +124,7 @@ class Animations(absOp.Abstract_Operation):
         curFile = pm.sceneName()
         animUtil.UpdateAnimFolder(rigRoot, curFile)
         pm.saveFile()
-        limbs = pm.listConnections(rigRoot.limbs)
-        animLimbs = self.bhvMng.BakeControlAnimation(limbs, animName)
-        self._ls._ExportAnimation(rigRoot, animLimbs, animName)
+        self._ls._ExportAnimation(rigRoot, animName)
         pm.openFile(curFile, f=1)
 
     def DeleteAnimation(self, filePath):

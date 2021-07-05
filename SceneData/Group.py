@@ -43,20 +43,6 @@ class Group:
         return group
 
     @staticmethod
-    def AddAnimGroup(limb, animName):
-        log.funcFileDebug()
-        hide = genData.HIDE_ATTRS
-
-        group = pm.group(n='AnimGroup_%s_#' % animName, em=1, w=1)
-        pm.addAttr(group, ln='pfrsName', dt='string', h=hide)
-        pm.addAttr(group, ln='limb', dt='string', h=hide)
-
-        group.pfrsName.set(animName)
-        pm.connectAttr(limb.animGroups, group.limb)
-        pm.parent(group, limb)
-        return group
-
-    @staticmethod
     def AddConstraintGroup(control):
         log.funcFileDebug()
         hide = genData.HIDE_ATTRS

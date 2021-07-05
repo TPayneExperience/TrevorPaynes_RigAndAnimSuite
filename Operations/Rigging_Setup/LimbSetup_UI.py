@@ -146,12 +146,12 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
                         
                     # Joint Anims
                     pm.menuItem(l='JOINT ANIMATIONS', d=1)
-                    self.exportAnim_mi = pm.menuItem(l='Export Joint Animation', 
+                    self.exportAnim_mi = pm.menuItem(l='Export Animation', 
                                             en=0,
-                                            c=self.ExportJointAnim)
-                    self.removeAnim_mi = pm.menuItem(l='Remove Joint Animation', 
+                                            c=self.ExportAnimation)
+                    self.removeAnim_mi = pm.menuItem(l='Remove Animation', 
                                             en=0,
-                                            c=self.RemoveJointAnim)
+                                            c=self.RemoveAnimation)
                     
             with pm.frameLayout(l='---', bv=1, en=0) as self.jntHier_fl:
                 tt = 'BRANCH limbs may reorder joints'
@@ -541,7 +541,7 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
         for limb in self._selectedLimbs:
             self.operation.SetLimbLocationAsFace(limb)
 
-    def ExportJointAnim(self, ignore):
+    def ExportAnimation(self, ignore):
         log.funcFileInfo()
         if not str(pm.sceneName()):
             msg = 'Please SAVE current scene before '
@@ -561,23 +561,23 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
         if result != 'Save':
             return
         animName = pm.promptDialog(q=1, tx=1)
-        self.operation.ExportJointAnimation(self._rigRoot, animName)
+        self.operation.ExportAnimation(self._rigRoot, animName)
         pm.frameLayout(self.sceneHier_fl, e=1, en=0)
         pm.frameLayout(self.limbHier_fl, e=1, en=0)
         pm.frameLayout(self.jntHier_fl, e=1, en=0)
 
-    def RemoveJointAnim(self, ignore):
+    def RemoveAnimation(self, ignore):
         log.funcFileInfo()
         result = pm.confirmDialog(
                 title='Remove Joint Animation',
                 message='Are you sure?',
-                button=['No', 'Yes, super sure'],
+                button=['Yes, super sure', 'No'],
                 defaultButton='Yes, super sure',
                 cancelButton='No',
                 dismissString='No')
         if result != 'Yes, super sure':
             return
-        self.operation.RemoveJointAnimation(self._rigRoot)
+        self.operation.RemoveAnimation(self._rigRoot)
         pm.menuItem(self.exportAnim_mi, e=1, en=0)
         pm.menuItem(self.removeAnim_mi, e=1, en=0)
 

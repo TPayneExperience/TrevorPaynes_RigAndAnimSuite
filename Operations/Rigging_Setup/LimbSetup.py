@@ -481,17 +481,24 @@ class LimbSetup(absOp.Abstract_Operation):
         joint.r.set(0, 0, 0)
         pm.delete(temp)
 
-    def ExportJointAnimation(self, rigRoot, animName):
+    def ExportAnimation(self, rigRoot, animName):
         log.funcFileDebug()
         curFile = pm.sceneName()
         animUtil.UpdateAnimFolder(rigRoot, curFile)
         pm.saveFile()
-        limbs = pm.listConnections(rigRoot.limbs)
-        animLimbs = self.bhvMng.BakeJointAnimation(limbs, animName)
-        self._ExportAnimation(rigRoot, animLimbs, animName)
+        self._ExportAnimation(rigRoot, animName)
         pm.openFile(curFile, f=1)
-    
-    def _ExportAnimation(self, rigRoot, animLimbs, animName):
+
+    def _ExportAnimation(self, rigRoot, animName):
+        jointDict = self.bhvMng.SetupAnimJoints(rigRoot)
+        # Inter-Parent Anim joints between limbs
+        for joint, animJoint in jointDict.items():
+            parentJoint = pm.listRelatives(joint, p=1)[0]
+            if parentJoint not in jointDict:
+                continue
+            parentAnimJoint = jointDict[parentJoint]
+            pm.parent(animJoint, parentAnimJoint)
+
         # File paths
         jsonFileName = '%s.json' % animName
         mayaFileName = '%s.ma' % animName
@@ -506,42 +513,47 @@ class LimbSetup(absOp.Abstract_Operation):
         # Delete layers, joints, unused limbs, groups
         layers = [l for l in pm.ls(type='displayLayer') if str(l) != 'defaultLayer']
         pm.delete(layers)
-        pm.delete(pm.listConnections(rigRoot.jointsParentGroup))
-        pm.delete(pm.listConnections(rigRoot.meshesParentGroup))
-        pm.delete(pm.listConnections(rigRoot.controlTemplates))
-        
-        # DELETE LATER, MESH CLEANUP
-        pm.delete([pm.listRelatives(m, p=1)[0] for m in pm.ls(type='mesh')])
-        limbs = pm.listConnections(rigRoot.limbs)
-        delLimbs = [l for l in limbs if l not in animLimbs]
-        for limb in delLimbs:
-            lmb.Limb.Remove(limb)
-        for limb in animLimbs:
-            for child in pm.listRelatives(limb, c=1):
-                if not child.hasAttr('pfrsName'):
-                    pm.delete(child)
-                elif child.pfrsName.get() != animName:
-                    pm.delete(child)
-                else:
-                    child.v.set(1)
+        rigGroups = pm.listRelatives(rigRoot, c=1)
+        jointParentGroup = pm.listConnections(rigRoot.jointsParentGroup)[0]
+        limbParentGroup = pm.listConnections(rigRoot.limbsParentGroup)[0]
+        for group in rigGroups:
+            if group not in (jointParentGroup, limbParentGroup):
+                pm.delete(group)
+
         rigRoot.rigMode.set(3) # Baked Animations
         
         # Json file
         data = {}
         data['limbs'] = []
-        for limb in animLimbs:
-            data['limbs'].append([limb.pfrsName.get(), limb.side.get()])
+        for limb in pm.listConnections(rigRoot.limbs):
+            limbID = '%s_%d' % (limb.pfrsName.get(), limb.side.get())
+            data['limbs'].append(limbID)
         data['startFrame'] = start
         data['frameCount'] = end-start
         genUtil.Json.Save(jsonFilePath, data)
 
+        # Remove reg joint anims
+        limbs = pm.listConnections(rigRoot.limbs)
+        joints = []
+        for limb in limbs:
+            joints += pm.listConnections(limb.joints)
+        pm.cutKey(joints)
+
+        # Hide stuff
+        for joint in joints:
+            joint.v.set(0)
+        rigUtil.ChannelBoxAttrs(limbParentGroup,0,0,0,1)
+        limbParentGroup.v.set(0)
+
         # Save, Reopen, disable window
         pm.saveAs(mayaFilePath, f=1)
 
-    def RemoveJointAnimation(self, rigRoot):
+    def RemoveAnimation(self, rigRoot):
         log.funcFileDebug()
+        joints = []
         for limb in pm.listConnections(rigRoot.limbs):
-            pm.cutKey(pm.listConnections(limb.joints))
+            joints += pm.listConnections(limb.joints)
+        pm.cutKey(joints)
 
     def SetJointRotationToZero(self, limb):
         for joint in pm.listConnections(limb.joints):
@@ -713,6 +725,7 @@ class LimbSetup(absOp.Abstract_Operation):
                 if (mirrorLimb.pfrsName.get() == name):
                     if mirrorLimb != limb:
                         break
+            
             pm.connectAttr(limb.mirrorLimb, mirrorLimb.mirrorLimb)
             mirrorLimb.side.set(1)
             limb.side.set(2)

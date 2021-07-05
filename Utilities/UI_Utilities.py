@@ -9,11 +9,9 @@ reload(rigUtil)
 import SceneData.RigRoot as rrt
 reload(rrt)
 
-# enable = for mult rigs
-# pm.treeView(widget, e=1, removeAll=1) # call in parent ui
 def PopulateLimbHier(widget, currentRigRoot, allRigRoots): 
     pm.treeView(widget, e=1, removeAll=1)
-    limbIDs = {}
+    limbIDs = {} # rigRootID_limbID : limb
     rootLimbs = []
     for rigRoot in allRigRoots:
         for limb in pm.listConnections(rigRoot.limbs):

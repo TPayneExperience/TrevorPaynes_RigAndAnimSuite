@@ -1,7 +1,7 @@
 
 
 __author__ = 'Trevor Payne'
-__version__ = '0.1'
+__version__ = 'Alpha v1.0'
 
 HIDE_ATTRS = False
 

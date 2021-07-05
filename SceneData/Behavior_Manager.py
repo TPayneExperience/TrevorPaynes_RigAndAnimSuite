@@ -188,65 +188,39 @@ class Behavior_Manager(object):
         
 #============= ANIMATION TRANSFER (BAKING) ============================
    
-    def BakeJointAnimation(self, limbs, animName):
+    def SetupAnimJoints(self, rigRoot):
         log.funcFileDebug()
-        animLimbs = []
-        pm.delete(all=1, staticChannels=1)
-        # Setup
-        for limb in limbs:
-            joints = pm.listConnections(limb.joints)
-
-            # if no keys, skip
-            if any([pm.keyframe(j, q=1, kc=1) for j in joints]):
-                animLimbs.append(limb)
-        
-        self._BakeAnimation(animLimbs, animName)
-        return animLimbs
-
-    def BakeControlAnimation(self, limbs, animName, force=0):
-        log.funcFileDebug()
-        animLimbs = []
-        pm.delete(all=1, staticChannels=1)
-        # Setup
-        for limb in limbs:
-            groups = pm.listConnections(limb.usedGroups)
-            controls = [pm.listConnections(g.control)[0] for g in groups]
-
-            # if no keys, skip
-            if any([pm.keyframe(c, q=1, kc=1) for c in controls]):
-                animLimbs.append(limb)
-            elif force:
-                animLimbs.append(limb)
-        
-        self._BakeAnimation(animLimbs, animName)
-        return animLimbs
-
-    def _BakeAnimation(self, animLimbs, animName):
-        tempCsts = []
-        locators = []
         start = pm.playbackOptions(q=1, ast=1)
         end = pm.playbackOptions(q=1, aet=1)
+        tempCsts = []
+        jointDict = {} # oldJoint : animJoint
 
-        for limb in animLimbs:
-            # Create loc group + cst
+        # Duplicate and pair joint/animJoint
+        for limb in pm.listConnections(rigRoot.limbs):
             joints = pm.listConnections(limb.joints)
-            joints = rigUtil.GetSortedJoints(joints)
-            jointParent = pm.listRelatives(joints[0], p=1)
-            group = grp.Group.AddAnimGroup(limb, animName)
-            group.v.set(0)
-            tempCsts.append(pm.parentConstraint(jointParent, group))
-            # create locs + cst
-            for joint in joints:
-                loc = pm.spaceLocator()
-                tempCsts.append(pm.parentConstraint(joint, loc))
-                tempCsts.append(pm.scaleConstraint(joint, loc))
-                pm.parent(loc, group)
-                locators.append(loc)
+            animJoints = pm.duplicate(joints, po=1, rc=1)
+            for i in range(len(joints)):
+                animJoint = animJoints[i]
+                pm.connectAttr(limb.animJoints, animJoint.limb)
+                joint = joints[i]
+                jointDict[joint] = animJoint
+                group = pm.listConnections(joint.group)[0]
+                pm.connectAttr(animJoint.group, group.animJoint)
+                tempCsts.append(pm.parentConstraint(joint, animJoint))
+                tempCsts.append(pm.scaleConstraint(joint, animJoint))
 
-        pm.bakeResults(locators, sm=1, t=(start, end))
+        # Bake + delete constraints
+        pm.bakeResults(list(jointDict.values()), sm=1, t=(start, end))
         pm.delete(tempCsts)
+        pm.delete(all=1, staticChannels=1)
 
-    def ApplyControlAnimation(self, limbs, animName, 
+        return jointDict
+
+    def TeardownAnimJoints(self, limb):
+        log.funcFileDebug()
+        pm.delete(pm.listConnections(limb.animJoints))
+
+    def ApplyAnimJoints(self, limbs, 
             hasPosCst, hasRotCst, hasScaleCs):
         log.funcFileDebug()
         start = pm.playbackOptions(q=1, ast=1)
@@ -254,14 +228,15 @@ class Behavior_Manager(object):
         controls = []
         constraints = []
         for limb in limbs:
+            if not pm.listConnections(limb.animJoints):
+                return
             joints = pm.listConnections(limb.joints)
             joints = rigUtil.GetSortedJoints(joints)
-            jointParent = pm.listRelatives(joints[0], p=1)
-            animGroup = animUtil.GetLimbAnim(limb, animName)
-            locs = pm.listRelatives(animGroup, c=1)
-            constraints.append(pm.parentConstraint(jointParent, animGroup))
+            jointGroups = pm.listConnections(limb.jointGroups)
+            jointGroups = rigUtil.SortGroups(jointGroups)
+            animJoints = [pm.listConnections(g.animJoint)[0] for g in jointGroups]
             bhv = self.bhvs[limb.bhvFile.get()]
-            ctrs = bhv.Setup_Constraint_ControlsToXforms(limb, locs, 
+            ctrs = bhv.Setup_Constraint_ControlsToXforms(limb, animJoints, 
                             hasPosCst, hasRotCst, hasScaleCs)
             controls.append(ctrs)
 
@@ -272,12 +247,6 @@ class Behavior_Manager(object):
         for limb in limbs:
             bhv = self.bhvs[limb.bhvFile.get()]
             bhv.Teardown_Constraint_ControlsToXforms(limb)
-
-    def DeleteAnimation(self, limbs, animName):
-        log.funcFileDebug()
-        for limb in limbs:
-            group = animUtil.GetLimbAnim(limb, animName)
-            grp.Group.Remove(group)
 
 #============= UTIL ============================
 

@@ -68,7 +68,7 @@ class Animation_UI(absOpUI.Abstract_OperationUI):
                                                 c=self.DeleteAnimation)
         with pm.verticalLayout():
             # Limbs
-            with pm.frameLayout('Limbs', bv=1) as self.limbs_fl:
+            with pm.frameLayout('Animated Limbs', bv=1) as self.limbs_fl:
                 self.limb_tv = pm.treeView(adr=0, arp=0, nb=1, enk=1,
                                             elc=self.IgnoreRename,
                                             scc=self.SelectedLimb)
@@ -184,6 +184,7 @@ class Animation_UI(absOpUI.Abstract_OperationUI):
         self.animData = None
         self.PopulateLimbHier()
         self.PopulateProperties()
+        self.UpdateApplyButton()
         pm.menuItem(self.delete_mi, e=1, en=0)
         animStrs = pm.treeView(self.animations_tv, q=1, selectItem=1)
         if not animStrs:
@@ -194,6 +195,7 @@ class Animation_UI(absOpUI.Abstract_OperationUI):
         self.animData['filePath'] = animFile
         self.PopulateLimbHier()
         self.PopulateProperties()
+        self.UpdateApplyButton()
 
     def DeleteAnimation(self, ignore):
         log.funcFileInfo()
@@ -220,28 +222,14 @@ class Animation_UI(absOpUI.Abstract_OperationUI):
         pm.treeView(self.limb_tv, e=1, removeAll=1)
         if not self.animData:
             return
-        self._limbIDs = {}
-        for limb in pm.listConnections(self._rigRoot.limbs):
-            pfrsName = limb.pfrsName.get()
-            name = '%s_%d' % (pfrsName, limb.side.get())
-            self._limbIDs[name] = limb
-        for limbData in self.animData['limbs']:
-            pfrsName = limbData[0]
-            limbID = '%s_%d' % (pfrsName, limbData[1])
-            if limbID not in self._limbIDs:
-                continue
-            pm.treeView(self.limb_tv, e=1, ai=(limbID, ''))
-            pm.treeView(self.limb_tv, e=1, dl=(limbID, pfrsName))
-            pm.treeView(self.limb_tv, e=1, si=(limbID, 1))
-            side = rigData.LIMB_SIDES[limbData[1]]
-            if (side == 'L'):
-                pm.treeView(self.limb_tv, e=1, bti=(limbID, 1, side),
-                        lbc=(limbID, 0.1, 0.1, 0.3))
-            elif (side == 'R'):
-                pm.treeView(self.limb_tv, e=1, bti=(limbID, 1, side),
-                        lbc=(limbID, 0.3, 0.1, 0.1))
-            else:
-                pm.treeView(self.limb_tv, e=1, bvf=(limbID, 1, 0))
+        self._limbIDs = uiUtil.PopulateLimbHier(self.limb_tv, 
+                                                self._rigRoot,
+                                                self._allRigRoots)
+        for rigLimbID, limb in self._limbIDs.items():
+            pm.treeView(self.limb_tv, e=1, si=(rigLimbID, 1))
+            limbID = '%s_%d' % (limb.pfrsName.get(), limb.side.get())
+            if limbID not in self.animData['limbs']:
+                pm.treeView(self.limb_tv, e=1, enl=(limbID, 0))
 
     def SelectedLimb(self):
         log.funcFileInfo()

@@ -5,8 +5,6 @@ import Abstracts.Abstract_Initializer as absInit
 reload(absInit)
 import Data.General_Data as genData
 reload(genData)
-# import Data.Rig_Data as rigData
-# reload(rigData)
 import Utilities.Logger as log
 reload(log)
 
@@ -24,9 +22,9 @@ class InitGroup(absInit.Abstract_Initializer):
         pm.addAttr(group, ln='joint', dt='string', h=hide)
         pm.addAttr(group, ln='limb', dt='string', h=hide)
         pm.addAttr(group, ln='constraintGroups', dt='string', h=hide)
-            # >>> TO IMPLEMENT
         pm.addAttr(group, ln='used', dt='string', h=hide)
         pm.addAttr(group, ln='groupType', dt='string', h=hide)
+        pm.addAttr(group, ln='animJoint', dt='string', h=hide)
 
 
         

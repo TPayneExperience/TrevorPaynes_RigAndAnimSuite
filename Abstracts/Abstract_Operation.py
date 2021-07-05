@@ -55,19 +55,16 @@ class Abstract_Operation:
             limbs += pm.listConnections(rigRoot.limbs)
         if not toBeBuilt and rigRoot.isBuilt.get():
             if rigRoot.rigMode.get() == 1: # Anim Mode
-                if animUtil.GetLimbAnim(limbs[0], 'TEMP'):
-                    self.bhvMng.BakeJointAnimation(limbs, 
-                                        'TEMP', 1, 1, scl)
+                self.bhvMng.SetupAnimJoints(rigRoot)
             for rigRoot in allRigRoots:
                 self.bhvMng.Teardown_Rig(rigRoot)
         elif toBeBuilt and not rigRoot.isBuilt.get():
             for rigRoot in allRigRoots:
                 self.bhvMng.Setup_Rig(rigRoot)
             if rigRoot.rigMode.get() == 1: # Anim Mode
-                if animUtil.GetLimbAnim(limbs[0], 'TEMP'):
-                    self.bhvMng.ApplyControlAnimation(limbs, 
-                                            'TEMP', 1, 1, scl)
-                    self.bhvMng.DeleteAnimation(limbs, 'TEMP')
+                self.bhvMng.ApplyAnimJoints(limbs, 1, 1, scl)
+                for limb in limbs:
+                    self.bhvMng.TeardownAnimJoints(limb)
         
         # LAYERS
         c = self.controlLayerState

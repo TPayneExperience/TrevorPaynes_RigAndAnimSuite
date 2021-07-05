@@ -205,7 +205,6 @@ class PayneFreeRigSuite:
                     continue
                 fileName = os.path.splitext(opFile)[0]
                 moduleName = '%s.%s' % (moduleCat, fileName)
-                print (moduleName)
                 # UI
                 exec('import %s' % moduleName)
                 exec('reload (%s)' % moduleName)

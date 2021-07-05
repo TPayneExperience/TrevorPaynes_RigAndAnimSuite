@@ -37,17 +37,6 @@ class Constraints(absOp.Abstract_Operation):
         self._ApplyConstraint(affectedControl, target1, target2,
                     hasMaintainOffset, lockX, lockY, lockZ, 3)
 
-    def BakeAndRemoveConstraintGroups(self, constraintGroups):
-        limbs = set()
-        for cstGroup in constraintGroups:
-            limbGroup = pm.listConnections(cstGroup.limbGroup)[0]
-            limbs.add(pm.listConnections(limbGroup.limb)[0])
-        limbs = list(limbs)
-        self.bhvMng.BakeControlAnimation(limbs, 'CstTemp', 1)
-        self.RemoveConstraintGroups(constraintGroups)
-        self.bhvMng.ApplyControlAnimation(limbs, 'CstTemp', 1, 1, 1)
-        self.bhvMng.DeleteAnimation(limbs, 'CstTemp')
-        
     def RemoveConstraintGroups(self, constraintGroups):
         for cstGroup in constraintGroups:
             self.bhvMng._TeardownConstraintGroup(cstGroup)

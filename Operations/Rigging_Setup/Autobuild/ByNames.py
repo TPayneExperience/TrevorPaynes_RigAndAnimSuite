@@ -17,7 +17,8 @@ class ByNames(absBld.Abstract_Autobuild):
     uiOrderIndex = 100
     def Execute(self, rigRoot):
         log.funcFileInfo()
-        # GROUP JOINTS AND VALIDATE NAMES
+
+        # Get All 'unlimbed' Joints
         freeJoints = []
         for joint in pm.ls(type='joint'):
             if joint.hasAttr('limb'):
@@ -25,6 +26,8 @@ class ByNames(absBld.Abstract_Autobuild):
                     freeJoints.append(joint)
             else:
                 freeJoints.append(joint)
+
+        # Validate Joint Names
         newLimbs = {} # limbName : jointList
         for joint in freeJoints:
             splitName = joint.shortName().split('_')
@@ -41,7 +44,7 @@ class ByNames(absBld.Abstract_Autobuild):
                 newLimbs[limbSideName] = []
             newLimbs[limbSideName].append(joint)
 
-        # VALIDATE LIMBS
+        # Get Limb Types + Validate
         limbTypes = {}
         for limbName, joints in newLimbs.items():
             newLimbs[limbName] = rigUtil.GetSortedJoints(joints)
@@ -72,14 +75,22 @@ class ByNames(absBld.Abstract_Autobuild):
 
         # ADD LIMBS
         unpairedLimbs = {} # pfrsName : limb
+        for limb in pm.listConnections(rigRoot.limbs):
+            if not pm.listConnections(limb.mirrorLimb):
+                unpairedLimbs[limb.pfrsName.get()] = limb
         allLimbs = []
         for indexName, joints in newLimbs.items():
+            # Store limb + joint names
             tempJoint = joints[0]
-            limbName, side, j = tempJoint.shortName().split('_')
+            splitJointNames = tempJoint.shortName().split('_')
+            limbName = splitJointNames[0]
+            side = splitJointNames[1]
             pfrsNames = []
             for joint in joints:
                 splitName = joint.shortName().split('_')
                 pfrsNames.append(splitName[-1])
+
+            # Create limb
             limbType = limbTypes[indexName]
             if limbType == 1:
                 limb = lmb.Limb.AddOneJointBranch(rigRoot, joints)
@@ -89,18 +100,25 @@ class ByNames(absBld.Abstract_Autobuild):
                 limb = lmb.Limb.AddTwoJointChain(rigRoot, joints)
             elif limbType == 4:
                 limb = lmb.Limb.AddThreeJointChain(rigRoot, joints)
+
+            # Set Limb + Joint Names
+            limb.pfrsName.set(limbName)
             for i in range(len(joints)):
                 joint = joints[i]
                 joint.pfrsName.set(pfrsNames[i])
-            limb.pfrsName.set(limbName)
-            if side.upper() == 'L':
-                limb.side.set(1)
-            elif side.upper() == 'R':
-                limb.side.set(2)
+
+            # Connect Mirror limbs
             if limbName in unpairedLimbs:
                 mirror = unpairedLimbs[limbName]
                 pm.connectAttr(limb.mirrorLimb, mirror.mirrorLimb)
                 del(unpairedLimbs[limbName])
+                if side.upper() == 'L':
+                    limb.side.set(1)
+                    mirror.side.set(2)
+                else:
+                    limb.side.set(2)
+                    mirror.side.set(1)
+                genUtil.Name.UpdateLimbName(rigRoot, mirror)
             genUtil.Name.UpdateLimbName(rigRoot, limb)
             unpairedLimbs[limbName] = limb
             allLimbs.append(limb)

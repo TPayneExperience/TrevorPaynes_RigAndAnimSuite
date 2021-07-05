@@ -11,8 +11,6 @@ import Abstracts.Abstract_OperationUI as absOpUI
 reload(absOpUI)
 import Utilities.UI_Utilities as uiUtil
 reload(uiUtil)
-# import Utilities.General_Utilities as genUtil
-# reload(genUtil)
 import Utilities.Rig_Utilities as rigUtil
 reload(rigUtil)
 import Utilities.Logger as log
@@ -99,9 +97,6 @@ class Constraints_UI(absOpUI.Abstract_OperationUI):
                     self.remove_mi = pm.menuItem(en=0,
                                         c=self.RemoveConstraintGroups,
                                         l='Remove Constraint Groups')
-                    self.bakeRemove_mi = pm.menuItem(en=0,
-                                        c=self.BakeAndRemoveConstraintGroups,
-                                        l='Bake And Remove Constraint Groups')
 
 #=========== LIMB HIER ====================================
 
@@ -175,7 +170,6 @@ class Constraints_UI(absOpUI.Abstract_OperationUI):
         pm.treeView(self.group_tv, e=1, removeAll=1)
         self._selectedGroup = None
         pm.menuItem(self.remove_mi, e=1, en=0)
-        pm.menuItem(self.bakeRemove_mi, e=1, en=0)
         if not self._selectedLimb:
             return
         
@@ -194,7 +188,6 @@ class Constraints_UI(absOpUI.Abstract_OperationUI):
         log.funcFileInfo()
         groupIDStrs = pm.treeView(self.group_tv, q=1, selectItem=1)
         pm.menuItem(self.remove_mi, e=1, en=0)
-        pm.menuItem(self.bakeRemove_mi, e=1, en=0)
         if not groupIDStrs:
             pm.select(d=1)
             return 
@@ -203,16 +196,10 @@ class Constraints_UI(absOpUI.Abstract_OperationUI):
             self._selectedGroups.append(self._groups[ID])
         pm.select(self._selectedGroups)
         pm.menuItem(self.remove_mi, e=1, en=1)
-        pm.menuItem(self.bakeRemove_mi, e=1, en=1)
 
     def RemoveConstraintGroups(self, ignore):
         log.funcFileInfo()
         self.operation.RemoveConstraintGroups(self._selectedGroups)
-        self.PopulateGroupHier()
-
-    def BakeAndRemoveConstraintGroups(self, ignore):
-        log.funcFileInfo()
-        self.operation.BakeAndRemoveConstraintGroups(self._selectedGroups)
         self.PopulateGroupHier()
 
 #=========== CONSTRAINT PROPERTIES ====================================

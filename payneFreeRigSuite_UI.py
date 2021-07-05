@@ -69,7 +69,7 @@ class PayneFreeRigSuite_UI:
         log.funcFileDebug()
         name = genData.LICENSE
         name += ' - Payne Free Rig Suite'
-        name += ' - v%s' %  genData.__version__
+        name += ' - %s' %  genData.__version__
         name += ' - by Trevor Payne'
         with pm.window(mb=True,mbv=True, t=name, w=500, h=500) as self.win:
             with pm.rowLayout(nc=2):
