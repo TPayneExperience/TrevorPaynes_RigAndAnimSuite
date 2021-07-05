@@ -14,6 +14,8 @@ class ANM_Behavior(absOp.Abstract_Operation):
     controlLayerState = (1, 0)  # isVis, isRef
     jointLayerState = (1, 1)    # isVis, isRef
     meshLayerState = (1, 1)    # isVis, isRef
+    applyBakedAnimations = True
+    
     def __init__(self):
         self._rigBhv = rigBhv.RIG_Behavior()
 

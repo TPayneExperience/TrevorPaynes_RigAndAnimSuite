@@ -21,6 +21,7 @@ reload(msh)
 
 class MeshSetup(absOp.Abstract_Operation):
     isRigBuilt = False
+    applyBakedAnimations = False
     validRigStates = (0,)     # 0 = Setup, 1 = Anim
     controlLayerState = (0, 0)  # isVis, isRef
     jointLayerState = (0, 1)    # isVis, isRef

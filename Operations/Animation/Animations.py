@@ -25,6 +25,7 @@ reload(lmb)
 
 class Animations(absOp.Abstract_Operation):
     isRigBuilt = True
+    applyBakedAnimations = True
     validRigStates = (0, 1)     # 0 = Setup, 1 = Anim
     controlLayerState = (1, 0)  # isVis, isRef
     jointLayerState = (0, 1)    # isVis, isRef

@@ -22,6 +22,7 @@ reload(pst)
 
 class RIG_Behavior(absOp.Abstract_Operation):
     isRigBuilt = False
+    applyBakedAnimations = False
     validRigStates = (0, 1)     # 0 = Setup, 1 = Anim
     controlLayerState = (1, 1)  # isVis, isRef
     jointLayerState = (1, 1)    # isVis, isRef

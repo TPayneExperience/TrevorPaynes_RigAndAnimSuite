@@ -208,6 +208,7 @@ class Behavior_Manager(object):
                 pm.connectAttr(animJoint.group, group.animJoint)
                 tempCsts.append(pm.parentConstraint(joint, animJoint))
                 tempCsts.append(pm.scaleConstraint(joint, animJoint))
+                animJoint.v.set(0)
 
         # Bake + delete constraints
         pm.bakeResults(list(jointDict.values()), sm=1, t=(start, end))

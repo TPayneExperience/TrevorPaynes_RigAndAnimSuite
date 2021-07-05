@@ -58,6 +58,7 @@ class InitRigRoot(absInit.Abstract_Initializer):
         pm.addAttr(rigRoot, ln='rebuildSkinInf', at='bool', h=hide)
 
         # ANIMATION
+        pm.addAttr(rigRoot, ln='hasAnimJoints', at='bool', h=hide)
         pm.addAttr(rigRoot, ln='posesFolderPath', dt='string', h=hide)
         pm.addAttr(rigRoot, ln='animationFolderPath', dt='string', h=hide)
 

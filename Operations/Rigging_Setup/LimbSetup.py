@@ -34,6 +34,7 @@ reload(pst)
 
 class LimbSetup(absOp.Abstract_Operation):
     isRigBuilt = False
+    applyBakedAnimations = False
     validRigStates = (0, )      # 0 = Setup, 1 = Anim
     controlLayerState = (0, 0)  # isVis, isRef
     jointLayerState = (1, 0)    # isVis, isRef

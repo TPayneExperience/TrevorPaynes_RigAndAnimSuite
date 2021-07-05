@@ -8,6 +8,7 @@ reload(log)
 
 class Test(absOp.Abstract_Operation):
     isRigBuilt = True
+    applyBakedAnimations = False
     validRigStates = (0,)       # 0 = Setup, 1 = Anim
     requiredLicense = 0         # 0 = Free, 1 = Personal, 2 = Pro
     controlLayerState = (1, 0)  # isVis, isRef

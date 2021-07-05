@@ -26,6 +26,10 @@ class Abstract_Operation:
         pass 
 
     @abstractproperty
+    def applyBakedAnimations(self): # bool | False
+        pass 
+
+    @abstractproperty
     def validRigStates(self):       # tuple int | (0, 1)  # 0 = Setup, 1 = Anim
         pass 
 
@@ -54,17 +58,34 @@ class Abstract_Operation:
         for rigRoot in allRigRoots:
             limbs += pm.listConnections(rigRoot.limbs)
         if not toBeBuilt and rigRoot.isBuilt.get():
-            if rigRoot.rigMode.get() == 1: # Anim Mode
+            # Setup Anim Joints
+            for rigRoot in allRigRoots:
+                if rigRoot.rigMode.get() != 1: # Anim Mode
+                    continue
+                if rigRoot.hasAnimJoints.get():
+                    continue
                 self.bhvMng.SetupAnimJoints(rigRoot)
+                rigRoot.hasAnimJoints.set(1)
+            # Teardown Rig
             for rigRoot in allRigRoots:
                 self.bhvMng.Teardown_Rig(rigRoot)
         elif toBeBuilt and not rigRoot.isBuilt.get():
+            # Setup Rig
             for rigRoot in allRigRoots:
                 self.bhvMng.Setup_Rig(rigRoot)
-            if rigRoot.rigMode.get() == 1: # Anim Mode
+            # Apply Anim Joints
+            for rigRoot in allRigRoots:
+                if rigRoot.rigMode.get() != 1: # Anim Mode
+                    continue
+                if not rigRoot.hasAnimJoints.get():
+                    continue
+                if not self.applyBakedAnimations:
+                    continue
+                limbs = pm.listConnections(rigRoot.limbs)
                 self.bhvMng.ApplyAnimJoints(limbs, 1, 1, scl)
                 for limb in limbs:
                     self.bhvMng.TeardownAnimJoints(limb)
+                rigRoot.hasAnimJoints.set(0)
         
         # LAYERS
         c = self.controlLayerState
