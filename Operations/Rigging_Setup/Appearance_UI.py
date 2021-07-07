@@ -9,31 +9,26 @@ import Utilities.UI_Utilities as uiUtil
 reload(uiUtil)
 import Utilities.Rig_Utilities as rigUtil
 reload(rigUtil)
-# import Utilities.General_Utilities as genUtil
-# reload(genUtil)
 import Utilities.Logger as log
 reload(log)
-# import Data.Rig_Data as rigData
-# reload(rigData)
-# import SceneData.Control as ctr
-# reload(ctr)
-
-# import SceneData.RigRoot as rrt
-# reload(rrt)
 
 class Appearance_UI(absOpUI.Abstract_OperationUI):
     uiName = 'Appearance'
     uiOrderIndex = 300
     operation = app.Appearance()
     def __init__(self):
-        self._bhvNames = []
-        self._currentBhv = None # for verifying group selection
-        self._selectedGroup = None
         self._rigRoot = None
+        self._allRigRoots = None
+        self._limbIDs = []
+        self._selectedLimbs = []
+        self._limbGroups = []
 
     def Setup_UI(self, rigRoot, allRigRoots): 
         self._rigRoot = rigRoot
         self._allRigRoots = allRigRoots
+        self._limbIDs = []
+        self._selectedLimbs = []
+        self._limbGroups = []
         self._Setup()
         self.PopulateLimbHier()
         for rigRoot in allRigRoots:
@@ -85,7 +80,7 @@ class Appearance_UI(absOpUI.Abstract_OperationUI):
                                                     a='perspShape.shakeEnabled')
                     self.limbRot = pm.attrControlGrp(l='Limb Rotate', ann=msg,
                                                     a='perspShape.shakeEnabled')
-                    self._limbscale = pm.attrControlGrp(l='Limb Scale', ann=msg,
+                    self._limbScale = pm.attrControlGrp(l='Limb Scale', ann=msg,
                                                     a='perspShape.shakeEnabled')
             with pm.frameLayout('Set Control Colors', bv=1, en=0) as self.mtr_fl:
                 with pm.columnLayout(adj=1):
@@ -177,7 +172,7 @@ class Appearance_UI(absOpUI.Abstract_OperationUI):
         pm.attrControlGrp(self.jointScale, e=1, a=limb.channelBoxJointCtrScale)
         pm.attrControlGrp(self.limbPos, e=1, a=limb.channelBoxLimbCtrPos)
         pm.attrControlGrp(self.limbRot, e=1, a=limb.channelBoxLimbCtrRot)
-        pm.attrControlGrp(self._limbscale, e=1, a=limb.channelBoxLimbCtrScale)
+        pm.attrControlGrp(self._limbScale, e=1, a=limb.channelBoxLimbCtrScale)
 
 #=========== MATERIAL PROPERTIES ====================================
 

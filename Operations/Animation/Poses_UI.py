@@ -7,17 +7,8 @@ import Poses as pss
 reload(pss)
 import Utilities.UI_Utilities as uiUtil
 reload(uiUtil)
-# import Utilities.General_Utilities as genUtil
-# reload(genUtil)
 import Utilities.Logger as log
 reload(log)
-# import Data.Rig_Data as rigData
-# reload(rigData)
-# import SceneData.Control as ctr
-# reload(ctr)
-
-# import SceneData.RigRoot as rrt
-# reload(rrt)
 
 class Poses_UI(absOpUI.Abstract_OperationUI):
     uiName = 'Poses'
@@ -35,6 +26,9 @@ class Poses_UI(absOpUI.Abstract_OperationUI):
         self._Setup()
         self._rigRoot = rigRoot
         self._allRigRoots = allRigRoots
+        self._limbIDs = []
+        self.poses_ui = []
+        self._copiedPoses = {} # pfrsName : Pose
         self._selectedLimbs = []
         self.PopulateLimbHier()
         self.operation.InitPoses(rigRoot)

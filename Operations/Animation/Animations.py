@@ -14,10 +14,6 @@ import Utilities.General_Utilities as genUtil
 reload(genUtil)
 import Utilities.Anim_Utilities as animUtil
 reload(animUtil)
-# import Data.Anim_Data as animData
-# reload(animData)
-# import Data.Rig_Data as rigData
-# reload(rigData)
 import Operations.Rigging_Setup.LimbSetup as ls
 reload(ls)
 import SceneData.Limb as lmb
@@ -111,6 +107,8 @@ class Animations(absOp.Abstract_Operation):
 
     def GetRigRootAnimations(self, rigRoot):
         curFile = pm.sceneName()
+        if not os.path.isfile(curFile):
+            return {}
         animUtil.UpdateAnimFolder(rigRoot, curFile)
         folder = rigRoot.animationFolderPath.get()
         files = [f for f in os.listdir(folder) if '.json' in f]

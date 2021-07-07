@@ -24,18 +24,26 @@ class RIG_Behavior_UI(absOpUI.Abstract_OperationUI):
     uiOrderIndex = 200
     operation = bhv.RIG_Behavior()
     def __init__(self):
+        self._rigRoot = None
+        self._allRigRoots = None
+        self._currentBhv = None 
         self._bhvTypes = []
-        self._currentBhv = None # for verifying group selection
         self._selectedLimbs = []
         self._presets = {} # preset_name : presetRoot
         self._presetsUI = []
-        self._rigRoot = None
+        self._limbGroups = {}
+        self._limbIDs = {}
 
     def Setup_UI(self, rigRoot, allRigRoots):  # Return nothing, parent should cleanup
         self._Setup()
         self._rigRoot = rigRoot
         self._allRigRoots = allRigRoots
+        self._currentBhv = None # for verifying group selection
+        self._bhvTypes = []
         self._selectedLimbs = []
+        self._presetsUI = []
+        self._limbIDs = {}
+        self._limbGroups = {}
         self.PopulateLimbHier()
         self.PopulatePresets()
         
@@ -184,8 +192,6 @@ class RIG_Behavior_UI(absOpUI.Abstract_OperationUI):
             parent = None
             log.info('"%s" to world' % name)
         self.operation.ReparentLimb(child, parent)
-        # self.PopulateLimbProperties(child)
-        # self.jntMng.UpdateLimbParentJoint(child)
     
     def AddEmptyLimb(self, ignore):
         log.funcFileInfo()

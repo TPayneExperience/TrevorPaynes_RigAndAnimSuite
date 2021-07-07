@@ -15,11 +15,9 @@ class ANM_Behavior_UI(absOpUI.Abstract_OperationUI):
     uiOrderIndex = 110
     operation = bhv.ANM_Behavior()
     def __init__(self):
-        self._bhvTypes = []
         self._currentBhv = None # for verifying group selection
-        self._selectedLimbs = []
-        self._presets = {} # preset_name : presetRoot
         self._presetsUI = []
+        self._selectedLimbs = []
 
     def Setup_UI(self, rigRoot, allRigRoots):  # Return nothing, parent should cleanup
         self._Setup()
@@ -29,7 +27,7 @@ class ANM_Behavior_UI(absOpUI.Abstract_OperationUI):
         self.PopulatePresets()
         
     def Teardown_UI(self, rigRoot, allRigRoots):
-        self._presetsUI = []
+        pass
 
 #=========== SETUP UI ====================================
 
@@ -88,7 +86,8 @@ class ANM_Behavior_UI(absOpUI.Abstract_OperationUI):
         self.PopulatePresets()
         self._rigRoot = None
         limbIDStrs = pm.treeView(self.limb_tv, q=1, selectItem=1)
-        self._selectedLimbs = None
+        self._selectedLimbs = []
+        self._currentBhv = None
         if not limbIDStrs:
             return
         self._selectedLimbs = [self._limbIDs[ID] for ID in limbIDStrs]

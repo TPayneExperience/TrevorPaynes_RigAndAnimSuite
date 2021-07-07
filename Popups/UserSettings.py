@@ -37,9 +37,14 @@ class UserSettings:
                         self._Setup_TemplatesFolder()
                         self._Setup_ControlShapesFile()
                 with pm.horizontalLayout():
-                    with pm.frameLayout(l='Joint Rotations', bv=1) as self._jr_fl:
+                    with pm.frameLayout(l='Joint Settings', bv=1) as self._jr_fl:
                         self._Setup_JointMirrorAxes()
                         self._Setup_JointRotOrder()
+                        value = pm.jointDisplayScale(q=1)
+                        pm.floatSliderGrp(l='Joint Display Size', min=0.01, max=10,
+                                        v=value, f=1, pre=2, 
+                                        cw3=(100, 35, 50),
+                                        dc=self.SetJointDisplaySize)
                     title = 'Control Colors + Transparency'
                     with pm.frameLayout(l=title, bv=1) as self._clr_fl:
                         self._Setup_Colors()
@@ -77,23 +82,9 @@ class UserSettings:
                 pm.menuItem(l=axis)
                 if i == self.config['jointUpAxis']:
                     pm.optionMenu(self.jUp_om, e=1, sl=(i+1))
-        # with pm.optionMenu(l=' Mirror Aim Axis') as self.mAim_om:
-        #     for i in range(6):
-        #         axis = rigData.JOINT_AIM_UP_AXES[i]
-        #         pm.menuItem(l=axis)
-        #         if i == self.config['mirrorAimAxis']:
-        #             pm.optionMenu(self.mAim_om, e=1, sl=(i+1))
-        # with pm.optionMenu(l=' Mirror Up Axis') as self.mUp_om:
-        #     for i in range(6):
-        #         axis = rigData.JOINT_AIM_UP_AXES[i]
-        #         pm.menuItem(l=axis)
-        #         if i == self.config['mirrorUpAxis']:
-        #             pm.optionMenu(self.mUp_om, e=1, sl=(i+1))
 
         pm.optionMenu(self.jAim_om, e=1, cc=self.SetJAim)
         pm.optionMenu(self.jUp_om, e=1, cc=self.SetJUp)
-        # pm.optionMenu(self.mAim_om, e=1, cc=self.SetMAim)
-        # pm.optionMenu(self.mUp_om, e=1, cc=self.SetMUp)
         
     def _Setup_JointRotOrder(self):
         with pm.optionMenu(l=' Joint Rot Order') as self.jRotOrder_om:
@@ -324,11 +315,8 @@ class UserSettings:
     def SetJUp(self, axis):
         self.config['jointUpAxis'] = rigData.JOINT_AIM_UP_AXES.index(axis)
 
-    # def SetMAim(self, axis):
-    #     self.config['mirrorAimAxis'] = rigData.JOINT_AIM_UP_AXES.index(axis)
-
-    # def SetMUp(self, axis):
-    #     self.config['mirrorUpAxis'] = rigData.JOINT_AIM_UP_AXES.index(axis)
+    def SetJointDisplaySize(self, value):
+        pm.jointDisplayScale(value)
 
 #============ SHAPES ============================
 

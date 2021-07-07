@@ -321,6 +321,8 @@ class Poses(absOp.Abstract_Operation):
 
     def _StoreLimbControlValues(self, limb):
         log.funcFileDebug()
+        if limb.longName() not in self.limbControls:
+            return
         controls = self.limbControls[limb.longName()]
         for control in controls:
             name = control.longName()

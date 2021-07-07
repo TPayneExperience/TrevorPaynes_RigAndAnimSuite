@@ -26,13 +26,10 @@ class Constraints_UI(absOpUI.Abstract_OperationUI):
     uiOrderIndex = 410
     operation = cst.Constraints()
     def __init__(self):
-        # self._limbFunc = None
         self._rigRoot = None
-        # self._selectedSceneJoints = []
-        # self._limbJoints = {}
-        # self._limbIDs = {} # limbID : limb
+        self._allRigRoots = []
         self._selectedLimb = None
-        self._selectedControls = None
+        self._selectedControls = []
         self._target1 = None
         self._target2 = None
         self._selectedTarget = None
@@ -41,6 +38,11 @@ class Constraints_UI(absOpUI.Abstract_OperationUI):
         self._Setup()
         self._rigRoot = rigRoot
         self._allRigRoots = allRigRoots
+        self._selectedLimb = None
+        self._target1 = None
+        self._target2 = None
+        self._selectedTarget = None
+        self._selectedControls = []
         self.PopulateLimbHier()
         self.UpdateApplyButton()
     
@@ -159,7 +161,7 @@ class Constraints_UI(absOpUI.Abstract_OperationUI):
             self._selectedControls = [pm.listConnections(g.control)[0] for g in groups]
             pm.select(self._selectedControls)
         else:
-            self._selectedControls = None
+            self._selectedControls = []
             pm.select(d=1)
         self.UpdateApplyButton()
 

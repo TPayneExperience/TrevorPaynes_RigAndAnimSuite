@@ -38,9 +38,15 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
 
     def Setup_UI(self, rigRoot, allRigRoots):  # Return nothing, parent should cleanup
         self.operation.InitAutobuilders()
-        self._Setup()
         self._rigRoot = rigRoot
         self._allRigRoots = allRigRoots
+        self._Setup()
+        self._limbFunc = None
+        self._selectedSceneJoints = []
+        self._limbJoints = {}
+        self._limbIDs = {} # limbID : limb
+        self._selectedLimbs = []
+        self._autobuild_mis = []
         self.Refresh(0)
     
     def Teardown_UI(self, rigRoot, allRigRoots):
@@ -49,7 +55,6 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
 #=========== SETUP UI ====================================
 
     def _Setup(self):
-        self._autobuild_mis = []
         with pm.verticalLayout():
             with pm.frameLayout(l='---', bv=1) as self.sceneHier_fl:
                 msg = 'Middle Mouse Button (MMB) + DRAG to reparent'

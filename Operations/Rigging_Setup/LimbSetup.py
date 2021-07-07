@@ -25,8 +25,6 @@ import Utilities.Rig_Utilities as rigUtil
 reload(rigUtil)
 import Utilities.Anim_Utilities as animUtil
 reload(animUtil)
-# import Operations.Rigging_Setup.Autobuild as auto
-# reload(auto)
 import Abstracts.Abstract_Autobuild as absBld
 reload(absBld)
 import SceneData.Preset as pst
@@ -84,9 +82,6 @@ class LimbSetup(absOp.Abstract_Operation):
                 if angles == (0,0,0):
                     joint.preferredAngle.set(bendAxis)
         self._ResetToDefaultParent(limbs)
-        # # Zeroing out joint rotations, breaks animations though...
-        # for joint in pm.ls(type='joint'):
-        #     self.TransferRotationsToJointOrient(joint)
         
 #============= LIMBS ============================
 

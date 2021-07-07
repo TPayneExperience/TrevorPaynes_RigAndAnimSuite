@@ -15,22 +15,11 @@ import Utilities.Logger as log
 reload(log)
 import Data.Rig_Data as rigData
 reload(rigData)
-# import SceneData.Control as ctr
-# reload(ctr)
-
-# import SceneData.RigRoot as rrt
-# reload(rrt)
 
 class Animation_UI(absOpUI.Abstract_OperationUI):
     uiName = 'Animations'
     uiOrderIndex = 310
     operation = anm.Animations()
-    def __init__(self):
-        self._rigRoot = None
-        self.rigRoots = {} # ID : rigRoot
-        self._allRigRoots = []
-        self._limbIDs = []
-        self.animData = None
 
     def Setup_UI(self, rigRoot, allRigRoots): 
         self._Setup()
@@ -87,6 +76,7 @@ class Animation_UI(absOpUI.Abstract_OperationUI):
    
     def PopulateRigRootHier(self):
         log.funcFileDebug()
+        self.rigRoots = {} # ID : rigRoot
         for rigRoot in genUtil.GetRigRoots():
             index = str(rigRoot.ID.get())
             name = rigRoot.pfrsName.get()
@@ -220,6 +210,7 @@ class Animation_UI(absOpUI.Abstract_OperationUI):
     def PopulateLimbHier(self):
         log.funcFileDebug()
         pm.treeView(self.limb_tv, e=1, removeAll=1)
+        self._limbIDs = []
         if not self.animData:
             return
         self._limbIDs = uiUtil.PopulateLimbHier(self.limb_tv, 

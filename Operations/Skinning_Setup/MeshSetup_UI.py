@@ -12,14 +12,17 @@ class MeshSetup_UI(absOpUI.Abstract_OperationUI):
     uiOrderIndex = 110
     operation = msh.MeshSetup()
     def __init__(self):
-        self.allMeshes = {} # name : meshNode
-        self.skinnedMeshes = {} # name : meshNode
+        self._allMeshes = {} # name : meshNode
+        self._skinnedMeshes = {} # name : meshNode
         self._selectedAvailable = []
         self._selectedSkinned = []
 
     def Setup_UI(self, rigRoot, allRigRoots): 
         self._rigRoot = rigRoot
         self._allRigRoots = allRigRoots
+        self._allMeshes = {} # name : meshNode
+        self._skinnedMeshes = {} # name : meshNode
+        self._selectedAvailable = []
         self._Setup()
         self.Refresh(0)
         
@@ -43,8 +46,8 @@ class MeshSetup_UI(absOpUI.Abstract_OperationUI):
         with pm.verticalLayout():
             with pm.frameLayout('Skinned Meshes', bv=1):
                 tt = 'RMB to modify meshes, Double LMB to rename'
-                self.skinnedMeshes_tv = pm.treeView(adr=0, arp=0, ann=tt)
-                pm.treeView(self.skinnedMeshes_tv, e=1,
+                self._skinnedMeshes_tv = pm.treeView(adr=0, arp=0, ann=tt)
+                pm.treeView(self._skinnedMeshes_tv, e=1,
                                                 scc=self.SelectedSkinned,
                                                 elc=self.RenameMesh)
                 with pm.popupMenu():
@@ -58,11 +61,11 @@ class MeshSetup_UI(absOpUI.Abstract_OperationUI):
         meshGroup = pm.listConnections(self._rigRoot.meshesParentGroup)[0]
         availableMeshes = pm.listRelatives(meshGroup, c=1)
         skinnedMeshes = pm.listConnections(self._rigRoot.meshes)
-        self.allMeshes = {} # name : meshNode
+        self._allMeshes = {} # name : meshNode
         self._selectedAvailable = []
         for mesh in availableMeshes:
             name = mesh.shortName()
-            self.allMeshes[name] = mesh
+            self._allMeshes[name] = mesh
             pm.treeView(self.availableMeshes_tv, e=1, ai=(name, ''))
             if mesh in skinnedMeshes:
                 pm.treeView(self.availableMeshes_tv, e=1, enl=(name, 0))
@@ -75,7 +78,7 @@ class MeshSetup_UI(absOpUI.Abstract_OperationUI):
         if not names:
             pm.select(d=1)
             return
-        self._selectedAvailable = [self.allMeshes[n] for n in names]
+        self._selectedAvailable = [self._allMeshes[n] for n in names]
         pm.menuItem(self.add_mi, e=1, en=1)
         for mesh in self._selectedAvailable:
             if mesh.hasAttr('rigRoot'):
@@ -96,8 +99,8 @@ class MeshSetup_UI(absOpUI.Abstract_OperationUI):
 
     def RenameMesh(self, oldName, newName):
         log.funcFileInfo()
-        if newName not in self.allMeshes:
-            mesh = self.allMeshes[oldName]
+        if newName not in self._allMeshes:
+            mesh = self._allMeshes[oldName]
             self.operation.RenameMesh(mesh, newName)
         self.PopulateAvailable()
         self.PopulateSkinned()
@@ -106,23 +109,23 @@ class MeshSetup_UI(absOpUI.Abstract_OperationUI):
 #=========== SKINNED ====================================
 
     def PopulateSkinned(self):
-        pm.treeView(self.skinnedMeshes_tv, e=1, removeAll=1)
+        pm.treeView(self._skinnedMeshes_tv, e=1, removeAll=1)
         meshes = pm.listConnections(self._rigRoot.meshes)
-        self.skinnedMeshes = {} # name : meshNode
+        self._skinnedMeshes = {} # name : meshNode
         for mesh in meshes:
             name = mesh.shortName()
-            self.skinnedMeshes[name] = mesh
-            pm.treeView(self.skinnedMeshes_tv, e=1, ai=(name, ''))
+            self._skinnedMeshes[name] = mesh
+            pm.treeView(self._skinnedMeshes_tv, e=1, ai=(name, ''))
 
     def SelectedSkinned(self):
         log.funcFileInfo()
         pm.menuItem(self.remove_mi, e=1, en=0)
         self._selectedSkinned = []
-        names = pm.treeView(self.skinnedMeshes_tv, q=1, si=1)
+        names = pm.treeView(self._skinnedMeshes_tv, q=1, si=1)
         if not names:
             pm.select(d=1)
             return
-        self._selectedSkinned = [self.allMeshes[n] for n in names]
+        self._selectedSkinned = [self._allMeshes[n] for n in names]
         pm.menuItem(self.remove_mi, e=1, en=1)
         pm.select(self._selectedSkinned)
 
