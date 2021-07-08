@@ -41,11 +41,11 @@ LIMB_TYPES = (  'Empty',
                 'TwoJointChain',
                 'ThreeJointChain',
 
-                'Custom0',
                 'Custom1',
                 'Custom2',
-                'Custom3')
-LIMB_LOCATIONS = ('Body', 'Face')
+                'Custom3',
+                'Custom4')
+LIMB_LOCATIONS = ('Body', 'Face', 'Custom1', 'Custom2')
 
 LIMB_SIDES = ('M', 'L', 'R', '-')
 

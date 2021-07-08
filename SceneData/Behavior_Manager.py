@@ -213,7 +213,6 @@ class Behavior_Manager(object):
         # Bake + delete constraints
         pm.bakeResults(list(jointDict.values()), sm=1, t=(start, end))
         pm.delete(tempCsts)
-        pm.delete(all=1, staticChannels=1)
 
         return jointDict
 

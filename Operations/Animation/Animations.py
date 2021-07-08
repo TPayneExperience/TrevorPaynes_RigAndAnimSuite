@@ -26,6 +26,7 @@ class Animations(absOp.Abstract_Operation):
     controlLayerState = (1, 0)  # isVis, isRef
     jointLayerState = (0, 1)    # isVis, isRef
     meshLayerState = (1, 1)    # isVis, isRef
+
     def __init__(self):
         self._ls = ls.LimbSetup()
 
@@ -52,8 +53,8 @@ class Animations(absOp.Abstract_Operation):
             raise ValueError('Imported file missing animation nodes!')
         
         # Pair Limbs
-        rigLimbs = {}
-        animLimbs = {}
+        rigLimbs = {} # limbID : limb
+        animLimbs = {} # limbID : limb
         for limb in limbs:
             limbID = '%s_%d' % (limb.pfrsName.get(), limb.side.get())
             rigLimbs[limbID] = limb
@@ -81,6 +82,11 @@ class Animations(absOp.Abstract_Operation):
             for i in range(len(rigGroups)):
                 rigGroup = rigGroups[i]
                 animJoint = animJoints[i]
+                parentAnimJoint = pm.listRelatives(animJoint, p=1)[0]
+                if parentAnimJoint not in animJoints:
+                    limbJoint = pm.listConnections(rigGroup.joint)[0]
+                    parentLimbJoint = pm.listRelatives(limbJoint, p=1)[0]
+                    pm.parent(animJoint, parentLimbJoint, r=1)
                 pm.disconnectAttr(animJoint.group)
                 pm.disconnectAttr(animJoint.limb)
                 pm.connectAttr(rigLimb.animJoints, animJoint.limb)
@@ -97,8 +103,9 @@ class Animations(absOp.Abstract_Operation):
         # Bake and Delete
         self.bhvMng.ApplyAnimJoints(bakeLimbs, hasPosCst, hasRotCst, hasScaleCst)
         pm.delete(allNodes)
-        pm.delete(all=1, staticChannels=1)
 
+    def DeleteStaticChannels(self):
+        pm.delete(all=1, staticChannels=1)
 
 #=========== FILES ====================================
 

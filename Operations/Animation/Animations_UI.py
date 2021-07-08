@@ -47,6 +47,9 @@ class Animation_UI(absOpUI.Abstract_OperationUI):
                                                 c=self.ExportControlAnimation)
                     self.remove_mi = pm.menuItem(l='Remove Control Animation', en=0, 
                                                 c=self.RemoveControlAnimation)
+                    pm.menuItem(d=1)
+                    pm.menuItem(l='Delete Static Channels', 
+                                c=pm.Callback(self.operation.DeleteStaticChannels))
             # Animations
             with pm.frameLayout('Animations', bv=1) as self.anim_fl:
                 self.animations_tv = pm.treeView(arp=0, adr=0, ams=0,
