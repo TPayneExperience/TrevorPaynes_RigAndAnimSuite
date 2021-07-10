@@ -17,8 +17,6 @@ class Mesh:
     @staticmethod
     def Add(rigRoot, mesh):
         log.funcFileDebug()
-        # pm.editDisplayLayerMembers(rigData.MESHES_DISP_LAYER, 
-        #                                 mesh, nr=1)
         genUtil.AbstractInitializer(mesh, 'Mesh')
         nextMeshID = rigRoot.nextMeshID.get()
         rigRoot.nextMeshID.set(nextMeshID + 1)

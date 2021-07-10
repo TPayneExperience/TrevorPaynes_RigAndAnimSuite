@@ -88,25 +88,25 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
                 with pm.popupMenu():
                     # Edit Limb Joints
                     pm.menuItem(l='EDIT LIMB JOINTS', d=1)
-                    with pm.subMenuItem(l='Joint Rotation Order', en=0) as self.jro_mi:
-                        for i in range(6):
-                            rotOrder = rigData.JOINT_ROT_ORDER[i]
-                            pm.menuItem(l=rotOrder, c=pm.Callback(self.JointRotOrder, i))
-                    self.aimUp_mi = pm.menuItem(l='Apply Joint Aim + Up User Settings', 
-                                            en=0, c=self.ApplyJointAimUp)
                     msg = 'Transfer Rotations To Joint Orient'
                     self.xferToJntOri_mi = pm.menuItem(l=msg, 
                                             en=0,
                                             c=self.TransferRotationsToJointOrient)
+                    self.aimUp_mi = pm.menuItem(l='Apply Joint Aim + Up User Settings', 
+                                            en=0, c=self.ApplyJointAimUp)
+                    self.zeroRot_mi = pm.menuItem(l='Set Joint Rotation to Zero', 
+                                            en=0,
+                                            c=self.SetJointRotationToZero)
                     self.updateBody_mi = pm.menuItem(l='Update Mirror Body Joints', 
                                             en=0,
                                             c=self.UpdateMirrorBodyJoints)
                     self.updateFace_mi = pm.menuItem(l='Update Mirror Face Joints', 
                                             en=0,
                                             c=self.UpdateMirrorFaceJoints)
-                    self.zeroRot_mi = pm.menuItem(l='Set Joint Rotation to Zero', 
-                                            en=0,
-                                            c=self.SetJointRotationToZero)
+                    with pm.subMenuItem(l='Joint Rotation Order', en=0) as self.jro_mi:
+                        for i in range(6):
+                            rotOrder = rigData.JOINT_ROT_ORDER[i]
+                            pm.menuItem(l=rotOrder, c=pm.Callback(self.JointRotOrder, i))
 
                     # Templates
                     pm.menuItem(l='TEMPLATES', d=1)

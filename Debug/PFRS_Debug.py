@@ -37,6 +37,34 @@ class PFRS_Debug:
         pm.newFile(f=1)
         pm.flushUndo()
 
+    def ArmTest(self):
+        self.NewScene()
+        path = os.path.join(self.folder, 'TEST_ArmFingers_01.ma')
+        pm.importFile(path)
+        rigRoot = self.pfrs.AddRigRoot()
+        rigRoot.operation.set('Limb Setup')
+        
+    def LegTest(self):
+        self.NewScene()
+        path = os.path.join(self.folder, 'TEST_LegFoot_01.ma')
+        pm.importFile(path)
+        rigRoot = self.pfrs.AddRigRoot()
+        rigRoot.operation.set('Limb Setup')
+
+    def FaceTest(self):
+        self.NewScene()
+        path = os.path.join(self.folder, 'TEST_Face_01.ma')
+        pm.importFile(path)
+        rigRoot = self.pfrs.AddRigRoot()
+        rigRoot.operation.set('Limb Setup')
+
+    def SpineTest(self):
+        self.NewScene()
+        path = os.path.join(self.folder, 'TEST_Spine_01.ma')
+        pm.importFile(path)
+        rigRoot = self.pfrs.AddRigRoot()
+        rigRoot.operation.set('Limb Setup')
+        
     def SimpleChainTest(self):
         self.NewScene()
         path = os.path.join(self.folder, 'TEST_SimpleChain_01.ma')
@@ -46,39 +74,6 @@ class PFRS_Debug:
         self.pfrs.LimbSetup.InitSceneJoints(rigRoot)
         self.pfrs.LimbSetup.AutoBuildByHierarchy(rigRoot)
 
-    def ArmTest(self):
-        self.NewScene()
-        path = os.path.join(self.folder, 'TEST_ArmFingers_01.ma')
-        pm.importFile(path)
-        rigRoot = self.pfrs.AddRigRoot()
-        rigRoot.operation.set('Limb Setup')
-        # rigRoot.operation.set('Behavior')
-        # self.pfrs.LimbSetup.AutoBuildByName(rigRoot)
-        
-    def LegTest(self):
-        self.NewScene()
-        path = os.path.join(self.folder, 'TEST_LegFoot_01.ma')
-        pm.importFile(path)
-        rigRoot = self.pfrs.AddRigRoot()
-        # rigRoot.operation.set('Behavior')
-        # self.pfrs.LimbSetup.AutoBuildByName(rigRoot)
-
-    def FaceTest(self):
-        self.NewScene()
-        path = os.path.join(self.folder, 'TEST_Face_01.ma')
-        pm.importFile(path)
-        rigRoot = self.pfrs.AddRigRoot()
-        # rigRoot.operation.set('Behavior')
-        # self.pfrs.LimbSetup.AutoBuildByName(rigRoot)
-
-    def SpineTest(self):
-        self.NewScene()
-        path = os.path.join(self.folder, 'TEST_Spine_01.ma')
-        pm.importFile(path)
-        rigRoot = self.pfrs.AddRigRoot()
-        rigRoot.operation.set('Behavior')
-        self.pfrs.LimbSetup.AutoBuildByName(rigRoot)
-        
     def MirrorTest(self):
         self.NewScene()
         path = os.path.join(self.folder, 'TEST_Mirror_01.ma')
@@ -121,19 +116,3 @@ class PFRS_Debug:
         self.NewScene()
         path = os.path.join(self.folder, 'temp_joints.ma')
         pm.importFile(path)
-        # self.UpdateEnableUI()
-        # self.Setup_Editable()
-        # pm.tabLayout(self.rig_ui.tab, e=1, sti=2) # Select Limb setup tab
-        # # joints = pm.ls('Pelvis_Root_M')
-        # # joints += pm.ls('Spine_M_S01')
-        # # limb = self.rigBHV.AddJointLimb(joints)
-        # # self.rig_ui.AddLimb(limb)
-        # # pm.tabLayout(self.tab, e=1, sti=2) # Select SKINNING tab
-        # mesh1 = pm.ls('pSphereShape1')[0]
-        # mesh2 = pm.ls('pCubeShape1')[0]
-        # self.skin_ui.meshMng.AddMesh(mesh1)
-        # self.skin_ui.meshMng.AddMesh(mesh2)
-        # self.skin_ui.skinMng.AddSkinAttrs(mesh1)
-        # self.skin_ui.skinMng.AddSkinAttrs(mesh2)
-        # pm.tabLayout(self.skin_ui.tab, e=1, sti=3) # Select PAINT WEIGHTS tab
-

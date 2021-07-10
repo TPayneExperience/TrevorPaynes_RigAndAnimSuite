@@ -259,7 +259,6 @@ class Behavior_Manager(object):
                 control = pm.listConnections(group.control)[0]
                 pm.makeIdentity(control, a=1, t=1, r=1, s=1) # Freeze xforms
                 pos = pm.xform(group, q=1, t=1, ws=1)
-                print(str(group) + ' : ' + str(pos))
                 pm.move(pos[0], pos[1], pos[2],         # Move pivot to group
                             control.scalePivot, 
                             control.rotatePivot, ws=1)

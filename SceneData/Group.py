@@ -47,7 +47,6 @@ class Group:
         log.funcFileDebug()
         hide = genData.HIDE_ATTRS
         limbGroup = pm.listConnections(control.group)[0]
-        # limb = pm.listConnections(limbGroup.limb)[0]
         group = pm.group(n='CstGroup_#', em=1, w=1)
         pm.addAttr(group, ln='limbGroup', dt='string', h=hide)
         pm.addAttr(group, ln='target1', dt='string', h=hide)

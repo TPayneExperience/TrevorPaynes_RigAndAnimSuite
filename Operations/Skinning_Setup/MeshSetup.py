@@ -55,3 +55,7 @@ class MeshSetup(absOp.Abstract_Operation):
         log.funcFileInfo()
         for mesh in meshes:
             msh.Mesh.Remove(mesh)
+
+    def PaintSkinWeightsTool(self):
+        import maya.mel as mel
+        mel.eval('ArtPaintSkinWeightsTool;')

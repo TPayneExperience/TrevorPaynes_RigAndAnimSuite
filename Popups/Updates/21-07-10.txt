@@ -1,0 +1,36 @@
+From the smelly sands of time...
+
+Payne Free Rigs Suite's ALPHA Launch! 
+
+The tool currently contains the following categories + operations:
+    - Rigging Setup:
+        - Limb Setup
+        - Behaviors
+        - Appearance
+    - Rigging Extras:
+        - Constraints
+    - Skinning Setup
+        - Mesh Setup
+    - Animation:
+        - Behaviors
+        - Poses
+        - Animation
+
+Planned features:
+    - Better skinning tools!
+    - More animations tools
+
+If you have thoughts, feedback or want to express your hatred of me,
+connect via Menubar > Help > Submit Feedback
+
+Thanks, and keep the dream alive!
+    - Trevor Payne
+
+
+
+
+
+
+
+
+

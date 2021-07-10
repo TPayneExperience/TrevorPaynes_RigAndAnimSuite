@@ -5,6 +5,7 @@ import sys
 import webbrowser
 
 import pymel.core as pm
+import maya.mel as mel
 
 import Operations
 reload(Operations)
@@ -18,8 +19,14 @@ import Abstracts.Abstract_Operation as absOp
 reload(absOp)
 import Utilities.Logger as log
 reload(log)
+import SceneData.Limb as lmb
+reload(lmb)
 import SceneData.RigRoot as rrt
 reload(rrt)
+import SceneData.DisplayLayers as dl
+reload(dl)
+import SceneData.Group as grp
+reload(grp)
 import SceneData.Behavior_Manager as bMng
 reload(bMng)
 import Data.Rig_Data as rigData
@@ -70,20 +77,10 @@ class PayneFreeRigSuite:
 
 #=========== RIG ROOT ====================================
 
-    def GetRigRoots(self):
-        log.funcFileDebug()
-        return genUtil.GetRigRoots()
-        # return [r for r in pm.ls(tr=1) if r.hasAttr('limbs')]
-
-    def _GetConfig(self):
-        folder = os.path.dirname(__file__)
-        folder = os.path.join(folder, 'Data')
-        filePath = os.path.join(folder, 'Config.json')
-        return genUtil.Json.Load(filePath)
-
     def AddRigRoot(self):
-        rigRoot = rrt.RigRoot.Add()
         config = self._GetConfig()
+        rigRoot = rrt.RigRoot.Add()
+        dl.DisplayLayers.Add()
 
         # Set Defaults
         rigRoot.pfrsName.set(config['rigRootName'])
@@ -102,6 +99,49 @@ class PayneFreeRigSuite:
         self.UpdateRootName(rigRoot)
         self._AddRigRootMaterials(rigRoot)
         return rigRoot
+
+    def RemoveRigRoot(self, rigRoot, deleteJoints, deleteMeshes):
+        log.funcFileDebug()
+        if not deleteJoints:
+            # Remove Limbs
+            for limb in pm.listConnections(rigRoot.limbs):
+                for group in pm.listConnections(limb.jointGroups):
+                    grp.Group.Remove(group)
+                lmb.Limb.Remove(limb)
+
+            jointGroup = pm.listConnections(rigRoot.jointsParentGroup)[0]
+
+            # Remove Joint Groups
+            for joint in pm.listRelatives(jointGroup, ad=1, type='joint'):
+                if not joint.hasAttr('group'):
+                    continue
+                groups = pm.listConnections(joint.group)
+                if not groups:
+                    continue
+                group = groups[0]
+                grp.Group.Remove(group)
+
+            # Reparent Root Joints
+            rootJoints = pm.listRelatives(jointGroup, c=1)
+            pm.parent(rootJoints, w=1)
+
+        if not deleteMeshes:
+            meshGroup = pm.listConnections(rigRoot.meshesParentGroup)[0]
+            meshes = pm.listRelatives(meshGroup, c=1)
+            pm.parent(meshes, w=1)
+        rrt.RigRoot.Remove(rigRoot)
+        dl.DisplayLayers.Remove()
+        mel.eval('hyperShadePanelMenuCommand("hyperShadePanel1", "deleteUnusedNodes");')
+
+    def GetRigRoots(self):
+        log.funcFileDebug()
+        return genUtil.GetRigRoots()
+
+    def _GetConfig(self):
+        folder = os.path.dirname(__file__)
+        folder = os.path.join(folder, 'Data')
+        filePath = os.path.join(folder, 'Config.json')
+        return genUtil.Json.Load(filePath)
 
     def UpdateRootName(self, rigRoot):
         log.funcFileDebug()

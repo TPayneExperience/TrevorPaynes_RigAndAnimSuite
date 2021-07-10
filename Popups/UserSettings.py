@@ -198,7 +198,7 @@ class UserSettings:
 
     def _Setup_RigRootName(self):
         name = self.config['rigRootName']
-        self.rootName_grp = pm.textFieldGrp(l='Rig Root Name', 
+        self.rootName_grp = pm.textFieldGrp(l='Default Rig Root Name', 
                                             adj=1, 
                                             pht='CAT...', 
                                             tcc=self.RootNameChanged, 

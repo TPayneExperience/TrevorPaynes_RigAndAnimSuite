@@ -114,7 +114,6 @@ class MixamoSimple(absBld.Abstract_Autobuild):
             name = j.shortName()
             if namespaceToRemove in name:
                 newName = name.split(namespaceToRemove)[1]
-                print newName
                 pm.rename(j, newName)
 
         # Rename joints

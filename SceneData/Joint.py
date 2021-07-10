@@ -5,8 +5,6 @@ import Utilities.Logger as log
 reload(log)
 import Utilities.General_Utilities as genUtil
 reload(genUtil)
-# import Utilities.Rig_Utilities as rigUtil
-# reload(rigUtil)
 import Data.Rig_Data as rigData
 reload(rigData)
 
@@ -30,7 +28,6 @@ class Joint:
             genUtil.AbstractInitializer(group, 'Group')
             group.groupIndex.set(index)
             pm.disconnectAttr(group.limb)
-            # pm.parent(group, limb)
         else:
             group = grp.Group.AddJointGroup(rigRoot, index, limb, joint)
         pm.connectAttr(limb.jointGroups, group.limb)

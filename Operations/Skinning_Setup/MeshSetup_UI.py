@@ -51,6 +51,8 @@ class MeshSetup_UI(absOpUI.Abstract_OperationUI):
                                                 scc=self.SelectedSkinned,
                                                 elc=self.RenameMesh)
                 with pm.popupMenu():
+                    pm.menuItem(l='Paint Weights Tool', 
+                                            c=self.PaintSkinWeightsTool)
                     self.remove_mi = pm.menuItem(l='Remove Meshes', en=0, 
                                                             c=self.RemoveMeshes)
 
@@ -134,3 +136,7 @@ class MeshSetup_UI(absOpUI.Abstract_OperationUI):
         self.operation.RemoveMeshes(self._selectedSkinned)
         self.PopulateAvailable()
         self.PopulateSkinned()
+
+    def PaintSkinWeightsTool(self, ignore):
+        log.funcFileInfo()
+        self.operation.PaintSkinWeightsTool()

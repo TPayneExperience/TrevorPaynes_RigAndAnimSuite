@@ -127,7 +127,12 @@ def GetSortedJoints(joints):
 #=========== LAYERS ====================================
 
 def SetLayerState(layerName, isVisible, isReference):
-    layer = pm.ls(layerName, type='displayLayer')[0]
+    layers = pm.ls(type='displayLayer')
+    for layer in layers:
+        if layerName in layer.shortName():
+            break
+    else:
+        return
     # Maya Bug: Layer Editor won't refresh buttons
     if isReference:
         layer.displayType.set(2) # 2 = reference, 0 = default

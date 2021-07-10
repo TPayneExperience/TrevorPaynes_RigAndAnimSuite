@@ -28,6 +28,8 @@ import Utilities.General_Utilities as genUtil
 reload(genUtil)
 import Popups.EditRigRoot as edRt
 reload(edRt)
+import Popups.RemoveRig as rmrig
+reload(rmrig)
 import Popups.UserSettings as usr
 reload(usr)
 import Popups.UsefulScripts as usfScr
@@ -92,13 +94,17 @@ class PayneFreeRigSuite_UI:
     def _Setup_MenuBar(self):
         with self.win:
             with pm.menu('File'):
+                pm.menuItem(l='User Settings', c=self.UserSettings_Dialog)
+                pm.menuItem(divider=1)
+                pm.menuItem(l='Close', c=self._CloseWindow)
+
+            with pm.menu('Rig Root'):
                 pm.menuItem(l='New / Update Rig Root', c=self.NewLoadRig)
                 pm.menuItem(l='Edit Rig...', c=self.EditRig_Dialog)
-                pm.menuItem(l='User Settings', c=self.UserSettings_Dialog)
                 pm.menuItem(divider=1)
                 pm.menuItem(l='Export Animation Rig', c=self.ExportAnimationRig)
                 pm.menuItem(divider=1)
-                pm.menuItem(l='Close', c=self._CloseWindow)
+                pm.menuItem(l='Remove Rig Root', c=self.RemoveRigRoot)
                 
             with pm.menu('Help'):
                 pm.menuItem(l='Documentation', c=self.OpenDocumentation)
@@ -254,14 +260,21 @@ class PayneFreeRigSuite_UI:
             return
         self.pfrs.ExportAnimationRig(self._rigRoot, result[0])
 
+    def RemoveRigRoot(self, ignore):
+        log.funcFileInfo()
+        rmrig.RemoveRigRoot(self._rigRoot, self.pfrs)
+        if pm.objExists(str(self._rigRoot)):
+            return
+        self._rigRoot = None
+        pm.frameLayout(self.frame, e=1, en=0)
+
     def OpenDocumentation(self, ignore):
         log.funcFileInfo()
         webbrowser.open(genData.DOC_URL)
 
     def OpenWebsite(self, ignore):
         log.funcFileInfo()
-        # self.logger.debug('\tPFRS_UI > OpenWebsite')
-        webbrowser.open('https://youtu.be/yBLdQ1a4-JI?t=9')
+        webbrowser.open(genData.STORE_URL)
 
     def closeEvent(self):
         log.funcFileInfo()
