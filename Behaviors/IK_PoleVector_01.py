@@ -121,8 +121,8 @@ class IK_PoleVector_01(absBhv.Abstract_Behavior):
 
         # Parent IK Handle to control, PV mid control
         pm.parent(handle, endControl)
-        pm.orientConstraint(endControl, endJoint, mo=1)
         pm.poleVectorConstraint(midControl, handle)
+        pm.orientConstraint(endControl, endJoint, mo=1)
 
         # Joint groups for parenting
         for group in jointGroups:
@@ -167,6 +167,8 @@ class IK_PoleVector_01(absBhv.Abstract_Behavior):
         jointGroups = pm.listConnections(limb.jointGroups)
         jointGroups = rigUtil.SortGroups(jointGroups)
         joints = [pm.listConnections(g.joint)[0] for g in jointGroups]
+        startJoint = joints[0]
+        endJoint = joints[-1]
 
         # Delete ikHandle
         limbGroups = rigUtil.GetLimbGroups(limb, self.groupType)
@@ -176,12 +178,15 @@ class IK_PoleVector_01(absBhv.Abstract_Behavior):
         pm.delete(handle)
 
         # Delete joint constraints
-        pm.delete(pm.listRelatives(joints[0], c=1, type='pointConstraint'))
-        pm.delete(pm.listRelatives(joints[-1], c=1, type='orientConstraint'))
+        pm.delete(pm.listRelatives(startJoint, c=1, type='pointConstraint'))
+        pm.delete(pm.listRelatives(endJoint, c=1, type='orientConstraint'))
         for group in jointGroups:
             cst = pm.listRelatives(group, c=1, type='parentConstraint')
             pm.delete(cst)
         
+        # Remove weird end joint rotations
+        endJoint.r.set(0,0,0)
+
         # Reposition group to second joint
         midGroup = limbGroups[1]
         jointPos = pm.xform(joints[1], q=1, t=1, ws=1)

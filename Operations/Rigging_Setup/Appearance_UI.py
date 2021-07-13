@@ -206,16 +206,17 @@ class Appearance_UI(absOpUI.Abstract_OperationUI):
         self._shapes_om = []
         pm.deleteUI(self.ctrShapes_cl)
         self._controlTemplates = self.operation.GetShapeTemplates(rigRoot)
+
+        # Get Limb Groups Types ('FK', 'IKPV', 'RFK')
         groupTypes = ['Joint']
         for limb in pm.listConnections(rigRoot.limbs):
             for group in pm.listConnections(limb.limbGroups):
                 groupType = group.groupType.get() 
                 if groupType not in groupTypes:
                     groupTypes.append(groupType)
-        # Populate
+
+        # Populate with Option Menues
         with pm.columnLayout(adj=1, p=self.ctrShapes_fl) as self.ctrShapes_cl:
-            # i = 1
-            # for groupType in groupTypes:
             for i in range(len(groupTypes)):
                 groupType = groupTypes[i]
                 label = '\t%s Shape' % groupType
@@ -225,10 +226,12 @@ class Appearance_UI(absOpUI.Abstract_OperationUI):
                                                     i)) as om:
                     attr = '%s.%sShape' % (rigRoot, groupType)
                     curShape = pm.listConnections(attr)[0]
+                    j = 1
                     for shapeName, shape in self._controlTemplates.items():
                         pm.menuItem(l=shapeName)
                         if curShape == shape:
-                            pm.optionMenu(om, e=1, sl=i+1)
+                            pm.optionMenu(om, e=1, sl=j)
+                        j += 1
                 self._shapes_om.append(om)
 
     def SetControlShape(self, groupType, omIndex):

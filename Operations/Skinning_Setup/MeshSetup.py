@@ -3,6 +3,7 @@ import os
 import subprocess
 
 import pymel.core as pm
+import maya.mel as mel
 
 import Abstracts.Abstract_Operation as absOp
 reload(absOp)
@@ -26,7 +27,6 @@ class MeshSetup(absOp.Abstract_Operation):
     controlLayerState = (0, 0)  # isVis, isRef
     jointLayerState = (0, 1)    # isVis, isRef
     meshLayerState = (1, 0)    # isVis, isRef
-
 
     def InitSceneMeshes(self, rigRoot):
         log.funcFileInfo()
@@ -57,5 +57,17 @@ class MeshSetup(absOp.Abstract_Operation):
             msh.Mesh.Remove(mesh)
 
     def PaintSkinWeightsTool(self):
-        import maya.mel as mel
         mel.eval('ArtPaintSkinWeightsTool;')
+    
+    def RebuildSkin(self, mesh):
+        log.funcFileInfo()
+        rigRoot = pm.listConnections(mesh.rigRoot)[0]
+        joints = rigUtil.GetSkinnableRigJoints(rigRoot)
+        backupMesh = pm.listConnections(mesh.backupMesh)[0]
+        backupSkin = pm.skinCluster(joints, backupMesh)
+        meshSkin = mel.eval('findRelatedSkinCluster %s;' % mesh)
+        pm.copySkinWeights( ss=meshSkin, ds=backupSkin, nm=1)
+        pm.skinCluster(mesh, e=1, unbind=1)
+        meshSkin = pm.skinCluster(joints, mesh)
+        pm.copySkinWeights( ss=backupSkin, ds=meshSkin, nm=1)
+

@@ -79,9 +79,25 @@ class Behavior_Manager(object):
 
 #============= SETUP / TEARDOWN RIG ============================
 
+    def _GetBhvSortedLimbs(self, rigRoot):
+        rootLimbs = []
+        allLimbs = []
+        ikLimbs = []
+        for limb in pm.listConnections(rigRoot.limbs):
+            if not pm.listConnections(limb.limbParent):
+                rootLimbs.append(limb)
+        for rootLimb in rootLimbs:
+            for limb in rigUtil.GetLimbCreationOrder(rootLimb):
+                if 'IK' in limb.bhvType.get():
+                    ikLimbs.append(limb)
+                else:
+                    allLimbs.append(limb)
+        allLimbs += ikLimbs
+        return allLimbs
+
     def Setup_Rig(self, rigRoot):
         log.funcFileDebug()
-        limbs = pm.listConnections(rigRoot.limbs)
+        limbs = self._GetBhvSortedLimbs(rigRoot)
 
         # Setup Control Hier
         joints = []
@@ -90,6 +106,8 @@ class Behavior_Manager(object):
             # Parent joint groups to limbs
             limbJoints = pm.listConnections(limb.joints)
             for joint in limbJoints:
+                joint.startPos.set(joint.t.get())
+                joint.startRot.set(joint.r.get())
                 group = pm.listConnections(joint.group)[0]
                 pm.parent(group, limb)
             self._Setup_ControlPivot(limb)
@@ -98,9 +116,9 @@ class Behavior_Manager(object):
             if limb.limbType.get() != 0: # Not Empty
                 joints += limbJoints
             
-        # Skin meshes
-        for mesh in pm.listConnections(rigRoot.meshes):
-            pm.skinCluster(joints, mesh)
+        # # Skin meshes
+        # for mesh in pm.listConnections(rigRoot.meshes):
+        #     pm.skinCluster(joints, mesh)
 
         # Constrain Joints to Controls
         for limb in limbs:
@@ -123,7 +141,7 @@ class Behavior_Manager(object):
 
     def Teardown_Rig(self, rigRoot):
         log.funcFileDebug()
-        limbs = pm.listConnections(rigRoot.limbs)
+        limbs = self._GetBhvSortedLimbs(rigRoot)[::-1]
 
         # Reset Controls
         for limb in limbs:
@@ -155,18 +173,26 @@ class Behavior_Manager(object):
             bhv.Teardown_Rig_Controls(limb)
         
         # Fix Pivots
+        joints = {} # longName : joint
         for limb in limbs:
             for group in pm.listConnections(limb.usedGroups):
                 self._Teardown_ControlPivot(group)
             # Parent joint groups to joint
             for joint in pm.listConnections(limb.joints):
+                joints[joint.longName()] = joint
                 group = pm.listConnections(joint.group)[0]
                 pm.parent(group, joint)
         rigRoot.isBuilt.set(0)
     
-        # Skin meshes
-        for mesh in pm.listConnections(rigRoot.meshes):
-            pm.skinCluster(mesh, e=1, unbind=1)
+        # # Skin meshes
+        # for mesh in pm.listConnections(rigRoot.meshes):
+        #     pm.skinCluster(mesh, e=1, unbind=1)
+        
+        # Reset Joints
+        for name in sorted(list(joints.keys())):
+            joint = joints[name]
+            joint.t.set(joint.startPos.get())
+            joint.r.set(joint.startRot.get())
 
     def _LockHideLimbControls(self, limb):
         log.funcFileDebug()
@@ -254,14 +280,17 @@ class Behavior_Manager(object):
         log.funcFileDebug()
         bhvFile = limb.bhvFile.get()
         bhv = self.bhvs[bhvFile]
-        if bhv.groupMoveable:
-            for group in pm.listConnections(limb.usedGroups):
-                control = pm.listConnections(group.control)[0]
+        for group in pm.listConnections(limb.usedGroups):
+            control = pm.listConnections(group.control)[0]
+            if bhv.groupMoveable:
                 pm.makeIdentity(control, a=1, t=1, r=1, s=1) # Freeze xforms
-                pos = pm.xform(group, q=1, t=1, ws=1)
-                pm.move(pos[0], pos[1], pos[2],         # Move pivot to group
-                            control.scalePivot, 
-                            control.rotatePivot, ws=1)
+            else:
+                pm.makeIdentity(control, a=1, r=1, s=1) # Freeze xforms
+            pos = pm.xform(group, q=1, t=1, ws=1)
+            pm.move(pos[0], pos[1], pos[2],         # Move pivot to group
+                        control.scalePivot, 
+                        control.rotatePivot, ws=1)
+
 
     def _Teardown_ControlPivot(self, group):
         control = pm.listConnections(group.control)[0]

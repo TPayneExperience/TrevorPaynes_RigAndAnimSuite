@@ -36,7 +36,7 @@ class Empty_01(absBhv.Abstract_Behavior):
         limbControl = pm.listConnections(limbGroup.control)[0]
         jointGroup = pm.listConnections(joint.group)[0]
         jointGroup.v.set(0)
-        pm.parent(jointGroup, limbControl)
+        # pm.parent(jointGroup, limbControl)
         
     def CleanupLimb(self, limb):
         log.funcFileDebug()
@@ -54,10 +54,12 @@ class Empty_01(absBhv.Abstract_Behavior):
     
     def Setup_Constraint_JointsToControls(self, limb):
         log.funcFileDebug()
-        group = rigUtil.GetLimbGroups(limb, self.groupType)[0]
+        limbGroup = rigUtil.GetLimbGroups(limb, self.groupType)[0]
         joint = pm.listConnections(limb.joints)[0]
-        control = pm.listConnections(group.control)[0]
+        control = pm.listConnections(limbGroup.control)[0]
         pm.parentConstraint(control, joint)
+        jointGroup = pm.listConnections(joint.group)[0]
+        pm.parent(jointGroup, joint)
     
     def Setup_Constraint_ControlsToXforms(self, limb, 
             xforms, hasPosCst, hasRotCst, hasScaleCst):

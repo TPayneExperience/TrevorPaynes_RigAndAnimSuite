@@ -55,6 +55,9 @@ class MeshSetup_UI(absOpUI.Abstract_OperationUI):
                                             c=self.PaintSkinWeightsTool)
                     self.remove_mi = pm.menuItem(l='Remove Meshes', en=0, 
                                                             c=self.RemoveMeshes)
+                    msg = 'Rebuild Skins (use if joints changed)'
+                    self.rebuild_mi = pm.menuItem(l=msg, 
+                                            c=self.RebuildSkins)
 
 #=========== AVAILABLE ====================================
 
@@ -63,9 +66,12 @@ class MeshSetup_UI(absOpUI.Abstract_OperationUI):
         meshGroup = pm.listConnections(self._rigRoot.meshesParentGroup)[0]
         availableMeshes = pm.listRelatives(meshGroup, c=1)
         skinnedMeshes = pm.listConnections(self._rigRoot.meshes)
+        backupMeshes = [pm.listConnections(m.backupMesh)[0] for m in skinnedMeshes]
         self._allMeshes = {} # name : meshNode
         self._selectedAvailable = []
         for mesh in availableMeshes:
+            if mesh in backupMeshes:
+                continue
             name = mesh.shortName()
             self._allMeshes[name] = mesh
             pm.treeView(self.availableMeshes_tv, e=1, ai=(name, ''))
@@ -122,6 +128,7 @@ class MeshSetup_UI(absOpUI.Abstract_OperationUI):
     def SelectedSkinned(self):
         log.funcFileInfo()
         pm.menuItem(self.remove_mi, e=1, en=0)
+        pm.menuItem(self.rebuild_mi, e=1, en=0)
         self._selectedSkinned = []
         names = pm.treeView(self._skinnedMeshes_tv, q=1, si=1)
         if not names:
@@ -129,6 +136,7 @@ class MeshSetup_UI(absOpUI.Abstract_OperationUI):
             return
         self._selectedSkinned = [self._allMeshes[n] for n in names]
         pm.menuItem(self.remove_mi, e=1, en=1)
+        pm.menuItem(self.rebuild_mi, e=1, en=1)
         pm.select(self._selectedSkinned)
 
     def RemoveMeshes(self, ignore):
@@ -140,3 +148,9 @@ class MeshSetup_UI(absOpUI.Abstract_OperationUI):
     def PaintSkinWeightsTool(self, ignore):
         log.funcFileInfo()
         self.operation.PaintSkinWeightsTool()
+
+    def RebuildSkins(self, ignore):
+        log.funcFileInfo()
+        for mesh in self._selectedSkinned:
+            self.operation.RebuildSkin(mesh)
+

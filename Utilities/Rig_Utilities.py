@@ -123,6 +123,12 @@ def GetSortedJoints(joints):
         temp[joint.longName()] = joint
     return [temp[n] for n in sorted(list(temp.keys()))]
 
+def GetSkinnableRigJoints(rigRoot):
+    joints = []
+    for limb in pm.listConnections(rigRoot.limbs):
+        if limb.limbType.get() != 0: # Not Empty
+            joints += pm.listConnections(limb.joints)
+    return joints
     
 #=========== LAYERS ====================================
 

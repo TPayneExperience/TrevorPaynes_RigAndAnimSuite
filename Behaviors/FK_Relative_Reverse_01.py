@@ -44,12 +44,19 @@ class FK_Relative_01(absBhv.Abstract_Behavior):
         jointGroups = pm.listConnections(limb.jointGroups)
         jointGroups = rigUtil.SortGroups(jointGroups)[::-1]
         controls = []
+
         # Parent control hierarchy
         for i in range(len(jointGroups)-1):
             childGroup = jointGroups[i+1]
             parentCtr = pm.listConnections(jointGroups[i].control)[0]
             pm.parent(childGroup, parentCtr)
             controls.append(parentCtr)
+
+        # Parent Root Joint group to Control
+        childGroup = jointGroups[0]
+        pm.parentConstraint(limbControl, childGroup, mo=1)
+
+        # Bind rotations
         multNode = pm.createNode('multiplyDivide')
         pm.connectAttr(limbControl.rotate, multNode.input1)
         scalar = 1.0/max(len(controls)-2, 1)

@@ -24,6 +24,16 @@ class InitJoint(absInit.Abstract_Initializer):
         pm.addAttr(joint, ln='pfrsName', dt='string', h=hide)
         pm.addAttr(joint, ln='group', dt='string', h=hide)
         
+        # Store pos/rot for Setup/Teardown Rig
+        pm.addAttr(joint, ln='startPos', at='double3', h=hide)
+        pm.addAttr(joint, ln='startPosX', at='double', p='startPos', h=hide)
+        pm.addAttr(joint, ln='startPosY', at='double', p='startPos', h=hide)
+        pm.addAttr(joint, ln='startPosZ', at='double', p='startPos', h=hide)
+        pm.addAttr(joint, ln='startRot', at='double3', h=hide)
+        pm.addAttr(joint, ln='startRotX', at='double', p='startRot', h=hide)
+        pm.addAttr(joint, ln='startRotY', at='double', p='startRot', h=hide)
+        pm.addAttr(joint, ln='startRotZ', at='double', p='startRot', h=hide)
+        
         # SKIN ATTRS
         pm.addAttr(joint, ln='skinAnimStart', at='float', h=hide)
         pm.addAttr(joint, ln='skinAnimEnd', at='float', h=hide)
@@ -31,8 +41,3 @@ class InitJoint(absInit.Abstract_Initializer):
         pm.addAttr(joint, ln='jointColorR', at='float', p='jointColor', h=hide)
         pm.addAttr(joint, ln='jointColorG', at='float', p='jointColor', h=hide)
         pm.addAttr(joint, ln='jointColorB', at='float', p='jointColor', h=hide)
-        # joint.jointColor.set((colors))
-        # colors = list(rigData.JOINT_COLORS[self.colorIndex])
-        # self.colorIndex = (self.colorIndex + 1) % len(rigData.JOINT_COLORS)
-        # shuffle(colors)
-        
