@@ -190,3 +190,5 @@ class IK_Spline_01(absBhv.Abstract_Behavior):
         return True # return if UI is enabled
     
     
+# Copyright (c) 2021 Trevor Payne
+# See user license in "PayneFreeRigSuite\Data\LicenseAgreement.txt"

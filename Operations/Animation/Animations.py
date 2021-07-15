@@ -137,3 +137,6 @@ class Animations(absOp.Abstract_Operation):
         if os.path.isfile(filePath):
             os.remove(filePath)
 
+
+# Copyright (c) 2021 Trevor Payne
+# See user license in "PayneFreeRigSuite\Data\LicenseAgreement.txt"

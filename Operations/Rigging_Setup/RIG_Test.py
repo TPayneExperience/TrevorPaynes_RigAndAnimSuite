@@ -16,3 +16,6 @@ class Test(absOp.Abstract_Operation):
     meshLayerState = (1, 1)    # isVis, isRef
 
 
+
+# Copyright (c) 2021 Trevor Payne
+# See user license in "PayneFreeRigSuite\Data\LicenseAgreement.txt"

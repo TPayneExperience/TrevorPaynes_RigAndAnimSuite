@@ -4,11 +4,17 @@ import inspect
 import os
 import re
 import sys
+import time
 
 import pymel.core as pm
 
+import Plugins.pyperclip as pyCopy
+reload(pyCopy)
+
 import Data.Rig_Data as rigData
 reload(rigData)
+import Data.General_Data as genData
+reload(genData)
 
 import Abstracts.Abstract_Initializer as absInit
 reload(absInit)
@@ -178,3 +184,19 @@ def AbstractInitializer(objectInstance, folder):
 
 def GetRigRoots():
     return [r for r in pm.ls(tr=1) if r.hasAttr('rigMode')]
+
+def IsLicenseValid():
+    return genData.__expiration__ > int(time.strftime('%Y'))
+
+def LicenseWarning():
+    msg = 'This license is no longer valid,'
+    msg += '\nplease download the latest from:'
+    msg += '\n' + genData.STORE_URL
+    pm.confirmDialog(   t='License Expired :(', 
+                        m=msg, 
+                        icon='critical', 
+                        b='Copy URL + Close')
+    pyCopy.copy(genData.STORE_URL)
+    
+# Copyright (c) 2021 Trevor Payne
+# See user license in "PayneFreeRigSuite\Data\LicenseAgreement.txt"

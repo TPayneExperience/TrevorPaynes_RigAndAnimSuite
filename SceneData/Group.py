@@ -76,3 +76,5 @@ class Group:
         # missing remove control??/
         pm.delete(group)
     
+# Copyright (c) 2021 Trevor Payne
+# See user license in "PayneFreeRigSuite\Data\LicenseAgreement.txt"

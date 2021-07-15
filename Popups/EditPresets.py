@@ -92,6 +92,9 @@ class EditPresets:
 
 
 
+# Copyright (c) 2021 Trevor Payne
+# See user license in "PayneFreeRigSuite\Data\LicenseAgreement.txt"
+
 
 
 

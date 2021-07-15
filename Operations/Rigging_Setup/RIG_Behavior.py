@@ -145,3 +145,6 @@ class RIG_Behavior(absOp.Abstract_Operation):
     def SetLimbBehaviorFile(self, limb, bhvFile):
         log.funcFileDebug()
         return self.bhvMng.SetBehavior(limb, bhvFile)
+
+# Copyright (c) 2021 Trevor Payne
+# See user license in "PayneFreeRigSuite\Data\LicenseAgreement.txt"

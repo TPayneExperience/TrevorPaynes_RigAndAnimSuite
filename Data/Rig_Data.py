@@ -90,6 +90,9 @@ JOINT_AIM_UP_VECTORS = ((1, 0, 0),
                         (0, 0, -1))
 
 
+# Copyright (c) 2021 Trevor Payne
+# See user license in "PayneFreeRigSuite\Data\LicenseAgreement.txt"
+
 
 
 

@@ -41,3 +41,6 @@ class InitJoint(absInit.Abstract_Initializer):
         pm.addAttr(joint, ln='jointColorR', at='float', p='jointColor', h=hide)
         pm.addAttr(joint, ln='jointColorG', at='float', p='jointColor', h=hide)
         pm.addAttr(joint, ln='jointColorB', at='float', p='jointColor', h=hide)
+
+# Copyright (c) 2021 Trevor Payne
+# See user license in "PayneFreeRigSuite\Data\LicenseAgreement.txt"

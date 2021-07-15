@@ -260,3 +260,16 @@ def UpdateUsedControlMaterials(rigRoot, limb):
             shape.overrideRGBColors.set(1)
             pm.disconnectAttr(shape.overrideColorRGB)
             pm.connectAttr(mtr.outColor, shape.overrideColorRGB)
+
+
+
+# Copyright (c) 2021 Trevor Payne
+# See user license in "PayneFreeRigSuite\Data\LicenseAgreement.txt"
+
+
+
+
+
+
+
+

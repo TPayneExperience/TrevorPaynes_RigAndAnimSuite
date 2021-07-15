@@ -28,3 +28,6 @@ class InitGroup(absInit.Abstract_Initializer):
 
 
         
+# Copyright (c) 2021 Trevor Payne
+# See user license in "PayneFreeRigSuite\Data\LicenseAgreement.txt"
+    

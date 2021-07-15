@@ -82,3 +82,6 @@ class ANM_Behavior(absOp.Abstract_Operation):
                     if i in keyframes:
                         continue
                     pm.cutKey(controls, t=(i, i))
+                    
+# Copyright (c) 2021 Trevor Payne
+# See user license in "PayneFreeRigSuite\Data\LicenseAgreement.txt"

@@ -13,3 +13,6 @@ def UpdateAnimFolder(rigRoot, currentFilePath):
         rigRoot.animationFolderPath.set(folder)
     if not os.path.isdir(folder):
         os.makedirs(folder)
+
+# Copyright (c) 2021 Trevor Payne
+# See user license in "PayneFreeRigSuite\Data\LicenseAgreement.txt"

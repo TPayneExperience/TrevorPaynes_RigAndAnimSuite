@@ -108,3 +108,5 @@ class Empty_01(absBhv.Abstract_Behavior):
         return False # return if UI is enabled
     
     
+# Copyright (c) 2021 Trevor Payne
+# See user license in "PayneFreeRigSuite\Data\LicenseAgreement.txt"

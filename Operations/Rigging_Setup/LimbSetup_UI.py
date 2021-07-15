@@ -662,3 +662,6 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
 
 
 
+
+# Copyright (c) 2021 Trevor Payne
+# See user license in "PayneFreeRigSuite\Data\LicenseAgreement.txt"

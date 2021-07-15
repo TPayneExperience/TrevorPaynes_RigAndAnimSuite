@@ -297,3 +297,6 @@ class Constraints_UI(absOpUI.Abstract_OperationUI):
         text = 'Target 2: Default Parent'
         pm.text(self.target2_t, e=1, l=text)
         self.PopulateTargetableHier()
+
+# Copyright (c) 2021 Trevor Payne
+# See user license in "PayneFreeRigSuite\Data\LicenseAgreement.txt"

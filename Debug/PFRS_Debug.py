@@ -61,3 +61,6 @@ class PFRS_Debug:
         rigRoot = self.pfrs.AddRigRoot()
         rigRoot.operation.set('Limb Setup')
         
+
+# Copyright (c) 2021 Trevor Payne
+# See user license in "PayneFreeRigSuite\Data\LicenseAgreement.txt"

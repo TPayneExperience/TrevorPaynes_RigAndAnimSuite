@@ -41,4 +41,7 @@ class Mesh:
         pm.disconnectAttr(mesh.rigRoot)
         pm.skinCluster(mesh, e=1, unbind=1)
     
+# Copyright (c) 2021 Trevor Payne
+# See user license in "PayneFreeRigSuite\Data\LicenseAgreement.txt"
+
     

@@ -266,3 +266,5 @@ class Animation_UI(absOpUI.Abstract_OperationUI):
         if any(vals) and limbIDStrs:
             pm.button(self.apply_b, e=1, en=1)
             
+# Copyright (c) 2021 Trevor Payne
+# See user license in "PayneFreeRigSuite\Data\LicenseAgreement.txt"

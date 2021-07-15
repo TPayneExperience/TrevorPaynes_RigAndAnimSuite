@@ -95,3 +95,6 @@ class InitRigRoot(absInit.Abstract_Initializer):
         # controlDL.displayType.set(2)
         # jointDL.displayType.set(2)
         # meshDL.displayType.set(2)
+
+# Copyright (c) 2021 Trevor Payne
+# See user license in "PayneFreeRigSuite\Data\LicenseAgreement.txt"

@@ -275,3 +275,6 @@ class Poses_UI(absOpUI.Abstract_OperationUI):
                                                 self._rigRoot, 
                                                 self._selectedLimbs)
         self.PopulatePoseLibrary()
+
+# Copyright (c) 2021 Trevor Payne
+# See user license in "PayneFreeRigSuite\Data\LicenseAgreement.txt"

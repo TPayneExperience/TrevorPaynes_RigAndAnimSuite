@@ -44,6 +44,10 @@ reload(msh)
 
 class PayneFreeRigSuite:
     def __init__(self):
+        if not genUtil.IsLicenseValid():
+            genUtil.LicenseWarning()
+            return
+
         self.currentRigRoot = None
         self.allRigRoots = []
         self.catOps = {} # {categoryName : {fileName : classObj}}
@@ -312,3 +316,6 @@ class PayneFreeRigSuite:
         endTxt += '='*40
         endTxt += '\n\n'
         log.info(endTxt)
+
+# Copyright (c) 2021 Trevor Payne
+# See user license in "PayneFreeRigSuite\Data\LicenseAgreement.txt"

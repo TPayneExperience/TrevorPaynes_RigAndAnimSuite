@@ -38,3 +38,6 @@ class Share:
         pyCopy.copy(genData.STORE_URL)
         pm.layoutDialog(dis='close')
         
+
+# Copyright (c) 2021 Trevor Payne
+# See user license in "PayneFreeRigSuite\Data\LicenseAgreement.txt"

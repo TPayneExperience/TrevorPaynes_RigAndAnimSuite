@@ -51,3 +51,6 @@ class Updates:
         genUtil.Json.Save(filePath, config)
         pm.layoutDialog(dis='close')
         
+# Copyright (c) 2021 Trevor Payne
+# See user license in "PayneFreeRigSuite\Data\LicenseAgreement.txt"
+

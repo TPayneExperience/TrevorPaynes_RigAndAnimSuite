@@ -273,3 +273,7 @@ class IK_PoleVector_01(absBhv.Abstract_Behavior):
         a = pm.aimConstraint(j2, ikpv2)
         pm.delete(a)
         pm.xform(ikpv2, t=pos2, ws=1)
+
+        
+# Copyright (c) 2021 Trevor Payne
+# See user license in "PayneFreeRigSuite\Data\LicenseAgreement.txt"

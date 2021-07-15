@@ -60,3 +60,6 @@ class PFRS_Debug_UI:
         self.parent.NewLoadRig(1)
         self.parent.InitOptionMenues()
 
+
+# Copyright (c) 2021 Trevor Payne
+# See user license in "PayneFreeRigSuite\Data\LicenseAgreement.txt"

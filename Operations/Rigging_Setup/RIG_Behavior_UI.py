@@ -375,3 +375,6 @@ class RIG_Behavior_UI(absOpUI.Abstract_OperationUI):
             enable = self._currentBhv.Setup_Editable_Limb_UI(limb)
         pm.frameLayout(self.bhvProp_fl, e=1, en=enable)
 
+# Copyright (c) 2021 Trevor Payne
+# See user license in "PayneFreeRigSuite\Data\LicenseAgreement.txt"
+

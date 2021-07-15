@@ -159,3 +159,14 @@ class _CustomFormatter(logging.Formatter):
         t = ct.strftime('%H:%M:%S')
         s = '%s.%02d' % (t, (record.msecs / 10))
         return s
+
+# Copyright (c) 2021 Trevor Payne
+# See user license in "PayneFreeRigSuite\Data\LicenseAgreement.txt"
+
+
+
+
+
+
+
+

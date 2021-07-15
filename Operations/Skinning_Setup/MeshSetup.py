@@ -71,3 +71,6 @@ class MeshSetup(absOp.Abstract_Operation):
         meshSkin = pm.skinCluster(joints, mesh)
         pm.copySkinWeights( ss=backupSkin, ds=meshSkin, nm=1)
 
+
+# Copyright (c) 2021 Trevor Payne
+# See user license in "PayneFreeRigSuite\Data\LicenseAgreement.txt"

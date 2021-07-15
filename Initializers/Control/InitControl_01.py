@@ -22,4 +22,7 @@ class InitControl(absInit.Abstract_Initializer):
         pm.addAttr(control, ln='group', dt='string', h=hide)
 
 
+# Copyright (c) 2021 Trevor Payne
+# See user license in "PayneFreeRigSuite\Data\LicenseAgreement.txt"
+
         

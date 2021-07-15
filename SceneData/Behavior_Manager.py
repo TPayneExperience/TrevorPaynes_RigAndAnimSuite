@@ -455,3 +455,6 @@ class Behavior_Manager(object):
         parent = pm.listRelatives(cstGroup, p=1)[0]
         pm.parent(control, parent)
 
+# Copyright (c) 2021 Trevor Payne
+# See user license in "PayneFreeRigSuite\Data\LicenseAgreement.txt"
+

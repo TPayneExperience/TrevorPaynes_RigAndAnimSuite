@@ -132,3 +132,5 @@ class FK_Relative_01(absBhv.Abstract_Behavior):
     def Setup_Animation_Limb_UI(self, limb):
         return False # return if UI is enabled
     
+# Copyright (c) 2021 Trevor Payne
+# See user license in "PayneFreeRigSuite\Data\LicenseAgreement.txt"

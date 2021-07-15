@@ -29,3 +29,6 @@ class InitPreset(absInit.Abstract_Initializer):
         pm.addAttr(preset, ln='bhvFile', dt='string', h=hide)
         pm.addAttr(preset, ln='bhvType', dt='string', h=hide)
         pm.addAttr(preset, ln='enableLimb', at='bool', h=hide)
+
+# Copyright (c) 2021 Trevor Payne
+# See user license in "PayneFreeRigSuite\Data\LicenseAgreement.txt"

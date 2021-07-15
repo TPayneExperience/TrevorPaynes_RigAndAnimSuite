@@ -96,6 +96,9 @@ class Abstract_Operation:
         rigUtil.SetLayerState(rigData.MESHES_DISP_LAYER, m[0], m[1])
     
 
+# Copyright (c) 2021 Trevor Payne
+# See user license in "PayneFreeRigSuite\Data\LicenseAgreement.txt"
+
 
 
 

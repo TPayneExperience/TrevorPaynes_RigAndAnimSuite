@@ -89,3 +89,8 @@ class Test_UI(absOpUI.Abstract_OperationUI):
             pm.select(control)
         else:
             pm.select(d=1)
+
+
+            
+# Copyright (c) 2021 Trevor Payne
+# See user license in "PayneFreeRigSuite\Data\LicenseAgreement.txt"

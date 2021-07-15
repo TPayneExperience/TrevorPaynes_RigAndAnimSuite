@@ -134,3 +134,6 @@ class LookAt_01(absBhv.Abstract_Behavior):
         control.tx.set(dist)
         control.ty.set(0)
         control.tz.set(0)
+
+# Copyright (c) 2021 Trevor Payne
+# See user license in "PayneFreeRigSuite\Data\LicenseAgreement.txt"

@@ -340,3 +340,6 @@ class UserSettings:
     def Save(self, ignore):
         genUtil.Json.Save(self.filePath, self.config)
         pm.layoutDialog(dis='save')
+
+# Copyright (c) 2021 Trevor Payne
+# See user license in "PayneFreeRigSuite\Data\LicenseAgreement.txt"

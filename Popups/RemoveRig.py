@@ -49,3 +49,6 @@ class RemoveRigRoot:
         self._pfrs.RemoveRigRoot(self._rigRoot, vals[0], vals[1])
         pm.layoutDialog(dis='remove')
         
+
+# Copyright (c) 2021 Trevor Payne
+# See user license in "PayneFreeRigSuite\Data\LicenseAgreement.txt"

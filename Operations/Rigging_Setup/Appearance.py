@@ -117,3 +117,7 @@ class Appearance(absOp.Abstract_Operation):
         limb.channelBoxLimbCtrPos.set(miscTranslate)
         limb.channelBoxLimbCtrRot.set(miscRotate)
         limb.channelBoxLimbCtrScale.set(miscScale)
+
+        
+# Copyright (c) 2021 Trevor Payne
+# See user license in "PayneFreeRigSuite\Data\LicenseAgreement.txt"

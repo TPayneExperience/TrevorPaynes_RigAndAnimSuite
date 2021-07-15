@@ -65,3 +65,5 @@ class Constraints(absOp.Abstract_Operation):
 
         self.bhvMng._SetupConstraintGroup(group)
         
+# Copyright (c) 2021 Trevor Payne
+# See user license in "PayneFreeRigSuite\Data\LicenseAgreement.txt"

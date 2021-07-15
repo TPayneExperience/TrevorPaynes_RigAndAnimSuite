@@ -154,3 +154,6 @@ class MeshSetup_UI(absOpUI.Abstract_OperationUI):
         for mesh in self._selectedSkinned:
             self.operation.RebuildSkin(mesh)
 
+
+# Copyright (c) 2021 Trevor Payne
+# See user license in "PayneFreeRigSuite\Data\LicenseAgreement.txt"

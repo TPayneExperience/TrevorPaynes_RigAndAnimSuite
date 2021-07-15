@@ -116,3 +116,5 @@ class FK_Chain_Reverse_01(absBhv.Abstract_Behavior):
         log.funcFileDebug()
         return False # return if UI is enabled
     
+# Copyright (c) 2021 Trevor Payne
+# See user license in "PayneFreeRigSuite\Data\LicenseAgreement.txt"

@@ -393,3 +393,6 @@ class Poses(absOp.Abstract_Operation):
         #     data = [pos, newRot, scale]
         #     return data
         # return []
+
+# Copyright (c) 2021 Trevor Payne
+# See user license in "PayneFreeRigSuite\Data\LicenseAgreement.txt"

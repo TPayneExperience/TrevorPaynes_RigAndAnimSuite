@@ -50,6 +50,8 @@ reload(debug_ui)
 class PayneFreeRigSuite_UI:
     def __init__(self):
         self.pfrs = pfrs.PayneFreeRigSuite()
+        if not genUtil.IsLicenseValid():
+            return
         
         self.operationNames = []
         self.operations = [] 
