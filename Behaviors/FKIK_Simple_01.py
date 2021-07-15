@@ -11,8 +11,8 @@ reload(genData)
 import Utilities.Logger as log
 reload(log)
 
-class FKIK_01(absBhv.Abstract_Behavior):
-    bhvType = 'FK IK'
+class FKIK_Simple_01(absBhv.Abstract_Behavior):
+    bhvType = 'FK IK - Simple'
     validLimbTypes = (4,) # rigData.LIMB_TYPES
     groupType = 'IKPV'        # LookAt, IKPV...
     groupShape = 'Sphere_Poly'
@@ -91,31 +91,30 @@ class FKIK_01(absBhv.Abstract_Behavior):
 
     def Setup_Rig_Controls(self, limb):
         log.funcFileDebug()
-        # Internal
-        # ------- IK ---------
+        # --------- Internal -----------
+        # Create IK helper display curve
         curve = pm.listConnections(limb.ikpvCurve)[0]
         curve.v.set(1)
 
-        # ------- FK ---------
+        # Inter parent FK groups/Controls
         fkGroups = rigUtil.GetLimbGroups(limb, 'FK')
         for i in range(len(fkGroups)-1):
             group = fkGroups[i+1]
             parentCtr = pm.listConnections(fkGroups[i].control)[0]
             pm.parent(group, parentCtr)
 
-        # External
-        joints = pm.listConnections(limb.joints)
-        joint = rigUtil.GetSortedJoints(joints)[0]
-        
-        # ------- IK ---------
+        # --------- External -----------
+        # Get FK / IK Groups
         limbGroups = rigUtil.GetLimbGroups(limb, self.groupType)
         ikpv1 = limbGroups[0]
         ikpv2 = limbGroups[1]
         ikpv3 = limbGroups[2]
         ikpv1.v.set(0)
-        # ------- FK ---------
         fkGroup = fkGroups[0]
-        # ------- FK + IK Root Parenting ---------
+
+        # Parent FK / IK1 to joint parent, if exists
+        joints = pm.listConnections(limb.joints)
+        joint = rigUtil.GetSortedJoints(joints)[0]
         parentJoints = pm.listRelatives(joint, p=1, type='joint')
         if parentJoints:
             parentJoint = parentJoints[0]
@@ -123,7 +122,8 @@ class FKIK_01(absBhv.Abstract_Behavior):
             parentControl = pm.listConnections(parentGroup.control)[0]
             pm.parentConstraint(parentControl, ikpv1, mo=1)
             pm.parentConstraint(parentControl, fkGroup, mo=1)
-        # ------- IK Other Parenting ---------
+
+        # Parekt IK2 / IK3 to parent control
         ikParentControl = rigUtil.GetParentControl(limb)
         if ikParentControl:
             pm.parentConstraint(ikParentControl, ikpv2, mo=1)
@@ -164,6 +164,7 @@ class FKIK_01(absBhv.Abstract_Behavior):
         pm.pointConstraint(startControl, startJoint)
 
         # Move Mid Group to Mid control position
+        pm.xform(midControl, cp=1)
         pos = pm.xform(midControl, q=1, t=1, ws=1)
         pm.xform(midGroup, t=pos, ws=1)
         rigUtil.ResetAttrs(midControl)
@@ -302,7 +303,13 @@ class FKIK_01(absBhv.Abstract_Behavior):
 
     def Setup_Editable_Limb_UI(self, limb):
         log.funcFileDebug()
-        return False
+        group = rigUtil.GetLimbGroups(limb, self.groupType)[0]
+        with pm.columnLayout(co=('left', -50)):
+            pm.attrControlGrp( l='Control Distance', a=limb.ikpvDistance,
+                                cc=pm.Callback(self._UpdateIKPV2, limb))
+        with pm.columnLayout(co=('left', -100)):
+            pm.attrControlGrp( l='Show Start Control', a=group.v)
+        return True
     
 #============= ANIMATION UI ============================
 

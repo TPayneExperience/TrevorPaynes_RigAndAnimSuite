@@ -54,3 +54,10 @@ class PFRS_Debug:
         rigRoot = self.pfrs.AddRigRoot()
         rigRoot.operation.set('Limb Setup')
         
+    def TailTest(self):
+        self.NewScene()
+        path = os.path.join(self.folder, 'TEST_Tail_01.ma')
+        pm.importFile(path)
+        rigRoot = self.pfrs.AddRigRoot()
+        rigRoot.operation.set('Limb Setup')
+        

@@ -26,6 +26,7 @@ class PFRS_Debug_UI:
                 pm.menuItem(l='Leg Test', c=self.LegTest)
                 pm.menuItem(l='Face Test', c=self.FaceTest)
                 pm.menuItem(l='Spine Test', c=self.SpineTest)
+                pm.menuItem(l='Tail Test', c=self.TailTest)
 
 # ================= TESTS =============================
 
@@ -50,6 +51,12 @@ class PFRS_Debug_UI:
     def SpineTest(self, ignore):
         log.funcFileDebug()
         self.debug.SpineTest()
+        self.parent.NewLoadRig(1)
+        self.parent.InitOptionMenues()
+
+    def TailTest(self, ignore):
+        log.funcFileDebug()
+        self.debug.TailTest()
         self.parent.NewLoadRig(1)
         self.parent.InitOptionMenues()
 

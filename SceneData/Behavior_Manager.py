@@ -99,27 +99,26 @@ class Behavior_Manager(object):
         log.funcFileDebug()
         limbs = self._GetBhvSortedLimbs(rigRoot)
 
-        # Setup Control Hier
+        # Store joint pos/rot + pivot
         joints = []
         for limb in limbs:
-            limb.v.set(limb.enableLimb.get())
-            # Parent joint groups to limbs
-            limbJoints = pm.listConnections(limb.joints)
-            for joint in limbJoints:
+            for joint in pm.listConnections(limb.joints):
                 joint.startPos.set(joint.t.get())
                 joint.startRot.set(joint.r.get())
                 group = pm.listConnections(joint.group)[0]
                 pm.parent(group, limb)
             self._Setup_ControlPivot(limb)
+
+        # Setup Control Hier
+        for limb in limbs:
+            limb.v.set(limb.enableLimb.get())
+            # Parent joint groups to limbs
+            limbJoints = pm.listConnections(limb.joints)
             bhv = self.bhvs[limb.bhvFile.get()]
             bhv.Setup_Rig_Controls(limb)
             if limb.limbType.get() != 0: # Not Empty
                 joints += limbJoints
             
-        # # Skin meshes
-        # for mesh in pm.listConnections(rigRoot.meshes):
-        #     pm.skinCluster(joints, mesh)
-
         # Constrain Joints to Controls
         for limb in limbs:
             bhv = self.bhvs[limb.bhvFile.get()]
@@ -152,13 +151,13 @@ class Behavior_Manager(object):
                 rigUtil.ChannelBoxAttrs(control, 1, 1, 1, 0)
                 rigUtil.ResetAttrs(control)
 
-        # Constrain Controls to Controls
+        # Teardown control constraints
         for limb in limbs:
             for group in pm.listConnections(limb.usedGroups):
                 for cstGroup in pm.listConnections(group.constraintGroups):
                     self._TeardownConstraintGroup(cstGroup)
 
-        # Joint Constraints
+        # Teardown Joint Constraints
         pm.refresh()
         for limb in limbs:
             bhvFile = limb.bhvFile.get()
@@ -184,10 +183,6 @@ class Behavior_Manager(object):
                 pm.parent(group, joint)
         rigRoot.isBuilt.set(0)
     
-        # # Skin meshes
-        # for mesh in pm.listConnections(rigRoot.meshes):
-        #     pm.skinCluster(mesh, e=1, unbind=1)
-        
         # Reset Joints
         for name in sorted(list(joints.keys())):
             joint = joints[name]
@@ -291,7 +286,6 @@ class Behavior_Manager(object):
                         control.scalePivot, 
                         control.rotatePivot, ws=1)
 
-
     def _Teardown_ControlPivot(self, group):
         control = pm.listConnections(group.control)[0]
         pm.xform(control, cp=1) # Re-center pivots
@@ -319,7 +313,7 @@ class Behavior_Manager(object):
             if uiOrderIndex in orderedFiles:
                 msg = 'All behavior uiOrderIndex values must be unique!'
                 msg += '\n"%s" conflicting with ' % bhv.bhvType
-                msg += '"%s"' % orderedFiles[uiOrderIndex].bhvType
+                msg += '"%s"' % orderedFiles[uiOrderIndex]
                 raise ValueError(msg)
             if limbType in bhv.validLimbTypes:
                 orderedFiles[uiOrderIndex] = bhvFile
@@ -452,13 +446,9 @@ class Behavior_Manager(object):
         pm.connectAttr(cstGroup.cstWeight, attr2)
 
     def _TeardownConstraintGroup(self, cstGroup):
-        # Delete cst + invert node
-        # weight = cstGroup.cstWeight.get()
-        # cstGroup.cstWeight.set(0)
         pm.delete(pm.listRelatives(cstGroup, c=1, type='constraint'))
         rigUtil.ResetAttrs(cstGroup)
         pm.delete(pm.listConnections(cstGroup.cstWeight))
-        # cstGroup.cstWeight.set(weight)
         
         limbGroup = pm.listConnections(cstGroup.limbGroup)[0]
         control = pm.listConnections(limbGroup.control)[0]
