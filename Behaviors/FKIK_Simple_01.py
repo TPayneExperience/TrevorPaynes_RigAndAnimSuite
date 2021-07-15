@@ -105,12 +105,19 @@ class FKIK_Simple_01(absBhv.Abstract_Behavior):
 
         # --------- External -----------
         # Get FK / IK Groups
-        limbGroups = rigUtil.GetLimbGroups(limb, self.groupType)
-        ikpv1 = limbGroups[0]
-        ikpv2 = limbGroups[1]
-        ikpv3 = limbGroups[2]
-        ikpv1.v.set(0)
+        ikpvGroups = rigUtil.GetLimbGroups(limb, self.groupType)
+        ikpvGroup1 = ikpvGroups[0]
+        ikpvGroup2 = ikpvGroups[1]
+        ikpvGroup3 = ikpvGroups[2]
+        ikpvGroup1.v.set(0)
         fkGroup = fkGroups[0]
+
+        # Move Mid Group to Mid control position
+        ikpvControl2 = pm.listConnections(ikpvGroup2.control)[0]
+        pm.xform(ikpvControl2, cp=1)
+        pos = pm.xform(ikpvControl2, q=1, t=1, ws=1)
+        pm.xform(ikpvGroup2, t=pos, ws=1)
+        rigUtil.ResetAttrs(ikpvControl2)
 
         # Parent FK / IK1 to joint parent, if exists
         joints = pm.listConnections(limb.joints)
@@ -120,14 +127,14 @@ class FKIK_Simple_01(absBhv.Abstract_Behavior):
             parentJoint = parentJoints[0]
             parentGroup = pm.listConnections(parentJoint.group)[0]
             parentControl = pm.listConnections(parentGroup.control)[0]
-            pm.parentConstraint(parentControl, ikpv1, mo=1)
+            pm.parentConstraint(parentControl, ikpvGroup1, mo=1)
             pm.parentConstraint(parentControl, fkGroup, mo=1)
 
         # Parekt IK2 / IK3 to parent control
         ikParentControl = rigUtil.GetParentControl(limb)
         if ikParentControl:
-            pm.parentConstraint(ikParentControl, ikpv2, mo=1)
-            pm.parentConstraint(ikParentControl, ikpv3, mo=1)
+            pm.parentConstraint(ikParentControl, ikpvGroup2, mo=1)
+            pm.parentConstraint(ikParentControl, ikpvGroup3, mo=1)
         
     def Setup_Constraint_JointsToControls(self, limb):
         log.funcFileDebug()
@@ -163,11 +170,11 @@ class FKIK_Simple_01(absBhv.Abstract_Behavior):
         # point cst start joint to control
         pm.pointConstraint(startControl, startJoint)
 
-        # Move Mid Group to Mid control position
-        pm.xform(midControl, cp=1)
-        pos = pm.xform(midControl, q=1, t=1, ws=1)
-        pm.xform(midGroup, t=pos, ws=1)
-        rigUtil.ResetAttrs(midControl)
+        # # Move Mid Group to Mid control position
+        # pm.xform(midControl, cp=1)
+        # pos = pm.xform(midControl, q=1, t=1, ws=1)
+        # pm.xform(midGroup, t=pos, ws=1)
+        # rigUtil.ResetAttrs(midControl)
 
         # Parent IK Handle to control, PV mid control
         pm.parent(handle, endControl)

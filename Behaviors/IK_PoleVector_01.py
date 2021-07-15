@@ -70,13 +70,25 @@ class IK_PoleVector_01(absBhv.Abstract_Behavior):
 
     def Setup_Rig_Controls(self, limb):
         log.funcFileDebug()
+        # Create IK helper display curve
         curve = pm.listConnections(limb.ikpvCurve)[0]
         curve.v.set(1)
-        limbGroups = rigUtil.GetLimbGroups(limb, self.groupType)
-        ikpv1 = limbGroups[0]
-        ikpv2 = limbGroups[1]
-        ikpv3 = limbGroups[2]
-        ikpv1.v.set(0)
+
+        # Get Groups
+        ikpvGroups = rigUtil.GetLimbGroups(limb, self.groupType)
+        ikpvGroup1 = ikpvGroups[0]
+        ikpvGroup2 = ikpvGroups[1]
+        ikpvGroup3 = ikpvGroups[2]
+        ikpvGroup1.v.set(0)
+        
+        # Move Mid Group to Mid control position
+        ikpvControl2 = pm.listConnections(ikpvGroup2.control)[0]
+        pm.xform(ikpvControl2, cp=1)
+        pos = pm.xform(ikpvControl2, q=1, t=1, ws=1)
+        pm.xform(ikpvGroup2, t=pos, ws=1)
+        rigUtil.ResetAttrs(ikpvControl2)
+
+        # Parent IK Group 1
         joints = pm.listConnections(limb.joints)
         joint = rigUtil.GetSortedJoints(joints)[0]
         parentJoints = pm.listRelatives(joint, p=1, type='joint')
@@ -84,11 +96,13 @@ class IK_PoleVector_01(absBhv.Abstract_Behavior):
             parentJoint = parentJoints[0]
             parentGroup = pm.listConnections(parentJoint.group)[0]
             parentControl = pm.listConnections(parentGroup.control)[0]
-            pm.parentConstraint(parentControl, ikpv1, mo=1)
+            pm.parentConstraint(parentControl, ikpvGroup1, mo=1)
+        
+        # Parent IK Group 2/3
         parentControl = rigUtil.GetParentControl(limb)
         if parentControl:
-            pm.parentConstraint(parentControl, ikpv2, mo=1)
-            pm.parentConstraint(parentControl, ikpv3, mo=1)
+            pm.parentConstraint(parentControl, ikpvGroup2, mo=1)
+            pm.parentConstraint(parentControl, ikpvGroup3, mo=1)
     
     def Setup_Constraint_JointsToControls(self, limb):
         log.funcFileDebug()
@@ -103,26 +117,27 @@ class IK_PoleVector_01(absBhv.Abstract_Behavior):
         handle.v.set(0)
 
         # IK Groups + Controls
-        groups = rigUtil.GetLimbGroups(limb, self.groupType)
-        startGroup = groups[0]
-        midGroup = groups[1]
-        endGroup = groups[2]
-        startControl = pm.listConnections(startGroup.control)[0]
-        midControl = pm.listConnections(midGroup.control)[0]
-        endControl = pm.listConnections(endGroup.control)[0]
+        ikpvGroups = rigUtil.GetLimbGroups(limb, self.groupType)
+        ikpvGroup1 = ikpvGroups[0]
+        ikpvGroup2 = ikpvGroups[1]
+        ikpvGroup3 = ikpvGroups[2]
+        ikpvControl1 = pm.listConnections(ikpvGroup1.control)[0]
+        ikpvControl2 = pm.listConnections(ikpvGroup2.control)[0]
+        ikpvControl3 = pm.listConnections(ikpvGroup3.control)[0]
 
         # point cst start joint to control
-        pm.pointConstraint(startControl, startJoint)
+        pm.pointConstraint(ikpvControl1, startJoint)
 
-        # Move Mid Group to Mid control position
-        pos = pm.xform(midControl, q=1, t=1, ws=1)
-        pm.xform(midGroup, t=pos, ws=1)
-        rigUtil.ResetAttrs(midControl)
+        # # Move Mid Group to Mid control position
+        # pm.xform(midControl, cp=1)
+        # pos = pm.xform(midControl, q=1, t=1, ws=1)
+        # pm.xform(midGroup, t=pos, ws=1)
+        # rigUtil.ResetAttrs(midControl)
 
         # Parent IK Handle to control, PV mid control
-        pm.parent(handle, endControl)
-        pm.poleVectorConstraint(midControl, handle)
-        pm.orientConstraint(endControl, endJoint, mo=1)
+        pm.parent(handle, ikpvControl3)
+        pm.poleVectorConstraint(ikpvControl2, handle)
+        pm.orientConstraint(ikpvControl3, endJoint, mo=1)
 
         # Joint groups for parenting
         for group in jointGroups:

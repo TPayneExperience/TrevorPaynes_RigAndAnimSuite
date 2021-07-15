@@ -61,7 +61,7 @@ class FK_Relative_01(absBhv.Abstract_Behavior):
         pm.connectAttr(limbControl.rotate, multNode.input1)
         scalar = 1.0/max(len(controls)-2, 1)
         multNode.input2.set(scalar, scalar, scalar)
-        for childControl in controls: #controls[1:]:
+        for childControl in controls[1:]:
             pm.connectAttr(multNode.output, childControl.rotate)
         
         # External
