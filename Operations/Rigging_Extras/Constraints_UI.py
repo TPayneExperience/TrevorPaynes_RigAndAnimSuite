@@ -68,7 +68,7 @@ class Constraints_UI(absOpUI.Abstract_OperationUI):
                                                     c=self.SetAsTarget2,
                                                     en=0)
                     pm.menuItem(l='Reset Target 2', c=self.ResetTarget2)
-            with pm.frameLayout('Targetable Attach Points (Coming v2.0)', bv=1, en=0):
+            with pm.frameLayout('Targetable Attach Points (Coming Beta)', bv=1, en=0):
                 self.attach_tv = pm.treeView(arp=0, adr=0, ams=0,
                                             elc=self.IgnoreRename)
         with pm.verticalLayout():

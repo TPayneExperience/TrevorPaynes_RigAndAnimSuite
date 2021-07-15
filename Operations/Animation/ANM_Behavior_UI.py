@@ -23,6 +23,9 @@ class ANM_Behavior_UI(absOpUI.Abstract_OperationUI):
         self._Setup()
         self._rigRoot = rigRoot
         self._allRigRoots = allRigRoots
+        self._presetsUI = []
+        self._selectedLimbs = []
+        self._currentBhv = None # for verifying group selection
         self.PopulateLimbHier()
         self.PopulatePresets()
         

@@ -66,7 +66,7 @@ class Appearance_UI(absOpUI.Abstract_OperationUI):
                                             elc=self.IgnoreRename)
                 pm.treeView(self.control_tv, e=1, scc=self.SelectedControl)
         with pm.verticalLayout():
-            with pm.frameLayout('Set Control Channelboxes (see tooltips)', bv=1, en=0) as self.limbProp_fl:
+            with pm.frameLayout('Control Channelboxes (see tooltips)', bv=1, en=0) as self.limbProp_fl:
                 with pm.columnLayout(co=('left', -100)) as self.appLimbLockHide_cl:
                     msg = 'Joint = FK Chain + Reverse, FK Branch Controls'
                     self.jointPos = pm.attrControlGrp(l='Joint Translate', ann=msg,
@@ -82,7 +82,7 @@ class Appearance_UI(absOpUI.Abstract_OperationUI):
                                                     a='perspShape.shakeEnabled')
                     self._limbScale = pm.attrControlGrp(l='Limb Scale', ann=msg,
                                                     a='perspShape.shakeEnabled')
-            with pm.frameLayout('Set Control Colors', bv=1, en=0) as self.mtr_fl:
+            with pm.frameLayout('Control Colors', bv=1, en=0) as self.mtr_fl:
                 with pm.columnLayout(adj=1):
                     self.clrL_cg = pm.attrColorSliderGrp(l='L Color', cw4=(66,44,44,22),
                                                     at='perspShape.backgroundColor')
@@ -97,7 +97,7 @@ class Appearance_UI(absOpUI.Abstract_OperationUI):
                     self.opR_cg = pm.attrColorSliderGrp(l='R Opacity', cw4=(66,44,44,22),
                                                     at='perspShape.backgroundColor')
                     
-            with pm.frameLayout('Set Control Shapes', bv=1, en=0) as self.ctrShapes_fl:
+            with pm.frameLayout('Control Shapes', bv=1, en=0) as self.ctrShapes_fl:
                 self.ctrShapes_cl = pm.columnLayout(adj=1)
 
 #=========== LIMB HIER ====================================

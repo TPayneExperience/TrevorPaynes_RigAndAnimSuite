@@ -1,4 +1,6 @@
 
+import os
+
 import pymel.core as pm
 
 import Abstracts.Abstract_Operation as absOp
@@ -7,6 +9,8 @@ import Utilities.Logger as log
 reload(log)
 import Operations.Rigging_Setup.RIG_Behavior as rigBhv
 reload(rigBhv)
+import Utilities.General_Utilities as genUtil
+reload(genUtil)
 
 class ANM_Behavior(absOp.Abstract_Operation):
     isRigBuilt = True
@@ -21,6 +25,14 @@ class ANM_Behavior(absOp.Abstract_Operation):
 
     def ApplyPreset(self, rigRoot, presetID, keyframesOnly=True):
         log.funcFileDebug()
+        folder = os.path.dirname(__file__)
+        folder = os.path.dirname(folder)
+        folder = os.path.dirname(folder)
+        folder = os.path.join(folder, 'Data')
+        filePath = os.path.join(folder, 'Config.json')
+        config = genUtil.Json.Load(filePath)
+        scl = config['useScaleConstraints']
+
         self._rigBhv.bhvMng = self.bhvMng
         allPresets = pm.listConnections(rigRoot.presets)
         presets = [p for p in allPresets if p.ID.get() == presetID]
@@ -28,7 +40,7 @@ class ANM_Behavior(absOp.Abstract_Operation):
         start = int(pm.playbackOptions(q=1, ast=1))
         end = int(pm.playbackOptions(q=1, aet=1))
         
-        # keyframe data
+        # Get Specific keyframes
         if keyframesOnly:
             for limb in limbs:
                 groups = pm.listConnections(limb.usedGroups)
@@ -46,7 +58,9 @@ class ANM_Behavior(absOp.Abstract_Operation):
                     keyframes = [str(k) for k in keyframes]
                     limb.controlKeyframes.set(':'.join(keyframes))
 
-        self.bhvMng.Teardown_Anim_Rig(rigRoot)
+        self.bhvMng.SetupAnimJoints(rigRoot)
+        rigRoot.hasAnimJoints.set(1)
+        self.bhvMng.Teardown_Rig(rigRoot)
 
         # Assign new Behaviors + new parents
         log.debug('Assign New Behaviors')
@@ -65,7 +79,11 @@ class ANM_Behavior(absOp.Abstract_Operation):
                 if limb.hasKeys.get():
                     limb.bakeExternal.set(True)
 
-        self.bhvMng.Setup_Anim_Rig(rigRoot)
+        self.bhvMng.Setup_Rig(rigRoot)
+        self.bhvMng.ApplyAnimJoints(limbs, 1, 1, scl)
+        for limb in pm.listConnections(rigRoot.limbs):
+            self.bhvMng.TeardownAnimJoints(limb)
+        rigRoot.hasAnimJoints.set(0)
 
         if keyframesOnly:
             for limb in limbs:
