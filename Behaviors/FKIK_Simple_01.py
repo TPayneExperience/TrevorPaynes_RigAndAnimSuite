@@ -31,61 +31,82 @@ class FKIK_Simple_01(absBhv.Abstract_Behavior):
                                 k=1, h=genData.HIDE_ATTRS)
             pm.addAttr(limb, ln='fkJoints', dt='string')
             pm.addAttr(limb, ln='ikJoints', dt='string')
-        # FK, Not Needed
+        joints = pm.listConnections(limb.joints)
+        joints = rigUtil.GetSortedJoints(joints)
 
-        # IK
-        if not limb.hasAttr('ikpvDistance'):
+        # FK, Reposition to Joints
+        fkGroups = rigUtil.GetLimbGroups(limb, 'FK')
+        for i in range(len(joints)):
+            joint = joints[i]
+            fkGroup = fkGroups[i]
+            pm.parent(fkGroup, joint)
+            rigUtil.ResetAttrs(fkGroup)
+            pm.parent(fkGroup, limb)
+
+        # IK, Create attrs
+        if limb.hasAttr('ikpvDistance'):
+            pm.delete(pm.listConnections(limb.ikpvCurve))
+            pm.delete(pm.listConnections(limb.ikpvClusters))
+        else:
             pm.addAttr(limb, ln='ikpvDistance', at='float', 
                                                 min=0, dv=10)
             pm.addAttr(limb, ln='ikpvCurve', dt='string')
-        joints = pm.listConnections(limb.joints)
-        joints = rigUtil.GetSortedJoints(joints)
-        limbGroups = rigUtil.GetLimbGroups(limb, self.groupType)
-        for limbGroup in limbGroups:
+            pm.addAttr(limb, ln='ikpvClusters', dt='string')
+
+        # Turn off IK Vis
+        ikpvGroups = rigUtil.GetLimbGroups(limb, self.groupType)
+        for limbGroup in ikpvGroups:
             limbGroup.v.set(0)
-        ikpv1 = limbGroups[0]
-        ikpv2 = limbGroups[1]
-        ikpv3 = limbGroups[2]
+        ikpvGroup1 = ikpvGroups[0]
+        ikpvGroup2 = ikpvGroups[1]
+        ikpvGroup3 = ikpvGroups[2]
         jointCount = len(joints)
 
         # Avoid index conflict with fk groups
-        ikpv1.groupIndex.set(jointCount)
-        ikpv2.groupIndex.set(jointCount+1)
-        ikpv3.groupIndex.set(jointCount+2)
+        ikpvGroup1.groupIndex.set(jointCount)
+        ikpvGroup2.groupIndex.set(jointCount+1)
+        ikpvGroup3.groupIndex.set(jointCount+2)
 
-        pm.parent(ikpv1, joints[0])
-        rigUtil.ResetAttrs(ikpv1)
-        pm.parent(ikpv1, limb)
-        pm.parent(ikpv3, joints[-1])
-        rigUtil.ResetAttrs(ikpv3)
-        pm.parent(ikpv3, limb)
-        self._InitIKPV2(limb, ikpv2)
+        # Position IK Groups
+        pm.parent(ikpvGroup1, joints[0])
+        rigUtil.ResetAttrs(ikpvGroup1)
+        pm.parent(ikpvGroup1, limb)
+        pm.parent(ikpvGroup3, joints[-1])
+        rigUtil.ResetAttrs(ikpvGroup3)
+        pm.parent(ikpvGroup3, limb)
+        self._InitIKPV2(limb, ikpvGroup2)
         self._UpdateIKPV2(limb)
-        if not pm.listConnections(limb.ikpvCurve):
-            curve = pm.curve(d=1, p=((0,0,0), (1,0,0)), k=(0, 1))
-            cluster1 = pm.cluster(curve.cv[0])
-            cluster2 = pm.cluster(curve.cv[1])
-            xform1 = cluster1[1]
-            xform2 = cluster2[1]
-            control = pm.listConnections(ikpv2.control)[0]
-            pm.parent(xform1, xform2, curve, limb)
-            pm.parentConstraint(control, xform1)
-            pm.parentConstraint(joints[1], xform2)
 
-            # Curve Cleanup
-            curve.template.set(1)
-            pm.addAttr(curve, ln='limb', dt='string')
-            pm.connectAttr(limb.ikpvCurve, curve.limb)
-            curve.v.set(0)
-            xform1.v.set(0)
-            xform2.v.set(0)
-            pm.select(d=1)
+        # Create IKPV2 Display/helper curve
+        curve = pm.curve(d=1, p=((0,0,0), (1,0,0)), k=(0, 1))
+        cluster1 = pm.cluster(curve.cv[0])
+        cluster2 = pm.cluster(curve.cv[1])
+        xform1 = cluster1[1]
+        xform2 = cluster2[1]
+        control = pm.listConnections(ikpvGroup2.control)[0]
+        pm.parent(xform1, xform2, curve, limb)
+        pm.parentConstraint(control, xform1)
+        pm.parentConstraint(joints[1], xform2)
+
+        # Curve Cleanup
+        curve.template.set(1)
+        pm.addAttr(curve, ln='limb', dt='string')
+        pm.addAttr(xform1, ln='limb', dt='string')
+        pm.addAttr(xform2, ln='limb', dt='string')
+        pm.connectAttr(limb.ikpvCurve, curve.limb)
+        pm.connectAttr(limb.ikpvClusters, xform1.limb)
+        pm.connectAttr(limb.ikpvClusters, xform2.limb)
+        curve.v.set(0)
+        xform1.v.set(0)
+        xform2.v.set(0)
+        pm.select(d=1)
         
     def CleanupLimb(self, limb):
         log.funcFileDebug()
         # FK Not Needed
         # IK
         pm.delete(pm.listConnections(limb.ikpvCurve))
+        pm.delete(pm.listConnections(limb.ikpvClusters))
     
 #============= SETUP ============================
 
@@ -159,22 +180,16 @@ class FKIK_Simple_01(absBhv.Abstract_Behavior):
         handle.v.set(0)
 
         # IK Groups + Controls
-        ikGroups = rigUtil.GetLimbGroups(limb, self.groupType)
-        startGroup = ikGroups[0]
-        midGroup = ikGroups[1]
-        endGroup = ikGroups[2]
-        startControl = pm.listConnections(startGroup.control)[0]
-        midControl = pm.listConnections(midGroup.control)[0]
-        endControl = pm.listConnections(endGroup.control)[0]
+        ikpvGroups = rigUtil.GetLimbGroups(limb, self.groupType)
+        ikpvGroup1 = ikpvGroups[0]
+        ikpvGroup2 = ikpvGroups[1]
+        ikpvGroup3 = ikpvGroups[2]
+        startControl = pm.listConnections(ikpvGroup1.control)[0]
+        midControl = pm.listConnections(ikpvGroup2.control)[0]
+        endControl = pm.listConnections(ikpvGroup3.control)[0]
 
         # point cst start joint to control
         pm.pointConstraint(startControl, startJoint)
-
-        # # Move Mid Group to Mid control position
-        # pm.xform(midControl, cp=1)
-        # pos = pm.xform(midControl, q=1, t=1, ws=1)
-        # pm.xform(midGroup, t=pos, ws=1)
-        # rigUtil.ResetAttrs(midControl)
 
         # Parent IK Handle to control, PV mid control
         pm.parent(handle, endControl)
@@ -207,7 +222,7 @@ class FKIK_Simple_01(absBhv.Abstract_Behavior):
         ikJoints[0].v.set(0)
         for group in fkGroups:
             pm.connectAttr(invertNode.output1D, group.v)
-        for group in ikGroups:
+        for group in ikpvGroups:
             pm.connectAttr(limb.fkik, group.v)
         curve = pm.listConnections(limb.ikpvCurve)[0]
         pm.connectAttr(limb.fkik, curve.v)
@@ -261,17 +276,20 @@ class FKIK_Simple_01(absBhv.Abstract_Behavior):
         # ------- FK ---------
         fkGroups = rigUtil.GetLimbGroups(limb, 'FK')
         pm.parent(fkGroups[1:], limb)
+        for fkGroup in fkGroups:
+            fkGroup.v.set(1)
 
         # EXTERNAL
 
         # ------- IK ---------
-        if pm.listConnections(limb.limbParent):
-            ikGroups = rigUtil.GetLimbGroups(limb, self.groupType)
-            for group in ikGroups:
-                pm.delete(pm.listRelatives(group, c=1, type='constraint'))
+        ikGroups = rigUtil.GetLimbGroups(limb, self.groupType)
+        for group in ikGroups:
+            pm.delete(pm.listRelatives(group, c=1, type='constraint'))
+            group.v.set(1)
                 
         # ------- FK ---------
-            pm.delete(pm.listRelatives(fkGroups[0], c=1, type='constraint'))
+        fkGroup = fkGroups[0]
+        pm.delete(pm.listRelatives(fkGroup, c=1, type='constraint'))
 
     def Teardown_Constraint_JointsToControls(self, limb):
         log.funcFileDebug()
@@ -291,6 +309,11 @@ class FKIK_Simple_01(absBhv.Abstract_Behavior):
         pm.delete(pm.listConnections(limb.fkJoints))
         pm.delete(pm.listConnections(limb.ikJoints))
         pm.disconnectAttr(limb.fkik)
+
+        # ------- Joint Groups ---------
+        jointGroups = [pm.listConnections(j.group)[0] for j in joints]
+        for jointGroup in jointGroups:
+            pm.delete(pm.listRelatives(jointGroup, c=1, type='constraint'))
     
     def Teardown_Constraint_ControlsToXforms(self, limb):
         log.funcFileDebug()

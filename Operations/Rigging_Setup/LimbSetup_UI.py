@@ -40,17 +40,20 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
         self.operation.InitAutobuilders()
         self._rigRoot = rigRoot
         self._allRigRoots = allRigRoots
-        self._Setup()
         self._limbFunc = None
         self._selectedSceneJoints = []
         self._limbJoints = {}
         self._limbIDs = {} # limbID : limb
         self._selectedLimbs = []
         self._autobuild_mis = []
+        self._Setup()
         self.Refresh(0)
     
     def Teardown_UI(self, rigRoot, allRigRoots):
-        pass
+        for limb in pm.listConnections(self._rigRoot.limbs):
+            bhvFile = limb.bhvFile.get()
+            bhv = self.operation.bhvMng.bhvs[bhvFile]
+            bhv.InitLimb(limb)
     
 #=========== SETUP UI ====================================
 
@@ -68,6 +71,8 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
                                             c=pm.Callback(self.operation.JointTool))
                     self.add_mi = pm.menuItem(l='Add Joint Limb', 
                                             en=0, c=self.AddJointLimb)
+                    self.rebuildSkins_mi = pm.menuItem(l='Rebuild Skins', 
+                                            en=0, c=self.RebuildSkins)
                     pm.menuItem(l='AUTOBUILD LIMBS', d=1)
                     order = {}
                     for name, bld in self.operation._autobuilders.items():
@@ -163,7 +168,8 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
                 tt += '\nDouble Click to RENAME'
                 self.joint_tv = pm.treeView(ams=0, arp=0, ann=tt)
                 pm.treeView(self.joint_tv, e=1, dad=self.ReorderJoints,
-                                                elc=self.RenameJoint)
+                                                elc=self.RenameJoint,
+                                                scc=self.SelectedJointHierJoint)
 
 #=========== SCENE HIER ====================================
 
@@ -288,6 +294,10 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
         self.operation.ReparentJoint(self._rigRoot, child, parent)
         self.Refresh(0)
     
+    def RebuildSkins(self, ignore):
+        log.funcFileInfo()
+        self.operation.RebuildSkins(self._rigRoot)
+
 #=========== LIMB HIER ====================================
 
     def PopulateLimbHier(self, selectLimb=None):
@@ -615,6 +625,15 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
             index = str(group.groupIndex.get())
             pm.treeView(self.joint_tv, e=1, si=(index, 1))
         
+    def SelectedJointHierJoint(self):
+        log.funcFileInfo()
+        jointIDs = pm.treeView(self.joint_tv, q=1, selectItem=1)
+        if not jointIDs:
+            return
+        jointID = jointIDs[0]
+        joint = self._limbJoints[jointID]
+        pm.select(joint)
+    
     def ReorderJoints(self, limbIDsStr, oldParents, i2, newParentIDStr, i3, i4, i5):
         log.funcFileInfo()
         limb = self._selectedLimbs[0]

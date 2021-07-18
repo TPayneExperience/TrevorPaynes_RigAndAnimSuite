@@ -118,7 +118,7 @@ class Behavior_Manager(object):
             bhv.Setup_Rig_Controls(limb)
             if limb.limbType.get() != 0: # Not Empty
                 joints += limbJoints
-            
+
         # Constrain Joints to Controls
         for limb in limbs:
             bhv = self.bhvs[limb.bhvFile.get()]
@@ -127,11 +127,13 @@ class Behavior_Manager(object):
                 rigUtil.Setup_ControllersToParent(limb)
             else:
                 rigUtil.Setup_ControllersGroup(limb)
+
         # Constrain Controls to Controls
         for limb in limbs:
             for group in pm.listConnections(limb.usedGroups):
                 for cstGroup in pm.listConnections(group.constraintGroups):
                     self._SetupConstraintGroup(cstGroup)
+
         # Lock hide channelbox + joint list
         for limb in limbs:
             self._LockHideLimbControls(limb)

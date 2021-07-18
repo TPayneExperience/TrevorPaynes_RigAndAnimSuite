@@ -29,6 +29,8 @@ import Abstracts.Abstract_Autobuild as absBld
 reload(absBld)
 import SceneData.Preset as pst
 reload(pst)
+import Operations.Skinning_Setup.MeshSetup as msh
+reload(msh)
 
 class LimbSetup(absOp.Abstract_Operation):
     isRigBuilt = False
@@ -115,103 +117,127 @@ class LimbSetup(absOp.Abstract_Operation):
         return limb
 
     def DuplicateLimbs(self, limbs):
-        oldNewLimbs = {}
-        oldNewJoints = {}
-        oldNewPresetIDs = {}
-        oldNewPresets = {}
+        # oldNewLimbs = {}
+        # oldNewJoints = {}
+        # oldNewPresetIDs = {}
+        # oldNewPresets = {}
         newLimbs = []
+        rigRoot = pm.listConnections(limbs[0].rigRoot)[0]
+        oldJoints = []
         for oldLimb in limbs:
-            oldJoints = pm.listConnections(oldLimb.joints)
-            ojGroups = [pm.listConnections(j.group)[0] for j in oldJoints]
-            ojControls = [pm.listConnections(g.control)[0] for g in ojGroups]
+            oldJoints += pm.listConnections(oldLimb.joints)
 
-            # Old Joint Group Setup
-            for joint, group in zip(oldJoints, ojGroups):
-                pm.parent(group, joint)
-
-            # New Limb, limbGroups, rigRoot
-            newLimb = pm.duplicate(oldLimb)[0]
-            oldNewLimbs[oldLimb] = newLimb
-            for group in pm.listRelatives(newLimb, c=1):
-                pm.connectAttr(newLimb.limbGroups, group.limb)
-            rigRoot = pm.listConnections(oldLimb.rigRoot)[0]
+        # Duplicate Limb
+        newParts = pm.duplicate(limbs, oldJoints, ic=1, rc=1)
+        newLimbs = newParts[:len(limbs)]
+        newJoints = newParts[len(limbs):]
+        for newLimb in newLimbs:
             nextID = rigRoot.nextLimbID.get()
             rigRoot.nextLimbID.set(nextID + 1)
             newLimb.ID.set(nextID)
-            
-            pm.connectAttr(rigRoot.limbs, newLimb.rigRoot)
-            
-            # New Joints
-            newJoints = pm.duplicate(oldJoints, po=1)
-            for oldJoint, newJoint in zip(oldJoints, newJoints):
-                oldNewJoints[oldJoint] = newJoint
-            njGroups = pm.duplicate(ojGroups, po=1)
-            njControls = pm.duplicate(ojControls)
-            for joint, group, control in zip(newJoints, njGroups, njControls):
-                pm.connectAttr(newLimb.joints, joint.limb)
-                pm.connectAttr(joint.group, group.joint)
-                pm.connectAttr(group.control, control.group)
-                pm.connectAttr(newLimb.jointGroups, group.limb)
-                pm.parent(group, newLimb)
-                pm.parent(control, group)
-            
-            # New Presets
-            for oldPreset in pm.listConnections(oldLimb.presets):
-                oldPresetID = oldPreset.ID.get()
-                if oldPresetID not in oldNewPresetIDs:
-                    ID = rigRoot.nextPresetID.get()
-                    rigRoot.nextPresetID.set(ID + 1)
-                    oldNewPresetIDs[oldPresetID] = ID
-                newPreset = pm.duplicate(oldPreset)[0]
-                newPreset.ID.set(oldNewPresetIDs[oldPresetID])
-                pm.connectAttr(newLimb.presets, newPreset.limb)
-                pm.connectAttr(rigRoot.presets, newPreset.rigRoot)
-                oldNewPresets[oldPreset] = newPreset
-
-            # Old Joint Group Teardown
-            for group in ojGroups:
-                pm.parent(group, oldLimb)
-            
-            # Setup behavior
-            bhvFile = newLimb.bhvFile.get()
-            self.bhvMng.SetBehavior(newLimb, bhvFile)
-
             self.RenameLimb(newLimb, newLimb.pfrsName.get() + '_Copy')
-            newLimbs.append(newLimb)
+        for newJoint in newJoints:
+            nextID = rigRoot.nextJointID.get()
+            rigRoot.nextJointID.set(nextID + 1)
+            newJoint.ID.set(nextID)
+            for child in pm.listRelatives(newJoint, c=1, type='joint'):
+                if child in newJoints:
+                    continue
+                pm.delete(child)
+
+
+            # # ----------OLD ------
+            # oldJoints = pm.listConnections(oldLimb.joints)
+            # ojGroups = [pm.listConnections(j.group)[0] for j in oldJoints]
+            # ojControls = [pm.listConnections(g.control)[0] for g in ojGroups]
+            # Old Joint Group Setup
+            # for joint, group in zip(oldJoints, ojGroups):
+            #     pm.parent(group, joint)
+
+            # # New Limb, limbGroups, rigRoot
+            # newLimb = pm.duplicate(oldLimb, ic=1)[0]
+            # oldNewLimbs[oldLimb] = newLimb
+            # for group in pm.listRelatives(newLimb, c=1):
+            #     if group.hasAttr('limb'):
+            #         pm.connectAttr(newLimb.limbGroups, group.limb)
+            # rigRoot = pm.listConnections(oldLimb.rigRoot)[0]
+            # nextID = rigRoot.nextLimbID.get()
+            # rigRoot.nextLimbID.set(nextID + 1)
+            # newLimb.ID.set(nextID)
+            
+            # pm.connectAttr(rigRoot.limbs, newLimb.rigRoot)
+            
+            # # New Joints
+            # newJoints = pm.duplicate(oldJoints, po=1)
+            # for oldJoint, newJoint in zip(oldJoints, newJoints):
+            #     oldNewJoints[oldJoint] = newJoint
+            # njGroups = pm.duplicate(ojGroups, po=1)
+            # njControls = pm.duplicate(ojControls)
+            # for joint, group, control in zip(newJoints, njGroups, njControls):
+            #     pm.connectAttr(newLimb.joints, joint.limb)
+            #     pm.connectAttr(joint.group, group.joint)
+            #     pm.connectAttr(group.control, control.group)
+            #     pm.connectAttr(newLimb.jointGroups, group.limb)
+            #     pm.parent(group, newLimb)
+            #     pm.parent(control, group)
+            
+            # # New Presets
+            # for oldPreset in pm.listConnections(oldLimb.presets):
+            #     oldPresetID = oldPreset.ID.get()
+            #     if oldPresetID not in oldNewPresetIDs:
+            #         ID = rigRoot.nextPresetID.get()
+            #         rigRoot.nextPresetID.set(ID + 1)
+            #         oldNewPresetIDs[oldPresetID] = ID
+            #     newPreset = pm.duplicate(oldPreset)[0]
+            #     newPreset.ID.set(oldNewPresetIDs[oldPresetID])
+            #     pm.connectAttr(newLimb.presets, newPreset.limb)
+            #     pm.connectAttr(rigRoot.presets, newPreset.rigRoot)
+            #     oldNewPresets[oldPreset] = newPreset
+
+            # # Old Joint Group Teardown
+            # for group in ojGroups:
+            #     pm.parent(group, oldLimb)
+            
+            # # Setup behavior
+            # bhvFile = newLimb.bhvFile.get()
+            # self.bhvMng.SetBehavior(newLimb, bhvFile)
+
+            # self.RenameLimb(newLimb, newLimb.pfrsName.get() + '_Copy')
+            # newLimbs.append(newLimb)
 
         # Reparenting Limbs
-        for oldLimb, newLimb in oldNewLimbs.items():
-            parent = pm.listConnections(oldLimb.limbParent)
-            if parent:
-                parent = parent[0]
-                if parent in oldNewLimbs:
-                    parent = oldNewLimbs[parent]
-                pm.connectAttr(parent.limbChildren, newLimb.limbParent)
-            oldJoints = pm.listConnections(oldLimb.joints)
-            for oldJoint in oldJoints:
-                oldParents = pm.listRelatives(oldJoint, p=1)
-                if not oldParents:
-                    continue
-                oldParent = oldParents[0]
-                if oldParent not in oldNewJoints:
-                    continue
-                newJoint = oldNewJoints[oldJoint]
-                newParent = oldNewJoints[oldParent]
-                pm.parent(newJoint, newParent)
+        # for oldLimb, newLimb in oldNewLimbs.items():
+        #     parent = pm.listConnections(oldLimb.limbParent)
+        #     if parent:
+        #         parent = parent[0]
+        #         if parent in oldNewLimbs:
+        #             parent = oldNewLimbs[parent]
+        #         pm.connectAttr(parent.limbChildren, newLimb.limbParent)
+        #     oldJoints = pm.listConnections(oldLimb.joints)
+        #     for oldJoint in oldJoints:
+        #         oldParents = pm.listRelatives(oldJoint, p=1)
+        #         if not oldParents:
+        #             continue
+        #         oldParent = oldParents[0]
+        #         if oldParent not in oldNewJoints:
+        #             continue
+        #         newJoint = oldNewJoints[oldJoint]
+        #         newParent = oldNewJoints[oldParent]
+        #         pm.parent(newJoint, newParent)
 
-        # Reparenting presets
-        for oldPreset, newPreset in oldNewPresets.items():
-            oldParents = pm.listConnections(oldPreset.limbParent)
-            if not oldParents:
-                continue
-            oldParent = oldParents[0]
-            if oldParent not in oldNewLimbs:
-                pm.connectAttr( oldParent.presetLimbChildren, 
-                                newPreset.limbParent)
-            else:
-                newParent = oldNewLimbs[oldParent]
-                pm.connectAttr( newParent.presetLimbChildren, 
-                                newPreset.limbParent)
+        # # Reparenting presets
+        # for oldPreset, newPreset in oldNewPresets.items():
+        #     oldParents = pm.listConnections(oldPreset.limbParent)
+        #     if not oldParents:
+        #         continue
+        #     oldParent = oldParents[0]
+        #     if oldParent not in oldNewLimbs:
+        #         pm.connectAttr( oldParent.presetLimbChildren, 
+        #                         newPreset.limbParent)
+        #     else:
+        #         newParent = oldNewLimbs[oldParent]
+        #         pm.connectAttr( newParent.presetLimbChildren, 
+        #                         newPreset.limbParent)
         return newLimbs
 
     def MirrorBodyLimbs(self, limbs, axisLetter):
@@ -879,4 +905,8 @@ class LimbSetup(absOp.Abstract_Operation):
         group = distances[targetDist][0]
         return groups.index(group)
 
-
+    def RebuildSkins(self, rigRoot):
+        meshSetup = msh.MeshSetup()
+        meshSetup.bhvMng = self.bhvMng
+        for mesh in pm.listConnections(rigRoot.meshes):
+            meshSetup.RebuildSkin(mesh)

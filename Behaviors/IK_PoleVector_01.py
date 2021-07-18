@@ -24,43 +24,56 @@ class IK_PoleVector_01(absBhv.Abstract_Behavior):
     
     def InitLimb(self, limb):
         log.funcFileDebug()
-        if not limb.hasAttr('ikpvDistance'):
+        # Delete old curve/cluster, or init attrs
+        if limb.hasAttr('ikpvDistance'):
+            pm.delete(pm.listConnections(limb.ikpvCurve))
+            pm.delete(pm.listConnections(limb.ikpvClusters))
+        else:
             pm.addAttr(limb, ln='ikpvDistance', at='float', 
                                                 min=0, dv=10)
             pm.addAttr(limb, ln='ikpvCurve', dt='string')
+
+        # Get data
         joints = pm.listConnections(limb.joints)
         joints = rigUtil.GetSortedJoints(joints)
-        limbGroups = rigUtil.GetLimbGroups(limb, self.groupType)
-        ikpv1 = limbGroups[0]
-        ikpv2 = limbGroups[1]
-        ikpv3 = limbGroups[2]
-        pm.parent(ikpv1, joints[0])
-        rigUtil.ResetAttrs(ikpv1)
-        pm.parent(ikpv1, limb)
-        pm.parent(ikpv3, joints[-1])
-        rigUtil.ResetAttrs(ikpv3)
-        pm.parent(ikpv3, limb)
-        self._InitIKPV2(limb, ikpv2)
-        self._UpdateIKPV2(limb)
-        if not pm.listConnections(limb.ikpvCurve):
-            curve = pm.curve(d=1, p=((0,0,0), (1,0,0)), k=(0, 1))
-            cluster1 = pm.cluster(curve.cv[0])
-            cluster2 = pm.cluster(curve.cv[1])
-            xform1 = cluster1[1]
-            xform2 = cluster2[1]
-            control = pm.listConnections(ikpv2.control)[0]
-            pm.parent(xform1, xform2, curve, limb)
-            pm.parentConstraint(control, xform1)
-            pm.parentConstraint(joints[1], xform2)
+        ikpvGroups = rigUtil.GetLimbGroups(limb, self.groupType)
+        ikpvGroup1 = ikpvGroups[0]
+        ikpvGroup2 = ikpvGroups[1]
+        ikpvGroup3 = ikpvGroups[2]
 
-            # Curve Cleanup
-            curve.template.set(1)
-            pm.addAttr(curve, ln='limb', dt='string')
-            pm.connectAttr(limb.ikpvCurve, curve.limb)
-            curve.v.set(0)
-            xform1.v.set(0)
-            xform2.v.set(0)
-            pm.select(d=1)
+        # Position IKPV groups
+        pm.parent(ikpvGroup1, joints[0])
+        rigUtil.ResetAttrs(ikpvGroup1)
+        pm.parent(ikpvGroup1, limb)
+        pm.parent(ikpvGroup3, joints[-1])
+        rigUtil.ResetAttrs(ikpvGroup3)
+        pm.parent(ikpvGroup3, limb)
+        self._InitIKPV2(limb, ikpvGroup2)
+        self._UpdateIKPV2(limb)
+
+        # Create IKPV2 Display/helper curve
+        curve = pm.curve(d=1, p=((0,0,0), (1,0,0)), k=(0, 1))
+        cluster1 = pm.cluster(curve.cv[0])
+        cluster2 = pm.cluster(curve.cv[1])
+        xform1 = cluster1[1]
+        xform2 = cluster2[1]
+        control = pm.listConnections(ikpvGroup2.control)[0]
+        pm.parent(xform1, xform2, curve, limb)
+        pm.parentConstraint(control, xform1)
+        pm.parentConstraint(joints[1], xform2)
+
+        # Curve Cleanup
+        curve.template.set(1)
+        pm.addAttr(curve, ln='limb', dt='string')
+        pm.addAttr(xform1, ln='limb', dt='string')
+        pm.addAttr(xform2, ln='limb', dt='string')
+        pm.connectAttr(limb.ikpvCurve, curve.limb)
+        pm.connectAttr(limb.ikpvClusters, xform1.limb)
+        pm.connectAttr(limb.ikpvClusters, xform2.limb)
+        curve.v.set(0)
+        xform1.v.set(0)
+        xform2.v.set(0)
+        pm.select(d=1)
     
     def CleanupLimb(self, limb):
         log.funcFileDebug()

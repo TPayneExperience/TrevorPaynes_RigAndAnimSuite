@@ -48,6 +48,7 @@ class LookAt_01(absBhv.Abstract_Behavior):
         control = pm.listConnections(limbGroup.control)[0]
 
         # Move Mid Group to Mid control position
+        pm.xform(control, cp=1)
         pos = pm.xform(control, q=1, t=1, ws=1)
         pm.xform(limbGroup, t=pos, ws=1)
         rigUtil.ResetAttrs(control)
