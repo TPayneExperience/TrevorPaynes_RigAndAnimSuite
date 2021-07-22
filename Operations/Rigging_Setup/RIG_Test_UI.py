@@ -22,7 +22,7 @@ class Test_UI(absOpUI.Abstract_OperationUI):
         self._Setup()
         self.PopulateLimbHier()
 
-    def Teardown_UI(self, rigRoot, allRigRoots):
+    def Teardown_UI(self):
         pass
 
 #=========== SETUP UI ====================================

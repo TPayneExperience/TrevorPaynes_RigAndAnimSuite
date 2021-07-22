@@ -26,6 +26,8 @@ class LoadTemplates:
         self.widget = pm.treeView(adr=0, arp=0, ann=msg,
                                     scc=self._SelectionChanged,
                                     elc=self.IgnoreRename)
+        self.suffix_grp = pm.textFieldGrp(  l='Suffix', adj=1, pht='Upper...',
+                                            cw=(2,80), cal=(1,'left'), p=form)
         self.cancel_btn = pm.button(l='Cancel', p=form, 
                                     c=lambda x: pm.layoutDialog(dis='close'))
         self.load_btn = pm.button(l='Load Selected', p=form, en=0, 
@@ -34,11 +36,18 @@ class LoadTemplates:
                         attachForm=[(temp_fl, 'top', 5), 
                                     (temp_fl, 'left', 5), 
                                     (temp_fl, 'right', 5),  
+                                    (self.suffix_grp, 'left', 5), 
+                                    (self.suffix_grp, 'right', 5), 
                                     (self.load_btn, 'bottom', 5), 
                                     (self.load_btn, 'right', 5),
                                     (self.cancel_btn, 'left', 5), 
                                     (self.cancel_btn, 'bottom', 5)],
-                        attachControl=[(temp_fl, 'bottom', 5, self.load_btn)],
+                        # attachControl=[(temp_fl, 'bottom', 5, self.load_btn)],
+                        attachControl=[(temp_fl, 'bottom', 5, self.suffix_grp),
+                                    (self.suffix_grp, 'bottom', 5, self.load_btn),
+                                    (self.suffix_grp, 'bottom', 5, self.cancel_btn)],
+                        # attachControl=[(temp_fl, 'bottom', 5, self.suffix_grp),
+                        #                 (self.suffix_grp, 'bottom', 5, self.load_btn)],
                         attachPosition=[(self.cancel_btn, 'right', 5, 50), 
                                         (self.load_btn, 'left', 5, 50)])
         self.Populate()
@@ -68,8 +77,9 @@ class LoadTemplates:
     def Load(self, ignore):
         log.funcFileDebug()
         limbSetup = ls.LimbSetup()
+        suffix = pm.textFieldGrp(self.suffix_grp, q=1, tx=1)
         for filePath in self._selected:
-            limbSetup.LoadTemplate(self._rigRoot, filePath)
+            limbSetup.LoadTemplate(self._rigRoot, filePath, suffix)
         pm.layoutDialog(dis='load')
 
     def IgnoreRename(self, idStr, newName):

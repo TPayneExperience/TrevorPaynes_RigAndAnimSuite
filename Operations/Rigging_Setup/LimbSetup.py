@@ -117,10 +117,6 @@ class LimbSetup(absOp.Abstract_Operation):
         return limb
 
     def DuplicateLimbs(self, limbs):
-        # oldNewLimbs = {}
-        # oldNewJoints = {}
-        # oldNewPresetIDs = {}
-        # oldNewPresets = {}
         newLimbs = []
         rigRoot = pm.listConnections(limbs[0].rigRoot)[0]
         oldJoints = []
@@ -144,100 +140,6 @@ class LimbSetup(absOp.Abstract_Operation):
                 if child in newJoints:
                     continue
                 pm.delete(child)
-
-
-            # # ----------OLD ------
-            # oldJoints = pm.listConnections(oldLimb.joints)
-            # ojGroups = [pm.listConnections(j.group)[0] for j in oldJoints]
-            # ojControls = [pm.listConnections(g.control)[0] for g in ojGroups]
-            # Old Joint Group Setup
-            # for joint, group in zip(oldJoints, ojGroups):
-            #     pm.parent(group, joint)
-
-            # # New Limb, limbGroups, rigRoot
-            # newLimb = pm.duplicate(oldLimb, ic=1)[0]
-            # oldNewLimbs[oldLimb] = newLimb
-            # for group in pm.listRelatives(newLimb, c=1):
-            #     if group.hasAttr('limb'):
-            #         pm.connectAttr(newLimb.limbGroups, group.limb)
-            # rigRoot = pm.listConnections(oldLimb.rigRoot)[0]
-            # nextID = rigRoot.nextLimbID.get()
-            # rigRoot.nextLimbID.set(nextID + 1)
-            # newLimb.ID.set(nextID)
-            
-            # pm.connectAttr(rigRoot.limbs, newLimb.rigRoot)
-            
-            # # New Joints
-            # newJoints = pm.duplicate(oldJoints, po=1)
-            # for oldJoint, newJoint in zip(oldJoints, newJoints):
-            #     oldNewJoints[oldJoint] = newJoint
-            # njGroups = pm.duplicate(ojGroups, po=1)
-            # njControls = pm.duplicate(ojControls)
-            # for joint, group, control in zip(newJoints, njGroups, njControls):
-            #     pm.connectAttr(newLimb.joints, joint.limb)
-            #     pm.connectAttr(joint.group, group.joint)
-            #     pm.connectAttr(group.control, control.group)
-            #     pm.connectAttr(newLimb.jointGroups, group.limb)
-            #     pm.parent(group, newLimb)
-            #     pm.parent(control, group)
-            
-            # # New Presets
-            # for oldPreset in pm.listConnections(oldLimb.presets):
-            #     oldPresetID = oldPreset.ID.get()
-            #     if oldPresetID not in oldNewPresetIDs:
-            #         ID = rigRoot.nextPresetID.get()
-            #         rigRoot.nextPresetID.set(ID + 1)
-            #         oldNewPresetIDs[oldPresetID] = ID
-            #     newPreset = pm.duplicate(oldPreset)[0]
-            #     newPreset.ID.set(oldNewPresetIDs[oldPresetID])
-            #     pm.connectAttr(newLimb.presets, newPreset.limb)
-            #     pm.connectAttr(rigRoot.presets, newPreset.rigRoot)
-            #     oldNewPresets[oldPreset] = newPreset
-
-            # # Old Joint Group Teardown
-            # for group in ojGroups:
-            #     pm.parent(group, oldLimb)
-            
-            # # Setup behavior
-            # bhvFile = newLimb.bhvFile.get()
-            # self.bhvMng.SetBehavior(newLimb, bhvFile)
-
-            # self.RenameLimb(newLimb, newLimb.pfrsName.get() + '_Copy')
-            # newLimbs.append(newLimb)
-
-        # Reparenting Limbs
-        # for oldLimb, newLimb in oldNewLimbs.items():
-        #     parent = pm.listConnections(oldLimb.limbParent)
-        #     if parent:
-        #         parent = parent[0]
-        #         if parent in oldNewLimbs:
-        #             parent = oldNewLimbs[parent]
-        #         pm.connectAttr(parent.limbChildren, newLimb.limbParent)
-        #     oldJoints = pm.listConnections(oldLimb.joints)
-        #     for oldJoint in oldJoints:
-        #         oldParents = pm.listRelatives(oldJoint, p=1)
-        #         if not oldParents:
-        #             continue
-        #         oldParent = oldParents[0]
-        #         if oldParent not in oldNewJoints:
-        #             continue
-        #         newJoint = oldNewJoints[oldJoint]
-        #         newParent = oldNewJoints[oldParent]
-        #         pm.parent(newJoint, newParent)
-
-        # # Reparenting presets
-        # for oldPreset, newPreset in oldNewPresets.items():
-        #     oldParents = pm.listConnections(oldPreset.limbParent)
-        #     if not oldParents:
-        #         continue
-        #     oldParent = oldParents[0]
-        #     if oldParent not in oldNewLimbs:
-        #         pm.connectAttr( oldParent.presetLimbChildren, 
-        #                         newPreset.limbParent)
-        #     else:
-        #         newParent = oldNewLimbs[oldParent]
-        #         pm.connectAttr( newParent.presetLimbChildren, 
-        #                         newPreset.limbParent)
         return newLimbs
 
     def MirrorBodyLimbs(self, limbs, axisLetter):
@@ -249,6 +151,7 @@ class LimbSetup(absOp.Abstract_Operation):
         self._MirrorLimbs(limbs, newLimbs, axisLetter)
         for limb in newLimbs + limbs:
             limb.limbLocation.set(0) # Body
+        pm.select(d=1)
     
     def MirrorFaceLimbs(self, limbs, axisLetter):
         newLimbs = self.DuplicateLimbs(limbs)
@@ -259,28 +162,33 @@ class LimbSetup(absOp.Abstract_Operation):
         self._MirrorLimbs(limbs, newLimbs, axisLetter)
         for limb in newLimbs + limbs:
             limb.limbLocation.set(1) # Face
+        pm.select(d=1)
 
     def _MirrorLimbs(self, oldLimbs, newLimbs, axisLetter):
         scale = self.mirrorAxisScales[axisLetter.upper()]
         for oldLimb, newLimb in zip(oldLimbs, newLimbs):
             self.RenameLimb(newLimb, oldLimb.pfrsName.get())
-            groups = pm.listConnections(newLimb.limbGroups)
-            groups += pm.listConnections(newLimb.jointGroups)
-            oldParents = {}
-            for group in groups:
-                oldParents[group] = pm.listRelatives(group, p=1)
-            rootGroup = pm.group(em=1, w=1)
-            pm.parent(groups, rootGroup)
-            pm.xform(rootGroup, s=scale)
-            for group in groups:
-                parents = oldParents[group]
-                if parents: # Delete later, after limbsetup
-                    parent = parents[0]
-                    pm.parent(group, parent)
-                else:
-                    pm.parent(group, w=1)
-            pm.makeIdentity(groups, a=1, s=1, pn=1)
-            pm.delete(rootGroup)
+            limbGroups = pm.listConnections(newLimb.limbGroups)
+            if limbGroups:
+                oldParents = {}
+                for group in limbGroups:
+                    oldParents[group] = pm.listRelatives(group, p=1)
+                rootGroup = pm.group(em=1, w=1)
+                pm.parent(limbGroups, rootGroup)
+                pm.xform(rootGroup, s=scale)
+                for group in limbGroups:
+                    parents = oldParents[group]
+                    if parents: # Delete later, after limbsetup
+                        parent = parents[0]
+                        pm.parent(group, parent)
+                    else:
+                        pm.parent(group, w=1)
+                pm.makeIdentity(limbGroups, a=1, s=1, pn=1)
+                pm.delete(rootGroup)
+            jointGroups = pm.listConnections(newLimb.jointGroups)
+            for jointGroup in jointGroups:
+                control = pm.listConnections(jointGroup.control)[0]
+                pm.polyNormal(control, nm=2, ch=0) 
 
     def UpdateMirrorBodyJoints(self, limb):
         config = self._GetConfig()
@@ -375,7 +283,7 @@ class LimbSetup(absOp.Abstract_Operation):
         pm.saveAs(filePath, f=1)
         pm.openFile(curFile, f=1)
 
-    def LoadTemplate(self, rigRoot, filePath):
+    def LoadTemplate(self, rigRoot, filePath, suffix):
         log.funcFileInfo()
         limbsParent = pm.listConnections(rigRoot.limbsParentGroup)[0]
         jointsParent = pm.listConnections(rigRoot.jointsParentGroup)[0]
@@ -388,6 +296,8 @@ class LimbSetup(absOp.Abstract_Operation):
         tempJointGrp = pm.listConnections(tempRoot.jointsParentGroup)[0]
         for limb in tempLimbs:
             pm.parent(limb, limbsParent)
+            pfrsName = limb.pfrsName.get() + suffix
+            limb.pfrsName.set(pfrsName)
         for joint in pm.listRelatives(tempJointGrp, c=1):
             pm.parent(joint, jointsParent)
         pm.delete(tempRoot)
@@ -461,7 +371,7 @@ class LimbSetup(absOp.Abstract_Operation):
     def ReparentJoint(self, rigRoot, childJoint, parentJoint):
         if parentJoint:
             pm.parent(childJoint, parentJoint)
-        if not parentJoint:
+        else:
             jointGroup = pm.listConnections(rigRoot.jointsParentGroup)[0]
             pm.parent(childJoint, jointGroup)
         if not childJoint.hasAttr('limb'):
@@ -580,6 +490,39 @@ class LimbSetup(absOp.Abstract_Operation):
     def SetJointRotationToZero(self, limb):
         for joint in pm.listConnections(limb.joints):
             joint.r.set(0,0,0)
+
+    def RemoveJointScale(self, limbs):
+        jointChildren = {}
+        toDelete = []
+        for limb in limbs:
+            for joint in pm.listConnections(limb.joints):
+                for child in pm.listRelatives(joint, c=1):
+                    jointChildren[child] = joint
+                    pm.parent(child, w=1)
+                    toDelete += pm.listRelatives(child, p=1)
+        for limb in limbs:
+            joints = pm.listConnections(limb.joints)
+            for joint in joints:
+                if joint not in jointChildren:
+                    parent = pm.listRelatives(joint, p=1)[0]
+                    pm.parent(joint, w=1)
+                    jointChildren[joint] = parent
+                    toDelete += pm.listRelatives(joint, p=1)
+        joints = []
+        for joint in set(list(jointChildren.values())):
+            if pm.objectType(joint) == 'joint':
+                joints.append(joint)
+                joint.radius.set(1)
+                parents = pm.listRelatives(joint, p=1)
+                if parents:
+                    parent = parents[0]
+                    joints.append(parent)
+        pm.makeIdentity(joints, a=1, s=1)
+        for child, joint in jointChildren.items():
+            pm.parent(child, joint)
+            if pm.objectType(child) != 'joint':
+                pm.makeIdentity(child, a=1, s=1)
+        pm.delete(toDelete)
 
     def ResetControlTransforms(self, limb):
         for group in pm.listConnections(limb.jointGroups):

@@ -32,6 +32,7 @@ class IK_PoleVector_01(absBhv.Abstract_Behavior):
             pm.addAttr(limb, ln='ikpvDistance', at='float', 
                                                 min=0, dv=10)
             pm.addAttr(limb, ln='ikpvCurve', dt='string')
+            pm.addAttr(limb, ln='ikpvClusters', dt='string')
 
         # Get data
         joints = pm.listConnections(limb.joints)

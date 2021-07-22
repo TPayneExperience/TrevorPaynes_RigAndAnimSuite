@@ -46,7 +46,7 @@ class Constraints_UI(absOpUI.Abstract_OperationUI):
         self.PopulateLimbHier()
         self.UpdateApplyButton()
     
-    def Teardown_UI(self, rigRoot, allRigRoots):
+    def Teardown_UI(self):
         pass
     
 #=========== SETUP UI ====================================

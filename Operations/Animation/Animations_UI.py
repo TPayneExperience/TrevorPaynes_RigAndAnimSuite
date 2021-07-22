@@ -27,7 +27,7 @@ class Animation_UI(absOpUI.Abstract_OperationUI):
         self._allRigRoots = allRigRoots
         self.PopulateRigRootHier()
         
-    def Teardown_UI(self, rigRoot, allRigRoots):
+    def Teardown_UI(self):
         pass
 
 #=========== SETUP UI ====================================

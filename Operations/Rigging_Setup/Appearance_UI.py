@@ -40,8 +40,10 @@ class Appearance_UI(absOpUI.Abstract_OperationUI):
                     control = pm.listConnections(group.control)[0]
                     rigUtil.ChannelBoxAttrs(control, 0, 1, 1, 0)
 
-    def Teardown_UI(self, rigRoot, allRigRoots):
-        for rigRoot in allRigRoots:
+    def Teardown_UI(self):
+        for rigRoot in self._allRigRoots:
+            if not rigRoot or not pm.objExists(rigRoot):
+                continue
             for limb in pm.listConnections(rigRoot.limbs):
                 bhv = self.operation.bhvMng.bhvs[limb.bhvFile.get()]
                 if bhv.groupMoveable:

@@ -26,7 +26,7 @@ class MeshSetup_UI(absOpUI.Abstract_OperationUI):
         self._Setup()
         self.Refresh(0)
         
-    def Teardown_UI(self, rigRoot, allRigRoots):
+    def Teardown_UI(self):
         pass
 
 #=========== SETUP ====================================

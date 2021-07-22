@@ -112,27 +112,10 @@ class PayneFreeRigSuite_UI:
                 pm.menuItem(l='Documentation', c=self.OpenDocumentation)
                 with pm.subMenuItem(l='Tutorials'):
                     pm.menuItem(l='QUICK STARTS', d=1)
-                    pm.menuItem(l='Basics', en=0)
+                    pm.menuItem(l='Artist', en=0)
                     pm.menuItem(l='Rigging', en=0)
-                    pm.menuItem(l='Skinning', en=0)
                     pm.menuItem(l='Animation', en=0)
 
-                    # pm.menuItem(l='RIGGING', d=1)
-                    # pm.menuItem(l='New / Edit Rig Setup', en=0)
-                    # pm.menuItem(l='Limb Setup', en=0)
-                    # pm.menuItem(l='Behaviors', en=0)
-                    # pm.menuItem(l='Appearance', en=0)
-                    # pm.menuItem(l='Duplicate Limbs', en=0)
-                    # pm.menuItem(l='Mirror Limbs', en=0)
-
-                    # pm.menuItem(l='SKINNING', d=1)
-                    # pm.menuItem(l='Mesh Setup', en=0)
-                    # pm.menuItem(l='Paint Weights', en=0)
-                    # pm.menuItem(l='Quick Weights', en=0)
-
-                    # pm.menuItem(l='ANIMATING', d=1)
-                    # pm.menuItem(l='Poses', en=0)
-                    
                 pm.menuItem(d=1)
                 pm.menuItem(l='Useful Scripts for hotkeys', c=self._UsefulScripts)
                 pm.menuItem(d=1)
@@ -190,8 +173,7 @@ class PayneFreeRigSuite_UI:
     def SetOperation(self, operationName):
         log.funcFileInfo()
         if self.currentOp:
-            self.currentOp.Teardown_UI(self._rigRoot, 
-                                        self._allRigRoots)
+            self.currentOp.Teardown_UI()
         pm.deleteUI(self.frame)
         if operationName not in self.operationNames:
             with pm.frameLayout(p=self.win, lv=0) as self.frame:

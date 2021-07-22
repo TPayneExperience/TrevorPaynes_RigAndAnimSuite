@@ -34,7 +34,7 @@ class Poses_UI(absOpUI.Abstract_OperationUI):
         self.operation.InitPoses(rigRoot)
         self.operation.SelectedLimbs([])
         
-    def Teardown_UI(self, rigRoot, allRigRoots):
+    def Teardown_UI(self):
         pass
 
 #=========== SETUP UI ====================================

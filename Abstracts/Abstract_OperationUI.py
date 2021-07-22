@@ -21,7 +21,7 @@ class Abstract_OperationUI:
         pass
     
     @abstractmethod
-    def Teardown_UI(self, rigRoot, allRigRoots):
+    def Teardown_UI(self):
         pass
     
 

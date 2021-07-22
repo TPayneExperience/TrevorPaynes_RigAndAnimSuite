@@ -49,7 +49,9 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
         self._Setup()
         self.Refresh(0)
     
-    def Teardown_UI(self, rigRoot, allRigRoots):
+    def Teardown_UI(self):
+        if not self._rigRoot or not pm.objExists(self._rigRoot):
+            return
         for limb in pm.listConnections(self._rigRoot.limbs):
             bhvFile = limb.bhvFile.get()
             bhv = self.operation.bhvMng.bhvs[bhvFile]
@@ -72,7 +74,7 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
                     self.add_mi = pm.menuItem(l='Add Joint Limb', 
                                             en=0, c=self.AddJointLimb)
                     self.rebuildSkins_mi = pm.menuItem(l='Rebuild Skins', 
-                                            en=0, c=self.RebuildSkins)
+                                            c=self.RebuildSkins)
                     pm.menuItem(l='AUTOBUILD LIMBS', d=1)
                     order = {}
                     for name, bld in self.operation._autobuilders.items():
@@ -102,6 +104,9 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
                     self.zeroRot_mi = pm.menuItem(l='Set Joint Rotation to Zero', 
                                             en=0,
                                             c=self.SetJointRotationToZero)
+                    self.resetScale_mi = pm.menuItem(l='Reset Joint Scale', 
+                                            en=0,
+                                            c=self.RemoveJointScale)
                     self.updateBody_mi = pm.menuItem(l='Update Mirror Body Joints', 
                                             en=0,
                                             c=self.UpdateMirrorBodyJoints)
@@ -333,6 +338,7 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
         pm.menuItem(self.exportAnim_mi, e=1, en=0)
         pm.menuItem(self.removeAnim_mi, e=1, en=0)
         pm.menuItem(self.zeroRot_mi, e=1, en=0)
+        pm.menuItem(self.resetScale_mi, e=1, en=0)
         self._selectedLimbs = None
         self.PopulateJointHier(None)
         if not limbIDStrs:
@@ -346,6 +352,7 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
         pm.menuItem(self.xferToJntOri_mi, e=1, en=1)
         pm.menuItem(self.limbLoc_mi, e=1, en=1)
         pm.menuItem(self.zeroRot_mi, e=1, en=1)
+        pm.menuItem(self.resetScale_mi, e=1, en=1)
         self._selectedLimbs = [self._limbIDs[ID] for ID in limbIDStrs]
         for limb in self._selectedLimbs:
             log.debug('\t\t' + limb.pfrsName.get())
@@ -365,7 +372,10 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
             self.PopulateJointHier(limb)
             if pm.listConnections(limb.mirrorLimb):
                 pm.menuItem(self.flipSides_mi, e=1, en=1)
-            pm.select(pm.listConnections(limb.joints))
+        allJoints = []
+        for limb in self._selectedLimbs:
+            allJoints += pm.listConnections(limb.joints)
+        pm.select(allJoints)
         pm.menuItem(self.removeLimbs_mi, e=1, en=1)
         pm.menuItem(self.removeLimbsAndJoints_mi, e=1, en=1)
 
@@ -604,6 +614,10 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
             self.operation.ResetControlTransforms(limb)
             bhv = self.operation.bhvMng.bhvs[limb.bhvFile.get()]
             bhv.InitLimb(limb)
+
+    def RemoveJointScale(self, ignore):
+        log.funcFileInfo()
+        self.operation.RemoveJointScale(self._selectedLimbs)
 
 #=========== JOINT HIER ====================================
 

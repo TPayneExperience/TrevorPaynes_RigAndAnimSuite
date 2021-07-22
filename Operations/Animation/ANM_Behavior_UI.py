@@ -29,7 +29,7 @@ class ANM_Behavior_UI(absOpUI.Abstract_OperationUI):
         self.PopulateLimbHier()
         self.PopulatePresets()
         
-    def Teardown_UI(self, rigRoot, allRigRoots):
+    def Teardown_UI(self):
         pass
 
 #=========== SETUP UI ====================================

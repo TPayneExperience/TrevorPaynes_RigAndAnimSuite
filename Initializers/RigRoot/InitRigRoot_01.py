@@ -86,15 +86,5 @@ class InitRigRoot(absInit.Abstract_Initializer):
         pm.connectAttr(rigRoot.meshesParentGroup, group.rigRoot)
         rigUtil.ChannelBoxAttrs(group, 0, 0, 0, 0)
         
-        # #============= DISPLAY LAYERS ============================
-
-        # controlDL = pm.createDisplayLayer(n=rigData.CONTROL_DISP_LAYER, empty=1)
-        # jointDL = pm.createDisplayLayer(n=rigData.JOINTS_DISP_LAYER, empty=1)
-        # meshDL = pm.createDisplayLayer(n=rigData.MESHES_DISP_LAYER, empty=1)
-        # controlDL.visibility.set(0)
-        # controlDL.displayType.set(2)
-        # jointDL.displayType.set(2)
-        # meshDL.displayType.set(2)
-
 # Copyright (c) 2021 Trevor Payne
 # See user license in "PayneFreeRigSuite\Data\LicenseAgreement.txt"

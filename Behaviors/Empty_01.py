@@ -27,16 +27,17 @@ class Empty_01(absBhv.Abstract_Behavior):
     def InitLimb(self, limb):
         log.funcFileDebug()
         pm.select(d=1)
+        if pm.listConnections(limb.joints):
+            return
         joint = pm.joint()
         rigRoot = pm.listConnections(limb.rigRoot)[0]
         jnt.Joint.Add(rigRoot, 0, limb, joint)
         joint.pfrsName.set('Empty')
         joint.v.set(0)
-        limbGroup = rigUtil.GetLimbGroups(limb, self.groupType)[0]
-        limbControl = pm.listConnections(limbGroup.control)[0]
         jointGroup = pm.listConnections(joint.group)[0]
         jointGroup.v.set(0)
-        # pm.parent(jointGroup, limbControl)
+        jointParentGroup = pm.listConnections(rigRoot.jointsParentGroup)[0]
+        pm.parent(joint, jointParentGroup)
         
     def CleanupLimb(self, limb):
         log.funcFileDebug()
@@ -60,6 +61,7 @@ class Empty_01(absBhv.Abstract_Behavior):
         pm.parentConstraint(control, joint)
         jointGroup = pm.listConnections(joint.group)[0]
         pm.parent(jointGroup, joint)
+        # pm.parentConstraint(joint, jointGroup)
     
     def Setup_Constraint_ControlsToXforms(self, limb, 
             xforms, hasPosCst, hasRotCst, hasScaleCst):
@@ -87,8 +89,9 @@ class Empty_01(absBhv.Abstract_Behavior):
     def Teardown_Constraint_JointsToControls(self, limb):
         log.funcFileDebug()
         joint = pm.listConnections(limb.joints)[0]
-        cst = pm.listRelatives(joint, c=1, type='parentConstraint')
-        pm.delete(cst)
+        # jointGroup = pm.listConnections(joint.group)[0]
+        pm.delete(pm.listRelatives(joint, c=1, type='constraint'))
+        # pm.delete(pm.listRelatives(jointGroup, c=1, type='constraint'))
     
     def Teardown_Constraint_ControlsToXforms(self, limb):
         log.funcFileDebug()

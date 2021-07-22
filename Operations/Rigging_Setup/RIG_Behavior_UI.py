@@ -47,8 +47,8 @@ class RIG_Behavior_UI(absOpUI.Abstract_OperationUI):
         self.PopulateLimbHier()
         self.PopulatePresets()
         
-    def Teardown_UI(self, rigRoot, allRigRoots):
-        self._presetsUI = []
+    def Teardown_UI(self):
+        pass
     
 #=========== SETUP UI ====================================
 
