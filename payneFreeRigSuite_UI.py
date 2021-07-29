@@ -112,9 +112,9 @@ class PayneFreeRigSuite_UI:
                 pm.menuItem(l='Documentation', c=self.OpenDocumentation)
                 with pm.subMenuItem(l='Tutorials'):
                     pm.menuItem(l='QUICK STARTS', d=1)
-                    pm.menuItem(l='Artist', en=0)
-                    pm.menuItem(l='Rigging', en=0)
-                    pm.menuItem(l='Animation', en=0)
+                    pm.menuItem(l='Artist', c=self.OpenQuickstartArtist)
+                    pm.menuItem(l='Rigging', c=self.OpenQuickstartRigger)
+                    pm.menuItem(l='Animator', c=self.OpenQuickstartAnimator)
 
                 pm.menuItem(d=1)
                 pm.menuItem(l='Useful Scripts for hotkeys', c=self._UsefulScripts)
@@ -259,6 +259,18 @@ class PayneFreeRigSuite_UI:
     def OpenWebsite(self, ignore):
         log.funcFileInfo()
         webbrowser.open(genData.STORE_URL)
+
+    def OpenQuickstartArtist(self, ignore):
+        log.funcFileInfo()
+        webbrowser.open(genData.QUICKSTART_ARTIST_VIDEO)
+
+    def OpenQuickstartRigger(self, ignore):
+        log.funcFileInfo()
+        webbrowser.open(genData.QUICKSTART_RIGGER_VIDEO)
+
+    def OpenQuickstartAnimator(self, ignore):
+        log.funcFileInfo()
+        webbrowser.open(genData.QUICKSTART_ANIMATOR_VIDEO)
 
     def closeEvent(self):
         log.funcFileInfo()
