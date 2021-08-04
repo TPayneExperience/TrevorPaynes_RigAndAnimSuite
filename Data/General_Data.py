@@ -16,9 +16,9 @@ DOC_URL += 'QHInxrmWjFJK_Q1hCwvnAP0-0SgMRE/edit?usp=sharing'
         
 STORE_URL = 'https://www.PayneFreeRigSuite.com'
 
-QUICKSTART_ARTIST_VIDEO = 'https://youtu.be/Y47mkYs-sH0'
-QUICKSTART_RIGGER_VIDEO = 'https://youtu.be/_NU8B_FhYxU'
-QUICKSTART_ANIMATOR_VIDEO = 'https://youtu.be/a6r-usLBjkM'
+QUICKSTART_ARTIST_VIDEO = 'https://youtu.be/MpWBymQXDws'
+QUICKSTART_RIGGER_VIDEO = 'https://youtu.be/OWlhMnAk3Wc'
+QUICKSTART_ANIMATOR_VIDEO = 'https://youtu.be/495WmBBMgx8'
 
 
 # Copyright (c) 2021 Trevor Payne

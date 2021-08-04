@@ -65,7 +65,7 @@ class Poses_UI(absOpUI.Abstract_OperationUI):
                 pm.treeView(self.control_tv, e=1, scc=self.SelectedControl)
         with pm.verticalLayout():
             with pm.frameLayout('Limb Poses', bv=1) as self.limbPoses_fl:
-                with pm.columnLayout(adj=1) as self.poses_cl:
+                with pm.columnLayout(adj=1, rs=5) as self.poses_cl:
                     pass
 
 #=========== LIMB HIER ====================================

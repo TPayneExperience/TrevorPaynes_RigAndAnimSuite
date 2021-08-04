@@ -50,7 +50,7 @@ class ANM_Behavior_UI(absOpUI.Abstract_OperationUI):
         with pm.verticalLayout():
             msg = 'Limb Properties'
             with pm.frameLayout(l=msg, bv=1, en=0) as self.limbProp_fl:
-                with pm.columnLayout(adj=1) as self.bhvLimbProp_cl:
+                with pm.columnLayout(adj=1, rs=5) as self.bhvLimbProp_cl:
                     pm.text('(EDIT in RIGGING Category)')
                     pm.text('(Select Limb to key bhv attrs)')
                     with pm.columnLayout(co=('left', -100)):

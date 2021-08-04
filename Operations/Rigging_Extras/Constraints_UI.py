@@ -77,7 +77,7 @@ class Constraints_UI(absOpUI.Abstract_OperationUI):
                                             elc=self.IgnoreRename)
                 pm.treeView(self.control_tv, e=1, scc=self.SelectedControl)
             with pm.frameLayout('Constraint Settings', bv=1):
-                with pm.columnLayout(adj=1) as self.bhvLimbProp_cl:
+                with pm.columnLayout(adj=1, rs=5) as self.bhvLimbProp_cl:
                     with pm.optionMenu(l='Cst Type') as self.cstType_om:
                         for cstType in rigData.CST_TYPES:
                             pm.menuItem(l=cstType)
