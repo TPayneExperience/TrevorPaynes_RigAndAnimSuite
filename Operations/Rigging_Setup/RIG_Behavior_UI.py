@@ -44,7 +44,7 @@ class RIG_Behavior_UI(absOpUI.Abstract_OperationUI):
         self._presetsUI = []
         self._limbIDs = {}
         self._limbGroups = {}
-        self.PopulateLimbHier()
+        self.PopulateLimbHierNormal()
         self.PopulatePresets()
         
     def Teardown_UI(self):
@@ -102,9 +102,9 @@ class RIG_Behavior_UI(absOpUI.Abstract_OperationUI):
 
 #=========== LIMB HIER ====================================
 
-    def PopulateLimbHier(self, selectLimb=None):
+    def PopulateLimbHierNormal(self, selectLimb=None):
         log.funcFileDebug()
-        self._limbIDs = uiUtil.PopulateLimbHier(self.limb_tv, 
+        self._limbIDs = uiUtil.PopulateLimbHierNormal(self.limb_tv, 
                                                 self._rigRoot,
                                                 self._allRigRoots)
         if not selectLimb:
@@ -173,7 +173,7 @@ class RIG_Behavior_UI(absOpUI.Abstract_OperationUI):
     def ResetToDefaultParent(self, ignore):
         log.funcFileDebug()
         self.operation.ResetToDefaultParent(self._selectedLimbs)
-        self.PopulateLimbHier()
+        self.PopulateLimbHierNormal()
         self.PopulateControlHier(None)
         self.PopulateLimbProperties(None)
         self.PopulateBhvProperties(None)
@@ -198,7 +198,7 @@ class RIG_Behavior_UI(absOpUI.Abstract_OperationUI):
         limb = self._selectedLimbs[0]
         rigRoot = pm.listConnections(limb.rigRoot)[0]
         newLimb = self.operation.AddEmptyLimb(rigRoot)
-        self.PopulateLimbHier(newLimb)
+        self.PopulateLimbHierNormal(newLimb)
         self.PopulateLimbProperties(newLimb)
         self.PopulateControlHier(newLimb)
         self.PopulateBhvProperties(newLimb)
@@ -209,7 +209,7 @@ class RIG_Behavior_UI(absOpUI.Abstract_OperationUI):
         log.funcFileInfo()
         limb = self._selectedLimbs[0]
         self.operation.RemoveEmptyLimb(limb)
-        self.PopulateLimbHier()
+        self.PopulateLimbHierNormal()
         self.PopulateLimbProperties(None)
         self.PopulateControlHier(None)
         self.PopulateBhvProperties(None)
@@ -225,7 +225,7 @@ class RIG_Behavior_UI(absOpUI.Abstract_OperationUI):
         msg = '\t"%s" to "%s"' % (oldName, newName)
         log.info(msg)
         if self.operation.RenameLimb(limb, newName):
-            self.PopulateLimbHier(limb)
+            self.PopulateLimbHierNormal(limb)
             pm.menuItem(self._addEmpty_mi, e=1, en=0)
             pm.menuItem(self._removeEmpty_mi, e=1, en=0)
         return ''
@@ -252,7 +252,7 @@ class RIG_Behavior_UI(absOpUI.Abstract_OperationUI):
         log.funcFileInfo()
         self.operation.ApplyPreset(self._rigRoot, presetID)
         self._selectedLimbs = []
-        self.PopulateLimbHier()
+        self.PopulateLimbHierNormal()
         self.PopulateControlHier(None)
         self.PopulateLimbProperties(None)
         self.PopulateBhvProperties(None)

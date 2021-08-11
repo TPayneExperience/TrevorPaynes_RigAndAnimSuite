@@ -43,7 +43,7 @@ class Constraints_UI(absOpUI.Abstract_OperationUI):
         self._target2 = None
         self._selectedTarget = None
         self._selectedControls = []
-        self.PopulateLimbHier()
+        self.PopulateLimbHierNormal()
         self.UpdateApplyButton()
     
     def Teardown_UI(self):
@@ -102,9 +102,9 @@ class Constraints_UI(absOpUI.Abstract_OperationUI):
 
 #=========== LIMB HIER ====================================
 
-    def PopulateLimbHier(self, selectLimb=None):
+    def PopulateLimbHierNormal(self, selectLimb=None):
         log.funcFileDebug()
-        self._limbIDs = uiUtil.PopulateLimbHier(self.limb_tv, 
+        self._limbIDs = uiUtil.PopulateLimbHierNormal(self.limb_tv, 
                                                 self._rigRoot,
                                                 self._allRigRoots)
         for limbID, limb in self._limbIDs.items():
@@ -225,7 +225,7 @@ class Constraints_UI(absOpUI.Abstract_OperationUI):
                                             not locks[1],
                                             not locks[2], 
                                             index)
-        self.PopulateLimbHier()
+        self.PopulateLimbHierNormal()
         self.PopulateControlHier()
         self.PopulateTargetableHier()
         self.PopulateGroupHier()

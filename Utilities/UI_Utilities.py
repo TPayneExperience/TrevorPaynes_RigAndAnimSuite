@@ -5,11 +5,13 @@ import Data.Rig_Data as rigData
 reload(rigData)
 import Utilities.Rig_Utilities as rigUtil
 reload(rigUtil)
+import Utilities.General_Utilities as genUtil
+reload(genUtil)
 
 import SceneData.RigRoot as rrt
 reload(rrt)
 
-def PopulateLimbHier(widget, currentRigRoot, allRigRoots): 
+def PopulateLimbHierNormal(widget, currentRigRoot, allRigRoots): 
     pm.treeView(widget, e=1, removeAll=1)
     limbIDs = {} # rigRootID_limbID : limb
     rootLimbs = []
@@ -50,6 +52,48 @@ def PopulateLimbHier(widget, currentRigRoot, allRigRoots):
                 pm.treeView(widget, e=1, bvf=(limbID, 1, 0))
     return limbIDs
 
+def PopulateLimbHierSkeletal(widget, rigRoot): 
+    limbIDs = {}
+    limbs = pm.listConnections(rigRoot.limbs)
+    limbParents = genUtil.GetDefaultLimbHier(limbs)
+    tempParents = limbParents.copy()
+
+    # Get limb hier order
+    limbs = []
+    while(tempParents):
+        toDelete = []
+        for child, parent in tempParents.items():
+            if not parent or parent in limbs:
+                limbs.append(child)
+                toDelete.append(child)
+        for child in toDelete:
+            del(tempParents[child])
+
+    # OLD
+    pm.treeView(widget, e=1, removeAll=1)
+    for limb in limbs:
+        rootName = rigRoot.pfrsName.get()
+        limbID = str(limb.ID.get())
+        limbIDs[limbID] = limb
+        name = '%s_%s' % (rootName, limb.pfrsName.get())
+        parent = limbParents[limb]
+        parentID = ''
+        if parent:
+            parentID = str(parent.ID.get())
+        pm.treeView(widget, e=1, ai=(limbID, parentID))
+        pm.treeView(widget, e=1, dl=(limbID, name))
+        side = rigData.LIMB_SIDES[limb.side.get()]
+        if (side == 'L'):
+            pm.treeView(widget, e=1, bti=(limbID, 1, side),
+                    lbc=(limbID, 0.1, 0.1, 0.3))
+        elif (side == 'R'):
+            pm.treeView(widget, e=1, bti=(limbID, 1, side),
+                    lbc=(limbID, 0.3, 0.1, 0.1))
+        else:
+            pm.treeView(widget, e=1, bvf=(limbID, 1, 0))
+    return limbIDs
+
+
 def PopulateControlHier(widget, limb):
     groups = {} # index : group
     for group in pm.listConnections(limb.usedGroups):
@@ -64,7 +108,7 @@ def PopulateControlHier(widget, limb):
         pm.treeView(widget, e=1, displayLabel=(index, name))
     return groups
 
-def PopluateJointHier(widget, limb):
+def PopulateJointHier(widget, limb):
     joints = {} # index : joint
     for joint in pm.listConnections(limb.joints):
         group = pm.listConnections(joint.group)[0]

@@ -26,7 +26,7 @@ class ANM_Behavior_UI(absOpUI.Abstract_OperationUI):
         self._presetsUI = []
         self._selectedLimbs = []
         self._currentBhv = None # for verifying group selection
-        self.PopulateLimbHier()
+        self.PopulateLimbHierNormal()
         self.PopulatePresets()
         
     def Teardown_UI(self):
@@ -70,9 +70,9 @@ class ANM_Behavior_UI(absOpUI.Abstract_OperationUI):
     def IgnoreRename(self, idStr, newName):
         return ''
 
-    def PopulateLimbHier(self, selectLimb=None):
+    def PopulateLimbHierNormal(self, selectLimb=None):
         log.funcFileDebug()
-        self._limbIDs = uiUtil.PopulateLimbHier(self.limb_tv, 
+        self._limbIDs = uiUtil.PopulateLimbHierNormal(self.limb_tv, 
                                                 self._rigRoot,
                                                 self._allRigRoots)
         if not selectLimb:
@@ -135,7 +135,7 @@ class ANM_Behavior_UI(absOpUI.Abstract_OperationUI):
         kfOnly = pm.menuItem(self.kfOnly_mi, q=1, cb=1)
         self.operation.ApplyPreset(self._rigRoot, presetID, kfOnly)
         self._selectedLimbs = []
-        self.PopulateLimbHier()
+        self.PopulateLimbHierNormal()
         self.PopulateControlHier(None)
         self.PopulateLimbProperties(None)
         self.PopulateBhvProperties(None)

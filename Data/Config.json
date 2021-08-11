@@ -5,19 +5,22 @@
         0
     ], 
     "controlShape_Empty": "Square_Wire", 
+    "paintWeightsRadius": 2.7416406207841644, 
+    "paintWeightsSoftness": 2.273359379215835, 
     "rigRootName": "TEMP", 
     "showRootName": false, 
     "templateFolderPath": "", 
     "jointUpAxis": 2, 
     "windowPos": [
-        353, 
-        507
+        339, 
+        1184
     ], 
+    "paintWeightsUseJointAnim": true, 
     "limbIndex": 1, 
     "lControlTransparency": 0.8, 
     "controlShape_IKPV": "Sphere_Poly", 
-    "version": 100, 
-    "lastVersionViewed": 100, 
+    "version": 110, 
+    "lastVersionViewed": 110, 
     "rigRootIndex": 0, 
     "jointAimAxis": 0, 
     "sideIndex": 3, 
@@ -37,6 +40,7 @@
         1, 
         0
     ], 
+    "paintWeightsValue": 0.6640625003055902, 
     "jointRotOrder": 0, 
     "controlShape_Joint": "Cube_Poly", 
     "jointIndex": 2, 

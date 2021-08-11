@@ -30,7 +30,7 @@ class Poses_UI(absOpUI.Abstract_OperationUI):
         self.poses_ui = []
         self._copiedPoses = {} # pfrsName : Pose
         self._selectedLimbs = []
-        self.PopulateLimbHier()
+        self.PopulateLimbHierNormal()
         self.operation.InitPoses(rigRoot)
         self.operation.SelectedLimbs([])
         
@@ -70,9 +70,9 @@ class Poses_UI(absOpUI.Abstract_OperationUI):
 
 #=========== LIMB HIER ====================================
    
-    def PopulateLimbHier(self):
+    def PopulateLimbHierNormal(self):
         log.funcFileDebug()
-        self._limbIDs = uiUtil.PopulateLimbHier(self.limb_tv, 
+        self._limbIDs = uiUtil.PopulateLimbHierNormal(self.limb_tv, 
                                                 self._rigRoot,
                                                 self._allRigRoots)
 

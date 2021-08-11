@@ -30,7 +30,7 @@ class Appearance_UI(absOpUI.Abstract_OperationUI):
         self._selectedLimbs = []
         self._limbGroups = []
         self._Setup()
-        self.PopulateLimbHier()
+        self.PopulateLimbHierNormal()
         for rigRoot in allRigRoots:
             for limb in pm.listConnections(rigRoot.limbs):
                 bhv = self.operation.bhvMng.bhvs[limb.bhvFile.get()]
@@ -104,11 +104,11 @@ class Appearance_UI(absOpUI.Abstract_OperationUI):
 
 #=========== LIMB HIER ====================================
    
-    def PopulateLimbHier(self):
+    def PopulateLimbHierNormal(self):
         log.funcFileDebug()
         self.PopulateControlHier(None)
         self.PopulateLimbProperties(None)
-        self._limbIDs = uiUtil.PopulateLimbHier(self.limb_tv, 
+        self._limbIDs = uiUtil.PopulateLimbHierNormal(self.limb_tv, 
                                                 self._rigRoot,
                                                 self._allRigRoots)
 

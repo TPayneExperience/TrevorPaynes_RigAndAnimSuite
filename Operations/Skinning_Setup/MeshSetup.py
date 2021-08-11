@@ -1,6 +1,6 @@
 
-import os
-import subprocess
+
+import random
 
 import pymel.core as pm
 import maya.mel as mel
@@ -19,6 +19,8 @@ import Data.Rig_Data as rigData
 reload(rigData)
 import SceneData.Mesh as msh
 reload(msh)
+import Data.General_Data as genData
+reload(genData)
 
 class MeshSetup(absOp.Abstract_Operation):
     isRigBuilt = False
@@ -48,13 +50,36 @@ class MeshSetup(absOp.Abstract_Operation):
 
     def AddMeshes(self, rigRoot, meshes):
         log.funcFileInfo()
-        for mesh in meshes:
-            msh.Mesh.Add(rigRoot, mesh)
+        for xform in meshes:
+            msh.Mesh.Add(rigRoot, xform)
+            mesh = pm.listRelatives(xform, c=1, type='mesh')[0]
+            for limb in pm.listConnections(rigRoot.limbs):
+                if limb.limbType.get() == 0: # Empty
+                    continue
+                self._AddLimbMask(mesh, limb)
+                # TEMP FLOODING
+                attr = 'L%03d' % limb.ID.get()
+                value = random.random()
+                self.FloodReplace(mesh, attr, value)
+                
+                for joint in pm.listConnections(limb.joints):
+                    self._AddJointMask(mesh, joint)
+                    # TEMP FLOODING
+                    attr = 'J%03d' % joint.ID.get()
+                    value = random.random()
+                    self.FloodReplace(mesh, attr, value)
     
-    def RemoveMeshes(self, meshes):
+    def RemoveMeshes(self, rigRoot, meshes):
         log.funcFileInfo()
-        for mesh in meshes:
-            msh.Mesh.Remove(mesh)
+        for xform in meshes:
+            msh.Mesh.Remove(xform)
+            mesh = pm.listRelatives(xform, c=1, type='mesh')[0]
+            for limb in pm.listConnections(rigRoot.limbs):
+                if limb.limbType.get() == 0: # Empty
+                    continue
+                self._RemoveLimbMask(mesh, limb)
+                for joint in pm.listConnections(limb.joints):
+                    self._RemoveJointMask(mesh, joint)
 
     def PaintSkinWeightsTool(self):
         mel.eval('ArtPaintSkinWeightsTool;')
@@ -70,6 +95,50 @@ class MeshSetup(absOp.Abstract_Operation):
         pm.skinCluster(mesh, e=1, unbind=1)
         meshSkin = pm.skinCluster(joints, mesh)
         pm.copySkinWeights( ss=backupSkin, ds=meshSkin, nm=1)
+
+#=========== ADD + REMOVE MASKS ====================================
+
+    def _AddLimbMask(self, mesh, limb):
+        log.funcFileInfo()
+        attr = 'L%03d' % limb.ID.get()
+        if mesh.hasAttr(attr):
+            return
+        pm.addAttr(mesh, ln=attr, dt='doubleArray', h=genData.HIDE_ATTRS) # Remove Later?
+        # pm.addAttr(mesh, ln=attr, dt='floatArray', h=1)
+    
+    def _AddJointMask(self, mesh, joint):
+        log.funcFileInfo()
+        attr = 'J%03d' % joint.ID.get()
+        if mesh.hasAttr(attr):
+            return
+        pm.addAttr(mesh, ln=attr, dt='doubleArray', h=genData.HIDE_ATTRS)
+        # pm.addAttr(mesh, ln=attr, dt='floatArray', h=1)
+    
+    def _RemoveLimbMask(self, mesh, limb):
+        log.funcFileInfo()
+        attr = 'L%03d' % limb.ID.get()
+        if not mesh.hasAttr(attr):
+            return
+        mesh.deleteAttr(attr)
+
+    def _RemoveJointMask(self, mesh, joint):
+        log.funcFileInfo()
+        attr = 'J%03d' % joint.ID.get()
+        if not mesh.hasAttr(attr):
+            return
+        mesh.deleteAttr(attr)
+
+#=========== FLOOD ====================================
+
+    def FloodReplace(self, mesh, attr, weight):
+        vertCount = pm.polyEvaluate(mesh, v=1)
+        values = [weight] * vertCount
+        mesh.setAttr(attr, values)
+
+    def FloodAdd(self, mesh, attr, weight):
+        weights = mesh.getAttr(attr)
+        weights = [min(1, w + weight) for w in weights]
+        mesh.setAttr(attr, weights)
 
 
 # Copyright (c) 2021 Trevor Payne

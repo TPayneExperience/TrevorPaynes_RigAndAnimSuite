@@ -244,6 +244,8 @@ class PayneFreeRigSuite:
             for opFile in os.listdir(categoryPath):
                 if '__init__.py' in opFile:
                     continue
+                if '.mel' in opFile:
+                    continue
                 opFilePath = os.path.join(categoryPath, opFile)
                 if not os.path.isfile(opFilePath):
                     continue

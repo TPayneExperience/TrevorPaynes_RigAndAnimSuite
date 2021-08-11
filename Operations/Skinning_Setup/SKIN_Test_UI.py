@@ -19,7 +19,7 @@ class Test_UI(absOpUI.Abstract_OperationUI):
         self._rigRoot = rigRoot
         self._allRigRoots = allRigRoots
         self._Setup()
-        self.PopulateLimbHier()
+        self.PopulateLimbHierNormal()
 
     def Teardown_UI(self):
         pass
@@ -42,10 +42,10 @@ class Test_UI(absOpUI.Abstract_OperationUI):
 
 #=========== LIMB HIER ====================================
    
-    def PopulateLimbHier(self):
+    def PopulateLimbHierNormal(self):
         log.funcFileDebug()
         self.PopulateControlHier(None)
-        self._limbIDs = uiUtil.PopulateLimbHier(self.limb_tv, 
+        self._limbIDs = uiUtil.PopulateLimbHierNormal(self.limb_tv, 
                                                 self._rigRoot,
                                                 self._allRigRoots)
 

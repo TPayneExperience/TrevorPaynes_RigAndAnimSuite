@@ -162,7 +162,7 @@ class Animation_UI(absOpUI.Abstract_OperationUI):
     def PopulateAnimationHier(self):
         log.funcFileDebug()
         self.animData = None
-        self.PopulateLimbHier()
+        self.PopulateLimbHierNormal()
         self.PopulateProperties()
         pm.menuItem(self.delete_mi, e=1, en=0)
         pm.treeView(self.animations_tv, e=1, removeAll=1)
@@ -175,7 +175,7 @@ class Animation_UI(absOpUI.Abstract_OperationUI):
     def SelectedAnimation(self):
         log.funcFileInfo()
         self.animData = None
-        self.PopulateLimbHier()
+        self.PopulateLimbHierNormal()
         self.PopulateProperties()
         self.UpdateApplyButton()
         pm.menuItem(self.delete_mi, e=1, en=0)
@@ -186,7 +186,7 @@ class Animation_UI(absOpUI.Abstract_OperationUI):
         animFile = self.anims[animStrs[0]]
         self.animData = genUtil.Json.Load(animFile)
         self.animData['filePath'] = animFile
-        self.PopulateLimbHier()
+        self.PopulateLimbHierNormal()
         self.PopulateProperties()
         self.UpdateApplyButton()
 
@@ -210,13 +210,13 @@ class Animation_UI(absOpUI.Abstract_OperationUI):
 
 #=========== LIMB HIER ====================================
 
-    def PopulateLimbHier(self):
+    def PopulateLimbHierNormal(self):
         log.funcFileDebug()
         pm.treeView(self.limb_tv, e=1, removeAll=1)
         self._limbIDs = []
         if not self.animData:
             return
-        self._limbIDs = uiUtil.PopulateLimbHier(self.limb_tv, 
+        self._limbIDs = uiUtil.PopulateLimbHierNormal(self.limb_tv, 
                                                 self._rigRoot,
                                                 self._allRigRoots)
         for rigLimbID, limb in self._limbIDs.items():

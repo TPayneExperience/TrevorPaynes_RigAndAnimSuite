@@ -14,8 +14,8 @@ class Updates:
     def _Setup(self):
         form = pm.setParent(q=1)
         with pm.scrollLayout() as self._sl:
-            with pm.columnLayout(adj=1):
-                for fileName in sorted(list(self._texts.keys())):
+            with pm.columnLayout(adj=1, rs=10):
+                for fileName in sorted(list(self._texts.keys()))[::-1]:
                     text = self._texts[fileName]
                     with pm.frameLayout(l=fileName, bv=1, w=550, h=150):
                         pm.scrollField(ed=0, ww=0, text=text)

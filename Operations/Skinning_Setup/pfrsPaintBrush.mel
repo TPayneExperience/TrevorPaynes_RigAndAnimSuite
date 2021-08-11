@@ -1,0 +1,49 @@
+
+// global string $objNameList[];
+// global int $nextFreeSlot = 0;
+// global int $totalFreeSlots = 0;
+
+python("import Operations.Skinning_Setup.pfrsPaintOperations as pfrsOps");
+python("reload(pfrsOps)");
+
+global proc pfrsPaint( string $context )
+{
+	artUserPaintCtx -e
+		-ic "initPFRSPaint"
+		-fc "finishPFRSPaint"
+		-svc "setPFRSPaintValue"
+		-gvc "getPFRSPaintValue"
+		-gsc ""
+		-cc ""
+		-tcc ""
+		-gac ""
+		$context;
+}
+
+global proc string initPFRSPaint( string $name )
+{	
+	print("Painting mesh named: " + $name + "\n");
+	python("pfrsOps.initPFRSPyPaint('" + $name + "')");
+	return ( "-id " + 0);
+		   
+}
+
+global proc finishPFRSPaint( int $slot )
+{
+	python("pfrsOps.finishPFRSPyPaint();");
+}
+
+global proc float getPFRSPaintValue( int $slot, int $index )
+{
+	float $value = python("pfrsOps.getPFRSPyPaintValue(" + $index + ")");
+	print("mel get value: " + $value + "\n");
+	return $value;
+}
+
+global proc setPFRSPaintValue( int $slot, int $index, float $val)
+{
+	python("pfrsOps.setPFRSPyPaintValue(" + $index + ", " + $val + ")");
+}
+
+
+
