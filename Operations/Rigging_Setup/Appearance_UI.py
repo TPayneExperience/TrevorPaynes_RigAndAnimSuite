@@ -85,7 +85,7 @@ class Appearance_UI(absOpUI.Abstract_OperationUI):
                     self._limbScale = pm.attrControlGrp(l='Limb Scale', ann=msg,
                                                     a='perspShape.shakeEnabled')
             with pm.frameLayout('Control Colors', bv=1, en=0) as self.mtr_fl:
-                with pm.columnLayout(adj=1):
+                with pm.columnLayout(adj=1, co=('both', 5)):
                     self.clrL_cg = pm.attrColorSliderGrp(l='L Color', cw4=(66,44,44,22),
                                                     at='perspShape.backgroundColor')
                     self.opL_cg = pm.attrColorSliderGrp(l='L Opacity', cw4=(66,44,44,22),
@@ -100,7 +100,7 @@ class Appearance_UI(absOpUI.Abstract_OperationUI):
                                                     at='perspShape.backgroundColor')
                     
             with pm.frameLayout('Control Shapes', bv=1, en=0) as self.ctrShapes_fl:
-                self.ctrShapes_cl = pm.columnLayout(adj=1)
+                self.ctrShapes_cl = pm.columnLayout(adj=1, co=('both', 5))
 
 #=========== LIMB HIER ====================================
    
@@ -218,7 +218,7 @@ class Appearance_UI(absOpUI.Abstract_OperationUI):
                     groupTypes.append(groupType)
 
         # Populate with Option Menues
-        with pm.columnLayout(adj=1, p=self.ctrShapes_fl) as self.ctrShapes_cl:
+        with pm.columnLayout(adj=1, co=('both', 5), rs=5, p=self.ctrShapes_fl) as self.ctrShapes_cl:
             for i in range(len(groupTypes)):
                 groupType = groupTypes[i]
                 label = '\t%s Shape' % groupType

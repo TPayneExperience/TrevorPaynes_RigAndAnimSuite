@@ -742,10 +742,7 @@ class LimbSetup(absOp.Abstract_Operation):
             self._UpdateParentControlEnum(childLimb)
 
     def SetupDefaultLimbParent(self, limb):
-        jointGroups = pm.listConnections(limb.jointGroups)
-        jointGroups = rigUtil.SortGroups(jointGroups)
-        joints = [pm.listConnections(g.joint)[0] for g in jointGroups]
-        joint = joints[0]
+        joint = rigUtil.GetSortedLimbJoints(limb)[0]
         parentLimb = None
         parentJoints = pm.listRelatives(joint, p=1, type='joint')
         if parentJoints:

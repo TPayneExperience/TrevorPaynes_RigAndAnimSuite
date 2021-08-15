@@ -72,7 +72,7 @@ class PaintWeights_UI:
             paint.PFRS_INF_JOINTS = []
             self.skinMng.SkinTestLimbAnim(limb)
             if self.curMesh:
-                paint.UpdateLimbVertexColors()
+                paint.DisplayLimbVertexColors()
                 pm.select(self.curMesh)
                 self.brush_ui.BrushOn()
         else:
@@ -90,7 +90,7 @@ class PaintWeights_UI:
             self.skinMng.SkinTestJointAnim(self.joint)
             if self.curMesh:
                 pm.select(self.curMesh)
-                paint.UpdateJointVertexColors()
+                paint.DisplayJointVertexColors()
                 self.brush_ui.BrushOn()
         else:
             self.brush_ui.BrushOff()

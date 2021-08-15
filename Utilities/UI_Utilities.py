@@ -3,11 +3,12 @@ import pymel.core as pm
 
 import Data.Rig_Data as rigData
 reload(rigData)
-import Utilities.Rig_Utilities as rigUtil
+import Rig_Utilities as rigUtil
 reload(rigUtil)
-import Utilities.General_Utilities as genUtil
+import General_Utilities as genUtil
 reload(genUtil)
-
+import Skin_Utilities as skinUtil
+reload(skinUtil)
 import SceneData.RigRoot as rrt
 reload(rrt)
 
@@ -56,18 +57,7 @@ def PopulateLimbHierSkeletal(widget, rigRoot):
     limbIDs = {}
     limbs = pm.listConnections(rigRoot.limbs)
     limbParents = genUtil.GetDefaultLimbHier(limbs)
-    tempParents = limbParents.copy()
-
-    # Get limb hier order
-    limbs = []
-    while(tempParents):
-        toDelete = []
-        for child, parent in tempParents.items():
-            if not parent or parent in limbs:
-                limbs.append(child)
-                toDelete.append(child)
-        for child in toDelete:
-            del(tempParents[child])
+    limbs = skinUtil.GetSkeletalLimbOrder(limbs)
 
     # OLD
     pm.treeView(widget, e=1, removeAll=1)

@@ -3,11 +3,15 @@
 import pymel.core as pm
 import maya.api.OpenMaya as om
 
+import Data.Skin_Data as skinData
+reload(skinData)
+
 PFRS_MESH_NAME = ''
+SKIN_CLUSTER = '' #  'skinCluster1'
 PFRS_ATTR = '' # J01, L22, ... J(oint)/L(imb) ID
-# PFRS_CUR_JOINT = None # joint node| if none, is limb attr
 PFRS_INF_JOINTS = [] # joint nodes. Set in PaintWeights_UI > JointSelected()
                     # If empty, painting limb
+PFRS_JOINT_INDEX = -1 #
 
 def initPFRSPyPaint(meshName):
     global PFRS_MESH_NAME
@@ -37,12 +41,6 @@ def setPFRSPyPaintValue(vertIndex, value):
     pm.setAttr(mainAttr, values)
     print ('PY: attr %s vert %s set to %s' % (mainAttr, str(vertIndex), str(value)))
     
-    # If painting limb mask, return
-    if not PFRS_INF_JOINTS:
-        # Set vertex color
-        SetLimbVertexColor(vertIndex, value)
-        return
-
     # Prepare to rebalance weights
     invValue = 1 - value
     otherValues = []
@@ -88,33 +86,32 @@ def setPFRSPyPaintValue(vertIndex, value):
 
 #============ VERTEX COLORS =======================
 
-def SetLimbVertexColor(vertIndex, value):
-    _SetColor([vertIndex], [om.MColor([value, value, value])])
+def SetJointVertexColor(vertIndex, value):
+    finalColor = (value, value, value)
+    dataLen = len(skinData.JOINT_COLORS)
+    for i in range(len(PFRS_INF_JOINTS)):
+        if i == PFRS_JOINT_INDEX:
+            continue
+        color = skinData.JOINT_COLORS[i % dataLen]
+        for j in range(3):
+            finalColor[j] = min(1, finalColor[j] + color[j])
+    _SetColor([vertIndex], [finalColor])
 
-def UpdateLimbVertexColors():
+def DisplayVertexColors():
     global PFRS_MESH_NAME
     global PFRS_ATTR
     meshAttr = '%s.%s' % (PFRS_MESH_NAME, PFRS_ATTR)
     values = pm.getAttr(meshAttr)
     colors = [om.MColor([v, v, v]) for v in values]
-    _SetColor(range(len(values)), colors)
-
-def SetJointVertexColor(vertIndex, value):
-    finalColor = [value, value, value]
-    for joint in PFRS_INF_JOINTS:
-        color = joint.jointColor.get()
-        for i in range(3):
-            finalColor[i] = min(1, finalColor[i] + color[i])
-    _SetColor([vertIndex], [finalColor])
-
-def UpdateJointVertexColors():
-    meshAttr = '%s.%s' % (PFRS_MESH_NAME, PFRS_ATTR)
-    values = pm.getAttr(meshAttr)
-    colors = [om.MColor([v, v, v]) for v in values]
     vertIndexes = range(len(values))
-    for joint in PFRS_INF_JOINTS:
-        color = joint.jointColor.get()
-        jointAttr = 'J%d' % joint.ID.get()
+    # for joint in PFRS_INF_JOINTS:
+    dataLen = len(skinData.JOINT_COLORS)
+    for i in range(len(PFRS_INF_JOINTS)):
+        joint = PFRS_INF_JOINTS[i]
+        if i == PFRS_JOINT_INDEX:
+            continue
+        color = skinData.JOINT_COLORS[i % dataLen]
+        jointAttr = 'J%03d' % joint.ID.get()
         fullJointAttr = '%s.%s' % (PFRS_MESH_NAME, jointAttr)
         jointValues = pm.getAttr(fullJointAttr)
         for index in vertIndexes:

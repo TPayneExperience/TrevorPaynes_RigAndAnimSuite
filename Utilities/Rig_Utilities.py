@@ -1,9 +1,4 @@
 
-import json
-import inspect
-import os
-import sys
-
 import pymel.core as pm
 
 import Data.Rig_Data as rigData
@@ -122,6 +117,12 @@ def GetSortedJoints(joints):
     for joint in joints:
         temp[joint.longName()] = joint
     return [temp[n] for n in sorted(list(temp.keys()))]
+
+def GetSortedLimbJoints(limb):
+    jointGroups = pm.listConnections(limb.jointGroups)
+    jointGroups = SortGroups(jointGroups)
+    joints = [pm.listConnections(g.joint)[0] for g in jointGroups]
+    return joints
 
 def GetSkinnableRigJoints(rigRoot):
     joints = []

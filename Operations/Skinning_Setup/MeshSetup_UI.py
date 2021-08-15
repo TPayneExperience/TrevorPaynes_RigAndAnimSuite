@@ -64,7 +64,8 @@ class MeshSetup_UI(absOpUI.Abstract_OperationUI):
     def PopulateAvailable(self):
         pm.treeView(self.availableMeshes_tv, e=1, removeAll=1)
         meshGroup = pm.listConnections(self._rigRoot.meshesParentGroup)[0]
-        availableMeshes = pm.listRelatives(meshGroup, c=1)
+        meshXforms = pm.listRelatives(meshGroup, c=1)
+        availableMeshes = [pm.listRelatives(m, c=1, type='mesh')[0] for m in meshXforms]
         skinnedMeshes = pm.listConnections(self._rigRoot.meshes)
         backupMeshes = [pm.listConnections(m.backupMesh)[0] for m in skinnedMeshes]
         self._allMeshes = {} # name : meshNode
@@ -118,7 +119,7 @@ class MeshSetup_UI(absOpUI.Abstract_OperationUI):
 
     def PopulateSkinned(self):
         pm.treeView(self._skinnedMeshes_tv, e=1, removeAll=1)
-        meshes = pm.listConnections(self._rigRoot.meshes)
+        meshes = pm.listConnections(self._rigRoot.meshes, sh=1)
         self._skinnedMeshes = {} # name : meshNode
         for mesh in meshes:
             name = mesh.shortName()
@@ -141,7 +142,7 @@ class MeshSetup_UI(absOpUI.Abstract_OperationUI):
 
     def RemoveMeshes(self, ignore):
         log.funcFileInfo()
-        self.operation.RemoveMeshes(self._selectedSkinned)
+        self.operation.RemoveMeshes(self._rigRoot, self._selectedSkinned)
         self.PopulateAvailable()
         self.PopulateSkinned()
 

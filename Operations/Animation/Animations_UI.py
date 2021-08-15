@@ -66,7 +66,7 @@ class Animation_UI(absOpUI.Abstract_OperationUI):
                                             scc=self.SelectedLimb)
             # Properties
             with pm.frameLayout('Animation Properties', bv=1, en=0) as self.prop_fl:
-                with pm.columnLayout(adj=1, rs=5):
+                with pm.columnLayout(adj=1, rs=5, co=('both', 5)):
                     self.constraints_cb = pm.checkBoxGrp( ncb=3, l='  ',
                                                 la3=['Position', 'Rotation', 'Scale'],
                                                 va3=(1,1,1), cw4=(10,70,70,70),

@@ -55,19 +55,6 @@ LIMB_JOINT_NAME_PRESETS = { # lowercase to for keycheck
 
 # ============= JOINTS =============
 
-JOINT_COLORS = ((1, 0, 0), # Red
-                (0, 1, 0), # Green
-                (0, 0, 1), # Blue
-                (1, 1, 0), # Yellow
-                (0, 1, 1), # Cyan
-                (1, 0, 1), # Magenta
-                (1, 0.5, 0), # 
-                (0, 1, 0.5), # 
-                (0.5, 0, 1),# 
-                (0.5, 1, 0), # 
-                (0, 0.5, 1), # 
-                (1, 0, 0.5)) 
-
 JOINT_ROT_ORDER = ( 'XYZ',
                     'YZX',
                     'ZXY',

@@ -91,7 +91,7 @@ def setPFRSPyPaintValue(vertIndex, value):
 def SetLimbVertexColor(vertIndex, value):
     _SetColor([vertIndex], [om.MColor([value, value, value])])
 
-def UpdateLimbVertexColors():
+def DisplayLimbVertexColors():
     meshAttr = '%s.%s' % (PFRS_MESH_NAME, PFRS_ATTR)
     values = pm.getAttr(meshAttr)
     colors = [om.MColor([v, v, v]) for v in values]
@@ -105,7 +105,7 @@ def SetJointVertexColor(vertIndex, value):
             finalColor[i] = min(1, finalColor[i] + color[i])
     _SetColor([vertIndex], [finalColor])
 
-def UpdateJointVertexColors():
+def DisplayJointVertexColors():
     meshAttr = '%s.%s' % (PFRS_MESH_NAME, PFRS_ATTR)
     values = pm.getAttr(meshAttr)
     colors = [om.MColor([v, v, v]) for v in values]

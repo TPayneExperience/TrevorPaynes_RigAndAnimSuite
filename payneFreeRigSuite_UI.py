@@ -77,10 +77,10 @@ class PayneFreeRigSuite_UI:
         name += ' - by Trevor Payne'
         with pm.window(mb=True,mbv=True, t=name, w=500, h=500) as self.win:
             with pm.rowLayout(nc=2):
-                with pm.columnLayout(co=('left', 0)):
+                with pm.columnLayout(co=('left', 10)):
                     self.cat_op = pm.optionMenu(l='Category', 
                                                 cc=self.SetCategory)
-                with pm.columnLayout(co=('left', 0)):
+                with pm.columnLayout(co=('left', 10)):
                     self.op_op = pm.optionMenu(l='Operation', 
                                                 cc=self.SetOperation)
             with pm.frameLayout(bv=0, lv=0) as self.frame:
@@ -275,8 +275,8 @@ class PayneFreeRigSuite_UI:
     def closeEvent(self):
         log.funcFileInfo()
         self._SaveWindowPos()
-        
-        # Get Config Data
+        if self.currentOp:
+            self.currentOp.Teardown_UI()
 
     def NewLoadRig(self, ignore):
         log.funcFileInfo()

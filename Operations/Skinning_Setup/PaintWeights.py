@@ -12,10 +12,14 @@ import Data.Rig_Data as rigData
 reload(rigData)
 import Utilities.Rig_Utilities as rigUtil
 reload(rigUtil)
+import Utilities.Skin_Utilities as skinUtil
+reload(skinUtil)
 import MeshSetup as ms
 reload(ms)
-import pfrsPaintOperations as paint
-reload(paint)
+import paintOp_Joints as jntOp
+reload(jntOp)
+import paintOp_Limbs as lmbOp
+reload(lmbOp)
 
 class PaintWeights(absOp.Abstract_Operation):
     isRigBuilt = True
@@ -27,19 +31,93 @@ class PaintWeights(absOp.Abstract_Operation):
     meshLayerState = (1, 0)     # isVis, isRef
 
     def __init__(self):
-        self.ctx = 'pfrsPaintCtx'
+        self.ctx = ''
         self._skinTestAnimLayer = 'Skin_Test_Anim'
         self.meshSetup = ms.MeshSetup()
 
         # Import Paint Brush
         folder = os.path.dirname(__file__)
-        pfrsPaintMel = os.path.join(folder, 'pfrsPaintBrush')
-        pfrsPaintMel = pfrsPaintMel.replace('\\', '/')
-        mel.eval('source "%s";' % pfrsPaintMel)
+        paintJointMel = os.path.join(folder, 'paintBrush_Joints')
+        paintLimbMel = os.path.join(folder, 'paintBrush_Limbs')
+        paintJointMel = paintJointMel.replace('\\', '/')
+        paintLimbMel = paintLimbMel.replace('\\', '/')
+        mel.eval('source "%s";' % paintJointMel)
+        mel.eval('source "%s";' % paintLimbMel)
 
 #=========== BRUSH ====================================
 
-    def PaintBrushOn(self):
+    def PaintBrushOn_Limbs(self):
+        self.ctx = 'pfrsPaintCtx1'
+        self._PaintBrushOn()
+        cmd = 'pfrsPaintLimbs("%s");' % self.ctx
+        mel.eval(cmd)
+        mesh = lmbOp.PFRS_MESH_NAME
+        vertCount = pm.polyEvaluate(mesh, v=1)
+
+        # BEFORE JOINT WEIGHTS
+        before = []
+        beforeLimb = {} # Attr : weights
+        for i in range(len(lmbOp.JOINT_ATTRS_BEFORE)):
+            jAttr = lmbOp.JOINT_ATTRS_BEFORE[i]
+            lAttr = lmbOp.LIMB_ATTRS_BEFORE[i]
+            jWeights = pm.getAttr('%s.%s' % (mesh, jAttr))
+            if lAttr not in beforeLimb:
+                beforeLimb[lAttr] = pm.getAttr('%s.%s' % (mesh, lAttr))
+            lWeights = beforeLimb[lAttr]
+            count = len(jWeights)
+            weights = [lWeights[i]*jWeights[i] for i in range(count)]
+            before.append(weights)
+
+        lmbOp.VERT_WEIGHTS_BEFORE = self._ConvertToVertWeights(
+                                        len(lmbOp.JOINT_ATTRS_BEFORE),
+                                        vertCount,
+                                        before)
+
+        # CURRENT JOINT WEIGHTS
+        current = []
+        for attr in lmbOp.JOINT_ATTRS_CURRENT:
+            current.append(pm.getAttr('%s.%s' % (mesh, attr)))
+        lmbOp.VERT_WEIGHTS_CURRENT = self._ConvertToVertWeights(
+                                        len(lmbOp.JOINT_ATTRS_CURRENT),
+                                        vertCount,
+                                        current)
+
+        # AFTER WEIGHTS
+        after = []
+        afterLimb = {} # Attr : weights
+        for i in range(len(lmbOp.JOINT_ATTRS_AFTER)):
+            jAttr = lmbOp.JOINT_ATTRS_AFTER[i]
+            lAttr = lmbOp.LIMB_ATTRS_AFTER[i]
+            jWeights = pm.getAttr('%s.%s' % (mesh, jAttr))
+            if lAttr not in afterLimb:
+                afterLimb[lAttr] = pm.getAttr('%s.%s' % (mesh, lAttr))
+            lWeights = afterLimb[lAttr]
+            count = len(jWeights)
+            weights = [lWeights[i]*jWeights[i] for i in range(count)]
+            after.append(weights)
+        lmbOp.VERT_WEIGHTS_AFTER = self._ConvertToVertWeights(
+                                        len(lmbOp.JOINT_ATTRS_AFTER),
+                                        vertCount,
+                                        after)
+        
+        # SET LIMB MASK VALUES
+        name = '%s.%s' % (mesh, lmbOp.PFRS_ATTR)
+        lmbOp.LIMB_MASK = pm.getAttr(name)
+
+    def _ConvertToVertWeights(self, infCount, vertCount, oldInf):
+        weights = [[0]*infCount for i in range(vertCount)]
+        for inf in range(len(oldInf)):
+            for vert in range(vertCount):
+                weights[vert][inf] = oldInf[inf][vert]
+        return weights
+
+    def PaintBrushOn_Joints(self):
+        self.ctx = 'pfrsPaintCtx2'
+        self._PaintBrushOn()
+        cmd = 'pfrsPaintJoints("%s");' % self.ctx
+        mel.eval(cmd)
+
+    def _PaintBrushOn(self):
         # Create Brush
         if not pm.artUserPaintCtx(self.ctx, ex=1):
             pm.artUserPaintCtx(self.ctx, dl=1, cl='both',
@@ -47,7 +125,6 @@ class PaintWeights(absOp.Abstract_Operation):
         # Set Brush
         if pm.currentCtx() != self.ctx:
             pm.setToolTo(self.ctx)
-        mel.eval('pfrsPaint("pfrsPaintCtx");')
         pm.polyOptions(cs=1)
         rigUtil.SetLayerState(rigData.JOINTS_DISP_LAYER, 1, 1)
         rigUtil.SetLayerState(rigData.CONTROL_DISP_LAYER, 0, 0)
@@ -58,32 +135,66 @@ class PaintWeights(absOp.Abstract_Operation):
         rigUtil.SetLayerState(rigData.JOINTS_DISP_LAYER, 1, 1)
         rigUtil.SetLayerState(rigData.CONTROL_DISP_LAYER, 1, 0)
 
-    def SetLimb(self, limb):
-        if limb:
-            paint.PFRS_ATTR = 'L%03d' % limb.ID.get()
-            paint.PFRS_INF_JOINTS = []
-        else:
-            paint.PFRS_ATTR = ''
-            paint.PFRS_INF_JOINTS = []
+    def SetLimb(self, rigRoot, limb):
+        lmbOp.PFRS_ATTR = 'L%03d' % limb.ID.get()
+        limbs = pm.listConnections(rigRoot.limbs)
+        limbOrder = skinUtil.GetSkeletalLimbOrder(limbs)
+        index = limbOrder.index(limb)
+        
+        # BEFORE JOINTS
+        beforeLimbs = limbOrder[:index]
+        beforeJoints = []
+        beforeLimbAttrs = []
+        for tempLimb in beforeLimbs:
+            joints = rigUtil.GetSortedLimbJoints(tempLimb)
+            attr = 'L%03d' % tempLimb.ID.get()
+            beforeLimbAttrs += [attr]*len(joints)
+            beforeJoints += joints
+
+        lmbOp.JOINT_NAMES_BEFORE = [j.longName() for j in beforeJoints]
+        lmbOp.JOINT_ATTRS_BEFORE = ['J%03d' % j.ID.get() for j in beforeJoints]
+        lmbOp.LIMB_ATTRS_BEFORE = beforeLimbAttrs
+
+        # CURRENT JOINTS
+        joints = rigUtil.GetSortedLimbJoints(limb)
+        lmbOp.JOINT_NAMES_CURRENT = [j.longName() for j in joints]
+        lmbOp.JOINT_ATTRS_CURRENT = ['J%03d' % j.ID.get() for j in joints]
+
+        # AFTER JOINTS
+        afterLimbs = limbOrder[index+1:]
+        afterJoints = []
+        afterLimbAttrs = []
+        for tempLimb in afterLimbs:
+            joints = rigUtil.GetSortedLimbJoints(tempLimb)
+            attr = 'L%03d' % tempLimb.ID.get()
+            afterLimbAttrs += [attr]*len(joints)
+            afterJoints += joints
+        lmbOp.JOINT_NAMES_AFTER = [j.longName() for j in afterJoints]
+        lmbOp.JOINT_ATTRS_AFTER = ['J%03d' % j.ID.get() for j in afterJoints]
+        lmbOp.LIMB_ATTRS_AFTER = afterLimbAttrs
     
     def SetJoint(self, limb, joint):
-        if joint:
-            joints = pm.listConnections(limb.joints)
-            
-            paint.PFRS_ATTR = 'J%03d' % joint.ID.get()
-            paint.PFRS_INF_JOINTS = []
-        else:
-            paint.PFRS_ATTR = ''
-            paint.PFRS_INF_JOINTS = []
+        joints = rigUtil.GetSortedLimbJoints(limb)
+        index = joints.index(joint)
+        
+        jntOp.PFRS_ATTR = 'J%03d' % joint.ID.get()
+        jntOp.PFRS_INF_JOINTS = joints
+        jntOp.PFRS_JOINT_INDEX = index
     
     def SetMesh(self, mesh):
-        if mesh:
-            paint.PFRS_MESH_NAME = mesh.longName()
-        else:
-            paint.PFRS_MESH_NAME = ''
+        lmbOp.PFRS_MESH_NAME = mesh.longName()
+        jntOp.PFRS_MESH_NAME = mesh.longName()
+        xform = pm.listRelatives(mesh, p=1)[0]
+        skinCluster = pm.listConnections(xform.pfrsSkinCluster)[0]
+        lmbOp.SKIN_CLUSTER = skinCluster.longName()
+        jntOp.SKIN_CLUSTER = skinCluster.longName()
     
-    def UpdatePaintDisplay(self):
-        paint.UpdateLimbVertexColors()
+    def DisplayLimbVertexColors(self):
+        lmbOp.DisplayVertexColors()
+
+    def DisplayJointVertexColors(self):
+        jntOp.DisplayVertexColors()
+    
 
 #=========== FLOOD ====================================
 
@@ -156,13 +267,25 @@ class PaintWeights(absOp.Abstract_Operation):
                 mesh.setAttr(attr, weights)
 
     
-#=========== Paint Mode ====================================
+#=========== PAINT SETTINGS ====================================
 
     def SetPaintModeAdd(self):
         mel.eval('artAttrPaintOperation artUserPaintCtx Add;')
 
     def SetPaintModeReplace(self):
         mel.eval('artAttrPaintOperation artUserPaintCtx Replace;')
+
+    def SetValue(self, value):
+        pm.artUserPaintCtx(self.ctx, e=1, val=value) 
+        
+    def SetRadius(self, radius):
+        pm.artUserPaintCtx(self.ctx, e=1, r=radius) 
+    
+    def SetSoftness(self, softness):
+        pm.artUserPaintCtx(self.ctx, e=1, lr=softness) 
+    
+
+#=========== ANIMATIONS ====================================
 
     def Setup_AnimJoints(self, rigRoot):
         self.bhvMng.Teardown_Rig(rigRoot)

@@ -30,16 +30,22 @@ class Mesh:
         # Connect to rigRoot
         pm.connectAttr(rigRoot.meshes, mesh.rigRoot)
 
-        # Skin Mesh
+    @staticmethod
+    def BindSkin(rigRoot, mesh):
         joints = rigUtil.GetSkinnableRigJoints(rigRoot)
-        pm.skinCluster(joints, mesh)
+        skinCls = pm.skinCluster(joints, mesh)
+        pm.addAttr(skinCls, ln='pfrsMeshes', dt='string')
+        pm.connectAttr(skinCls.pfrsMeshes, mesh.pfrsSkinCluster)
+    
+    @staticmethod
+    def UnbindSkin(mesh):
+        pm.skinCluster(mesh, e=1, unbind=1)
     
     @staticmethod
     def Remove(mesh):
         log.funcFileDebug()
         pm.delete(pm.listConnections(mesh.backupMesh))
         pm.disconnectAttr(mesh.rigRoot)
-        pm.skinCluster(mesh, e=1, unbind=1)
     
 # Copyright (c) 2021 Trevor Payne
 # See user license in "PayneFreeRigSuite\Data\LicenseAgreement.txt"

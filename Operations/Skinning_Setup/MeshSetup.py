@@ -50,25 +50,30 @@ class MeshSetup(absOp.Abstract_Operation):
 
     def AddMeshes(self, rigRoot, meshes):
         log.funcFileInfo()
-        for xform in meshes:
-            msh.Mesh.Add(rigRoot, xform)
-            mesh = pm.listRelatives(xform, c=1, type='mesh')[0]
+        for mesh in meshes:
+            msh.Mesh.Add(rigRoot, mesh)
+            if not pm.listConnections(mesh.pfrsSkinCluster):
+                msh.Mesh.BindSkin(rigRoot, mesh)
+            shouldUnpackWeights = True
             for limb in pm.listConnections(rigRoot.limbs):
                 if limb.limbType.get() == 0: # Empty
                     continue
-                self._AddLimbMask(mesh, limb)
-                # TEMP FLOODING
+                # ADD LIMB MASK
                 attr = 'L%03d' % limb.ID.get()
-                value = random.random()
-                self.FloodReplace(mesh, attr, value)
-                
-                for joint in pm.listConnections(limb.joints):
-                    self._AddJointMask(mesh, joint)
-                    # TEMP FLOODING
-                    attr = 'J%03d' % joint.ID.get()
-                    value = random.random()
-                    self.FloodReplace(mesh, attr, value)
+                if not mesh.hasAttr(attr):
+                    pm.addAttr(mesh, ln=attr, dt='doubleArray', h=1) # Remove Later?
+                else:
+                    shouldUnpackWeights = False
     
+                for joint in pm.listConnections(limb.joints):
+                    attr = 'J%03d' % joint.ID.get()
+                    if not mesh.hasAttr(attr):
+                        pm.addAttr(mesh, ln=attr, dt='doubleArray', h=1)
+                    else:
+                        shouldUnpackWeights = False
+            if shouldUnpackWeights:
+                self._UnpackWeights(rigRoot, mesh)
+
     def RemoveMeshes(self, rigRoot, meshes):
         log.funcFileInfo()
         for xform in meshes:
@@ -98,22 +103,6 @@ class MeshSetup(absOp.Abstract_Operation):
 
 #=========== ADD + REMOVE MASKS ====================================
 
-    def _AddLimbMask(self, mesh, limb):
-        log.funcFileInfo()
-        attr = 'L%03d' % limb.ID.get()
-        if mesh.hasAttr(attr):
-            return
-        pm.addAttr(mesh, ln=attr, dt='doubleArray', h=genData.HIDE_ATTRS) # Remove Later?
-        # pm.addAttr(mesh, ln=attr, dt='floatArray', h=1)
-    
-    def _AddJointMask(self, mesh, joint):
-        log.funcFileInfo()
-        attr = 'J%03d' % joint.ID.get()
-        if mesh.hasAttr(attr):
-            return
-        pm.addAttr(mesh, ln=attr, dt='doubleArray', h=genData.HIDE_ATTRS)
-        # pm.addAttr(mesh, ln=attr, dt='floatArray', h=1)
-    
     def _RemoveLimbMask(self, mesh, limb):
         log.funcFileInfo()
         attr = 'L%03d' % limb.ID.get()
@@ -127,6 +116,82 @@ class MeshSetup(absOp.Abstract_Operation):
         if not mesh.hasAttr(attr):
             return
         mesh.deleteAttr(attr)
+
+    def _UnpackWeights(self, rigRoot, mesh):
+        # create dict of limbs attrs to joint attrs
+        limbs = pm.listConnections(rigRoot.limbs)
+        joints = [] # [[j1, j2...], [...]]
+        jointPositions = [] # [l1[j1[0,0,0], j2...], l2[...]]
+        limbAttrs = []
+        jointAttrs = [] # [[j1, j2...], [...]]
+        finalLWeights = [] # [limb01[v1,v2...], limb02[v1,v2...], ...]
+        finalJWeights = [] # [L1[j1[v1,v2...], j2[v1,v2...]], L2[j1[v1,c2...], ...]
+        vertCount = pm.polyEvaluate(mesh, v=1)
+        skin = pm.listConnections(mesh.pfrsSkinCluster)[0]
+
+        # Get Limb Attr, Joint Attrs, empty limb/joint weight lists
+        for limb in limbs:
+            if limb.limbType.get() == 0: # Skip empty
+                continue
+            tempJoints = rigUtil.GetSortedLimbJoints(limb)
+            joints.append(tempJoints)
+            jointPositions.append([pm.xform(j, q=1, t=1, ws=1) for j in tempJoints])
+            limbAttrs.append('L%03d' % limb.ID.get())
+            jointAttrs.append(['J%03d' % j.ID.get() for j in tempJoints])
+            finalLWeights.append([0]*vertCount)
+            finalJWeights.append([[0]*vertCount for j in tempJoints])
+
+        # For each vert
+        for vert in range(vertCount):
+            vAttr = '%s.vtx[%d]' % (mesh, vert)
+            for l in range(len(limbAttrs)):
+                limbAttr = limbAttrs[l]
+                jAttrs = jointAttrs[l]
+                jointWeights = []
+                # Get joint weights on vert
+                for j in range(len(jAttrs)):
+                    joint = joints[l][j]
+                    jointWeights.append(pm.skinPercent(skin, vAttr, t=joint, q=1))
+
+                # Limb weight
+                limbWeight = sum(jointWeights)
+                finalLWeights[l][vert] = limbWeight
+                if limbWeight == 0:
+                    continue
+
+                # Scale Joint weights up
+                scalar = 1.0/limbWeight
+                jointWeights = [min(j*scalar, 1) for j in jointWeights]
+                for j in range(len(jAttrs)):
+                    finalJWeights[l][j][vert] = jointWeights[j]
+
+        # Set zero weight verts to closest joint
+        for vert in range(vertCount):
+            vAttr = '%s.vtx[%d]' % (mesh, vert)
+            vPos = pm.xform(vAttr, q=1, t=1, ws=1)
+            for l in range(len(limbAttrs)):
+                limbWeight = finalLWeights[l][vert]
+                if limbWeight != 0:
+                    continue
+                distances = {} # dist : jointIndex
+                for j in range(len(jointAttrs[l])):
+                    jPos = jointPositions[l][j]
+                    squared = [(vPos[i] - jPos[i])**2 for i in range(3)]
+                    dist = sum(squared)
+                    distances[dist] = j
+                closestDist = sorted(list(distances.keys()))[0]
+                closestIndex = distances[closestDist]
+                finalJWeights[l][closestIndex][vert] = 1
+
+        # Set Attrs
+        for vert in range(vertCount):
+            vAttr = '%s.vtx[%d]' % (mesh, vert)
+            for l in range(len(limbAttrs)):
+                limbAttr = limbAttrs[l]
+                mesh.setAttr(limbAttr, finalLWeights[l])
+                for j in range(len(jointAttrs[l])):
+                    jointAttr = jointAttrs[l][j]
+                    mesh.setAttr(jointAttr, finalJWeights[l][j])
 
 #=========== FLOOD ====================================
 
