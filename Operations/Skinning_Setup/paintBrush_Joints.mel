@@ -9,10 +9,10 @@ python("reload(jointOps)");
 global proc pfrsPaintJoints( string $context )
 {
 	artUserPaintCtx -e
-		-ic "initPFRSPaint"
-		-fc "finishPFRSPaint"
-		-svc "setPFRSPaintValue"
-		-gvc "getPFRSPaintValue"
+		-ic "initPFRSPaintJoint"
+		-fc "finishPFRSPaintJoint"
+		-svc "setPFRSPaintJointValue"
+		-gvc "getPFRSPaintJointValue"
 		-gsc ""
 		-cc ""
 		-tcc ""
@@ -20,27 +20,27 @@ global proc pfrsPaintJoints( string $context )
 		$context;
 }
 
-global proc string initPFRSPaint( string $name )
+global proc string initPFRSPaintJoint( string $name )
 {	
-	print("Painting mesh named: " + $name + "\n");
+	// print("Painting mesh named: " + $name + "\n");
 	python("jointOps.initPFRSPyPaint('" + $name + "')");
 	return ( "-id " + 0);
 		   
 }
 
-global proc finishPFRSPaint( int $slot )
+global proc finishPFRSPaintJoint( int $slot )
 {
 	python("jointOps.finishPFRSPyPaint();");
 }
 
-global proc float getPFRSPaintValue( int $slot, int $index )
+global proc float getPFRSPaintJointValue( int $slot, int $index )
 {
 	float $value = python("jointOps.getPFRSPyPaintValue(" + $index + ")");
-	print("mel get value: " + $value + "\n");
+	// print("mel get value: " + $value + "\n");
 	return $value;
 }
 
-global proc setPFRSPaintValue( int $slot, int $index, float $val)
+global proc setPFRSPaintJointValue( int $slot, int $index, float $val)
 {
 	python("jointOps.setPFRSPyPaintValue(" + $index + ", " + $val + ")");
 }

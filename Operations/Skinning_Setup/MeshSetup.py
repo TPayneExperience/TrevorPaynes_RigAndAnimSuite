@@ -21,6 +21,8 @@ import SceneData.Mesh as msh
 reload(msh)
 import Data.General_Data as genData
 reload(genData)
+import Utilities.Skin_Utilities as skinUtil
+reload(skinUtil)
 
 class MeshSetup(absOp.Abstract_Operation):
     isRigBuilt = False
@@ -120,6 +122,14 @@ class MeshSetup(absOp.Abstract_Operation):
     def _UnpackWeights(self, rigRoot, mesh):
         # create dict of limbs attrs to joint attrs
         limbs = pm.listConnections(rigRoot.limbs)
+        limbs = skinUtil.GetSkeletalLimbOrder(limbs)[::-1]
+        limbParents = genUtil.GetDefaultLimbHier(limbs)
+        limbChildren = {}
+        for limb in limbs:
+            limbChildren[limb] = []
+        for child, parent in limbParents.items():
+            if parent:
+                limbChildren[parent].append(child)
         joints = [] # [[j1, j2...], [...]]
         jointPositions = [] # [l1[j1[0,0,0], j2...], l2[...]]
         limbAttrs = []
@@ -146,15 +156,19 @@ class MeshSetup(absOp.Abstract_Operation):
             vAttr = '%s.vtx[%d]' % (mesh, vert)
             for l in range(len(limbAttrs)):
                 limbAttr = limbAttrs[l]
-                jAttrs = jointAttrs[l]
+                jointAttr = jointAttrs[l]
                 jointWeights = []
                 # Get joint weights on vert
-                for j in range(len(jAttrs)):
+                for j in range(len(jointAttr)):
                     joint = joints[l][j]
                     jointWeights.append(pm.skinPercent(skin, vAttr, t=joint, q=1))
 
                 # Limb weight
                 limbWeight = sum(jointWeights)
+                limb = limbs[l]
+                for child in limbChildren[limb]:
+                    ci = limbs.index(child)
+                    limbWeight = min(finalLWeights[ci][vert] + limbWeight, 1)
                 finalLWeights[l][vert] = limbWeight
                 if limbWeight == 0:
                     continue
@@ -162,7 +176,7 @@ class MeshSetup(absOp.Abstract_Operation):
                 # Scale Joint weights up
                 scalar = 1.0/limbWeight
                 jointWeights = [min(j*scalar, 1) for j in jointWeights]
-                for j in range(len(jAttrs)):
+                for j in range(len(jointAttr)):
                     finalJWeights[l][j][vert] = jointWeights[j]
 
         # Set zero weight verts to closest joint
@@ -182,16 +196,23 @@ class MeshSetup(absOp.Abstract_Operation):
                 closestDist = sorted(list(distances.keys()))[0]
                 closestIndex = distances[closestDist]
                 finalJWeights[l][closestIndex][vert] = 1
-
+        
         # Set Attrs
-        for vert in range(vertCount):
-            vAttr = '%s.vtx[%d]' % (mesh, vert)
-            for l in range(len(limbAttrs)):
-                limbAttr = limbAttrs[l]
-                mesh.setAttr(limbAttr, finalLWeights[l])
-                for j in range(len(jointAttrs[l])):
-                    jointAttr = jointAttrs[l][j]
-                    mesh.setAttr(jointAttr, finalJWeights[l][j])
+        for l in range(len(limbAttrs)):
+            limbAttr = limbAttrs[l]
+            mesh.setAttr(limbAttr, finalLWeights[l])
+            for j in range(len(jointAttrs[l])):
+                jointAttr = jointAttrs[l][j]
+                mesh.setAttr(jointAttr, finalJWeights[l][j])
+        print('done!')
+
+    # def _AddChildLimbWeights(limb, limbs, allWeights, limbParents):
+    #     index = limbs.index(limb)
+    #     limbWeights
+    #     for child, parent in limbParents.items():
+    #         if parent == limb:
+    #             self._AddChildLimbWeights(child, allWeights, limbParents)
+    #     # 
 
 #=========== FLOOD ====================================
 

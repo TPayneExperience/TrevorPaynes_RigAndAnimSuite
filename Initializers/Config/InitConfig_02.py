@@ -13,9 +13,13 @@ class InitConfig(absInit.Abstract_Initializer):
 
         # New Stuff
         temp.data['paintWeightsUseJointAnim'] = True
-        temp.data['paintWeightsRadius'] = 1.0
-        temp.data['paintWeightsValue'] = 1.0
-        temp.data['paintWeightsSoftness'] = 1.0
+        temp.data['paintWeightsMode'] = 1   # Add = 1, replace = 2
+        temp.data['paintWeightsAddValue'] = 1.0
+        temp.data['paintWeightsAddSoftness'] = 1.0
+        temp.data['paintWeightsAddRadius'] = 1.0
+        temp.data['paintWeightsReplaceValue'] = 1.0
+        temp.data['paintWeightsReplaceSoftness'] = 1.0
+        temp.data['paintWeightsReplaceRadius'] = 1.0
 
 
         

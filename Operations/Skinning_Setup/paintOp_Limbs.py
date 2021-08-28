@@ -3,13 +3,14 @@
 import pymel.core as pm
 import maya.api.OpenMaya as om
 
-PFRS_ATTR = '' # L022, L001... LimbID Attr
+LIMB_ATTR = ''      # L022, L001... LimbID Attr
 PFRS_MESH_NAME = ''
-SKIN_CLUSTER = '' #  'skinCluster1'
-LIMB_MASK = [] # 
+SKIN_CLUSTER = ''   #  'skinCluster1'
+LIMB_WEIGHTS = []      # [v1, v2, ...]
+
 JOINT_NAMES_BEFORE = []     # long? joint names
 JOINT_ATTRS_BEFORE = []     # [J001, J002...]
-LIMB_ATTRS_BEFORE = []     # [L001, L002...]
+LIMB_ATTRS_BEFORE = []      # [L001, L002...] IGNORE, FOR WEIGHT CALCS
 VERT_WEIGHTS_BEFORE = []    # [v1[j1, j2,...], v2[j1, j2, ...], ...]
 
 JOINT_NAMES_CURRENT = []  
@@ -18,7 +19,7 @@ VERT_WEIGHTS_CURRENT = []
 
 JOINT_NAMES_AFTER = []
 JOINT_ATTRS_AFTER = []    
-LIMB_ATTRS_AFTER = []     # [L001, L002...]
+LIMB_ATTRS_AFTER = []     # [L001, L002...] IGNORE, FOR WEIGHT CALCS
 VERT_WEIGHTS_AFTER = []
 
 #============ BRUSH OPERATIONS =======================
@@ -32,32 +33,35 @@ def initPFRSPyPaint(meshName):
 def finishPFRSPyPaint():
     pass
     # global PFRS_MESH_NAME
-    # global PFRS_ATTR
+    # global LIMB_ATTR
     # print ('finish py pfrs weights')
-    # attr = '%s.%s' % (PFRS_MESH_NAME, PFRS_ATTR)
+    # attr = '%s.%s' % (PFRS_MESH_NAME, LIMB_ATTR)
     # print (pm.getAttr(attr))
 
 def getPFRSPyPaintValue(vertIndex):
-    value = LIMB_MASK[vertIndex]
+    value = LIMB_WEIGHTS[vertIndex]
     # print ('PY: Get Weight %s for vert %s' %(str(value), str(vertIndex)))
     return value
 
 def setPFRSPyPaintValue(vertIndex, value):
-    global PFRS_ATTR
-
     # SET VALUE
-    mainAttr = '%s.%s' % (PFRS_MESH_NAME, PFRS_ATTR)
-    LIMB_MASK[vertIndex] = value
-    pm.setAttr(mainAttr, LIMB_MASK)
+    mainAttr = '%s.%s' % (PFRS_MESH_NAME, LIMB_ATTR)
+    LIMB_WEIGHTS[vertIndex] = value
+    pm.setAttr(mainAttr, LIMB_WEIGHTS)
 
     # UPDATE DISPLAY
-    # print ('PY: attr %s vert %s set to %s' % (mainAttr, str(vertIndex), str(value)))
     _SetColor([vertIndex], [om.MColor([value, value, value])])
 
     # SKIP IF BEFORE WEIGHTS >= 1
     beforeSum = 0
+    weights = []
+    names = []
+    remainingWeight = 1
     if VERT_WEIGHTS_BEFORE:
         beforeSum = sum(VERT_WEIGHTS_BEFORE[vertIndex])
+        remainingWeight -= beforeSum
+        weights += VERT_WEIGHTS_BEFORE[vertIndex]
+        names += JOINT_NAMES_BEFORE
     if beforeSum >= 1:
         return
 
@@ -65,13 +69,27 @@ def setPFRSPyPaintValue(vertIndex, value):
     currentCopy = VERT_WEIGHTS_CURRENT[vertIndex][:]
     currentCopy = [w*value for w in currentCopy]
     currentSum = sum(currentCopy)
-    names = JOINT_NAMES_BEFORE + JOINT_NAMES_CURRENT
-    weights = VERT_WEIGHTS_BEFORE[vertIndex] + currentCopy
+    scalar = 1
+    if remainingWeight < currentSum:
+        scalar = remainingWeight / currentSum
+        remainingWeight = 0
+    else:
+        remainingWeight -= currentSum
+    currentCopy = [w*scalar for w in currentCopy]
+    names += JOINT_NAMES_CURRENT
+    weights += currentCopy
 
     # POSSIBLY SKIP END WEIGHTS
-    if beforeSum + currentSum < 1:
+    if remainingWeight:
+        if VERT_WEIGHTS_AFTER and sum(VERT_WEIGHTS_AFTER[vertIndex]):
+            afterWeights = VERT_WEIGHTS_AFTER[vertIndex]
+            scalar = remainingWeight / sum(afterWeights)
+            afterWeights = [w*scalar for w in afterWeights]
+            weights += afterWeights
+            names += JOINT_NAMES_AFTER
+    else:
+        weights += [0]*len(VERT_WEIGHTS_AFTER)
         names += JOINT_NAMES_AFTER
-        weights += VERT_WEIGHTS_AFTER[vertIndex]
     
     # SET WEIGHTS
     influences = zip(names, weights)
@@ -81,8 +99,8 @@ def setPFRSPyPaintValue(vertIndex, value):
 #============ VERTEX COLORS =======================
 
 def DisplayVertexColors():
-    colors = [om.MColor([v, v, v]) for v in LIMB_MASK]
-    _SetColor(range(len(LIMB_MASK)), colors)
+    colors = [om.MColor([v, v, v]) for v in LIMB_WEIGHTS]
+    _SetColor(range(len(LIMB_WEIGHTS)), colors)
 
 def _SetColor(vertIndexes, colors):
     tempSel = om.MSelectionList()

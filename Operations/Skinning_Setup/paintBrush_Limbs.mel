@@ -9,10 +9,10 @@ python("reload(limbOps)");
 global proc pfrsPaintLimbs( string $context )
 {
 	artUserPaintCtx -e
-		-ic "initPFRSPaint"
-		-fc "finishPFRSPaint"
-		-svc "setPFRSPaintValue"
-		-gvc "getPFRSPaintValue"
+		-ic "initPFRSPaintLimb"
+		-fc "finishPFRSPaintLimb"
+		-svc "setPFRSPaintLimbValue"
+		-gvc "getPFRSPaintLimbValue"
 		-gsc ""
 		-cc ""
 		-tcc ""
@@ -20,27 +20,27 @@ global proc pfrsPaintLimbs( string $context )
 		$context;
 }
 
-global proc string initPFRSPaint( string $name )
+global proc string initPFRSPaintLimb( string $name )
 {	
-	print("Painting mesh named: " + $name + "\n");
+	// print("Painting mesh named: " + $name + "\n");
 	python("limbOps.initPFRSPyPaint('" + $name + "')");
 	return ( "-id " + 0);
 		   
 }
 
-global proc finishPFRSPaint( int $slot )
+global proc finishPFRSPaintLimb( int $slot )
 {
 	python("limbOps.finishPFRSPyPaint();");
 }
 
-global proc float getPFRSPaintValue( int $slot, int $index )
+global proc float getPFRSPaintLimbValue( int $slot, int $index )
 {
 	float $value = python("limbOps.getPFRSPyPaintValue(" + $index + ")");
-	print("mel get value: " + $value + "\n");
+	// print("mel get value: " + $value + "\n");
 	return $value;
 }
 
-global proc setPFRSPaintValue( int $slot, int $index, float $val)
+global proc setPFRSPaintLimbValue( int $slot, int $index, float $val)
 {
 	python("limbOps.setPFRSPyPaintValue(" + $index + ", " + $val + ")");
 }

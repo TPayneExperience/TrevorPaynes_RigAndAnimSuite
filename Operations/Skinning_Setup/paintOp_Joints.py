@@ -6,118 +6,194 @@ import maya.api.OpenMaya as om
 import Data.Skin_Data as skinData
 reload(skinData)
 
+# PFRS_ATTR = ''      # J01, J22, ... J(oint) ID
 PFRS_MESH_NAME = ''
-SKIN_CLUSTER = '' #  'skinCluster1'
-PFRS_ATTR = '' # J01, L22, ... J(oint)/L(imb) ID
-PFRS_INF_JOINTS = [] # joint nodes. Set in PaintWeights_UI > JointSelected()
-                    # If empty, painting limb
-PFRS_JOINT_INDEX = -1 #
+SKIN_CLUSTER = ''   #  'skinCluster1'
+LIMB_WEIGHTS = []           # [v1, v2...]
+LIMB_ATTR = ''
+JOINT_WEIGHTS = []          # [j1[v1, v2...], j2[v1,v2...]]
+JOINT_INDEX = -1 #
+
+PFRS_INF_JOINTS = []        # joints!
+LIMB_JOINT_POSITIONS = []   # [[jPos1], [jPos2]...]
+
+JOINT_NAMES_BEFORE = []     # long? joint names
+JOINT_ATTRS_BEFORE = []     # [J001, J002...]
+LIMB_ATTRS_BEFORE = []      # [L001, L002...]
+VERT_WEIGHTS_BEFORE = []    # [v1[j1, j2,... all joints], v2[...], ...]
+
+JOINT_NAMES_CURRENT = []  
+JOINT_ATTRS_CURRENT = []    
+VERT_WEIGHTS_CURRENT = []   # [v1[j1, j2,... all joints], v2[...], ...]
+
+JOINT_NAMES_AFTER = []
+JOINT_ATTRS_AFTER = []    
+LIMB_ATTRS_AFTER = []     # [L001, L002...]
+VERT_WEIGHTS_AFTER = []
+
 
 def initPFRSPyPaint(meshName):
-    global PFRS_MESH_NAME
-    PFRS_MESH_NAME = meshName
-    print ('init py pfrs weights for mesh ' + meshName)
+    pass
+    # global PFRS_MESH_NAME
+    # PFRS_MESH_NAME = meshName
+    # print ('init py pfrs weights for mesh ' + meshName)
 
 def finishPFRSPyPaint():
-    print ('finish py pfrs weights')
-    attr = '%s.%s' % (PFRS_MESH_NAME, PFRS_ATTR)
-    print (pm.getAttr(attr))
+    pass
+    # print ('finish py pfrs weights')
+    # attr = '%s.%s' % (PFRS_MESH_NAME, PFRS_ATTR)
+    # print (pm.getAttr(attr))
 
 def getPFRSPyPaintValue(vertIndex):
-    global PFRS_MESH_NAME
-    global PFRS_ATTR
-    attr = '%s.%s' % (PFRS_MESH_NAME, PFRS_ATTR)
-    value = pm.getAttr(attr)[vertIndex]
-    print ('PY: Get Weight %s for vert %s' %(str(value), str(vertIndex)))
+    # global PFRS_MESH_NAME
+    # global PFRS_ATTR
+    # attr = '%s.%s' % (PFRS_MESH_NAME, PFRS_ATTR)
+    # value = pm.getAttr(attr)[vertIndex]
+    # print ('PY: Get Weight %s for vert %s' %(str(value), str(vertIndex)))
+    value = VERT_WEIGHTS_CURRENT[vertIndex][JOINT_INDEX]
     return value
 
 def setPFRSPyPaintValue(vertIndex, value):
-    global PFRS_ATTR
-    global PFRS_INF_JOINTS
-    mainAttr = '%s.%s' % (PFRS_MESH_NAME, PFRS_ATTR)
-    values = pm.getAttr(mainAttr)
-    oldValue = values[vertIndex]
-    values[vertIndex] = value
-    pm.setAttr(mainAttr, values)
-    print ('PY: attr %s vert %s set to %s' % (mainAttr, str(vertIndex), str(value)))
-    
-    # Prepare to rebalance weights
-    invValue = 1 - value
-    otherValues = []
-    for joint in PFRS_INF_JOINTS:
-        ID = joint.ID.get()
-        attr = '%s.%s' % (PFRS_MESH_NAME, 'J' + str(ID))
-        otherValues.append(pm.getAttr(attr)[vertIndex])
-    oldOtherTotal = sum(otherValues)
+    remainingWeight = 1 - value
+    weightIndexes = {} # weight : jointIndex
 
-    # If no other weights, get closest joint, and set remaining weight
-    if oldOtherTotal == 0:
-        if value < 1: 
-            # get vert pos, ws
+    # SET Current joint weight
+    JOINT_WEIGHTS[JOINT_INDEX][vertIndex] = value
+    VERT_WEIGHTS_CURRENT[vertIndex][JOINT_INDEX] = value
+    attr = '%s.%s' % (PFRS_MESH_NAME, JOINT_ATTRS_CURRENT[JOINT_INDEX])
+    pm.setAttr(attr, JOINT_WEIGHTS[JOINT_INDEX])
+
+    # REBALANCE WEIGHTS
+    otherWeightTotal = sum(VERT_WEIGHTS_CURRENT[vertIndex])
+    otherWeightTotal -= VERT_WEIGHTS_CURRENT[vertIndex][JOINT_INDEX]
+    invValue = 1 - value
+
+    # IF NO OTHER WEIGHTS AND NEW WEIGHT <1
+    if otherWeightTotal == 0:
+        if value < 1 and len(LIMB_JOINT_POSITIONS) > 1:
             name = '%s.vtx[%d]' %(PFRS_MESH_NAME, vertIndex)
             vp = pm.xform(name, q=1, t=1, ws=1)
-            # foreach joint, get dist to vert
+
+            # FIND CLOSEST JOINT TO VERT
             jointDist = {} # dist : joint
-            for joint in PFRS_INF_JOINTS:
-                jp = pm.xform(joint, q=1, t=1, ws=1)
+            for index in range(len(LIMB_JOINT_POSITIONS)):
+                if index == JOINT_INDEX:
+                    continue
+                jp = LIMB_JOINT_POSITIONS[index]
                 dist = ((vp[0]-jp[0])**2 + (vp[1]-jp[1])**2 + (vp[2]-jp[2])**2)
-                jointDist[dist] = joint
-            # get closest inf
+                jointDist[dist] = index
             closestDist = sorted(list(jointDist.keys()))[0]
-            closestAttr = 'J' + str(jointDist[closestDist].ID.get())
-            # set value to invValue
+            jointIndex = jointDist[closestDist]
+            closestAttr = JOINT_ATTRS_CURRENT[jointIndex]
+
+            # SET TO REMAINING WEIGHT
             attr = '%s.%s' % (PFRS_MESH_NAME, closestAttr)
-            values = pm.getAttr(attr)
-            values[vertIndex] = invValue
-            pm.setAttr(attr, values)
-    # Else, Scale weights
+            VERT_WEIGHTS_CURRENT[vertIndex][jointIndex] = invValue
+            JOINT_WEIGHTS[jointIndex][vertIndex] = invValue
+            pm.setAttr(attr, JOINT_WEIGHTS[jointIndex])
     else:
-        change = oldValue - value # Amount all other cha
-        scalar = (oldOtherTotal + change) / oldOtherTotal
-        attrs = ['J' + str(j.ID.get()) for j in PFRS_INF_JOINTS]
-        for attr in attrs:
-            meshAttr = '%s.%s' % (PFRS_MESH_NAME, attr)
-            values = pm.getAttr(meshAttr)
-            otherValue = values[vertIndex] * scalar
-            values[vertIndex] = otherValue
-            pm.setAttr(meshAttr, values)
-            print ('REBALANCE WEIGHTS: attr %s to %s' % (meshAttr, str(otherValue)))
+        scalar = invValue / otherWeightTotal
+        for jointIndex in range(len(JOINT_WEIGHTS)):
+            if jointIndex == JOINT_INDEX:
+                continue
+            # SCALE WEIGHTS
+            JOINT_WEIGHTS[jointIndex][vertIndex] *= scalar
+            VERT_WEIGHTS_CURRENT[vertIndex][jointIndex] *= scalar
+            jointAttr = JOINT_ATTRS_CURRENT[jointIndex]
+            attr = '%s.%s' % (PFRS_MESH_NAME, jointAttr)
+            pm.setAttr(attr, JOINT_WEIGHTS[jointIndex])
+
+            # CALC REMAINING WEIGHT
+            weight = JOINT_WEIGHTS[jointIndex][vertIndex]
+            remainingWeight -= weight
+            weightIndexes[weight] = jointIndex
+
+        # ADD MISSING WEIGHT
+        if remainingWeight != 0 and weightIndexes:
+            index = sorted(list(weightIndexes.keys()))[0]
+            jointIndex = weightIndexes[index]
+            JOINT_WEIGHTS[jointIndex][vertIndex] += remainingWeight
+            VERT_WEIGHTS_CURRENT[vertIndex][jointIndex] += remainingWeight
+            jointAttr = JOINT_ATTRS_CURRENT[jointIndex]
+            attr = '%s.%s' % (PFRS_MESH_NAME, jointAttr)
+            pm.setAttr(attr, JOINT_WEIGHTS[jointIndex])
+
+    # DISPLAY
     SetJointVertexColor(vertIndex, value)
+
+    # SKIP IF BEFORE WEIGHTS >= 1
+    beforeSum = 0
+    names = [] 
+    weights = []
+    remainingWeight = 1
+    if VERT_WEIGHTS_BEFORE:
+        beforeSum = sum(VERT_WEIGHTS_BEFORE[vertIndex])
+        remainingWeight -= beforeSum
+        weights += VERT_WEIGHTS_BEFORE[vertIndex]
+        names += JOINT_NAMES_BEFORE
+    if beforeSum >= 1:
+        return
+
+    # CALC NEW WEIGHTS
+    maskWeight = LIMB_WEIGHTS[vertIndex]
+    currentCopy = VERT_WEIGHTS_CURRENT[vertIndex][:]
+    currentCopy = [w*maskWeight for w in currentCopy]
+    currentSum = sum(currentCopy)
+    scalar = 1
+    if remainingWeight < currentSum:
+        scalar = remainingWeight / currentSum
+        remainingWeight = 0
+    else:
+        remainingWeight -= currentSum
+    currentCopy = [w*scalar for w in currentCopy]
+    names += JOINT_NAMES_CURRENT
+    weights += currentCopy
+
+    # POSSIBLY SKIP END WEIGHTS
+    if remainingWeight:
+        if VERT_WEIGHTS_AFTER:
+            afterWeights = VERT_WEIGHTS_AFTER[vertIndex]
+            scalar = remainingWeight / sum(afterWeights)
+            afterWeights = [w*scalar for w in afterWeights]
+            weights += afterWeights
+            names += JOINT_NAMES_AFTER
+    else:
+        weights += [0]*len(VERT_WEIGHTS_AFTER)
+        names += JOINT_NAMES_AFTER
+    
+    # SET WEIGHTS
+    influences = zip(names, weights)
+    mesh = '%s.vtx[%d]' % (PFRS_MESH_NAME, vertIndex)
+    pm.skinPercent(SKIN_CLUSTER, mesh, tv=influences)
+
 
 #============ VERTEX COLORS =======================
 
 def SetJointVertexColor(vertIndex, value):
-    finalColor = (value, value, value)
+    finalColor = om.MColor([value, value, value])
     dataLen = len(skinData.JOINT_COLORS)
-    for i in range(len(PFRS_INF_JOINTS)):
-        if i == PFRS_JOINT_INDEX:
+    for jointIndex in range(len(PFRS_INF_JOINTS)):
+        if jointIndex == JOINT_INDEX:
             continue
-        color = skinData.JOINT_COLORS[i % dataLen]
+        color = skinData.JOINT_COLORS[jointIndex % dataLen]
+        jVal = JOINT_WEIGHTS[jointIndex][vertIndex]
         for j in range(3):
-            finalColor[j] = min(1, finalColor[j] + color[j])
+            finalColor[j] = min(1, finalColor[j] + color[j]*jVal)
     _SetColor([vertIndex], [finalColor])
 
 def DisplayVertexColors():
-    global PFRS_MESH_NAME
-    global PFRS_ATTR
-    meshAttr = '%s.%s' % (PFRS_MESH_NAME, PFRS_ATTR)
-    values = pm.getAttr(meshAttr)
+    values = JOINT_WEIGHTS[JOINT_INDEX]
     colors = [om.MColor([v, v, v]) for v in values]
     vertIndexes = range(len(values))
-    # for joint in PFRS_INF_JOINTS:
     dataLen = len(skinData.JOINT_COLORS)
-    for i in range(len(PFRS_INF_JOINTS)):
-        joint = PFRS_INF_JOINTS[i]
-        if i == PFRS_JOINT_INDEX:
+    for jointIndex in range(len(JOINT_WEIGHTS)):
+        if jointIndex == JOINT_INDEX:
             continue
-        color = skinData.JOINT_COLORS[i % dataLen]
-        jointAttr = 'J%03d' % joint.ID.get()
-        fullJointAttr = '%s.%s' % (PFRS_MESH_NAME, jointAttr)
-        jointValues = pm.getAttr(fullJointAttr)
-        for index in vertIndexes:
-            jVal = jointValues[index]
+        color = skinData.JOINT_COLORS[jointIndex % dataLen]
+        for vert in vertIndexes:
+            jVal = JOINT_WEIGHTS[jointIndex][vert]
             for i in range(3):
-                colors[index][i] = min(1, colors[index][i] + color[i]*jVal)
+                colors[vert][i] = min(1, colors[vert][i] + color[i]*jVal)
     _SetColor(vertIndexes, colors)
 
 def _SetColor(vertIndexes, colors):

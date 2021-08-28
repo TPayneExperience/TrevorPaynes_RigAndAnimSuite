@@ -46,78 +46,102 @@ class PaintWeights(absOp.Abstract_Operation):
 
 #=========== BRUSH ====================================
 
-    def PaintBrushOn_Limbs(self):
+    def PaintBrushOn_Limbs(self, brushMode, value, radius, softness):
         self.ctx = 'pfrsPaintCtx1'
-        self._PaintBrushOn()
+        self._PaintBrushOn(brushMode, value, radius, softness)
         cmd = 'pfrsPaintLimbs("%s");' % self.ctx
         mel.eval(cmd)
-        mesh = lmbOp.PFRS_MESH_NAME
-        vertCount = pm.polyEvaluate(mesh, v=1)
+        meshName = lmbOp.PFRS_MESH_NAME
 
         # BEFORE JOINT WEIGHTS
-        before = []
-        beforeLimb = {} # Attr : weights
-        for i in range(len(lmbOp.JOINT_ATTRS_BEFORE)):
-            jAttr = lmbOp.JOINT_ATTRS_BEFORE[i]
-            lAttr = lmbOp.LIMB_ATTRS_BEFORE[i]
-            jWeights = pm.getAttr('%s.%s' % (mesh, jAttr))
-            if lAttr not in beforeLimb:
-                beforeLimb[lAttr] = pm.getAttr('%s.%s' % (mesh, lAttr))
-            lWeights = beforeLimb[lAttr]
-            count = len(jWeights)
-            weights = [lWeights[i]*jWeights[i] for i in range(count)]
-            before.append(weights)
+        lmbOp.VERT_WEIGHTS_BEFORE = []
+        if lmbOp.LIMB_ATTRS_BEFORE:
+            beforeJointWeights = self._GetJointWeights( meshName,
+                                                        lmbOp.JOINT_ATTRS_BEFORE,
+                                                        lmbOp.LIMB_ATTRS_BEFORE)
 
-        lmbOp.VERT_WEIGHTS_BEFORE = self._ConvertToVertWeights(
-                                        len(lmbOp.JOINT_ATTRS_BEFORE),
-                                        vertCount,
-                                        before)
+            lmbOp.VERT_WEIGHTS_BEFORE = self._ConvertToVertWeights(beforeJointWeights)
 
         # CURRENT JOINT WEIGHTS
-        current = []
+        currentJointWeights = []
         for attr in lmbOp.JOINT_ATTRS_CURRENT:
-            current.append(pm.getAttr('%s.%s' % (mesh, attr)))
-        lmbOp.VERT_WEIGHTS_CURRENT = self._ConvertToVertWeights(
-                                        len(lmbOp.JOINT_ATTRS_CURRENT),
-                                        vertCount,
-                                        current)
+            currentJointWeights.append(pm.getAttr('%s.%s' % (meshName, attr)))
+        lmbOp.VERT_WEIGHTS_CURRENT = self._ConvertToVertWeights(currentJointWeights)
 
         # AFTER WEIGHTS
-        after = []
-        afterLimb = {} # Attr : weights
-        for i in range(len(lmbOp.JOINT_ATTRS_AFTER)):
-            jAttr = lmbOp.JOINT_ATTRS_AFTER[i]
-            lAttr = lmbOp.LIMB_ATTRS_AFTER[i]
-            jWeights = pm.getAttr('%s.%s' % (mesh, jAttr))
-            if lAttr not in afterLimb:
-                afterLimb[lAttr] = pm.getAttr('%s.%s' % (mesh, lAttr))
-            lWeights = afterLimb[lAttr]
-            count = len(jWeights)
-            weights = [lWeights[i]*jWeights[i] for i in range(count)]
-            after.append(weights)
-        lmbOp.VERT_WEIGHTS_AFTER = self._ConvertToVertWeights(
-                                        len(lmbOp.JOINT_ATTRS_AFTER),
-                                        vertCount,
-                                        after)
+        lmbOp.VERT_WEIGHTS_AFTER = []
+        if lmbOp.LIMB_ATTRS_AFTER:
+            afterJointWeights = self._GetJointWeights(  meshName,
+                                                        lmbOp.JOINT_ATTRS_AFTER,
+                                                        lmbOp.LIMB_ATTRS_AFTER)
+            lmbOp.VERT_WEIGHTS_AFTER = self._ConvertToVertWeights(afterJointWeights)
         
         # SET LIMB MASK VALUES
-        name = '%s.%s' % (mesh, lmbOp.PFRS_ATTR)
-        lmbOp.LIMB_MASK = pm.getAttr(name)
+        name = '%s.%s' % (meshName, lmbOp.LIMB_ATTR)
+        lmbOp.LIMB_WEIGHTS = pm.getAttr(name)
 
-    def _ConvertToVertWeights(self, infCount, vertCount, oldInf):
-        weights = [[0]*infCount for i in range(vertCount)]
-        for inf in range(len(oldInf)):
+    def _GetJointWeights(self, meshName, jointAttrs, limbAttrs):
+        jointWeights = []
+        beforeLimb = {} # Attr : weights
+        for i in range(len(jointAttrs)):
+            jAttr = jointAttrs[i]
+            lAttr = limbAttrs[i]
+            jWeights = pm.getAttr('%s.%s' % (meshName, jAttr))
+            if lAttr not in beforeLimb:
+                beforeLimb[lAttr] = pm.getAttr('%s.%s' % (meshName, lAttr))
+            lWeights = beforeLimb[lAttr]
+            weights = [lWeights[i]*jWeights[i] for i in range(len(jWeights))]
+            jointWeights.append(weights)
+        return jointWeights
+
+    def _ConvertToVertWeights(self, jointWeights):
+        jointCount = len(jointWeights)
+        vertCount = len(jointWeights[0])
+        vertWeights = [[0]*jointCount for i in range(vertCount)]
+        for inf in range(len(jointWeights)):
             for vert in range(vertCount):
-                weights[vert][inf] = oldInf[inf][vert]
-        return weights
+                vertWeights[vert][inf] = jointWeights[inf][vert]
+        return vertWeights
 
-    def PaintBrushOn_Joints(self):
+    def PaintBrushOn_Joints(self, brushMode, value, radius, softness):
         self.ctx = 'pfrsPaintCtx2'
-        self._PaintBrushOn()
+        self._PaintBrushOn(brushMode, value, radius, softness)
         cmd = 'pfrsPaintJoints("%s");' % self.ctx
         mel.eval(cmd)
+        meshName = jntOp.PFRS_MESH_NAME
+        
+        # BEFORE JOINT WEIGHTS
+        jntOp.VERT_WEIGHTS_BEFORE = []
+        if jntOp.LIMB_ATTRS_BEFORE:
+            beforeJointWeights = self._GetJointWeights( meshName,
+                                                        jntOp.JOINT_ATTRS_BEFORE,
+                                                        jntOp.LIMB_ATTRS_BEFORE)
 
-    def _PaintBrushOn(self):
+            jntOp.VERT_WEIGHTS_BEFORE = self._ConvertToVertWeights(beforeJointWeights)
+
+        # CURRENT JOINT WEIGHTS
+        currentJointWeights = []
+        for attr in jntOp.JOINT_ATTRS_CURRENT:
+            currentJointWeights.append(pm.getAttr('%s.%s' % (meshName, attr)))
+        jntOp.VERT_WEIGHTS_CURRENT = self._ConvertToVertWeights(currentJointWeights)
+
+        # AFTER WEIGHTS
+        jntOp.VERT_WEIGHTS_AFTER = []
+        if jntOp.LIMB_ATTRS_AFTER:
+            afterJointWeights = self._GetJointWeights(  meshName,
+                                                        jntOp.JOINT_ATTRS_AFTER,
+                                                        jntOp.LIMB_ATTRS_AFTER)
+            jntOp.VERT_WEIGHTS_AFTER = self._ConvertToVertWeights(afterJointWeights)
+        
+        # SET LIMB MASK VALUES
+        jntOp.JOINT_WEIGHTS = []
+        for jointAttr in jntOp.JOINT_ATTRS_CURRENT:
+            attr = '%s.%s' % (meshName, jointAttr)
+            jntOp.JOINT_WEIGHTS.append(pm.getAttr(attr))
+        attr = '%s.%s' % (meshName, jntOp.LIMB_ATTR)
+        jntOp.LIMB_WEIGHTS = pm.getAttr(attr)
+
+    def _PaintBrushOn(self, brushMode, value, radius, softness):
         # Create Brush
         if not pm.artUserPaintCtx(self.ctx, ex=1):
             pm.artUserPaintCtx(self.ctx, dl=1, cl='both',
@@ -125,6 +149,13 @@ class PaintWeights(absOp.Abstract_Operation):
         # Set Brush
         if pm.currentCtx() != self.ctx:
             pm.setToolTo(self.ctx)
+            if brushMode == 1: # Maya Add brush mode
+                self.SetPaintModeAdd()
+            else:
+                self.SetPaintModeReplace()
+            self.SetValue(value)
+            self.SetRadius(radius)
+            self.SetSoftness(softness)
         pm.polyOptions(cs=1)
         rigUtil.SetLayerState(rigData.JOINTS_DISP_LAYER, 1, 1)
         rigUtil.SetLayerState(rigData.CONTROL_DISP_LAYER, 0, 0)
@@ -136,7 +167,9 @@ class PaintWeights(absOp.Abstract_Operation):
         rigUtil.SetLayerState(rigData.CONTROL_DISP_LAYER, 1, 0)
 
     def SetLimb(self, rigRoot, limb):
-        lmbOp.PFRS_ATTR = 'L%03d' % limb.ID.get()
+        attr = 'L%03d' % limb.ID.get()
+        lmbOp.LIMB_ATTR = attr
+        jntOp.LIMB_ATTR = attr
         limbs = pm.listConnections(rigRoot.limbs)
         limbOrder = skinUtil.GetSkeletalLimbOrder(limbs)
         index = limbOrder.index(limb)
@@ -150,15 +183,24 @@ class PaintWeights(absOp.Abstract_Operation):
             attr = 'L%03d' % tempLimb.ID.get()
             beforeLimbAttrs += [attr]*len(joints)
             beforeJoints += joints
-
-        lmbOp.JOINT_NAMES_BEFORE = [j.longName() for j in beforeJoints]
-        lmbOp.JOINT_ATTRS_BEFORE = ['J%03d' % j.ID.get() for j in beforeJoints]
+        jointNamesBefore = [j.longName() for j in beforeJoints]
+        jointAttrsBefore = ['J%03d' % j.ID.get() for j in beforeJoints]
+        lmbOp.JOINT_NAMES_BEFORE = jointNamesBefore
+        jntOp.JOINT_NAMES_BEFORE = jointNamesBefore
+        lmbOp.JOINT_ATTRS_BEFORE = jointAttrsBefore
+        jntOp.JOINT_ATTRS_BEFORE = jointAttrsBefore
         lmbOp.LIMB_ATTRS_BEFORE = beforeLimbAttrs
+        jntOp.LIMB_ATTRS_BEFORE = beforeLimbAttrs
 
         # CURRENT JOINTS
         joints = rigUtil.GetSortedLimbJoints(limb)
-        lmbOp.JOINT_NAMES_CURRENT = [j.longName() for j in joints]
-        lmbOp.JOINT_ATTRS_CURRENT = ['J%03d' % j.ID.get() for j in joints]
+        jntOp.PFRS_INF_JOINTS = joints
+        jointNamesCurrent = [j.longName() for j in joints]
+        jointAttrsCurrent = ['J%03d' % j.ID.get() for j in joints]
+        lmbOp.JOINT_NAMES_CURRENT = jointNamesCurrent
+        jntOp.JOINT_NAMES_CURRENT = jointNamesCurrent
+        lmbOp.JOINT_ATTRS_CURRENT = jointAttrsCurrent
+        jntOp.JOINT_ATTRS_CURRENT = jointAttrsCurrent
 
         # AFTER JOINTS
         afterLimbs = limbOrder[index+1:]
@@ -169,17 +211,20 @@ class PaintWeights(absOp.Abstract_Operation):
             attr = 'L%03d' % tempLimb.ID.get()
             afterLimbAttrs += [attr]*len(joints)
             afterJoints += joints
-        lmbOp.JOINT_NAMES_AFTER = [j.longName() for j in afterJoints]
-        lmbOp.JOINT_ATTRS_AFTER = ['J%03d' % j.ID.get() for j in afterJoints]
+        jointNamesAfter = [j.longName() for j in afterJoints]
+        jointAttrsAfter = ['J%03d' % j.ID.get() for j in afterJoints]
+        lmbOp.JOINT_NAMES_AFTER = jointNamesAfter
+        jntOp.JOINT_NAMES_AFTER = jointNamesAfter
+        lmbOp.JOINT_ATTRS_AFTER = jointAttrsAfter
+        jntOp.JOINT_ATTRS_AFTER = jointAttrsAfter
         lmbOp.LIMB_ATTRS_AFTER = afterLimbAttrs
     
     def SetJoint(self, limb, joint):
         joints = rigUtil.GetSortedLimbJoints(limb)
         index = joints.index(joint)
-        
-        jntOp.PFRS_ATTR = 'J%03d' % joint.ID.get()
-        jntOp.PFRS_INF_JOINTS = joints
-        jntOp.PFRS_JOINT_INDEX = index
+        jntOp.JOINT_INDEX = index
+        positions = [pm.xform(j, q=1, t=1, ws=1) for j in joints]
+        jntOp.LIMB_JOINT_POSITIONS = positions
     
     def SetMesh(self, mesh):
         lmbOp.PFRS_MESH_NAME = mesh.longName()
