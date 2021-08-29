@@ -259,15 +259,17 @@ class PaintWeights_UI(absOpUI.Abstract_OperationUI):
     def Flood(self, ignore):
         log.funcFileDebug()
         mode = self._GetMode()
-        weight = 1 # FIX LATER
-        for mesh in self._selectedMesh:
+        weight = self._GetValue()
+        if self._isPaintingLimb:
             if mode == 1:
-                self.operation.FloodAdd(mesh, weight)
+                self.operation.FloodAddLimb(self._selectedMesh, weight)
             elif mode == 2:
-                self.operation.FloodReplace(mesh, weight)
-
-    def Flood(self, ignore):
-        log.funcFileDebug()
+                self.operation.FloodReplaceLimb(self._selectedMesh, weight)
+        else:
+            if mode == 1:
+                self.operation.FloodAddJoint(self._selectedMesh, weight)
+            elif mode == 2:
+                self.operation.FloodReplaceJoint(self._selectedMesh, weight)
     
     def SetMode(self, ignore):
         log.funcFileDebug()

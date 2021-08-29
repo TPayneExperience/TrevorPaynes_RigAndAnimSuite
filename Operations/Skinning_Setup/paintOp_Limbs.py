@@ -14,7 +14,7 @@ LIMB_ATTRS_BEFORE = []      # [L001, L002...] IGNORE, FOR WEIGHT CALCS
 VERT_WEIGHTS_BEFORE = []    # [v1[j1, j2,...], v2[j1, j2, ...], ...]
 
 JOINT_NAMES_CURRENT = []  
-JOINT_ATTRS_CURRENT = []    
+JOINT_ATTRS_CURRENT = []    # For use in PaintWeights.py
 VERT_WEIGHTS_CURRENT = [] 
 
 JOINT_NAMES_AFTER = []
@@ -81,7 +81,7 @@ def setPFRSPyPaintValue(vertIndex, value):
 
     # POSSIBLY SKIP END WEIGHTS
     if remainingWeight:
-        if VERT_WEIGHTS_AFTER and sum(VERT_WEIGHTS_AFTER[vertIndex]):
+        if VERT_WEIGHTS_AFTER and sum(VERT_WEIGHTS_AFTER[vertIndex]): # difference
             afterWeights = VERT_WEIGHTS_AFTER[vertIndex]
             scalar = remainingWeight / sum(afterWeights)
             afterWeights = [w*scalar for w in afterWeights]

@@ -51,8 +51,6 @@ class MeshSetup_UI(absOpUI.Abstract_OperationUI):
                                                 scc=self.SelectedSkinned,
                                                 elc=self.RenameMesh)
                 with pm.popupMenu():
-                    pm.menuItem(l='Paint Weights Tool', 
-                                            c=self.PaintSkinWeightsTool)
                     self.remove_mi = pm.menuItem(l='Remove Meshes', en=0, 
                                                             c=self.RemoveMeshes)
                     msg = 'Rebuild Skins (use if joints changed)'
@@ -64,10 +62,11 @@ class MeshSetup_UI(absOpUI.Abstract_OperationUI):
     def PopulateAvailable(self):
         pm.treeView(self.availableMeshes_tv, e=1, removeAll=1)
         meshGroup = pm.listConnections(self._rigRoot.meshesParentGroup)[0]
+        availableMeshes = pm.listRelatives(meshGroup, c=1, s=1)
         meshXforms = pm.listRelatives(meshGroup, c=1)
-        availableMeshes = [pm.listRelatives(m, c=1, type='mesh')[0] for m in meshXforms]
-        skinnedMeshes = pm.listConnections(self._rigRoot.meshes)
-        backupMeshes = [pm.listConnections(m.backupMesh)[0] for m in skinnedMeshes]
+        availableMeshes = [pm.listRelatives(m, c=1, s=1)[0] for m in meshXforms]
+        skinnedMeshes = pm.listConnections(self._rigRoot.meshes, sh=1)
+        backupMeshes = [pm.listConnections(m.backupMesh, sh=1)[0] for m in skinnedMeshes]
         self._allMeshes = {} # name : meshNode
         self._selectedAvailable = []
         for mesh in availableMeshes:
@@ -145,10 +144,6 @@ class MeshSetup_UI(absOpUI.Abstract_OperationUI):
         self.operation.RemoveMeshes(self._rigRoot, self._selectedSkinned)
         self.PopulateAvailable()
         self.PopulateSkinned()
-
-    def PaintSkinWeightsTool(self, ignore):
-        log.funcFileInfo()
-        self.operation.PaintSkinWeightsTool()
 
     def RebuildSkins(self, ignore):
         log.funcFileInfo()

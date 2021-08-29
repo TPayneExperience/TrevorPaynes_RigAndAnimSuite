@@ -118,7 +118,7 @@ def setPFRSPyPaintValue(vertIndex, value):
             attr = '%s.%s' % (PFRS_MESH_NAME, jointAttr)
             pm.setAttr(attr, JOINT_WEIGHTS[jointIndex])
 
-    # DISPLAY
+    # DISPLAY # difference
     SetJointVertexColor(vertIndex, value)
 
     # SKIP IF BEFORE WEIGHTS >= 1
@@ -135,7 +135,7 @@ def setPFRSPyPaintValue(vertIndex, value):
         return
 
     # CALC NEW WEIGHTS
-    maskWeight = LIMB_WEIGHTS[vertIndex]
+    maskWeight = LIMB_WEIGHTS[vertIndex] # difference
     currentCopy = VERT_WEIGHTS_CURRENT[vertIndex][:]
     currentCopy = [w*maskWeight for w in currentCopy]
     currentSum = sum(currentCopy)

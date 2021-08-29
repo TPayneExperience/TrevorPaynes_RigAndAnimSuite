@@ -88,9 +88,6 @@ class MeshSetup(absOp.Abstract_Operation):
                 for joint in pm.listConnections(limb.joints):
                     self._RemoveJointMask(mesh, joint)
 
-    def PaintSkinWeightsTool(self):
-        mel.eval('ArtPaintSkinWeightsTool;')
-    
     def RebuildSkin(self, mesh):
         log.funcFileInfo()
         rigRoot = pm.listConnections(mesh.rigRoot)[0]
@@ -206,13 +203,6 @@ class MeshSetup(absOp.Abstract_Operation):
                 mesh.setAttr(jointAttr, finalJWeights[l][j])
         print('done!')
 
-    # def _AddChildLimbWeights(limb, limbs, allWeights, limbParents):
-    #     index = limbs.index(limb)
-    #     limbWeights
-    #     for child, parent in limbParents.items():
-    #         if parent == limb:
-    #             self._AddChildLimbWeights(child, allWeights, limbParents)
-    #     # 
 
 #=========== FLOOD ====================================
 
@@ -222,9 +212,10 @@ class MeshSetup(absOp.Abstract_Operation):
         mesh.setAttr(attr, values)
 
     def FloodAdd(self, mesh, attr, weight):
-        weights = mesh.getAttr(attr)
+        combineAttr = '%s.%s' % (mesh, attr)
+        weights = pm.getAttr(combineAttr)
         weights = [min(1, w + weight) for w in weights]
-        mesh.setAttr(attr, weights)
+        mesh.setAttr(combineAttr, weights)
 
 
 # Copyright (c) 2021 Trevor Payne

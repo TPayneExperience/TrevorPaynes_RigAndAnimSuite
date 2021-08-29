@@ -243,73 +243,39 @@ class PaintWeights(absOp.Abstract_Operation):
 
 #=========== FLOOD ====================================
 
-    def FloodAddLimb(self, mesh, limb, weight):
-        attr = 'L%03d' % limb.ID.get()
-        self.meshSetup.FloodAdd(mesh, attr, weight)
-    
-    def FloodAddJoint(self, mesh, limb, joint, weight):
-        attr = 'J%03d' % joint.ID.get()
-        joints = pm.listConnections(limb.joints)
-        joints = [j for j in joints if j != joint]
-        self.meshSetup.FloodAdd(mesh, attr, weight)
-
-        # Get Weights
+    def FloodAddLimb(self, mesh, weight):
+        lmbOp.LIMB_WEIGHTS = [min(1, w + weight) for w in lmbOp.LIMB_WEIGHTS]
         vertCount = pm.polyEvaluate(mesh, v=1)
-        attrs = ['J%03d' % j.ID.get() for j in joints]
-        weights = [mesh.getAttr(a) for a in attrs]
+        for vertIndex in range(vertCount):
+            value = lmbOp.LIMB_WEIGHTS[vertIndex]
+            lmbOp.setPFRSPyPaintValue(vertIndex, value)
 
-        for i in range(vertCount):
-            # Get old weight total for vertex
-            oldWeightTotal = 0
-            vertWeight = mesh.getAttr(attr)
-            remainingWeight = 1 - vertWeight
-            for jointWeights in weights:
-                oldWeightTotal += jointWeights[i]
-            oldWeightTotal = min(1, oldWeightTotal)
-            # Scale vertex weights
-            scalar = remainingWeight / oldWeightTotal
-            for j in range(len(weights)):
-                weights[j][i] *= scalar
+    def FloodReplaceLimb(self, mesh, weight):
+        lmbOp.LIMB_WEIGHTS = [weight]*len(lmbOp.LIMB_WEIGHTS)
+        vertCount = pm.polyEvaluate(mesh, v=1)
+        for vertIndex in range(vertCount):
+            value = lmbOp.LIMB_WEIGHTS[vertIndex]
+            lmbOp.setPFRSPyPaintValue(vertIndex, value)
 
-        # Set Attrs values
-        for i in range(len(attrs)):
-            attr = attrs[i]
-            newWeights = weights[i]
-            mesh.setAttr(attr, newWeights)
-    
-    def FloodReplaceLimb(self, mesh, limb, weight):
-        attr = 'L%03d' % limb.ID.get()
-        self.meshSetup.FloodReplace(mesh, attr, weight)
-    
-    def FloodReplaceJoint(self, mesh, limb, joint, weight):
-        attr = 'J%03d' % joint.ID.get()
-        joints = pm.listConnections(limb.joints)
-        joints = [j for j in joints if j != joint]
-        self.meshSetup.FloodReplace(mesh, attr, weight)
-        remainingWeight = 1-weight
-        if remainingWeight < 0.001:
-            for joint in joints:
-                attr = 'J%03d' % joint.ID.get()
-                self.meshSetup.FloodReplace(mesh, attr, 0)
-        else:
-            # Rebalance weights
-            # Get amount to scale weights by
-            attrs = ['J%03d' % j.ID.get() for j in joints]
-            weights = [mesh.getAttr(a) for a in attrs]
-            weightSums = [sum(w) for w in weights]
-            oldWeightTotal = sum(weightSums)
-            scalar = remainingWeight/oldWeightTotal
-            newWeights = []
+    def FloodAddJoint(self, mesh, weight):
+        jointIndex = jntOp.JOINT_INDEX
+        weights = jntOp.JOINT_WEIGHTS[jointIndex]
+        weights = [min(1, weight + w) for w in weights]
+        jntOp.JOINT_WEIGHTS[jointIndex] = weights
+        vertCount = pm.polyEvaluate(mesh, v=1)
+        for vertIndex in range(vertCount):
+            value = weights[vertIndex]
+            jntOp.setPFRSPyPaintValue(vertIndex, value)
 
-            # Scale weights
-            for jointWeights in weights:
-                newWeights.append([w*scalar for w in jointWeights])
-
-            # Set Attrs values
-            for i in range(len(attrs)):
-                attr = attrs[i]
-                weights = newWeights[i]
-                mesh.setAttr(attr, weights)
+    def FloodReplaceJoint(self, mesh, weight):
+        jointIndex = jntOp.JOINT_INDEX
+        weights = jntOp.JOINT_WEIGHTS[jointIndex]
+        weights = [weight] * len(weights)
+        jntOp.JOINT_WEIGHTS[jointIndex] = weights
+        vertCount = pm.polyEvaluate(mesh, v=1)
+        for vertIndex in range(vertCount):
+            value = weights[vertIndex]
+            jntOp.setPFRSPyPaintValue(vertIndex, value)
 
     
 #=========== PAINT SETTINGS ====================================
