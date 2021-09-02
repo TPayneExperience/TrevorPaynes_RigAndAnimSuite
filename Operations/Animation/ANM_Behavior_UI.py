@@ -49,8 +49,8 @@ class ANM_Behavior_UI(absOpUI.Abstract_OperationUI):
                 pm.treeView(self.control_tv, e=1, scc=self.SelectedControl)
         with pm.verticalLayout():
             msg = 'Limb Properties'
-            with pm.frameLayout(l=msg, bv=1, en=0) as self.limbProp_fl:
-                with pm.columnLayout(adj=1, rs=5, co=('both', 5)) as self.bhvLimbProp_cl:
+            with pm.frameLayout(l=msg, bv=1, en=0, mw=7, mh=7) as self.limbProp_fl:
+                with pm.columnLayout(adj=1, rs=5) as self.bhvLimbProp_cl:
                     pm.text('(EDIT in RIGGING Category)')
                     pm.text('(Select Limb to key bhv attrs)')
                     with pm.columnLayout(co=('left', -100)):
@@ -62,8 +62,8 @@ class ANM_Behavior_UI(absOpUI.Abstract_OperationUI):
                                                 l='Parent Joint', 
                                                 at='perspShape.filmFit')
             msg = 'Behavior Properties'
-            with pm.frameLayout(l=msg, bv=1, en=0) as self.bhvProp_fl:
-                self.bhvProp_cl = pm.columnLayout(adj=1, co=('both', 5))
+            with pm.frameLayout(l=msg, bv=1, en=0, mw=7, mh=7) as self.bhvProp_fl:
+                self.bhvProp_cl = pm.columnLayout(adj=1)
 
 #=========== LIMB HIER ====================================
 

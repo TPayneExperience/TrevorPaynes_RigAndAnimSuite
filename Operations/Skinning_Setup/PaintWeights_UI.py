@@ -22,7 +22,7 @@ reload(skinUtil)
 
 class PaintWeights_UI(absOpUI.Abstract_OperationUI):
     uiName = 'Paint Weights'
-    uiOrderIndex = 210
+    uiOrderIndex = 310
     operation = pnt.PaintWeights()
     
     def Setup_UI(self, rigRoot, allRigRoots):
@@ -31,16 +31,15 @@ class PaintWeights_UI(absOpUI.Abstract_OperationUI):
         self._selectedMesh = None
         self._selectedLimb = None
         self._selectedJoint = None
-        self._isBrushOn = False
-        self._isBrushSet = False
         self._isPaintingLimb = True
         self._Setup()
-        self.PopulateLimbHier()
         self.PopulateMeshHier()
+        self.PopulateLimbHier()
+        self.PaintBrushOn()
+        self.GetBrush(1)
 
     def Teardown_UI(self):
-        if self._isBrushOn:
-            self.ToggleBrush(1)
+        self.PaintBrushOff()
 
 #=========== SETUP UI ====================================
 
@@ -55,14 +54,13 @@ class PaintWeights_UI(absOpUI.Abstract_OperationUI):
                                             elc=self.IgnoreRename)
                 pm.treeView(self.limb_tv, e=1, scc=self.SelectedLimb)
         with pm.verticalLayout():
-            with pm.frameLayout('Brush', bv=1):
-                with pm.columnLayout(adj=1, rs=7, co=('both', 5)):
+            with pm.frameLayout('Brush', bv=1, mw=7, mh=7):
+                with pm.columnLayout(adj=1, rs=5):
                     self.useJointAnim_cb = pm.checkBox(l='Use Joint Animations', 
                                                         cc=self.SetUseJointAnim)
-                    self.brush_btn = pm.button(l='Paint Brush OFF: Move Controls', 
-                                                        c=self.ToggleBrush)
-                    with pm.columnLayout(adj=1, rs=7, en=0) as self.buttons_l:
-                        self._brushMode_rb = pm.radioButtonGrp( nrb=2, l='Brush Mode', 
+                    pm.button(l='Get Brush', c=self.GetBrush)
+                    with pm.columnLayout(adj=1, rs=5, en=0) as self.buttons_l:
+                        self._brushMode_rb = pm.radioButtonGrp( nrb=2, l='Brush Mode: ', 
                                             la2=['Add', 'Replace'], cw3=[77,44,44],
                                             sl=1, onc=self.SetMode)
                         self.value_sl = pm.floatSliderGrp( l='Value', f=1, min=0.0, 
@@ -159,9 +157,6 @@ class PaintWeights_UI(absOpUI.Abstract_OperationUI):
         self.UpdateTool()
         self.PopulateJointHier(self._selectedLimb)
 
-        if not self._isBrushOn:
-            return
-
         # Display
         mode = self._GetMode()
         value = self._GetValue()
@@ -212,42 +207,39 @@ class PaintWeights_UI(absOpUI.Abstract_OperationUI):
             self.operation.SetRadius(radius)
             self.operation.SetSoftness(softness)
 
-    def ToggleBrush(self, ignore):
-        log.funcFileDebug()
-        if self._isBrushOn:
-            pm.button(self.brush_btn, e=1, l='Paint Brush OFF: Move Controls')
-            pm.columnLayout(self.buttons_l, e=1, en=0)
-            self.operation.PaintBrushOff()
-            pm.checkBox(self.useJointAnim_cb, e=1, en=1)
-            if pm.checkBox(self.useJointAnim_cb, q=1, v=1):
-                self.operation.Teardown_AnimJoints(self._rigRoot)
-        else:
-            pm.button(self.brush_btn, e=1, l='Paint Brush ON: Paint')
-            pm.columnLayout(self.buttons_l, e=1, en=1)
-            mode = self._GetMode()
-            value = self._GetValue()
-            radius = self._GetRadius()
-            softness = self._GetSoftness()
-            pm.checkBox(self.useJointAnim_cb, e=1, en=0)
-            if pm.checkBox(self.useJointAnim_cb, q=1, v=1):
-                self.operation.Setup_AnimJoints(self._rigRoot)
-            pm.select(self._selectedMesh)
-            useJointAnim = pm.checkBox(self.useJointAnim_cb, q=1, v=1)
-            if self._isPaintingLimb:
-                self.operation.PaintBrushOn_Limbs(mode, value, radius, softness)
-                self.operation.DisplayLimbVertexColors()
-                # Anim Joints
-                if useJointAnim:
-                    joints = pm.listConnections(self._selectedLimb.joints)
-                    self.operation.SetTimeRange(joints)
-            else:
-                self.operation.PaintBrushOn_Joints(mode, value, radius, softness)
-                self.operation.DisplayJointVertexColors()
-                # Anim Joints
-                if useJointAnim:
-                    self.operation.SetTimeRange([self._selectedJoint])
+    def GetBrush(self, ignore):
+        self.operation.GetBrush()
 
-        self._isBrushOn = not self._isBrushOn
+    def PaintBrushOff(self):
+        pm.columnLayout(self.buttons_l, e=1, en=0)
+        self.operation.PaintBrushOff()
+        if pm.checkBox(self.useJointAnim_cb, q=1, v=1):
+            self.operation.Teardown_AnimJoints(self._rigRoot)
+
+    def PaintBrushOn(self):
+        pm.columnLayout(self.buttons_l, e=1, en=1)
+        mode = self._GetMode()
+        value = self._GetValue()
+        radius = self._GetRadius()
+        softness = self._GetSoftness()
+        useJointAnim = pm.checkBox(self.useJointAnim_cb, q=1, v=1)
+        if useJointAnim:
+            self.operation.Setup_AnimJoints(self._rigRoot)
+        pm.select(self._selectedMesh)
+        if self._isPaintingLimb:
+            self.operation.PaintBrushOn_Limbs(mode, value, radius, softness)
+            self.operation.DisplayLimbVertexColors()
+            # Anim Joints
+            if useJointAnim:
+                joints = pm.listConnections(self._selectedLimb.joints)
+                self.operation.SetTimeRange(joints)
+        else:
+            self.operation.PaintBrushOn_Joints(mode, value, radius, softness)
+            self.operation.DisplayJointVertexColors()
+            # Anim Joints
+            if useJointAnim:
+                self.operation.SetTimeRange([self._selectedJoint])
+        self.operation.UpdateControlDisplay(self._rigRoot)
 
     def SetUseJointAnim(self, value):
         log.funcFileDebug()
@@ -255,6 +247,15 @@ class PaintWeights_UI(absOpUI.Abstract_OperationUI):
         config = genUtil.Json.Load(filePath)
         config['paintWeightsUseJointAnim'] = value
         genUtil.Json.Save(filePath, config)
+        if value:
+            self.operation.Setup_AnimJoints(self._rigRoot)
+            if self._isPaintingLimb:
+                joints = pm.listConnections(self._selectedLimb.joints)
+                self.operation.SetTimeRange(joints)
+            else:
+                self.operation.SetTimeRange([self._selectedJoint])
+        else:
+            self.operation.Teardown_AnimJoints(self._rigRoot)
 
     def Flood(self, ignore):
         log.funcFileDebug()
@@ -335,8 +336,6 @@ class PaintWeights_UI(absOpUI.Abstract_OperationUI):
         self._isPaintingLimb = False
 
         self.operation.SetJoint(self._selectedLimb, self._selectedJoint)
-        if not self._isBrushOn:
-            return
 
         # Display
         mode = self._GetMode()
@@ -363,27 +362,20 @@ class PaintWeights_UI(absOpUI.Abstract_OperationUI):
         return os.path.join(folder, 'Config.json')
 
     def UpdateTool(self):
-        if not self._isBrushOn:
+        if not self._selectedLimb:
             return
-        if not self._isBrushSet:
-            if self._selectedLimb:
-                if self._selectedMesh:
-                    self._isBrushSet = True
-                    mode = self._GetMode()
-                    value = self._GetValue()
-                    radius = self._GetRadius()
-                    softness = self._GetSoftness()
-                    if self._isPaintingLimb:
-                        self.operation.PaintBrushOn_Limbs(mode, value, 
-                                                        radius, softness)
-                    else:
-                        self.operation.PaintBrushOn_Joints(mode, value, 
-                                                        radius, softness)
-                    return
+        if not self._selectedMesh:
+            return
+        mode = self._GetMode()
+        value = self._GetValue()
+        radius = self._GetRadius()
+        softness = self._GetSoftness()
+        if self._isPaintingLimb:
+            self.operation.PaintBrushOn_Limbs(mode, value, 
+                                            radius, softness)
         else:
-            if not self._selectedLimb or not self._selectedMesh:
-                self._isBrushSet = False
-                self.operation.PaintBrushOff()
+            self.operation.PaintBrushOn_Joints(mode, value, 
+                                            radius, softness)
 
 
 # Copyright (c) 2021 Trevor Payne

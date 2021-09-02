@@ -84,8 +84,8 @@ class Appearance_UI(absOpUI.Abstract_OperationUI):
                                                     a='perspShape.shakeEnabled')
                     self._limbScale = pm.attrControlGrp(l='Limb Scale', ann=msg,
                                                     a='perspShape.shakeEnabled')
-            with pm.frameLayout('Control Colors', bv=1, en=0) as self.mtr_fl:
-                with pm.columnLayout(adj=1, co=('both', 5)):
+            with pm.frameLayout('Control Colors', bv=1, en=0, mw=7, mh=7) as self.mtr_fl:
+                with pm.columnLayout(adj=1):
                     self.clrL_cg = pm.attrColorSliderGrp(l='L Color', cw4=(66,44,44,22),
                                                     at='perspShape.backgroundColor')
                     self.opL_cg = pm.attrColorSliderGrp(l='L Opacity', cw4=(66,44,44,22),
@@ -99,8 +99,8 @@ class Appearance_UI(absOpUI.Abstract_OperationUI):
                     self.opR_cg = pm.attrColorSliderGrp(l='R Opacity', cw4=(66,44,44,22),
                                                     at='perspShape.backgroundColor')
                     
-            with pm.frameLayout('Control Shapes', bv=1, en=0) as self.ctrShapes_fl:
-                self.ctrShapes_cl = pm.columnLayout(adj=1, co=('both', 5))
+            with pm.frameLayout('Control Shapes', bv=1, en=0, mw=7, mh=7) as self.ctrShapes_fl:
+                self.ctrShapes_cl = pm.columnLayout(adj=1)
 
 #=========== LIMB HIER ====================================
    

@@ -51,6 +51,9 @@ class PaintWeights(absOp.Abstract_Operation):
         self._PaintBrushOn(brushMode, value, radius, softness)
         cmd = 'pfrsPaintLimbs("%s");' % self.ctx
         mel.eval(cmd)
+        self.UpdateLimbOps()
+    
+    def UpdateLimbOps(self):
         meshName = lmbOp.PFRS_MESH_NAME
 
         # BEFORE JOINT WEIGHTS
@@ -103,13 +106,17 @@ class PaintWeights(absOp.Abstract_Operation):
                 vertWeights[vert][inf] = jointWeights[inf][vert]
         return vertWeights
 
+    def GetBrush(self):
+        pm.setToolTo(self.ctx)
+
     def PaintBrushOn_Joints(self, brushMode, value, radius, softness):
         self.ctx = 'pfrsPaintCtx2'
         self._PaintBrushOn(brushMode, value, radius, softness)
         cmd = 'pfrsPaintJoints("%s");' % self.ctx
         mel.eval(cmd)
-        meshName = jntOp.PFRS_MESH_NAME
         
+    def UpdateJointOps(self):
+        meshName = jntOp.PFRS_MESH_NAME
         # BEFORE JOINT WEIGHTS
         jntOp.VERT_WEIGHTS_BEFORE = []
         if jntOp.LIMB_ATTRS_BEFORE:
@@ -157,14 +164,10 @@ class PaintWeights(absOp.Abstract_Operation):
             self.SetRadius(radius)
             self.SetSoftness(softness)
         pm.polyOptions(cs=1)
-        rigUtil.SetLayerState(rigData.JOINTS_DISP_LAYER, 1, 1)
-        rigUtil.SetLayerState(rigData.CONTROL_DISP_LAYER, 0, 0)
 
     def PaintBrushOff(self):
         pm.polyOptions(cs=0)
         pm.setToolTo('selectSuperContext')
-        rigUtil.SetLayerState(rigData.JOINTS_DISP_LAYER, 1, 1)
-        rigUtil.SetLayerState(rigData.CONTROL_DISP_LAYER, 1, 0)
 
     def SetLimb(self, rigRoot, limb):
         attr = 'L%03d' % limb.ID.get()
@@ -240,6 +243,9 @@ class PaintWeights(absOp.Abstract_Operation):
     def DisplayJointVertexColors(self):
         jntOp.DisplayVertexColors()
     
+    def UpdateControlDisplay(self, rigRoot):
+        isRigged = not rigRoot.paintWeightsUseAnimJoints.get()
+        rigUtil.SetLayerState(rigData.CONTROL_DISP_LAYER, isRigged, 0)
 
 #=========== FLOOD ====================================
 
@@ -276,8 +282,14 @@ class PaintWeights(absOp.Abstract_Operation):
         for vertIndex in range(vertCount):
             value = weights[vertIndex]
             jntOp.setPFRSPyPaintValue(vertIndex, value)
-
     
+    def SetLimbWeights(self, mesh, weights):
+        lmbOp.LIMB_WEIGHTS = weights
+        vertCount = pm.polyEvaluate(mesh, v=1)
+        for vertIndex in range(vertCount):
+            value = lmbOp.LIMB_WEIGHTS[vertIndex]
+            lmbOp.setPFRSPyPaintValue(vertIndex, value)
+
 #=========== PAINT SETTINGS ====================================
 
     def SetPaintModeAdd(self):
@@ -302,11 +314,13 @@ class PaintWeights(absOp.Abstract_Operation):
         self.bhvMng.Teardown_Rig(rigRoot)
         self._Setup_JointAnim(rigRoot)
         rigRoot.paintWeightsUseAnimJoints.set(1)
+        rigUtil.SetLayerState(rigData.CONTROL_DISP_LAYER, 0, 0)
 
     def Teardown_AnimJoints(self, rigRoot):
         self._Teardown_JointAnim()
         self.bhvMng.Setup_Rig(rigRoot)
         rigRoot.paintWeightsUseAnimJoints.set(0)
+        rigUtil.SetLayerState(rigData.CONTROL_DISP_LAYER, 1, 0)
 
     def SetTimeRange(self, joints):
         values = []

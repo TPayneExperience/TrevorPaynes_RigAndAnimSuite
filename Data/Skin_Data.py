@@ -13,6 +13,20 @@ JOINT_COLORS = ((0.9, 0, 0), # Red
                 (0, 0.45, 0.9), # 
                 (0.9, 0, 0.45)) 
 
+
+LIMB_JOINT_COLORS = ((1, 0.2, 0.2), # Red
+                (0.2, 1, 0.2), # Green
+                (0.2, 0.2, 1), # Blue
+                (1, 1, 0.2), # Yellow
+                (0.2, 1, 1), # Cyan
+                (1, 0.2, 1), # Magenta
+                (1, 0.5, 0.2), # 
+                (0.2, 1, 0.5), # 
+                (0.5, 0.2, 1),# 
+                (0.5, 1, 0.2), # 
+                (0.2, 0.5, 1), # 
+                (1, 0.2, 0.5)) 
+
 # Copyright (c) 2020.9 Trevor Payne
 # See user license in "PayneFreeRigSuite\Data\LicenseAgreement.txt"
 

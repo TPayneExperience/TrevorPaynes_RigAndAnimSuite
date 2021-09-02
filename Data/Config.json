@@ -1,5 +1,5 @@
 {
-    "paintWeightsReplaceValue": 0.32758620721769743, 
+    "paintWeightsReplaceValue": 0.0, 
     "rControlColor": [
         1, 
         0, 
@@ -14,10 +14,10 @@
     "jointUpAxis": 2, 
     "paintWeightsMode": 1, 
     "windowPos": [
-        197, 
-        1232
+        391, 
+        1111
     ], 
-    "paintWeightsUseJointAnim": true, 
+    "paintWeightsUseJointAnim": false, 
     "limbIndex": 1, 
     "lControlTransparency": 0.8, 
     "controlShape_IKPV": "Sphere_Poly", 
@@ -38,7 +38,7 @@
     ], 
     "paintWeightsReplaceSoftness": 0.01, 
     "controlShape_FKR": "Cube_Poly", 
-    "paintWeightsAddValue": 0.5344827585564605, 
+    "paintWeightsAddValue": 0.7758620693830067, 
     "welcomePopupSeen": true, 
     "mControlColor": [
         1, 
