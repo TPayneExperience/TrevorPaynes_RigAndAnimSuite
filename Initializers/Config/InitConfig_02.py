@@ -20,6 +20,11 @@ class InitConfig(absInit.Abstract_Initializer):
         temp.data['paintWeightsReplaceValue'] = 1.0
         temp.data['paintWeightsReplaceSoftness'] = 1.0
         temp.data['paintWeightsReplaceRadius'] = 1.0
+        temp.data['quickWeightsLimbMaskRadius'] = 1.0
+        temp.data['quickWeightsJointMaskRadius'] = 1.0
+        temp.data['quickWeightsLimbMaskMidpoints'] = 4
+        temp.data['quickWeightsJointMaskMidpoints'] = 5
+        temp.data['quickWeightsDisplayMode'] = 1
 
 
         

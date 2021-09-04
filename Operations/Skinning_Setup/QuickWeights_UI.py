@@ -13,10 +13,10 @@ import Utilities.UI_Utilities as uiUtil
 reload(uiUtil)
 import Utilities.Skin_Utilities as skinUtil
 reload(skinUtil)
+import Utilities.General_Utilities as genUtil
+reload(genUtil)
 # import Utilities.Rig_Utilities as rigUtil
 # reload(rigUtil)
-# import Utilities.General_Utilities as genUtil
-# reload(genUtil)
 # import Data.Rig_Data as rigData
 # reload(rigData)
 
@@ -29,13 +29,13 @@ class QuickWeights_UI(absOpUI.Abstract_OperationUI):
         self._rigRoot = rigRoot
         self._allRigRoots = allRigRoots
         self._selectedMesh = None
-        self._selectedLimb = None
+        self._selectedLimbs = []
 
         self._Setup()
         self.PopulateLimbHier()
         self.PopulateMeshHier()
         self.operation.SetupDisplay()
-        self.operation.DisplayLimb(self._selectedMesh, self._selectedLimb)
+        self.UpdateDisplay()
 
     def Teardown_UI(self):
         self.operation.TeardownDisplay()
@@ -51,19 +51,32 @@ class QuickWeights_UI(absOpUI.Abstract_OperationUI):
                                             elc=self.IgnoreRename)
                 pm.treeView(self.mesh_tv, e=1, scc=self.SelectedMeshes)
             with pm.frameLayout('Limbs', bv=1):
-                self.limb_tv = pm.treeView(ams=0, adr=0, arp=0, nb=1, enk=1,
+                self.limb_tv = pm.treeView(adr=0, arp=0, nb=1, enk=1,
                                             elc=self.IgnoreRename)
                 pm.treeView(self.limb_tv, e=1, scc=self.SelectedLimb)
         with pm.verticalLayout():
             with pm.frameLayout('LIMB Mask Actions', bv=1, mw=7, mh=7):
                 with pm.columnLayout(adj=1, rs=7):
-                    pm.button(l='Surface Crawl', c=self.LimbMaskSurfaceCrawl)
-                    pm.button(l='Closes Influence')
+                    self._brushMode_rb = pm.radioButtonGrp( nrb=3, 
+                                        l='Display Mode: ', 
+                                        la3=['Limb', 'Joint', 'Both'], 
+                                        cw4=[77,44,44, 44],
+                                        sl=1, onc=self.UpdateDisplayMode)
+                    pm.separator()
+                    pm.button(l='Apply Surface Crawl Limb Mask', c=self.ApplyLimbMaskSurfaceCrawl)
+                    pm.separator()
+                    self.limbRadius_ff = pm.floatFieldGrp(  nf=1, 
+                                                            l='Radius', 
+                                                            v1=1,
+                                                            cc=self.UpdateLimbMaskRadius)
+                    pm.button(l='Apply Limb Radius Mask', c=self.ApplyLimbMaskRadius)
+                    pm.separator()
                     with pm.rowLayout(adj=1, nc=2):
-                        pm.intSliderGrp(l='Soften Steps', f=1, v=1, 
+                        self._softenLimb_is = pm.intSliderGrp(l='Soften Steps', 
+                                        f=1, v=1, 
                                         cw3=(70, 30, 60),
                                         min=1, max=5)
-                        pm.button(l='Apply')
+                        pm.button(l='Soften', c=self.ApplyLimbMaskSoften)
 
             with pm.frameLayout('JOINT Mask Actions', bv=1, mw=7, mh=7):
                 with pm.columnLayout(adj=1, rs=7):
@@ -73,6 +86,14 @@ class QuickWeights_UI(absOpUI.Abstract_OperationUI):
                                         cw3=(70, 30, 60),
                                         min=1, max=5)
                         pm.button(l='Apply')
+
+        filePath = self.GetConfigFilePath()
+        config = genUtil.Json.Load(filePath)   
+        mode = config['quickWeightsDisplayMode']
+        pm.radioButtonGrp(self._brushMode_rb, e=1, sl=mode)
+        radius = config['quickWeightsLimbMaskRadius']
+        pm.floatFieldGrp(self.limbRadius_ff, e=1, v1=radius)
+
 
 #=========== MESH HIER ====================================
    
@@ -95,6 +116,7 @@ class QuickWeights_UI(absOpUI.Abstract_OperationUI):
         self._selectedMesh = meshes[0]
         name = self._selectedMesh.shortName()
         pm.treeView(self.mesh_tv, e=1, selectItem=(name, 1))
+        self.operation.SetMesh(self._selectedMesh)
 
     def SelectedMeshes(self):
         log.funcFileInfo()
@@ -104,8 +126,7 @@ class QuickWeights_UI(absOpUI.Abstract_OperationUI):
             pm.treeView(self.mesh_tv, e=1, selectItem=(name, 1))
             return
         self._selectedMesh = self._meshes[meshIDStrs[0]]
-        self.operation.DisplayLimb(self._selectedMesh, self._selectedLimb)
-
+        self.UpdateDisplay()
 
 #=========== LIMB HIER ====================================
    
@@ -114,9 +135,10 @@ class QuickWeights_UI(absOpUI.Abstract_OperationUI):
         self._limbIDs = uiUtil.PopulateLimbHierSkeletal(self.limb_tv, 
                                                 self._rigRoot)
         limbs = skinUtil.GetSkeletalLimbOrder(list(self._limbIDs.values()))
-        self._selectedLimb = limbs[0]
-        limbID = self._selectedLimb.ID.get()
+        self._selectedLimbs = [limbs[0]]
+        limbID = self._selectedLimbs[0].ID.get()
         pm.treeView(self.limb_tv, e=1, selectItem=(limbID, 1))
+        self.operation.SetLimb(self._selectedLimbs[0])
 
     def IgnoreRename(self, idStr, newName):
         log.funcFileInfo()
@@ -126,22 +148,92 @@ class QuickWeights_UI(absOpUI.Abstract_OperationUI):
         log.funcFileInfo()
         limbIDStrs = pm.treeView(self.limb_tv, q=1, selectItem=1)
         if not limbIDStrs:
-            limbID = self._selectedLimb.ID.get()
+            limbID = self._selectedLimbs[0].ID.get()
             pm.treeView(self.limb_tv, e=1, selectItem=(limbID, 1))
             return
-        self._selectedLimb = self._limbIDs[limbIDStrs[0]]
-        self.operation.DisplayLimb(self._selectedMesh, self._selectedLimb)
+        self._selectedLimbs = [self._limbIDs[ID] for ID in limbIDStrs]
+        self.operation.SetLimb(self._selectedLimbs[0])
+        self.UpdateDisplay()
 
-    def LimbMaskSurfaceCrawl(self, ignore):
+#=========== DISPLAY ====================================
+
+    def UpdateDisplayMode(self, ignore):
+        mode = pm.radioButtonGrp(self._brushMode_rb, q=1, sl=1)
+        filePath = self.GetConfigFilePath()
+        config = genUtil.Json.Load(filePath)   
+        config['quickWeightsDisplayMode'] = mode
+        genUtil.Json.Save(filePath, config)
+        self.UpdateDisplay()
+
+    def UpdateDisplay(self):
+        mode = pm.radioButtonGrp(self._brushMode_rb, q=1, sl=1)
+        if mode == 1:
+            self.operation.DisplayLimbVertexColors()
+        elif mode == 2:
+            self.operation.DisplayJointVertexColors(self._selectedMesh,
+                                                    self._selectedLimbs[0])
+        else:
+            self.operation.DisplayLimbJointVertexColors(self._selectedMesh,
+                                                    self._selectedLimbs[0])
+
+#=========== LIMB ACTIONS ====================================
+
+    def ApplyLimbMaskSurfaceCrawl(self, ignore):
         log.funcFileInfo()
-        self.operation.LimbMaskCrawl(   self._rigRoot,
-                                        self._selectedMesh, 
-                                        self._selectedLimb)
-        self.operation.DisplayLimb(self._selectedMesh, self._selectedLimb)
+        for limb in self._selectedLimbs:
+            self.operation.LimbMaskCrawl(self._selectedMesh, limb)
+        self.operation.UpdateLimbWeights(self._selectedMesh, 
+                                        self._selectedLimbs[0])
+        mode = pm.radioButtonGrp(self._brushMode_rb, q=1, sl=1)
+        if mode == 2: # joint
+            pm.radioButtonGrp(self._brushMode_rb, e=1, sl=1)
+        self.UpdateDisplay()
 
+    def UpdateLimbMaskRadius(self, value):
+        filePath = self.GetConfigFilePath()
+        config = genUtil.Json.Load(filePath)   
+        config['quickWeightsLimbMaskRadius'] = value
+        genUtil.Json.Save(filePath, config)
 
-#=========== ACTIONS ====================================
+    def ApplyLimbMaskRadius(self, ignore):
+        log.funcFileInfo()
+        radius = pm.floatFieldGrp(self.limbRadius_ff, q=1, v1=1)
+        filePath = self.GetConfigFilePath()
+        config = genUtil.Json.Load(filePath)   
+        midpoints = config['quickWeightsLimbMaskMidpoints']
+        for limb in self._selectedLimbs:
+            self.operation.ApplyLimbMaskRadius(self._selectedMesh, 
+                                        limb,
+                                        radius,
+                                        midpoints)
+        self.operation.UpdateLimbWeights(self._selectedMesh, 
+                                        self._selectedLimbs[0])
+        mode = pm.radioButtonGrp(self._brushMode_rb, q=1, sl=1)
+        if mode == 2: # joint
+            pm.radioButtonGrp(self._brushMode_rb, e=1, sl=1)
+        self.UpdateDisplay()
 
+    def ApplyLimbMaskSoften(self, ignore):
+        softenSteps =  pm.intSliderGrp(self._softenLimb_is, q=1, v=1)
+        for limb in self._selectedLimbs:
+            self.operation.ApplyLimbMaskSoften( self._selectedMesh, 
+                                                limb, 
+                                                softenSteps)
+        self.operation.UpdateLimbWeights(self._selectedMesh, 
+                                        self._selectedLimbs[0])
+        mode = pm.radioButtonGrp(self._brushMode_rb, q=1, sl=1)
+        if mode == 2: # joint
+            pm.radioButtonGrp(self._brushMode_rb, e=1, sl=1)
+        self.UpdateDisplay()
+
+#=========== MISC ====================================
+
+    def GetConfigFilePath(self):
+        folder = os.path.dirname(__file__)
+        folder = os.path.dirname(folder)
+        folder = os.path.dirname(folder)
+        folder = os.path.join(folder, 'Data')
+        return os.path.join(folder, 'Config.json')
 
 
 

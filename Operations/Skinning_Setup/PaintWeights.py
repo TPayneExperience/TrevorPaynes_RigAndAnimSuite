@@ -283,10 +283,9 @@ class PaintWeights(absOp.Abstract_Operation):
             value = weights[vertIndex]
             jntOp.setPFRSPyPaintValue(vertIndex, value)
     
-    def SetLimbWeights(self, mesh, weights):
+    def SetLimbWeights(self, weights, vertsToUpdate):
         lmbOp.LIMB_WEIGHTS = weights
-        vertCount = pm.polyEvaluate(mesh, v=1)
-        for vertIndex in range(vertCount):
+        for vertIndex in vertsToUpdate:
             value = lmbOp.LIMB_WEIGHTS[vertIndex]
             lmbOp.setPFRSPyPaintValue(vertIndex, value)
 
