@@ -16,17 +16,17 @@ class Appearance_UI(absOpUI.Abstract_OperationUI):
     uiName = 'Appearance'
     uiOrderIndex = 300
     operation = app.Appearance()
+    
     def __init__(self):
         self._rigRoot = None
         self._allRigRoots = None
-        self._limbIDs = []
+        self._limbIDs = {}
         self._selectedLimbs = []
         self._limbGroups = []
 
     def Setup_UI(self, rigRoot, allRigRoots): 
         self._rigRoot = rigRoot
         self._allRigRoots = allRigRoots
-        self._limbIDs = []
         self._selectedLimbs = []
         self._limbGroups = []
         self._Setup()
@@ -57,9 +57,9 @@ class Appearance_UI(absOpUI.Abstract_OperationUI):
     def _Setup(self):
         with pm.verticalLayout():
             with pm.frameLayout('Limbs', bv=1):
-                self.limb_tv = pm.treeView(ams=0, adr=0, arp=0, nb=1, enk=1,
-                                            elc=self.IgnoreRename)
-                pm.treeView(self.limb_tv, e=1, scc=self.SelectedLimb)
+                self.limb_tv = uiUtil.SetupLimbHier(self._limbIDs)
+                pm.treeView(self.limb_tv, elc=self.IgnoreRename,
+                                            scc=self.SelectedLimb)
                 with pm.popupMenu(): #as self.rmb_ui:
                     self._reimport_mi = pm.menuItem(l='Reimport Control Shapes', 
                                                     c=self.ReimportControlShapes)
@@ -108,9 +108,10 @@ class Appearance_UI(absOpUI.Abstract_OperationUI):
         log.funcFileDebug()
         self.PopulateControlHier(None)
         self.PopulateLimbProperties(None)
-        self._limbIDs = uiUtil.PopulateLimbHierNormal(self.limb_tv, 
+        self._limbIDs.clear()
+        self._limbIDs.update(uiUtil.PopulateLimbHierNormal(self.limb_tv, 
                                                 self._rigRoot,
-                                                self._allRigRoots)
+                                                self._allRigRoots))
 
     def IgnoreRename(self, idStr, newName):
         log.funcFileInfo()

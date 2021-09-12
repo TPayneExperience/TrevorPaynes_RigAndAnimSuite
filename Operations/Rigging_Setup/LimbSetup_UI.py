@@ -43,7 +43,6 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
         self._limbFunc = None
         self._selectedSceneJoints = []
         self._limbJoints = {}
-        self._limbIDs = {} # limbID : limb
         self._selectedLimbs = []
         self._autobuild_mis = []
         self._Setup()
@@ -89,8 +88,9 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
                 tt = 'Double click to RENAME.'
                 tt += '\nTo set a limb as a MIRROR,'
                 tt += '\nname BOTH LIMBS with the SAME NAME.'
-                self.limb_tv = pm.treeView(adr=0, arp=0, ann=tt, nb=1, fb=1, enk=1)
-                pm.treeView(self.limb_tv, e=1, scc=self.SelectedLimb,   
+                self.limb_tv = uiUtil.SetupLimbHier(self._limbIDs)
+                pm.treeView(self.limb_tv, e=1, ams=1, ann=tt,
+                                                scc=self.SelectedLimb,   
                                                 elc=self.RenameLimb)
                 with pm.popupMenu():
                     # Edit Limb Joints
@@ -156,8 +156,11 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
                     self.flipSides_mi = pm.menuItem(l='Flip Sides', 
                                             en=0, c=self.FlipSides)
                     with pm.subMenuItem(l='Set Limb Location...', en=0) as self.limbLoc_mi:
-                        pm.menuItem(l='As Body', c=self.SetLimbLocationAsBody)
-                        pm.menuItem(l='As Face', c=self.SetLimbLocationAsFace)
+                        pm.menuItem(l='As Body', c=pm.Callback(self.SetLimbLocation, 0))
+                        pm.menuItem(l='As Face', c=pm.Callback(self.SetLimbLocation, 1))
+                        pm.menuItem(l='As Fingers', c=pm.Callback(self.SetLimbLocation, 2))
+                        pm.menuItem(l='As Toes', c=pm.Callback(self.SetLimbLocation, 3))
+                        pm.menuItem(l='As Misc', c=pm.Callback(self.SetLimbLocation, 4))
                         
                     # Joint Anims
                     pm.menuItem(l='JOINT ANIMATIONS', d=1)
@@ -218,7 +221,7 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
     def Refresh(self, ignore):
         self.operation.InitSceneJoints(self._rigRoot)
         self.PopulateSceneHier()
-        self.PopulateLimbHierNormal()
+        self.PopulateLimbHier()
         self.PopulateJointHier(None)
 
     def _Build(self, autobuilder):
@@ -226,7 +229,7 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
         self.operation.InitSceneJoints(self._rigRoot)
         self.operation.Autobuild(self._rigRoot, autobuilder)
         self.PopulateSceneHier()
-        self.PopulateLimbHierNormal()
+        self.PopulateLimbHier()
         self.PopulateJointHier(None)
 
     def IgnoreRename(self, idStr, newName):
@@ -305,11 +308,12 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
 
 #=========== LIMB HIER ====================================
 
-    def PopulateLimbHierNormal(self, selectLimb=None):
+    def PopulateLimbHier(self, selectLimb=None):
         log.funcFileDebug()
-        self._limbIDs = uiUtil.PopulateLimbHierNormal(self.limb_tv, 
-                                                self._rigRoot,
-                                                self._allRigRoots)
+        self._limbIDs.clear()
+        self._limbIDs.update(uiUtil.PopulateLimbHierNormal(self.limb_tv, 
+                                                    self._rigRoot,
+                                                    self._allRigRoots))
         for limbID, limb in self._limbIDs.items():
             if limb.limbType.get() == 0:
                 pm.treeView(self.limb_tv, e=1, enl=(limbID, 0))
@@ -395,28 +399,28 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
         self.operation._InitBehavior(self._rigRoot, limb)
         self.operation.RenameLimb(limb, limbName)
         self.operation.SetupDefaultLimbParent(limb)
-        self.PopulateLimbHierNormal(limb)
+        self.PopulateLimbHier(limb)
         self.PopulateJointHier(limb)
         self.PopulateSceneHier()
 
     def DuplicateLimbs(self, ignore):
         log.funcFileInfo()
         self.operation.DuplicateLimbs(self._selectedLimbs)
-        self.PopulateLimbHierNormal()
+        self.PopulateLimbHier()
         self.PopulateSceneHier()
         self.PopulateJointHier(None)
 
     def MirrorBodyLimbs(self, axis):
         log.funcFileInfo()
         self.operation.MirrorBodyLimbs(self._selectedLimbs, axis)
-        self.PopulateLimbHierNormal()
+        self.PopulateLimbHier()
         self.PopulateSceneHier()
         self.PopulateJointHier(None)
 
     def MirrorFaceLimbs(self, axis):
         log.funcFileInfo()
         self.operation.MirrorFaceLimbs(self._selectedLimbs, axis)
-        self.PopulateLimbHierNormal()
+        self.PopulateLimbHier()
         self.PopulateSceneHier()
         self.PopulateJointHier(None)
 
@@ -473,7 +477,7 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
         templateFolder = self._GetTemplateFolder()
         ldTmp.LoadTemplates(self._rigRoot, templateFolder)
         self.PopulateSceneHier()
-        self.PopulateLimbHierNormal()
+        self.PopulateLimbHier()
         self.PopulateJointHier(None)
 
     def _GetTemplateFolder(self):
@@ -502,7 +506,7 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
             return
         for limb in self._selectedLimbs:
             self.operation.RemoveLimb(limb)
-        self.PopulateLimbHierNormal()
+        self.PopulateLimbHier()
         self.PopulateJointHier(None)
         self.PopulateSceneHier()
         self.SelectedLimb()
@@ -520,7 +524,7 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
             return
         for limb in self._selectedLimbs:
             self.operation.RemoveLimbAndJoints(limb)
-        self.PopulateLimbHierNormal()
+        self.PopulateLimbHier()
         self.PopulateJointHier(None)
         self.PopulateSceneHier()
         self.SelectedLimb()
@@ -536,7 +540,7 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
         msg = '\t"%s" to "%s"' % (oldName, newName)
         log.info(msg)
         if self.operation.RenameLimb(limb, newName):
-            self.PopulateLimbHierNormal(limb)
+            self.PopulateLimbHier(limb)
             self.PopulateJointHier(limb)
             self.PopulateSceneHier()
         return ''
@@ -546,7 +550,7 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
         limbIDStrs = pm.treeView(self.limb_tv, q=1, selectItem=1)
         limb = self._limbIDs[limbIDStrs[0]]
         self.operation.FlipSides(limb)
-        self.PopulateLimbHierNormal(limb)
+        self.PopulateLimbHier(limb)
         self.PopulateJointHier(limb)
 
     def ApplyJointAimUp(self, ignore):
@@ -558,13 +562,9 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
             for joint in pm.listConnections(limb.joints):
                 self.operation.TransferRotationsToJointOrient(joint)
 
-    def SetLimbLocationAsBody(self, value):
+    def SetLimbLocation(self, value):
         for limb in self._selectedLimbs:
-            self.operation.SetLimbLocationAsBody(limb)
-
-    def SetLimbLocationAsFace(self, value):
-        for limb in self._selectedLimbs:
-            self.operation.SetLimbLocationAsFace(limb)
+            self.operation.SetLimbLocation(limb, value)
 
     def ExportAnimation(self, ignore):
         log.funcFileInfo()

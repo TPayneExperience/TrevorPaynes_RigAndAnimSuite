@@ -30,6 +30,7 @@ class Constraints_UI(absOpUI.Abstract_OperationUI):
         self._allRigRoots = []
         self._selectedLimb = None
         self._selectedControls = []
+        self._limbIDs = {}
         self._target1 = None
         self._target2 = None
         self._selectedTarget = None
@@ -54,8 +55,9 @@ class Constraints_UI(absOpUI.Abstract_OperationUI):
     def _Setup(self):
         with pm.verticalLayout():
             with pm.frameLayout('Limbs', bv=1):
-                self.limb_tv = pm.treeView(nb=1, enk=1)
-                pm.treeView(self.limb_tv, e=1, scc=self.SelectedLimb)
+                self.limb_tv = uiUtil.SetupLimbHier(self._limbIDs)
+                pm.treeView(self.limb_tv, e=1, scc=self.SelectedLimb,
+                                            elc=self.IgnoreRename)
             with pm.frameLayout('Targetable Controls', bv=1):
                 self.targetable_tv = pm.treeView(arp=0, adr=0,
                                             elc=self.IgnoreRename)
@@ -104,9 +106,10 @@ class Constraints_UI(absOpUI.Abstract_OperationUI):
 
     def PopulateLimbHierNormal(self, selectLimb=None):
         log.funcFileDebug()
-        self._limbIDs = uiUtil.PopulateLimbHierNormal(self.limb_tv, 
+        self._limbIDs.clear()
+        self._limbIDs.update(uiUtil.PopulateLimbHierNormal(self.limb_tv, 
                                                 self._rigRoot,
-                                                self._allRigRoots)
+                                                self._allRigRoots))
         for limbID, limb in self._limbIDs.items():
             cstGrps = []
             for group in pm.listConnections(limb.usedGroups):

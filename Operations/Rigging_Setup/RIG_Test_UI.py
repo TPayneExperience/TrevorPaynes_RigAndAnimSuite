@@ -19,6 +19,7 @@ class Test_UI(absOpUI.Abstract_OperationUI):
         self._rigRoot = rigRoot
         self._allRigRoots = allRigRoots
         self._limbGroups = {}
+        self._limbIDs = {}
         self._Setup()
         self.PopulateLimbHierNormal()
 
@@ -30,9 +31,9 @@ class Test_UI(absOpUI.Abstract_OperationUI):
     def _Setup(self):
         with pm.verticalLayout():
             with pm.frameLayout('Limbs', bv=1):
-                self.limb_tv = pm.treeView(ams=0, adr=0, arp=0, nb=1, enk=1,
+                self.limb_tv = uiUtil.SetupLimbHier(self._limbIDs)
+                pm.treeView(self.limb_tv, e=1, scc=self.SelectedLimb,
                                             elc=self.IgnoreRename)
-                pm.treeView(self.limb_tv, e=1, scc=self.SelectedLimb)
             with pm.frameLayout('Controls', bv=1):
                 self.control_tv = pm.treeView(arp=0, adr=0, ams=0,
                                             elc=self.IgnoreRename)
@@ -46,9 +47,10 @@ class Test_UI(absOpUI.Abstract_OperationUI):
     def PopulateLimbHierNormal(self):
         log.funcFileDebug()
         self.PopulateControlHier(None)
-        self._limbIDs = uiUtil.PopulateLimbHierNormal(self.limb_tv, 
+        self._limbIDs.clear()
+        self._limbIDs.update(uiUtil.PopulateLimbHierNormal(self.limb_tv, 
                                                 self._rigRoot,
-                                                self._allRigRoots)
+                                                self._allRigRoots))
 
     def IgnoreRename(self, idStr, newName):
         log.funcFileInfo()

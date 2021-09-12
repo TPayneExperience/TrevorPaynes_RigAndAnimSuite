@@ -15,7 +15,7 @@ class Poses_UI(absOpUI.Abstract_OperationUI):
     uiOrderIndex = 210
     operation = pss.Poses()
     def __init__(self):
-        self._limbIDs = []
+        self._limbIDs = {}
         self.poses_ui = []
         self._copiedPoses = {} # pfrsName : Pose
         self._rigRoot = None
@@ -26,7 +26,6 @@ class Poses_UI(absOpUI.Abstract_OperationUI):
         self._Setup()
         self._rigRoot = rigRoot
         self._allRigRoots = allRigRoots
-        self._limbIDs = []
         self.poses_ui = []
         self._copiedPoses = {} # pfrsName : Pose
         self._selectedLimbs = []
@@ -42,7 +41,8 @@ class Poses_UI(absOpUI.Abstract_OperationUI):
     def _Setup(self):
         with pm.verticalLayout():
             with pm.frameLayout('Limbs', bv=1):
-                self.limb_tv = pm.treeView(adr=0, arp=0, nb=1, enk=1)
+                self.limb_tv = uiUtil.SetupLimbHier(self._limbIDs)
+                pm.treeView(self.limb_tv, e=1, ams=1)
                 with pm.popupMenu() as self.rmb_ui:
                     self.reset_mi = pm.menuItem(l='Reset Limb Controls', en=0, 
                                                 c=self.ResetLimbControls)
@@ -72,9 +72,10 @@ class Poses_UI(absOpUI.Abstract_OperationUI):
    
     def PopulateLimbHierNormal(self):
         log.funcFileDebug()
-        self._limbIDs = uiUtil.PopulateLimbHierNormal(self.limb_tv, 
+        self._limbIDs.clear()
+        self._limbIDs.update(uiUtil.PopulateLimbHierNormal(self.limb_tv, 
                                                 self._rigRoot,
-                                                self._allRigRoots)
+                                                self._allRigRoots))
 
     def SelectedLimb(self):
         log.funcFileInfo()

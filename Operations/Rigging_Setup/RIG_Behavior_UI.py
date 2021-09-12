@@ -55,13 +55,17 @@ class RIG_Behavior_UI(absOpUI.Abstract_OperationUI):
     def _Setup(self):
         with pm.verticalLayout():
             with pm.frameLayout('Limbs', bv=1):
+                # with pm.columnLayout(adj=1, rs=5):
+                # self._filter_bs = uiUtil.SetupFilterBar()
                 tt = '- MMB + Drag + Drop to reparent'
                 tt += '\n- Red Dots indicate Empty Limbs'
                 tt += '\n- Double Click to rename Empty Limbs'
                 self.limb_tv = pm.treeView(nb=1, ann=tt, enk=1)
+                # self._filter_bs, self.limb_tv = uiUtil.SetupLimbHier()
                 pm.treeView(self.limb_tv, e=1, scc=self.SelectedLimb,
                                                 elc=self.RenameLimb,
-                                                dad=self.ReparentLimb)
+                                                dad=self.ReparentLimb,
+                                                ann=tt)
                 with pm.popupMenu() as self.rmb_ui:
                     self._addEmpty_mi = pm.menuItem(l='Add Empty Limb', 
                                         en=0, c=self.AddEmptyLimb)

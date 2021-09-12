@@ -25,6 +25,11 @@ class QuickWeights_UI(absOpUI.Abstract_OperationUI):
     uiOrderIndex = 210
     operation = qck.QuickWeights()
     
+    def __init__(self):
+        self._rigRoot = None
+        self._allRigRoots = None
+        self._limbIDs = {}
+
     def Setup_UI(self, rigRoot, allRigRoots):
         self._rigRoot = rigRoot
         self._allRigRoots = allRigRoots
@@ -36,6 +41,8 @@ class QuickWeights_UI(absOpUI.Abstract_OperationUI):
         self.PopulateMeshHier()
         self.operation.SetupDisplay()
         self.UpdateDisplay()
+        self._UpdateSurfaceCrawlButton()
+        self.operation.StorePositionData(rigRoot)
 
     def Teardown_UI(self):
         self.operation.TeardownDisplay()
@@ -51,9 +58,10 @@ class QuickWeights_UI(absOpUI.Abstract_OperationUI):
                                             elc=self.IgnoreRename)
                 pm.treeView(self.mesh_tv, e=1, scc=self.SelectedMeshes)
             with pm.frameLayout('Limbs', bv=1):
-                self.limb_tv = pm.treeView(adr=0, arp=0, nb=1, enk=1,
-                                            elc=self.IgnoreRename)
-                pm.treeView(self.limb_tv, e=1, scc=self.SelectedLimb)
+                self.limb_tv = uiUtil.SetupLimbHier(self._limbIDs)
+                pm.treeView(self.limb_tv, e=1, ams=1, 
+                                            elc=self.IgnoreRename,
+                                            scc=self.SelectedLimb)
         with pm.verticalLayout():
             with pm.frameLayout('LIMB Mask Actions', bv=1, mw=7, mh=7):
                 with pm.columnLayout(adj=1, rs=7):
@@ -63,7 +71,8 @@ class QuickWeights_UI(absOpUI.Abstract_OperationUI):
                                         cw4=[77,44,44, 44],
                                         sl=1, onc=self.UpdateDisplayMode)
                     pm.separator()
-                    pm.button(l='Apply Surface Crawl Limb Mask', c=self.ApplyLimbMaskSurfaceCrawl)
+                    self._surface_b = pm.button(l='Apply Surface Crawl Limb Mask', 
+                                        c=self.ApplyLimbMaskSurfaceCrawl)
                     pm.separator()
                     self.limbRadius_ff = pm.floatFieldGrp(  nf=1, 
                                                             l='Radius', 
@@ -80,12 +89,16 @@ class QuickWeights_UI(absOpUI.Abstract_OperationUI):
 
             with pm.frameLayout('JOINT Mask Actions', bv=1, mw=7, mh=7):
                 with pm.columnLayout(adj=1, rs=7):
-                    pm.button(l='Closes Influence')
+                    pm.button(l='Apply Closest Joint Mask', c=self.ApplyJointMask)
+                    msg = 'Skip Last Joint (Chain Limbs Only)'
+                    self.skipLast_cb = pm.checkBox(l=msg, v=1)
+                    pm.separator()
                     with pm.rowLayout(adj=1, nc=2):
-                        pm.intSliderGrp(l='Soften Steps', f=1, v=1, 
+                        self._softenJoint_is =  pm.intSliderGrp(l='Soften Steps', 
+                                        f=1, v=1, 
                                         cw3=(70, 30, 60),
                                         min=1, max=5)
-                        pm.button(l='Apply')
+                        pm.button(l='Soften', c=self.ApplyJointMaskSoften)
 
         filePath = self.GetConfigFilePath()
         config = genUtil.Json.Load(filePath)   
@@ -93,7 +106,6 @@ class QuickWeights_UI(absOpUI.Abstract_OperationUI):
         pm.radioButtonGrp(self._brushMode_rb, e=1, sl=mode)
         radius = config['quickWeightsLimbMaskRadius']
         pm.floatFieldGrp(self.limbRadius_ff, e=1, v1=radius)
-
 
 #=========== MESH HIER ====================================
    
@@ -132,11 +144,13 @@ class QuickWeights_UI(absOpUI.Abstract_OperationUI):
    
     def PopulateLimbHier(self):
         log.funcFileDebug()
-        self._limbIDs = uiUtil.PopulateLimbHierSkeletal(self.limb_tv, 
-                                                self._rigRoot)
+        self._limbIDs.clear()
+        self._limbIDs.update(uiUtil.PopulateLimbHierSkeletal(self.limb_tv, 
+                                                self._rigRoot))
         limbs = skinUtil.GetSkeletalLimbOrder(list(self._limbIDs.values()))
         self._selectedLimbs = [limbs[0]]
-        limbID = self._selectedLimbs[0].ID.get()
+        rigRootID = self._rigRoot.ID.get()
+        limbID = '%d_%d' % (rigRootID, limbs[0].ID.get())
         pm.treeView(self.limb_tv, e=1, selectItem=(limbID, 1))
         self.operation.SetLimb(self._selectedLimbs[0])
 
@@ -148,12 +162,15 @@ class QuickWeights_UI(absOpUI.Abstract_OperationUI):
         log.funcFileInfo()
         limbIDStrs = pm.treeView(self.limb_tv, q=1, selectItem=1)
         if not limbIDStrs:
-            limbID = self._selectedLimbs[0].ID.get()
+            limb = self._selectedLimbs[0]
+            rigRootID = self._rigRoot.ID.get()
+            limbID = '%d_%d' % (rigRootID, limb.ID.get())
             pm.treeView(self.limb_tv, e=1, selectItem=(limbID, 1))
             return
         self._selectedLimbs = [self._limbIDs[ID] for ID in limbIDStrs]
         self.operation.SetLimb(self._selectedLimbs[0])
         self.UpdateDisplay()
+        self._UpdateSurfaceCrawlButton()
 
 #=========== DISPLAY ====================================
 
@@ -181,7 +198,7 @@ class QuickWeights_UI(absOpUI.Abstract_OperationUI):
     def ApplyLimbMaskSurfaceCrawl(self, ignore):
         log.funcFileInfo()
         for limb in self._selectedLimbs:
-            self.operation.LimbMaskCrawl(self._selectedMesh, limb)
+            self.operation.ApplyLimbMaskCrawl(self._selectedMesh, limb)
         self.operation.UpdateLimbWeights(self._selectedMesh, 
                                         self._selectedLimbs[0])
         mode = pm.radioButtonGrp(self._brushMode_rb, q=1, sl=1)
@@ -224,6 +241,50 @@ class QuickWeights_UI(absOpUI.Abstract_OperationUI):
         mode = pm.radioButtonGrp(self._brushMode_rb, q=1, sl=1)
         if mode == 2: # joint
             pm.radioButtonGrp(self._brushMode_rb, e=1, sl=1)
+        self.UpdateDisplay()
+
+    def _UpdateSurfaceCrawlButton(self):
+        enableBtn = True
+        enableCb = False
+        for limb in self._selectedLimbs:
+            if limb.limbType.get() in (3, 4): # Chains
+                enableCb = True
+            if limb.limbType.get() not in (3, 4): # Chains
+                enableBtn = False
+        pm.button(self._surface_b, e=1, en=enableBtn)
+        pm.checkBox(self.skipLast_cb, e=1, en=enableCb)
+
+#=========== JOINT ACTIONS ====================================
+
+    def ApplyJointMask(self, ignore):
+        skipLast = pm.checkBox(self.skipLast_cb, q=1, v=1)
+        for limb in self._selectedLimbs:
+            limbType = limb.limbType.get()
+            if limbType in (1, 2): # branch
+                self.operation.ApplyClosestBranchJoint( self._selectedMesh,
+                                                        limb)
+            if limbType in (3, 4): # chain
+                self.operation.ApplyClosestChainJoint( self._selectedMesh,
+                                                        limb,
+                                                        skipLast)
+        self.operation.UpdateLimbWeights(self._selectedMesh, 
+                                        self._selectedLimbs[0])
+        mode = pm.radioButtonGrp(self._brushMode_rb, q=1, sl=1)
+        if mode == 1: # joint
+            pm.radioButtonGrp(self._brushMode_rb, e=1, sl=2)
+        self.UpdateDisplay()
+
+    def ApplyJointMaskSoften(self, ignore):
+        softenSteps = pm.intSliderGrp(self._softenJoint_is, q=1, v=1)
+        for limb in self._selectedLimbs:
+            self.operation.ApplyJointMaskSoften( self._selectedMesh, 
+                                                limb, 
+                                                softenSteps)
+        self.operation.UpdateLimbWeights(self._selectedMesh, 
+                                        self._selectedLimbs[0])
+        mode = pm.radioButtonGrp(self._brushMode_rb, q=1, sl=1)
+        if mode == 1: # limb
+            pm.radioButtonGrp(self._brushMode_rb, e=1, sl=2)
         self.UpdateDisplay()
 
 #=========== MISC ====================================

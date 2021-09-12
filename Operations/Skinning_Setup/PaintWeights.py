@@ -277,7 +277,7 @@ class PaintWeights(absOp.Abstract_Operation):
         jointIndex = jntOp.JOINT_INDEX
         weights = jntOp.JOINT_WEIGHTS[jointIndex]
         weights = [weight] * len(weights)
-        jntOp.JOINT_WEIGHTS[jointIndex] = weights
+        self.SetJointWeights(jointIndex, weights)
         vertCount = pm.polyEvaluate(mesh, v=1)
         for vertIndex in range(vertCount):
             value = weights[vertIndex]
@@ -286,7 +286,7 @@ class PaintWeights(absOp.Abstract_Operation):
     def SetLimbWeights(self, weights, vertsToUpdate):
         lmbOp.LIMB_WEIGHTS = weights
         for vertIndex in vertsToUpdate:
-            value = lmbOp.LIMB_WEIGHTS[vertIndex]
+            value = weights[vertIndex]
             lmbOp.setPFRSPyPaintValue(vertIndex, value)
 
 #=========== PAINT SETTINGS ====================================

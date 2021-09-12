@@ -25,6 +25,11 @@ class PaintWeights_UI(absOpUI.Abstract_OperationUI):
     uiOrderIndex = 310
     operation = pnt.PaintWeights()
     
+    def __init__(self):
+        self._rigRoot = None
+        self._allRigRoots = None
+        self._limbIDs = {}
+
     def Setup_UI(self, rigRoot, allRigRoots):
         self._rigRoot = rigRoot
         self._allRigRoots = allRigRoots
@@ -50,9 +55,9 @@ class PaintWeights_UI(absOpUI.Abstract_OperationUI):
                                             elc=self.IgnoreRename)
                 pm.treeView(self.mesh_tv, e=1, scc=self.SelectedMeshes)
             with pm.frameLayout('Limbs', bv=1):
-                self.limb_tv = pm.treeView(ams=0, adr=0, arp=0, nb=1, enk=1,
-                                            elc=self.IgnoreRename)
-                pm.treeView(self.limb_tv, e=1, scc=self.SelectedLimb)
+                self.limb_tv = uiUtil.SetupLimbHier(self._limbIDs)
+                pm.treeView(self.limb_tv, e=1, elc=self.IgnoreRename,
+                                             scc=self.SelectedLimb)
         with pm.verticalLayout():
             with pm.frameLayout('Brush', bv=1, mw=7, mh=7):
                 with pm.columnLayout(adj=1, rs=5):
@@ -130,11 +135,13 @@ class PaintWeights_UI(absOpUI.Abstract_OperationUI):
    
     def PopulateLimbHier(self):
         log.funcFileDebug()
-        self._limbIDs = uiUtil.PopulateLimbHierSkeletal(self.limb_tv, 
-                                                self._rigRoot)
+        self._limbIDs.clear()
+        self._limbIDs.update(uiUtil.PopulateLimbHierSkeletal(self.limb_tv, 
+                                                self._rigRoot))
         limbs = skinUtil.GetSkeletalLimbOrder(list(self._limbIDs.values()))
         self._selectedLimb = limbs[0]
-        limbID = self._selectedLimb.ID.get()
+        rigRootID = self._rigRoot.ID.get()
+        limbID = '%d_%d' % (rigRootID, self._selectedLimb.ID.get())
         pm.treeView(self.limb_tv, e=1, selectItem=(limbID, 1))
         self.SelectedLimb()
         self.PopulateJointHier(self._selectedLimb)
@@ -148,7 +155,8 @@ class PaintWeights_UI(absOpUI.Abstract_OperationUI):
         self._isPaintingLimb = True
         limbIDStrs = pm.treeView(self.limb_tv, q=1, selectItem=1)
         if not limbIDStrs:
-            limbID = self._selectedLimb.ID.get()
+            rigRootID = self._rigRoot.ID.get()
+            limbID = '%d_%d' % (rigRootID, self._selectedLimb.ID.get())
             pm.treeView(self.limb_tv, e=1, selectItem=(limbID, 1))
             self.UpdateTool()
             return
@@ -336,6 +344,7 @@ class PaintWeights_UI(absOpUI.Abstract_OperationUI):
         self._isPaintingLimb = False
 
         self.operation.SetJoint(self._selectedLimb, self._selectedJoint)
+        self.operation.UpdateJointOps()
 
         # Display
         mode = self._GetMode()
