@@ -130,6 +130,19 @@ def PopulateJointHier(widget, limb):
         pm.treeView(widget, e=1, displayLabel=(str(i), name))
     return joints
 
+def PopulateAttachPointsHier(widget, rigRoot):
+    attachPointDict = {}
+    group = pm.listConnections(rigRoot.attachPoints)[0]
+    attachPoints = pm.listRelatives(group, c=1)
+    rigRootID = rigRoot.ID.get()
+    for attachPoint in attachPoints:
+        apID = '%d_%d' % (rigRootID, attachPoint.ID.get())
+        name = attachPoint.shortName()
+        pm.treeView(widget, e=1, addItem=(apID, ''))
+        pm.treeView(widget, e=1, displayLabel=(apID, name))
+        attachPointDict[apID] = attachPoint
+    return attachPointDict
+
 def SetupLimbHier(limbIDDict):
     with pm.formLayout(numberOfDivisions=100) as form:
         with pm.horizontalLayout() as hl:

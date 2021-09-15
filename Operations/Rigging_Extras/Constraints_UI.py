@@ -31,9 +31,11 @@ class Constraints_UI(absOpUI.Abstract_OperationUI):
         self._selectedLimb = None
         self._selectedControls = []
         self._limbIDs = {}
+        self._apIDs = {}
         self._target1 = None
         self._target2 = None
-        self._selectedTarget = None
+        self._selectedTargetControl = None
+        self._selectedTargetAttachPoint = None
 
     def Setup_UI(self, rigRoot, allRigRoots):  # Return nothing, parent should cleanup
         self._Setup()
@@ -42,7 +44,8 @@ class Constraints_UI(absOpUI.Abstract_OperationUI):
         self._selectedLimb = None
         self._target1 = None
         self._target2 = None
-        self._selectedTarget = None
+        self._selectedTargetControl = None
+        self._selectedTargetAttachPoint = None
         self._selectedControls = []
         self.PopulateLimbHierNormal()
         self.UpdateApplyButton()
@@ -59,20 +62,31 @@ class Constraints_UI(absOpUI.Abstract_OperationUI):
                 pm.treeView(self.limb_tv, e=1, scc=self.SelectedLimb,
                                             elc=self.IgnoreRename)
             with pm.frameLayout('Targetable Controls', bv=1):
-                self.targetable_tv = pm.treeView(arp=0, adr=0,
-                                            elc=self.IgnoreRename)
-                pm.treeView(self.targetable_tv, e=1, scc=self.SelectedTarget)
+                self.targetable_tv = pm.treeView(arp=0, adr=0, ams=0,
+                                            elc=self.IgnoreRename,
+                                            scc=self.SelectedTargetControl)
                 with pm.popupMenu():
-                    self.setTarget1_mi = pm.menuItem(l='Set As Target 1 (Required)', 
-                                                    c=self.SetAsTarget1,
+                    self.setTargetControl1_mi = pm.menuItem(l='Set As Target 1 (Required)', 
+                                                    c=self.SetControlAsTarget1,
                                                     en=0)
-                    self.setTarget2_mi = pm.menuItem(l='Set As Target 2 (Optional)', 
-                                                    c=self.SetAsTarget2,
+                    self.setTargetControl2_mi = pm.menuItem(l='Set As Target 2 (Optional)', 
+                                                    c=self.SetControlAsTarget2,
                                                     en=0)
                     pm.menuItem(l='Reset Target 2', c=self.ResetTarget2)
-            with pm.frameLayout('Targetable Attach Points (Coming Beta)', bv=1, en=0):
-                self.attach_tv = pm.treeView(arp=0, adr=0, ams=0,
-                                            elc=self.IgnoreRename)
+            with pm.frameLayout('Targetable Attach Points', bv=1):
+                self.ap_tv = pm.treeView(arp=0, adr=0, ams=0,
+                                            elc=self.IgnoreRename,
+                                            scc=self.SelectedTargetAttachPoint)
+                with pm.popupMenu():
+                    self.setTargetAttachPoint1_mi = pm.menuItem(
+                                                    l='Set As Target 1 (Required)', 
+                                                    c=self.SetControlAsTarget1,
+                                                    en=0)
+                    self.setTargetAttachPoint2_mi = pm.menuItem(
+                                                    l='Set As Target 2 (Optional)', 
+                                                    c=self.SetControlAsTarget2,
+                                                    en=0)
+                    pm.menuItem(l='Reset Target 2', c=self.ResetTarget2)
         with pm.verticalLayout():
             with pm.frameLayout('Limb Controls', bv=1):
                 self.control_tv = pm.treeView(arp=0, adr=0,
@@ -140,6 +154,105 @@ class Constraints_UI(absOpUI.Abstract_OperationUI):
         self.PopulateControlHier()
         self.PopulateGroupHier()
         self.PopulateTargetableHier()
+        self.PopulateAttachPointsHier()
+
+#=========== TARGETABLE CONTROLS HIER ====================================
+
+    def PopulateTargetableHier(self):
+        log.funcFileDebug()
+        self._targetableControls = {}
+        self._selectedTargetControl = None
+        self._selectedTargetAttachPoint = None
+        pm.treeView(self.targetable_tv, e=1, removeAll=1)
+        pm.menuItem(self.setTargetControl1_mi, e=1, en=0)
+        pm.menuItem(self.setTargetControl2_mi, e=1, en=0)
+        self.UpdateApplyButton()
+        if not self._selectedLimb:
+            return
+        
+        limb = self._selectedLimb
+        jointGroups = pm.listConnections(limb.jointGroups)
+        jointGroups = rigUtil.SortGroups(jointGroups)
+        controls = [pm.listConnections(g.control)[0] for g in jointGroups]
+        for control in controls:
+            name = control.shortName()
+            self._targetableControls[name] = control
+            pm.treeView(self.targetable_tv, e=1, ai=(name, ''))
+    
+    def SelectedTargetControl(self):
+        log.funcFileInfo()
+        pm.menuItem(self.setTargetControl1_mi, e=1, en=0)
+        pm.menuItem(self.setTargetControl2_mi, e=1, en=0)
+        groupIDStrs = pm.treeView(self.targetable_tv, q=1, si=1)
+        if not groupIDStrs:
+            pm.select(d=1)
+            return 
+        self._selectedTargetControl = self._targetableControls[groupIDStrs[0]]
+        pm.select(self._selectedTargetControl)
+        pm.menuItem(self.setTargetControl1_mi, e=1, en=1)
+        if self._selectedTargetControl != self._target1:
+            pm.menuItem(self.setTargetControl2_mi, e=1, en=1)
+
+    def SetControlAsTarget1(self, ignore):
+        self._target1 = self._selectedTargetControl
+        text = 'Target 1: %s' % self._target1
+        pm.text(self.target1_t, e=1, l=text)
+        self.PopulateTargetableHier()
+        self.UpdateApplyButton()
+
+    def SetControlAsTarget2(self, ignore):
+        self._target2 = self._selectedTargetControl
+        text = 'Target 2: %s' % self._target2
+        pm.text(self.target2_t, e=1, l=text)
+        self.PopulateTargetableHier()
+
+    def ResetTarget2(self, ignore):
+        self._target2 = None
+        text = 'Target 2: Default Parent'
+        pm.text(self.target2_t, e=1, l=text)
+        self.PopulateTargetableHier()
+
+#=========== ATTACH POINTS ====================================
+
+    def PopulateAttachPointsHier(self):
+        log.funcFileDebug()
+        pm.treeView(self.ap_tv, e=1, removeAll=1)
+        self._apIDs.clear()
+        self._apIDs.update(uiUtil.PopulateAttachPointsHier(self.ap_tv,
+                                                    self._rigRoot))
+
+    def SelectedTargetAttachPoint(self):
+        log.funcFileInfo()
+        pm.menuItem(self.setTargetAttachPoint1_mi, e=1, en=0)
+        pm.menuItem(self.setTargetAttachPoint2_mi, e=1, en=0)
+        apIDStrs = pm.treeView(self.ap_tv, q=1, selectItem=1)
+        if not apIDStrs:
+            pm.select(d=1)
+            return 
+        self._selectedTargetAttachPoint = self._apIDs[apIDStrs[0]]
+        pm.select(self._selectedTargetAttachPoint)
+        pm.menuItem(self.setTargetAttachPoint1_mi, e=1, en=1)
+        if self._selectedTargetAttachPoint != self._target1:
+            pm.menuItem(self.setTargetAttachPoint2_mi, e=1, en=1)
+
+    def SetControlAsTarget1(self, ignore):
+        self._target1 = self._selectedTargetControl
+        text = 'Target 1: %s' % self._target1
+        pm.text(self.target1_t, e=1, l=text)
+        self.PopulateTargetableHier()
+        self.UpdateApplyButton()
+
+    def SetControlAsTarget2(self, ignore):
+        self._target2 = self._selectedTargetControl
+        text = 'Target 2: %s' % self._target2
+        pm.text(self.target2_t, e=1, l=text)
+        self.PopulateTargetableHier()
+
+    def ResetTarget2(self, ignore):
+        self._target2 = None
+        text = 'Target 2: Default Parent'
+        pm.text(self.target2_t, e=1, l=text)
+        self.PopulateTargetableHier()
 
 #=========== CONTROL HIER ====================================
 
@@ -167,45 +280,6 @@ class Constraints_UI(absOpUI.Abstract_OperationUI):
             self._selectedControls = []
             pm.select(d=1)
         self.UpdateApplyButton()
-
-#=========== GROUP HIER ====================================
-
-    def PopulateGroupHier(self):
-        log.funcFileDebug()
-        pm.treeView(self.group_tv, e=1, removeAll=1)
-        self._selectedGroup = None
-        pm.menuItem(self.remove_mi, e=1, en=0)
-        if not self._selectedLimb:
-            return
-        
-        limb = self._selectedLimb
-        self._groups = {} # index : group
-        cstGroups = {}
-        for group in pm.listConnections(limb.usedGroups):
-            for cstGroup in pm.listConnections(group.constraintGroups):
-                cstGroups[cstGroup.shortName()] = cstGroup
-        for name in sorted(list(cstGroups.keys())):
-            group = cstGroups[name]
-            self._groups[name] = group
-            pm.treeView(self.group_tv, e=1, ai=(name, ''))
-    
-    def SelectedGroup(self):
-        log.funcFileInfo()
-        groupIDStrs = pm.treeView(self.group_tv, q=1, selectItem=1)
-        pm.menuItem(self.remove_mi, e=1, en=0)
-        if not groupIDStrs:
-            pm.select(d=1)
-            return 
-        self._selectedGroups = []
-        for ID in groupIDStrs:
-            self._selectedGroups.append(self._groups[ID])
-        pm.select(self._selectedGroups)
-        pm.menuItem(self.remove_mi, e=1, en=1)
-
-    def RemoveConstraintGroups(self, ignore):
-        log.funcFileInfo()
-        self.operation.RemoveConstraintGroups(self._selectedGroups)
-        self.PopulateGroupHier()
 
 #=========== CONSTRAINT PROPERTIES ====================================
 
@@ -246,60 +320,44 @@ class Constraints_UI(absOpUI.Abstract_OperationUI):
         msg = '%s Constraint (%d) Controls' %(cstTypeStr, count)
         pm.button(self.apply_b, e=1, en=1, l=msg)
 
-#=========== TARGETABLE HIER ====================================
+#=========== CONSTRAINT GROUP HIER ====================================
 
-    def PopulateTargetableHier(self):
+    def PopulateGroupHier(self):
         log.funcFileDebug()
-        self._targetables = {}
-        self._selectedTarget = None
-        pm.treeView(self.targetable_tv, e=1, removeAll=1)
-        pm.menuItem(self.setTarget1_mi, e=1, en=0)
-        pm.menuItem(self.setTarget2_mi, e=1, en=0)
-        self.UpdateApplyButton()
+        pm.treeView(self.group_tv, e=1, removeAll=1)
+        self._selectedGroup = None
+        pm.menuItem(self.remove_mi, e=1, en=0)
         if not self._selectedLimb:
             return
         
         limb = self._selectedLimb
-        jointGroups = pm.listConnections(limb.jointGroups)
-        jointGroups = rigUtil.SortGroups(jointGroups)
-        controls = [pm.listConnections(g.control)[0] for g in jointGroups]
-        for control in controls:
-            name = control.shortName()
-            self._targetables[name] = control
-            pm.treeView(self.targetable_tv, e=1, ai=(name, ''))
+        self._groups = {} # index : group
+        cstGroups = {}
+        for group in pm.listConnections(limb.usedGroups):
+            for cstGroup in pm.listConnections(group.constraintGroups):
+                cstGroups[cstGroup.shortName()] = cstGroup
+        for name in sorted(list(cstGroups.keys())):
+            group = cstGroups[name]
+            self._groups[name] = group
+            pm.treeView(self.group_tv, e=1, ai=(name, ''))
     
-    def SelectedTarget(self):
+    def SelectedGroup(self):
         log.funcFileInfo()
-        pm.menuItem(self.setTarget1_mi, e=1, en=0)
-        pm.menuItem(self.setTarget2_mi, e=1, en=0)
-        groupIDStrs = pm.treeView(self.targetable_tv, q=1, si=1)
+        groupIDStrs = pm.treeView(self.group_tv, q=1, selectItem=1)
+        pm.menuItem(self.remove_mi, e=1, en=0)
         if not groupIDStrs:
             pm.select(d=1)
             return 
-        self._selectedTarget = self._targetables[groupIDStrs[0]]
-        pm.select(self._selectedTarget)
-        pm.menuItem(self.setTarget1_mi, e=1, en=1)
-        if self._selectedTarget != self._target1:
-            pm.menuItem(self.setTarget2_mi, e=1, en=1)
+        self._selectedGroups = []
+        for ID in groupIDStrs:
+            self._selectedGroups.append(self._groups[ID])
+        pm.select(self._selectedGroups)
+        pm.menuItem(self.remove_mi, e=1, en=1)
 
-    def SetAsTarget1(self, ignore):
-        self._target1 = self._selectedTarget
-        text = 'Target 1: %s' % self._target1
-        pm.text(self.target1_t, e=1, l=text)
-        self.PopulateTargetableHier()
-        self.UpdateApplyButton()
-
-    def SetAsTarget2(self, ignore):
-        self._target2 = self._selectedTarget
-        text = 'Target 2: %s' % self._target2
-        pm.text(self.target2_t, e=1, l=text)
-        self.PopulateTargetableHier()
-
-    def ResetTarget2(self, ignore):
-        self._target2 = None
-        text = 'Target 2: Default Parent'
-        pm.text(self.target2_t, e=1, l=text)
-        self.PopulateTargetableHier()
+    def RemoveConstraintGroups(self, ignore):
+        log.funcFileInfo()
+        self.operation.RemoveConstraintGroups(self._selectedGroups)
+        self.PopulateGroupHier()
 
 # Copyright (c) 2021 Trevor Payne
 # See user license in "PayneFreeRigSuite\Data\LicenseAgreement.txt"

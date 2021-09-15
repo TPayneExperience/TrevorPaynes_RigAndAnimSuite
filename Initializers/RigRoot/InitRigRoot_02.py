@@ -7,17 +7,31 @@ import Data.General_Data as genData
 reload(genData)
 import Utilities.Logger as log
 reload(log)
+import Utilities.Rig_Utilities as rigUtil
+reload(rigUtil)
 
 class InitRigRoot(absInit.Abstract_Initializer):
     @staticmethod
     def Initialize(rigRoot):
         log.funcFileDebug()
-        if rigRoot.pfrsVersion.get() > 100:
+        if rigRoot.pfrsVersion.get() > 110:
             return
 
         # New Stuff
         hide = genData.HIDE_ATTRS
+        rigRoot.pfrsVersion.set(110)
         pm.addAttr(rigRoot, ln='paintWeightsUseAnimJoints', at='bool', h=hide)
+        pm.addAttr(rigRoot, ln='nextAttachPointID', at='short', dv=1, h=hide)
+
+        
+        #============= GROUPS ============================
+
+        pm.addAttr(rigRoot, ln='attachPoints', dt='string', h=hide)
+
+        group = pm.group(name='ATTACH_POINTS', em=1, p=rigRoot)
+        pm.addAttr(group, ln='rigRoot', dt='string')
+        pm.connectAttr(rigRoot.attachPoints, group.rigRoot)
+        rigUtil.ChannelBoxAttrs(group, 0, 0, 0, 0)
 
 
 # Copyright (c) 2021 Trevor Payne
