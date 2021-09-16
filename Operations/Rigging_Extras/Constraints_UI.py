@@ -80,11 +80,11 @@ class Constraints_UI(absOpUI.Abstract_OperationUI):
                 with pm.popupMenu():
                     self.setTargetAttachPoint1_mi = pm.menuItem(
                                                     l='Set As Target 1 (Required)', 
-                                                    c=self.SetControlAsTarget1,
+                                                    c=self.SetAttachPointAsTarget1,
                                                     en=0)
                     self.setTargetAttachPoint2_mi = pm.menuItem(
                                                     l='Set As Target 2 (Optional)', 
-                                                    c=self.SetControlAsTarget2,
+                                                    c=self.SetAttachPointAsTarget2,
                                                     en=0)
                     pm.menuItem(l='Reset Target 2', c=self.ResetTarget2)
         with pm.verticalLayout():
@@ -235,22 +235,16 @@ class Constraints_UI(absOpUI.Abstract_OperationUI):
         if self._selectedTargetAttachPoint != self._target1:
             pm.menuItem(self.setTargetAttachPoint2_mi, e=1, en=1)
 
-    def SetControlAsTarget1(self, ignore):
-        self._target1 = self._selectedTargetControl
+    def SetAttachPointAsTarget1(self, ignore):
+        self._target1 = self._selectedTargetAttachPoint
         text = 'Target 1: %s' % self._target1
         pm.text(self.target1_t, e=1, l=text)
         self.PopulateTargetableHier()
         self.UpdateApplyButton()
 
-    def SetControlAsTarget2(self, ignore):
-        self._target2 = self._selectedTargetControl
+    def SetAttachPointAsTarget2(self, ignore):
+        self._target2 = self._selectedTargetAttachPoint
         text = 'Target 2: %s' % self._target2
-        pm.text(self.target2_t, e=1, l=text)
-        self.PopulateTargetableHier()
-
-    def ResetTarget2(self, ignore):
-        self._target2 = None
-        text = 'Target 2: Default Parent'
         pm.text(self.target2_t, e=1, l=text)
         self.PopulateTargetableHier()
 

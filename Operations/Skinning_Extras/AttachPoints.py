@@ -37,11 +37,7 @@ class AttachPoints(absOp.Abstract_Operation):
         control = pm.listConnections(group.control)[0]
         pm.select(control)
 
-    def AddAttachPoint(self, mesh):
-        vertex = pm.ls(sl=1)[0]
-        if vertex._node != mesh:
-            return
-        rigRoot = pm.listConnections(mesh.rigRoot)[0]
+    def AddAttachPoint(self, rigRoot, vertex):
         ap.AttachPoint.Add(rigRoot, vertex)
 
     def RemoveAttachPoint(self, attachPoint):
