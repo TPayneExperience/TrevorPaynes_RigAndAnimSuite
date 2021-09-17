@@ -197,6 +197,7 @@ class PayneFreeRigSuite:
     def _AddRigRootMaterials(self, rigRoot):
         config = self._GetConfig()
 
+        # CONTROLS
         colors = [config['lControlColor']]
         colors.append(config['mControlColor'])
         colors.append(config['rControlColor'])

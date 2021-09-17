@@ -21,16 +21,24 @@ class InitRigRoot(absInit.Abstract_Initializer):
         hide = genData.HIDE_ATTRS
         rigRoot.pfrsVersion.set(110)
         pm.addAttr(rigRoot, ln='paintWeightsUseAnimJoints', at='bool', h=hide)
+
         pm.addAttr(rigRoot, ln='nextAttachPointID', at='short', dv=1, h=hide)
 
+        pm.addAttr(rigRoot, ln='nextGhostID', at='short', dv=1, h=hide)
         
         #============= GROUPS ============================
 
         pm.addAttr(rigRoot, ln='attachPoints', dt='string', h=hide)
+        pm.addAttr(rigRoot, ln='ghosts', dt='string', h=hide)
 
         group = pm.group(name='ATTACH_POINTS', em=1, p=rigRoot)
         pm.addAttr(group, ln='rigRoot', dt='string')
         pm.connectAttr(rigRoot.attachPoints, group.rigRoot)
+        rigUtil.ChannelBoxAttrs(group, 0, 0, 0, 0)
+
+        group = pm.group(name='GHOSTS', em=1, p=rigRoot)
+        pm.addAttr(group, ln='rigRoot', dt='string')
+        pm.connectAttr(rigRoot.ghosts, group.rigRoot)
         rigUtil.ChannelBoxAttrs(group, 0, 0, 0, 0)
 
 

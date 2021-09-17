@@ -27,6 +27,9 @@ LIMB_JOINT_COLORS = ((1, 0, 0), # Red
                 (0, 0.5, 1), # 
                 (1, 0, 0.5)) 
 
+GHOST_COLOR = (0.3, 1.0, 0.3)
+GHOST_TRANSPARNCY = (0.5, 0.5, 0.5)
+
 # Copyright (c) 2020.9 Trevor Payne
 # See user license in "PayneFreeRigSuite\Data\LicenseAgreement.txt"
 

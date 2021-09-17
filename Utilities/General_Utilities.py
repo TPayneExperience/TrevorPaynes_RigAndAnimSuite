@@ -183,7 +183,14 @@ def AbstractInitializer(objectInstance, folder):
     return objectInstance
 
 def GetRigRoots():
-    return [r for r in pm.ls(tr=1) if r.hasAttr('rigMode')]
+    rigRoots = []
+    for xform in pm.ls(tr=1):
+        if not xform.hasAttr('rigMode'):
+            continue
+        if xform.rigMode.get() == 4:  # ghost
+            continue
+        rigRoots.append(xform)
+    return rigRoots
 
 def IsLicenseValid():
     return genData.__expiration__ > int(time.strftime('%Y'))

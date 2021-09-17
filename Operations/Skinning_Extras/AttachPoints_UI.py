@@ -1,6 +1,4 @@
 
-from SceneData.AttachPoint import AttachPoint
-import os
 
 import pymel.core as pm
 
