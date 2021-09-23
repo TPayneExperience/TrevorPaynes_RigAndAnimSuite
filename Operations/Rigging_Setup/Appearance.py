@@ -69,6 +69,25 @@ class Appearance(absOp.Abstract_Operation):
             pm.delete([ 'Control_Shapes_sceneConfigurationScriptNode', 
                         'Control_Shapes_uiConfigurationScriptNode'])
 
+    def SetupOp(self, rigRoot):
+        for limb in pm.listConnections(rigRoot.limbs):
+            bhv = self.bhvMng.bhvs[limb.bhvFile.get()]
+            if bhv.groupMoveable:
+                continue
+            for group in pm.listConnections(limb.usedGroups):
+                control = pm.listConnections(group.control)[0]
+                rigUtil.ChannelBoxAttrs(control, 0, 1, 1, 0)
+
+    def TeardownOp(self, rigRoot):
+        for limb in pm.listConnections(rigRoot.limbs):
+            bhv = self.bhvMng.bhvs[limb.bhvFile.get()]
+            if bhv.groupMoveable:
+                continue
+            for group in pm.listConnections(limb.usedGroups):
+                control = pm.listConnections(group.control)[0]
+                rigUtil.ChannelBoxAttrs(control, 1, 1, 1, 0)
+                pm.makeIdentity(control, a=1, t=1)
+
     def GetShapeTemplates(self, rigRoot):
         controlTemplates = {}
         controlTemplateParent = pm.listConnections(rigRoot.controlTemplates)[0]

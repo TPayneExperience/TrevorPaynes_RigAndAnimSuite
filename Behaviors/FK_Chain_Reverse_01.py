@@ -37,6 +37,14 @@ class FK_Chain_Reverse_01(absBhv.Abstract_Behavior):
     def CleanupLimb(self, limb):
         log.funcFileDebug()
     
+#============= FOR BEHAVIOR OPERATION ============================
+
+    def Setup_ForBhvOp(self, limb):
+        pass
+    
+    def Teardown_ForBhvOp(self, limb):
+        pass
+    
 #============= SETUP ============================
 
     def Setup_Rig_Controls(self, limb):

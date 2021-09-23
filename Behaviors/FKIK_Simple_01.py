@@ -39,9 +39,8 @@ class FKIK_Simple_01(absBhv.Abstract_Behavior):
         for i in range(len(joints)):
             joint = joints[i]
             fkGroup = fkGroups[i]
-            pm.parent(fkGroup, joint)
-            rigUtil.ResetAttrs(fkGroup)
             pm.parent(fkGroup, limb)
+            pm.delete(pm.parentConstraint(joint, fkGroup))
 
         # IK, Create attrs
         if limb.hasAttr('ikpvDistance'):
@@ -68,14 +67,12 @@ class FKIK_Simple_01(absBhv.Abstract_Behavior):
         ikpvGroup3.groupIndex.set(jointCount+2)
 
         # Position IK Groups
-        pm.parent(ikpvGroup1, joints[0])
-        rigUtil.ResetAttrs(ikpvGroup1)
         pm.parent(ikpvGroup1, limb)
-        pm.parent(ikpvGroup3, joints[-1])
-        rigUtil.ResetAttrs(ikpvGroup3)
+        pm.delete(pm.parentConstraint(joints[0], ikpvGroup1))
         pm.parent(ikpvGroup3, limb)
-        self._InitIKPV2(limb, ikpvGroup2)
-        self._UpdateIKPV2(limb)
+        pm.delete(pm.parentConstraint(joints[-1], ikpvGroup3))
+        self.Setup_ForBhvOp(limb)
+        self.Teardown_ForBhvOp(limb)
 
         # Create IKPV2 Display/helper curve
         curve = pm.curve(d=1, p=((0,0,0), (1,0,0)), k=(0, 1))
@@ -108,6 +105,26 @@ class FKIK_Simple_01(absBhv.Abstract_Behavior):
         pm.delete(pm.listConnections(limb.ikpvCurve))
         pm.delete(pm.listConnections(limb.ikpvClusters))
     
+#============= FOR BEHAVIOR OPERATION ============================
+
+    def Setup_ForBhvOp(self, limb):
+        tempGroup = pm.group(em=1, w=1)
+        self._InitIKPV2(limb, tempGroup)
+        group = rigUtil.GetLimbGroups(limb, self.groupType)[1]
+        pm.parent(group, tempGroup)
+        pm.delete(pm.parentConstraint(tempGroup, group))
+        control = pm.listConnections(group.control)[0]
+        pm.xform(control, cp=1)
+        pm.delete(pm.parentConstraint(group, control))
+        pm.makeIdentity(group, a=1, t=1)
+        self._UpdateIKPV2(limb)
+    
+    def Teardown_ForBhvOp(self, limb):
+        group = rigUtil.GetLimbGroups(limb, self.groupType)[1]
+        tempGroup = pm.listRelatives(group, p=1)[0]
+        pm.parent(group, limb)
+        pm.delete(tempGroup)
+    
 #============= SETUP ============================
 
     def Setup_Rig_Controls(self, limb):
@@ -130,7 +147,7 @@ class FKIK_Simple_01(absBhv.Abstract_Behavior):
         ikpvGroup1 = ikpvGroups[0]
         ikpvGroup2 = ikpvGroups[1]
         ikpvGroup3 = ikpvGroups[2]
-        ikpvGroup1.v.set(0)
+        # ikpvGroup1.v.set(0)
         fkGroup = fkGroups[0]
 
         # Move Mid Group to Mid control position
@@ -351,11 +368,16 @@ class FKIK_Simple_01(absBhv.Abstract_Behavior):
 
     def _UpdateIKPV2(self, limb):
         dist = limb.ikpvDistance.get()
-        ikpv2 = rigUtil.GetLimbGroups(limb, self.groupType)[1]
-        control = pm.listConnections(ikpv2.control)[0]
-        control.tx.set(dist)
-        control.ty.set(0)
-        control.tz.set(0)
+        group = rigUtil.GetLimbGroups(limb, self.groupType)[1]
+        group.tx.set(dist)
+        group.ty.set(0)
+        group.tz.set(0)
+        # dist = limb.ikpvDistance.get()
+        # ikpv2 = rigUtil.GetLimbGroups(limb, self.groupType)[1]
+        # control = pm.listConnections(ikpv2.control)[0]
+        # control.tx.set(dist)
+        # control.ty.set(0)
+        # control.tz.set(0)
 
     def _InitIKPV2(self, limb, ikpv2):
         joints = pm.listConnections(limb.joints)
@@ -388,6 +410,7 @@ class FKIK_Simple_01(absBhv.Abstract_Behavior):
         a = pm.aimConstraint(j2, ikpv2)
         pm.delete(a)
         pm.xform(ikpv2, t=pos2, ws=1)
+        pm.parent(ikpv2, j2)
 
         
 # Copyright (c) 2021 Trevor Payne

@@ -61,6 +61,14 @@ class IK_Spline_01(absBhv.Abstract_Behavior):
         log.funcFileDebug()
         pm.delete(pm.listConnections(limb.IKSCurve))
     
+#============= FOR BEHAVIOR OPERATION ============================
+
+    def Setup_ForBhvOp(self, limb):
+        pass
+    
+    def Teardown_ForBhvOp(self, limb):
+        pass
+    
 #============= RIG ============================
 
     def Setup_Rig_Controls(self, limb):

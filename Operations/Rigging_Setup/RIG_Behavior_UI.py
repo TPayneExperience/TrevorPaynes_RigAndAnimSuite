@@ -46,9 +46,15 @@ class RIG_Behavior_UI(absOpUI.Abstract_OperationUI):
         self._limbGroups = {}
         self.PopulateLimbHierNormal()
         self.PopulatePresets()
+        for rigRoot in self._allRigRoots:
+            for limb in pm.listConnections(rigRoot.limbs):
+                self.operation.SetupBhvOp(limb)
         
     def Teardown_UI(self):
-        pass
+        for rigRoot in self._allRigRoots:
+            for limb in pm.listConnections(rigRoot.limbs):
+                self.operation.TeardownBhvOp(limb)
+                self.operation.FreezeGroupXformsForLimb(limb)
     
 #=========== SETUP UI ====================================
 

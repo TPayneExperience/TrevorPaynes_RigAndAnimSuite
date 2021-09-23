@@ -31,13 +31,20 @@ class FK_Branch_01(absBhv.Abstract_Behavior):
     def CleanupLimb(self, limb):
         log.funcFileDebug()
     
+#============= FOR BEHAVIOR OPERATION ============================
+
+    def Setup_ForBhvOp(self, limb):
+        pass
+    
+    def Teardown_ForBhvOp(self, limb):
+        pass
+    
 #============= SETUP ============================
 
     def Setup_Rig_Controls(self, limb):
         parentControl = rigUtil.GetParentControl(limb)
-        groups = pm.listConnections(limb.jointGroups)
         if parentControl:
-            for group in groups:
+            for group in pm.listConnections(limb.jointGroups):
                 pm.parentConstraint(parentControl, group, mo=1)
     
     def Setup_Constraint_JointsToControls(self, limb):

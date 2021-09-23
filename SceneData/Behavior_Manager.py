@@ -67,15 +67,20 @@ class Behavior_Manager(object):
     def SetBehavior(self, limb, bhvFile):
         log.funcFileDebug()
         self._Teardown_GroupVisibility(limb)
-        bhv = self.bhvs[bhvFile]
+        oldBhvFile = limb.bhvFile.get()
+        if oldBhvFile:
+            oldBhv = self.bhvs[oldBhvFile]
+            oldBhv.CleanupLimb(limb)
+
+        newBhv = self.bhvs[bhvFile]
         limb.bhvFile.set(bhvFile)
-        limb.bhvType.set(bhv.bhvType)
+        limb.bhvType.set(newBhv.bhvType)
         rigRoot = pm.listConnections(limb.rigRoot)[0]
-        self._SetupLimbGroups(rigRoot, limb, bhv)
-        bhv.InitLimb(limb)
+        self._SetupLimbGroups(rigRoot, limb, newBhv)
+        newBhv.InitLimb(limb)
         self._Setup_GroupVisibility(limb)
         rigUtil.UpdateUsedControlMaterials(rigRoot, limb)
-        return bhv
+        return newBhv
 
 #============= SETUP / TEARDOWN RIG ============================
 
@@ -107,7 +112,7 @@ class Behavior_Manager(object):
                 joint.startRot.set(joint.r.get())
                 group = pm.listConnections(joint.group)[0]
                 pm.parent(group, limb)
-            self._Setup_ControlPivot(limb)
+            # self._Setup_ControlPivot(limb)
 
         # Setup Control Hier
         for limb in limbs:
@@ -176,8 +181,8 @@ class Behavior_Manager(object):
         # Fix Pivots
         joints = {} # longName : joint
         for limb in limbs:
-            for group in pm.listConnections(limb.usedGroups):
-                self._Teardown_ControlPivot(group)
+            # for group in pm.listConnections(limb.usedGroups):
+            #     self._Teardown_ControlPivot(group)
             # Parent joint groups to joint
             for joint in pm.listConnections(limb.joints):
                 joints[joint.longName()] = joint
@@ -273,29 +278,29 @@ class Behavior_Manager(object):
 
 #============= UTIL ============================
 
-    def _Setup_ControlPivot(self, limb):
-        log.funcFileDebug()
-        bhvFile = limb.bhvFile.get()
-        bhv = self.bhvs[bhvFile]
-        for group in pm.listConnections(limb.usedGroups):
-            control = pm.listConnections(group.control)[0]
-            if bhv.groupMoveable:
-                pm.makeIdentity(control, a=1, t=1, r=1, s=1) # Freeze xforms
-            else:
-                pm.makeIdentity(control, a=1, r=1, s=1) # Freeze xforms
-            pos = pm.xform(group, q=1, t=1, ws=1)
-            pm.move(pos[0], pos[1], pos[2],         # Move pivot to group
-                        control.scalePivot, 
-                        control.rotatePivot, ws=1)
+    # def _Setup_ControlPivot(self, limb):
+    #     log.funcFileDebug()
+    #     bhvFile = limb.bhvFile.get()
+    #     bhv = self.bhvs[bhvFile]
+    #     for group in pm.listConnections(limb.usedGroups):
+    #         control = pm.listConnections(group.control)[0]
+    #         if bhv.groupMoveable:
+    #             pm.makeIdentity(control, a=1, t=1, r=1, s=1) # Freeze xforms
+    #         else:
+    #             pm.makeIdentity(control, a=1, r=1, s=1) # Freeze xforms
+    #         pos = pm.xform(group, q=1, t=1, ws=1)
+    #         pm.move(pos[0], pos[1], pos[2],         # Move pivot to group
+    #                     control.scalePivot, 
+    #                     control.rotatePivot, ws=1)
 
-    def _Teardown_ControlPivot(self, group):
-        control = pm.listConnections(group.control)[0]
-        pm.xform(control, cp=1) # Re-center pivots
-        gPos = pm.xform(group, q=1, t=1, ws=1)
-        cPos = pm.xform(control, q=1, t=1, ws=1)
-        pm.xform(control, t=gPos, ws=1)
-        pm.makeIdentity(control, a=1, t=1, r=1, s=1) # Freeze xforms
-        pm.xform(control, t=cPos, ws=1)
+    # def _Teardown_ControlPivot(self, group):
+    #     control = pm.listConnections(group.control)[0]
+    #     pm.xform(control, cp=1) # Re-center pivots
+    #     gPos = pm.xform(group, q=1, t=1, ws=1)
+    #     cPos = pm.xform(control, q=1, t=1, ws=1)
+    #     pm.xform(control, t=gPos, ws=1)
+    #     pm.makeIdentity(control, a=1, t=1, r=1, s=1) # Freeze xforms
+    #     pm.xform(control, t=cPos, ws=1)
 
     def _Setup_GroupVisibility(self, limb):
         for group in pm.listConnections(limb.usedGroups):

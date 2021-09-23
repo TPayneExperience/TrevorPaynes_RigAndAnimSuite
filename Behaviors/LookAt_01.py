@@ -30,15 +30,32 @@ class LookAt_01(absBhv.Abstract_Behavior):
             pm.addAttr(limb, ln='lookAtOffsetX', at='float')
             pm.addAttr(limb, ln='lookAtOffsetY', at='float')
             pm.addAttr(limb, ln='lookAtOffsetZ', at='float')
-        joint = pm.listConnections(limb.joints)[0]
-        group = rigUtil.GetLimbGroups(limb, self.groupType)[0]
-        pm.parent(group, joint)
-        rigUtil.ResetAttrs(group)
-        pm.parent(group, limb)
-        self._UpdateControl(limb)
+        self.Setup_ForBhvOp(limb)
+        self.Teardown_ForBhvOp(limb)
     
     def CleanupLimb(self, limb):
         log.funcFileDebug()
+    
+#============= FOR BEHAVIOR OPERATION ============================
+
+    def Setup_ForBhvOp(self, limb):
+        joint = pm.listConnections(limb.joints)[0]
+        tempGroup = pm.group(em=1, w=1)
+        pm.parent(tempGroup, joint)
+        rigUtil.ResetAttrs(tempGroup)
+        group = rigUtil.GetLimbGroups(limb, self.groupType)[0]
+        control = pm.listConnections(group.control)[0]
+        pm.parent(group, tempGroup)
+        pm.delete(pm.parentConstraint(group, control))
+        pm.delete(pm.parentConstraint(tempGroup, group))
+        pm.makeIdentity(group, a=1, t=1)
+        self._UpdateControl(limb)
+    
+    def Teardown_ForBhvOp(self, limb):
+        group = rigUtil.GetLimbGroups(limb, self.groupType)[0]
+        tempGroup = pm.listRelatives(group, p=1)[0]
+        pm.parent(group, limb)
+        pm.delete(tempGroup)
     
 #============= SETUP ============================
 
@@ -131,10 +148,9 @@ class LookAt_01(absBhv.Abstract_Behavior):
     def _UpdateControl(self, limb):
         dist = limb.lookAtDistance.get()
         group = rigUtil.GetLimbGroups(limb, self.groupType)[0]
-        control = pm.listConnections(group.control)[0]
-        control.tx.set(dist)
-        control.ty.set(0)
-        control.tz.set(0)
+        group.tx.set(dist)
+        group.ty.set(0)
+        group.tz.set(0)
 
 # Copyright (c) 2021 Trevor Payne
 # See user license in "PayneFreeRigSuite\Data\LicenseAgreement.txt"

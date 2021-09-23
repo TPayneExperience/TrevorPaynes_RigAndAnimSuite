@@ -30,27 +30,11 @@ class Appearance_UI(absOpUI.Abstract_OperationUI):
         self._selectedLimbs = []
         self._limbGroups = []
         self._Setup()
-        self.PopulateLimbHierNormal()
-        for rigRoot in allRigRoots:
-            for limb in pm.listConnections(rigRoot.limbs):
-                bhv = self.operation.bhvMng.bhvs[limb.bhvFile.get()]
-                if bhv.groupMoveable:
-                    continue
-                for group in pm.listConnections(limb.usedGroups):
-                    control = pm.listConnections(group.control)[0]
-                    rigUtil.ChannelBoxAttrs(control, 0, 1, 1, 0)
+        self.PopulateLimbHier()
+        self.operation.SetupOp(self._rigRoot)
 
     def Teardown_UI(self):
-        for rigRoot in self._allRigRoots:
-            if not rigRoot or not pm.objExists(rigRoot):
-                continue
-            for limb in pm.listConnections(rigRoot.limbs):
-                bhv = self.operation.bhvMng.bhvs[limb.bhvFile.get()]
-                if bhv.groupMoveable:
-                    continue
-                for group in pm.listConnections(limb.usedGroups):
-                    control = pm.listConnections(group.control)[0]
-                    rigUtil.ChannelBoxAttrs(control, 1, 1, 1, 0)
+        self.operation.TeardownOp(self._rigRoot)
 
 #=========== SETUP UI ====================================
 
@@ -104,7 +88,7 @@ class Appearance_UI(absOpUI.Abstract_OperationUI):
 
 #=========== LIMB HIER ====================================
    
-    def PopulateLimbHierNormal(self):
+    def PopulateLimbHier(self):
         log.funcFileDebug()
         self.PopulateControlHier(None)
         self.PopulateLimbProperties(None)

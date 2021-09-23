@@ -44,6 +44,14 @@ class Empty_01(absBhv.Abstract_Behavior):
         joint = pm.listConnections(limb.joints)[0]
         jnt.Joint.Remove(joint)
     
+#============= FOR BEHAVIOR OPERATION ============================
+
+    def Setup_ForBhvOp(self, limb):
+        pass
+    
+    def Teardown_ForBhvOp(self, limb):
+        pass
+    
 #============= SETUP ============================
 
     def Setup_Rig_Controls(self, limb):

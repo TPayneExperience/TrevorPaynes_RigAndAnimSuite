@@ -25,10 +25,7 @@ class IK_PoleVector_01(absBhv.Abstract_Behavior):
     def InitLimb(self, limb):
         log.funcFileDebug()
         # Delete old curve/cluster, or init attrs
-        if limb.hasAttr('ikpvDistance'):
-            pm.delete(pm.listConnections(limb.ikpvCurve))
-            pm.delete(pm.listConnections(limb.ikpvClusters))
-        else:
+        if not limb.hasAttr('ikpvDistance'):
             pm.addAttr(limb, ln='ikpvDistance', at='float', 
                                                 min=0, dv=10)
             pm.addAttr(limb, ln='ikpvCurve', dt='string')
@@ -42,15 +39,13 @@ class IK_PoleVector_01(absBhv.Abstract_Behavior):
         ikpvGroup2 = ikpvGroups[1]
         ikpvGroup3 = ikpvGroups[2]
 
-        # Position IKPV groups
-        pm.parent(ikpvGroup1, joints[0])
-        rigUtil.ResetAttrs(ikpvGroup1)
+        # Position IK Groups
         pm.parent(ikpvGroup1, limb)
-        pm.parent(ikpvGroup3, joints[-1])
-        rigUtil.ResetAttrs(ikpvGroup3)
+        pm.delete(pm.parentConstraint(joints[0], ikpvGroup1))
         pm.parent(ikpvGroup3, limb)
-        self._InitIKPV2(limb, ikpvGroup2)
-        self._UpdateIKPV2(limb)
+        pm.delete(pm.parentConstraint(joints[-1], ikpvGroup3))
+        self.Setup_ForBhvOp(limb)
+        self.Teardown_ForBhvOp(limb)
 
         # Create IKPV2 Display/helper curve
         curve = pm.curve(d=1, p=((0,0,0), (1,0,0)), k=(0, 1))
@@ -79,6 +74,26 @@ class IK_PoleVector_01(absBhv.Abstract_Behavior):
     def CleanupLimb(self, limb):
         log.funcFileDebug()
         pm.delete(pm.listConnections(limb.ikpvCurve))
+        pm.delete(pm.listConnections(limb.ikpvClusters))
+    
+#============= FOR BEHAVIOR OPERATION ============================
+
+    def Setup_ForBhvOp(self, limb):
+        tempGroup = pm.group(em=1, w=1)
+        self._InitIKPV2(limb, tempGroup)
+        group = rigUtil.GetLimbGroups(limb, self.groupType)[1]
+        pm.parent(group, tempGroup)
+        pm.delete(pm.parentConstraint(tempGroup, group))
+        control = pm.listConnections(group.control)[0]
+        pm.delete(pm.parentConstraint(group, control))
+        pm.makeIdentity(group, a=1, t=1)
+        self._UpdateIKPV2(limb)
+    
+    def Teardown_ForBhvOp(self, limb):
+        group = rigUtil.GetLimbGroups(limb, self.groupType)[1]
+        tempGroup = pm.listRelatives(group, p=1)[0]
+        pm.parent(group, limb)
+        pm.delete(tempGroup)
     
 #============= SETUP ============================
 
@@ -93,7 +108,7 @@ class IK_PoleVector_01(absBhv.Abstract_Behavior):
         ikpvGroup1 = ikpvGroups[0]
         ikpvGroup2 = ikpvGroups[1]
         ikpvGroup3 = ikpvGroups[2]
-        ikpvGroup1.v.set(0)
+        # ikpvGroup1.v.set(0)
         
         # Move Mid Group to Mid control position
         ikpvControl2 = pm.listConnections(ikpvGroup2.control)[0]
@@ -250,11 +265,10 @@ class IK_PoleVector_01(absBhv.Abstract_Behavior):
 
     def _UpdateIKPV2(self, limb):
         dist = limb.ikpvDistance.get()
-        ikpv2 = rigUtil.GetLimbGroups(limb, self.groupType)[1]
-        control = pm.listConnections(ikpv2.control)[0]
-        control.tx.set(dist)
-        control.ty.set(0)
-        control.tz.set(0)
+        group = rigUtil.GetLimbGroups(limb, self.groupType)[1]
+        group.tx.set(dist)
+        group.ty.set(0)
+        group.tz.set(0)
 
     def _InitIKPV2(self, limb, ikpv2):
         jointGroups = pm.listConnections(limb.jointGroups)
@@ -287,6 +301,7 @@ class IK_PoleVector_01(absBhv.Abstract_Behavior):
         a = pm.aimConstraint(j2, ikpv2)
         pm.delete(a)
         pm.xform(ikpv2, t=pos2, ws=1)
+        pm.parent(ikpv2, j2)
 
         
 # Copyright (c) 2021 Trevor Payne

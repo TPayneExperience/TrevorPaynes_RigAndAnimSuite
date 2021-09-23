@@ -21,7 +21,7 @@ class Test_UI(absOpUI.Abstract_OperationUI):
         self._limbGroups = {}
         self._limbIDs = {}
         self._Setup()
-        self.PopulateLimbHierNormal()
+        self.PopulateLimbHier()
 
     def Teardown_UI(self):
         pass
@@ -44,7 +44,7 @@ class Test_UI(absOpUI.Abstract_OperationUI):
 
 #=========== LIMB HIER ====================================
    
-    def PopulateLimbHierNormal(self):
+    def PopulateLimbHier(self):
         log.funcFileDebug()
         self.PopulateControlHier(None)
         self._limbIDs.clear()

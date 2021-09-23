@@ -108,6 +108,13 @@ class PayneFreeRigSuite_UI:
                 pm.menuItem(divider=1)
                 pm.menuItem(l='Remove Rig Root', c=self.RemoveRigRoot)
                 
+            # with pm.menu('Physics'):
+            #     pm.menuItem(l='Reset Physics Limbs', c=self.ResetPhysics)
+            #     self.enablePhys_mi = pm.menuItem(l='Turn ON Physics Limbs', 
+            #                                         c=self.EnablePhysics)
+            #     self.disablePhys_mi = pm.menuItem(l='Turn OFF Physics Limbs', 
+            #                                         c=self.DisablePhysics)
+                
             with pm.menu('Help'):
                 pm.menuItem(l='Documentation', c=self.OpenDocumentation)
                 with pm.subMenuItem(l='Tutorials'):
@@ -217,15 +224,13 @@ class PayneFreeRigSuite_UI:
             self.operationNames.append(operationName)
             self.operations.append(operation)
 
-#=========== MENUBAR FUNCTIONS ====================================
+#=========== MENUBAR FILE ====================================
 
     def UserSettings_Dialog(self, ignore):
         log.funcFileInfo()
         usr.UserSettings()
 
-    def SubmitFeedback(self, ignore):
-        log.funcFileInfo()
-        self.pfrs.SubmitFeedback()
+#=========== MENUBAR RIG ROOT ====================================
 
     def ExportAnimationRig(self, ignore):
         log.funcFileInfo()
@@ -251,32 +256,6 @@ class PayneFreeRigSuite_UI:
             return
         self._rigRoot = None
         pm.frameLayout(self.frame, e=1, en=0)
-
-    def OpenDocumentation(self, ignore):
-        log.funcFileInfo()
-        webbrowser.open(genData.DOC_URL)
-
-    def OpenWebsite(self, ignore):
-        log.funcFileInfo()
-        webbrowser.open(genData.STORE_URL)
-
-    def OpenQuickstartArtist(self, ignore):
-        log.funcFileInfo()
-        webbrowser.open(genData.QUICKSTART_ARTIST_VIDEO)
-
-    def OpenQuickstartRigger(self, ignore):
-        log.funcFileInfo()
-        webbrowser.open(genData.QUICKSTART_RIGGER_VIDEO)
-
-    def OpenQuickstartAnimator(self, ignore):
-        log.funcFileInfo()
-        webbrowser.open(genData.QUICKSTART_ANIMATOR_VIDEO)
-
-    def closeEvent(self):
-        log.funcFileInfo()
-        self._SaveWindowPos()
-        if self.currentOp:
-            self.currentOp.Teardown_UI()
 
     def NewLoadRig(self, ignore):
         log.funcFileInfo()
@@ -306,6 +285,59 @@ class PayneFreeRigSuite_UI:
         self.pfrs.UpdateRootName(self._rigRoot)
         self.SetOperation(self._rigRoot.operation.get())
 
+# #=========== MENUBAR PHYSICS ====================================
+
+#     def ResetPhysics(self, ignore):
+#         log.funcFileInfo()
+#         self.pfrs.ResetPhysics()
+
+#     def EnablePhysics(self, ignore):
+#         log.funcFileInfo()
+#         self.pfrs.EnablePhysics()
+#         pm.menuItem(self.disablePhys_mi, e=1, en=1)
+#         pm.menuItem(self.enablePhys_mi, e=1, en=0)
+
+#     def DisablePhysics(self, ignore):
+#         log.funcFileInfo()
+#         self.pfrs.DisablePhysics()
+#         pm.menuItem(self.disablePhys_mi, e=1, en=0)
+#         pm.menuItem(self.enablePhys_mi, e=1, en=1)
+
+
+#=========== MENUBAR HELP ====================================
+
+    def SubmitFeedback(self, ignore):
+        log.funcFileInfo()
+        self.pfrs.SubmitFeedback()
+
+    def OpenDocumentation(self, ignore):
+        log.funcFileInfo()
+        webbrowser.open(genData.DOC_URL)
+
+    def OpenWebsite(self, ignore):
+        log.funcFileInfo()
+        webbrowser.open(genData.STORE_URL)
+
+    def OpenQuickstartArtist(self, ignore):
+        log.funcFileInfo()
+        webbrowser.open(genData.QUICKSTART_ARTIST_VIDEO)
+
+    def OpenQuickstartRigger(self, ignore):
+        log.funcFileInfo()
+        webbrowser.open(genData.QUICKSTART_RIGGER_VIDEO)
+
+    def OpenQuickstartAnimator(self, ignore):
+        log.funcFileInfo()
+        webbrowser.open(genData.QUICKSTART_ANIMATOR_VIDEO)
+
+#=========== MISC ====================================
+
+    def closeEvent(self):
+        log.funcFileInfo()
+        self._SaveWindowPos()
+        if self.currentOp:
+            self.currentOp.Teardown_UI()
+
     def _UsefulScripts(self, ignore):
         log.funcFileInfo()
         usfScr.UsefulScripts()
@@ -322,8 +354,6 @@ class PayneFreeRigSuite_UI:
         cmd = 'import pymel.core as pm;'
         cmd += 'pm.deleteUI("' + self.win + '", window=1)'
         pm.evalDeferred(cmd)
-
-#=========== MISC ====================================
 
     def _SaveWindowPos(self):
         folder = os.path.dirname(__file__)

@@ -23,7 +23,7 @@ reload(editPst)
 
 class Constraints_UI(absOpUI.Abstract_OperationUI):
     uiName = 'Constraints'
-    uiOrderIndex = 410
+    uiOrderIndex = 210
     operation = cst.Constraints()
     def __init__(self):
         self._rigRoot = None

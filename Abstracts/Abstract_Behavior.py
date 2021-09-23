@@ -67,6 +67,16 @@ class Abstract_Behavior:
         # Remove lingering behavior specific stuff (EX - IK Spline curve)
         pass
     
+#============= FOR BEHAVIOR OPERATION ============================
+
+    @abstractmethod
+    def Setup_ForBhvOp(self, limb):
+        pass
+    
+    @abstractmethod
+    def Teardown_ForBhvOp(self, limb):
+        pass
+    
 #============= SETUP ============================
 
     @abstractmethod

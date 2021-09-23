@@ -27,6 +27,7 @@ class RIG_Behavior(absOp.Abstract_Operation):
     controlLayerState = (1, 1)  # isVis, isRef
     jointLayerState = (1, 1)    # isVis, isRef
     meshLayerState = (1, 1)    # isVis, isRef
+    
     def __init__(self):
         self._ls = ls.LimbSetup()
 
@@ -120,6 +121,12 @@ class RIG_Behavior(absOp.Abstract_Operation):
 
 #=========== MISC ====================================
 
+    def FreezeGroupXformsForLimb(self, limb):
+        groups = pm.listConnections(limb.limbGroups)
+        groups += pm.listConnections(limb.jointGroups)
+        for group in groups:
+            pm.makeIdentity(group, a=1, t=1, r=1, s=1)
+
     def ResetControlTransforms(self, limb):
         self._ls.ResetControlTransforms(limb)
 
@@ -141,10 +148,31 @@ class RIG_Behavior(absOp.Abstract_Operation):
         log.funcFileDebug()
         bhvFile = self.bhvMng.bhvFiles[bhvType][-1]
         return self.SetLimbBehaviorFile(limb, bhvFile)
+        # oldBhvFile = limb.bhvFile.get()
+        # oldBhv = self.bhvMng.bhvs[oldBhvFile]
+        # oldBhv.Teardown_ForBhvOp(limb)
+        # newBhvFile = self.bhvMng.bhvFiles[bhvType][-1]
+        # newBhv = self.SetLimbBehaviorFile(limb, newBhvFile)
+        # newBhv.Setup_ForBhvOp(limb)
+        # return newBhv
 
     def SetLimbBehaviorFile(self, limb, bhvFile):
         log.funcFileDebug()
-        return self.bhvMng.SetBehavior(limb, bhvFile)
+        self.TeardownBhvOp(limb)
+        newBhv = self.bhvMng.SetBehavior(limb, bhvFile)
+        self.SetupBhvOp(limb)
+        return newBhv
+        # return self.bhvMng.SetBehavior(limb, bhvFile)
+
+    def SetupBhvOp(self, limb):
+        bhvFile = limb.bhvFile.get()
+        bhv = self.bhvMng.bhvs[bhvFile]
+        bhv.Setup_ForBhvOp(limb)
+
+    def TeardownBhvOp(self, limb):
+        bhvFile = limb.bhvFile.get()
+        bhv = self.bhvMng.bhvs[bhvFile]
+        bhv.Teardown_ForBhvOp(limb)
 
 # Copyright (c) 2021 Trevor Payne
 # See user license in "PayneFreeRigSuite\Data\LicenseAgreement.txt"

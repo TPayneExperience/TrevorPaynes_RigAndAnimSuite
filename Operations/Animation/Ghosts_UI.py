@@ -10,8 +10,6 @@ import Utilities.Logger as log
 reload(log)
 import Utilities.UI_Utilities as uiUtil
 reload(uiUtil)
-# import Utilities.Skin_Utilities as skinUtil
-# reload(skinUtil)
 
 class Ghost_UI(absOpUI.Abstract_OperationUI):
     uiName = 'Ghosts'
@@ -168,17 +166,6 @@ class Ghost_UI(absOpUI.Abstract_OperationUI):
                                     p=self.gm_l)
             self.ghostMtr_ui.append(ui1)
             self.ghostMtr_ui.append(ui2)
-
-        # for i in range(len(self.poseNames)):
-        #     poseName = self.poseNames[i]
-        #     ui = pm.floatSliderGrp(l=poseName, f=1, cw3=(100, 40, 50),
-        #                     max=1, p=self.poses_cl, pre=3,
-        #                     dc=pm.Callback(self._SetPoseWeight, i))
-        #     self.poses_ui.append(ui)
-        #     with pm.popupMenu():
-        #         pm.menuItem(l='Delete Pose', c=pm.Callback(
-        #                                 self.DeletePose, poseName))
-
 
 
 

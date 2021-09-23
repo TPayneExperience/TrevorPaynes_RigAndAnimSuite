@@ -33,6 +33,8 @@ import Data.Rig_Data as rigData
 reload(rigData)
 import Utilities.General_Utilities as genUtil
 reload(genUtil)
+import Utilities.Rig_Utilities as rigUtil
+reload(rigUtil)
 import Operations.Rigging_Setup.Appearance as app
 reload(app)
 import Operations.Rigging_Setup.LimbSetup as ls
@@ -319,6 +321,34 @@ class PayneFreeRigSuite:
         endTxt += '='*40
         endTxt += '\n\n'
         log.info(endTxt)
+
+#=========== PHYSICS ====================================
+
+    # def ResetPhysics(self):
+    #     for rigRoot in genUtil.GetRigRoots():
+    #         for limb in pm.listConnections(rigRoot.limbs):
+    #             if not limb.bhvHasPhysics.get():
+    #                 continue
+    #             for springGroup in pm.listConnections(limb.physicsGroups):
+    #                 parentGroup = pm.listRelatives(springGroup, p=1)[0]
+    #                 control = pm.listRelatives(springGroup, c=1)[0]
+                    
+    #                 # rigUtil.ResetAttrs(group)
+    #                 # rigidBody = pm.listRelatives(group, c=1, type='rigidBody')
+    #                 # pm.delete(pm.parentConstraint(parentGroup, springGroup))
+    #                 pos = pm.xform(parentGroup, q=1, rp=1, ws=1)
+    #                 # rot = pm.xform(parentGroup, q=1, ro=1, ws=1)
+    #                 pm.xform(springGroup, t=pos, ws=1)
+    #                 pm.delete(pm.parentConstraint(springGroup, control))
+    #                 # pm.xform(springGroup, ro=rot, ws=1)
+
+    # def EnablePhysics(self):
+    #     for rigRoot in genUtil.GetRigRoots():
+    #         rigRoot.arePhysicsActive.set(1)
+
+    # def DisablePhysics(self):
+    #     for rigRoot in genUtil.GetRigRoots():
+    #         rigRoot.arePhysicsActive.set(0)
 
 # Copyright (c) 2021 Trevor Payne
 # See user license in "PayneFreeRigSuite\Data\LicenseAgreement.txt"
