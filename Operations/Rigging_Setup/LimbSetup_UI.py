@@ -668,29 +668,32 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
             return ''
         msg = '\t"%s" to "%s"' % (oldName, newName)
         log.info(msg)
-        if not genUtil.Name.IsValidCharacterLength(newName):
-            msg = 'Joint Name Must be 2 or more characters'
-            log.error(msg)
-            return ''
-        if not genUtil.Name.DoesNotStartWithNumber(newName):
-            msg = 'Cannot start with number OR _'
-            log.error(msg)
-            return ''
-        if not genUtil.Name.AreAllValidCharacters(newName):
-            msg = 'May only contain A-Z, a-z, 0-9, _'
-            log.error(msg)
-            return ''
-        limb = self._selectedLimbs[0]
-        joints = pm.listConnections(limb.joints)
-        jointNames = [j.pfrsName.get() for j in joints]
-        if newName in jointNames:
-            msg = 'Every limb joint name must be UNIQUE'
-            log.error(msg)
-            return ''
-        rigRoot = pm.listConnections(limb.rigRoot)[0]
-        self.operation._RenameJoint(rigRoot, limb, joint, newName)
-        self.PopulateJointHier(limb, joint)
-        self.PopulateSceneHier()
+        if self.operation.RenameJoint(joint, newName):
+            self.PopulateJointHier(self._selectedLimbs[0], joint)
+            self.PopulateSceneHier()
+        # if not genUtil.Name.IsValidCharacterLength(newName):
+        #     msg = 'Joint Name Must be 2 or more characters'
+        #     log.error(msg)
+        #     return ''
+        # if not genUtil.Name.DoesNotStartWithNumber(newName):
+        #     msg = 'Cannot start with number OR _'
+        #     log.error(msg)
+        #     return ''
+        # if not genUtil.Name.AreAllValidCharacters(newName):
+        #     msg = 'May only contain A-Z, a-z, 0-9, _'
+        #     log.error(msg)
+        #     return ''
+        # limb = self._selectedLimbs[0]
+        # joints = pm.listConnections(limb.joints)
+        # jointNames = [j.pfrsName.get() for j in joints]
+        # if newName in jointNames:
+        #     msg = 'Every limb joint name must be UNIQUE'
+        #     log.error(msg)
+        #     return ''
+        # rigRoot = pm.listConnections(limb.rigRoot)[0]
+        # self.operation._RenameJoint(rigRoot, limb, joint, newName)
+        # self.PopulateJointHier(limb, joint)
+        # self.PopulateSceneHier()
         return ''
 
 

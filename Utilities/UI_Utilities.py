@@ -123,11 +123,11 @@ def PopulateJointHier(widget, limb):
         group = pm.listConnections(joint.group)[0]
         groupID = str(group.groupIndex.get())
         joints[groupID] = joint
-    for i in range(len(joints)):
-        joint = joints[str(i)]
+    for groupID in sorted(list(joints.keys())):
+        joint = joints[groupID]
         name = joint.pfrsName.get()
-        pm.treeView(widget, e=1, addItem=(str(i), ''))
-        pm.treeView(widget, e=1, displayLabel=(str(i), name))
+        pm.treeView(widget, e=1, addItem=(groupID, ''))
+        pm.treeView(widget, e=1, displayLabel=(groupID, name))
     return joints
 
 def PopulateAttachPointsHier(widget, rigRoot):

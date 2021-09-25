@@ -341,24 +341,30 @@ class LimbSetup(absOp.Abstract_Operation):
         if not genUtil.Name.IsValidCharacterLength(newName):
             msg = 'Joint Name Must be 2 or more characters'
             log.error(msg)
+            return False
         if not genUtil.Name.DoesNotStartWithNumber(newName):
             msg = 'Cannot start with number OR _'
             log.error(msg)
+            return False
         if not genUtil.Name.AreAllValidCharacters(newName):
             msg = 'May only contain A-Z, a-z, 0-9, _'
             log.error(msg)
+            return False
         limbs = pm.listConnections(joint.limb)
         if not limbs:
             msg = 'Cannot rename joint DISCONNECTED from limb'
             log.error(msg)
+            return False
         limb = limbs[0]
         joints = pm.listConnections(limb.joints)
         jointNames = [j.pfrsName.get() for j in joints]
         if newName in jointNames:
             msg = 'Every limb joint name must be UNIQUE'
             log.error(msg)
+            return False
         rigRoot = pm.listConnections(limb.rigRoot)[0]
         self._RenameJoint(rigRoot, limb, joint, newName)
+        return True
 
     def ReparentJoint(self, rigRoot, childJoint, parentJoint):
         if parentJoint:

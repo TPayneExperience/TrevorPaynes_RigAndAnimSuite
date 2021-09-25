@@ -24,6 +24,7 @@ class InitRigRoot(absInit.Abstract_Initializer):
 
         pm.addAttr(rigRoot, ln='nextAttachPointID', at='short', dv=1, h=hide)
         pm.addAttr(rigRoot, ln='nextGhostID', at='short', dv=1, h=hide)
+        pm.addAttr(rigRoot, ln='nextSetDrivenGroupID', at='short', dv=1, h=hide)
 
         pm.addAttr(rigRoot, ln='arePhysicsActive', at='bool', dv=1, h=hide)
         

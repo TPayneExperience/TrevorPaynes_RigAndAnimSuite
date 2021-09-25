@@ -15,10 +15,6 @@ import Utilities.Skin_Utilities as skinUtil
 reload(skinUtil)
 import Utilities.General_Utilities as genUtil
 reload(genUtil)
-# import Utilities.Rig_Utilities as rigUtil
-# reload(rigUtil)
-# import Data.Rig_Data as rigData
-# reload(rigData)
 
 class QuickWeights_UI(absOpUI.Abstract_OperationUI):
     uiName = 'Quick Weights'
@@ -46,8 +42,6 @@ class QuickWeights_UI(absOpUI.Abstract_OperationUI):
 
     def Teardown_UI(self):
         self.operation.TeardownDisplay()
-        # if self._isBrushOn:
-        #     self.ToggleBrush(1)
 
 #=========== SETUP UI ====================================
 
