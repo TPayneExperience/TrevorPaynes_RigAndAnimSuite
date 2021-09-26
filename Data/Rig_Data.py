@@ -2,11 +2,13 @@
 # ============= ROOT =============
 
 RIG_MODES = (   'Setup Rig',
+
                 'Animate Rig',
                 'Template',
                 'Baked Animations',
                 'Ghost',
-                'Misc1',
+                'Exported',
+                
                 'Misc2',
                 'Misc3',
                 'Misc4')

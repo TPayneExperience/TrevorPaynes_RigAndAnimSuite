@@ -162,7 +162,7 @@ class PayneFreeRigSuite:
         url += "&body=You're Amazing!"
         webbrowser.open(url, new=1)
 
-    def ExportAnimationRig(self, rigRoot, filePath):
+    def SaveAnimationRig(self, rigRoot, filePath):
         log.funcFileDebug()
         # Make pose folder
         folder = os.path.dirname(filePath)

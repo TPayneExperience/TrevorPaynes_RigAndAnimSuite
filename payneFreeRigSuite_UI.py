@@ -34,6 +34,8 @@ import Popups.UserSettings as usr
 reload(usr)
 import Popups.UsefulScripts as usfScr
 reload(usfScr)
+import Popups.Export_UI as xprt
+reload(xprt)
 import Popups.Share as shr
 reload(shr)
 import Popups.Welcome as wlc
@@ -104,7 +106,8 @@ class PayneFreeRigSuite_UI:
                 pm.menuItem(l='New / Update Rig Root', c=self.NewLoadRig)
                 pm.menuItem(l='Edit Rig...', c=self.EditRig_Dialog)
                 pm.menuItem(divider=1)
-                pm.menuItem(l='Export Animation Rig', c=self.ExportAnimationRig)
+                pm.menuItem(l='Save Animation Rig', c=self.SaveAnimationRig)
+                pm.menuItem(l='Export Rig FBX(s)', c=self.ExportFBX)
                 pm.menuItem(divider=1)
                 pm.menuItem(l='Remove Rig Root', c=self.RemoveRigRoot)
                 
@@ -232,7 +235,7 @@ class PayneFreeRigSuite_UI:
 
 #=========== MENUBAR RIG ROOT ====================================
 
-    def ExportAnimationRig(self, ignore):
+    def SaveAnimationRig(self, ignore):
         log.funcFileInfo()
         if self._rigRoot.rigMode.get() != 0:
             return pm.confirmDialog(
@@ -247,7 +250,20 @@ class PayneFreeRigSuite_UI:
                                 cap='Save Exported Animation Rig')
         if not result:
             return
-        self.pfrs.ExportAnimationRig(self._rigRoot, result[0])
+        self.pfrs.SaveAnimationRig(self._rigRoot, result[0])
+
+    def ExportFBX(self, ignore):
+        log.funcFileInfo()
+        for rigRoot in self._allRigRoots:
+            if rigRoot.rigMode.get() == 0:
+                msg = 'Setup rig "%s" cannot be exported.' % rigRoot
+                msg += '\nOnly Anim rigs may be present to export.'
+                pm.confirmDialog(
+                    t='Warning: Setup rig found',
+                    m=msg,
+                    button=['Ok']) 
+                return
+        xprt.Export_UI()
 
     def RemoveRigRoot(self, ignore):
         log.funcFileInfo()
