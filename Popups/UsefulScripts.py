@@ -48,33 +48,7 @@ def SelectMirrorLimbControl():
             control = pm.listConnections(group.control)[0]
             pm.select(control)
             return
-SelectMirrorLimbControl()''',
-
-# -------------------------
-'MIRROR POSE':
-'''import pymel.core as pm
-import Operations.Animation.Poses as pss
-reload(pss)
-control = pm.ls(sl=1)[0]
-group = pm.listConnections(control.group)[0]
-limb = pm.listConnections(group.limb)[0]
-rigRoot = pm.listConnections(limb.rigRoot)[0]
-poseMng = pss.Poses()
-poseMng.InitPoses(rigRoot)
-poseMng.MirrorPose(limb)''',
-
-# -------------------------
-'FLIP POSE':
-'''import pymel.core as pm
-import Operations.Animation.Poses as pss
-reload(pss)
-control = pm.ls(sl=1)[0]
-group = pm.listConnections(control.group)[0]
-limb = pm.listConnections(group.limb)[0]
-rigRoot = pm.listConnections(limb.rigRoot)[0]
-poseMng = pss.Poses()
-poseMng.InitPoses(rigRoot)
-poseMng.FlipPose(limb)'''
+SelectMirrorLimbControl()'''
         }
 
     def __init__(self):

@@ -1,8 +1,7 @@
 
 
 __author__ = 'Trevor Payne'
-__version__ = 'Alpha v1.0'
-__expiration__ = 2022
+__expiration__ = 2023
 
 HIDE_ATTRS = False
 

@@ -75,10 +75,15 @@ class PayneFreeRigSuite_UI:
 
     def _Setup(self):
         log.funcFileDebug()
-        name = genData.LICENSE
-        name += ' - Payne Free Rig Suite'
-        name += ' - %s' %  genData.__version__
-        name += ' - by Trevor Payne'
+        path = os.path.dirname(__file__)
+        path = os.path.join(path, 'Data')
+        path = os.path.join(path, 'Version.json')
+        version = genUtil.Json.Load(path)
+        name = 'Payne Free Rig Suite'
+        name += ' - v%02d' % version['featureVersion']
+        name += '.%03d' % version['buildVersion']
+        name += ' - by %s' % genData.__author__
+        name += ' - %s' % genData.LICENSE
         with pm.window(mb=True,mbv=True, t=name, w=500, h=500) as self.win:
             with pm.rowLayout(nc=2):
                 with pm.columnLayout(co=('left', 10)):

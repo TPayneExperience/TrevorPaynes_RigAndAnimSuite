@@ -164,12 +164,6 @@ class PayneFreeRigSuite:
 
     def SaveAnimationRig(self, rigRoot, filePath):
         log.funcFileDebug()
-        # Make pose folder
-        folder = os.path.dirname(filePath)
-        poseFolder = os.path.join(folder, 'Poses')
-        if not os.path.exists(poseFolder):
-            os.makedirs(poseFolder)
-        rigRoot.posesFolderPath.set(poseFolder)
 
         # Set rigmode, export, revert
         if rigRoot.isBuilt.get():
@@ -180,7 +174,7 @@ class PayneFreeRigSuite:
         oldMain = rigRoot.category.get()
         oldSub = rigRoot.operation.get()
         rigRoot.category.set('Animation')
-        rigRoot.operation.set('Poses')
+        rigRoot.operation.set('Ghosts')
         setupFile = pm.sceneName()
         
         pm.saveAs(filePath)

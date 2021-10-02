@@ -1,6 +1,5 @@
 
 import os
-# import subprocess
 
 import pymel.core as pm
 

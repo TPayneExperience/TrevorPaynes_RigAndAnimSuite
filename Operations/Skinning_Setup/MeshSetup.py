@@ -13,8 +13,6 @@ import Utilities.Rig_Utilities as rigUtil
 reload(rigUtil)
 import Utilities.General_Utilities as genUtil
 reload(genUtil)
-import Data.Anim_Data as animData
-reload(animData)
 import Data.Rig_Data as rigData
 reload(rigData)
 import SceneData.Mesh as msh
