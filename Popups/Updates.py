@@ -9,26 +9,25 @@ reload(genUtil)
 class Updates:
     def __init__(self):
         self._GetUpdates()
-        pm.layoutDialog(ui=self._Setup, title='Updates to Tool')
+        pm.layoutDialog(ui=self._Setup, title='TOOL UPDATES')
 
     def _Setup(self):
         form = pm.setParent(q=1)
-        with pm.scrollLayout() as self._sl:
-            with pm.columnLayout(adj=1, rs=10):
-                for fileName in sorted(list(self._texts.keys()))[::-1]:
-                    text = self._texts[fileName]
-                    with pm.frameLayout(l=fileName, bv=1, w=550, h=150):
-                        pm.scrollField(ed=0, ww=0, text=text)
+        text = 'PAYNE FREE RIG SUITE TOOL UPDATES'
+        for fileName in sorted(list(self._texts.keys()))[::-1]:
+            text += '\n\n------------- %s ------------\n\n' % fileName
+            text += self._texts[fileName]
+        self.updateText_sf = pm.scrollField(ed=0, ww=0, text=text)
         self.close_btn = pm.button('Close', c=self._Close)
 
         pm.formLayout(form, e=1, width=600, height=500,
-                        attachForm=[(self._sl, 'top', 5), 
-                                    (self._sl, 'left', 5), 
-                                    (self._sl, 'right', 5),  
+                        attachForm=[(self.updateText_sf, 'top', 5), 
+                                    (self.updateText_sf, 'left', 5), 
+                                    (self.updateText_sf, 'right', 5),  
                                     (self.close_btn, 'left', 5),
                                     (self.close_btn, 'right', 5), 
                                     (self.close_btn, 'bottom', 5)],
-                        attachControl=[(self._sl, 'bottom', 5, 
+                        attachControl=[(self.updateText_sf, 'bottom', 5, 
                                             self.close_btn)])
     
     def _GetUpdates(self):

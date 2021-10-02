@@ -17,7 +17,7 @@ Stay Amazing!
 
 TUTORIALS
     - Menubar > Help > Tutorials
-SCRIPT FOR HOTKEY LOVERS
+SCRIPTS FOR HOTKEY LOVERS
     - Menubar > Help > Useful Scripts
 '''
     def __init__(self):

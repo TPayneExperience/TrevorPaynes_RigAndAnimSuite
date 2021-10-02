@@ -1,0 +1,19 @@
+Payne Free Rigs Suite's BETA! 
+
+UPDATES:
+    - Skinning 
+        - Paint Weights: added, new way to paint skin weights
+        - Quick Weights: quickly set weights
+    - Exporting
+        - Collection of options for exporting
+    - Rigging Extras
+        - Set Driven Keys: For easier eye, foot roll and more
+        - Attach Points: Create locator at any surface point 
+            for easier attachment of controls
+    - MISC
+        - Fixed various bugs
+        - Limb Hierarchies: selection sets added
+
+
+Thanks, and keep the dream alive!
+    - Trevor Payne

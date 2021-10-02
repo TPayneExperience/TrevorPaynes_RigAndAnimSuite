@@ -162,6 +162,7 @@ class PayneFreeRigSuite_UI:
         config = self._GetConfig()
         if config['lastVersionViewed'] != config['version']:
             upd.Updates()
+        upd.Updates()
 
     def UpdateOperationOptionMenu(self, operationName):
         if operationName in self.operationNames:

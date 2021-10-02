@@ -80,13 +80,13 @@ class Appearance(absOp.Abstract_Operation):
 
     def TeardownOp(self, rigRoot):
         for limb in pm.listConnections(rigRoot.limbs):
-            bhv = self.bhvMng.bhvs[limb.bhvFile.get()]
-            if bhv.groupMoveable:
-                continue
+            # bhv = self.bhvMng.bhvs[limb.bhvFile.get()]
+            # if bhv.groupMoveable:
+            #     continue
             for group in pm.listConnections(limb.usedGroups):
                 control = pm.listConnections(group.control)[0]
                 rigUtil.ChannelBoxAttrs(control, 1, 1, 1, 0)
-                pm.makeIdentity(control, a=1, t=1)
+                pm.makeIdentity(control, a=1, t=1, r=1, s=1)
 
     def GetShapeTemplates(self, rigRoot):
         controlTemplates = {}
