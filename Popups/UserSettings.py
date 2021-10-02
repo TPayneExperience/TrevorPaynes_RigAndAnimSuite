@@ -37,7 +37,10 @@ class UserSettings:
                         self._Setup_TemplatesFolder()
                         self._Setup_ControlShapesFile()
                 with pm.horizontalLayout():
-                    with pm.frameLayout(l='Joint Settings', bv=1) as self._jr_fl:
+                    title = 'Control Colors + Transparency'
+                    with pm.frameLayout(l=title, bv=1, mw=5, mh=5) as self._clr_fl:
+                        self._Setup_Colors()
+                    with pm.frameLayout(l='Joint Settings', bv=1, mw=5, mh=5) as self._jr_fl:
                         self._Setup_JointMirrorAxes()
                         self._Setup_JointRotOrder()
                         value = pm.jointDisplayScale(q=1)
@@ -45,14 +48,14 @@ class UserSettings:
                                         v=value, f=1, pre=2, 
                                         cw3=(100, 35, 50),
                                         dc=self.SetJointDisplaySize)
-                    title = 'Control Colors + Transparency'
-                    with pm.frameLayout(l=title, bv=1) as self._clr_fl:
-                        self._Setup_Colors()
                 with pm.horizontalLayout():
-                    with pm.frameLayout(l='Control Shapes', bv=1) as self._shp_fl:
+                    with pm.frameLayout(l='Control Shapes', bv=1, mw=5, mh=5) as self._shp_fl:
                         self._Setup_ControlShapes()
-                    with pm.frameLayout(l='Naming Order', bv=1) as self._shp_fl:
+                    with pm.frameLayout(l='Naming Order', bv=1, mw=5, mh=5) as self._shp_fl:
                         self._Setup_Naming()
+                with pm.horizontalLayout():
+                    with pm.frameLayout(l='Quick Weights', bv=1, mw=5, mh=5) as self._shp_fl:
+                        self._Setup_QuickWeights()
 
         self.save_btn = pm.button(l='Save', p=form, c=self.Save)
         self.cancel_btn = pm.button(l='Close', p=form, 
@@ -68,6 +71,8 @@ class UserSettings:
                         attachControl=[(temp_fl, 'bottom', 5, self.save_btn)],
                         attachPosition=[(self.cancel_btn, 'right', 5, 50), 
                                         (self.save_btn, 'left', 5, 50)])
+
+#============ SETUP OTHERS ============================
 
     def _Setup_JointMirrorAxes(self):
         with pm.optionMenu(l=' Joint Aim Axis') as self.jAim_om:
@@ -206,6 +211,21 @@ class UserSettings:
                                             cw=(2,80), 
                                             cal=(1,'left'))
 
+    def _Setup_QuickWeights(self):
+        with pm.verticalLayout():
+            lTitle = 'Limb Mask Midpoints'
+            jTitle = 'Joint Mask Midpoints'
+            lVal = self.config['quickWeightsLimbMaskMidpoints']
+            jVal = self.config['quickWeightsJointMaskMidpoints']
+            self._lMidpoints_is = pm.intSliderGrp(l=lTitle, 
+                                        f=1, v=lVal, 
+                                        cw3=(120, 30, 60),
+                                        min=1, max=10, cc=self.SetLimbMidpoints)
+            self._jMidpoints_is = pm.intSliderGrp(l=jTitle, 
+                                        f=1, v=jVal, 
+                                        cw3=(120, 30, 60),
+                                        min=1, max=10, cc=self.SetJointMidpoints)
+
 #============ COLOR ============================
 
     def SetLColor(self, ignore):
@@ -323,6 +343,14 @@ class UserSettings:
     def SetControlShape(self, opMenu, controlShape):
         self.config[controlShape] = pm.optionMenu(opMenu, q=1, v=1)
     
+#============ MISC ============================
+    
+    def SetLimbMidpoints(self, value):
+        self.config['quickWeightsLimbMaskMidpoints'] = value
+
+    def SetJointMidpoints(self, value):
+        self.config['quickWeightsJointMaskMidpoints'] = value
+
 #============ SAVE ============================
 
     def UpdateSaveButton(self):

@@ -9,7 +9,7 @@ class InitConfig(absInit.Abstract_Initializer):
     def Initialize(temp):
         if temp.data['version'] > 100:
             return 
-        temp.data['version'] = 110
+        temp.data['version'] = 110 # Beta
 
         # New Stuff
         temp.data['paintWeightsUseJointAnim'] = True

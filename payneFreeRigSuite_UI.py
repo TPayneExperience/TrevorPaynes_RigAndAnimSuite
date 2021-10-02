@@ -36,6 +36,8 @@ import Popups.UsefulScripts as usfScr
 reload(usfScr)
 import Popups.Export_UI as xprt
 reload(xprt)
+import Popups.SuggestedExternalTools as sget
+reload(sget)
 import Popups.Share as shr
 reload(shr)
 import Popups.Welcome as wlc
@@ -128,6 +130,7 @@ class PayneFreeRigSuite_UI:
 
                 pm.menuItem(d=1)
                 pm.menuItem(l='Useful Scripts for hotkeys', c=self._UsefulScripts)
+                pm.menuItem(l='Suggested External Tools', c=self._SuggestedExternalTools)
                 pm.menuItem(d=1)
                 pm.menuItem(l='Submit Feedback...', c=self.SubmitFeedback)
                 pm.menuItem(l="Share (You're My Hero!)", c=self._Share)
@@ -162,7 +165,6 @@ class PayneFreeRigSuite_UI:
         config = self._GetConfig()
         if config['lastVersionViewed'] != config['version']:
             upd.Updates()
-        upd.Updates()
 
     def UpdateOperationOptionMenu(self, operationName):
         if operationName in self.operationNames:
@@ -358,6 +360,10 @@ class PayneFreeRigSuite_UI:
     def _UsefulScripts(self, ignore):
         log.funcFileInfo()
         usfScr.UsefulScripts()
+
+    def _SuggestedExternalTools(self, ignore):
+        log.funcFileInfo()
+        sget.SuggestedExternalTools()
 
     def _Share(self, ignore):
         log.funcFileInfo()
