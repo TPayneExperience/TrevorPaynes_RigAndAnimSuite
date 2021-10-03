@@ -15,6 +15,8 @@ reload(log)
 class Ghosts(absOp.Abstract_Operation):
     isRigBuilt = True
     applyBakedAnimations = False
+    areLimbsRequired = True
+    areMeshesRequired = True
     validRigStates = (1,)       # 0 = Setup, 1 = Anim
     requiredLicense = 0         # 0 = Free, 1 = Personal, 2 = Pro
     controlLayerState = (1, 0)  # isVis, isRef

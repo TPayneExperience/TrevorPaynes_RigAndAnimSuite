@@ -14,7 +14,7 @@ class InitLimb(absInit.Abstract_Initializer):
     @staticmethod
     def Initialize(limb):
         log.funcFileDebug()
-        if limb.pfrsVersion.get() > = 110 # Beta:
+        if limb.pfrsVersion.get() >= 110: # Beta:
             return
 
         limb.pfrsVersion.set(110)

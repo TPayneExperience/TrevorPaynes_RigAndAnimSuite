@@ -14,11 +14,13 @@ reload(genUtil)
 
 class ANM_Behavior(absOp.Abstract_Operation):
     isRigBuilt = True
+    applyBakedAnimations = True
+    areLimbsRequired = True
+    areMeshesRequired = True
     validRigStates = (0, 1)     # 0 = Setup, 1 = Anim
     controlLayerState = (1, 0)  # isVis, isRef
     jointLayerState = (1, 1)    # isVis, isRef
     meshLayerState = (1, 1)    # isVis, isRef
-    applyBakedAnimations = True
     
     def __init__(self):
         self._rigBhv = rigBhv.RIG_Behavior()

@@ -2,7 +2,6 @@
 import os
 
 import pymel.core as pm
-import maya.mel as mel
 
 import Abstracts.Abstract_Operation as absOp
 reload(absOp)
@@ -24,6 +23,8 @@ reload(lmbOp)
 class PaintWeights(absOp.Abstract_Operation):
     isRigBuilt = True
     applyBakedAnimations = False
+    areLimbsRequired = True
+    areMeshesRequired = True
     validRigStates = (0,)       # 0 = Setup, 1 = Anim
     requiredLicense = 0         # 0 = Free, 1 = Personal, 2 = Pro
     controlLayerState = (1, 0)  # isVis, isRef
@@ -41,8 +42,8 @@ class PaintWeights(absOp.Abstract_Operation):
         paintLimbMel = os.path.join(folder, 'paintBrush_Limbs')
         paintJointMel = paintJointMel.replace('\\', '/')
         paintLimbMel = paintLimbMel.replace('\\', '/')
-        mel.eval('source "%s";' % paintJointMel)
-        mel.eval('source "%s";' % paintLimbMel)
+        pm.mel.eval('source "%s";' % paintJointMel)
+        pm.mel.eval('source "%s";' % paintLimbMel)
 
 #=========== BRUSH ====================================
 
@@ -50,7 +51,7 @@ class PaintWeights(absOp.Abstract_Operation):
         self.ctx = 'pfrsPaintCtx1'
         self._PaintBrushOn(brushMode, value, radius, softness)
         cmd = 'pfrsPaintLimbs("%s");' % self.ctx
-        mel.eval(cmd)
+        pm.mel.eval(cmd)
         self.UpdateLimbOps()
     
     def UpdateLimbOps(self):
@@ -113,7 +114,7 @@ class PaintWeights(absOp.Abstract_Operation):
         self.ctx = 'pfrsPaintCtx2'
         self._PaintBrushOn(brushMode, value, radius, softness)
         cmd = 'pfrsPaintJoints("%s");' % self.ctx
-        mel.eval(cmd)
+        pm.mel.eval(cmd)
         
     def UpdateJointOps(self):
         meshName = jntOp.PFRS_MESH_NAME
@@ -292,10 +293,10 @@ class PaintWeights(absOp.Abstract_Operation):
 #=========== PAINT SETTINGS ====================================
 
     def SetPaintModeAdd(self):
-        mel.eval('artAttrPaintOperation artUserPaintCtx Add;')
+        pm.mel.eval('artAttrPaintOperation artUserPaintCtx Add;')
 
     def SetPaintModeReplace(self):
-        mel.eval('artAttrPaintOperation artUserPaintCtx Replace;')
+        pm.mel.eval('artAttrPaintOperation artUserPaintCtx Replace;')
 
     def SetValue(self, value):
         pm.artUserPaintCtx(self.ctx, e=1, val=value) 

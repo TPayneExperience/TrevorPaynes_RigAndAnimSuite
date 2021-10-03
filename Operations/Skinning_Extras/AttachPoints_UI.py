@@ -24,7 +24,7 @@ class AttachPoints_UI(absOpUI.Abstract_OperationUI):
         self._rigRootIDs = dict()
         self._apIDs = {}
 
-    def Setup_UI(self, rigRoot, allRigRoots):
+    def Setup_UI(self, rigRoot, allRigRoots, pfrsUI):
         self._rigRoot = rigRoot
         self._allRigRoots = allRigRoots
         self._Setup()

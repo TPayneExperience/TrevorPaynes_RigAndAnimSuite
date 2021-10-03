@@ -23,7 +23,7 @@ class Ghost_UI(absOpUI.Abstract_OperationUI):
         self._ghostIDs = dict() # ghostID : ghost
         self.ghostMtr_ui = list()
 
-    def Setup_UI(self, rigRoot, allRigRoots):
+    def Setup_UI(self, rigRoot, allRigRoots, pfrsUI):
         self._rigRoot = rigRoot
         self._allRigRoots = allRigRoots
         self.ghostMtr_ui = list()

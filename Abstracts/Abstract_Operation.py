@@ -30,6 +30,14 @@ class Abstract_Operation:
         pass 
 
     @abstractproperty
+    def areLimbsRequired(self):     # bool | False
+        pass 
+
+    @abstractproperty
+    def areMeshesRequired(self):    # bool | False
+        pass 
+
+    @abstractproperty
     def validRigStates(self):       # tuple int | (0, 1)  # 0 = Setup, 1 = Anim
         pass 
 

@@ -9,6 +9,8 @@ import LimbSetup as ls
 reload(ls)
 import Utilities.UI_Utilities as uiUtil
 reload(uiUtil)
+import Utilities.Anim_Utilities as animUtil
+reload(animUtil)
 import Utilities.General_Utilities as genUtil
 reload(genUtil)
 import Utilities.Logger as log
@@ -36,10 +38,11 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
         self._selectedLimbs = []
         self._autobuild_mis = []
 
-    def Setup_UI(self, rigRoot, allRigRoots):  # Return nothing, parent should cleanup
+    def Setup_UI(self, rigRoot, allRigRoots, pfrsUI):  # Return nothing, parent should cleanup
         self.operation.InitAutobuilders()
         self._rigRoot = rigRoot
         self._allRigRoots = allRigRoots
+        self._pfrsUI = pfrsUI
         self._limbFunc = None
         self._selectedSceneJoints = []
         self._limbJoints = {}
@@ -231,6 +234,7 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
         self.PopulateSceneHier()
         self.PopulateLimbHier()
         self.PopulateJointHier(None)
+        self._pfrsUI.EnableOperations()
 
     def IgnoreRename(self, idStr, newName):
         log.funcFileInfo()
@@ -402,6 +406,7 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
         self.PopulateLimbHier(limb)
         self.PopulateJointHier(limb)
         self.PopulateSceneHier()
+        self._pfrsUI.EnableOperations()
 
     def DuplicateLimbs(self, ignore):
         log.funcFileInfo()
@@ -510,6 +515,7 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
         self.PopulateJointHier(None)
         self.PopulateSceneHier()
         self.SelectedLimb()
+        self._pfrsUI.EnableOperations()
     
     def RemoveLimbsAndJoints(self, ignore):
         log.funcFileInfo()
@@ -528,6 +534,7 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
         self.PopulateJointHier(None)
         self.PopulateSceneHier()
         self.SelectedLimb()
+        self._pfrsUI.EnableOperations()
 
     def RenameLimb(self, limbIDStr, newName):
         log.funcFileInfo()
@@ -586,10 +593,22 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
         if result != 'Save':
             return
         animName = pm.promptDialog(q=1, tx=1)
-        self.operation.ExportAnimation(self._rigRoot, animName)
-        pm.frameLayout(self.sceneHier_fl, e=1, en=0)
-        pm.frameLayout(self.limbHier_fl, e=1, en=0)
-        pm.frameLayout(self.jntHier_fl, e=1, en=0)
+        curFile = pm.sceneName()
+        animUtil.UpdateAnimFolder(self._rigRoot, curFile)
+        animFolderPath = self._rigRoot.animationFolderPath.get()
+        animFilePath = os.path.join(animFolderPath, animName)
+        animFilePath = '%s.ma' % animFilePath
+        if os.path.exists(animFilePath):
+            result = pm.confirmDialog(
+                        t='Animation file already exists!', 
+                        icon='warning', 
+                        m='Override existing file?', 
+                        b=['Ok', 'Cancel'])
+            if result and result == 'Ok':
+                self.operation.ExportAnimation(self._rigRoot, animName)
+                pm.frameLayout(self.sceneHier_fl, e=1, en=0)
+                pm.frameLayout(self.limbHier_fl, e=1, en=0)
+                pm.frameLayout(self.jntHier_fl, e=1, en=0)
 
     def RemoveAnimation(self, ignore):
         log.funcFileInfo()

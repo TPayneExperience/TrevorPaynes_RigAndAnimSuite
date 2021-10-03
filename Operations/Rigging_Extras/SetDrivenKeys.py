@@ -19,6 +19,8 @@ reload(genUtil)
 class SetDrivenKeys(absOp.Abstract_Operation):
     isRigBuilt = True
     applyBakedAnimations = False
+    areLimbsRequired = True
+    areMeshesRequired = False
     validRigStates = (0,)     # 0 = Setup, 1 = Anim
     controlLayerState = (1, 0)  # isVis, isRef
     jointLayerState = (1, 1)    # isVis, isRef

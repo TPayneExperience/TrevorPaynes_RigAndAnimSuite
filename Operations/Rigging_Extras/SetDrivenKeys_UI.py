@@ -29,7 +29,7 @@ class SetDrivenKeys_UI(absOpUI.Abstract_OperationUI):
         self._emptyLimbIDs = {}
         self._ctrGroups = []
 
-    def Setup_UI(self, rigRoot, allRigRoots): 
+    def Setup_UI(self, rigRoot, allRigRoots, pfrsUI): 
         self._rigRoot = rigRoot
         self._allRigRoots = allRigRoots
         self._selectedLimb = None

@@ -37,7 +37,7 @@ class Constraints_UI(absOpUI.Abstract_OperationUI):
         self._selectedTargetControl = None
         self._selectedTargetAttachPoint = None
 
-    def Setup_UI(self, rigRoot, allRigRoots):  # Return nothing, parent should cleanup
+    def Setup_UI(self, rigRoot, allRigRoots, pfrsUI):  # Return nothing, parent should cleanup
         self._Setup()
         self._rigRoot = rigRoot
         self._allRigRoots = allRigRoots
@@ -47,7 +47,7 @@ class Constraints_UI(absOpUI.Abstract_OperationUI):
         self._selectedTargetControl = None
         self._selectedTargetAttachPoint = None
         self._selectedControls = []
-        self.PopulateLimbHierNormal()
+        self.PopulateLimbHier()
         self.UpdateApplyButton()
     
     def Teardown_UI(self):
@@ -66,27 +66,25 @@ class Constraints_UI(absOpUI.Abstract_OperationUI):
                                             elc=self.IgnoreRename,
                                             scc=self.SelectedTargetControl)
                 with pm.popupMenu():
-                    self.setTargetControl1_mi = pm.menuItem(l='Set As Target 1 (Required)', 
+                    self.setTargetControl1_mi = pm.menuItem(l='Set As Target 1', 
                                                     c=self.SetControlAsTarget1,
                                                     en=0)
-                    self.setTargetControl2_mi = pm.menuItem(l='Set As Target 2 (Optional)', 
+                    self.setTargetControl2_mi = pm.menuItem(l='Set As Target 2', 
                                                     c=self.SetControlAsTarget2,
                                                     en=0)
-                    pm.menuItem(l='Reset Target 2', c=self.ResetTarget2)
             with pm.frameLayout('Targetable Attach Points', bv=1):
                 self.ap_tv = pm.treeView(arp=0, adr=0, ams=0,
                                             elc=self.IgnoreRename,
                                             scc=self.SelectedTargetAttachPoint)
                 with pm.popupMenu():
                     self.setTargetAttachPoint1_mi = pm.menuItem(
-                                                    l='Set As Target 1 (Required)', 
+                                                    l='Set As Target 1', 
                                                     c=self.SetAttachPointAsTarget1,
                                                     en=0)
                     self.setTargetAttachPoint2_mi = pm.menuItem(
-                                                    l='Set As Target 2 (Optional)', 
+                                                    l='Set As Target 2', 
                                                     c=self.SetAttachPointAsTarget2,
                                                     en=0)
-                    pm.menuItem(l='Reset Target 2', c=self.ResetTarget2)
         with pm.verticalLayout():
             with pm.frameLayout('Limb Controls', bv=1):
                 self.control_tv = pm.treeView(arp=0, adr=0,
@@ -103,7 +101,7 @@ class Constraints_UI(absOpUI.Abstract_OperationUI):
                                                     la3=['X', 'Y', 'Z'],
                                                     va3=(1,1,1), cw4=(80,50,50,50))
                     self.target1_t = pm.text(l='Target 1: NONE')
-                    self.target2_t = pm.text(l='Target 2: Default Parent')
+                    self.target2_t = pm.text(l='Target 2: NONE')
                     self.apply_b = pm.button(l='Apply Constraint', 
                                             c=self.ApplyConstraints,
                                             en=0)
@@ -118,7 +116,7 @@ class Constraints_UI(absOpUI.Abstract_OperationUI):
 
 #=========== LIMB HIER ====================================
 
-    def PopulateLimbHierNormal(self, selectLimb=None):
+    def PopulateLimbHier(self, selectLimb=None):
         log.funcFileDebug()
         self._limbIDs.clear()
         self._limbIDs.update(uiUtil.PopulateLimbHierNormal(self.limb_tv, 
@@ -189,9 +187,10 @@ class Constraints_UI(absOpUI.Abstract_OperationUI):
             return 
         self._selectedTargetControl = self._targetableControls[groupIDStrs[0]]
         pm.select(self._selectedTargetControl)
-        pm.menuItem(self.setTargetControl1_mi, e=1, en=1)
         if self._selectedTargetControl != self._target1:
             pm.menuItem(self.setTargetControl2_mi, e=1, en=1)
+        if self._selectedTargetControl != self._target2:
+            pm.menuItem(self.setTargetControl1_mi, e=1, en=1)
 
     def SetControlAsTarget1(self, ignore):
         self._target1 = self._selectedTargetControl
@@ -203,12 +202,6 @@ class Constraints_UI(absOpUI.Abstract_OperationUI):
     def SetControlAsTarget2(self, ignore):
         self._target2 = self._selectedTargetControl
         text = 'Target 2: %s' % self._target2
-        pm.text(self.target2_t, e=1, l=text)
-        self.PopulateTargetableHier()
-
-    def ResetTarget2(self, ignore):
-        self._target2 = None
-        text = 'Target 2: Default Parent'
         pm.text(self.target2_t, e=1, l=text)
         self.PopulateTargetableHier()
 
@@ -296,15 +289,15 @@ class Constraints_UI(absOpUI.Abstract_OperationUI):
                                             not locks[1],
                                             not locks[2], 
                                             index)
-        self.PopulateLimbHierNormal()
+        self.PopulateLimbHier()
         self.PopulateControlHier()
         self.PopulateTargetableHier()
         self.PopulateGroupHier()
         self.UpdateApplyButton()
 
     def UpdateApplyButton(self):
-        if not self._target1:
-            pm.button(self.apply_b, e=1, en=0, l='Missing Target')
+        if not self._target1 or not self._target2:
+            pm.button(self.apply_b, e=1, en=0, l='Missing Targets')
             return
         if not self._selectedControls:
             pm.button(self.apply_b, e=1, en=0, l='Select Affected Controls')
@@ -352,6 +345,7 @@ class Constraints_UI(absOpUI.Abstract_OperationUI):
         log.funcFileInfo()
         self.operation.RemoveConstraintGroups(self._selectedGroups)
         self.PopulateGroupHier()
+        self.PopulateLimbHier()
 
 # Copyright (c) 2021 Trevor Payne
 # See user license in "PayneFreeRigSuite\Data\LicenseAgreement.txt"

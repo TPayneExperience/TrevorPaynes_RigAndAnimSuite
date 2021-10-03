@@ -17,7 +17,7 @@ class Abstract_OperationUI:
         pass 
 
     @abstractmethod
-    def Setup_UI(self, rigRoot, allRigRoots):
+    def Setup_UI(self, rigRoot, allRigRoots, pfrsUI):
         pass
     
     @abstractmethod

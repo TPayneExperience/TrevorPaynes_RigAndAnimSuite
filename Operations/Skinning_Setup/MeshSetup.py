@@ -25,6 +25,8 @@ reload(skinUtil)
 class MeshSetup(absOp.Abstract_Operation):
     isRigBuilt = False
     applyBakedAnimations = False
+    areLimbsRequired = True
+    areMeshesRequired = False
     validRigStates = (0,)     # 0 = Setup, 1 = Anim
     controlLayerState = (0, 0)  # isVis, isRef
     jointLayerState = (0, 1)    # isVis, isRef
@@ -76,9 +78,8 @@ class MeshSetup(absOp.Abstract_Operation):
 
     def RemoveMeshes(self, rigRoot, meshes):
         log.funcFileInfo()
-        for xform in meshes:
-            msh.Mesh.Remove(xform)
-            mesh = pm.listRelatives(xform, c=1, type='mesh')[0]
+        for mesh in meshes:
+            msh.Mesh.Remove(mesh)
             for limb in pm.listConnections(rigRoot.limbs):
                 if limb.limbType.get() == 0: # Empty
                     continue

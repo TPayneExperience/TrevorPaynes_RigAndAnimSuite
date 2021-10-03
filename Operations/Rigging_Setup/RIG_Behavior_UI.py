@@ -34,7 +34,7 @@ class RIG_Behavior_UI(absOpUI.Abstract_OperationUI):
         self._limbGroups = {}
         self._limbIDs = {}
 
-    def Setup_UI(self, rigRoot, allRigRoots):  # Return nothing, parent should cleanup
+    def Setup_UI(self, rigRoot, allRigRoots, pfrsUI):  # Return nothing, parent should cleanup
         self._Setup()
         self._rigRoot = rigRoot
         self._allRigRoots = allRigRoots

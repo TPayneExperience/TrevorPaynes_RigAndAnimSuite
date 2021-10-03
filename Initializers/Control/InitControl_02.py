@@ -14,7 +14,7 @@ class InitControl(absInit.Abstract_Initializer):
     @staticmethod
     def Initialize(control):
         log.funcFileDebug()
-        if control.pfrsVersion.get() > = 110 # Beta:
+        if control.pfrsVersion.get() >= 110: # Beta
             return 
         control.pfrsVersion.set(110)
         # hide = genData.HIDE_ATTRS

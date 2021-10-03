@@ -1,6 +1,4 @@
 
-import os
-
 import pymel.core as pm
 
 import Abstracts.Abstract_OperationUI as absOpUI
@@ -21,7 +19,7 @@ class Animation_UI(absOpUI.Abstract_OperationUI):
     uiOrderIndex = 310
     operation = anm.Animations()
 
-    def Setup_UI(self, rigRoot, allRigRoots): 
+    def Setup_UI(self, rigRoot, allRigRoots, pfrsUI): 
         self._Setup()
         self._rigRoot = rigRoot
         self._allRigRoots = allRigRoots
@@ -42,9 +40,9 @@ class Animation_UI(absOpUI.Abstract_OperationUI):
                 with pm.popupMenu() as self.rmb_ui:
                     self.setAnim_mi = pm.menuItem(l='Set Animation Folder', en=0,
                                                 c=self.SetAnimationFolder)
-                    pm.menuItem(d=1)
-                    self.export_mi = pm.menuItem(l='Export Control Animation', en=0, 
-                                                c=self.ExportControlAnimation)
+                    # pm.menuItem(d=1)
+                    # self.export_mi = pm.menuItem(l='Export Control Animation', en=0, 
+                    #                             c=self.ExportControlAnimation)
                     self.remove_mi = pm.menuItem(l='Remove Control Animation', en=0, 
                                                 c=self.RemoveControlAnimation)
                     pm.menuItem(d=1)
@@ -107,31 +105,31 @@ class Animation_UI(absOpUI.Abstract_OperationUI):
         log.funcFileInfo()
         return ''
 
-    def ExportControlAnimation(self, ignore):
-        log.funcFileInfo()
-        if not str(pm.sceneName()):
-            msg = 'Please SAVE current scene before '
-            msg += '\nsaving a template'
-            pm.confirmDialog(   t='Save Current Scene', 
-                                m=msg, 
-                                icon='warning', 
-                                b='Ok')
-            return
-        result = pm.promptDialog(
-                title='Name New Animation',
-                message='Animation Name: ',
-                button=['Save', 'Cancel'],
-                defaultButton='Save',
-                cancelButton='Cancel',
-                dismissString='Cancel')
-        if result != 'Save':
-            return
-        animName = pm.promptDialog(q=1, tx=1)
-        self.operation.ExportControlAnimation(self._rigRoot, animName)
-        pm.frameLayout(self.rigRoot_fl, e=1, en=0)
-        pm.frameLayout(self.anim_fl, e=1, en=0)
-        pm.frameLayout(self.limbs_fl, e=1, en=0)
-        pm.frameLayout(self.prop_fl, e=1, en=0)
+    # def ExportControlAnimation(self, ignore):
+    #     log.funcFileInfo()
+    #     if not str(pm.sceneName()):
+    #         msg = 'Please SAVE current scene before '
+    #         msg += '\nsaving a template'
+    #         pm.confirmDialog(   t='Save Current Scene', 
+    #                             m=msg, 
+    #                             icon='warning', 
+    #                             b='Ok')
+    #         return
+    #     result = pm.promptDialog(
+    #             title='Name New Animation',
+    #             message='Animation Name: ',
+    #             button=['Save', 'Cancel'],
+    #             defaultButton='Save',
+    #             cancelButton='Cancel',
+    #             dismissString='Cancel')
+    #     if result != 'Save':
+    #         return
+    #     animName = pm.promptDialog(q=1, tx=1)
+    #     self.operation.ExportControlAnimation(self._rigRoot, animName)
+    #     pm.frameLayout(self.rigRoot_fl, e=1, en=0)
+    #     pm.frameLayout(self.anim_fl, e=1, en=0)
+    #     pm.frameLayout(self.limbs_fl, e=1, en=0)
+    #     pm.frameLayout(self.prop_fl, e=1, en=0)
 
     def RemoveControlAnimation(self, ignore):
         log.funcFileInfo()

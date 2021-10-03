@@ -15,7 +15,7 @@ class Test_UI(absOpUI.Abstract_OperationUI):
     uiOrderIndex = 900
     operation = tst.Test()
     
-    def Setup_UI(self, rigRoot, allRigRoots):
+    def Setup_UI(self, rigRoot, allRigRoots, pfrsUI):
         self._rigRoot = rigRoot
         self._allRigRoots = allRigRoots
         self._limbGroups = {}

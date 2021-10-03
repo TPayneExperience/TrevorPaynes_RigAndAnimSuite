@@ -24,7 +24,7 @@ class Appearance_UI(absOpUI.Abstract_OperationUI):
         self._selectedLimbs = []
         self._limbGroups = []
 
-    def Setup_UI(self, rigRoot, allRigRoots): 
+    def Setup_UI(self, rigRoot, allRigRoots, pfrsUI): 
         self._rigRoot = rigRoot
         self._allRigRoots = allRigRoots
         self._selectedLimbs = []

@@ -17,9 +17,10 @@ class MeshSetup_UI(absOpUI.Abstract_OperationUI):
         self._selectedAvailable = []
         self._selectedSkinned = []
 
-    def Setup_UI(self, rigRoot, allRigRoots): 
+    def Setup_UI(self, rigRoot, allRigRoots, pfrsUI): 
         self._rigRoot = rigRoot
         self._allRigRoots = allRigRoots
+        self._pfrsUI = pfrsUI
         self._allMeshes = {} # name : meshNode
         self._skinnedMeshes = {} # name : meshNode
         self._selectedAvailable = []
@@ -104,6 +105,7 @@ class MeshSetup_UI(absOpUI.Abstract_OperationUI):
         self.operation.AddMeshes(self._rigRoot, self._selectedAvailable)
         self.PopulateAvailable()
         self.PopulateSkinned()
+        self._pfrsUI.EnableOperations()
 
     def RenameMesh(self, oldName, newName):
         log.funcFileInfo()
@@ -144,6 +146,7 @@ class MeshSetup_UI(absOpUI.Abstract_OperationUI):
         self.operation.RemoveMeshes(self._rigRoot, self._selectedSkinned)
         self.PopulateAvailable()
         self.PopulateSkinned()
+        self._pfrsUI.EnableOperations()
 
     def RebuildSkins(self, ignore):
         log.funcFileInfo()

@@ -144,12 +144,6 @@ class PayneFreeRigSuite_UI:
                 pm.menuItem(l='Debug (Requires Restart!)', cb=config['debug'], c=self._SetDebug)
                 pm.menuItem(l='Open Log', c=self.pfrs.OpenLog)
 
-            # ADD BACK LATER
-            # with pm.menu('Store'):
-            #     pm.menuItem(l='Free Version', c=self.OpenWebsite)
-            #     pm.menuItem(l='Personal Version', en=0)
-            #     pm.menuItem(l='Professional Version', en=0)
-            
 #=========== COMBOBOX SWITCHING ====================================
 
     def InitOptionMenues(self):
@@ -209,7 +203,8 @@ class PayneFreeRigSuite_UI:
         with pm.frameLayout(p=self.win, lv=0) as self.frame:
             with pm.horizontalLayout():
                 self.currentOp.Setup_UI(self._rigRoot, 
-                                        self._allRigRoots)
+                                        self._allRigRoots,
+                                        self)
 
     def PopulateCategories(self):
         log.funcFileDebug()
@@ -220,6 +215,7 @@ class PayneFreeRigSuite_UI:
         log.funcFileDebug()
         self.operationNames = []
         self.operations = []
+        self.operations_mi = []
         pm.optionMenu(self.op_op, e=1, dai=1)
         pm.menuItem(l=' ', p=self.op_op) # Empty
         rigMode = self._rigRoot.rigMode.get()
@@ -231,9 +227,24 @@ class PayneFreeRigSuite_UI:
             if rigMode not in operation.operation.validRigStates:
                 continue
             operationName = operation.uiName
-            pm.menuItem(l=operationName, p=self.op_op)
+            mi = pm.menuItem(l=operationName, p=self.op_op)
+            self.operations_mi.append(mi)
             self.operationNames.append(operationName)
             self.operations.append(operation)
+        self.EnableOperations()
+
+    def EnableOperations(self):
+        for index, operation in enumerate(self.operations):
+            isEnabled = True
+            menuItem = self.operations_mi[index]
+            if operation.operation.areLimbsRequired:
+                if not pm.listConnections(self._rigRoot.limbs):
+                    isEnabled = False
+            if operation.operation.areMeshesRequired:
+                if not pm.listConnections(self._rigRoot.meshes):
+                    isEnabled = False
+            pm.menuItem(menuItem, e=1, en=isEnabled)
+
 
 #=========== MENUBAR FILE ====================================
 
@@ -245,10 +256,15 @@ class PayneFreeRigSuite_UI:
 
     def SaveAnimationRig(self, ignore):
         log.funcFileInfo()
+        if not self.IsRigRootValid():
+            return
         if self._rigRoot.rigMode.get() != 0:
+            msg = 'Rig Root must be in "Setup Rig" mode'
+            msg += '\nin order to export anim rig'
             return pm.confirmDialog(
-                t='Rig Already Exported',
-                m='Rig Root has already be exported to anim rig',
+                t='Cannot Export Rig',
+                m=msg,
+                icon='critical',
                 button=['Ok']) 
         name = '%s_AnimRig' % self._rigRoot.pfrsName.get()
         setupFile = pm.sceneName()
@@ -258,7 +274,8 @@ class PayneFreeRigSuite_UI:
                                 cap='Save Exported Animation Rig')
         if not result:
             return
-        self.pfrs.SaveAnimationRig(self._rigRoot, result[0])
+        filePath = result[0]
+        self.pfrs.SaveAnimationRig(self._rigRoot, filePath)
 
     def ExportFBX(self, ignore):
         log.funcFileInfo()
@@ -289,9 +306,6 @@ class PayneFreeRigSuite_UI:
             self._rigRoot = self.pfrs.AddRigRoot()
             self._allRigRoots = [self._rigRoot]
             self.InitOptionMenues()
-        # Read scene
-        # If not, create new rig
-        # if exists, just refresh ui
 
     def LoadRig(self):
         rigRoots = self.pfrs.GetRigRoots()
@@ -302,12 +316,24 @@ class PayneFreeRigSuite_UI:
 
     def EditRig_Dialog(self, ignore):
         log.funcFileInfo()
-        edRt.EditRigRoot(self._rigRoot, self)
-        self.pfrs.UpdateRootName(self._rigRoot)
+        if self.IsRigRootValid():
+            edRt.EditRigRoot(self._rigRoot, self)
+            self.pfrs.UpdateRootName(self._rigRoot)
 
     def UpdateRigRoot(self):
         self.pfrs.UpdateRootName(self._rigRoot)
         self.SetOperation(self._rigRoot.operation.get())
+
+    def IsRigRootValid(self):
+        if not self._rigRoot or not pm.objExists(self._rigRoot):
+            pm.confirmDialog(
+                            t='No Valid Rig Root', 
+                            icon='critical', 
+                            m='No valid rig root is set', 
+                            b=['Ok'], 
+                            db='Ok')
+            return False
+        return True
 
 # #=========== MENUBAR PHYSICS ====================================
 
