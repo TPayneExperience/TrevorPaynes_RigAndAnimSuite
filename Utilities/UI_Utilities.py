@@ -1,4 +1,6 @@
 
+from collections import OrderedDict
+
 import pymel.core as pm
 
 import Data.Rig_Data as rigData
@@ -14,7 +16,7 @@ reload(rrt)
 
 def PopulateLimbHierNormal(widget, currentRigRoot, allRigRoots): 
     pm.treeView(widget, e=1, removeAll=1)
-    limbIDs = {} # rigRootID_limbID : limb
+    limbIDs = OrderedDict() # rigRootID_limbID : limb
     rootLimbs = []
     for rigRoot in allRigRoots:
         for limb in pm.listConnections(rigRoot.limbs):
@@ -64,7 +66,7 @@ def PopulateLimbHierNormal(widget, currentRigRoot, allRigRoots):
     return limbIDs
 
 def PopulateLimbHierSkeletal(widget, rigRoot): 
-    limbIDs = {}
+    limbIDs = OrderedDict()
     limbs = pm.listConnections(rigRoot.limbs)
     limbParents = genUtil.GetDefaultLimbHier(limbs)
     limbs = skinUtil.GetSkeletalLimbOrder(limbs)
@@ -104,7 +106,7 @@ def PopulateLimbHierSkeletal(widget, rigRoot):
     return limbIDs
 
 def PopulateControlHier(widget, limb):
-    groups = {} # index : group
+    groups = OrderedDict() # index : group
     for group in pm.listConnections(limb.usedGroups):
         groupID = str(group.groupIndex.get())
         groups[groupID] = group
@@ -118,7 +120,7 @@ def PopulateControlHier(widget, limb):
     return groups
 
 def PopulateJointHier(widget, limb):
-    joints = {} # index : joint
+    joints = OrderedDict() # index : joint
     for joint in pm.listConnections(limb.joints):
         group = pm.listConnections(joint.group)[0]
         groupID = str(group.groupIndex.get())
@@ -131,7 +133,7 @@ def PopulateJointHier(widget, limb):
     return joints
 
 def PopulateAttachPointsHier(widget, rigRoot):
-    attachPointDict = {}
+    attachPointDict = OrderedDict()
     group = pm.listConnections(rigRoot.attachPoints)[0]
     attachPoints = pm.listRelatives(group, c=1)
     rigRootID = rigRoot.ID.get()
@@ -146,7 +148,7 @@ def PopulateAttachPointsHier(widget, rigRoot):
 def SetupLimbHier(limbIDDict):
     with pm.formLayout(numberOfDivisions=100) as form:
         with pm.horizontalLayout() as hl:
-            radio = pm.iconTextRadioCollection('whatever')
+            pm.iconTextRadioCollection('whatever')
             b1 = pm.iconTextRadioButton( st='textOnly', 
                         l='ALL', 
                         flat=0,

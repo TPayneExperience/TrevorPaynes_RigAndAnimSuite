@@ -109,13 +109,13 @@ class Abstract_Behavior:
 #============= EDITABLE UI ============================
 
     @abstractmethod
-    def Setup_Editable_Limb_UI(self, limb):
+    def Setup_Behavior_Limb_UI(self, limb):
         return False # return if UI is enabled
     
 #============= ANIMATION UI ============================
 
     @abstractmethod
-    def Setup_Animation_Limb_UI(self, limb):
+    def Setup_AnimationTools_Limb_UI(self, limb):
         return False # return if UI is enabled
     
 # Copyright (c) 2021 Trevor Payne

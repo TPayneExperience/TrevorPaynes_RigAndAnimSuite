@@ -7,8 +7,6 @@ import RIG_Behavior as bhv
 reload(bhv)
 import Utilities.UI_Utilities as uiUtil
 reload(uiUtil)
-# import Utilities.General_Utilities as genUtil
-# reload(genUtil)
 import Utilities.Logger as log
 reload(log)
 import Data.Rig_Data as rigData
@@ -25,7 +23,7 @@ class RIG_Behavior_UI(absOpUI.Abstract_OperationUI):
     operation = bhv.RIG_Behavior()
     def __init__(self):
         self._rigRoot = None
-        self._allRigRoots = None
+        self._allRigRoots = []
         self._currentBhv = None 
         self._bhvTypes = []
         self._selectedLimbs = []
@@ -35,7 +33,6 @@ class RIG_Behavior_UI(absOpUI.Abstract_OperationUI):
         self._limbIDs = {}
 
     def Setup_UI(self, rigRoot, allRigRoots, pfrsUI):  # Return nothing, parent should cleanup
-        self._Setup()
         self._rigRoot = rigRoot
         self._allRigRoots = allRigRoots
         self._currentBhv = None # for verifying group selection
@@ -44,6 +41,7 @@ class RIG_Behavior_UI(absOpUI.Abstract_OperationUI):
         self._presetsUI = []
         self._limbIDs = {}
         self._limbGroups = {}
+        self._Setup()
         self.PopulateLimbHierNormal()
         self.PopulatePresets()
         for rigRoot in self._allRigRoots:
@@ -54,6 +52,12 @@ class RIG_Behavior_UI(absOpUI.Abstract_OperationUI):
         for rigRoot in self._allRigRoots:
             for limb in pm.listConnections(rigRoot.limbs):
                 self.operation.TeardownBhvOp(limb)
+                if pm.listConnections(limb.animJoints):
+                    continue
+                bhvFile = limb.bhvFile.get()
+                bhv = self.operation.bhvMng.bhvs[bhvFile]
+                if not bhv.groupMoveable:
+                    continue
                 self.operation.FreezeGroupXformsForLimb(limb)
     
 #=========== SETUP UI ====================================
@@ -61,13 +65,10 @@ class RIG_Behavior_UI(absOpUI.Abstract_OperationUI):
     def _Setup(self):
         with pm.verticalLayout():
             with pm.frameLayout('Limbs', bv=1):
-                # with pm.columnLayout(adj=1, rs=5):
-                # self._filter_bs = uiUtil.SetupFilterBar()
                 tt = '- MMB + Drag + Drop to reparent'
                 tt += '\n- Red Dots indicate Empty Limbs'
                 tt += '\n- Double Click to rename Empty Limbs'
                 self.limb_tv = pm.treeView(nb=1, ann=tt, enk=1)
-                # self._filter_bs, self.limb_tv = uiUtil.SetupLimbHier()
                 pm.treeView(self.limb_tv, e=1, scc=self.SelectedLimb,
                                                 elc=self.RenameLimb,
                                                 dad=self.ReparentLimb,
@@ -91,7 +92,9 @@ class RIG_Behavior_UI(absOpUI.Abstract_OperationUI):
                                         en=0, c=self.SavePreset)
                     pm.menuItem(l='Edit Presets', c=self.EditPresets)
                     pm.menuItem(l='APPLY PRESET', en=0, d=1)
-            with pm.frameLayout('Controls (select + move pivots)', bv=1):
+            isEnabled = (self._rigRoot.rigMode.get() == 0) # Setup Rig ONLY
+            with pm.frameLayout('Controls (select + move pivots)', bv=1, 
+                                en=isEnabled):
                 tt = 'DOT = pivot is moveable!'
                 tt += '\nDimmed = Disabled group'
                 self.control_tv = pm.treeView(arp=0, adr=0, ams=0, ann=tt,
@@ -106,7 +109,8 @@ class RIG_Behavior_UI(absOpUI.Abstract_OperationUI):
                     self.bhvType_om = pm.optionMenu(l='Bhv Type', 
                                                     cc=self.SetBhvType)
                     self.grpParent_at = pm.attrEnumOptionMenu(  l='Parent Joint', 
-                                                                at='perspShape.filmFit')
+                                                                at='perspShape.filmFit',
+                                                                cc=self.SetJointParent)
             with pm.frameLayout('Behavior Properties', bv=1, en=0) as self.bhvProp_fl:
                 self.bhvProp_cl = pm.columnLayout(adj=1)
 
@@ -203,6 +207,10 @@ class RIG_Behavior_UI(absOpUI.Abstract_OperationUI):
             log.info('"%s" to world' % name)
         self.operation.ReparentLimb(child, parent)
     
+    def SetJointParent(self):
+        log.funcFileInfo()
+        self.operation.UpdateToBeBaked(self._selectedLimbs[0])
+
     def AddEmptyLimb(self, ignore):
         log.funcFileInfo()
         limb = self._selectedLimbs[0]
@@ -281,7 +289,6 @@ class RIG_Behavior_UI(absOpUI.Abstract_OperationUI):
         log.funcFileDebug()
         for limb in self._selectedLimbs:
             self.operation.RemoveUnusedGroups(limb)
-
 
 #=========== CONTROL HIER ====================================
 
@@ -382,7 +389,7 @@ class RIG_Behavior_UI(absOpUI.Abstract_OperationUI):
             return
         pm.deleteUI(self.bhvProp_cl)
         with pm.columnLayout(adj=1, p=self.bhvProp_fl) as self.bhvProp_cl:
-            enable = self._currentBhv.Setup_Editable_Limb_UI(limb)
+            enable = self._currentBhv.Setup_Behavior_Limb_UI(limb)
         pm.frameLayout(self.bhvProp_fl, e=1, en=enable)
 
 # Copyright (c) 2021 Trevor Payne

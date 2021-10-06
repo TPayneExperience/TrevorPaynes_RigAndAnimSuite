@@ -61,10 +61,8 @@ class InitLimb(absInit.Abstract_Initializer):
         pm.addAttr(limb, ln='presetLimbChildren', dt='string', h=hide)
 
         # BAKING
-        pm.addAttr(limb, ln='hasKeys', at='bool', dv=1, h=hide)
+        # pm.addAttr(limb, ln='hasKeys', at='bool', dv=1, h=hide)
         pm.addAttr(limb, ln='controlKeyframes', dt='string', h=hide)
-        pm.addAttr(limb, ln='bakeInternal', at='bool', dv=1, h=hide)
-        pm.addAttr(limb, ln='bakeExternal', at='bool', dv=1, h=hide)
         pm.addAttr(limb, ln='animJoints', dt='string', h=hide)
         
 # Copyright (c) 2021 Trevor Payne

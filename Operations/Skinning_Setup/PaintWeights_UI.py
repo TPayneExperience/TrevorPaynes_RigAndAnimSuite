@@ -27,7 +27,7 @@ class PaintWeights_UI(absOpUI.Abstract_OperationUI):
     
     def __init__(self):
         self._rigRoot = None
-        self._allRigRoots = None
+        self._allRigRoots = []
         self._limbIDs = {}
 
     def Setup_UI(self, rigRoot, allRigRoots, pfrsUI):

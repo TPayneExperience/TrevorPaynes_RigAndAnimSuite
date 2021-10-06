@@ -19,7 +19,7 @@ class SetDrivenKeys_UI(absOpUI.Abstract_OperationUI):
     
     def __init__(self):
         self._rigRoot = None
-        self._allRigRoots = None
+        self._allRigRoots = []
         self._limbIDs = {}
         self._selectedLimb = None
         self._selectedControlGrp = None

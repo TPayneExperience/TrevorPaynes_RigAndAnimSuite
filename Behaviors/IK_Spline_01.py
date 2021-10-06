@@ -183,7 +183,7 @@ class IK_Spline_01(absBhv.Abstract_Behavior):
     
 #============= EDITABLE UI ============================
 
-    def Setup_Editable_Limb_UI(self, limb):
+    def Setup_Behavior_Limb_UI(self, limb):
         log.funcFileDebug()
         group = rigUtil.GetLimbGroups(limb, self.groupType)[0]
         with pm.columnLayout(co=('left', -100)):
@@ -192,7 +192,7 @@ class IK_Spline_01(absBhv.Abstract_Behavior):
     
 #============= ANIMATION UI ============================
 
-    def Setup_Animation_Limb_UI(self, limb):
+    def Setup_AnimationTools_Limb_UI(self, limb):
         with pm.columnLayout(co=('left', -100)):
             pm.attrControlGrp(l='Twist', a=limb.IKSTwist)
         return True # return if UI is enabled

@@ -18,7 +18,7 @@ class Ghost_UI(absOpUI.Abstract_OperationUI):
     
     def __init__(self):
         self._rigRoot = None
-        self._allRigRoots = None
+        self._allRigRoots = []
         self._rigRootIDs = dict()
         self._ghostIDs = dict() # ghostID : ghost
         self.ghostMtr_ui = list()

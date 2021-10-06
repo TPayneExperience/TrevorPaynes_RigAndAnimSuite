@@ -23,7 +23,7 @@ class QuickWeights(absOp.Abstract_Operation):
     requiredLicense = 0         # 0 = Free, 1 = Personal, 2 = Pro
     controlLayerState = (1, 0)  # isVis, isRef
     jointLayerState = (1, 1)    # isVis, isRef
-    meshLayerState = (1, 0)     # isVis, isRef
+    meshLayerState = (1, 1)     # isVis, isRef
 
     def __init__(self):
         self._paintWeightsOp = pntWgt.PaintWeights()
@@ -261,11 +261,21 @@ class QuickWeights(absOp.Abstract_Operation):
                         newWeights[jointIndex2][vertIndex] = 0
         
         if not skipLast:
+            jointIndex += 1
             jp1 = jointPositions[-2]
             jp2 = jointPositions[-1]
             jVec = [jp2[i] - jp1[i] for i in range(3)]
             for vertIndex in range(vertCount):
-                pass
+                vp = vertPositions[vertIndex]
+                vVec = [vp[i] - jp2[i] for i in range(3)]
+                dot = (jVec[0]*vVec[0] + jVec[1]*vVec[1] + jVec[2]*vVec[2])
+                if dot < 0:
+                    continue
+                for jointIndex2 in range(jointCount):
+                    if jointIndex2 == jointIndex:
+                        newWeights[jointIndex2][vertIndex] = 1
+                    else:
+                        newWeights[jointIndex2][vertIndex] = 0
         # SET ATTRS
         for jointIndex in range(len(joints)):
             attr = jointAttrs[jointIndex]

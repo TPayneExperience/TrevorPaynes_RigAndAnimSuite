@@ -531,10 +531,11 @@ class LimbSetup(absOp.Abstract_Operation):
             pm.parent(group, joint)
             rigUtil.ResetAttrs(group)
             # Center control pivot
-            c = pm.objectCenter(control, gl=1)
-            pm.move(c[0], c[1], c[2], 
-                    control.scalePivot, 
-                    control.rotatePivot, ws=1)
+            center = pm.objectCenter(control, gl=1)
+            pm.xform(control, piv=center)
+            # pm.move(c[0], c[1], c[2], 
+            #         control.scalePivot, 
+            #         control.rotatePivot, ws=1)
             rigUtil.ResetAttrs(control)
             pm.parent(group, limb)
 
@@ -808,6 +809,8 @@ class LimbSetup(absOp.Abstract_Operation):
             pm.connectAttr(parentLimb.limbChildren, childLimb.limbParent)
         if self._UpdateParentControlEnum(childLimb):
             self._UpdateParentControlIndex(childLimb)
+        if pm.listConnections(childLimb.animJoints):
+            childLimb.toBeBaked.set(1)
     
     def _UpdateParentControlEnum(self, childLimb):
         log.funcFileDebug()

@@ -109,13 +109,13 @@ class Empty_01(absBhv.Abstract_Behavior):
     
 #============= EDITABLE UI ============================
 
-    def Setup_Editable_Limb_UI(self, limb):
+    def Setup_Behavior_Limb_UI(self, limb):
         log.funcFileDebug()
         return False
     
 #============= ANIMATION UI ============================
 
-    def Setup_Animation_Limb_UI(self, limb):
+    def Setup_AnimationTools_Limb_UI(self, limb):
         return False # return if UI is enabled
     
     

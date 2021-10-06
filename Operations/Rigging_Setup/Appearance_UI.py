@@ -1,4 +1,6 @@
 
+from collections import OrderedDict
+
 import pymel.core as pm
 
 import Abstracts.Abstract_OperationUI as absOpUI
@@ -9,6 +11,8 @@ import Utilities.UI_Utilities as uiUtil
 reload(uiUtil)
 import Utilities.Rig_Utilities as rigUtil
 reload(rigUtil)
+import Utilities.General_Utilities as genUtil
+reload(genUtil)
 import Utilities.Logger as log
 reload(log)
 
@@ -19,8 +23,8 @@ class Appearance_UI(absOpUI.Abstract_OperationUI):
     
     def __init__(self):
         self._rigRoot = None
-        self._allRigRoots = None
-        self._limbIDs = {}
+        self._allRigRoots = []
+        self._limbIDs = OrderedDict()
         self._selectedLimbs = []
         self._limbGroups = []
 
@@ -42,60 +46,66 @@ class Appearance_UI(absOpUI.Abstract_OperationUI):
         with pm.verticalLayout():
             with pm.frameLayout('Limbs', bv=1):
                 self.limb_tv = uiUtil.SetupLimbHier(self._limbIDs)
-                pm.treeView(self.limb_tv, elc=self.IgnoreRename,
+                pm.treeView(self.limb_tv, e=1, ams=1, elc=self.IgnoreRename,
                                             scc=self.SelectedLimb)
-                with pm.popupMenu(): #as self.rmb_ui:
+                with pm.popupMenu():
                     self._reimport_mi = pm.menuItem(l='Reimport Control Shapes', 
                                                     c=self.ReimportControlShapes)
             with pm.frameLayout('Controls', bv=1):
-                self.control_tv = pm.treeView(arp=0, adr=0, ams=0,
+                self.control_tv = pm.treeView(arp=0, adr=0,
                                             elc=self.IgnoreRename)
                 pm.treeView(self.control_tv, e=1, scc=self.SelectedControl)
         with pm.verticalLayout():
-            with pm.frameLayout('Control Channelboxes (see tooltips)', bv=1, en=0) as self.limbProp_fl:
-                with pm.columnLayout(co=('left', -100)) as self.appLimbLockHide_cl:
+            with pm.frameLayout('Control Channelboxes (see tooltips)', bv=1, mw=7, mh=7):
+                with pm.columnLayout(adj=1, co=('left', 70)):
                     msg = 'Joint = FK Chain + Reverse, FK Branch Controls'
-                    self.jointPos = pm.attrControlGrp(l='Joint Translate', ann=msg,
-                                                    a='perspShape.shakeEnabled')
-                    self.jointRot = pm.attrControlGrp(l='Joint Rotate', ann=msg,
-                                                    a='perspShape.shakeEnabled')
-                    self.jointScale = pm.attrControlGrp(l='Joint Scale', ann=msg,
-                                                    a='perspShape.shakeEnabled')
+                    self.jointPos = pm.checkBox(l='Joint Translate', ann=msg, 
+                                                        cc=self.SetJointCtrPos)
+                    self.jointRot = pm.checkBox(l='Joint Rotate', ann=msg, 
+                                                        cc=self.SetJointCtrRot)
+                    self.jointScale = pm.checkBox(l='Joint Scale', ann=msg, 
+                                                        cc=self.SetJointCtrScale)
                     msg = 'Limb = Look At, IK Pole Vector, IK Spline, Empty, FK Relative'
-                    self.limbPos = pm.attrControlGrp(l='Limb Translate', ann=msg,
-                                                    a='perspShape.shakeEnabled')
-                    self.limbRot = pm.attrControlGrp(l='Limb Rotate', ann=msg,
-                                                    a='perspShape.shakeEnabled')
-                    self._limbScale = pm.attrControlGrp(l='Limb Scale', ann=msg,
-                                                    a='perspShape.shakeEnabled')
-            with pm.frameLayout('Control Colors', bv=1, en=0, mw=7, mh=7) as self.mtr_fl:
+                    self.limbPos = pm.checkBox(l='Limb Translate', ann=msg, 
+                                                        cc=self.SetLimbCtrPos)
+                    self.limbRot = pm.checkBox(l='Limb Rotate', ann=msg, 
+                                                        cc=self.SetLimbCtrRot)
+                    self.limbScale = pm.checkBox(l='Limb Scale', ann=msg, 
+                                                        cc=self.SetLimbCtrScale)
+            with pm.frameLayout('Control Colors', bv=1, mw=7, mh=7) as self.mtr_fl:
                 with pm.columnLayout(adj=1):
-                    self.clrL_cg = pm.attrColorSliderGrp(l='L Color', cw4=(66,44,44,22),
+                    self.clrL_cg = pm.attrColorSliderGrp(l='L Color', cw4=(55,44,33,22),
                                                     at='perspShape.backgroundColor')
-                    self.opL_cg = pm.attrColorSliderGrp(l='L Opacity', cw4=(66,44,44,22),
+                    self.opL_cg = pm.attrColorSliderGrp(l='L Opacity', cw4=(55,44,33,22),
                                                     at='perspShape.backgroundColor')
-                    self.clrM_cg = pm.attrColorSliderGrp(l='M Color', cw4=(66,44,44,22),
+                    self.clrM_cg = pm.attrColorSliderGrp(l='M Color', cw4=(55,44,33,22),
                                                     at='perspShape.backgroundColor')
-                    self.opM_cg = pm.attrColorSliderGrp(l='M Opacity', cw4=(66,44,44,22),
+                    self.opM_cg = pm.attrColorSliderGrp(l='M Opacity', cw4=(55,44,33,22),
                                                     at='perspShape.backgroundColor')
-                    self.clrR_cg = pm.attrColorSliderGrp(l='R Color', cw4=(66,44,44,22),
+                    self.clrR_cg = pm.attrColorSliderGrp(l='R Color', cw4=(55,44,33,22),
                                                     at='perspShape.backgroundColor')
-                    self.opR_cg = pm.attrColorSliderGrp(l='R Opacity', cw4=(66,44,44,22),
+                    self.opR_cg = pm.attrColorSliderGrp(l='R Opacity', cw4=(55,44,33,22),
                                                     at='perspShape.backgroundColor')
                     
-            with pm.frameLayout('Control Shapes', bv=1, en=0, mw=7, mh=7) as self.ctrShapes_fl:
+            with pm.frameLayout('Control Shapes', bv=1, mw=7, mh=7) as self.ctrShapes_fl:
                 self.ctrShapes_cl = pm.columnLayout(adj=1)
 
 #=========== LIMB HIER ====================================
    
     def PopulateLimbHier(self):
         log.funcFileDebug()
-        self.PopulateControlHier(None)
-        self.PopulateLimbProperties(None)
         self._limbIDs.clear()
         self._limbIDs.update(uiUtil.PopulateLimbHierNormal(self.limb_tv, 
                                                 self._rigRoot,
                                                 self._allRigRoots))
+        limb = self._limbIDs.values()[0]
+        self._selectedLimbs = [limb]
+        limbID = '%d_%d' % (self._rigRoot.ID.get(), limb.ID.get())
+        pm.treeView(self.limb_tv, e=1, selectItem=(limbID, 1))
+        self.PopulateControlHier()
+        self.PopulateLimbProperties()
+        self.PopulateControlShapes()
+        self.PopulateControlMaterials()
 
     def IgnoreRename(self, idStr, newName):
         log.funcFileInfo()
@@ -104,23 +114,17 @@ class Appearance_UI(absOpUI.Abstract_OperationUI):
     def SelectedLimb(self):
         log.funcFileInfo()
         limbIDStrs = pm.treeView(self.limb_tv, q=1, selectItem=1)
-        self._rigRoot = None
-        self.PopulateLimbProperties(None)
-        self.PopulateControlHier(None)
-        self.PopulateControlMaterials(None)
-        self.PopulateControlShapes()
         if not limbIDStrs:
+            rigRootID = self._rigRoot.ID.get()
+            for limb in self._selectedLimbs:
+                limbID = '%d_%d' % (rigRootID, limb.ID.get())
+                pm.treeView(self.limb_tv, e=1, selectItem=(limbID, 1))
             return
         self._selectedLimbs = [self._limbIDs[ID] for ID in limbIDStrs]
-        for limb in self._selectedLimbs:
-            log.debug('\t\t' + limb.pfrsName.get())
-        if len(self._selectedLimbs) == 1:
-            limb = self._selectedLimbs[0]
-            self._rigRoot = pm.listConnections(limb.rigRoot)[0]
-            self.PopulateControlHier(limb)
-            self.PopulateLimbProperties(limb)
-            self.PopulateControlMaterials(self._rigRoot)
-            self.PopulateControlShapes()
+        self.PopulateControlHier()
+        self.PopulateLimbProperties()
+        self.PopulateControlMaterials()
+        self.PopulateControlShapes()
 
     def ReimportControlShapes(self, ignore):
         log.funcFileInfo()
@@ -128,49 +132,65 @@ class Appearance_UI(absOpUI.Abstract_OperationUI):
 
 #=========== CONTROL HIER ====================================
 
-    def PopulateControlHier(self, limb):
+    def PopulateControlHier(self):
         log.funcFileDebug()
         pm.treeView(self.control_tv, e=1, removeAll=1)
-        if not limb:
-            return
         self._limbGroups = uiUtil.PopulateControlHier(self.control_tv, 
-                                                    limb)
+                                                    self._selectedLimbs[0])
         
     def SelectedControl(self):
         log.funcFileDebug()
-        groupIDStr = pm.treeView(self.control_tv, q=1, selectItem=1)
-        if groupIDStr and self._rigRoot.rigMode.get() == 0:
-            group = self._limbGroups[groupIDStr[0]]
-            control = pm.listConnections(group.control)[0]
-            log.info('\t"%s"'% control)
-            pm.select(control)
+        groupIDStrs = pm.treeView(self.control_tv, q=1, selectItem=1)
+        if groupIDStrs and self._rigRoot.rigMode.get() == 0:
+            groups = [self._limbGroups[ID] for ID in groupIDStrs]
+            controls = [pm.listConnections(g.control)[0] for g in groups]
+            pm.select(controls)
         else:
             pm.select(d=1)
 
 #=========== LIMB PROPERTIES ====================================
 
-    def PopulateLimbProperties(self, limb):
+    def PopulateLimbProperties(self):
         log.funcFileDebug()
-        pm.frameLayout(self.limbProp_fl, e=1, en=bool(limb))
-        if not limb:
-            return
-        pm.attrControlGrp(self.jointPos, e=1, a=limb.channelBoxJointCtrPos)
-        pm.attrControlGrp(self.jointRot, e=1, a=limb.channelBoxJointCtrRot)
-        pm.attrControlGrp(self.jointScale, e=1, a=limb.channelBoxJointCtrScale)
-        pm.attrControlGrp(self.limbPos, e=1, a=limb.channelBoxLimbCtrPos)
-        pm.attrControlGrp(self.limbRot, e=1, a=limb.channelBoxLimbCtrRot)
-        pm.attrControlGrp(self._limbScale, e=1, a=limb.channelBoxLimbCtrScale)
+        limb = self._selectedLimbs[0]
+        pm.checkBox(self.jointPos, e=1, v=limb.channelBoxJointCtrPos.get())
+        pm.checkBox(self.jointRot, e=1, v=limb.channelBoxJointCtrRot.get())
+        pm.checkBox(self.jointScale, e=1, v=limb.channelBoxJointCtrScale.get())
+        pm.checkBox(self.limbPos, e=1, v=limb.channelBoxLimbCtrPos.get())
+        pm.checkBox(self.limbRot, e=1, v=limb.channelBoxLimbCtrRot.get())
+        pm.checkBox(self.limbScale, e=1, v=limb.channelBoxLimbCtrScale.get())
+
+    def SetJointCtrPos(self, value):
+        for limb in self._selectedLimbs:
+            limb.channelBoxJointCtrPos.set(value)
+
+    def SetJointCtrRot(self, value):
+        for limb in self._selectedLimbs:
+            limb.channelBoxJointCtrRot.set(value)
+
+    def SetJointCtrScale(self, value):
+        for limb in self._selectedLimbs:
+            limb.channelBoxJointCtrScale.set(value)
+
+    def SetLimbCtrPos(self, value):
+        for limb in self._selectedLimbs:
+            limb.channelBoxLimbCtrPos.set(value)
+
+    def SetLimbCtrRot(self, value):
+        for limb in self._selectedLimbs:
+            limb.channelBoxLimbCtrRot.set(value)
+
+    def SetLimbCtrScale(self, value):
+        for limb in self._selectedLimbs:
+            limb.channelBoxLimbCtrScale.set(value)
 
 #=========== MATERIAL PROPERTIES ====================================
 
-    def PopulateControlMaterials(self, rigRoot):
+    def PopulateControlMaterials(self):
         log.funcFileDebug()
-        pm.frameLayout(self.mtr_fl, e=1, en=bool(rigRoot))
-        if not rigRoot:
-            return
-        sgL = pm.listConnections(rigRoot.controlMtrL)[0]
-        sgM = pm.listConnections(rigRoot.controlMtrM)[0]
-        sgR = pm.listConnections(rigRoot.controlMtrR)[0]
+        sgL = pm.listConnections(self._rigRoot.controlMtrL)[0]
+        sgM = pm.listConnections(self._rigRoot.controlMtrM)[0]
+        sgR = pm.listConnections(self._rigRoot.controlMtrR)[0]
         mtrL = pm.listConnections(sgL.surfaceShader)[0]
         mtrM = pm.listConnections(sgM.surfaceShader)[0]
         mtrR = pm.listConnections(sgR.surfaceShader)[0]
@@ -203,7 +223,7 @@ class Appearance_UI(absOpUI.Abstract_OperationUI):
                     groupTypes.append(groupType)
 
         # Populate with Option Menues
-        with pm.columnLayout(adj=1, co=('both', 5), rs=5, p=self.ctrShapes_fl) as self.ctrShapes_cl:
+        with pm.columnLayout(adj=1, rs=5, p=self.ctrShapes_fl) as self.ctrShapes_cl:
             for i in range(len(groupTypes)):
                 groupType = groupTypes[i]
                 label = '\t%s Shape' % groupType

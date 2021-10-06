@@ -74,21 +74,21 @@ class Appearance(absOp.Abstract_Operation):
     def SetupOp(self, rigRoot):
         for limb in pm.listConnections(rigRoot.limbs):
             bhv = self.bhvMng.bhvs[limb.bhvFile.get()]
-            if bhv.groupMoveable:
-                continue
             for group in pm.listConnections(limb.usedGroups):
                 control = pm.listConnections(group.control)[0]
-                rigUtil.ChannelBoxAttrs(control, 0, 1, 1, 0)
+                center = pm.objectCenter(control, gl=1)
+                pm.xform(control, piv=center, ws=1)
+                if not bhv.groupMoveable:
+                    rigUtil.ChannelBoxAttrs(control, 0, 1, 1, 0)
 
     def TeardownOp(self, rigRoot):
         for limb in pm.listConnections(rigRoot.limbs):
-            # bhv = self.bhvMng.bhvs[limb.bhvFile.get()]
-            # if bhv.groupMoveable:
-            #     continue
             for group in pm.listConnections(limb.usedGroups):
                 control = pm.listConnections(group.control)[0]
                 rigUtil.ChannelBoxAttrs(control, 1, 1, 1, 0)
                 pm.makeIdentity(control, a=1, t=1, r=1, s=1)
+                center = pm.xform(group, q=1, rp=1, ws=1)
+                pm.xform(control, piv=center, ws=1)
 
     def GetShapeTemplates(self, rigRoot):
         controlTemplates = {}

@@ -1,10 +1,6 @@
 
 import pymel.core as pm
 
-# import Data.Rig_Data as rigData
-# reload(rigData)
-# import Rig_Utilities as rigUtil
-# reload(rigUtil)
 import General_Utilities as genUtil
 reload(genUtil)
 

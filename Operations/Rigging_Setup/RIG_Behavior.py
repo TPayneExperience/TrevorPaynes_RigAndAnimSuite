@@ -150,21 +150,14 @@ class RIG_Behavior(absOp.Abstract_Operation):
         log.funcFileDebug()
         bhvFile = self.bhvMng.bhvFiles[bhvType][-1]
         return self.SetLimbBehaviorFile(limb, bhvFile)
-        # oldBhvFile = limb.bhvFile.get()
-        # oldBhv = self.bhvMng.bhvs[oldBhvFile]
-        # oldBhv.Teardown_ForBhvOp(limb)
-        # newBhvFile = self.bhvMng.bhvFiles[bhvType][-1]
-        # newBhv = self.SetLimbBehaviorFile(limb, newBhvFile)
-        # newBhv.Setup_ForBhvOp(limb)
-        # return newBhv
 
     def SetLimbBehaviorFile(self, limb, bhvFile):
         log.funcFileDebug()
         self.TeardownBhvOp(limb)
         newBhv = self.bhvMng.SetBehavior(limb, bhvFile)
         self.SetupBhvOp(limb)
+        self.UpdateToBeBaked(limb)
         return newBhv
-        # return self.bhvMng.SetBehavior(limb, bhvFile)
 
     def SetupBhvOp(self, limb):
         bhvFile = limb.bhvFile.get()
@@ -175,6 +168,11 @@ class RIG_Behavior(absOp.Abstract_Operation):
         bhvFile = limb.bhvFile.get()
         bhv = self.bhvMng.bhvs[bhvFile]
         bhv.Teardown_ForBhvOp(limb)
+
+    def UpdateToBeBaked(self, limb):
+        if pm.listConnections(limb.animJoints):
+            limb.toBeBaked.set(1)
+
 
 # Copyright (c) 2021 Trevor Payne
 # See user license in "PayneFreeRigSuite\Data\LicenseAgreement.txt"

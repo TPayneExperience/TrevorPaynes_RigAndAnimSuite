@@ -114,7 +114,7 @@ class FK_Chain_01(absBhv.Abstract_Behavior):
     
 #============= EDITABLE UI ============================
 
-    def Setup_Editable_Limb_UI(self, limb):
+    def Setup_Behavior_Limb_UI(self, limb):
         log.funcFileDebug()
         with pm.columnLayout(co=('left', -100)):
             pm.attrControlGrp(l='Enable End Control',
@@ -135,7 +135,7 @@ class FK_Chain_01(absBhv.Abstract_Behavior):
     
 #============= ANIMATION UI ============================
 
-    def Setup_Animation_Limb_UI(self, limb):
+    def Setup_AnimationTools_Limb_UI(self, limb):
         log.funcFileDebug()
         return False 
     

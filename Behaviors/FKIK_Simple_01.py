@@ -111,12 +111,11 @@ class FKIK_Simple_01(absBhv.Abstract_Behavior):
         tempGroup = pm.group(em=1, w=1)
         self._InitIKPV2(limb, tempGroup)
         group = rigUtil.GetLimbGroups(limb, self.groupType)[1]
-        pm.parent(group, tempGroup)
         pm.delete(pm.parentConstraint(tempGroup, group))
+        pm.parent(group, tempGroup)
+        pm.makeIdentity(group, a=1, t=1, r=1, s=1)
         control = pm.listConnections(group.control)[0]
-        pm.xform(control, cp=1)
         pm.delete(pm.parentConstraint(group, control))
-        pm.makeIdentity(group, a=1, t=1)
         self._UpdateIKPV2(limb)
     
     def Teardown_ForBhvOp(self, limb):
@@ -147,15 +146,14 @@ class FKIK_Simple_01(absBhv.Abstract_Behavior):
         ikpvGroup1 = ikpvGroups[0]
         ikpvGroup2 = ikpvGroups[1]
         ikpvGroup3 = ikpvGroups[2]
-        # ikpvGroup1.v.set(0)
         fkGroup = fkGroups[0]
 
-        # Move Mid Group to Mid control position
-        ikpvControl2 = pm.listConnections(ikpvGroup2.control)[0]
-        pm.xform(ikpvControl2, cp=1)
-        pos = pm.xform(ikpvControl2, q=1, t=1, ws=1)
-        pm.xform(ikpvGroup2, t=pos, ws=1)
-        rigUtil.ResetAttrs(ikpvControl2)
+        # # Move Mid Group to Mid control position
+        # ikpvControl2 = pm.listConnections(ikpvGroup2.control)[0]
+        # pm.xform(ikpvControl2, cp=1)
+        # pos = pm.xform(ikpvControl2, q=1, t=1, ws=1)
+        # pm.xform(ikpvGroup2, t=pos, ws=1)
+        # rigUtil.ResetAttrs(ikpvControl2)
 
         # Parent FK / IK1 to joint parent, if exists
         joints = pm.listConnections(limb.joints)
@@ -266,7 +264,6 @@ class FKIK_Simple_01(absBhv.Abstract_Behavior):
         if hasScaleCst:
             pm.scaleConstraint(xforms[0], ikpvStart)
             pm.scaleConstraint(xforms[-1], ikpvEnd)
-        self._UpdateIKPV2(limb)
         if hasPosCst or hasRotCst:
             pm.parentConstraint(xforms[1], ikpvMid, mo=1)
         
@@ -315,11 +312,11 @@ class FKIK_Simple_01(absBhv.Abstract_Behavior):
         # Reposition group to second joint
         joints = pm.listConnections(limb.joints)
         joints = rigUtil.GetSortedJoints(joints)
-        limbGroups = rigUtil.GetLimbGroups(limb, self.groupType)
-        midGroup = limbGroups[1]
-        jointPos = pm.xform(joints[1], q=1, t=1, ws=1)
-        pm.xform(midGroup, t=jointPos, ws=1)
-        self._UpdateIKPV2(limb)
+        # limbGroups = rigUtil.GetLimbGroups(limb, self.groupType)
+        # midGroup = limbGroups[1]
+        # jointPos = pm.xform(joints[1], q=1, t=1, ws=1)
+        # pm.xform(midGroup, t=jointPos, ws=1)
+        # self._UpdateIKPV2(limb)
 
         # ------- FK ---------
         pm.delete(pm.listConnections(limb.fkik, type='plusMinusAverage'))
@@ -348,23 +345,50 @@ class FKIK_Simple_01(absBhv.Abstract_Behavior):
     
 #============= EDITABLE UI ============================
 
-    def Setup_Editable_Limb_UI(self, limb):
-        log.funcFileDebug()
-        group = rigUtil.GetLimbGroups(limb, self.groupType)[0]
+    def Setup_Behavior_Limb_UI(self, limb):
         with pm.columnLayout(co=('left', -50)):
             pm.attrControlGrp( l='Control Distance', a=limb.ikpvDistance,
                                 cc=pm.Callback(self._UpdateIKPV2, limb))
-        with pm.columnLayout(co=('left', -100)):
-            pm.attrControlGrp( l='Show Start Control', a=group.v)
         return True
     
 #============= ANIMATION UI ============================
 
-    def Setup_Animation_Limb_UI(self, limb):
-        log.funcFileDebug()
-        return False 
+    def Setup_AnimationTools_Limb_UI(self, limb):
+        with pm.columnLayout(adj=1):
+            pm.button('Snap Switch FK IK', c=pm.Callback(
+                      self._SnapSwitch, limb))
+        return True 
     
 #============= UTIL ============================
+
+    def _SnapSwitch(self, limb):
+        fkGroups = rigUtil.GetLimbGroups(limb, 'FK')
+        fkCtrs = [pm.listConnections(g.control)[0] for g in fkGroups]
+        ikGroups = rigUtil.GetLimbGroups(limb, self.groupType)
+        ikCtrs = [pm.listConnections(g.control)[0] for g in ikGroups]
+
+        if limb.fkik.get() < 0.5:
+            limb.fkik.set(1)
+            pm.delete(pm.parentConstraint(fkCtrs[0], ikCtrs[0]))
+            pm.delete(pm.parentConstraint(fkCtrs[-1], ikCtrs[-1]))
+            inner = pm.group(em=1, w=1)
+            outer = pm.group(inner, w=1)
+            self._InitIKPV2(limb, outer)
+            inner.tx.set(limb.ikpvDistance.get())
+            pm.parent(outer, w=1)
+            pm.delete(pm.parentConstraint(inner, ikCtrs[1]))
+            pm.delete(outer)
+        else:
+            locs = []
+            for joint in rigUtil.GetSortedLimbJoints(limb):
+                loc = pm.spaceLocator()
+                pm.delete(pm.parentConstraint(joint, loc))
+                locs.append(loc)
+            for loc, fk in zip(locs, fkCtrs):
+                pm.delete(pm.parentConstraint(loc, fk))
+                pm.refresh()
+            pm.delete(locs)
+            limb.fkik.set(0)
 
     def _UpdateIKPV2(self, limb):
         dist = limb.ikpvDistance.get()
@@ -372,12 +396,6 @@ class FKIK_Simple_01(absBhv.Abstract_Behavior):
         group.tx.set(dist)
         group.ty.set(0)
         group.tz.set(0)
-        # dist = limb.ikpvDistance.get()
-        # ikpv2 = rigUtil.GetLimbGroups(limb, self.groupType)[1]
-        # control = pm.listConnections(ikpv2.control)[0]
-        # control.tx.set(dist)
-        # control.ty.set(0)
-        # control.tz.set(0)
 
     def _InitIKPV2(self, limb, ikpv2):
         joints = pm.listConnections(limb.joints)

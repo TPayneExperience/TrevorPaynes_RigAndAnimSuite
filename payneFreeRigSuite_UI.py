@@ -186,6 +186,7 @@ class PayneFreeRigSuite_UI:
         log.funcFileInfo()
         if self.currentOp:
             self.currentOp.Teardown_UI()
+            self.currentOp = None
         pm.deleteUI(self.frame)
         if operationName not in self.operationNames:
             with pm.frameLayout(p=self.win, lv=0) as self.frame:
@@ -193,7 +194,6 @@ class PayneFreeRigSuite_UI:
                 pm.text(l=msg)
                 return
         index = self.operationNames.index(operationName)
-        op = self.operations[index]
 
         self._rigRoot.operation.set(operationName)
         self.currentOp = self.operations[index]

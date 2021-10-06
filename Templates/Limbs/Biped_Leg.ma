@@ -936,7 +936,7 @@ createNode transform -n "Leg_Limb_M_NODE" -p "LIMBS";
 	addAttr -ci true -sn "presetLimbChildren" -ln "presetLimbChildren" -dt "string";
 	addAttr -ci true -sn "hasKeys" -ln "hasKeys" -dv 1 -min 0 -max 1 -at "bool";
 	addAttr -ci true -sn "controlKeyframes" -ln "controlKeyframes" -dt "string";
-	addAttr -ci true -sn "bakeInternal" -ln "bakeInternal" -dv 1 -min 0 -max 1 -at "bool";
+	addAttr -ci true -sn "toBeBaked" -ln "toBeBaked" -dv 1 -min 0 -max 1 -at "bool";
 	addAttr -ci true -sn "bakeExternal" -ln "bakeExternal" -dv 1 -min 0 -max 1 -at "bool";
 	addAttr -ci true -sn "animJoints" -ln "animJoints" -dt "string";
 	addAttr -ci true -sn "enableEndControl" -ln "enableEndControl" -dv 1 -min 0 -max 
@@ -2946,7 +2946,7 @@ createNode transform -n "Foot_Limb_M_NODE" -p "LIMBS";
 	addAttr -ci true -sn "presetLimbChildren" -ln "presetLimbChildren" -dt "string";
 	addAttr -ci true -sn "hasKeys" -ln "hasKeys" -dv 1 -min 0 -max 1 -at "bool";
 	addAttr -ci true -sn "controlKeyframes" -ln "controlKeyframes" -dt "string";
-	addAttr -ci true -sn "bakeInternal" -ln "bakeInternal" -dv 1 -min 0 -max 1 -at "bool";
+	addAttr -ci true -sn "toBeBaked" -ln "toBeBaked" -dv 1 -min 0 -max 1 -at "bool";
 	addAttr -ci true -sn "bakeExternal" -ln "bakeExternal" -dv 1 -min 0 -max 1 -at "bool";
 	addAttr -ci true -sn "animJoints" -ln "animJoints" -dt "string";
 	addAttr -ci true -sn "enableEndControl" -ln "enableEndControl" -dv 1 -min 0 -max 
@@ -3006,7 +3006,7 @@ createNode transform -n "FootRoll_Limb_M_NODE" -p "LIMBS";
 	addAttr -ci true -sn "presetLimbChildren" -ln "presetLimbChildren" -dt "string";
 	addAttr -ci true -sn "hasKeys" -ln "hasKeys" -dv 1 -min 0 -max 1 -at "bool";
 	addAttr -ci true -sn "controlKeyframes" -ln "controlKeyframes" -dt "string";
-	addAttr -ci true -sn "bakeInternal" -ln "bakeInternal" -dv 1 -min 0 -max 1 -at "bool";
+	addAttr -ci true -sn "toBeBaked" -ln "toBeBaked" -dv 1 -min 0 -max 1 -at "bool";
 	addAttr -ci true -sn "bakeExternal" -ln "bakeExternal" -dv 1 -min 0 -max 1 -at "bool";
 	addAttr -ci true -sn "animJoints" -ln "animJoints" -dt "string";
 	addAttr -ci true -sn "enableEndControl" -ln "enableEndControl" -dv 1 -min 0 -max 

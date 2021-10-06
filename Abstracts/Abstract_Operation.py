@@ -62,10 +62,8 @@ class Abstract_Operation:
         scl = config['useScaleConstraints']
         
         toBeBuilt = self.isRigBuilt
-        limbs = []
-        for rigRoot in allRigRoots:
-            limbs += pm.listConnections(rigRoot.limbs)
-        if not toBeBuilt and rigRoot.isBuilt.get():
+        aRigRoot = allRigRoots[0]
+        if not toBeBuilt and aRigRoot.isBuilt.get():
             # Setup Anim Joints
             for rigRoot in allRigRoots:
                 if rigRoot.rigMode.get() != 1: # Anim Mode
@@ -77,7 +75,8 @@ class Abstract_Operation:
             # Teardown Rig
             for rigRoot in allRigRoots:
                 self.bhvMng.Teardown_Rig(rigRoot)
-        elif toBeBuilt and not rigRoot.isBuilt.get():
+
+        elif toBeBuilt and not aRigRoot.isBuilt.get():
             # Setup Rig
             for rigRoot in allRigRoots:
                 self.bhvMng.Setup_Rig(rigRoot)

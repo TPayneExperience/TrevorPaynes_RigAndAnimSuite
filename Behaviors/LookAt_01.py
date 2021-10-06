@@ -48,7 +48,6 @@ class LookAt_01(absBhv.Abstract_Behavior):
         pm.parent(group, tempGroup)
         pm.delete(pm.parentConstraint(group, control))
         pm.delete(pm.parentConstraint(tempGroup, group))
-        pm.makeIdentity(group, a=1, t=1)
         self._UpdateControl(limb)
     
     def Teardown_ForBhvOp(self, limb):
@@ -130,7 +129,7 @@ class LookAt_01(absBhv.Abstract_Behavior):
 
 #============= EDITABLE UI ============================
 
-    def Setup_Editable_Limb_UI(self, limb):
+    def Setup_Behavior_Limb_UI(self, limb):
         log.funcFileDebug()
         pm.attrControlGrp( l='Control Distance', a=limb.lookAtDistance,
                             cc=pm.Callback(self._UpdateControl, limb))
@@ -138,7 +137,7 @@ class LookAt_01(absBhv.Abstract_Behavior):
     
 #============= ANIMATION UI ============================
 
-    def Setup_Animation_Limb_UI(self, limb):
+    def Setup_AnimationTools_Limb_UI(self, limb):
         with pm.columnLayout(co=('left', -100)):
             pm.attrControlGrp(l='Offset X', a=limb.lookAtOffsetX)
             pm.attrControlGrp(l='Offset Y', a=limb.lookAtOffsetY)

@@ -66,11 +66,11 @@ class Behavior_Manager(object):
     
     def SetBehavior(self, limb, bhvFile):
         log.funcFileDebug()
-        self._Teardown_GroupVisibility(limb)
         oldBhvFile = limb.bhvFile.get()
         if oldBhvFile:
             oldBhv = self.bhvs[oldBhvFile]
             oldBhv.CleanupLimb(limb)
+        self._Teardown_GroupVisibility(limb)
 
         newBhv = self.bhvs[bhvFile]
         limb.bhvFile.set(bhvFile)
@@ -112,7 +112,6 @@ class Behavior_Manager(object):
                 joint.startRot.set(joint.r.get())
                 group = pm.listConnections(joint.group)[0]
                 pm.parent(group, limb)
-            # self._Setup_ControlPivot(limb)
 
         # Setup Control Hier
         for limb in limbs:
@@ -154,7 +153,7 @@ class Behavior_Manager(object):
             limb.v.set(1)
             for group in pm.listConnections(limb.usedGroups):
                 control = pm.listConnections(group.control)[0]
-                pm.cutKey(control)
+                # pm.cutKey(control)
                 rigUtil.ChannelBoxAttrs(control, 1, 1, 1, 0)
                 rigUtil.ResetAttrs(control)
 
@@ -181,9 +180,6 @@ class Behavior_Manager(object):
         # Fix Pivots
         joints = {} # longName : joint
         for limb in limbs:
-            # for group in pm.listConnections(limb.usedGroups):
-            #     self._Teardown_ControlPivot(group)
-            # Parent joint groups to joint
             for joint in pm.listConnections(limb.joints):
                 joints[joint.longName()] = joint
                 group = pm.listConnections(joint.group)[0]
@@ -217,6 +213,7 @@ class Behavior_Manager(object):
 #============= ANIMATION TRANSFER (BAKING) ============================
    
     def SetupAnimJoints(self, rigRoot):
+        '''Create duplicate joints to store animation'''
         log.funcFileDebug()
         start = pm.playbackOptions(q=1, ast=1)
         end = pm.playbackOptions(q=1, aet=1)
@@ -254,12 +251,10 @@ class Behavior_Manager(object):
         start = pm.playbackOptions(q=1, ast=1)
         end = pm.playbackOptions(q=1, aet=1)
         controls = []
-        constraints = []
+        cstLimbs = []
         for limb in limbs:
-            if not pm.listConnections(limb.animJoints):
-                return
-            joints = pm.listConnections(limb.joints)
-            joints = rigUtil.GetSortedJoints(joints)
+            if not limb.toBeBaked.get():
+                continue
             jointGroups = pm.listConnections(limb.jointGroups)
             jointGroups = rigUtil.SortGroups(jointGroups)
             animJoints = [pm.listConnections(g.animJoint)[0] for g in jointGroups]
@@ -267,44 +262,22 @@ class Behavior_Manager(object):
             ctrs = bhv.Setup_Constraint_ControlsToXforms(limb, animJoints, 
                             hasPosCst, hasRotCst, hasScaleCs)
             controls.append(ctrs)
+            cstLimbs.append(limb)
+        if controls:
+            pm.cutKey(controls)
+            pm.bakeResults(controls, sm=1, t=(start, end))
 
-        pm.cutKey(controls)
-        pm.bakeResults(controls, sm=1, t=(start, end))
-        pm.delete(constraints)
-
-        for limb in limbs:
+        for limb in cstLimbs:
+            limb.toBeBaked.set(0)
             bhv = self.bhvs[limb.bhvFile.get()]
             bhv.Teardown_Constraint_ControlsToXforms(limb)
 
 #============= UTIL ============================
 
-    # def _Setup_ControlPivot(self, limb):
-    #     log.funcFileDebug()
-    #     bhvFile = limb.bhvFile.get()
-    #     bhv = self.bhvs[bhvFile]
-    #     for group in pm.listConnections(limb.usedGroups):
-    #         control = pm.listConnections(group.control)[0]
-    #         if bhv.groupMoveable:
-    #             pm.makeIdentity(control, a=1, t=1, r=1, s=1) # Freeze xforms
-    #         else:
-    #             pm.makeIdentity(control, a=1, r=1, s=1) # Freeze xforms
-    #         pos = pm.xform(group, q=1, t=1, ws=1)
-    #         pm.move(pos[0], pos[1], pos[2],         # Move pivot to group
-    #                     control.scalePivot, 
-    #                     control.rotatePivot, ws=1)
-
-    # def _Teardown_ControlPivot(self, group):
-    #     control = pm.listConnections(group.control)[0]
-    #     pm.xform(control, cp=1) # Re-center pivots
-    #     gPos = pm.xform(group, q=1, t=1, ws=1)
-    #     cPos = pm.xform(control, q=1, t=1, ws=1)
-    #     pm.xform(control, t=gPos, ws=1)
-    #     pm.makeIdentity(control, a=1, t=1, r=1, s=1) # Freeze xforms
-    #     pm.xform(control, t=cPos, ws=1)
-
     def _Setup_GroupVisibility(self, limb):
         for group in pm.listConnections(limb.usedGroups):
-            group.v.set(1)
+            if not pm.listConnections(group.v):
+                group.v.set(1)
 
     def _Teardown_GroupVisibility(self, limb):
         for group in pm.listConnections(limb.usedGroups):
