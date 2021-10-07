@@ -248,6 +248,12 @@ class PaintWeights(absOp.Abstract_Operation):
         isRigged = not rigRoot.paintWeightsUseAnimJoints.get()
         rigUtil.SetLayerState(rigData.CONTROL_DISP_LAYER, isRigged, 0)
 
+    def SetupDisplay(self):
+        pm.polyOptions(cs=1)
+    
+    def TeardownDisplay(self):
+        pm.polyOptions(cs=0)
+
 #=========== FLOOD ====================================
 
     def FloodAddLimb(self, mesh, weight):

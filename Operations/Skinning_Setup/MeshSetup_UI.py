@@ -16,6 +16,7 @@ class MeshSetup_UI(absOpUI.Abstract_OperationUI):
         self._skinnedMeshes = {} # name : meshNode
         self._selectedAvailable = []
         self._selectedSkinned = []
+        self._sourceSkin = None
 
     def Setup_UI(self, rigRoot, allRigRoots, pfrsUI): 
         self._rigRoot = rigRoot
@@ -24,6 +25,7 @@ class MeshSetup_UI(absOpUI.Abstract_OperationUI):
         self._allMeshes = {} # name : meshNode
         self._skinnedMeshes = {} # name : meshNode
         self._selectedAvailable = []
+        self._sourceSkin = None
         self._Setup()
         self.Refresh(0)
         
@@ -52,11 +54,16 @@ class MeshSetup_UI(absOpUI.Abstract_OperationUI):
                                                 scc=self.SelectedSkinned,
                                                 elc=self.RenameMesh)
                 with pm.popupMenu():
+                    self.copy_mi = pm.menuItem(l='Copy Weights', en=0,
+                                                  c=self.CopyWeights)
+                    self.paste_mi = pm.menuItem(l='Paste Weights (None)', en=0,
+                                                  c=self.PasteWeights)
+                    pm.menuItem(divider=1)
+                    msg = 'Rebuild Skins (use if joints changed)'
+                    self.rebuild_mi = pm.menuItem(l=msg, c=self.RebuildSkins)
+                    pm.menuItem(divider=1)
                     self.remove_mi = pm.menuItem(l='Remove Meshes', en=0, 
                                                             c=self.RemoveMeshes)
-                    msg = 'Rebuild Skins (use if joints changed)'
-                    self.rebuild_mi = pm.menuItem(l=msg, 
-                                            c=self.RebuildSkins)
 
 #=========== AVAILABLE ====================================
 
@@ -118,6 +125,14 @@ class MeshSetup_UI(absOpUI.Abstract_OperationUI):
 
 #=========== SKINNED ====================================
 
+    def CopyWeights(self, ignore):
+        self._sourceSkin = self._selectedSkinned[0]
+        label = 'Paste Weights (from %s)' % self._sourceSkin.shortName()
+        pm.menuItem(self.paste_mi, e=1, l=label, en=1)
+
+    def PasteWeights(self, ignore):
+        pass
+
     def PopulateSkinned(self):
         pm.treeView(self._skinnedMeshes_tv, e=1, removeAll=1)
         meshes = pm.listConnections(self._rigRoot.meshes, sh=1)
@@ -129,16 +144,17 @@ class MeshSetup_UI(absOpUI.Abstract_OperationUI):
 
     def SelectedSkinned(self):
         log.funcFileInfo()
-        pm.menuItem(self.remove_mi, e=1, en=0)
-        pm.menuItem(self.rebuild_mi, e=1, en=0)
         self._selectedSkinned = []
         names = pm.treeView(self._skinnedMeshes_tv, q=1, si=1)
+        pm.menuItem(self.remove_mi, e=1, en=bool(names))
+        pm.menuItem(self.rebuild_mi, e=1, en=bool(names))
+        pm.menuItem(self.copy_mi, e=1, en=bool(names))
+        isEnabled = (bool(names) and bool(self._sourceSkin))
+        pm.menuItem(self.paste_mi, e=1, en=isEnabled)
         if not names:
             pm.select(d=1)
             return
         self._selectedSkinned = [self._allMeshes[n] for n in names]
-        pm.menuItem(self.remove_mi, e=1, en=1)
-        pm.menuItem(self.rebuild_mi, e=1, en=1)
         pm.select(self._selectedSkinned)
 
     def RemoveMeshes(self, ignore):
@@ -147,6 +163,11 @@ class MeshSetup_UI(absOpUI.Abstract_OperationUI):
         self.PopulateAvailable()
         self.PopulateSkinned()
         self._pfrsUI.EnableOperations()
+        if self._sourceSkin in self._selectedSkinned:
+            pm.menuItem(self.paste_mi, e=1, en=0, l='Paste Weights (None)')
+            self._sourceSkin = None
+        pm.menuItem(self.copy_mi, e=1, en=0)
+        self._selectedSkinned = []
 
     def RebuildSkins(self, ignore):
         log.funcFileInfo()

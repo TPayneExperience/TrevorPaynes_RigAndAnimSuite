@@ -99,6 +99,12 @@ class MeshSetup(absOp.Abstract_Operation):
         meshSkin = pm.skinCluster(joints, mesh)
         pm.copySkinWeights( ss=backupSkin, ds=meshSkin, nm=1)
 
+    def PasteWeights(self, rigRoot, sourceMesh, targetMesh):
+        sourceSkin = pm.listConnections(sourceMesh.pfrsSkinCluster)[0]
+        targetSkin = pm.listConnections(targetMesh.pfrsSkinCluster)[0]
+        pm.copySkinWeights(ss=sourceSkin, ds=targetSkin, noMirror=1)
+        self._UnpackWeights(targetMesh)
+
 #=========== ADD + REMOVE MASKS ====================================
 
     def _RemoveLimbMask(self, mesh, limb):
@@ -150,6 +156,7 @@ class MeshSetup(absOp.Abstract_Operation):
         # For each vert
         for vert in range(vertCount):
             vAttr = '%s.vtx[%d]' % (mesh, vert)
+            vPos = pm.xform(vAttr, q=1, t=1, ws=1)
             for l in range(len(limbAttrs)):
                 limbAttr = limbAttrs[l]
                 jointAttr = jointAttrs[l]
@@ -161,38 +168,30 @@ class MeshSetup(absOp.Abstract_Operation):
 
                 # Limb weight
                 limbWeight = sum(jointWeights)
+                if limbWeight == 0:
+                    # Get closest joint and flood
+                    closestDist = 999999
+                    closestJointIndex = None
+                    for j in range(len(jointAttr)):
+                        jPos = jointPositions[l][j]
+                        squared = [(vPos[i] - jPos[i])**2 for i in range(3)]
+                        dist = sum(squared)
+                        if dist < closestDist:
+                            closestDist = dist
+                            closestJointIndex = j
+                    finalJWeights[l][closestJointIndex][vert] = 1
+                else:
+                    # Scale Joint weights up
+                    scalar = 1.0/limbWeight
+                    jointWeights = [min(j*scalar, 1) for j in jointWeights]
+                    for j in range(len(jointAttr)):
+                        finalJWeights[l][j][vert] = jointWeights[j]
                 limb = limbs[l]
                 for child in limbChildren[limb]:
                     ci = limbs.index(child)
                     limbWeight = min(finalLWeights[ci][vert] + limbWeight, 1)
                 finalLWeights[l][vert] = limbWeight
-                if limbWeight == 0:
-                    continue
 
-                # Scale Joint weights up
-                scalar = 1.0/limbWeight
-                jointWeights = [min(j*scalar, 1) for j in jointWeights]
-                for j in range(len(jointAttr)):
-                    finalJWeights[l][j][vert] = jointWeights[j]
-
-        # Set zero weight verts to closest joint
-        for vert in range(vertCount):
-            vAttr = '%s.vtx[%d]' % (mesh, vert)
-            vPos = pm.xform(vAttr, q=1, t=1, ws=1)
-            for l in range(len(limbAttrs)):
-                limbWeight = finalLWeights[l][vert]
-                if limbWeight != 0:
-                    continue
-                distances = {} # dist : jointIndex
-                for j in range(len(jointAttrs[l])):
-                    jPos = jointPositions[l][j]
-                    squared = [(vPos[i] - jPos[i])**2 for i in range(3)]
-                    dist = sum(squared)
-                    distances[dist] = j
-                closestDist = sorted(list(distances.keys()))[0]
-                closestIndex = distances[closestDist]
-                finalJWeights[l][closestIndex][vert] = 1
-        
         # Set Attrs
         for l in range(len(limbAttrs)):
             limbAttr = limbAttrs[l]
@@ -201,7 +200,6 @@ class MeshSetup(absOp.Abstract_Operation):
                 jointAttr = jointAttrs[l][j]
                 mesh.setAttr(jointAttr, finalJWeights[l][j])
         print('done!')
-
 
 #=========== FLOOD ====================================
 

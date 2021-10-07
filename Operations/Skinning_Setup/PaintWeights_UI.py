@@ -127,7 +127,10 @@ class PaintWeights_UI(absOpUI.Abstract_OperationUI):
             pm.treeView(self.mesh_tv, e=1, selectItem=(name, 1))
             self.UpdateTool()
             return
+        self.operation.TeardownDisplay()
         self._selectedMesh = self._meshes[meshIDStrs[0]]
+        pm.select(self._selectedMesh)
+        self.operation.SetupDisplay()
         self.UpdateTool()
         self.operation.SetMesh(self._selectedMesh)
 

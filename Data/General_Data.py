@@ -19,6 +19,11 @@ QUICKSTART_ARTIST_VIDEO = 'https://youtu.be/MpWBymQXDws'
 QUICKSTART_RIGGER_VIDEO = 'https://youtu.be/OWlhMnAk3Wc'
 QUICKSTART_ANIMATOR_VIDEO = 'https://youtu.be/495WmBBMgx8'
 
+CATEGORIES = [  'Rigging_Setup',
+                'Skinning_Setup',  
+                'Rigging_Extras',
+                'Skinning_Extras', 
+                'Animation']
 
 # Copyright (c) 2021 Trevor Payne
 # See user license in "PayneFreeRigSuite\Data\LicenseAgreement.txt"

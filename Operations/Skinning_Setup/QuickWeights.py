@@ -315,6 +315,17 @@ class QuickWeights(absOp.Abstract_Operation):
             attr = jointAttrs[jointIndex]
             mesh.setAttr(attr, jointWeights[jointIndex])
 
+#=========== OPTIONS ====================================
+
+    def Setup_AnimJoints(self, rigRoot):
+        self._paintWeightsOp.Setup_AnimJoints(rigRoot)
+
+    def Teardown_AnimJoints(self, rigRoot):
+        self._paintWeightsOp.Teardown_AnimJoints(rigRoot)
+
+    def SetTimeRange(self, joints):
+        self._paintWeightsOp.SetTimeRange(joints)
+
 #=========== DISPLAY ====================================
    
     def DisplayLimbVertexColors(self):

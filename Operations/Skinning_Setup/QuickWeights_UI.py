@@ -31,17 +31,21 @@ class QuickWeights_UI(absOpUI.Abstract_OperationUI):
         self._allRigRoots = allRigRoots
         self._selectedMesh = None
         self._selectedLimbs = []
+        self.operation._paintWeightsOp.bhvMng = self.operation.bhvMng
 
         self._Setup()
-        self.PopulateLimbHier()
         self.PopulateMeshHier()
+        self.PopulateLimbHier()
         self.operation.SetupDisplay()
         self.UpdateDisplay()
         self._UpdateSurfaceCrawlButton()
         self.operation.StorePositionData(rigRoot)
+        self.operation.Setup_AnimJoints(self._rigRoot)
 
     def Teardown_UI(self):
         self.operation.TeardownDisplay()
+        if pm.checkBox(self.useJointAnim_cb, q=1, v=1):
+            self.operation.Teardown_AnimJoints(self._rigRoot)
 
 #=========== SETUP UI ====================================
 
@@ -57,14 +61,19 @@ class QuickWeights_UI(absOpUI.Abstract_OperationUI):
                                             elc=self.IgnoreRename,
                                             scc=self.SelectedLimb)
         with pm.verticalLayout():
-            with pm.frameLayout('LIMB Mask Actions', bv=1, mw=7, mh=7):
-                with pm.columnLayout(adj=1, rs=7):
+            with pm.frameLayout('Options', bv=1, mw=7, mh=7):
+                with pm.columnLayout(adj=1, rs=5):
                     self._brushMode_rb = pm.radioButtonGrp( nrb=3, 
                                         l='Display Mode: ', 
                                         la3=['Limb', 'Joint', 'Both'], 
                                         cw4=[77,44,44, 44],
                                         sl=1, onc=self.UpdateDisplayMode)
                     pm.separator()
+                    self.useJointAnim_cb = pm.checkBox(
+                                                l='Use Joint Animations', 
+                                                cc=self.SetUseJointAnim)
+            with pm.frameLayout('LIMB Mask Actions', bv=1, mw=7, mh=7):
+                with pm.columnLayout(adj=1, rs=5):
                     self._surface_b = pm.button(l='Apply Surface Crawl Limb Mask', 
                                         c=self.ApplyLimbMaskSurfaceCrawl)
                     pm.separator()
@@ -82,11 +91,10 @@ class QuickWeights_UI(absOpUI.Abstract_OperationUI):
                         pm.button(l='Soften', c=self.ApplyLimbMaskSoften)
 
             with pm.frameLayout('JOINT Mask Actions', bv=1, mw=7, mh=7):
-                with pm.columnLayout(adj=1, rs=7):
+                with pm.columnLayout(adj=1, rs=5):
                     pm.button(l='Apply Closest Joint Mask', c=self.ApplyJointMask)
                     msg = 'Skip Last Joint (Chain Limbs Only)'
                     self.skipLast_cb = pm.checkBox(l=msg, v=1)
-                    pm.separator()
                     with pm.rowLayout(adj=1, nc=2):
                         self._softenJoint_is =  pm.intSliderGrp(l='Soften Steps', 
                                         f=1, v=1, 
@@ -100,6 +108,8 @@ class QuickWeights_UI(absOpUI.Abstract_OperationUI):
         pm.radioButtonGrp(self._brushMode_rb, e=1, sl=mode)
         radius = config['quickWeightsLimbMaskRadius']
         pm.floatFieldGrp(self.limbRadius_ff, e=1, v1=radius)
+        useJointAnim = config['paintWeightsUseJointAnim']   
+        pm.checkBox(self.useJointAnim_cb, e=1, v=useJointAnim)
 
 #=========== MESH HIER ====================================
    
@@ -131,7 +141,10 @@ class QuickWeights_UI(absOpUI.Abstract_OperationUI):
             name = self._selectedMesh.shortName()
             pm.treeView(self.mesh_tv, e=1, selectItem=(name, 1))
             return
+        self.operation.TeardownDisplay()
         self._selectedMesh = self._meshes[meshIDStrs[0]]
+        pm.select(self._selectedMesh)
+        self.operation.SetupDisplay()
         self.UpdateDisplay()
 
 #=========== LIMB HIER ====================================
@@ -147,6 +160,7 @@ class QuickWeights_UI(absOpUI.Abstract_OperationUI):
         limbID = '%d_%d' % (rigRootID, limbs[0].ID.get())
         pm.treeView(self.limb_tv, e=1, selectItem=(limbID, 1))
         self.operation.SetLimb(self._selectedLimbs[0])
+        self.SelectedLimb()
 
     def IgnoreRename(self, idStr, newName):
         log.funcFileInfo()
@@ -166,7 +180,14 @@ class QuickWeights_UI(absOpUI.Abstract_OperationUI):
         self.UpdateDisplay()
         self._UpdateSurfaceCrawlButton()
 
-#=========== DISPLAY ====================================
+        if not pm.checkBox(self.useJointAnim_cb, q=1, v=1):
+            return
+        joints = []
+        for limb in self._selectedLimbs:
+            joints += pm.listConnections(limb.joints)
+        self.operation.SetTimeRange(joints)
+
+#=========== OPTIONS ====================================
 
     def UpdateDisplayMode(self, ignore):
         mode = pm.radioButtonGrp(self._brushMode_rb, q=1, sl=1)
@@ -187,12 +208,28 @@ class QuickWeights_UI(absOpUI.Abstract_OperationUI):
             self.operation.DisplayLimbJointVertexColors(self._selectedMesh,
                                                     self._selectedLimbs[0])
 
+    def SetUseJointAnim(self, value):
+        log.funcFileDebug()
+        filePath = self.GetConfigFilePath()
+        config = genUtil.Json.Load(filePath)
+        config['paintWeightsUseJointAnim'] = value
+        genUtil.Json.Save(filePath, config)
+        if value:
+            self.operation.Setup_AnimJoints(self._rigRoot)
+            joints = []
+            for limb in self._selectedLimbs:
+                joints += pm.listConnections(limb.joints)
+            self.operation.SetTimeRange(joints)
+        else:
+            self.operation.Teardown_AnimJoints(self._rigRoot)
+
 #=========== LIMB ACTIONS ====================================
 
     def ApplyLimbMaskSurfaceCrawl(self, ignore):
         log.funcFileInfo()
         for limb in self._selectedLimbs:
             self.operation.ApplyLimbMaskCrawl(self._selectedMesh, limb)
+            # self.operation.UpdateLimbWeights(self._selectedMesh, limb)
         self.operation.UpdateLimbWeights(self._selectedMesh, 
                                         self._selectedLimbs[0])
         mode = pm.radioButtonGrp(self._brushMode_rb, q=1, sl=1)

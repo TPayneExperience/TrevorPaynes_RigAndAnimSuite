@@ -31,6 +31,8 @@ import SceneData.Behavior_Manager as bMng
 reload(bMng)
 import Data.Rig_Data as rigData
 reload(rigData)
+import Data.General_Data as genData
+reload(genData)
 import Utilities.General_Utilities as genUtil
 reload(genUtil)
 import Utilities.Rig_Utilities as rigUtil
@@ -53,7 +55,7 @@ class PayneFreeRigSuite:
         self.currentRigRoot = None
         self.allRigRoots = []
         self.catOps = {} # {categoryName : {fileName : classObj}}
-        self.categories = []
+        self.categories = genData.CATEGORIES
 
         self._InitConfigFile()
         self._StartLogger()
@@ -222,11 +224,6 @@ class PayneFreeRigSuite:
         self.catOps = {}
         rootPath = os.path.dirname(__file__)
         rootPath = os.path.join(rootPath, 'Operations')
-        self.categories = [ 'Rigging_Setup', 
-                            'Rigging_Extras',
-                            'Skinning_Setup', 
-                            'Skinning_Extras', 
-                            'Animation']
         for f in os.listdir(rootPath):
             filePath = os.path.join(rootPath, f)
             if os.path.isfile(filePath):
