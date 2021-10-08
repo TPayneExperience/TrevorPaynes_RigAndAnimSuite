@@ -81,16 +81,10 @@ class QuickWeights(absOp.Abstract_Operation):
 
 #=========== LIMB ====================================
    
-    def UpdateLimbWeights(self, mesh, limb):
-        rigRoot = pm.listConnections(limb.rigRoot)[0]
-        self._paintWeightsOp.SetLimb(rigRoot, limb)
-        self._paintWeightsOp.SetMesh(mesh)
-        self._paintWeightsOp.UpdateLimbOps()
-        vertCount = pm.polyEvaluate(mesh, v=1)
-        newWeights = mesh.getAttr('L%03d' % limb.ID.get())
-        self._paintWeightsOp.SetLimbWeights(newWeights, range(vertCount))
-            
-    def ApplyLimbMaskCrawl(self, mesh, limb):
+    def UpdateMeshWeights(self, rigRoot, mesh):
+        self._paintWeightsOp.UpdateMeshWeights(rigRoot, mesh)
+
+    def ApplyLimbMaskCrawl(self, mesh, vertNeighbors, limb):
         vertCount = pm.polyEvaluate(mesh, v=1)
         jointPositions = self._jointPositions[limb]
         vertexPositions = self._vertPositions[mesh]
@@ -126,16 +120,16 @@ class QuickWeights(absOp.Abstract_Operation):
             for vertIndex in currentVerts:
                 visitedVerts.add(vertIndex)
                 edges = mesh.vtx[vertIndex].connectedEdges()
-                for edge in edges:
-                    for vert in edge.connectedVertices():
-                        newIndex = vert.index()
-                        if newIndex in visitedVerts:
-                            continue
-                        if newIndex in nextVerts:
-                            continue
-                        if newIndex in currentVerts:
-                            continue
-                        nextVerts.append(newIndex)
+                # for edge in edges:
+                #     for vert in edge.connectedVertices():
+                for vert in vertNeighbors[vertIndex]:
+                    if vert in visitedVerts:
+                        continue
+                    if vert in nextVerts:
+                        continue
+                    if vert in currentVerts:
+                        continue
+                    nextVerts.append(vert)
             currentVerts = nextVerts
             if closestEndVertIndex in nextVerts:
                 break
@@ -180,11 +174,10 @@ class QuickWeights(absOp.Abstract_Operation):
         attr = '%s.L%03d' % (mesh, limb.ID.get())
         pm.setAttr(attr, newLimbMask)
 
-    def ApplyLimbMaskSoften(self, mesh, limb, softenSteps):
+    def ApplyLimbMaskSoften(self, mesh, vertNeighbors, limb, softenSteps):
         attr = '%s.L%03d' % (mesh, limb.ID.get())
         maskWeights = pm.getAttr(attr)
         vertCount = len(maskWeights)
-        vertNeighbors = self._GetVertNeighbors(mesh)
 
         # SOFTEN WEIGHTS
         for s in range(softenSteps):
@@ -195,7 +188,7 @@ class QuickWeights(absOp.Abstract_Operation):
             maskWeights = newWeights
         pm.setAttr(attr, maskWeights)
 
-    def _GetVertNeighbors(self, mesh):
+    def GetVertNeighbors(self, mesh):
         vertCount = pm.polyEvaluate(mesh, v=1)
         vertNeighbors = {} # vertIndex : set([v1, v4, ...])
         for vertIndex in range(vertCount):
@@ -281,16 +274,13 @@ class QuickWeights(absOp.Abstract_Operation):
             attr = jointAttrs[jointIndex]
             mesh.setAttr(attr, newWeights[jointIndex])
 
-    def ApplyJointMaskSoften(self, mesh, limb, softenSteps):
+    def ApplyJointMaskSoften(self, mesh, vertNeighbors, limb, softenSteps):
         vertCount = pm.polyEvaluate(mesh, v=1)
         joints = rigUtil.GetSortedLimbJoints(limb)
         jointCount = len(joints)
         jointAttrs = ['J%03d' % j.ID.get() for j in joints]
         jointWeights = [mesh.getAttr(a) for a in jointAttrs]
-        meshStr = '%s' % mesh
         
-        vertNeighbors = self._GetVertNeighbors(mesh)
-
         # SOFTEN WEIGHTS
         for s in range(softenSteps):
             newWeights = [[0]*vertCount for j in range(jointCount)]

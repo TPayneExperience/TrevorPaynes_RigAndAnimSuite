@@ -25,13 +25,18 @@ class QuickWeights_UI(absOpUI.Abstract_OperationUI):
         self._rigRoot = None
         self._allRigRoots = []
         self._limbIDs = {}
+        self._meshVertNeighbors = {} # mesh : vertNeighbors{}
 
     def Setup_UI(self, rigRoot, allRigRoots, pfrsUI):
         self._rigRoot = rigRoot
         self._allRigRoots = allRigRoots
+        self._meshVertNeighbors.clear()
         self._selectedMesh = None
         self._selectedLimbs = []
         self.operation._paintWeightsOp.bhvMng = self.operation.bhvMng
+        for mesh in pm.listConnections(rigRoot.meshes, sh=1):
+            vertNeighbors = self.operation.GetVertNeighbors(mesh)
+            self._meshVertNeighbors[mesh] = vertNeighbors
 
         self._Setup()
         self.PopulateMeshHier()
@@ -43,6 +48,7 @@ class QuickWeights_UI(absOpUI.Abstract_OperationUI):
         self.operation.Setup_AnimJoints(self._rigRoot)
 
     def Teardown_UI(self):
+        pm.select(self._selectedMesh)
         self.operation.TeardownDisplay()
         if pm.checkBox(self.useJointAnim_cb, q=1, v=1):
             self.operation.Teardown_AnimJoints(self._rigRoot)
@@ -227,11 +233,29 @@ class QuickWeights_UI(absOpUI.Abstract_OperationUI):
 
     def ApplyLimbMaskSurfaceCrawl(self, ignore):
         log.funcFileInfo()
+
+        # PROGRESS BAR START
+        progressBar = pm.mel.eval('$tmp = $gMainProgressBar')
+        pm.progressBar(progressBar, e=1, beginProgress=1, max=100, 
+                                        st='Limb Surface Mask Crawl...')
+        totalSteps = len(self._selectedLimbs) + 1
+        step = 1
+
+        vertNeighbors = self._meshVertNeighbors[self._selectedMesh]
         for limb in self._selectedLimbs:
-            self.operation.ApplyLimbMaskCrawl(self._selectedMesh, limb)
-            # self.operation.UpdateLimbWeights(self._selectedMesh, limb)
-        self.operation.UpdateLimbWeights(self._selectedMesh, 
-                                        self._selectedLimbs[0])
+            # PROGRESS BAR STEP
+            progress = int(100*(float(step)/totalSteps))
+            pm.progressBar(progressBar, e=1, pr=progress)
+            step += 1
+            self.operation.ApplyLimbMaskCrawl(self._selectedMesh, 
+                                              vertNeighbors,
+                                              limb)
+            
+        # PROGRESS BAR END
+        pm.progressBar(progressBar, e=1, pr=95)
+        self.operation.UpdateMeshWeights(self._rigRoot, self._selectedMesh)
+        pm.progressBar(progressBar, e=1, endProgress=1)
+
         mode = pm.radioButtonGrp(self._brushMode_rb, q=1, sl=1)
         if mode == 2: # joint
             pm.radioButtonGrp(self._brushMode_rb, e=1, sl=1)
@@ -249,13 +273,29 @@ class QuickWeights_UI(absOpUI.Abstract_OperationUI):
         filePath = self.GetConfigFilePath()
         config = genUtil.Json.Load(filePath)   
         midpoints = config['quickWeightsLimbMaskMidpoints']
+
+        # PROGRESS BAR START
+        progressBar = pm.mel.eval('$tmp = $gMainProgressBar')
+        pm.progressBar(progressBar, e=1, beginProgress=1, max=100, 
+                                        st='Limb Mask Radius...')
+        totalSteps = len(self._selectedLimbs) + 1
+        step = 1
+
         for limb in self._selectedLimbs:
+            # PROGRESS BAR STEP
+            progress = int(100*(float(step)/totalSteps))
+            pm.progressBar(progressBar, e=1, pr=progress)
+            step += 1
+            
             self.operation.ApplyLimbMaskRadius(self._selectedMesh, 
                                         limb,
                                         radius,
                                         midpoints)
-        self.operation.UpdateLimbWeights(self._selectedMesh, 
-                                        self._selectedLimbs[0])
+        # PROGRESS BAR END
+        pm.progressBar(progressBar, e=1, pr=95)
+        self.operation.UpdateMeshWeights(self._rigRoot, self._selectedMesh)
+        pm.progressBar(progressBar, e=1, endProgress=1)
+
         mode = pm.radioButtonGrp(self._brushMode_rb, q=1, sl=1)
         if mode == 2: # joint
             pm.radioButtonGrp(self._brushMode_rb, e=1, sl=1)
@@ -263,12 +303,30 @@ class QuickWeights_UI(absOpUI.Abstract_OperationUI):
 
     def ApplyLimbMaskSoften(self, ignore):
         softenSteps =  pm.intSliderGrp(self._softenLimb_is, q=1, v=1)
+        vertNeighbors = self._meshVertNeighbors[self._selectedMesh]
+
+        # PROGRESS BAR START
+        progressBar = pm.mel.eval('$tmp = $gMainProgressBar')
+        pm.progressBar(progressBar, e=1, beginProgress=1, max=100, 
+                                        st='Softening Limb Masks...')
+        totalSteps = len(self._selectedLimbs) + 1
+        step = 1
         for limb in self._selectedLimbs:
+            # PROGRESS BAR STEP
+            progress = int(100*(float(step)/totalSteps))
+            pm.progressBar(progressBar, e=1, pr=progress)
+            step += 1
+
             self.operation.ApplyLimbMaskSoften( self._selectedMesh, 
+                                                vertNeighbors,
                                                 limb, 
                                                 softenSteps)
-        self.operation.UpdateLimbWeights(self._selectedMesh, 
-                                        self._selectedLimbs[0])
+                                                
+        # PROGRESS BAR END
+        pm.progressBar(progressBar, e=1, pr=95)
+        self.operation.UpdateMeshWeights(self._rigRoot, self._selectedMesh)
+        pm.progressBar(progressBar, e=1, endProgress=1)
+
         mode = pm.radioButtonGrp(self._brushMode_rb, q=1, sl=1)
         if mode == 2: # joint
             pm.radioButtonGrp(self._brushMode_rb, e=1, sl=1)
@@ -289,7 +347,19 @@ class QuickWeights_UI(absOpUI.Abstract_OperationUI):
 
     def ApplyJointMask(self, ignore):
         skipLast = pm.checkBox(self.skipLast_cb, q=1, v=1)
+
+        # PROGRESS BAR START
+        progressBar = pm.mel.eval('$tmp = $gMainProgressBar')
+        pm.progressBar(progressBar, e=1, beginProgress=1, max=100, 
+                                        st='Applying Joint Masks...')
+        totalSteps = len(self._selectedLimbs) + 1
+        step = 1
         for limb in self._selectedLimbs:
+            # PROGRESS BAR STEP
+            progress = int(100*(float(step)/totalSteps))
+            pm.progressBar(progressBar, e=1, pr=progress)
+            step += 1
+
             limbType = limb.limbType.get()
             if limbType in (1, 2): # branch
                 self.operation.ApplyClosestBranchJoint( self._selectedMesh,
@@ -298,8 +368,11 @@ class QuickWeights_UI(absOpUI.Abstract_OperationUI):
                 self.operation.ApplyClosestChainJoint( self._selectedMesh,
                                                         limb,
                                                         skipLast)
-        self.operation.UpdateLimbWeights(self._selectedMesh, 
-                                        self._selectedLimbs[0])
+        # PROGRESS BAR END
+        pm.progressBar(progressBar, e=1, pr=95)
+        self.operation.UpdateMeshWeights(self._rigRoot, self._selectedMesh)
+        pm.progressBar(progressBar, e=1, endProgress=1)
+        
         mode = pm.radioButtonGrp(self._brushMode_rb, q=1, sl=1)
         if mode == 1: # joint
             pm.radioButtonGrp(self._brushMode_rb, e=1, sl=2)
@@ -307,12 +380,29 @@ class QuickWeights_UI(absOpUI.Abstract_OperationUI):
 
     def ApplyJointMaskSoften(self, ignore):
         softenSteps = pm.intSliderGrp(self._softenJoint_is, q=1, v=1)
+        vertNeighbors = self._meshVertNeighbors[self._selectedMesh]
+
+        # PROGRESS BAR START
+        progressBar = pm.mel.eval('$tmp = $gMainProgressBar')
+        pm.progressBar(progressBar, e=1, beginProgress=1, max=100, 
+                                        st='Softening Joint Masks...')
+        totalSteps = len(self._selectedLimbs) + 1
+        step = 1
         for limb in self._selectedLimbs:
+            # PROGRESS BAR STEP
+            progress = int(100*(float(step)/totalSteps))
+            pm.progressBar(progressBar, e=1, pr=progress)
+            step += 1
             self.operation.ApplyJointMaskSoften( self._selectedMesh, 
+                                                vertNeighbors,
                                                 limb, 
                                                 softenSteps)
-        self.operation.UpdateLimbWeights(self._selectedMesh, 
-                                        self._selectedLimbs[0])
+        
+        # PROGRESS BAR END
+        pm.progressBar(progressBar, e=1, pr=95)
+        self.operation.UpdateMeshWeights(self._rigRoot, self._selectedMesh)
+        pm.progressBar(progressBar, e=1, endProgress=1)
+
         mode = pm.radioButtonGrp(self._brushMode_rb, q=1, sl=1)
         if mode == 1: # limb
             pm.radioButtonGrp(self._brushMode_rb, e=1, sl=2)
@@ -327,7 +417,14 @@ class QuickWeights_UI(absOpUI.Abstract_OperationUI):
         folder = os.path.join(folder, 'Data')
         return os.path.join(folder, 'Config.json')
 
-
-
+    def ProgressBarUI(self):
+        form = pm.setParent(q=True)
+        with pm.columnLayout(adj=1, p=form) as cl:
+            self.progressBar_pb = pm.progressBar(w=300)
+        pm.formLayout(form, e=1, w=300, h=44,
+                        attachForm=[(cl, 'top', 5),
+                                    (cl, 'left', 5), 
+                                    (cl, 'right', 5), 
+                                    (cl, 'bottom', 5)])
 # Copyright (c) 2021 Trevor Payne
 # See user license in "PayneFreeRigSuite\Data\LicenseAgreement.txt"

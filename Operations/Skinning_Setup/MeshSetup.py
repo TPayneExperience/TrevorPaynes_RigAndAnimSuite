@@ -60,13 +60,15 @@ class MeshSetup(absOp.Abstract_Operation):
             for limb in pm.listConnections(rigRoot.limbs):
                 if limb.limbType.get() == 0: # Empty
                     continue
+                
                 # ADD LIMB MASK
                 attr = 'L%03d' % limb.ID.get()
                 if not mesh.hasAttr(attr):
                     pm.addAttr(mesh, ln=attr, dt='doubleArray', h=1) # Remove Later?
                 else:
                     shouldUnpackWeights = False
-    
+
+                # Add Joint Mask
                 for joint in pm.listConnections(limb.joints):
                     attr = 'J%03d' % joint.ID.get()
                     if not mesh.hasAttr(attr):

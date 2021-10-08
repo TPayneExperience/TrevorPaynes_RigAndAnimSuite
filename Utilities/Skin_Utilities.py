@@ -5,6 +5,7 @@ import General_Utilities as genUtil
 reload(genUtil)
 
 def GetSkeletalLimbOrder(limbs):
+    '''Returns Root limb to end children'''
     limbParents = genUtil.GetDefaultLimbHier(limbs)
     orderedLimbs = []
     for i in range(99):

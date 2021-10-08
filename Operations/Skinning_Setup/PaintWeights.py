@@ -1,4 +1,5 @@
 
+from collections import OrderedDict
 import os
 
 import pymel.core as pm
@@ -295,6 +296,52 @@ class PaintWeights(absOp.Abstract_Operation):
         for vertIndex in vertsToUpdate:
             value = weights[vertIndex]
             lmbOp.setPFRSPyPaintValue(vertIndex, value)
+
+    def UpdateMeshWeights(self, rigRoot, mesh):
+        vCount = pm.polyEvaluate(mesh, v=1)
+        skin = pm.listConnections(mesh.pfrsSkinCluster)[0]
+        limbs = pm.listConnections(rigRoot.limbs)
+        limbs = [l for l in limbs if l.limbType.get()] # if not empty
+        limbs = skinUtil.GetSkeletalLimbOrder(limbs)
+        limbs.reverse() # Start with children
+
+        joints = []
+        for limb in limbs:
+            joints += pm.listConnections(limb.joints)
+        jointCount = len(joints)
+
+        # [v1[j1, j2...], v2[j1...]]
+        finalVertWeights = [[0]*jointCount for v in range(vCount)] 
+        jointIndex = 0
+        jointNames = []
+
+        # For each limb, joint: Combine weights
+        for limb in limbs:
+            lWeights = mesh.getAttr('L%03d' % limb.ID.get())
+            for joint in pm.listConnections(limb.joints):
+                jWeights = mesh.getAttr('J%03d' % joint.ID.get())
+
+                # For each vert, get final weights for vert
+                for v in range(vCount):
+                    weight = lWeights[v]*jWeights[v]
+                    if weight == 0:
+                        continue
+                    total = sum(finalVertWeights[v])
+                    if total >= 1:
+                        continue
+                    remainingWeight = 1-total
+                    newWeight = min(remainingWeight, weight)
+                    finalVertWeights[v][jointIndex] = newWeight
+                jointNames.append(joint.longName())
+                jointIndex += 1
+        
+        # Apply Weights
+        for v in range(vCount):
+            influences = zip(jointNames, finalVertWeights[v])
+            attr = '%s.vtx[%d]' % (mesh.longName(), v)
+            pm.skinPercent(skin, attr, tv=influences)
+
+
 
 #=========== PAINT SETTINGS ====================================
 

@@ -12,8 +12,8 @@
     "quickWeightsLimbMaskMidpoints": 6, 
     "templateFolderPath": "", 
     "windowPos": [
-        310, 
-        895
+        205, 
+        488
     ], 
     "paintWeightsMode": 1, 
     "jointUpAxis": 2, 
@@ -38,9 +38,9 @@
         1
     ], 
     "paintWeightsReplaceSoftness": 1.0, 
-    "quickWeightsLimbMaskRadius": 1.0, 
+    "quickWeightsLimbMaskRadius": 3.0, 
     "controlShape_FKR": "Cube_Poly", 
-    "quickWeightsDisplayMode": 1, 
+    "quickWeightsDisplayMode": 2, 
     "paintWeightsAddValue": 1.0, 
     "welcomePopupSeen": true, 
     "mControlColor": [
