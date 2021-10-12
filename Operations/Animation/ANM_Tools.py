@@ -7,7 +7,7 @@ import Abstracts.Abstract_Operation as absOp
 reload(absOp)
 import Utilities.Logger as log
 reload(log)
-import Operations.Rigging_Setup.RIG_Behavior as rigBhv
+import Operations.Rigging_Setup.Behavior as rigBhv
 reload(rigBhv)
 import Utilities.General_Utilities as genUtil
 reload(genUtil)
@@ -23,7 +23,7 @@ class ANM_Tools(absOp.Abstract_Operation):
     meshLayerState = (1, 1)    # isVis, isRef
     
     def __init__(self):
-        self._rigBhv = rigBhv.RIG_Behavior()
+        self._rigBhv = rigBhv.Behavior()
 
     def ApplyPreset(self, rigRoot, presetID, keyframesOnly=True):
         log.funcFileDebug()

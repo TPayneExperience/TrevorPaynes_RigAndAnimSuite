@@ -59,8 +59,6 @@ class InitRigRoot(absInit.Abstract_Initializer):
 
         # ANIMATION
         pm.addAttr(rigRoot, ln='hasAnimJoints', at='bool', h=hide)
-        # pm.addAttr(rigRoot, ln='posesFolderPath', dt='string', h=hide)
-        pm.addAttr(rigRoot, ln='animationFolderPath', dt='string', h=hide)
 
         #============= GROUPS ============================
 

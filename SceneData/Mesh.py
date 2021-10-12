@@ -34,9 +34,13 @@ class Mesh:
     def BindSkin(rigRoot, mesh):
         joints = rigUtil.GetSkinnableRigJoints(rigRoot)
         skinCls = pm.skinCluster(joints, mesh)
-        pm.addAttr(skinCls, ln='pfrsMeshes', dt='string')
-        pm.connectAttr(skinCls.pfrsMeshes, mesh.pfrsSkinCluster)
+        Mesh.ConnectSkin(mesh, skinCls)
     
+    @staticmethod
+    def ConnectSkin(mesh, skinCls):
+        pm.addAttr(skinCls, ln='pfrsMeshes', dt='string')
+        pm.connectAttr(skinCls + '.pfrsMeshes', mesh.pfrsSkinCluster)
+
     @staticmethod
     def UnbindSkin(mesh):
         pm.skinCluster(mesh, e=1, unbind=1)

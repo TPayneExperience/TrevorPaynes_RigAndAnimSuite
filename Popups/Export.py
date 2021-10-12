@@ -3,6 +3,8 @@ import pymel.core as pm
 
 import Operations.Rigging_Setup.LimbSetup as ls
 reload(ls)
+import Utilities.Rig_Utilities as rigUtil
+reload(rigUtil)
 
 class Export(object):
     def __init__(self):
@@ -41,10 +43,7 @@ class Export(object):
     def _BakeKeysToSkeleton(self, rigRoot, areKeysReduced):
         start = pm.playbackOptions(q=1, ast=1)
         end = pm.playbackOptions(q=1, aet=1)
-        joints = list()
-        for limb in pm.listConnections(rigRoot.limbs):
-            if limb.limbType.get() != 0:
-                joints += pm.listConnections(limb.joints)
+        joints = rigUtil.GetSkinnableRigJoints(rigRoot)
         pm.bakeResults(joints, sm=1, t=(start, end))
         if areKeysReduced:
             pm.filterCurve(joints, f='keyReducer', pre=80)

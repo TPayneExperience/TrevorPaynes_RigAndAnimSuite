@@ -25,6 +25,8 @@ class InitRigRoot(absInit.Abstract_Initializer):
         hide = genData.HIDE_ATTRS
         if rigRoot.hasAttr('posesFolderPath'):
             rigRoot.deleteAttr('posesFolderPath')
+        if rigRoot.hasAttr('animationFolderPath'):
+            rigRoot.deleteAttr('animationFolderPath')
 
 # Copyright (c) 2021 Trevor Payne
 # See user license in "PayneFreeRigSuite\Data\LicenseAgreement.txt"

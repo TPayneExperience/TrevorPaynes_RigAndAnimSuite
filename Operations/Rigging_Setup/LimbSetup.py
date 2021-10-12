@@ -23,8 +23,6 @@ import SceneData.RigRoot as rrt
 reload(rrt)
 import Utilities.Rig_Utilities as rigUtil
 reload(rigUtil)
-import Utilities.Anim_Utilities as animUtil
-reload(animUtil)
 import Abstracts.Abstract_Autobuild as absBld
 reload(absBld)
 import SceneData.Preset as pst
@@ -118,6 +116,12 @@ class LimbSetup(absOp.Abstract_Operation):
         self._InitBehavior(rigRoot, limb)
         return limb
 
+    def AddEmptyLimb(self, rigRoot):
+        log.funcFileDebug()
+        limb = lmb.Limb.AddEmpty(rigRoot)
+        self._InitBehavior(rigRoot, limb)
+        return limb
+
     def DuplicateLimbs(self, limbs):
         newLimbs = []
         rigRoot = pm.listConnections(limbs[0].rigRoot)[0]
@@ -192,28 +196,27 @@ class LimbSetup(absOp.Abstract_Operation):
                 control = pm.listConnections(jointGroup.control)[0]
                 pm.polyNormal(control, nm=2, ch=0) 
 
-    def UpdateMirrorBodyJoints(self, limb):
+    def UpdateMirrorJoints(self, limb):
         config = self._GetConfig()
-        aimIndex = config['jointAimAxis']
-        upIndex = config['jointUpAxis']
-        aimVector = rigData.JOINT_AIM_UP_VECTORS[aimIndex]
-        upVector = rigData.JOINT_AIM_UP_VECTORS[upIndex]
-        rot = [1,1,1]
-        rot = [rot[i] - abs(aimVector[i]) for i in range(3)]
-        rot = [rot[i] - abs(upVector[i]) for i in range(3)]
-        rot = [rot[i] * 180 for i in range(3)]
-        self._UpdateMirrorLimbJoints(limb, rot)
-
-    def UpdateMirrorFaceJoints(self, limb):
-        config = self._GetConfig()
-        index = config['jointUpAxis']
-        upVector = rigData.JOINT_AIM_UP_VECTORS[index]
-        rot = [abs(i*180) for i in upVector]
+        if limb.limbLocation.get() == 1: # Face
+            index = config['jointUpAxis']
+            upVector = rigData.JOINT_AIM_UP_VECTORS[index]
+            rot = [abs(i*180) for i in upVector]
+        else:
+            aimIndex = config['jointAimAxis']
+            upIndex = config['jointUpAxis']
+            aimVector = rigData.JOINT_AIM_UP_VECTORS[aimIndex]
+            upVector = rigData.JOINT_AIM_UP_VECTORS[upIndex]
+            rot = [1,1,1]
+            rot = [rot[i] - abs(aimVector[i]) for i in range(3)]
+            rot = [rot[i] - abs(upVector[i]) for i in range(3)]
+            rot = [rot[i] * 180 for i in range(3)]
         self._UpdateMirrorLimbJoints(limb, rot)
 
     def RemoveLimb(self, limb):
         if pm.listConnections(limb.mirrorLimb):
             self._BreakMirror(limb)
+        self.bhvMng.CleanupLimb(limb)
         lmb.Limb.Remove(limb)
         
     def RemoveLimbAndJoints(self, limb):
@@ -383,12 +386,7 @@ class LimbSetup(absOp.Abstract_Operation):
         self.SetupDefaultLimbParent(childLimb)
 
     def ApplyAimUpToLimbJoints(self, limbs):
-        folder = os.path.dirname(__file__)
-        folder = os.path.dirname(folder)
-        folder = os.path.dirname(folder)
-        folder = os.path.join(folder, 'Data')
-        filePath = os.path.join(folder, 'Config.json')
-        config = genUtil.Json.Load(filePath)
+        config = self._GetConfig()
 
         aimLM = rigData.JOINT_AIM_UP_VECTORS[config['jointAimAxis']]
         upLM = rigData.JOINT_AIM_UP_VECTORS[config['jointUpAxis']]
@@ -402,9 +400,9 @@ class LimbSetup(absOp.Abstract_Operation):
                 up = upR
             for joint in pm.listConnections(limb.joints):
                 self._ApplyAimUpToJoint(joint, aim, up)
-                self.TransferRotationsToJointOrient(joint)
+                self.FreezeJointRotations(joint)
 
-    def TransferRotationsToJointOrient(self, joint):
+    def FreezeJointRotations(self, joint):
         temp = pm.group(em=1, p=joint)
         parent = pm.listRelatives(joint, p=1)[0]
         pm.parent(temp, parent)
@@ -413,15 +411,10 @@ class LimbSetup(absOp.Abstract_Operation):
         joint.r.set(0, 0, 0)
         pm.delete(temp)
 
-    def ExportAnimation(self, rigRoot, animName):
+    def ExportAnimation(self, rigRoot, animFilePath):
         log.funcFileDebug()
         curFile = pm.sceneName()
-        animUtil.UpdateAnimFolder(rigRoot, curFile)
         pm.saveFile()
-        self._ExportAnimation(rigRoot, animName)
-        pm.openFile(curFile, f=1)
-
-    def _ExportAnimation(self, rigRoot, animName):
         jointDict = self.bhvMng.SetupAnimJoints(rigRoot)
         # Inter-Parent Anim joints between limbs
         for joint, animJoint in jointDict.items():
@@ -431,19 +424,9 @@ class LimbSetup(absOp.Abstract_Operation):
             parentAnimJoint = jointDict[parentJoint]
             pm.parent(animJoint, parentAnimJoint)
 
-        # File paths
-        jsonFileName = '%s.json' % animName
-        mayaFileName = '%s.ma' % animName
-        folder = rigRoot.animationFolderPath.get()
-        jsonFilePath = os.path.join(folder, jsonFileName)
-        mayaFilePath = os.path.join(folder, mayaFileName)
-
-        # Anim Stuff
-        start = pm.playbackOptions(q=1, ast=1)
-        end = pm.playbackOptions(q=1, aet=1)
-
         # Delete layers, joints, unused limbs, groups
-        layers = [l for l in pm.ls(type='displayLayer') if str(l) != 'defaultLayer']
+        layers = pm.ls(type='displayLayer')
+        layers = [l for l in layers if str(l) != 'defaultLayer']
         pm.delete(layers)
         rigGroups = pm.listRelatives(rigRoot, c=1)
         jointParentGroup = pm.listConnections(rigRoot.jointsParentGroup)[0]
@@ -454,16 +437,6 @@ class LimbSetup(absOp.Abstract_Operation):
 
         rigRoot.rigMode.set(3) # Baked Animations
         
-        # Json file
-        data = {}
-        data['limbs'] = []
-        for limb in pm.listConnections(rigRoot.limbs):
-            limbID = '%s_%d' % (limb.pfrsName.get(), limb.side.get())
-            data['limbs'].append(limbID)
-        data['startFrame'] = start
-        data['frameCount'] = end-start
-        genUtil.Json.Save(jsonFilePath, data)
-
         # Remove reg joint anims
         limbs = pm.listConnections(rigRoot.limbs)
         joints = []
@@ -478,7 +451,9 @@ class LimbSetup(absOp.Abstract_Operation):
         limbParentGroup.v.set(0)
 
         # Save, Reopen, disable window
-        pm.saveAs(mayaFilePath, f=1)
+        pm.saveAs(animFilePath, f=1)
+        pm.openFile(curFile, f=1)
+        os.rename(animFilePath + '.ma', animFilePath)
 
     def RemoveAnimation(self, rigRoot):
         log.funcFileDebug()
@@ -538,6 +513,10 @@ class LimbSetup(absOp.Abstract_Operation):
             #         control.rotatePivot, ws=1)
             rigUtil.ResetAttrs(control)
             pm.parent(group, limb)
+
+    def MakeLimbJointsPlanar(self, limb):
+        # 
+        pass
 
     def _ApplyAimUpToJoint(self, joint, aimVector, upVector):
         children = pm.listRelatives(joint, c=1)
@@ -661,14 +640,6 @@ class LimbSetup(absOp.Abstract_Operation):
         if newJoints:
             pm.select(newJoints)
 
-    def _GetConfig(self):
-        folder = os.path.dirname(__file__)
-        folder = os.path.dirname(folder)
-        folder = os.path.dirname(folder)
-        folder = os.path.join(folder, 'Data')
-        filePath = os.path.join(folder, 'Config.json')
-        return genUtil.Json.Load(filePath)
-
 #============= RELATIONSHIP ============================
 
     def _BreakMirror(self, sourceLimb):
@@ -711,8 +682,9 @@ class LimbSetup(absOp.Abstract_Operation):
         log.funcFileDebug()
         rigRoot = pm.listConnections(sourceLimb.rigRoot)[0]
         # Rename joints if limb named as preset 'leg', 'arm'...
-        if newName.lower() in rigData.LIMB_JOINT_NAME_PRESETS:
-            jointNames = rigData.LIMB_JOINT_NAME_PRESETS[newName.lower()]
+        limbNamePresets = self._GetLimbNamePresets()
+        if newName.lower() in limbNamePresets:
+            jointNames = limbNamePresets[newName.lower()]
             for joint in pm.listConnections(sourceLimb.joints):
                 group = pm.listConnections(joint.group)[0]
                 index = group.groupIndex.get()
@@ -723,7 +695,7 @@ class LimbSetup(absOp.Abstract_Operation):
             oldName = sourceLimb.pfrsName.get()
             for joint in pm.listConnections(sourceLimb.joints):
                 jointName = joint.pfrsName.get()
-                if 'Joint' in jointName or oldName in jointName:
+                if jointName.startswith('Joint') or jointName.startswith(oldName):
                     group = pm.listConnections(joint.group)[0]
                     index = group.groupIndex.get()
                     indexStr = '%03d' % (index + 1)
@@ -736,6 +708,14 @@ class LimbSetup(absOp.Abstract_Operation):
                 self._UpdateParentControlIndex(childLimb)
         return True
     
+    def _GetLimbNamePresets(self):
+        folder = os.path.dirname(__file__)
+        folder = os.path.dirname(folder)
+        folder = os.path.dirname(folder)
+        folder = os.path.join(folder, 'Data')
+        filePath = os.path.join(folder, 'LimbNamePresets.json')
+        return genUtil.Json.Load(filePath)
+
     def _RenameJoint(self, rigRoot, limb, joint, newName):
         joint.pfrsName.set(newName)
         genUtil.Name.UpdateJointName(rigRoot, limb, joint)

@@ -11,8 +11,6 @@ import Utilities.Rig_Utilities as rigUtil
 reload(rigUtil)
 import Utilities.General_Utilities as genUtil
 reload(genUtil)
-import Utilities.Anim_Utilities as animUtil
-reload(animUtil)
 import Operations.Rigging_Setup.LimbSetup as ls
 reload(ls)
 import SceneData.Limb as lmb
@@ -31,22 +29,17 @@ class Animations(absOp.Abstract_Operation):
     def __init__(self):
         self._ls = ls.LimbSetup()
 
-    def RemoveControlAnimation(self, rigRoot):
-        log.funcFileInfo()
-        for limb in pm.listConnections(rigRoot.limbs):
-            groups = pm.listConnections(limb.usedGroups)
-            controls = [pm.listConnections(g.control)[0] for g in groups]
-            pm.cutKey(controls)
+    def RemoveLimbAnimations(self, limb):
+        groups = pm.listConnections(limb.usedGroups)
+        controls = [pm.listConnections(g.control)[0] for g in groups]
+        pm.cutKey(controls)
 
-    def ApplyAnimation(self, limbs, animData, newStartFrame,
+    def ImportAnimation(self, limbs, animFilePath,
                         hasPosCst, hasRotCst, hasScaleCst):
         log.funcFileInfo()
 
         # import file
-        filePath = animData['filePath']
-        filePath = os.path.splitext(filePath)[0]
-        filePath += '.ma'
-        allNodes = pm.importFile(filePath, rnn=1)
+        allNodes = pm.importFile(animFilePath, rnn=1)
         for rigRoot in genUtil.GetRigRoots():
             if rigRoot.rigMode.get() == 3: # Baked Anims
                 break
@@ -95,23 +88,16 @@ class Animations(absOp.Abstract_Operation):
                 allAnimJoints.append(animJoint)
             bakeLimbs.append(rigLimb)
         
-        # Shift all joint keyframes to new offset
-        start = animData['startFrame']
-        end = start + animData['frameCount']
-        offset = newStartFrame - start
-        pm.keyframe(allAnimJoints, r=1, tc=offset, t=(start, end))
-
         # Bake and Delete
         self.bhvMng.ApplyAnimJoints(bakeLimbs, hasPosCst, hasRotCst, hasScaleCst)
         pm.delete(allNodes)
 
-    def DeleteStaticChannels(self):
-        pm.delete(all=1, staticChannels=1)
+    def DeleteStaticChannelsOnLimb(self, limb):
+        groups = pm.listConnections(limb.usedGroups)
+        controls = [pm.listConnections(g.control)[0] for g in groups]
+        pm.delete(controls, staticChannels=1)
 
 #=========== FILES ====================================
-
-    def SetAnimationFolder(self, rigRoot, folderPath):
-        rigRoot.animationFolderPath.set(folderPath)
 
     def GetRigRootAnimations(self, rigRoot):
         curFile = pm.sceneName()

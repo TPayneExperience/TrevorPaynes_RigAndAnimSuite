@@ -19,8 +19,6 @@ CONTROL_DISP_LAYER = 'Control_Disp'
 MESHES_DISP_LAYER = 'Meshes_Disp'
 JOINTS_DISP_LAYER = 'Joint_Disp'
 
-# JOINTS_ANIM_LAYER = 'Joint_Anim'
-
 # ============= BEHAVIORS =============
 
 CST_TYPES = ('Orient', 'Parent', 'Point',  'Scale')
@@ -50,10 +48,6 @@ LIMB_TYPES = (  'Empty',
 LIMB_LOCATIONS = ('Body', 'Face', 'Fingers', 'Toes', 'Misc')
 
 LIMB_SIDES = ('M', 'L', 'R', '-')
-
-LIMB_JOINT_NAME_PRESETS = { # lowercase to for keycheck
-                'arm' : ['Shoulder', 'Elbow', 'Wrist'],
-                'leg' : ['Hip', 'Knee', 'Ankle']}
 
 # ============= JOINTS =============
 

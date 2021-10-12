@@ -17,8 +17,6 @@ import SceneData.Group as grp
 reload(grp)
 import Utilities.General_Utilities as genUtil
 reload(genUtil)
-import Utilities.Anim_Utilities as animUtil
-reload(animUtil)
 import Data.General_Data as genData
 reload(genUtil)
 
@@ -64,12 +62,15 @@ class Behavior_Manager(object):
         bhvFile = self._GetDefaultBehaviorFile(limb)
         self.SetBehavior(limb, bhvFile)
     
+    def CleanupLimb(self, limb):
+        bhv = self.bhvs[limb.bhvFile.get()]
+        bhv.CleanupLimb(limb)
+
     def SetBehavior(self, limb, bhvFile):
         log.funcFileDebug()
         oldBhvFile = limb.bhvFile.get()
         if oldBhvFile:
-            oldBhv = self.bhvs[oldBhvFile]
-            oldBhv.CleanupLimb(limb)
+            self.CleanupLimb(limb)
         self._Teardown_GroupVisibility(limb)
 
         newBhv = self.bhvs[bhvFile]
@@ -105,7 +106,6 @@ class Behavior_Manager(object):
         limbs = self._GetBhvSortedLimbs(rigRoot)
 
         # Store joint pos/rot + pivot
-        joints = []
         for limb in limbs:
             for joint in pm.listConnections(limb.joints):
                 joint.startPos.set(joint.t.get())
@@ -117,11 +117,8 @@ class Behavior_Manager(object):
         for limb in limbs:
             limb.v.set(limb.enableLimb.get())
             # Parent joint groups to limbs
-            limbJoints = pm.listConnections(limb.joints)
             bhv = self.bhvs[limb.bhvFile.get()]
             bhv.Setup_Rig_Controls(limb)
-            if limb.limbType.get() != 0: # Not Empty
-                joints += limbJoints
 
         # Constrain Joints to Controls
         for limb in limbs:

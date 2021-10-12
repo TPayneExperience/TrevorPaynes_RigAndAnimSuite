@@ -52,9 +52,17 @@ class MeshSetup(absOp.Abstract_Operation):
 
     def AddMeshes(self, rigRoot, meshes):
         log.funcFileInfo()
+        joints = rigUtil.GetSkinnableRigJoints(rigRoot)
         for mesh in meshes:
             msh.Mesh.Add(rigRoot, mesh)
-            if not pm.listConnections(mesh.pfrsSkinCluster):
+            skinCls = pm.mel.eval('findRelatedSkinCluster %s;' % mesh)
+            if skinCls:
+                msh.Mesh.ConnectSkin(mesh, skinCls)
+                infJoints = set(pm.skinCluster(skinCls, q=1, inf=1))
+                missingInf = set(joints).difference(infJoints)
+                for joint in missingInf:
+                    pm.skinCluster(skinCls, e=1, ai=joint)
+            else:
                 msh.Mesh.BindSkin(rigRoot, mesh)
             shouldUnpackWeights = True
             for limb in pm.listConnections(rigRoot.limbs):
@@ -89,23 +97,28 @@ class MeshSetup(absOp.Abstract_Operation):
                 for joint in pm.listConnections(limb.joints):
                     self._RemoveJointMask(mesh, joint)
 
+    def DeleteMeshes(self, meshes):
+        for mesh in meshes:
+            pm.delete(pm.listRelatives(mesh, p=1))
+
     def RebuildSkin(self, mesh):
         log.funcFileInfo()
         rigRoot = pm.listConnections(mesh.rigRoot)[0]
         joints = rigUtil.GetSkinnableRigJoints(rigRoot)
         backupMesh = pm.listConnections(mesh.backupMesh)[0]
         backupSkin = pm.skinCluster(joints, backupMesh)
-        meshSkin = mel.eval('findRelatedSkinCluster %s;' % mesh)
+        meshSkin = pm.listConnections(mesh.pfrsSkinCluster)[0]
         pm.copySkinWeights( ss=meshSkin, ds=backupSkin, nm=1)
-        pm.skinCluster(mesh, e=1, unbind=1)
-        meshSkin = pm.skinCluster(joints, mesh)
+        msh.Mesh.UnbindSkin(mesh)
+        msh.Mesh.BindSkin(rigRoot, mesh)
+        meshSkin = pm.listConnections(mesh.pfrsSkinCluster)[0]
         pm.copySkinWeights( ss=backupSkin, ds=meshSkin, nm=1)
 
     def PasteWeights(self, rigRoot, sourceMesh, targetMesh):
         sourceSkin = pm.listConnections(sourceMesh.pfrsSkinCluster)[0]
         targetSkin = pm.listConnections(targetMesh.pfrsSkinCluster)[0]
         pm.copySkinWeights(ss=sourceSkin, ds=targetSkin, noMirror=1)
-        self._UnpackWeights(targetMesh)
+        self._UnpackWeights(rigRoot, targetMesh)
 
 #=========== ADD + REMOVE MASKS ====================================
 
@@ -127,6 +140,7 @@ class MeshSetup(absOp.Abstract_Operation):
         # create dict of limbs attrs to joint attrs
         limbs = pm.listConnections(rigRoot.limbs)
         limbs = skinUtil.GetSkeletalLimbOrder(limbs)[::-1]
+        limbIndexes = range(len(limbs))
         limbParents = genUtil.GetDefaultLimbHier(limbs)
         limbChildren = {}
         for limb in limbs:
@@ -156,25 +170,27 @@ class MeshSetup(absOp.Abstract_Operation):
             finalJWeights.append([[0]*vertCount for j in tempJoints])
 
         # For each vert
+        progressBar = pm.mel.eval('$tmp = $gMainProgressBar')
+        pm.progressBar(progressBar, e=1, beginProgress=1, max=vertCount, 
+                                        st='Unpacking Skin Weights...')
         for vert in range(vertCount):
+            pm.progressBar(progressBar, e=1, pr=vert)
             vAttr = '%s.vtx[%d]' % (mesh, vert)
             vPos = pm.xform(vAttr, q=1, t=1, ws=1)
-            for l in range(len(limbAttrs)):
-                limbAttr = limbAttrs[l]
-                jointAttr = jointAttrs[l]
-                jointWeights = []
+            for l in limbIndexes:
                 # Get joint weights on vert
-                for j in range(len(jointAttr)):
-                    joint = joints[l][j]
-                    jointWeights.append(pm.skinPercent(skin, vAttr, t=joint, q=1))
+                jointWeights = []
+                for joint in joints[l]:
+                    jointWeights.append(pm.skinPercent(skin, vAttr, 
+                                                        t=joint, q=1))
 
                 # Limb weight
                 limbWeight = sum(jointWeights)
+                # Get closest joint and flood
                 if limbWeight == 0:
-                    # Get closest joint and flood
                     closestDist = 999999
                     closestJointIndex = None
-                    for j in range(len(jointAttr)):
+                    for j in range(len(jointPositions[l])):
                         jPos = jointPositions[l][j]
                         squared = [(vPos[i] - jPos[i])**2 for i in range(3)]
                         dist = sum(squared)
@@ -182,11 +198,12 @@ class MeshSetup(absOp.Abstract_Operation):
                             closestDist = dist
                             closestJointIndex = j
                     finalJWeights[l][closestJointIndex][vert] = 1
+
                 else:
                     # Scale Joint weights up
                     scalar = 1.0/limbWeight
                     jointWeights = [min(j*scalar, 1) for j in jointWeights]
-                    for j in range(len(jointAttr)):
+                    for j in range(len(jointPositions[l])):
                         finalJWeights[l][j][vert] = jointWeights[j]
                 limb = limbs[l]
                 for child in limbChildren[limb]:
@@ -201,6 +218,7 @@ class MeshSetup(absOp.Abstract_Operation):
             for j in range(len(jointAttrs[l])):
                 jointAttr = jointAttrs[l][j]
                 mesh.setAttr(jointAttr, finalJWeights[l][j])
+        pm.progressBar(progressBar, e=1, endProgress=1)
         print('done!')
 
 #=========== FLOOD ====================================

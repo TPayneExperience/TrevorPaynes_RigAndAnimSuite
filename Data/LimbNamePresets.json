@@ -1,0 +1,4 @@
+{
+    "arm" : ["Shoulder", "Elbow", "Wrist"],
+    "leg" : ["Hip", "Knee", "Ankle"]
+}

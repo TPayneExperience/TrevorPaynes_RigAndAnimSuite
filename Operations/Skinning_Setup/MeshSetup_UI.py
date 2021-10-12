@@ -45,6 +45,8 @@ class MeshSetup_UI(absOpUI.Abstract_OperationUI):
                     pm.menuItem(l='Refresh', c=self.Refresh)
                     self.add_mi = pm.menuItem(l='Add Meshes', en=0, 
                                                             c=self.AddMeshes)
+                    self.delete_mi = pm.menuItem(l='Delete Meshes', en=0, 
+                                                            c=self.DeleteMeshes)
         
         with pm.verticalLayout():
             with pm.frameLayout('Skinned Meshes', bv=1):
@@ -64,6 +66,9 @@ class MeshSetup_UI(absOpUI.Abstract_OperationUI):
                     pm.menuItem(divider=1)
                     self.remove_mi = pm.menuItem(l='Remove Meshes', en=0, 
                                                             c=self.RemoveMeshes)
+                    self.removeDelete_mi = pm.menuItem(l='Remove + Delete Meshes', 
+                                                        en=0, 
+                                                        c=self.RemoveDeleteMeshes)
 
 #=========== AVAILABLE ====================================
 
@@ -75,7 +80,7 @@ class MeshSetup_UI(absOpUI.Abstract_OperationUI):
         availableMeshes = [pm.listRelatives(m, c=1, s=1)[0] for m in meshXforms]
         skinnedMeshes = pm.listConnections(self._rigRoot.meshes, sh=1)
         backupMeshes = [pm.listConnections(m.backupMesh, sh=1)[0] for m in skinnedMeshes]
-        self._allMeshes = {} # name : meshNode
+        self._allMeshes.clear() # name : meshNode
         self._selectedAvailable = []
         for mesh in availableMeshes:
             if mesh in backupMeshes:
@@ -88,14 +93,14 @@ class MeshSetup_UI(absOpUI.Abstract_OperationUI):
 
     def SelectedAvaiable(self):
         log.funcFileInfo()
-        pm.menuItem(self.add_mi, e=1, en=0)
         self._selectedAvailable = []
         names = pm.treeView(self.availableMeshes_tv, q=1, si=1)
+        pm.menuItem(self.add_mi, e=1, en=bool(names))
+        pm.menuItem(self.delete_mi, e=1, en=bool(names))
         if not names:
             pm.select(d=1)
             return
         self._selectedAvailable = [self._allMeshes[n] for n in names]
-        pm.menuItem(self.add_mi, e=1, en=1)
         for mesh in self._selectedAvailable:
             if mesh.hasAttr('rigRoot'):
                 if pm.listConnections(mesh.rigRoot):
@@ -109,10 +114,17 @@ class MeshSetup_UI(absOpUI.Abstract_OperationUI):
 
     def AddMeshes(self, ignore):
         log.funcFileInfo()
-        self.operation.AddMeshes(self._rigRoot, self._selectedAvailable)
+        self.operation.AddMeshes(self._rigRoot, 
+                                self._selectedAvailable)
         self.PopulateAvailable()
         self.PopulateSkinned()
         self._pfrsUI.EnableOperations()
+
+    def DeleteMeshes(self, ignore):
+        log.funcFileInfo()
+        self.operation.DeleteMeshes(self._selectedAvailable)
+        self._selectedAvailable = []
+        self.PopulateAvailable()
 
     def RenameMesh(self, oldName, newName):
         log.funcFileInfo()
@@ -147,6 +159,7 @@ class MeshSetup_UI(absOpUI.Abstract_OperationUI):
         self._selectedSkinned = []
         names = pm.treeView(self._skinnedMeshes_tv, q=1, si=1)
         pm.menuItem(self.remove_mi, e=1, en=bool(names))
+        pm.menuItem(self.removeDelete_mi, e=1, en=bool(names))
         pm.menuItem(self.rebuild_mi, e=1, en=bool(names))
         pm.menuItem(self.copy_mi, e=1, en=bool(names))
         isEnabled = (bool(names) and bool(self._sourceSkin))
@@ -168,6 +181,17 @@ class MeshSetup_UI(absOpUI.Abstract_OperationUI):
             self._sourceSkin = None
         pm.menuItem(self.copy_mi, e=1, en=0)
         self._selectedSkinned = []
+
+    def RemoveDeleteMeshes(self, ignore):
+        log.funcFileInfo()
+        self.operation.RemoveMeshes(self._rigRoot, self._selectedSkinned)
+        self.operation.DeleteMeshes(self._selectedSkinned)
+        if self._sourceSkin in self._selectedSkinned:
+            pm.menuItem(self.paste_mi, e=1, en=0, l='Paste Weights (None)')
+            self._sourceSkin = None
+        self._selectedSkinned = []
+        self.PopulateAvailable()
+        self.PopulateSkinned()
 
     def RebuildSkins(self, ignore):
         log.funcFileInfo()

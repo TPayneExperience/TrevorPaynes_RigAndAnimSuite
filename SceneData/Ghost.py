@@ -25,16 +25,11 @@ class Ghost:
         newRigRoot = pm.duplicate(rigRoot, un=1)[0]
         newRigRoot.rename('Ghost_%03d' % newID)
         newRigRoot.ID.set(newID)
-        joints = list()
-        limbs = pm.listConnections(newRigRoot.limbs)
-        for limb in limbs:
-            if limb.limbType.get() != 0:
-                limbJoints = pm.listConnections(limb.joints)
-                joints += limbJoints
+        joints = rigUtil.GetSkinnableRigJoints(rigRoot)
         start = pm.playbackOptions(q=1, ast=1)
         end = pm.playbackOptions(q=1, aet=1)
-        safe = pm.listConnections(newRigRoot.meshesParentGroup)
-        safe += pm.listConnections(newRigRoot.jointsParentGroup)
+        saveGroups = pm.listConnections(newRigRoot.meshesParentGroup)
+        saveGroups += pm.listConnections(newRigRoot.jointsParentGroup)
         pm.bakeResults(joints, sm=1, t=(start, end))
 
         pm.addAttr(newRigRoot, ln='ghostMtr', dt='string')
@@ -55,7 +50,7 @@ class Ghost:
         for mesh in pm.listConnections(newRigRoot.meshes, sh=1):
             pm.sets(sg, e=True, forceElement=mesh)
         for child in pm.listRelatives(newRigRoot, c=1):
-            if child not in safe:
+            if child not in saveGroups:
                 pm.delete(child)
         pm.parent(newRigRoot, parent)
 

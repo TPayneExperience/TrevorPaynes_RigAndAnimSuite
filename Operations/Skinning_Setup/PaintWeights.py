@@ -234,8 +234,7 @@ class PaintWeights(absOp.Abstract_Operation):
     def SetMesh(self, mesh):
         lmbOp.PFRS_MESH_NAME = mesh.longName()
         jntOp.PFRS_MESH_NAME = mesh.longName()
-        xform = pm.listRelatives(mesh, p=1)[0]
-        skinCluster = pm.listConnections(xform.pfrsSkinCluster)[0]
+        skinCluster = pm.listConnections(mesh.pfrsSkinCluster)[0]
         lmbOp.SKIN_CLUSTER = skinCluster.longName()
         jntOp.SKIN_CLUSTER = skinCluster.longName()
     
@@ -385,14 +384,7 @@ class PaintWeights(absOp.Abstract_Operation):
         pm.playbackOptions(min=start, max=end)
 
     def _Setup_JointAnim(self, rigRoot):
-        allJoints = {}
-        for limb in pm.listConnections(rigRoot.limbs):
-            if limb.limbType.get() == 0:
-                continue
-            for joint in pm.listConnections(limb.joints):
-                allJoints[joint.longName()] = joint
-        sortedNames = sorted(list(allJoints.keys()))
-        joints = [allJoints[n] for n in sortedNames]
+        joints = rigUtil.GetSkinnableRigJoints(rigRoot)
         pm.select(joints)
         pm.animLayer(self._skinTestAnimLayer, aso=1, s=1)
         pm.select(d=1)

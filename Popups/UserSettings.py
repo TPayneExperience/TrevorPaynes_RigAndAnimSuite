@@ -31,7 +31,7 @@ class UserSettings:
         form = pm.setParent(q=1)
         with pm.frameLayout(lv=0, p=form) as temp_fl:
             with pm.columnLayout(adj=1):
-                with pm.frameLayout(l='Text Fields', bv=1) as self._txt_fl:
+                with pm.frameLayout(l='Text Fields', bv=1, mw=5, mh=5) as self._txt_fl:
                     with pm.columnLayout(adj=1):
                         self._Setup_RigRootName()
                         self._Setup_TemplatesFolder()

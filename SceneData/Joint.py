@@ -31,7 +31,7 @@ class Joint:
         else:
             group = grp.Group.AddJointGroup(rigRoot, index, limb, joint)
         pm.connectAttr(limb.jointGroups, group.limb)
-        joint.pfrsName.set('Joint%03d' % (index))
+        joint.pfrsName.set('Joint%03d' % (nextJointID))
     
     @staticmethod
     def Remove(joint):

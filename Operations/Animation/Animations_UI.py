@@ -1,4 +1,7 @@
 
+from collections import OrderedDict
+import os
+
 import pymel.core as pm
 
 import Abstracts.Abstract_OperationUI as absOpUI
@@ -19,10 +22,15 @@ class Animation_UI(absOpUI.Abstract_OperationUI):
     uiOrderIndex = 310
     operation = anm.Animations()
 
+    def __init__(self):
+        self._limbIDs = OrderedDict() # limbID : limb
+
     def Setup_UI(self, rigRoot, allRigRoots, pfrsUI): 
         self._Setup()
         self._rigRoot = rigRoot
         self._allRigRoots = allRigRoots
+        self._selectedLimbs = []
+        self.rigRoots = OrderedDict() # ID : rigRoot
         self.PopulateRigRootHier()
         
     def Teardown_UI(self):
@@ -32,106 +40,87 @@ class Animation_UI(absOpUI.Abstract_OperationUI):
 
     def _Setup(self):
         with pm.verticalLayout():
-            # Rig Roots
-            with pm.frameLayout('Rig Roots', bv=1) as self.rigRoot_fl:
+            with pm.frameLayout('Rig Roots', bv=1):
                 self.rigRoot_tv = pm.treeView(adr=0, arp=0, ams=0)
                 pm.treeView(self.rigRoot_tv, e=1, scc=self.SelectedRigRoot,
                                             elc=self.IgnoreRename)
-                with pm.popupMenu() as self.rmb_ui:
-                    self.setAnim_mi = pm.menuItem(l='Set Animation Folder', en=0,
-                                                c=self.SetAnimationFolder)
-                    # pm.menuItem(d=1)
-                    # self.export_mi = pm.menuItem(l='Export Control Animation', en=0, 
-                    #                             c=self.ExportControlAnimation)
-                    self.remove_mi = pm.menuItem(l='Remove Control Animation', en=0, 
-                                                c=self.RemoveControlAnimation)
-                    pm.menuItem(d=1)
-                    pm.menuItem(l='Delete Static Channels', 
-                                c=pm.Callback(self.operation.DeleteStaticChannels))
-            # Animations
-            with pm.frameLayout('Animations', bv=1) as self.anim_fl:
-                self.animations_tv = pm.treeView(arp=0, adr=0, ams=0,
-                                            elc=self.IgnoreRename)
-                pm.treeView(self.animations_tv, e=1, scc=self.SelectedAnimation)
-                with pm.popupMenu() as self.rmb_ui:
-                    self.delete_mi = pm.menuItem(l='Delete Animation', en=0, 
-                                                c=self.DeleteAnimation)
-        with pm.verticalLayout():
-            # Limbs
-            with pm.frameLayout('Animated Limbs', bv=1) as self.limbs_fl:
-                self.limb_tv = pm.treeView(adr=0, arp=0, nb=1, enk=1,
-                                            elc=self.IgnoreRename,
+            with pm.frameLayout('Limbs', bv=1):
+                self.limb_tv = uiUtil.SetupLimbHier(self._limbIDs)
+                pm.treeView(self.limb_tv, e=1, ams=1, elc=self.IgnoreRename,
                                             scc=self.SelectedLimb)
-            # Properties
-            with pm.frameLayout('Animation Properties', bv=1, en=0, mw=7, mh=7) as self.prop_fl:
+        with pm.verticalLayout():
+            with pm.frameLayout('Options', bv=1, mw=5, mh=5):
+                with pm.columnLayout(adj=1, rs=5):
+                    pm.button(l='Delete Static Channels On Limb', c=self.DeleteStaticChannelsOnLimb)
+                    pm.button(l='Remove Limb Animations', c=self.RemoveLimbAnimations)
+            with pm.frameLayout('Import Animation', bv=1, mw=7, mh=7):
                 with pm.columnLayout(adj=1, rs=5):
                     self.constraints_cb = pm.checkBoxGrp( ncb=3, l='  ',
                                                 la3=['Position', 'Rotation', 'Scale'],
                                                 va3=(1,1,1), cw4=(10,70,70,70),
                                                 cc=self.ChangedConstraints)
-                    self.startFrame_ff = pm.floatFieldGrp(nf=1, l='Start Frame')
-                    self.frameCount_t = pm.text('Frame Count')
-                    self.apply_b = pm.button(l='Apply Animation', c=self.ApplyAnimation)
+                    self.import_b = pm.button(l='Import Animation', c=self.ImportAnimation)
 
 #=========== RIG ROOT HIER ====================================
    
     def PopulateRigRootHier(self):
         log.funcFileDebug()
-        self.rigRoots = {} # ID : rigRoot
+        self.rigRoots.clear()
         for rigRoot in genUtil.GetRigRoots():
             index = str(rigRoot.ID.get())
             name = rigRoot.pfrsName.get()
             pm.treeView(self.rigRoot_tv, e=1, addItem=(index, ''))
             pm.treeView(self.rigRoot_tv, e=1, displayLabel=(index, name))
             self.rigRoots[index] = rigRoot
+        rigRootID = self._rigRoot.ID.get()
+        pm.treeView(self.rigRoot_tv, e=1, selectItem=(rigRootID, 1))
+        self.PopulateLimbHier()
 
     def SelectedRigRoot(self):
         log.funcFileInfo()
-        self._rigRoot = None
-        self.PopulateAnimationHier()
-        pm.menuItem(self.export_mi, e=1, en=0)
-        pm.menuItem(self.setAnim_mi, e=1, en=0)
-        pm.menuItem(self.remove_mi, e=1, en=0)
         rigRootIDStrs = pm.treeView(self.rigRoot_tv, q=1, selectItem=1)
         if not rigRootIDStrs:
+            rigRootID = self._rigRoot.ID.get()
+            pm.treeView(self.rigRoot_tv, e=1, selectItem=(rigRootID, 1))
             return
         self._rigRoot = self.rigRoots[rigRootIDStrs[0]]
-        pm.menuItem(self.export_mi, e=1, en=1)
-        pm.menuItem(self.setAnim_mi, e=1, en=1)
-        pm.menuItem(self.remove_mi, e=1, en=1)
-        self.PopulateAnimationHier()
+        self.PopulateLimbHier()
 
     def IgnoreRename(self, idStr, newName):
         log.funcFileInfo()
         return ''
 
-    # def ExportControlAnimation(self, ignore):
-    #     log.funcFileInfo()
-    #     if not str(pm.sceneName()):
-    #         msg = 'Please SAVE current scene before '
-    #         msg += '\nsaving a template'
-    #         pm.confirmDialog(   t='Save Current Scene', 
-    #                             m=msg, 
-    #                             icon='warning', 
-    #                             b='Ok')
-    #         return
-    #     result = pm.promptDialog(
-    #             title='Name New Animation',
-    #             message='Animation Name: ',
-    #             button=['Save', 'Cancel'],
-    #             defaultButton='Save',
-    #             cancelButton='Cancel',
-    #             dismissString='Cancel')
-    #     if result != 'Save':
-    #         return
-    #     animName = pm.promptDialog(q=1, tx=1)
-    #     self.operation.ExportControlAnimation(self._rigRoot, animName)
-    #     pm.frameLayout(self.rigRoot_fl, e=1, en=0)
-    #     pm.frameLayout(self.anim_fl, e=1, en=0)
-    #     pm.frameLayout(self.limbs_fl, e=1, en=0)
-    #     pm.frameLayout(self.prop_fl, e=1, en=0)
+#=========== LIMB HIER ====================================
 
-    def RemoveControlAnimation(self, ignore):
+    def PopulateLimbHier(self):
+        log.funcFileDebug()
+        pm.treeView(self.limb_tv, e=1, removeAll=1)
+        self._limbIDs.clear()
+        self._limbIDs.update(uiUtil.PopulateLimbHierNormal(self.limb_tv, 
+                                                self._rigRoot,
+                                                self._allRigRoots))
+        self._selectedLimbs = list(self._limbIDs.values())
+        for rigLimbID in list(self._limbIDs.keys()):
+            pm.treeView(self.limb_tv, e=1, si=(rigLimbID, 1))
+
+    def SelectedLimb(self):
+        log.funcFileInfo()
+        limbIDStrs = pm.treeView(self.limb_tv, q=1, selectItem=1)
+        if not limbIDStrs:
+            for limb in self._selectedLimbs:
+                rigRootID = self._rigRoot.ID.get()
+                limbID = '%d_%d' % (rigRootID, limb.ID.get())
+                pm.treeView(self.limb_tv, e=1, selectItem=(limbID, 1))
+                return
+        self._selectedLimbs = [self._limbIDs[ID] for ID in limbIDStrs]
+
+#=========== MISC ====================================
+
+    def DeleteStaticChannelsOnLimb(self, ignore):
+        for limb in self._selectedLimbs:
+            self.operation.DeleteStaticChannelsOnLimb(limb)
+
+    def RemoveLimbAnimations(self, ignore):
         log.funcFileInfo()
         result = pm.confirmDialog(
                         t='Delete Animation', 
@@ -141,116 +130,24 @@ class Animation_UI(absOpUI.Abstract_OperationUI):
                         db='Ok', 
                         cb='Cancel', 
                         ds='Cancel')
-        if result == 'Cancel':
-            return
-        self.operation.RemoveControlAnimation(self._rigRoot)
-
-    def SetAnimationFolder(self, ignore):
-        log.funcFileInfo()
-        folder = self._rigRoot.animationFolderPath.get()
-        result = pm.fileDialog2(fm=3, dir=folder, 
-                                cap='Set Animation Folder')
-        if not result:
-            return
-        self.operation.SetAnimationFolder(self._rigRoot, result[0])
-        self.PopulateAnimationHier()
-
-#=========== ANIMATION HIER ====================================
-
-    def PopulateAnimationHier(self):
-        log.funcFileDebug()
-        self.animData = None
-        self.PopulateLimbHierNormal()
-        self.PopulateProperties()
-        pm.menuItem(self.delete_mi, e=1, en=0)
-        pm.treeView(self.animations_tv, e=1, removeAll=1)
-        if not self._rigRoot:
-            return
-        self.anims = self.operation.GetRigRootAnimations(self._rigRoot)
-        for anim in list(self.anims.keys()):
-            pm.treeView(self.animations_tv, e=1, ai=(anim, ''))
-            
-    def SelectedAnimation(self):
-        log.funcFileInfo()
-        self.animData = None
-        self.PopulateLimbHierNormal()
-        self.PopulateProperties()
-        self.UpdateApplyButton()
-        pm.menuItem(self.delete_mi, e=1, en=0)
-        animStrs = pm.treeView(self.animations_tv, q=1, selectItem=1)
-        if not animStrs:
-            return
-        pm.menuItem(self.delete_mi, e=1, en=1)
-        animFile = self.anims[animStrs[0]]
-        self.animData = genUtil.Json.Load(animFile)
-        self.animData['filePath'] = animFile
-        self.PopulateLimbHierNormal()
-        self.PopulateProperties()
-        self.UpdateApplyButton()
-
-    def DeleteAnimation(self, ignore):
-        log.funcFileInfo()
-        animStrs = pm.treeView(self.animations_tv, q=1, selectItem=1)
-        msg = 'Delete animation "%s"?' % animStrs[0]
-        result = pm.confirmDialog(
-                        t='Delete Animation', 
-                        icon='warning', 
-                        m=msg, 
-                        b=['Ok', 'Cancel'], 
-                        db='Ok', 
-                        cb='Cancel', 
-                        ds='Cancel')
-        if result == 'Cancel':
-            return
-        animFile = self.anims[animStrs[0]]
-        self.operation.DeleteAnimation(animFile)
-        self.PopulateAnimationHier()
-
-#=========== LIMB HIER ====================================
-
-    def PopulateLimbHierNormal(self):
-        log.funcFileDebug()
-        pm.treeView(self.limb_tv, e=1, removeAll=1)
-        self._limbIDs = []
-        if not self.animData:
-            return
-        self._limbIDs = uiUtil.PopulateLimbHierNormal(self.limb_tv, 
-                                                self._rigRoot,
-                                                self._allRigRoots)
-        for rigLimbID, limb in self._limbIDs.items():
-            pm.treeView(self.limb_tv, e=1, si=(rigLimbID, 1))
-            limbID = '%s_%d' % (limb.pfrsName.get(), limb.side.get())
-            if limbID not in self.animData['limbs']:
-                pm.treeView(self.limb_tv, e=1, enl=(limbID, 0))
-
-    def SelectedLimb(self):
-        log.funcFileInfo()
-        self.UpdateApplyButton()
+        if result == 'Ok':
+            for limb in self._selectedLimbs:
+                self.operation.RemoveLimbAnimations(limb)
 
 #=========== PROPERTIES ====================================
 
-    def PopulateProperties(self):
-        log.funcFileDebug()
-        pm.frameLayout(self.prop_fl, e=1, en=0)
-        if not self.animData:
-            return
-        pm.frameLayout(self.prop_fl, e=1, en=1)
-
-        # Frame Count
-        txt = 'Frame Count: ' + str(self.animData['frameCount'])
-        pm.text(self.frameCount_t, e=1, l=txt)
-
-        # Start Frame
-        startFrame = self.animData['startFrame']
-        pm.floatFieldGrp(self.startFrame_ff, e=1, v1=startFrame)
-    
-    def ApplyAnimation(self, ignore):
+    def ImportAnimation(self, ignore):
         log.funcFileInfo()
-        limbIDStrs = pm.treeView(self.limb_tv, q=1, selectItem=1)
-        limbs = [self._limbIDs[ID] for ID in limbIDStrs]
-        newStart = pm.floatFieldGrp(self.startFrame_ff, q=1, v1=1)
+        curFile = pm.sceneName()
+        result = pm.fileDialog2(fm=1, 
+                                ff='PFRS Animation (*.pfa)', 
+                                dir=os.path.dirname(curFile), 
+                                cap='Import Animation',
+                                okc='Import')
+        if not result:
+            return
         vals = pm.checkBoxGrp(self.constraints_cb, q=1, va3=1)
-        self.operation.ApplyAnimation(  limbs, self.animData, newStart,
+        self.operation.ImportAnimation(self._selectedLimbs, self.animData,
                                         vals[0], vals[1], vals[2])
 
     def ChangedConstraints(self, ignore):
@@ -258,11 +155,8 @@ class Animation_UI(absOpUI.Abstract_OperationUI):
         self.UpdateApplyButton()
 
     def UpdateApplyButton(self):
-        pm.button(self.apply_b, e=1, en=0)
-        vals = pm.checkBoxGrp(self.constraints_cb, q=1, va3=1)
-        limbIDStrs = pm.treeView(self.limb_tv, q=1, selectItem=1)
-        if any(vals) and limbIDStrs:
-            pm.button(self.apply_b, e=1, en=1)
+        isEnabled = any(pm.checkBoxGrp(self.constraints_cb, q=1, va3=1))
+        pm.button(self.import_b, e=1, en=isEnabled)
             
 # Copyright (c) 2021 Trevor Payne
 # See user license in "PayneFreeRigSuite\Data\LicenseAgreement.txt"

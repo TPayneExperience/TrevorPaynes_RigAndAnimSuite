@@ -12,7 +12,7 @@ import SceneData.Joint as jnt
 reload(jnt)
 
 class Empty_01(absBhv.Abstract_Behavior):
-    bhvType = 'Empty'
+    bhvType = 'Empty1'
     validLimbTypes = (0,)   # rigData.LIMB_TYPES
     groupType = 'Empty'  # LookAt, IKPV...
     groupShape = 'Square_Wire'
@@ -32,7 +32,7 @@ class Empty_01(absBhv.Abstract_Behavior):
         joint = pm.joint()
         rigRoot = pm.listConnections(limb.rigRoot)[0]
         jnt.Joint.Add(rigRoot, 0, limb, joint)
-        joint.pfrsName.set('Empty')
+        joint.pfrsName.set(self.groupType)
         joint.v.set(0)
         jointGroup = pm.listConnections(joint.group)[0]
         jointGroup.v.set(0)
@@ -42,7 +42,7 @@ class Empty_01(absBhv.Abstract_Behavior):
     def CleanupLimb(self, limb):
         log.funcFileDebug()
         joint = pm.listConnections(limb.joints)[0]
-        jnt.Joint.Remove(joint)
+        jnt.Joint.Delete(joint)
     
 #============= FOR BEHAVIOR OPERATION ============================
 

@@ -9,8 +9,6 @@ import LimbSetup as ls
 reload(ls)
 import Utilities.UI_Utilities as uiUtil
 reload(uiUtil)
-import Utilities.Anim_Utilities as animUtil
-reload(animUtil)
 import Utilities.General_Utilities as genUtil
 reload(genUtil)
 import Utilities.Logger as log
@@ -98,28 +96,27 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
                 with pm.popupMenu():
                     # Edit Limb Joints
                     pm.menuItem(l='EDIT LIMB JOINTS', d=1)
-                    msg = 'Transfer Rotations To Joint Orient'
-                    self.xferToJntOri_mi = pm.menuItem(l=msg, 
+                    self.xferToJntOri_mi = pm.menuItem(l='Freeze Joint Rotations', 
                                             en=0,
-                                            c=self.TransferRotationsToJointOrient)
-                    self.aimUp_mi = pm.menuItem(l='Apply Joint Aim + Up User Settings', 
-                                            en=0, c=self.ApplyJointAimUp)
+                                            c=self.FreezeJointRotations)
+                    self.updateMirror_mi = pm.menuItem(l='Update Mirror Joints', 
+                                            en=0,
+                                            c=self.UpdateMirrorJoints)
+                    self.makePlanar_mi = pm.menuItem(l='Make Joints Planar', 
+                                            en=0,
+                                            c=self.MakeLimbJointsPlanar)
                     self.zeroRot_mi = pm.menuItem(l='Set Joint Rotation to Zero', 
                                             en=0,
                                             c=self.SetJointRotationToZero)
-                    self.resetScale_mi = pm.menuItem(l='Reset Joint Scale', 
-                                            en=0,
-                                            c=self.RemoveJointScale)
-                    self.updateBody_mi = pm.menuItem(l='Update Mirror Body Joints', 
-                                            en=0,
-                                            c=self.UpdateMirrorBodyJoints)
-                    self.updateFace_mi = pm.menuItem(l='Update Mirror Face Joints', 
-                                            en=0,
-                                            c=self.UpdateMirrorFaceJoints)
                     with pm.subMenuItem(l='Joint Rotation Order', en=0) as self.jro_mi:
                         for i in range(6):
                             rotOrder = rigData.JOINT_ROT_ORDER[i]
                             pm.menuItem(l=rotOrder, c=pm.Callback(self.JointRotOrder, i))
+                    self.resetScale_mi = pm.menuItem(l='Reset Joint Scale', 
+                                            en=0,
+                                            c=self.RemoveJointScale)
+                    self.aimUp_mi = pm.menuItem(l='Apply Joint Aim + Up User Settings', 
+                                            en=0, c=self.ApplyJointAimUp)
 
                     # Templates
                     pm.menuItem(l='TEMPLATES', d=1)
@@ -130,6 +127,8 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
                            
                     # More Limbs
                     pm.menuItem(l='MORE LIMBS!', d=1)
+                    self.addEmpty_mi = pm.menuItem(l='Add Empty Limb', 
+                                            c=self.AddEmptyLimb)
                     self.duplicate_mi = pm.menuItem(l='Duplicate Limbs', 
                                             en=0, c=self.DuplicateLimbs)
                     with pm.subMenuItem(l='Mirror Body Limbs', en=0) as self.mirrorBody_mi:
@@ -330,45 +329,39 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
     def SelectedLimb(self):
         log.funcFileInfo()
         limbIDStrs = pm.treeView(self.limb_tv, q=1, selectItem=1)
-        pm.menuItem(self.removeLimbs_mi, e=1, en=0)
-        pm.menuItem(self.removeLimbsAndJoints_mi, e=1, en=0)
+        pm.menuItem(self.removeLimbs_mi, e=1, en=bool(limbIDStrs))
+        pm.menuItem(self.removeLimbsAndJoints_mi, e=1, en=bool(limbIDStrs))
+        pm.menuItem(self.duplicate_mi, e=1, en=bool(limbIDStrs))
+        pm.menuItem(self.mirrorBody_mi, e=1, en=bool(limbIDStrs))
+        pm.menuItem(self.mirrorFace_mi, e=1, en=bool(limbIDStrs))
+        pm.menuItem(self.jro_mi, e=1, en=bool(limbIDStrs))
+        pm.menuItem(self.saveTemp_mi, e=1, en=bool(limbIDStrs))
+        pm.menuItem(self.aimUp_mi, e=1, en=bool(limbIDStrs))
+        pm.menuItem(self.xferToJntOri_mi, e=1, en=bool(limbIDStrs))
+        pm.menuItem(self.limbLoc_mi, e=1, en=bool(limbIDStrs))
+        pm.menuItem(self.zeroRot_mi, e=1, en=bool(limbIDStrs))
+        pm.menuItem(self.resetScale_mi, e=1, en=bool(limbIDStrs))
         pm.menuItem(self.flipSides_mi, e=1, en=0)
-        pm.menuItem(self.duplicate_mi, e=1, en=0)
-        pm.menuItem(self.mirrorBody_mi, e=1, en=0)
-        pm.menuItem(self.mirrorFace_mi, e=1, en=0)
-        pm.menuItem(self.jro_mi, e=1, en=0)
-        pm.menuItem(self.saveTemp_mi, e=1, en=0)
-        pm.menuItem(self.aimUp_mi, e=1, en=0)
-        pm.menuItem(self.xferToJntOri_mi, e=1, en=0)
-        pm.menuItem(self.updateBody_mi, e=1, en=0)
-        pm.menuItem(self.updateFace_mi, e=1, en=0)
-        pm.menuItem(self.limbLoc_mi, e=1, en=0)
+        pm.menuItem(self.updateMirror_mi, e=1, en=0)
         pm.menuItem(self.exportAnim_mi, e=1, en=0)
         pm.menuItem(self.removeAnim_mi, e=1, en=0)
-        pm.menuItem(self.zeroRot_mi, e=1, en=0)
-        pm.menuItem(self.resetScale_mi, e=1, en=0)
-        self._selectedLimbs = None
+        pm.menuItem(self.makePlanar_mi, e=1, en=0)
+        self._selectedLimbs = []
         self.PopulateJointHier(None)
         if not limbIDStrs:
             return
-        pm.menuItem(self.mirrorBody_mi, e=1, en=1)
-        pm.menuItem(self.mirrorFace_mi, e=1, en=1)
-        pm.menuItem(self.duplicate_mi, e=1, en=1)
-        pm.menuItem(self.saveTemp_mi, e=1, en=1)
-        pm.menuItem(self.jro_mi, e=1, en=1)
-        pm.menuItem(self.aimUp_mi, e=1, en=1)
-        pm.menuItem(self.xferToJntOri_mi, e=1, en=1)
-        pm.menuItem(self.limbLoc_mi, e=1, en=1)
-        pm.menuItem(self.zeroRot_mi, e=1, en=1)
-        pm.menuItem(self.resetScale_mi, e=1, en=1)
         self._selectedLimbs = [self._limbIDs[ID] for ID in limbIDStrs]
+        self._selectedLimbs = list(set(self._selectedLimbs))
+        allChains = True
         for limb in self._selectedLimbs:
             log.debug('\t\t' + limb.pfrsName.get())
             if pm.listConnections(limb.mirrorLimb):
                 pm.menuItem(self.mirrorBody_mi, e=1, en=0)
                 pm.menuItem(self.mirrorFace_mi, e=1, en=0)
-                pm.menuItem(self.updateBody_mi, e=1, en=1)
-                pm.menuItem(self.updateFace_mi, e=1, en=1)
+                pm.menuItem(self.updateMirror_mi, e=1, en=1)
+            if limb.limbType.get() != 4: # 3+ Chain
+                allChains = False
+        pm.menuItem(self.makePlanar_mi, e=1, en=allChains)
         for limb in pm.listConnections(self._rigRoot.limbs):
             for joint in pm.listConnections(limb.joints):
                 if pm.keyframe(joint, q=1, kc=1):
@@ -384,8 +377,6 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
         for limb in self._selectedLimbs:
             allJoints += pm.listConnections(limb.joints)
         pm.select(allJoints)
-        pm.menuItem(self.removeLimbs_mi, e=1, en=1)
-        pm.menuItem(self.removeLimbsAndJoints_mi, e=1, en=1)
 
     def AddJointLimb(self, ignore):
         log.funcFileInfo()
@@ -408,6 +399,13 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
         self.PopulateSceneHier()
         self._pfrsUI.EnableOperations()
 
+    def AddEmptyLimb(self, ignore):
+        log.funcFileInfo()
+        limb = self._selectedLimbs[0]
+        rigRoot = pm.listConnections(limb.rigRoot)[0]
+        self.operation.AddEmptyLimb(rigRoot)
+        self.PopulateLimbHier()
+
     def DuplicateLimbs(self, ignore):
         log.funcFileInfo()
         self.operation.DuplicateLimbs(self._selectedLimbs)
@@ -429,15 +427,10 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
         self.PopulateSceneHier()
         self.PopulateJointHier(None)
 
-    def UpdateMirrorBodyJoints(self, ignore):
+    def UpdateMirrorJoints(self, ignore):
         log.funcFileInfo()
         for limb in self._selectedLimbs:
-            self.operation.UpdateMirrorBodyJoints(limb)
-
-    def UpdateMirrorFaceJoints(self, ignore):
-        log.funcFileInfo()
-        for limb in self._selectedLimbs:
-            self.operation.UpdateMirrorFaceJoints(limb)
+            self.operation.UpdateMirrorJoints(limb)
 
     def JointRotOrder(self, index):
         log.funcFileInfo()
@@ -564,10 +557,10 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
         log.funcFileInfo()
         self.operation.ApplyAimUpToLimbJoints(self._selectedLimbs)
     
-    def TransferRotationsToJointOrient(self, ignore):
+    def FreezeJointRotations(self, ignore):
         for limb in self._selectedLimbs:
             for joint in pm.listConnections(limb.joints):
-                self.operation.TransferRotationsToJointOrient(joint)
+                self.operation.FreezeJointRotations(joint)
 
     def SetLimbLocation(self, value):
         for limb in self._selectedLimbs:
@@ -583,32 +576,15 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
                                 icon='warning', 
                                 b='Ok')
             return
-        result = pm.promptDialog(
-                title='Name New Animation',
-                message='Animation Name: ',
-                button=['Save', 'Cancel'],
-                defaultButton='Save',
-                cancelButton='Cancel',
-                dismissString='Cancel')
-        if result != 'Save':
-            return
-        animName = pm.promptDialog(q=1, tx=1)
         curFile = pm.sceneName()
-        animUtil.UpdateAnimFolder(self._rigRoot, curFile)
-        animFolderPath = self._rigRoot.animationFolderPath.get()
-        animFilePath = os.path.join(animFolderPath, animName)
-        animFilePath = '%s.ma' % animFilePath
-        if os.path.exists(animFilePath):
-            result = pm.confirmDialog(
-                        t='Animation file already exists!', 
-                        icon='warning', 
-                        m='Override existing file?', 
-                        b=['Ok', 'Cancel'])
-            if result and result == 'Ok':
-                self.operation.ExportAnimation(self._rigRoot, animName)
-                pm.frameLayout(self.sceneHier_fl, e=1, en=0)
-                pm.frameLayout(self.limbHier_fl, e=1, en=0)
-                pm.frameLayout(self.jntHier_fl, e=1, en=0)
+        result = pm.fileDialog2(ff='PFRS Animation (*.pfa)', 
+                                dir=os.path.dirname(curFile), 
+                                cap='Export Animation',
+                                okc='Export')
+        if not result:
+            return
+        animFilePath = result[0]
+        self.operation.ExportAnimation(self._rigRoot, animFilePath)
 
     def RemoveAnimation(self, ignore):
         log.funcFileInfo()
@@ -633,6 +609,9 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
             self.operation.ResetControlTransforms(limb)
             bhv = self.operation.bhvMng.bhvs[limb.bhvFile.get()]
             bhv.InitLimb(limb)
+
+    def MakeLimbJointsPlanar(self, ignore):
+        log.funcFileInfo()
 
     def RemoveJointScale(self, ignore):
         log.funcFileInfo()
