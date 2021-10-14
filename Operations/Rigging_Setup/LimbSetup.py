@@ -515,16 +515,68 @@ class LimbSetup(absOp.Abstract_Operation):
             pm.parent(group, limb)
 
     def MakeLimbJointsPlanar(self, limb):
-        # 
-        pass
+        joints = rigUtil.GetSortedLimbJoints(limb)
+        j1 = joints[0]
+        j2 = joints[1]
+        j3 = joints[-1]
+        
+        # Get vectors
+        pos1 = pm.xform(j1, t=1, q=1, ws=1)
+        pos2 = pm.xform(j2, t=1, q=1, ws=1)
+        pos3 = pm.xform(j3, t=1, q=1, ws=1)
+        v12 = (pos2[0] - pos1[0], pos2[1] - pos1[1], pos2[2] - pos1[2])
+        v13 = (pos3[0] - pos1[0], pos3[1] - pos1[1], pos3[2] - pos1[2])
 
-    def _ApplyAimUpToJoint(self, joint, aimVector, upVector):
+        # Get Angle
+        dot = (v12[0]*v13[0] + v12[1]*v13[1] + v12[2]*v13[2])
+        mag12 = (v12[0]**2 + v12[1]**2 + v12[2]**2)**0.5
+        mag13 = (v13[0]**2 + v13[1]**2 + v13[2]**2)**0.5
+        magProd = mag12 * mag13
+        cosAngle = dot / magProd
+
+        # Get perp v13 point
+        scalar = (cosAngle*mag12)/ mag13
+        v13s = (scalar*v13[0], scalar*v13[1], scalar*v13[2])
+        posP = (v13s[0]+pos1[0], v13s[1]+pos1[1], v13s[2]+pos1[2])
+        vp = (pos2[0]-posP[0], pos2[1]-posP[1], pos2[2]-posP[2])
+        
+        # cross vector
+        vc = [  v12[1]*vp[2] - v12[2]*vp[1],
+                v12[2]*vp[0] - v12[0]*vp[2],
+                v12[0]*vp[1] - v12[1]*vp[0]]
+        vcSquared = vc[0]**2 + vc[1]**2 + vc[2]**2
+        magC = (vcSquared)**0.5
+        vc = [vc[i]/magC for i in range(3)]
+        
+        # project joints onto plane
+        for joint in joints[2:-1]:
+            children = pm.listRelatives(joint, c=1)
+            pm.parent(children, w=1)
+            posJ = pm.xform(joint, t=1, q=1, ws=1)
+            top = vc[0]*pos1[0] - vc[0]*posJ[0]
+            top += vc[1]*pos1[1] - vc[1]*posJ[1]
+            top += vc[2]*pos1[2] - vc[2]*posJ[2]
+            vcj = [vc[i]*top for i in range(3)]
+            newPos = (vcj[0]+posJ[0], vcj[1]+posJ[1], vcj[2]+posJ[2])
+            pm.xform(joint, t=newPos, ws=1)
+            pm.parent(children, joint)
+
+        config = self._GetConfig()
+        aimLM = rigData.JOINT_AIM_UP_VECTORS[config['jointAimAxis']]
+        aimUP = rigData.JOINT_AIM_UP_VECTORS[config['jointUpAxis']]
+        for joint in joints:
+            self._ApplyAimUpToJoint(joint, aimLM, aimUP, vp)
+        print (vp)
+
+    def _ApplyAimUpToJoint(self, joint, aimVector, upVector, 
+                                    worldUpVector=(0,1,0)):
         children = pm.listRelatives(joint, c=1)
         if children:
             pm.parent(children, w=1)
             pm.select(d=1)
             cst = pm.aimConstraint(children[0], joint, 
-                                    aim=aimVector, u=upVector) 
+                                    aim=aimVector, u=upVector,
+                                    wu=worldUpVector) 
             pm.delete(cst)
             pm.parent(children, joint)
         else:

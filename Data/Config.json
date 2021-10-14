@@ -12,8 +12,8 @@
     "quickWeightsLimbMaskMidpoints": 6, 
     "templateFolderPath": "", 
     "windowPos": [
-        194, 
-        538
+        115, 
+        993
     ], 
     "paintWeightsMode": 1, 
     "jointUpAxis": 2, 
@@ -37,7 +37,7 @@
         0, 
         1
     ], 
-    "controlShape_FK": "Cube_Poly", 
+    "paintWeightsReplaceSoftness": 1.0, 
     "quickWeightsLimbMaskRadius": 3.0, 
     "controlShape_FKR": "Cube_Poly", 
     "quickWeightsDisplayMode": 3, 
@@ -53,7 +53,7 @@
     "jointRotOrder": 0, 
     "controlShape_Joint": "Cube_Poly", 
     "jointIndex": 3, 
-    "paintWeightsReplaceSoftness": 1.0, 
+    "controlShape_FK": "Cube_Poly", 
     "controlShape_IKS": "Cylinder_Poly", 
     "typeIndex": 0, 
     "debug": false, 

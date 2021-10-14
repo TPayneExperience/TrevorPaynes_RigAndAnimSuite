@@ -612,6 +612,9 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
 
     def MakeLimbJointsPlanar(self, ignore):
         log.funcFileInfo()
+        for limb in self._selectedLimbs:
+            self.operation.MakeLimbJointsPlanar(limb)
+
 
     def RemoveJointScale(self, ignore):
         log.funcFileInfo()

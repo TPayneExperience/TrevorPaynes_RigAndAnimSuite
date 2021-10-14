@@ -255,8 +255,6 @@ class IK_PoleVector_01(absBhv.Abstract_Behavior):
     
 #============= UTIL ============================
 
-
-
     def _UpdateIKPV2(self, limb):
         dist = limb.ikpvDistance.get()
         group = rigUtil.GetLimbGroups(limb, self.groupType)[1]
@@ -265,11 +263,10 @@ class IK_PoleVector_01(absBhv.Abstract_Behavior):
         group.tz.set(0)
 
     def _InitIKPV2(self, limb, ikpv2):
-        jointGroups = pm.listConnections(limb.jointGroups)
-        jointGroups = rigUtil.SortGroups(jointGroups)
-        j1 = pm.listConnections(jointGroups[0].joint)[0]
-        j2 = pm.listConnections(jointGroups[1].joint)[0]
-        j3 = pm.listConnections(jointGroups[-1].joint)[0]
+        joints = rigUtil.GetSortedLimbJoints(limb)
+        j1 = joints[0]
+        j2 = joints[1]
+        j3 = joints[-1]
         
         # Get vectors
         pos1 = pm.xform(j1, t=1, q=1, ws=1)
