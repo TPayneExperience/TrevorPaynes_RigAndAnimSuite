@@ -46,6 +46,12 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
         self._limbJoints = {}
         self._selectedLimbs = []
         self._autobuild_mis = []
+        
+        for limb in pm.listConnections(self._rigRoot.limbs):
+            bhvFile = limb.bhvFile.get()
+            bhv = self.operation.bhvMng.bhvs[bhvFile]
+            bhv.CleanupLimb(limb)
+            
         self._Setup()
         self.Refresh(0)
     

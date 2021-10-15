@@ -1,25 +1,25 @@
 {
-    "jointAimAxis": 0, 
+    "paintWeightsReplaceValue": 1.0, 
     "rControlColor": [
         1, 
         0, 
         0
     ], 
+    "paintWeightsReplaceSoftness": 1.0, 
     "paintWeightsReplaceRadius": 1.0, 
     "quickWeightsJointMaskRadius": 1.0, 
     "rigRootName": "TEMP", 
     "showRootName": false, 
     "quickWeightsLimbMaskMidpoints": 6, 
     "templateFolderPath": "", 
-    "windowPos": [
-        115, 
-        993
-    ], 
-    "paintWeightsMode": 1, 
     "jointUpAxis": 2, 
+    "paintWeightsMode": 1, 
+    "windowPos": [
+        230, 
+        859
+    ], 
     "paintWeightsUseJointAnim": true, 
     "limbIndex": 2, 
-    "paintWeightsAddRadius": 1.0, 
     "lControlTransparency": 0.8, 
     "controlShape_IKPV": "Sphere_Poly", 
     "version": 110, 
@@ -27,7 +27,7 @@
     "mControlTransparency": 0.8, 
     "paintWeightsAddSoftness": 1.0, 
     "controlShape_Empty": "Square_Wire", 
-    "paintWeightsReplaceValue": 1.0, 
+    "jointAimAxis": 0, 
     "sideIndex": 4, 
     "rControlTransparency": 0.8, 
     "rigRootIndex": 1, 
@@ -37,7 +37,7 @@
         0, 
         1
     ], 
-    "paintWeightsReplaceSoftness": 1.0, 
+    "controlShape_FK": "Cube_Poly", 
     "quickWeightsLimbMaskRadius": 3.0, 
     "controlShape_FKR": "Cube_Poly", 
     "quickWeightsDisplayMode": 3, 
@@ -53,7 +53,7 @@
     "jointRotOrder": 0, 
     "controlShape_Joint": "Cube_Poly", 
     "jointIndex": 3, 
-    "controlShape_FK": "Cube_Poly", 
+    "paintWeightsAddRadius": 1.0, 
     "controlShape_IKS": "Cylinder_Poly", 
     "typeIndex": 0, 
     "debug": false, 

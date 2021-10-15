@@ -566,7 +566,7 @@ class LimbSetup(absOp.Abstract_Operation):
         aimUP = rigData.JOINT_AIM_UP_VECTORS[config['jointUpAxis']]
         for joint in joints:
             self._ApplyAimUpToJoint(joint, aimLM, aimUP, vp)
-        print (vp)
+            self.FreezeJointRotations(joint)
 
     def _ApplyAimUpToJoint(self, joint, aimVector, upVector, 
                                     worldUpVector=(0,1,0)):

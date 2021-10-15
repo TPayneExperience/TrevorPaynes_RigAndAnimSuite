@@ -114,6 +114,23 @@ class MeshSetup_UI(absOpUI.Abstract_OperationUI):
 
     def AddMeshes(self, ignore):
         log.funcFileInfo()
+        vertCount = 0
+        for mesh in self._selectedAvailable:
+            vertCount += pm.polyEvaluate(mesh, v=1)
+        limbCount = len(pm.listConnections(self._rigRoot.limbs))
+        if limbCount * vertCount > 5000:
+            msg = 'Adding meshes with a high vertex count to '
+            msg += '\na rig with many limbs may take a few minutes.' 
+            msg += '\n\nProceed?'
+            result = pm.confirmDialog(t='"Add Mesh" may be Slow', 
+                                icon='warning', 
+                                m=msg, 
+                                b=['No', 'Yes'], 
+                                db='Yes', 
+                                cb='No', 
+                                ds='No')
+            if result == 'No':
+                return
         self.operation.AddMeshes(self._rigRoot, 
                                 self._selectedAvailable)
         self.PopulateAvailable()
