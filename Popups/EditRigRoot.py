@@ -1,10 +1,12 @@
 
+import imp
+
 import pymel.core as pm
 
 import Utilities.General_Utilities as genUtil
-reload(genUtil)
+#imp.reload(genUtil)
 import Utilities.Logger as log
-reload(log)
+#imp.reload(log)
 
 class EditRigRoot:
     def __init__(self, rigRoot, parentUI):

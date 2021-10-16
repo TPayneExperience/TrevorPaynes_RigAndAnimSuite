@@ -1,25 +1,25 @@
 
-from collections import OrderedDict
+import imp
 import os
 
 import pymel.core as pm
 
 import Abstracts.Abstract_Operation as absOp
-reload(absOp)
+#imp.reload(absOp)
 import Utilities.Logger as log
-reload(log)
+#imp.reload(log)
 import Data.Rig_Data as rigData
-reload(rigData)
+#imp.reload(rigData)
 import Utilities.Rig_Utilities as rigUtil
-reload(rigUtil)
+#imp.reload(rigUtil)
 import Utilities.Skin_Utilities as skinUtil
-reload(skinUtil)
+#imp.reload(skinUtil)
 import MeshSetup as ms
-reload(ms)
+#imp.reload(ms)
 import paintOp_Joints as jntOp
-reload(jntOp)
+#imp.reload(jntOp)
 import paintOp_Limbs as lmbOp
-reload(lmbOp)
+#imp.reload(lmbOp)
 
 class PaintWeights(absOp.Abstract_Operation):
     isRigBuilt = True

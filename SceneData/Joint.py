@@ -1,15 +1,17 @@
 
+import imp
+
 import pymel.core as pm
 
 import Utilities.Logger as log
-reload(log)
+#imp.reload(log)
 import Utilities.General_Utilities as genUtil
-reload(genUtil)
+#imp.reload(genUtil)
 import Data.Rig_Data as rigData
-reload(rigData)
+#imp.reload(rigData)
 
 import Group as grp
-reload(grp)
+#imp.reload(grp)
 
 class Joint:
     @staticmethod

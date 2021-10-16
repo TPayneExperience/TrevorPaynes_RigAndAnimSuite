@@ -1,16 +1,16 @@
 
+import imp
+
 import pymel.core as pm
 
 import Abstracts.Abstract_Initializer as absInit
-reload(absInit)
+#imp.reload(absInit)
 import Data.General_Data as genData
-reload(genData)
+#imp.reload(genData)
 import Data.Rig_Data as rigData
-reload(rigData)
+#imp.reload(rigData)
 import Utilities.Logger as log
-reload(log)
-# import Utilities.Rig_Utilities as rigUtil
-# reload(rigUtil)
+#imp.reload(log)
 
 class InitMesh(absInit.Abstract_Initializer):
     @staticmethod

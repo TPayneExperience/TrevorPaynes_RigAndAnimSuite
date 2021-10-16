@@ -1,8 +1,8 @@
 
-import pymel.core as pm
+import imp
 
 import Abstracts.Abstract_Initializer as absInit
-reload(absInit)
+#imp.reload(absInit)
 
 class InitConfig(absInit.Abstract_Initializer):
     @staticmethod

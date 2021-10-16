@@ -1,15 +1,17 @@
 
+import imp
+
 import pymel.core as pm
 
 import Abstracts.Abstract_Behavior as absBhv
-reload(absBhv)
+#imp.reload(absBhv)
 import Utilities.Rig_Utilities as rigUtil
-reload(rigUtil)
+#imp.reload(rigUtil)
 import Data.General_Data as genData
-reload(genData)
+#imp.reload(genData)
 
 import Utilities.Logger as log
-reload(log)
+#imp.reload(log)
 
 class FK_Chain_01(absBhv.Abstract_Behavior):
     bhvType = 'FK Chain'

@@ -1,14 +1,14 @@
 
+import imp
+
 import pymel.core as pm
 
 import Abstracts.Abstract_Initializer as absInit
-reload(absInit)
+#imp.reload(absInit)
 import Data.General_Data as genData
-reload(genData)
-# import Data.Rig_Data as rigData
-# reload(rigData)
+#imp.reload(genData)
 import Utilities.Logger as log
-reload(log)
+#imp.reload(log)
 
 class InitControl(absInit.Abstract_Initializer):
     @staticmethod

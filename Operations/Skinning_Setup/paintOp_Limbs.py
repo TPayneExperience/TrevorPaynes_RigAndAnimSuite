@@ -26,21 +26,12 @@ VERT_WEIGHTS_AFTER = []
 
 def initPFRSPyPaint(meshName):
     pass
-    # global PFRS_MESH_NAME
-    # PFRS_MESH_NAME = meshName
-    # print ('init py pfrs weights for mesh ' + meshName)
 
 def finishPFRSPyPaint():
     pass
-    # global PFRS_MESH_NAME
-    # global LIMB_ATTR
-    # print ('finish py pfrs weights')
-    # attr = '%s.%s' % (PFRS_MESH_NAME, LIMB_ATTR)
-    # print (pm.getAttr(attr))
 
 def getPFRSPyPaintValue(vertIndex):
     value = LIMB_WEIGHTS[vertIndex]
-    # print ('PY: Get Weight %s for vert %s' %(str(value), str(vertIndex)))
     return value
 
 def setPFRSPyPaintValue(vertIndex, value):

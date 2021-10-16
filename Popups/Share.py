@@ -1,12 +1,14 @@
 
+import imp
+
 import pymel.core as pm
 
 import Utilities.Logger as log
-reload(log)
+#imp.reload(log)
 import Data.General_Data as genData
-reload(genData)
+#imp.reload(genData)
 import Plugins.pyperclip as pyCopy
-reload(pyCopy)
+#imp.reload(pyCopy)
 
 class Share:
     def __init__(self):

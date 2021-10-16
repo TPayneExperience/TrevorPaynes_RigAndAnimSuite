@@ -1,16 +1,16 @@
+
+import imp
 import datetime as dt
-reload(dt)
-import functools
+#imp.reload(dt)
 import inspect
 import logging
 import os
 import platform
 import subprocess
-import sys
 import time
 
 import Utilities.General_Utilities as genUtil
-reload(genUtil)
+#imp.reload(genUtil)
 
 # ---- USES ------
 # log.funcFileInfo()
@@ -21,6 +21,7 @@ reload(genUtil)
 LOGGING_LEVEL = None
 # LOGGING_LEVEL = logging.DEBUG
 # LOGGING_LEVEL = logging.INFO
+
 
 def info(msg):
     logger_obj = _General_Logger.Get()
@@ -84,9 +85,11 @@ def _GetConfig():
 #=========== LOGGER ====================================
    
 def _GetLogPath():
-    folder = os.path.dirname(__file__)
-    folder = os.path.dirname(folder)
+    folder = os.path.dirname(__file__) # utils
+    folder = os.path.dirname(folder)    # pfrs
     folder = os.path.join(folder, 'Logs')
+    if not os.path.exists:
+        os.mkdir(folder)
     t = time.localtime()
     fileName = '%02d-%02d-%02d_PFRS.log' % (t[0] %100, t[1], t[2])
     return os.path.join(folder, fileName)

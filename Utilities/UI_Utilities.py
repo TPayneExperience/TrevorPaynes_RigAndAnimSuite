@@ -1,18 +1,19 @@
 
 from collections import OrderedDict
+import imp
 
 import pymel.core as pm
 
 import Data.Rig_Data as rigData
-reload(rigData)
+#imp.reload(rigData)
 import Rig_Utilities as rigUtil
-reload(rigUtil)
+#imp.reload(rigUtil)
 import General_Utilities as genUtil
-reload(genUtil)
+#imp.reload(genUtil)
 import Skin_Utilities as skinUtil
-reload(skinUtil)
+#imp.reload(skinUtil)
 import SceneData.RigRoot as rrt
-reload(rrt)
+#imp.reload(rrt)
 
 def PopulateLimbHierNormal(widget, currentRigRoot, allRigRoots): 
     pm.treeView(widget, e=1, removeAll=1)

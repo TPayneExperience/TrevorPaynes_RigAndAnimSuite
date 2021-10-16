@@ -1,8 +1,8 @@
 
-import pymel.core as pm
+import imp
 
 import General_Utilities as genUtil
-reload(genUtil)
+#imp.reload(genUtil)
 
 def GetSkeletalLimbOrder(limbs):
     '''Returns Root limb to end children'''

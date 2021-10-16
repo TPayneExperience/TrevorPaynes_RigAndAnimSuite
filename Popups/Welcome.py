@@ -1,10 +1,11 @@
 
+import imp
 import os
 
 import pymel.core as pm
 
 import Utilities.General_Utilities as genUtil
-reload(genUtil)
+#imp.reload(genUtil)
 
 class Welcome:
     text = '''Hello and Welcome!

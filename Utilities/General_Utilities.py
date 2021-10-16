@@ -1,5 +1,6 @@
 
 import json
+import imp
 import inspect
 import os
 import re
@@ -9,15 +10,15 @@ import time
 import pymel.core as pm
 
 import Plugins.pyperclip as pyCopy
-reload(pyCopy)
+#imp.reload(pyCopy)
 
 import Data.Rig_Data as rigData
-reload(rigData)
+#imp.reload(rigData)
 import Data.General_Data as genData
-reload(genData)
+#imp.reload(genData)
 
 import Abstracts.Abstract_Initializer as absInit
-reload(absInit)
+#imp.reload(absInit)
 
 
 #=========== NAMING ====================================
@@ -173,7 +174,7 @@ def AbstractInitializer(objectInstance, folder):
             continue
         # UI
         exec('import %s' % moduleName)
-        exec('reload (%s)' % moduleName)
+        exec('#imp.reload(%s)' % moduleName)
         module = sys.modules[moduleName]
         for name, obj in inspect.getmembers(module):
             if inspect.isclass(obj):

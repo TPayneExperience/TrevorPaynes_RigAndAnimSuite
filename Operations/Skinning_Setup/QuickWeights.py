@@ -1,18 +1,17 @@
 
-import os
+import imp
 
 import pymel.core as pm
-import maya.mel as mel
 import maya.api.OpenMaya as om
 
 import Abstracts.Abstract_Operation as absOp
-reload(absOp)
+#imp.reload(absOp)
 import Utilities.Rig_Utilities as rigUtil
-reload(rigUtil)
+#imp.reload(rigUtil)
 import Data.Skin_Data as skinData
-reload(skinData)
+#imp.reload(skinData)
 import PaintWeights as pntWgt
-reload(pntWgt)
+#imp.reload(pntWgt)
 
 class QuickWeights(absOp.Abstract_Operation):
     isRigBuilt = True

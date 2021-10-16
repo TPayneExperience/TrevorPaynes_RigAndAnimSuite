@@ -1,24 +1,25 @@
 
+import imp
 import os
 
 import pymel.core as pm
 
 import Abstracts.Abstract_OperationUI as absOpUI
-reload(absOpUI)
+#imp.reload(absOpUI)
 import PaintWeights as pnt
-reload (pnt)
+#imp.reload(pnt)
 import Utilities.UI_Utilities as uiUtil
-reload(uiUtil)
+#imp.reload(uiUtil)
 import Utilities.Rig_Utilities as rigUtil
-reload(rigUtil)
+#imp.reload(rigUtil)
 import Utilities.Logger as log
-reload(log)
+#imp.reload(log)
 import Utilities.General_Utilities as genUtil
-reload(genUtil)
+#imp.reload(genUtil)
 import Data.Rig_Data as rigData
-reload(rigData)
+#imp.reload(rigData)
 import Utilities.Skin_Utilities as skinUtil
-reload(skinUtil)
+#imp.reload(skinUtil)
 
 class PaintWeights_UI(absOpUI.Abstract_OperationUI):
     uiName = 'Paint Weights'

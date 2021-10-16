@@ -1,10 +1,12 @@
 
+import imp
+
 # GLOBAL VARS / FUNCTIONS for painting / viewing skin weights
 import pymel.core as pm
 import maya.api.OpenMaya as om
 
 import Data.Skin_Data as skinData
-reload(skinData)
+#imp.reload(skinData)
 
 # PFRS_ATTR = ''      # J01, J22, ... J(oint) ID
 PFRS_MESH_NAME = ''
@@ -34,22 +36,11 @@ VERT_WEIGHTS_AFTER = []
 
 def initPFRSPyPaint(meshName):
     pass
-    # global PFRS_MESH_NAME
-    # PFRS_MESH_NAME = meshName
-    # print ('init py pfrs weights for mesh ' + meshName)
 
 def finishPFRSPyPaint():
     pass
-    # print ('finish py pfrs weights')
-    # attr = '%s.%s' % (PFRS_MESH_NAME, PFRS_ATTR)
-    # print (pm.getAttr(attr))
 
 def getPFRSPyPaintValue(vertIndex):
-    # global PFRS_MESH_NAME
-    # global PFRS_ATTR
-    # attr = '%s.%s' % (PFRS_MESH_NAME, PFRS_ATTR)
-    # value = pm.getAttr(attr)[vertIndex]
-    # print ('PY: Get Weight %s for vert %s' %(str(value), str(vertIndex)))
     value = VERT_WEIGHTS_CURRENT[vertIndex][JOINT_INDEX]
     return value
 

@@ -1,10 +1,7 @@
 
-// global string $objNameList[];
-// global int $nextFreeSlot = 0;
-// global int $totalFreeSlots = 0;
-
 python("import Operations.Skinning_Setup.paintOp_Joints as jointOps");
-python("reload(jointOps)");
+python("import imp");
+// python("#imp.reload(jointOps)");
 
 global proc pfrsPaintJoints( string $context )
 {
@@ -22,7 +19,6 @@ global proc pfrsPaintJoints( string $context )
 
 global proc string initPFRSPaintJoint( string $name )
 {	
-	// print("Painting mesh named: " + $name + "\n");
 	python("jointOps.initPFRSPyPaint('" + $name + "')");
 	return ( "-id " + 0);
 		   
@@ -36,7 +32,6 @@ global proc finishPFRSPaintJoint( int $slot )
 global proc float getPFRSPaintJointValue( int $slot, int $index )
 {
 	float $value = python("jointOps.getPFRSPyPaintValue(" + $index + ")");
-	// print("mel get value: " + $value + "\n");
 	return $value;
 }
 

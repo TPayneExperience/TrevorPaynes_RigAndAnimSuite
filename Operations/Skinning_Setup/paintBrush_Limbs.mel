@@ -1,10 +1,7 @@
 
-// global string $objNameList[];
-// global int $nextFreeSlot = 0;
-// global int $totalFreeSlots = 0;
-
 python("import Operations.Skinning_Setup.paintOp_Limbs as limbOps");
-python("reload(limbOps)");
+python("import imp");
+// python("#imp.reload(limbOps)");
 
 global proc pfrsPaintLimbs( string $context )
 {
@@ -22,7 +19,6 @@ global proc pfrsPaintLimbs( string $context )
 
 global proc string initPFRSPaintLimb( string $name )
 {	
-	// print("Painting mesh named: " + $name + "\n");
 	python("limbOps.initPFRSPyPaint('" + $name + "')");
 	return ( "-id " + 0);
 		   
@@ -36,7 +32,6 @@ global proc finishPFRSPaintLimb( int $slot )
 global proc float getPFRSPaintLimbValue( int $slot, int $index )
 {
 	float $value = python("limbOps.getPFRSPyPaintValue(" + $index + ")");
-	// print("mel get value: " + $value + "\n");
 	return $value;
 }
 

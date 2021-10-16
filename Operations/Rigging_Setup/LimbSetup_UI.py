@@ -1,27 +1,28 @@
 
+import imp
 import os
 
 import pymel.core as pm
 
 import Abstracts.Abstract_OperationUI as absOpUI
-reload(absOpUI)
+#imp.reload(absOpUI)
 import LimbSetup as ls
-reload(ls)
+#imp.reload(ls)
 import Utilities.UI_Utilities as uiUtil
-reload(uiUtil)
+#imp.reload(uiUtil)
 import Utilities.General_Utilities as genUtil
-reload(genUtil)
+#imp.reload(genUtil)
 import Utilities.Logger as log
-reload(log)
+#imp.reload(log)
 
 import SceneData.RigRoot as rrt
-reload(rrt)
+#imp.reload(rrt)
 import Popups.LoadTemplates as ldTmp
-reload(ldTmp)
+#imp.reload(ldTmp)
 import Data.Rig_Data as rigData
-reload(rigData)
+#imp.reload(rigData)
 import Utilities.Rig_Utilities as rigUtil
-reload(rigUtil)
+#imp.reload(rigUtil)
 
 class LimbSetup_UI(absOpUI.Abstract_OperationUI):
     uiName = 'Limb Setup'

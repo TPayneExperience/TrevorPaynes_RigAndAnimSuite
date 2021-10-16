@@ -1,10 +1,10 @@
 
-import pymel.core as pm
+import imp
 
 import Abstracts.Abstract_Operation as absOp
-reload(absOp)
+#imp.reload(absOp)
 import Utilities.Logger as log
-reload(log)
+#imp.reload(log)
 
 class Test(absOp.Abstract_Operation):
     isRigBuilt = True

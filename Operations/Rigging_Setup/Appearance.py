@@ -1,20 +1,21 @@
 
+import imp
 import os
 
 import pymel.core as pm
 
 import Abstracts.Abstract_Operation as absOp
-reload(absOp)
+#imp.reload(absOp)
 import Utilities.Logger as log
-reload(log)
+#imp.reload(log)
 import SceneData.Control as ctr
-reload(ctr)
+#imp.reload(ctr)
 import Utilities.Rig_Utilities as rigUtil
-reload(rigUtil)
+#imp.reload(rigUtil)
 import Data.Rig_Data as rigData
-reload(rigData)
+#imp.reload(rigData)
 import Utilities.General_Utilities as genUtil
-reload(genUtil)
+#imp.reload(genUtil)
 
 class Appearance(absOp.Abstract_Operation):
     isRigBuilt = False

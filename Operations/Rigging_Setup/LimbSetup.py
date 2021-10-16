@@ -1,4 +1,5 @@
 
+import imp
 import inspect
 import os
 import sys
@@ -6,29 +7,29 @@ import sys
 import pymel.core as pm
 
 import Abstracts.Abstract_Operation as absOp
-reload(absOp)
+#imp.reload(absOp)
 import Utilities.Logger as log
-reload(log)
+#imp.reload(log)
 import Data.Rig_Data as rigData
-reload(rigData)
+#imp.reload(rigData)
 import SceneData.Limb as lmb
-reload(lmb)
+#imp.reload(lmb)
 import SceneData.Joint as jnt
-reload(jnt)
+#imp.reload(jnt)
 import SceneData.Group as grp
-reload(grp)
+#imp.reload(grp)
 import Utilities.General_Utilities as genUtil
-reload(genUtil)
+#imp.reload(genUtil)
 import SceneData.RigRoot as rrt
-reload(rrt)
+#imp.reload(rrt)
 import Utilities.Rig_Utilities as rigUtil
-reload(rigUtil)
+#imp.reload(rigUtil)
 import Abstracts.Abstract_Autobuild as absBld
-reload(absBld)
+#imp.reload(absBld)
 import SceneData.Preset as pst
-reload(pst)
+#imp.reload(pst)
 import Operations.Skinning_Setup.MeshSetup as msh
-reload(msh)
+#imp.reload(msh)
 
 class LimbSetup(absOp.Abstract_Operation):
     isRigBuilt = False
@@ -54,7 +55,7 @@ class LimbSetup(absOp.Abstract_Operation):
             fileName = os.path.splitext(buildFile)[0]
             moduleName = 'Operations.Rigging_Setup.Autobuild.%s' % fileName
             exec('import %s' % moduleName)
-            exec('reload (%s)' % moduleName)
+            exec('#imp.reload(%s)' % moduleName)
             module = sys.modules[moduleName]
             for name, obj in inspect.getmembers(module):
                 if inspect.isclass(obj):

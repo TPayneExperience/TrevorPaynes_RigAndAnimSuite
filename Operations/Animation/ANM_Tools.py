@@ -1,16 +1,17 @@
 
+import imp
 import os
 
 import pymel.core as pm
 
 import Abstracts.Abstract_Operation as absOp
-reload(absOp)
+#imp.reload(absOp)
 import Utilities.Logger as log
-reload(log)
+#imp.reload(log)
 import Operations.Rigging_Setup.Behavior as rigBhv
-reload(rigBhv)
+#imp.reload(rigBhv)
 import Utilities.General_Utilities as genUtil
-reload(genUtil)
+#imp.reload(genUtil)
 
 class ANM_Tools(absOp.Abstract_Operation):
     isRigBuilt = True

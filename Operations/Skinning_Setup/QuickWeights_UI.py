@@ -1,20 +1,21 @@
 
+import imp
 import os
 
 import pymel.core as pm
 
 import Abstracts.Abstract_OperationUI as absOpUI
-reload(absOpUI)
+#imp.reload(absOpUI)
 import QuickWeights as qck
-reload (qck)
+#imp.reload(qck)
 import Utilities.Logger as log
-reload(log)
+#imp.reload(log)
 import Utilities.UI_Utilities as uiUtil
-reload(uiUtil)
+#imp.reload(uiUtil)
 import Utilities.Skin_Utilities as skinUtil
-reload(skinUtil)
+#imp.reload(skinUtil)
 import Utilities.General_Utilities as genUtil
-reload(genUtil)
+#imp.reload(genUtil)
 
 class QuickWeights_UI(absOpUI.Abstract_OperationUI):
     uiName = 'Quick Weights'

@@ -1,16 +1,17 @@
 
 from collections import OrderedDict
+import imp
 
 import pymel.core as pm
 
 import Abstracts.Abstract_OperationUI as absOpUI
-reload(absOpUI)
+#imp.reload(absOpUI)
 import ANM_Tools as tls
-reload(tls)
+#imp.reload(tls)
 import Utilities.UI_Utilities as uiUtil
-reload(uiUtil)
+#imp.reload(uiUtil)
 import Utilities.Logger as log
-reload(log)
+#imp.reload(log)
 
 class ANM_Tools_UI(absOpUI.Abstract_OperationUI):
     uiName = 'Tools'

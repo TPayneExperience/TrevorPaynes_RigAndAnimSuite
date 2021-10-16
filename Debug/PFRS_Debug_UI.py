@@ -1,13 +1,13 @@
 
-import os
+import imp
 
 import pymel.core as pm
 
 import PFRS_Debug as dbg
-reload(dbg)
+#imp.reload(dbg)
 
 import Utilities.Logger as log
-reload(log)
+#imp.reload(log)
 
 class PFRS_Debug_UI:
     def __init__(self, parent):

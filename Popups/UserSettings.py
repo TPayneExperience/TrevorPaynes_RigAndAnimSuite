@@ -1,14 +1,15 @@
 
+import imp
 import os
 
 import pymel.core as pm
 
 import Utilities.General_Utilities as genUtil
-reload(genUtil)
+#imp.reload(genUtil)
 import Utilities.Logger as log
-reload(log)
+#imp.reload(log)
 import Data.Rig_Data as rigData
-reload(rigData)
+#imp.reload(rigData)
 
 class UserSettings:
     def __init__(self):

@@ -1,20 +1,21 @@
 
 from collections import OrderedDict
+import imp
 
 import pymel.core as pm
 
 import Abstracts.Abstract_OperationUI as absOpUI
-reload(absOpUI)
+#imp.reload(absOpUI)
 import Appearance as app
-reload(app)
+#imp.reload(app)
 import Utilities.UI_Utilities as uiUtil
-reload(uiUtil)
+#imp.reload(uiUtil)
 import Utilities.Rig_Utilities as rigUtil
-reload(rigUtil)
+#imp.reload(rigUtil)
 import Utilities.General_Utilities as genUtil
-reload(genUtil)
+#imp.reload(genUtil)
 import Utilities.Logger as log
-reload(log)
+#imp.reload(log)
 
 class Appearance_UI(absOpUI.Abstract_OperationUI):
     uiName = 'Appearance'

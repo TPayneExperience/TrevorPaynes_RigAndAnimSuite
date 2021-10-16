@@ -1,21 +1,22 @@
 
 from collections import OrderedDict
+import imp
 import os
 
 import pymel.core as pm
 
 import Abstracts.Abstract_OperationUI as absOpUI
-reload(absOpUI)
+#imp.reload(absOpUI)
 import Animations as anm
-reload(anm)
+#imp.reload(anm)
 import Utilities.UI_Utilities as uiUtil
-reload(uiUtil)
+#imp.reload(uiUtil)
 import Utilities.General_Utilities as genUtil
-reload(genUtil)
+#imp.reload(genUtil)
 import Utilities.Logger as log
-reload(log)
+#imp.reload(log)
 import Data.Rig_Data as rigData
-reload(rigData)
+#imp.reload(rigData)
 
 class Animation_UI(absOpUI.Abstract_OperationUI):
     uiName = 'Animations'

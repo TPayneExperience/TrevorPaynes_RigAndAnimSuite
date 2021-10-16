@@ -1,14 +1,16 @@
 
+import imp
+
 import pymel.core as pm
 
 import Abstracts.Abstract_OperationUI as absOpUI
-reload(absOpUI)
+#imp.reload(absOpUI)
 import SKIN_Test as tst
-reload (tst)
+#imp.reload(tst)
 import Utilities.UI_Utilities as uiUtil
-reload(uiUtil)
+#imp.reload(uiUtil)
 import Utilities.Logger as log
-reload(log)
+#imp.reload(log)
 
 class Test_UI(absOpUI.Abstract_OperationUI):
     uiName = 'Test'

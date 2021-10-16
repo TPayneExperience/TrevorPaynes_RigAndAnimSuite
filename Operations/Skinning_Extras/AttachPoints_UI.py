@@ -1,17 +1,18 @@
 
+import imp
 
 import pymel.core as pm
 
 import Abstracts.Abstract_OperationUI as absOpUI
-reload(absOpUI)
+#imp.reload(absOpUI)
 import AttachPoints as att
-reload (att)
+#imp.reload(att)
 import Utilities.Logger as log
-reload(log)
+#imp.reload(log)
 import Utilities.UI_Utilities as uiUtil
-reload(uiUtil)
+#imp.reload(uiUtil)
 import Utilities.Skin_Utilities as skinUtil
-reload(skinUtil)
+#imp.reload(skinUtil)
 
 class AttachPoints_UI(absOpUI.Abstract_OperationUI):
     uiName = 'Attach Points'

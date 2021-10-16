@@ -1,12 +1,13 @@
 
+import imp
 import os
 
 import pymel.core as pm
 
 import Utilities.Logger as log
-reload(log)
+#imp.reload(log)
 import Operations.Rigging_Setup.LimbSetup as ls
-reload(ls)
+#imp.reload(ls)
 
 class LoadTemplates:
     def __init__(self, rigRoot, templatesFolder):

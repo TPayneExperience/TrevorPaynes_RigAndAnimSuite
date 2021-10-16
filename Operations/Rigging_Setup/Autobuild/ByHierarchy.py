@@ -1,14 +1,16 @@
 
+import imp
+
 import pymel.core as pm
 
 import Abstracts.Abstract_Autobuild as absBld
-reload(absBld)
+#imp.reload(absBld)
 import Utilities.Logger as log
-reload(log)
+#imp.reload(log)
 import SceneData.Limb as lmb
-reload(lmb)
+#imp.reload(lmb)
 import Utilities.Rig_Utilities as rigUtil
-reload(rigUtil)
+#imp.reload(rigUtil)
 
 class ByHierarchy(absBld.Abstract_Autobuild):
     uiName = 'By Hierarchy'

@@ -1,8 +1,10 @@
 
+import imp
+
 import pymel.core as pm
 
 import Utilities.Logger as log
-reload(log)
+#imp.reload(log)
 
 class UsefulScripts:
     scripts = {

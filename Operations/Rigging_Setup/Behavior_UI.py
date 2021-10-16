@@ -1,21 +1,23 @@
 
+import imp
+
 import pymel.core as pm
 
 import Abstracts.Abstract_OperationUI as absOpUI
-reload(absOpUI)
+#imp.reload(absOpUI)
 import Behavior as bhv
-reload(bhv)
+#imp.reload(bhv)
 import Utilities.UI_Utilities as uiUtil
-reload(uiUtil)
+#imp.reload(uiUtil)
 import Utilities.Logger as log
-reload(log)
+#imp.reload(log)
 import Data.Rig_Data as rigData
-reload(rigData)
+#imp.reload(rigData)
 import Popups.EditPresets as editPst
-reload(editPst)
+#imp.reload(editPst)
 
 import SceneData.RigRoot as rrt
-reload(rrt)
+#imp.reload(rrt)
 
 class Behavior_UI(absOpUI.Abstract_OperationUI):
     uiName = 'Behavior'

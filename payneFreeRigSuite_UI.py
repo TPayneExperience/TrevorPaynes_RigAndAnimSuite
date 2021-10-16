@@ -1,55 +1,54 @@
 
-import inspect
+import imp
 import os
-import sys
 import webbrowser
 
 import pymel.core as pm
 
 import Data.General_Data as genData
-reload(genData)
+#imp.reload(genData)
 
 import Initializers
-reload(Initializers)
+#imp.reload(Initializers)
 import SceneData
-reload(SceneData)
+#imp.reload(SceneData)
 import Popups
-reload(Popups)
+#imp.reload(Popups)
 
 import Utilities.Logger as log
-reload(log)
+#imp.reload(log)
 import SceneData.RigRoot as rrt
-reload(rrt)
+#imp.reload(rrt)
 import Data.Rig_Data as rigData
-reload(rigData)
+#imp.reload(rigData)
 import Utilities.Rig_Utilities as rigUtil
-reload(rigUtil)
+#imp.reload(rigUtil)
 import Utilities.General_Utilities as genUtil
-reload(genUtil)
+#imp.reload(genUtil)
 import Popups.EditRigRoot as edRt
-reload(edRt)
+#imp.reload(edRt)
 import Popups.RemoveRig as rmrig
-reload(rmrig)
+#imp.reload(rmrig)
 import Popups.UserSettings as usr
-reload(usr)
+#imp.reload(usr)
 import Popups.UsefulScripts as usfScr
-reload(usfScr)
+#imp.reload(usfScr)
 import Popups.Export_UI as xprt
-reload(xprt)
+#imp.reload(xprt)
 import Popups.SuggestedExternalTools as sget
-reload(sget)
+#imp.reload(sget)
 import Popups.Share as shr
-reload(shr)
+#imp.reload(shr)
 import Popups.Welcome as wlc
-reload(wlc)
+#imp.reload(wlc)
 import Popups.Updates as upd
-reload(upd)
+#imp.reload(upd)
 
-import payneFreeRigSuite as pfrs
-reload(pfrs)
+import payneFreeRigSuite_backend as pfrs
+#imp.reload(pfrs)
 
 import Debug.PFRS_Debug_UI as debug_ui
-reload(debug_ui)
+#imp.reload(debug_ui)
 
 class PayneFreeRigSuite_UI:
     def __init__(self):

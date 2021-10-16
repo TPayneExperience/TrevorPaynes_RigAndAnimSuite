@@ -1,10 +1,11 @@
 
+import imp
 import os
 
 import pymel.core as pm
 
 import Utilities.Logger as log
-reload(log)
+#imp.reload(log)
 
 class PFRS_Debug:
     def __init__(self, parent):

@@ -1,8 +1,10 @@
 
+import imp
+
 import pymel.core as pm
 
 import Data.Rig_Data as rigData
-reload(rigData)
+#imp.reload(rigData)
 
 # !!! Functions used ACROSS MULTIPLE OPERATIONS !!!
 class Joint:

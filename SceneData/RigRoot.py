@@ -1,14 +1,14 @@
 
-import os
+import imp
 
 import pymel.core as pm
 
 import Data.Rig_Data as rigData
-reload(rigData)
+#imp.reload(rigData)
 import Utilities.Logger as log
-reload(log)
+#imp.reload(log)
 import Utilities.General_Utilities as genUtil
-reload(genUtil)
+#imp.reload(genUtil)
 
 class RigRoot:
     @staticmethod
