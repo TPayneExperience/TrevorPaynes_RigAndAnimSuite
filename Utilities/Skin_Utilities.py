@@ -1,7 +1,7 @@
 
 import imp
 
-import General_Utilities as genUtil
+import Utilities.General_Utilities as genUtil
 #imp.reload(genUtil)
 
 def GetSkeletalLimbOrder(limbs):
@@ -18,7 +18,7 @@ def GetSkeletalLimbOrder(limbs):
                 del(limbParents[child])
             if parent in orderedLimbs:
                 limbParents[child] = None
-        idOrder = sorted(list(toAdd.keys()))
+        idOrder = sorted(toAdd.keys())
         orderedLimbs += [toAdd[ID] for ID in idOrder]
     return orderedLimbs
 

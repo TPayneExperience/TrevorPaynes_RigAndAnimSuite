@@ -13,7 +13,7 @@ import SceneData.Limb as lmb
 #imp.reload(lmb)
 import SceneData.Group as grp
 #imp.reload(grp)
-import LimbSetup as ls
+import Operations.Rigging_Setup.LimbSetup as ls
 #imp.reload(ls)
 import Utilities.General_Utilities as genUtil
 #imp.reload(genUtil)

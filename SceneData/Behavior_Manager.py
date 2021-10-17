@@ -37,12 +37,12 @@ class Behavior_Manager(object):
         rootPath = os.path.dirname(rootPath)
         bhvPath = os.path.join(rootPath, 'Behaviors')
         for opFile in os.listdir(bhvPath):
-            if '__init__.py' in opFile:
+            if opFile.startswith('__'):
                 continue
             fileName = os.path.splitext(opFile)[0]
             moduleName = '%s.%s' % ('Behaviors', fileName)
             exec('import %s' % moduleName)
-            exec('#imp.reload(%s)' % moduleName)
+            # exec('#imp.reload(%s)' % moduleName)
             module = sys.modules[moduleName]
             for name, obj in inspect.getmembers(module):
                 if inspect.isclass(obj):
@@ -185,7 +185,7 @@ class Behavior_Manager(object):
         rigRoot.isBuilt.set(0)
     
         # Reset Joints
-        for name in sorted(list(joints.keys())):
+        for name in sorted(joints.keys()):
             joint = joints[name]
             joint.t.set(joint.startPos.get())
             joint.r.set(joint.startRot.get())
@@ -298,7 +298,7 @@ class Behavior_Manager(object):
             # Set Branch limb to fk Branch
             if bhv.bhvType == 'FK Branch' and limbType == 2:
                 orderedFiles[0] = bhvFile
-        index = sorted(list(orderedFiles.keys()))[0]
+        index = sorted(orderedFiles.keys())[0]
         return orderedFiles[index]
 
     def InitRigRootControlShapeAttrs(self, rigRoot):

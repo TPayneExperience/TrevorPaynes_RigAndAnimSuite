@@ -17,12 +17,6 @@ import Popups
 
 import Utilities.Logger as log
 #imp.reload(log)
-import SceneData.RigRoot as rrt
-#imp.reload(rrt)
-import Data.Rig_Data as rigData
-#imp.reload(rigData)
-import Utilities.Rig_Utilities as rigUtil
-#imp.reload(rigUtil)
 import Utilities.General_Utilities as genUtil
 #imp.reload(genUtil)
 import Popups.EditRigRoot as edRt
@@ -45,7 +39,7 @@ import Popups.Updates as upd
 #imp.reload(upd)
 
 import payneFreeRigSuite_backend as pfrs
-#imp.reload(pfrs)
+imp.reload(pfrs)
 
 import Debug.PFRS_Debug_UI as debug_ui
 #imp.reload(debug_ui)
@@ -221,7 +215,7 @@ class PayneFreeRigSuite_UI:
         opPriorities = {}
         for operation in list(self.pfrs.catOps[category].values()):
             opPriorities[operation.uiOrderIndex] = operation
-        for index in sorted(list(opPriorities.keys())):
+        for index in sorted(opPriorities.keys()):
             operation = opPriorities[index]
             if rigMode not in operation.operation.validRigStates:
                 continue

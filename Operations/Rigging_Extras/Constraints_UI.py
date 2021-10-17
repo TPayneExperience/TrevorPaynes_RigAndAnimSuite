@@ -5,7 +5,7 @@ import pymel.core as pm
 
 import Abstracts.Abstract_OperationUI as absOpUI
 #imp.reload(absOpUI)
-import Constraints as cst
+import Operations.Rigging_Extras.Constraints as cst
 #imp.reload(cst)
 import Abstracts.Abstract_OperationUI as absOpUI
 #imp.reload(absOpUI)
@@ -323,7 +323,7 @@ class Constraints_UI(absOpUI.Abstract_OperationUI):
         for group in pm.listConnections(limb.usedGroups):
             for cstGroup in pm.listConnections(group.constraintGroups):
                 cstGroups[cstGroup.shortName()] = cstGroup
-        for name in sorted(list(cstGroups.keys())):
+        for name in sorted(cstGroups.keys()):
             group = cstGroups[name]
             self._groups[name] = group
             pm.treeView(self.group_tv, e=1, ai=(name, ''))

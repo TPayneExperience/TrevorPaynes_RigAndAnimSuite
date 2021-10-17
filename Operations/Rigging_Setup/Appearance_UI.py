@@ -6,14 +6,12 @@ import pymel.core as pm
 
 import Abstracts.Abstract_OperationUI as absOpUI
 #imp.reload(absOpUI)
-import Appearance as app
+import Operations.Rigging_Setup.Appearance as app
 #imp.reload(app)
 import Utilities.UI_Utilities as uiUtil
 #imp.reload(uiUtil)
 import Utilities.Rig_Utilities as rigUtil
 #imp.reload(rigUtil)
-import Utilities.General_Utilities as genUtil
-#imp.reload(genUtil)
 import Utilities.Logger as log
 #imp.reload(log)
 
@@ -99,7 +97,7 @@ class Appearance_UI(absOpUI.Abstract_OperationUI):
         self._limbIDs.update(uiUtil.PopulateLimbHierNormal(self.limb_tv, 
                                                 self._rigRoot,
                                                 self._allRigRoots))
-        limb = self._limbIDs.values()[0]
+        limb = list(self._limbIDs.values())[0]
         self._selectedLimbs = [limb]
         limbID = '%d_%d' % (self._rigRoot.ID.get(), limb.ID.get())
         pm.treeView(self.limb_tv, e=1, selectItem=(limbID, 1))

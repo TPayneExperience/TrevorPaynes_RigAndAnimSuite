@@ -1,50 +1,42 @@
 
+import imp
 import inspect
 import os
 import sys
 import webbrowser
 
 import pymel.core as pm
-import maya.mel as mel
 
 import Operations
-reload(Operations)
+#imp.reload(Operations)
 import Behaviors
-reload(Behaviors)
-import Behaviors
-reload(Behaviors)
+#imp.reload(Behaviors)
 import Abstracts.Abstract_OperationUI as absOpUI
-reload(absOpUI)
+#imp.reload(absOpUI)
 import Abstracts.Abstract_Operation as absOp
-reload(absOp)
+#imp.reload(absOp)
 import Utilities.Logger as log
-reload(log)
+#imp.reload(log)
 import SceneData.Limb as lmb
-reload(lmb)
+#imp.reload(lmb)
 import SceneData.RigRoot as rrt
-reload(rrt)
+#imp.reload(rrt)
 import SceneData.DisplayLayers as dl
-reload(dl)
+#imp.reload(dl)
 import SceneData.Group as grp
-reload(grp)
+#imp.reload(grp)
 import SceneData.Behavior_Manager as bMng
-reload(bMng)
-import Data.Rig_Data as rigData
-reload(rigData)
+#imp.reload(bMng)
 import Data.General_Data as genData
-reload(genData)
+#imp.reload(genData)
 import Utilities.General_Utilities as genUtil
-reload(genUtil)
-import Utilities.Rig_Utilities as rigUtil
-reload(rigUtil)
+#imp.reload(genUtil)
 import Operations.Rigging_Setup.Appearance as app
-reload(app)
+#imp.reload(app)
 import Operations.Rigging_Setup.LimbSetup as ls
-reload(ls)
+#imp.reload(ls)
 import Operations.Skinning_Setup.MeshSetup as msh
-reload(msh)
-# import Data.Config as cnfg
-# reload(cnfg)
+#imp.reload(msh)
 
 class PayneFreeRigSuite:
     def __init__(self):
@@ -139,7 +131,7 @@ class PayneFreeRigSuite:
             pm.parent(meshes, w=1)
         rrt.RigRoot.Remove(rigRoot)
         dl.DisplayLayers.Remove()
-        mel.eval('hyperShadePanelMenuCommand("hyperShadePanel1", "deleteUnusedNodes");')
+        pm.mel.eval('hyperShadePanelMenuCommand("hyperShadePanel1", "deleteUnusedNodes");')
 
     def GetRigRoots(self):
         log.funcFileDebug()
@@ -230,13 +222,15 @@ class PayneFreeRigSuite:
                 continue
             if f in self.categories:
                 continue
+            if f.startswith('__'): # Skip __pycache__
+                continue
             self.categories.append(f)
         for category in self.categories:
             self.catOps[category] = {}
             moduleCat = '%s.%s' % ('Operations', category)
             categoryPath = os.path.join(rootPath, category)
             for opFile in os.listdir(categoryPath):
-                if '__init__.py' in opFile:
+                if opFile.startswith('__'):
                     continue
                 if '.mel' in opFile:
                     continue
@@ -247,7 +241,7 @@ class PayneFreeRigSuite:
                 moduleName = '%s.%s' % (moduleCat, fileName)
                 # UI
                 exec('import %s' % moduleName)
-                exec('reload (%s)' % moduleName)
+                # exec('import imp; imp.reload (%s)' % moduleName)
                 module = sys.modules[moduleName]
                 for name, obj in inspect.getmembers(module):
                     if inspect.isclass(obj):

@@ -6,7 +6,7 @@ import pymel.core as pm
 
 import Abstracts.Abstract_OperationUI as absOpUI
 #imp.reload(absOpUI)
-import PaintWeights as pnt
+import Operations.Skinning_Setup.PaintWeights as pnt
 #imp.reload(pnt)
 import Utilities.UI_Utilities as uiUtil
 #imp.reload(uiUtil)

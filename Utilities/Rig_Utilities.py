@@ -118,7 +118,7 @@ def GetSortedJoints(joints):
     temp = {}
     for joint in joints:
         temp[joint.longName()] = joint
-    return [temp[n] for n in sorted(list(temp.keys()))]
+    return [temp[n] for n in sorted(temp.keys())]
 
 def GetSortedLimbJoints(limb):
     jointGroups = pm.listConnections(limb.jointGroups)
@@ -223,7 +223,7 @@ def GetLimbGroups(limb, groupType):
     for group in pm.listConnections(limb.limbGroups):
         if group.groupType.get() == groupType:
             groups[group.groupIndex.get()] = group
-    return [groups[i] for i in sorted(list(groups.keys()))]
+    return [groups[i] for i in sorted(groups.keys())]
 
 #=========== CONTROLLERS ====================================
 

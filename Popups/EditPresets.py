@@ -53,7 +53,7 @@ class EditPresets:
         self.presetIDs = {} # presetID : presetName
         for preset in allPresets:
             self.presetIDs[preset.ID.get()] = preset.presetName.get()
-        for presetID in sorted(list(self.presetIDs.keys())):
+        for presetID in sorted(self.presetIDs.keys()):
             presetName = self.presetIDs[presetID]
             pm.treeView(self.widget, e=1, ai=(presetID, ''))
             pm.treeView(self.widget, e=1, dl=(presetID, presetName))

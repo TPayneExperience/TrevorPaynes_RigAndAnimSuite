@@ -6,7 +6,7 @@ import pymel.core as pm
 
 import Abstracts.Abstract_OperationUI as absOpUI
 #imp.reload(absOpUI)
-import ANM_Tools as tls
+import Operations.Animation.ANM_Tools as tls
 #imp.reload(tls)
 import Utilities.UI_Utilities as uiUtil
 #imp.reload(uiUtil)

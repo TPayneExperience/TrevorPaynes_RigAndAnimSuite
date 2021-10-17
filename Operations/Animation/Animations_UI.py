@@ -7,7 +7,7 @@ import pymel.core as pm
 
 import Abstracts.Abstract_OperationUI as absOpUI
 #imp.reload(absOpUI)
-import Animations as anm
+import Operations.Animation.Animations as anm
 #imp.reload(anm)
 import Utilities.UI_Utilities as uiUtil
 #imp.reload(uiUtil)

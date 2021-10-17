@@ -54,7 +54,7 @@ class Name:
                 rigRoot.typeIndex.get() : objType}
         if rigRoot.showRootName.get():
             temp[rigRoot.rigRootIndex.get()] = rigRoot.pfrsName.get()
-        partNames = [temp[i] for i in sorted(list(temp.keys()))]
+        partNames = [temp[i] for i in sorted(temp.keys())]
         return '_'.join(partNames)
 
 #=========== UDPATE NAMES ====================================
@@ -168,13 +168,13 @@ def AbstractInitializer(objectInstance, folder):
         opFilePath = os.path.join(rootPath, modFile)
         if not os.path.isfile(opFilePath):
             continue
-        if '__init__.py' in modFile:
+        if modFile.startswith('__'):
             continue
         if fileName in visited:
             continue
         # UI
         exec('import %s' % moduleName)
-        exec('#imp.reload(%s)' % moduleName)
+        # exec('#imp.reload(%s)' % moduleName)
         module = sys.modules[moduleName]
         for name, obj in inspect.getmembers(module):
             if inspect.isclass(obj):

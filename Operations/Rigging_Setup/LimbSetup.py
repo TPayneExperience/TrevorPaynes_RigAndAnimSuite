@@ -16,12 +16,8 @@ import SceneData.Limb as lmb
 #imp.reload(lmb)
 import SceneData.Joint as jnt
 #imp.reload(jnt)
-import SceneData.Group as grp
-#imp.reload(grp)
 import Utilities.General_Utilities as genUtil
 #imp.reload(genUtil)
-import SceneData.RigRoot as rrt
-#imp.reload(rrt)
 import Utilities.Rig_Utilities as rigUtil
 #imp.reload(rigUtil)
 import Abstracts.Abstract_Autobuild as absBld
@@ -50,12 +46,12 @@ class LimbSetup(absOp.Abstract_Operation):
         folder = os.path.dirname(__file__)
         folder = os.path.join(folder, 'Autobuild')
         for buildFile in os.listdir(folder):
-            if '__init__.py' in buildFile:
+            if buildFile.startswith('__'):
                 continue
             fileName = os.path.splitext(buildFile)[0]
             moduleName = 'Operations.Rigging_Setup.Autobuild.%s' % fileName
             exec('import %s' % moduleName)
-            exec('#imp.reload(%s)' % moduleName)
+            # exec('#imp.reload(%s)' % moduleName)
             module = sys.modules[moduleName]
             for name, obj in inspect.getmembers(module):
                 if inspect.isclass(obj):
@@ -485,7 +481,7 @@ class LimbSetup(absOp.Abstract_Operation):
                     jointChildren[joint] = parent
                     toDelete += pm.listRelatives(joint, p=1)
         joints = []
-        for joint in set(list(jointChildren.values())):
+        for joint in set(jointChildren.values()):
             if pm.objectType(joint) == 'joint':
                 joints.append(joint)
                 joint.radius.set(1)
@@ -877,7 +873,7 @@ class LimbSetup(absOp.Abstract_Operation):
             if dist not in distances:
                 distances[dist] = []
             distances[dist].append(group)
-        targetDist = sorted(list(distances.keys()))[0]
+        targetDist = sorted(distances.keys())[0]
         group = distances[targetDist][0]
         return groups.index(group)
 

@@ -5,7 +5,7 @@ import pymel.core as pm
 
 import Abstracts.Abstract_OperationUI as absOpUI
 #imp.reload(absOpUI)
-import Behavior as bhv
+import Operations.Rigging_Setup.Behavior as bhv
 #imp.reload(bhv)
 import Utilities.UI_Utilities as uiUtil
 #imp.reload(uiUtil)
@@ -138,7 +138,7 @@ class Behavior_UI(absOpUI.Abstract_OperationUI):
         for limb in self._selectedLimbs:
             for preset in pm.listConnections(limb.presets):
                 presetIDs[preset.ID.get()] = preset.presetName.get()
-        for presetID in sorted(list(presetIDs.keys())):
+        for presetID in sorted(presetIDs.keys()):
             presetName = presetIDs[presetID]
             item = pm.menuItem(l=presetName, p=self.rmb_ui, 
                             c=pm.Callback(self.ApplyPreset, presetID))
@@ -309,7 +309,7 @@ class Behavior_UI(absOpUI.Abstract_OperationUI):
             bhv = self.operation.bhvMng.bhvs[bhvFiles[-1]]
             orderedBhvs[bhv.uiOrderIndex] = bhv
         index = 0
-        for priority in sorted(list(orderedBhvs.keys())):
+        for priority in sorted(orderedBhvs.keys()):
             bhv = orderedBhvs[priority]
             bhvType = bhv.bhvType
             if limbType in bhv.validLimbTypes:

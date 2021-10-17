@@ -10,7 +10,7 @@ import Utilities.Rig_Utilities as rigUtil
 #imp.reload(rigUtil)
 import Data.Skin_Data as skinData
 #imp.reload(skinData)
-import PaintWeights as pntWgt
+import Operations.Skinning_Setup.PaintWeights as pntWgt
 #imp.reload(pntWgt)
 
 class QuickWeights(absOp.Abstract_Operation):

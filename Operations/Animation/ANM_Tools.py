@@ -57,7 +57,7 @@ class ANM_Tools(absOp.Abstract_Operation):
                         for k in pm.keyframe(control, q=1, t=(start,end), 
                                                             vc=1, tc=1):
                             keyframes.add(k[0])
-                    keyframes = sorted(list(keyframes))
+                    keyframes = sorted(keyframes)
                     keyframes = [str(k) for k in keyframes]
                     limb.controlKeyframes.set(':'.join(keyframes))
 

@@ -10,7 +10,7 @@ import Utilities.General_Utilities as genUtil
 import Data.Rig_Data as rigData
 #imp.reload(rigData)
 
-import Group as grp
+import SceneData.Group as grp
 #imp.reload(grp)
 
 class Joint:

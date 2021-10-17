@@ -62,7 +62,7 @@ SelectMirrorLimbControl()'''
         form = pm.setParent(q=1)
         with pm.scrollLayout() as self._sl:
             with pm.columnLayout(adj=1):
-                for name in sorted(list(self.scripts.keys())):
+                for name in sorted(self.scripts.keys()):
                     text = self.scripts[name]
                     with pm.frameLayout(l=name, bv=1, w=550, h=150):
                         pm.scrollField(ed=0, ww=0, text=text)

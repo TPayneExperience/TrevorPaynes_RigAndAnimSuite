@@ -8,7 +8,7 @@ import Utilities.General_Utilities as genUtil
 #imp.reload(genUtil)
 import Utilities.Logger as log
 #imp.reload(log)
-import Export as xprt
+import Popups.Export as xprt
 #imp.reload(xprt)
 
 class Export_UI:

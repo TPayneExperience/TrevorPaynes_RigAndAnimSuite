@@ -5,12 +5,10 @@ import pymel.core as pm
 
 import Abstracts.Abstract_OperationUI as absOpUI
 #imp.reload(absOpUI)
-import Ghosts as gst
+import Operations.Animation.Ghosts as gst
 #imp.reload(gst)
 import Utilities.Logger as log
 #imp.reload(log)
-import Utilities.UI_Utilities as uiUtil
-#imp.reload(uiUtil)
 
 class Ghost_UI(absOpUI.Abstract_OperationUI):
     uiName = 'Ghosts'

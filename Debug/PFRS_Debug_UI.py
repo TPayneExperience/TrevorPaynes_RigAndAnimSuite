@@ -3,7 +3,7 @@ import imp
 
 import pymel.core as pm
 
-import PFRS_Debug as dbg
+import Debug.PFRS_Debug as dbg
 #imp.reload(dbg)
 
 import Utilities.Logger as log

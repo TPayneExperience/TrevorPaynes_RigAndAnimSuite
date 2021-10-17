@@ -6,11 +6,11 @@ import pymel.core as pm
 
 import Data.Rig_Data as rigData
 #imp.reload(rigData)
-import Rig_Utilities as rigUtil
+import Utilities.Rig_Utilities as rigUtil
 #imp.reload(rigUtil)
-import General_Utilities as genUtil
+import Utilities.General_Utilities as genUtil
 #imp.reload(genUtil)
-import Skin_Utilities as skinUtil
+import Utilities.Skin_Utilities as skinUtil
 #imp.reload(skinUtil)
 import SceneData.RigRoot as rrt
 #imp.reload(rrt)
@@ -112,7 +112,7 @@ def PopulateControlHier(widget, limb):
         groupID = str(group.groupIndex.get())
         groups[groupID] = group
     
-    for index in sorted(list(groups.keys())):
+    for index in sorted(groups.keys()):
         group = groups[index]
         control = pm.listConnections(group.control)[0]
         name = control.shortName()
@@ -126,7 +126,7 @@ def PopulateJointHier(widget, limb):
         group = pm.listConnections(joint.group)[0]
         groupID = str(group.groupIndex.get())
         joints[groupID] = joint
-    for groupID in sorted(list(joints.keys())):
+    for groupID in sorted(joints.keys()):
         joint = joints[groupID]
         name = joint.pfrsName.get()
         pm.treeView(widget, e=1, addItem=(groupID, ''))

@@ -73,7 +73,7 @@ def setPFRSPyPaintValue(vertIndex, value):
                 jp = LIMB_JOINT_POSITIONS[index]
                 dist = ((vp[0]-jp[0])**2 + (vp[1]-jp[1])**2 + (vp[2]-jp[2])**2)
                 jointDist[dist] = index
-            closestDist = sorted(list(jointDist.keys()))[0]
+            closestDist = sorted(jointDist.keys())[0]
             jointIndex = jointDist[closestDist]
             closestAttr = JOINT_ATTRS_CURRENT[jointIndex]
 
@@ -101,7 +101,7 @@ def setPFRSPyPaintValue(vertIndex, value):
 
         # ADD MISSING WEIGHT
         if remainingWeight != 0 and weightIndexes:
-            index = sorted(list(weightIndexes.keys()))[0]
+            index = sorted(weightIndexes.keys())[0]
             jointIndex = weightIndexes[index]
             JOINT_WEIGHTS[jointIndex][vertIndex] += remainingWeight
             VERT_WEIGHTS_CURRENT[vertIndex][jointIndex] += remainingWeight

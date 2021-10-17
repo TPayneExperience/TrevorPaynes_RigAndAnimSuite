@@ -128,7 +128,7 @@ class EditRigRoot:
                 self.nameOrder[4]:objType}
         if self.showRootName:
             temp[self.nameOrder[0]] = rootName
-        partNames = [temp[i] for i in sorted(list(temp.keys()))]
+        partNames = [temp[i] for i in sorted(temp.keys())]
         return '_'.join(partNames)
 
     def Update_ExampleLabels(self, i1, i2, i3, i4, i5, i6, i7):

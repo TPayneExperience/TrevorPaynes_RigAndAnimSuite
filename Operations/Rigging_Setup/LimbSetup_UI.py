@@ -6,7 +6,7 @@ import pymel.core as pm
 
 import Abstracts.Abstract_OperationUI as absOpUI
 #imp.reload(absOpUI)
-import LimbSetup as ls
+import Operations.Rigging_Setup.LimbSetup as ls
 #imp.reload(ls)
 import Utilities.UI_Utilities as uiUtil
 #imp.reload(uiUtil)
@@ -86,7 +86,7 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
                     order = {}
                     for name, bld in self.operation._autobuilders.items():
                         order[bld.uiOrderIndex] = name
-                    for uiOrderIndex in sorted(list(order.keys())):
+                    for uiOrderIndex in sorted(order.keys()):
                         name = order[uiOrderIndex]
                         bld = self.operation._autobuilders[name]
                         item = pm.menuItem(l=name, c=pm.Callback(self._Build, bld))
@@ -202,7 +202,7 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
                 if pm.listConnections(joint.limb):
                     limbJoints.append(joint)
         # Populate Items
-        for longName in sorted(list(self.allJoints.keys())):
+        for longName in sorted(self.allJoints.keys()):
             joint = self.allJoints[longName]
             parent = pm.listRelatives(joint, parent=1)
             if parent and (parent[0].longName() in self.allJoints):

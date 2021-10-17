@@ -5,7 +5,7 @@ import pymel.core as pm
 
 import Abstracts.Abstract_OperationUI as absOpUI
 #imp.reload(absOpUI)
-import SetDrivenKeys as sdk
+import Operations.Rigging_Extras.SetDrivenKeys as sdk
 #imp.reload(sdk)
 import Utilities.UI_Utilities as uiUtil
 #imp.reload(uiUtil)

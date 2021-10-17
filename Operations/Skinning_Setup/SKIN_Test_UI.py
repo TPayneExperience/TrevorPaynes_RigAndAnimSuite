@@ -5,7 +5,7 @@ import pymel.core as pm
 
 import Abstracts.Abstract_OperationUI as absOpUI
 #imp.reload(absOpUI)
-import SKIN_Test as tst
+import Operations.Skinning_Setup.SKIN_Test as tst
 #imp.reload(tst)
 import Utilities.UI_Utilities as uiUtil
 #imp.reload(uiUtil)

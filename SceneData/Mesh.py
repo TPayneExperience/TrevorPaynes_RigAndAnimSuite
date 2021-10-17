@@ -12,7 +12,7 @@ import Utilities.Rig_Utilities as rigUtil
 import Data.Rig_Data as rigData
 #imp.reload(rigData)
 
-import Group as grp
+import SceneData.Group as grp
 #imp.reload(grp)
 
 class Mesh:

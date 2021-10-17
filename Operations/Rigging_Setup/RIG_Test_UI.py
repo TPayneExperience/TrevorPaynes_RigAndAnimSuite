@@ -5,7 +5,7 @@ import pymel.core as pm
 
 import Abstracts.Abstract_OperationUI as absOpUI
 #imp.reload(absOpUI)
-import RIG_Test as tst
+import Operations.Rigging_Setup.RIG_Test as tst
 #imp.reload(tst)
 import Utilities.UI_Utilities as uiUtil
 #imp.reload(uiUtil)

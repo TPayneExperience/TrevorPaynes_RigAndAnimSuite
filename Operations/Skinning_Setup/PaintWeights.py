@@ -14,11 +14,11 @@ import Utilities.Rig_Utilities as rigUtil
 #imp.reload(rigUtil)
 import Utilities.Skin_Utilities as skinUtil
 #imp.reload(skinUtil)
-import MeshSetup as ms
+import Operations.Skinning_Setup.MeshSetup as ms
 #imp.reload(ms)
-import paintOp_Joints as jntOp
+import Operations.Skinning_Setup.paintOp_Joints as jntOp
 #imp.reload(jntOp)
-import paintOp_Limbs as lmbOp
+import Operations.Skinning_Setup.paintOp_Limbs as lmbOp
 #imp.reload(lmbOp)
 
 class PaintWeights(absOp.Abstract_Operation):

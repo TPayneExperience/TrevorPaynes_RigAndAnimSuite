@@ -6,7 +6,7 @@ import pymel.core as pm
 
 import Abstracts.Abstract_OperationUI as absOpUI
 #imp.reload(absOpUI)
-import QuickWeights as qck
+import Operations.Skinning_Setup.QuickWeights as qck
 #imp.reload(qck)
 import Utilities.Logger as log
 #imp.reload(log)

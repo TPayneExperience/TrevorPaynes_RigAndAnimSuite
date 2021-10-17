@@ -15,7 +15,7 @@ class Updates:
     def _Setup(self):
         form = pm.setParent(q=1)
         text = 'PAYNE FREE RIG SUITE TOOL UPDATES'
-        for fileName in sorted(list(self._texts.keys()))[::-1]:
+        for fileName in sorted(self._texts.keys())[::-1]:
             text += '\n\n------------- %s ------------\n\n' % fileName
             text += self._texts[fileName]
         self.updateText_sf = pm.scrollField(ed=0, ww=0, text=text)
