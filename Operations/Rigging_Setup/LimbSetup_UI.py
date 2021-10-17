@@ -314,9 +314,6 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
         self._limbIDs.update(uiUtil.PopulateLimbHierNormal(self.limb_tv, 
                                                     self._rigRoot,
                                                     self._allRigRoots))
-        for limbID, limb in self._limbIDs.items():
-            if limb.limbType.get() == 0:
-                pm.treeView(self.limb_tv, e=1, enl=(limbID, 0))
         if not selectLimb:
             return
         for limbID, limb in self._limbIDs.items():
@@ -448,13 +445,14 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
         result = pm.promptDialog(
                 title='Save Template',
                 message='New Template Name:',
-                button=['OK', 'Cancel'],
+                button=['Cancel', 'OK'],
                 defaultButton='OK',
                 cancelButton='Cancel',
                 dismissString='Cancel')
-        if result != 'OK':
+        name = pm.promptDialog(q=1, tx=1).replace(' ', '_')
+        if result != 'OK' or not name:
             return
-        templateName = pm.promptDialog(q=1, tx=1) + '.ma'
+        templateName = name + '.ma'
         templateFolder = self._GetTemplateFolder()
 
         filePath = os.path.join(templateFolder, templateName)

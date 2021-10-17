@@ -80,14 +80,6 @@ class Behavior_UI(absOpUI.Abstract_OperationUI):
                                         en=0, c=self.SavePreset)
                     pm.menuItem(l='Edit Presets', c=self.EditPresets)
                     pm.menuItem(l='APPLY PRESET', en=0, d=1)
-            isEnabled = (self._rigRoot.rigMode.get() == 0) # Setup Rig ONLY
-            with pm.frameLayout('Controls (select + move pivots)', bv=1, 
-                                en=isEnabled):
-                tt = 'DOT = pivot is moveable!'
-                tt += '\nDimmed = Disabled group'
-                self.control_tv = pm.treeView(arp=0, adr=0, ams=0, ann=tt,
-                                            elc=self.IgnoreRename)
-                pm.treeView(self.control_tv, e=1, scc=self.SelectedControl)
         with pm.verticalLayout():
             with pm.frameLayout('Limb Properties', bv=1, en=0, mw=7, mh=7) as self.limbProp_fl:
                 with pm.columnLayout(adj=1, rs=5) as self.bhvLimbProp_cl:
@@ -101,6 +93,14 @@ class Behavior_UI(absOpUI.Abstract_OperationUI):
                                                                 cc=self.SetJointParent)
             with pm.frameLayout('Behavior Properties', bv=1, en=0) as self.bhvProp_fl:
                 self.bhvProp_cl = pm.columnLayout(adj=1)
+            isEnabled = (self._rigRoot.rigMode.get() == 0) # Setup Rig ONLY
+            with pm.frameLayout('Controls (select + move pivots)', bv=1, 
+                                en=isEnabled):
+                tt = 'DOT = pivot is moveable!'
+                tt += '\nDimmed = Disabled group'
+                self.control_tv = pm.treeView(arp=0, adr=0, ams=0, ann=tt,
+                                            elc=self.IgnoreRename)
+                pm.treeView(self.control_tv, e=1, scc=self.SelectedControl)
 
 #=========== LIMB HIER ====================================
 

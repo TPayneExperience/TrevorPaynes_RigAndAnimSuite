@@ -72,7 +72,7 @@ class PayneFreeRigSuite_UI:
             with pm.frameLayout(bv=0, lv=0) as self.frame:
                 msg = 'Hey talented person!'
                 msg += '\nOpen a scene with a rig, or a new scene, then update the tool!'
-                msg += '\nMenubar > RigRoot > New / Update Rig Root'
+                msg += '\n\nMenubar > RigRoot > New / Update Rig Root'
                 msg += '\n\nStay awesome and keep the dream alive!'
                 pm.text(l=msg, en=0)
                 

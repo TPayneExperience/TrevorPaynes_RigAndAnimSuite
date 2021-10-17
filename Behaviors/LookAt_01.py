@@ -25,7 +25,7 @@ class LookAt_01(absBhv.Abstract_Behavior):
         log.funcFileDebug()
         if not limb.hasAttr('lookAtDistance'):
             pm.addAttr(limb, ln='lookAtDistance', at='float', 
-                                                min=0, dv=1)
+                                                min=0, dv=10)
             pm.addAttr(limb, ln='lookAtOffsetX', at='float')
             pm.addAttr(limb, ln='lookAtOffsetY', at='float')
             pm.addAttr(limb, ln='lookAtOffsetZ', at='float')
@@ -40,8 +40,7 @@ class LookAt_01(absBhv.Abstract_Behavior):
     def Setup_ForBhvOp(self, limb):
         joint = pm.listConnections(limb.joints)[0]
         tempGroup = pm.group(em=1, w=1)
-        pm.parent(tempGroup, joint)
-        rigUtil.ResetAttrs(tempGroup)
+        pm.delete(pm.parentConstraint(joint, tempGroup))
         group = rigUtil.GetLimbGroups(limb, self.groupType)[0]
         control = pm.listConnections(group.control)[0]
         pm.parent(group, tempGroup)

@@ -12,6 +12,7 @@ class PFRS_Debug:
 
         folder = os.path.dirname(__file__)
         folder = os.path.dirname(folder)
+        folder = os.path.dirname(folder)
         self.folder = os.path.join( folder, 
                                     'PFRS_ExternalFiles', 
                                     'TESTING_FILES')
