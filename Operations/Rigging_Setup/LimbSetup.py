@@ -7,25 +7,15 @@ import sys
 import pymel.core as pm
 
 import Abstracts.Abstract_Operation as absOp
-#imp.reload(absOp)
 import Utilities.Logger as log
-#imp.reload(log)
 import Data.Rig_Data as rigData
-#imp.reload(rigData)
 import SceneData.Limb as lmb
-#imp.reload(lmb)
 import SceneData.Joint as jnt
-#imp.reload(jnt)
 import Utilities.General_Utilities as genUtil
-#imp.reload(genUtil)
 import Utilities.Rig_Utilities as rigUtil
-#imp.reload(rigUtil)
 import Abstracts.Abstract_Autobuild as absBld
-#imp.reload(absBld)
 import SceneData.Preset as pst
-#imp.reload(pst)
 import Operations.Skinning_Setup.MeshSetup as msh
-#imp.reload(msh)
 
 class LimbSetup(absOp.Abstract_Operation):
     isRigBuilt = False
@@ -51,7 +41,6 @@ class LimbSetup(absOp.Abstract_Operation):
             fileName = os.path.splitext(buildFile)[0]
             moduleName = 'Operations.Rigging_Setup.Autobuild.%s' % fileName
             exec('import %s' % moduleName)
-            # exec('#imp.reload(%s)' % moduleName)
             module = sys.modules[moduleName]
             for name, obj in inspect.getmembers(module):
                 if inspect.isclass(obj):

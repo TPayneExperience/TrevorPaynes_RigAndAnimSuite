@@ -4,9 +4,7 @@ import imp
 import pymel.core as pm
 
 import Operations.Rigging_Setup.LimbSetup as ls
-#imp.reload(ls)
 import Utilities.Rig_Utilities as rigUtil
-#imp.reload(rigUtil)
 
 class Export(object):
     def __init__(self):

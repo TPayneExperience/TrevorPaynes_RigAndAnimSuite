@@ -2,9 +2,6 @@
 import imp
 
 import Abstracts.Abstract_Operation as absOp
-#imp.reload(absOp)
-import Utilities.Logger as log
-#imp.reload(log)
 
 class Test(absOp.Abstract_Operation):
     isRigBuilt = True

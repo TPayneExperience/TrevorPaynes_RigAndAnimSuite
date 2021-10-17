@@ -4,15 +4,10 @@ import imp
 import pymel.core as pm
 
 import Abstracts.Abstract_Autobuild as absBld
-#imp.reload(absBld)
 import Utilities.Logger as log
-#imp.reload(log)
 import SceneData.Limb as lmb
-#imp.reload(lmb)
 import Utilities.Rig_Utilities as rigUtil
-#imp.reload(rigUtil)
 import Utilities.General_Utilities as genUtil
-#imp.reload(genUtil)
 
 class ByNames(absBld.Abstract_Autobuild):
     uiName = 'By Names | [limb]_[L/M/R]_[joint]'

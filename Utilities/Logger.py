@@ -1,7 +1,6 @@
 
 import imp
 import datetime as dt
-#imp.reload(dt)
 import inspect
 import logging
 import os
@@ -10,7 +9,6 @@ import subprocess
 import time
 
 import Utilities.General_Utilities as genUtil
-#imp.reload(genUtil)
 
 # ---- USES ------
 # log.funcFileInfo()

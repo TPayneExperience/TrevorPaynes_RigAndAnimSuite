@@ -5,21 +5,11 @@ import os
 import pymel.core as pm
 
 import Abstracts.Abstract_OperationUI as absOpUI
-#imp.reload(absOpUI)
 import Operations.Skinning_Setup.PaintWeights as pnt
-#imp.reload(pnt)
 import Utilities.UI_Utilities as uiUtil
-#imp.reload(uiUtil)
-import Utilities.Rig_Utilities as rigUtil
-#imp.reload(rigUtil)
 import Utilities.Logger as log
-#imp.reload(log)
 import Utilities.General_Utilities as genUtil
-#imp.reload(genUtil)
-import Data.Rig_Data as rigData
-#imp.reload(rigData)
 import Utilities.Skin_Utilities as skinUtil
-#imp.reload(skinUtil)
 
 class PaintWeights_UI(absOpUI.Abstract_OperationUI):
     uiName = 'Paint Weights'

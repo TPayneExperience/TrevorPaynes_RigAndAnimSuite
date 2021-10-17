@@ -4,13 +4,10 @@
 # import pymel.core as pm
 
 # import Abstracts.Abstract_Behavior as absBhv
-# #imp.reload(absBhv)
-# import Utilities.Rig_Utilities as rigUtil
-# #imp.reload(rigUtil)
-
+# # import Utilities.Rig_Utilities as rigUtil
+# 
 # import Utilities.Logger as log
-# #imp.reload(log)
-
+# 
 # class Physics_Spring_01(absBhv.Abstract_Behavior):
 #     bhvType = 'Physics Spring'
 #     validLimbTypes = (1, 2, 3, 4) # rigData.LIMB_TYPES, 1B, 2B, 2C, 3C

@@ -5,21 +5,12 @@ import os
 import pymel.core as pm
 
 import Abstracts.Abstract_Operation as absOp
-#imp.reload(absOp)
-import Utilities.Logger as log
-#imp.reload(log)
 import Data.Rig_Data as rigData
-#imp.reload(rigData)
 import Utilities.Rig_Utilities as rigUtil
-#imp.reload(rigUtil)
 import Utilities.Skin_Utilities as skinUtil
-#imp.reload(skinUtil)
 import Operations.Skinning_Setup.MeshSetup as ms
-#imp.reload(ms)
 import Operations.Skinning_Setup.paintOp_Joints as jntOp
-#imp.reload(jntOp)
 import Operations.Skinning_Setup.paintOp_Limbs as lmbOp
-#imp.reload(lmbOp)
 
 class PaintWeights(absOp.Abstract_Operation):
     isRigBuilt = True

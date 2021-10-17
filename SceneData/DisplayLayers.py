@@ -4,9 +4,7 @@ import imp
 import pymel.core as pm
 
 import Data.Rig_Data as rigData
-#imp.reload(rigData)
 import Utilities.Logger as log
-#imp.reload(log)
 
 class DisplayLayers:
     @staticmethod

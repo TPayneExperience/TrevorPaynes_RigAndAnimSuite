@@ -2,15 +2,9 @@
 import imp
 
 import Abstracts.Abstract_Operation as absOp
-#imp.reload(absOp)
-import Utilities.Rig_Utilities as rigUtil
-#imp.reload(rigUtil)
 import SceneData.AttachPoint as ap
-#imp.reload(ap)
 import Utilities.General_Utilities as genUtil
-#imp.reload(genUtil)
 import Utilities.Logger as log
-#imp.reload(log)
 
 class AttachPoints(absOp.Abstract_Operation):
     isRigBuilt = True

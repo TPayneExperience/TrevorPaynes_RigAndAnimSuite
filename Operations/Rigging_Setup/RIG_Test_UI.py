@@ -4,13 +4,9 @@ import imp
 import pymel.core as pm
 
 import Abstracts.Abstract_OperationUI as absOpUI
-#imp.reload(absOpUI)
 import Operations.Rigging_Setup.RIG_Test as tst
-#imp.reload(tst)
 import Utilities.UI_Utilities as uiUtil
-#imp.reload(uiUtil)
 import Utilities.Logger as log
-#imp.reload(log)
 
 class Test_UI(absOpUI.Abstract_OperationUI):
     uiName = 'Test'

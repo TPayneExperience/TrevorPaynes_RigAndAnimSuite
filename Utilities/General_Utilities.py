@@ -10,15 +10,11 @@ import time
 import pymel.core as pm
 
 import Plugins.pyperclip as pyCopy
-#imp.reload(pyCopy)
 
 import Data.Rig_Data as rigData
-#imp.reload(rigData)
 import Data.General_Data as genData
-#imp.reload(genData)
 
 import Abstracts.Abstract_Initializer as absInit
-#imp.reload(absInit)
 
 
 #=========== NAMING ====================================
@@ -174,7 +170,6 @@ def AbstractInitializer(objectInstance, folder):
             continue
         # UI
         exec('import %s' % moduleName)
-        # exec('#imp.reload(%s)' % moduleName)
         module = sys.modules[moduleName]
         for name, obj in inspect.getmembers(module):
             if inspect.isclass(obj):

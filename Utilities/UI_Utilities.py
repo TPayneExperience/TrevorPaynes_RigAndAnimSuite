@@ -5,15 +5,9 @@ import imp
 import pymel.core as pm
 
 import Data.Rig_Data as rigData
-#imp.reload(rigData)
 import Utilities.Rig_Utilities as rigUtil
-#imp.reload(rigUtil)
 import Utilities.General_Utilities as genUtil
-#imp.reload(genUtil)
 import Utilities.Skin_Utilities as skinUtil
-#imp.reload(skinUtil)
-import SceneData.RigRoot as rrt
-#imp.reload(rrt)
 
 def PopulateLimbHierNormal(widget, currentRigRoot, allRigRoots): 
     pm.treeView(widget, e=1, removeAll=1)

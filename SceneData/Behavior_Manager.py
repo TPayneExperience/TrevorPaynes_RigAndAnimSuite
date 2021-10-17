@@ -7,19 +7,11 @@ import sys
 import pymel.core as pm
 
 import Utilities.Logger as log
-#imp.reload(log)
 import Abstracts.Abstract_Behavior as absBhv
-#imp.reload(absBhv)
-import Data.Rig_Data as rigData
-#imp.reload(rigData)
 import Utilities.Rig_Utilities as rigUtil
-#imp.reload(rigUtil)
 import SceneData.Group as grp
-#imp.reload(grp)
 import Utilities.General_Utilities as genUtil
-#imp.reload(genUtil)
 import Data.General_Data as genData
-#imp.reload(genUtil)
 
 # FUNCTIONS MUST BE STATIC, USED ACROSS MULTIPLE FILES
 class Behavior_Manager(object):
@@ -42,7 +34,6 @@ class Behavior_Manager(object):
             fileName = os.path.splitext(opFile)[0]
             moduleName = '%s.%s' % ('Behaviors', fileName)
             exec('import %s' % moduleName)
-            # exec('#imp.reload(%s)' % moduleName)
             module = sys.modules[moduleName]
             for name, obj in inspect.getmembers(module):
                 if inspect.isclass(obj):

@@ -6,7 +6,6 @@ import pymel.core as pm
 import maya.api.OpenMaya as om
 
 import Data.Skin_Data as skinData
-#imp.reload(skinData)
 
 # PFRS_ATTR = ''      # J01, J22, ... J(oint) ID
 PFRS_MESH_NAME = ''

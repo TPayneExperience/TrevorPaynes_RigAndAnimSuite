@@ -3,12 +3,8 @@ import imp
 
 import pymel.core as pm
 
-import Data.Rig_Data as rigData
-#imp.reload(rigData)
 import Utilities.Logger as log
-#imp.reload(log)
 import Utilities.General_Utilities as genUtil
-#imp.reload(genUtil)
 
 class RigRoot:
     @staticmethod

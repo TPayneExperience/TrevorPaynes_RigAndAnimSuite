@@ -4,14 +4,10 @@ import imp
 import pymel.core as pm
 
 import Abstracts.Abstract_Behavior as absBhv
-#imp.reload(absBhv)
 import Utilities.Rig_Utilities as rigUtil
-#imp.reload(rigUtil)
 import Data.General_Data as genData
-#imp.reload(genData)
 
 import Utilities.Logger as log
-#imp.reload(log)
 
 class FKIK_Simple_01(absBhv.Abstract_Behavior):
     bhvType = 'FK IK - Simple'

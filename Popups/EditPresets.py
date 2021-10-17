@@ -4,7 +4,6 @@ import imp
 import pymel.core as pm
 
 import Utilities.Logger as log
-#imp.reload(log)
 
 class EditPresets:
     def __init__(self, rigRoot, behaviorOp):

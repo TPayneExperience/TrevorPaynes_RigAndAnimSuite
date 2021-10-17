@@ -5,7 +5,6 @@ import os
 import pymel.core as pm
 
 import Utilities.Logger as log
-#imp.reload(log)
 
 class PFRS_Debug:
     def __init__(self, parent):
@@ -13,7 +12,9 @@ class PFRS_Debug:
 
         folder = os.path.dirname(__file__)
         folder = os.path.dirname(folder)
-        self.folder = os.path.join(folder,'TESTING_FILES')
+        self.folder = os.path.join( folder, 
+                                    'PFRS_ExternalFiles', 
+                                    'TESTING_FILES')
 
         if not os.path.isfile(__file__.replace('.pyc', '.py')):
             print ('>>>>>>>>>>>>>> AUTO DEBUG OFF <<<<<<<<<<<<<')

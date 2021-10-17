@@ -2,7 +2,6 @@
 import imp
 
 import Abstracts.Abstract_Initializer as absInit
-#imp.reload(absInit)
 
 class InitConfig(absInit.Abstract_Initializer):
     @staticmethod

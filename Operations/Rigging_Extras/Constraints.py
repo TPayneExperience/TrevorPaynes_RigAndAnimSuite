@@ -4,9 +4,7 @@ import imp
 import pymel.core as pm
 
 import Abstracts.Abstract_Operation as absOp
-#imp.reload(absOp)
 import SceneData.Group as grp
-#imp.reload(grp)
 
 class Constraints(absOp.Abstract_Operation):
     isRigBuilt = True

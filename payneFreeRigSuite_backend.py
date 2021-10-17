@@ -8,35 +8,20 @@ import webbrowser
 import pymel.core as pm
 
 import Operations
-#imp.reload(Operations)
 import Behaviors
-#imp.reload(Behaviors)
 import Abstracts.Abstract_OperationUI as absOpUI
-#imp.reload(absOpUI)
 import Abstracts.Abstract_Operation as absOp
-#imp.reload(absOp)
 import Utilities.Logger as log
-#imp.reload(log)
 import SceneData.Limb as lmb
-#imp.reload(lmb)
 import SceneData.RigRoot as rrt
-#imp.reload(rrt)
 import SceneData.DisplayLayers as dl
-#imp.reload(dl)
 import SceneData.Group as grp
-#imp.reload(grp)
 import SceneData.Behavior_Manager as bMng
-#imp.reload(bMng)
 import Data.General_Data as genData
-#imp.reload(genData)
 import Utilities.General_Utilities as genUtil
-#imp.reload(genUtil)
 import Operations.Rigging_Setup.Appearance as app
-#imp.reload(app)
 import Operations.Rigging_Setup.LimbSetup as ls
-#imp.reload(ls)
 import Operations.Skinning_Setup.MeshSetup as msh
-#imp.reload(msh)
 
 class PayneFreeRigSuite:
     def __init__(self):

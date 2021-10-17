@@ -4,13 +4,9 @@ import imp
 import pymel.core as pm
 
 import Abstracts.Abstract_OperationUI as absOpUI
-#imp.reload(absOpUI)
 import Operations.Skinning_Extras.AttachPoints as att
-#imp.reload(att)
 import Utilities.Logger as log
-#imp.reload(log)
 import Utilities.UI_Utilities as uiUtil
-#imp.reload(uiUtil)
 
 class AttachPoints_UI(absOpUI.Abstract_OperationUI):
     uiName = 'Attach Points'

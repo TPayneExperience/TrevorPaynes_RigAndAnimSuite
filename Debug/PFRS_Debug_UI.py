@@ -1,21 +1,19 @@
 
 import imp
+import os
 
 import pymel.core as pm
 
 import Debug.PFRS_Debug as dbg
-#imp.reload(dbg)
-
 import Utilities.Logger as log
-#imp.reload(log)
 
 class PFRS_Debug_UI:
     def __init__(self, parent):
         self.parent = parent
         self.pfrs = parent.pfrs
         self.debug = dbg.PFRS_Debug(self)
-
-        self._Setup()
+        if os.path.exists(self.debug.folder):
+            self._Setup()
 
 # ================= SETUP =============================
 

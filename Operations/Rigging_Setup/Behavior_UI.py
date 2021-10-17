@@ -4,20 +4,11 @@ import imp
 import pymel.core as pm
 
 import Abstracts.Abstract_OperationUI as absOpUI
-#imp.reload(absOpUI)
 import Operations.Rigging_Setup.Behavior as bhv
-#imp.reload(bhv)
 import Utilities.UI_Utilities as uiUtil
-#imp.reload(uiUtil)
 import Utilities.Logger as log
-#imp.reload(log)
-import Data.Rig_Data as rigData
-#imp.reload(rigData)
 import Popups.EditPresets as editPst
-#imp.reload(editPst)
 
-import SceneData.RigRoot as rrt
-#imp.reload(rrt)
 
 class Behavior_UI(absOpUI.Abstract_OperationUI):
     uiName = 'Behavior'

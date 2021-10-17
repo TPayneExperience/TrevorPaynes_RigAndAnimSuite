@@ -6,43 +6,27 @@ import webbrowser
 import pymel.core as pm
 
 import Data.General_Data as genData
-#imp.reload(genData)
 
 import Initializers
-#imp.reload(Initializers)
 import SceneData
-#imp.reload(SceneData)
 import Popups
-#imp.reload(Popups)
 
 import Utilities.Logger as log
-#imp.reload(log)
 import Utilities.General_Utilities as genUtil
-#imp.reload(genUtil)
 import Popups.EditRigRoot as edRt
-#imp.reload(edRt)
 import Popups.RemoveRig as rmrig
-#imp.reload(rmrig)
 import Popups.UserSettings as usr
-#imp.reload(usr)
 import Popups.UsefulScripts as usfScr
-#imp.reload(usfScr)
 import Popups.Export_UI as xprt
-#imp.reload(xprt)
 import Popups.SuggestedExternalTools as sget
-#imp.reload(sget)
 import Popups.Share as shr
-#imp.reload(shr)
 import Popups.Welcome as wlc
-#imp.reload(wlc)
 import Popups.Updates as upd
-#imp.reload(upd)
 
 import payneFreeRigSuite_backend as pfrs
 imp.reload(pfrs)
 
 import Debug.PFRS_Debug_UI as debug_ui
-#imp.reload(debug_ui)
 
 class PayneFreeRigSuite_UI:
     def __init__(self):
@@ -86,7 +70,11 @@ class PayneFreeRigSuite_UI:
                     self.op_op = pm.optionMenu(l='Operation', 
                                                 cc=self.SetOperation)
             with pm.frameLayout(bv=0, lv=0) as self.frame:
-                pm.text(l='Loading...', en=0)
+                msg = 'Hey talented person!'
+                msg += '\nOpen a scene with a rig, or a new scene, then update the tool!'
+                msg += '\nMenubar > RigRoot > New / Update Rig Root'
+                msg += '\n\nStay awesome and keep the dream alive!'
+                pm.text(l=msg, en=0)
                 
         pm.window(self.win, e=1, cc=self.closeEvent)
         self._LoadWindowPos()

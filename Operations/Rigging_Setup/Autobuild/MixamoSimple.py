@@ -4,11 +4,7 @@ import imp
 import pymel.core as pm
 
 import Abstracts.Abstract_Autobuild as absBld
-#imp.reload(absBld)
-import Utilities.Logger as log
-#imp.reload(log)
 import Operations.Rigging_Setup.Autobuild.ByNames as autoBld
-#imp.reload(autoBld)
 
 class MixamoSimple(absBld.Abstract_Autobuild):
     uiName = 'Mixamo | Simple'

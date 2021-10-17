@@ -4,11 +4,8 @@ import imp
 import pymel.core as pm
 
 import Abstracts.Abstract_OperationUI as absOpUI
-#imp.reload(absOpUI)
 import Utilities.Logger as log
-#imp.reload(log)
 import Operations.Skinning_Setup.MeshSetup as msh
-#imp.reload(msh)
 
 class MeshSetup_UI(absOpUI.Abstract_OperationUI):
     uiName = 'Mesh Setup'
