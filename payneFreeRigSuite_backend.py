@@ -1,5 +1,4 @@
 
-import imp
 import inspect
 import os
 import sys
@@ -132,7 +131,7 @@ class PayneFreeRigSuite:
         log.funcFileDebug()
         rigRoot.rename('%s_RigRoot' % rigRoot.pfrsName.get())
         for limb in pm.listConnections(rigRoot.limbs):
-            genUtil.Name.UpdateLimbName(rigRoot, limb)
+            genUtil.UpdateLimbName(rigRoot, limb)
 
     def SubmitFeedback(self):
         email = 'trevor@paynefreerigsuite.com'

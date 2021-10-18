@@ -1,5 +1,4 @@
 
-import imp
 
 import pymel.core as pm
 
@@ -37,14 +36,14 @@ class ByHierarchy(absBld.Abstract_Autobuild):
                 if child not in jointParents:
                     continue
                 # Unparent CHAIN root joint + track
-                joints = rigUtil.Joint._GetLongestJointChain(child)
+                joints = rigUtil.GetLongestJointChain(child)
                 
                 if len(joints) >= 3:
                     limbType = 4
                 elif len(joints) == 2:
                     limbType = 3
                 else:
-                    joints = rigUtil.Joint._GetJointBranch(child)
+                    joints = rigUtil.GetJointBranch(child)
                     if len(joints) == 1:
                         limbType = 1
                     else:

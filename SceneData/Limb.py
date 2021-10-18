@@ -1,5 +1,4 @@
 
-import imp
 
 import pymel.core as pm
 
@@ -37,7 +36,7 @@ class Limb:
         log.funcFileDebug()
         limb = Limb._Add(rigRoot)
         limb.limbType.set(0)
-        genUtil.Name.UpdateLimbName(rigRoot, limb)
+        genUtil.UpdateLimbName(rigRoot, limb)
         return limb
 
     @staticmethod
@@ -46,7 +45,7 @@ class Limb:
         limb = Limb._Add(rigRoot)
         limb.limbType.set(1)
         Limb._AddJoints(rigRoot, limb, joints)
-        genUtil.Name.UpdateLimbName(rigRoot, limb)
+        genUtil.UpdateLimbName(rigRoot, limb)
         return limb
 
     @staticmethod
@@ -55,7 +54,7 @@ class Limb:
         limb = Limb._Add(rigRoot)
         limb.limbType.set(2)
         Limb._AddJoints(rigRoot, limb, joints)
-        genUtil.Name.UpdateLimbName(rigRoot, limb)
+        genUtil.UpdateLimbName(rigRoot, limb)
         return limb
 
     @staticmethod
@@ -64,7 +63,7 @@ class Limb:
         limb = Limb._Add(rigRoot)
         limb.limbType.set(3)
         Limb._AddJoints(rigRoot, limb, joints)
-        genUtil.Name.UpdateLimbName(rigRoot, limb)
+        genUtil.UpdateLimbName(rigRoot, limb)
         return limb
 
     @staticmethod
@@ -73,7 +72,7 @@ class Limb:
         limb = Limb._Add(rigRoot)
         limb.limbType.set(4)
         Limb._AddJoints(rigRoot, limb, joints)
-        genUtil.Name.UpdateLimbName(rigRoot, limb)
+        genUtil.UpdateLimbName(rigRoot, limb)
         return limb
 
     @staticmethod

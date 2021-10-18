@@ -1,5 +1,4 @@
 
-import imp
 import inspect
 import os
 import sys
@@ -343,7 +342,7 @@ class Behavior_Manager(object):
             for i in range(len(joints)):
                 group = limbGroupDict['FK'][i]
                 pm.connectAttr(limb.usedGroups, group.used)
-                genUtil.Name.UpdateLimbGroupName(rigRoot, limb, group)
+                genUtil.UpdateLimbGroupName(rigRoot, limb, group)
                 pm.parent(group, joints[i])
                 rigUtil.ResetAttrs(group)
                 pm.parent(group, limb)
@@ -352,7 +351,7 @@ class Behavior_Manager(object):
         for i in range(groupCount):
             group = limbGroupDict[groupType][i]
             pm.connectAttr(limb.usedGroups, group.used)
-            genUtil.Name.UpdateLimbGroupName(rigRoot, limb, group)
+            genUtil.UpdateLimbGroupName(rigRoot, limb, group)
 
 #=========== CONSTRAINTS ====================================
 

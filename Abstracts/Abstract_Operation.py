@@ -1,6 +1,5 @@
 
 from abc import ABCMeta, abstractproperty
-import imp
 import os
 
 import pymel.core as pm

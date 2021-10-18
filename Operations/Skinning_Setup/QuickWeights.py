@@ -1,5 +1,4 @@
 
-import imp
 
 import pymel.core as pm
 import maya.api.OpenMaya as om

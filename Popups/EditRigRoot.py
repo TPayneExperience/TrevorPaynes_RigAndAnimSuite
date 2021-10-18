@@ -1,5 +1,4 @@
 
-import imp
 
 import pymel.core as pm
 
@@ -152,13 +151,13 @@ class EditRigRoot:
         self.rootNameValid = False
         pm.button(self.save_btn, e=1, en=0)
         msg = 'Rig Root Name'
-        if not genUtil.Name.IsValidCharacterLength(text):
+        if not genUtil.IsValidCharacterLength(text):
             msg += ' | Must be 2 or more characters'
             return pm.textFieldGrp(self.rootName_grp, e=1, l=msg)
-        if not genUtil.Name.DoesNotStartWithNumber(text):
+        if not genUtil.DoesNotStartWithNumber(text):
             msg += ' | Cannot start with number OR _'
             return pm.textFieldGrp(self.rootName_grp, e=1, l=msg)
-        if not genUtil.Name.AreAllValidCharacters(text):
+        if not genUtil.AreAllValidCharacters(text):
             msg += ' | May only contain A-Z, a-z, 0-9, _'
             return pm.textFieldGrp(self.rootName_grp, e=1, l=msg)
         self.rootNameValid = True

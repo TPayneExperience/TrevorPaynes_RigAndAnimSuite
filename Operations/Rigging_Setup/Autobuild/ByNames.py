@@ -1,5 +1,4 @@
 
-import imp
 
 import pymel.core as pm
 
@@ -45,13 +44,13 @@ class ByNames(absBld.Abstract_Autobuild):
         limbTypes = {}
         for limbName, joints in newLimbs.items():
             newLimbs[limbName] = rigUtil.GetSortedJoints(joints)
-            if rigUtil.Joint._AreJointsSiblings(joints):
+            if rigUtil.AreJointsSiblings(joints):
                 if len(joints) == 1:
                     limbTypes[limbName] = 1
                 else:
                     limbTypes[limbName] = 2
                 continue
-            if rigUtil.Joint._AreJointsChained(joints):
+            if rigUtil.AreJointsChained(joints):
                 if len(joints) == 2:
                     limbTypes[limbName] = 3
                 else:
@@ -115,8 +114,8 @@ class ByNames(absBld.Abstract_Autobuild):
                 else:
                     limb.side.set(2)
                     mirror.side.set(1)
-                genUtil.Name.UpdateLimbName(rigRoot, mirror)
-            genUtil.Name.UpdateLimbName(rigRoot, limb)
+                genUtil.UpdateLimbName(rigRoot, mirror)
+            genUtil.UpdateLimbName(rigRoot, limb)
             unpairedLimbs[limbName] = limb
             allLimbs.append(limb)
         return allLimbs

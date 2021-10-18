@@ -1,5 +1,4 @@
 
-import imp
 import inspect
 import os
 import sys
@@ -76,9 +75,9 @@ class LimbSetup(absOp.Abstract_Operation):
     def GetLimbFuncForJoints(self, joints):
         if (len(joints) == 1):
             return lmb.Limb.AddOneJointBranch
-        elif rigUtil.Joint._AreJointsSiblings(joints):
+        elif rigUtil.AreJointsSiblings(joints):
             return lmb.Limb.AddTwoJointBranch
-        elif rigUtil.Joint._AreJointsChained(joints):
+        elif rigUtil.AreJointsChained(joints):
             if (len(joints) == 2):
                 return lmb.Limb.AddTwoJointChain
             else:
@@ -91,7 +90,7 @@ class LimbSetup(absOp.Abstract_Operation):
         for joint in joints:
             if pm.objectType(joint) != 'joint':
                 raise ValueError('Please pass in LIST of JOINTS')
-        if not rigUtil.Joint._AreJointsDisconnected(joints):
+        if not rigUtil.AreJointsDisconnected(joints):
             raise ValueError('Joints must be DISCONNECTED from LIMB')
         createLimbFunc = self.GetLimbFuncForJoints(joints)
         if not createLimbFunc:
@@ -215,15 +214,15 @@ class LimbSetup(absOp.Abstract_Operation):
             jnt.Joint.Delete(joint)
         
     def RenameLimb(self, limb, newName):
-        if not genUtil.Name.IsValidCharacterLength(newName):
+        if not genUtil.IsValidCharacterLength(newName):
             msg = 'Limb Name Must be 2 or more characters'
             log.error(msg)
             return False
-        if not genUtil.Name.DoesNotStartWithNumber(newName):
+        if not genUtil.DoesNotStartWithNumber(newName):
             msg = 'Cannot start with number OR _'
             log.error(msg)
             return False
-        if not genUtil.Name.AreAllValidCharacters(newName):
+        if not genUtil.AreAllValidCharacters(newName):
             msg = 'May only contain A-Z, a-z, 0-9, _'
             log.error(msg)
             return False
@@ -247,8 +246,8 @@ class LimbSetup(absOp.Abstract_Operation):
         side2 = mirrorLimb.side.get()
         sourceLimb.side.set(side2)
         mirrorLimb.side.set(side1)
-        genUtil.Name.UpdateLimbName(rigRoot, sourceLimb)
-        genUtil.Name.UpdateLimbName(rigRoot, mirrorLimb)
+        genUtil.UpdateLimbName(rigRoot, sourceLimb)
+        genUtil.UpdateLimbName(rigRoot, mirrorLimb)
 
     def SaveTemplate(self, rigRoot, limbs, filePath):
         log.funcFileInfo()
@@ -304,7 +303,7 @@ class LimbSetup(absOp.Abstract_Operation):
             nextLimbID = rigRoot.nextLimbID.get()
             rigRoot.nextLimbID.set(nextLimbID + 1)
             limb.ID.set(nextLimbID)
-            genUtil.Name.UpdateLimbName(rigRoot, limb)
+            genUtil.UpdateLimbName(rigRoot, limb)
             joints = pm.listConnections(limb.joints)
             for joint in joints:
                 nextJointID = rigRoot.nextJointID.get()
@@ -329,15 +328,15 @@ class LimbSetup(absOp.Abstract_Operation):
         oldName = joint.pfrsName.get()
         msg = '\t"%s" to "%s"' % (oldName, newName)
         log.info(msg)
-        if not genUtil.Name.IsValidCharacterLength(newName):
+        if not genUtil.IsValidCharacterLength(newName):
             msg = 'Joint Name Must be 2 or more characters'
             log.error(msg)
             return False
-        if not genUtil.Name.DoesNotStartWithNumber(newName):
+        if not genUtil.DoesNotStartWithNumber(newName):
             msg = 'Cannot start with number OR _'
             log.error(msg)
             return False
-        if not genUtil.Name.AreAllValidCharacters(newName):
+        if not genUtil.AreAllValidCharacters(newName):
             msg = 'May only contain A-Z, a-z, 0-9, _'
             log.error(msg)
             return False
@@ -687,7 +686,7 @@ class LimbSetup(absOp.Abstract_Operation):
         sourceLimb.side.set(0)
         pm.disconnectAttr(sourceLimb.mirrorLimb)
         rigRoot = pm.listConnections(mirrorLimb.rigRoot)[0]
-        genUtil.Name.UpdateLimbName(rigRoot, mirrorLimb)
+        genUtil.UpdateLimbName(rigRoot, mirrorLimb)
 
     def _UpdateMirrorConnection(self, rigRoot, limb):
         log.funcFileDebug()
@@ -706,7 +705,7 @@ class LimbSetup(absOp.Abstract_Operation):
             limb.side.set(2)
             rigUtil.UpdateUsedControlMaterials(rigRoot, limb)
             rigUtil.UpdateUsedControlMaterials(rigRoot, mirrorLimb)
-            genUtil.Name.UpdateLimbName(rigRoot, mirrorLimb)
+            genUtil.UpdateLimbName(rigRoot, mirrorLimb)
 
         # BREAK MIRROR
         else:
@@ -740,7 +739,7 @@ class LimbSetup(absOp.Abstract_Operation):
                     joint.pfrsName.set(newName + indexStr)
         sourceLimb.pfrsName.set(newName)
         self._UpdateMirrorConnection(rigRoot, sourceLimb)
-        genUtil.Name.UpdateLimbName(rigRoot, sourceLimb)
+        genUtil.UpdateLimbName(rigRoot, sourceLimb)
         for childLimb in pm.listConnections(sourceLimb.limbChildren):
             if self._UpdateParentControlEnum(childLimb):
                 self._UpdateParentControlIndex(childLimb)
@@ -756,7 +755,7 @@ class LimbSetup(absOp.Abstract_Operation):
 
     def _RenameJoint(self, rigRoot, limb, joint, newName):
         joint.pfrsName.set(newName)
-        genUtil.Name.UpdateJointName(rigRoot, limb, joint)
+        genUtil.UpdateJointName(rigRoot, limb, joint)
         for childLimb in pm.listConnections(limb.limbChildren):
             self._UpdateParentControlEnum(childLimb)
 

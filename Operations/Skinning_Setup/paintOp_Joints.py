@@ -1,5 +1,4 @@
 
-import imp
 
 # GLOBAL VARS / FUNCTIONS for painting / viewing skin weights
 import pymel.core as pm

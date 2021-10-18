@@ -1,5 +1,4 @@
 
-import imp
 import os
 
 import pymel.core as pm
@@ -157,8 +156,8 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
                     with pm.subMenuItem(l='Set Limb Location...', en=0) as self.limbLoc_mi:
                         pm.menuItem(l='As Body', c=pm.Callback(self.SetLimbLocation, 0))
                         pm.menuItem(l='As Face', c=pm.Callback(self.SetLimbLocation, 1))
-                        pm.menuItem(l='As Fingers', c=pm.Callback(self.SetLimbLocation, 2))
-                        pm.menuItem(l='As Toes', c=pm.Callback(self.SetLimbLocation, 3))
+                        pm.menuItem(l='As Hands', c=pm.Callback(self.SetLimbLocation, 2))
+                        pm.menuItem(l='As Feet', c=pm.Callback(self.SetLimbLocation, 3))
                         pm.menuItem(l='As Misc', c=pm.Callback(self.SetLimbLocation, 4))
                         
                     # Joint Anims
@@ -281,7 +280,7 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
         self._limbFunc = None
         if not self._selectedSceneJoints:
             return 
-        if not rigUtil.Joint._AreJointsDisconnected(self._selectedSceneJoints):
+        if not rigUtil.AreJointsDisconnected(self._selectedSceneJoints):
             return
         self._limbFunc = self.operation.GetLimbFuncForJoints(self._selectedSceneJoints)
         b = bool(self._limbFunc)
@@ -377,7 +376,7 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
         result = pm.promptDialog(
                 title='Add Joint Limb',
                 message='Limb Name:',
-                button=['OK', 'Cancel'],
+                button=['Cancel', 'OK'],
                 defaultButton='OK',
                 cancelButton='Cancel',
                 dismissString='Cancel')
@@ -667,15 +666,15 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
         if self.operation.RenameJoint(joint, newName):
             self.PopulateJointHier(self._selectedLimbs[0], joint)
             self.PopulateSceneHier()
-        # if not genUtil.Name.IsValidCharacterLength(newName):
+        # if not genUtil.IsValidCharacterLength(newName):
         #     msg = 'Joint Name Must be 2 or more characters'
         #     log.error(msg)
         #     return ''
-        # if not genUtil.Name.DoesNotStartWithNumber(newName):
+        # if not genUtil.DoesNotStartWithNumber(newName):
         #     msg = 'Cannot start with number OR _'
         #     log.error(msg)
         #     return ''
-        # if not genUtil.Name.AreAllValidCharacters(newName):
+        # if not genUtil.AreAllValidCharacters(newName):
         #     msg = 'May only contain A-Z, a-z, 0-9, _'
         #     log.error(msg)
         #     return ''

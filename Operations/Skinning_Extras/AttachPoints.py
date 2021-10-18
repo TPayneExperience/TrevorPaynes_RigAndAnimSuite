@@ -1,5 +1,4 @@
 
-import imp
 
 import Abstracts.Abstract_Operation as absOp
 import SceneData.AttachPoint as ap
@@ -24,13 +23,13 @@ class AttachPoints(absOp.Abstract_Operation):
         ap.AttachPoint.Remove(attachPoint)
 
     def RenameAttachPoint(self, attachPoint, newName):
-        if not genUtil.Name.IsValidCharacterLength(newName):
+        if not genUtil.IsValidCharacterLength(newName):
             log.error('Limb Name Must be 2 or more characters')
             return False
-        if not genUtil.Name.DoesNotStartWithNumber(newName):
+        if not genUtil.DoesNotStartWithNumber(newName):
             log.error('Cannot start with number OR _')
             return False
-        if not genUtil.Name.AreAllValidCharacters(newName):
+        if not genUtil.AreAllValidCharacters(newName):
             log.error('May only contain A-Z, a-z, 0-9, _')
             return False
         attachPoint.rename(newName)

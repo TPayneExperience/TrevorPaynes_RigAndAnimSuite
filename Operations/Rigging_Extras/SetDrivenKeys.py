@@ -1,5 +1,4 @@
 
-import imp
 
 import pymel.core as pm
 
@@ -44,15 +43,15 @@ class SetDrivenKeys(absOp.Abstract_Operation):
         oldName = group.shortName()
         msg = '\t"%s" to "%s"' % (oldName, newName)
         log.info(msg)
-        if not genUtil.Name.IsValidCharacterLength(newName):
+        if not genUtil.IsValidCharacterLength(newName):
             msg = 'Joint Name Must be 2 or more characters'
             log.error(msg)
             return False
-        if not genUtil.Name.DoesNotStartWithNumber(newName):
+        if not genUtil.DoesNotStartWithNumber(newName):
             msg = 'Cannot start with number OR _'
             log.error(msg)
             return False
-        if not genUtil.Name.AreAllValidCharacters(newName):
+        if not genUtil.AreAllValidCharacters(newName):
             msg = 'May only contain A-Z, a-z, 0-9, _'
             log.error(msg)
             return False

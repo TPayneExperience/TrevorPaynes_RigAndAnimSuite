@@ -1,5 +1,4 @@
 
-import imp
 import os
 
 import pymel.core as pm

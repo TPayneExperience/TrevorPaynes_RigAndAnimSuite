@@ -45,7 +45,7 @@ LIMB_TYPES = (  'Empty',
                 'Custom2',
                 'Custom3',
                 'Custom4')
-LIMB_LOCATIONS = ('Body', 'Face', 'Fingers', 'Toes', 'Misc')
+LIMB_LOCATIONS = ('Body', 'Face', 'Hands', 'Feet', 'Misc')
 
 LIMB_SIDES = ('M', 'L', 'R', '-')
 

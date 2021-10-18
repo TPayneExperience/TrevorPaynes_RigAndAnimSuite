@@ -806,7 +806,7 @@ createNode transform -n "NODE_SpineLower_Limb_M" -p "LIMBS";
 	addAttr -ci true -sn "pfrsName" -ln "pfrsName" -dt "string";
 	addAttr -ci true -sn "limbType" -ln "limbType" -min 0 -max 8 -en "Empty:OneJointBranch:TwoJointBranch:TwoJointChain:ThreeJointChain:Custom1:Custom2:Custom3:Custom4" 
 		-at "enum";
-	addAttr -ci true -sn "limbLocation" -ln "limbLocation" -min 0 -max 4 -en "Body:Face:Fingers:Toes:Misc" 
+	addAttr -ci true -sn "limbLocation" -ln "limbLocation" -min 0 -max 4 -en "Body:Face:Hands:Feet:Misc" 
 		-at "enum";
 	addAttr -ci true -sn "side" -ln "side" -min 0 -max 3 -en "M:L:R:-" -at "enum";
 	addAttr -ci true -sn "joints" -ln "joints" -dt "string";
@@ -1047,7 +1047,7 @@ createNode transform -n "NODE_SpineUpper_Limb_M" -p "LIMBS";
 	addAttr -ci true -sn "pfrsName" -ln "pfrsName" -dt "string";
 	addAttr -ci true -sn "limbType" -ln "limbType" -min 0 -max 8 -en "Empty:OneJointBranch:TwoJointBranch:TwoJointChain:ThreeJointChain:Custom1:Custom2:Custom3:Custom4" 
 		-at "enum";
-	addAttr -ci true -sn "limbLocation" -ln "limbLocation" -min 0 -max 4 -en "Body:Face:Fingers:Toes:Misc" 
+	addAttr -ci true -sn "limbLocation" -ln "limbLocation" -min 0 -max 4 -en "Body:Face:Hands:Feet:Misc" 
 		-at "enum";
 	addAttr -ci true -sn "side" -ln "side" -min 0 -max 3 -en "M:L:R:-" -at "enum";
 	addAttr -ci true -sn "joints" -ln "joints" -dt "string";
@@ -1288,7 +1288,7 @@ createNode transform -n "NODE_Pelvis_Limb_M" -p "LIMBS";
 	addAttr -ci true -sn "pfrsName" -ln "pfrsName" -dt "string";
 	addAttr -ci true -sn "limbType" -ln "limbType" -min 0 -max 8 -en "Empty:OneJointBranch:TwoJointBranch:TwoJointChain:ThreeJointChain:Custom1:Custom2:Custom3:Custom4" 
 		-at "enum";
-	addAttr -ci true -sn "limbLocation" -ln "limbLocation" -min 0 -max 4 -en "Body:Face:Fingers:Toes:Misc" 
+	addAttr -ci true -sn "limbLocation" -ln "limbLocation" -min 0 -max 4 -en "Body:Face:Hands:Feet:Misc" 
 		-at "enum";
 	addAttr -ci true -sn "side" -ln "side" -min 0 -max 3 -en "M:L:R:-" -at "enum";
 	addAttr -ci true -sn "joints" -ln "joints" -dt "string";
@@ -1346,7 +1346,7 @@ createNode transform -n "NODE_COG_Limb_M" -p "LIMBS";
 	addAttr -ci true -sn "pfrsName" -ln "pfrsName" -dt "string";
 	addAttr -ci true -sn "limbType" -ln "limbType" -min 0 -max 8 -en "Empty:OneJointBranch:TwoJointBranch:TwoJointChain:ThreeJointChain:Custom1:Custom2:Custom3:Custom4" 
 		-at "enum";
-	addAttr -ci true -sn "limbLocation" -ln "limbLocation" -min 0 -max 4 -en "Body:Face:Fingers:Toes:Misc" 
+	addAttr -ci true -sn "limbLocation" -ln "limbLocation" -min 0 -max 4 -en "Body:Face:Hands:Feet:Misc" 
 		-at "enum";
 	addAttr -ci true -sn "side" -ln "side" -min 0 -max 3 -en "M:L:R:-" -at "enum";
 	addAttr -ci true -sn "joints" -ln "joints" -dt "string";
@@ -1444,7 +1444,7 @@ createNode transform -n "NODE_Root_Limb_M" -p "LIMBS";
 	addAttr -ci true -sn "pfrsName" -ln "pfrsName" -dt "string";
 	addAttr -ci true -sn "limbType" -ln "limbType" -min 0 -max 8 -en "Empty:OneJointBranch:TwoJointBranch:TwoJointChain:ThreeJointChain:Custom1:Custom2:Custom3:Custom4" 
 		-at "enum";
-	addAttr -ci true -sn "limbLocation" -ln "limbLocation" -min 0 -max 4 -en "Body:Face:Fingers:Toes:Misc" 
+	addAttr -ci true -sn "limbLocation" -ln "limbLocation" -min 0 -max 4 -en "Body:Face:Hands:Feet:Misc" 
 		-at "enum";
 	addAttr -ci true -sn "side" -ln "side" -min 0 -max 3 -en "M:L:R:-" -at "enum";
 	addAttr -ci true -sn "joints" -ln "joints" -dt "string";

@@ -1,6 +1,5 @@
 
 from collections import OrderedDict
-import imp
 
 import pymel.core as pm
 
@@ -144,29 +143,30 @@ def SetupLimbHier(limbIDDict):
     with pm.formLayout(numberOfDivisions=100) as form:
         with pm.horizontalLayout() as hl:
             pm.iconTextRadioCollection('whatever')
+            locations = rigData.LIMB_LOCATIONS
             b1 = pm.iconTextRadioButton( st='textOnly', 
                         l='ALL', 
                         flat=0,
                         bgc=(0.2, 0.2, 0.2),
                         sl=1)
             b2 = pm.iconTextRadioButton( st='textOnly',
+                        l=locations[0],
                         flat=0,
-                        bgc=(0.2, 0.2, 0.2),
-                        l='Body')
+                        bgc=(0.2, 0.2, 0.2))
             b3 = pm.iconTextRadioButton( st='textOnly',
-                        l='Face', 
+                        l=locations[1], 
                         flat=0,
                         bgc=(0.2, 0.2, 0.2))
             b4 = pm.iconTextRadioButton( st='textOnly',
-                        l='Fingers', 
+                        l=locations[2], 
                         flat=0,
                         bgc=(0.2, 0.2, 0.2))
             b5 = pm.iconTextRadioButton( st='textOnly',
-                        l='Toes', 
+                        l=locations[3], 
                         flat=0,
                         bgc=(0.2, 0.2, 0.2))
             b6 = pm.iconTextRadioButton( st='textOnly',
-                        l='Misc', 
+                        l=locations[4], 
                         flat=0,
                         bgc=(0.2, 0.2, 0.2))
         widget = pm.treeView(nb=1, enk=1, ams=0, adr=0, arp=0)
