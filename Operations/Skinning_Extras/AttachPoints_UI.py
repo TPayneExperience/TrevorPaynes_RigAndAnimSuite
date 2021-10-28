@@ -65,6 +65,7 @@ class AttachPoints_UI(absOpUI.Abstract_OperationUI):
             pm.treeView(self.rigRoot_tv, e=1, ai=(name, ''))
         name = self._rigRoot.pfrsName.get()
         pm.treeView(self.rigRoot_tv, e=1, selectItem=(name, 1))
+        
     def SelectedRigRoot(self):
         log.funcFileInfo()
         rigRootIDStrs = pm.treeView(self.rigRoot_tv, q=1, selectItem=1)

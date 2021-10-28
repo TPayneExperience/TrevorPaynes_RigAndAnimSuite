@@ -95,11 +95,10 @@ class Animations(absOp.Abstract_Operation):
     def GetRigRootAnimations(self, rigRoot):
         curFile = pm.sceneName()
         if not os.path.isfile(curFile):
-            return {}
-        animUtil.UpdateAnimFolder(rigRoot, curFile)
+            return dict()
         folder = rigRoot.animationFolderPath.get()
         files = [f for f in os.listdir(folder) if '.json' in f]
-        filePaths = {}
+        filePaths = dict()
         for f in files:
             anim = os.path.splitext(f)[0]
             filePaths[anim] = os.path.join(folder, f)
@@ -108,7 +107,6 @@ class Animations(absOp.Abstract_Operation):
     def ExportControlAnimation(self, rigRoot, animName):
         log.funcFileDebug()
         curFile = pm.sceneName()
-        animUtil.UpdateAnimFolder(rigRoot, curFile)
         pm.saveFile()
         self._ls._ExportAnimation(rigRoot, animName)
         pm.openFile(curFile, f=1)
