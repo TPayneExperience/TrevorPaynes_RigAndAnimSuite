@@ -401,7 +401,7 @@ class LimbSetup(absOp.Abstract_Operation):
         curFile = pm.sceneName()
         pm.saveFile()
         jointDict = self.bhvMng.SetupAnimJoints(rigRoot)
-        
+
         # Inter-Parent Anim joints between limbs
         for joint, animJoint in jointDict.items():
             parentJoint = pm.listRelatives(joint, p=1)[0]
@@ -423,7 +423,7 @@ class LimbSetup(absOp.Abstract_Operation):
 
         rigRoot.rigMode.set(3) # Baked Animations
         
-        # Remove reg joint anims
+        # Remove reg joint anims, joint groups
         limbs = pm.listConnections(rigRoot.limbs)
         joints = []
         for limb in limbs:

@@ -37,7 +37,7 @@ class Animations(absOp.Abstract_Operation):
         if os.path.exists(mayaFilePath):
             os.remove(mayaFilePath)
         os.rename(animFilePath, mayaFilePath)
-        allNodes = pm.importFile(mayaFilePath, rnn=1)
+        allNodes = pm.importFile(mayaFilePath, returnNewNodes=1)
         for rigRoot in genUtil.GetRigRoots():
             if rigRoot.rigMode.get() == 3: # Baked Anims
                 break
@@ -50,13 +50,13 @@ class Animations(absOp.Abstract_Operation):
         for limb in limbs:
             limbID = '%s_%d' % (limb.pfrsName.get(), limb.side.get())
             rigLimbs[limbID] = limb
+            limb.toBeBaked.set(1)
         for limb in pm.listConnections(rigRoot.limbs):
             limbID = '%s_%d' % (limb.pfrsName.get(), limb.side.get())
             animLimbs[limbID] = limb
         
         # Setup Anim Joints
         bakeLimbs = []
-        allAnimJoints = []
         for limbID in list(rigLimbs.keys()):
             if limbID not in animLimbs:
                 continue
@@ -70,20 +70,20 @@ class Animations(absOp.Abstract_Operation):
             rigGroups = pm.listConnections(rigLimb.jointGroups)
             rigGroups = rigUtil.SortGroups(rigGroups)
 
-            # Connect Anim Limb joints to rig limbs
-            for i in range(len(rigGroups)):
-                rigGroup = rigGroups[i]
-                animJoint = animJoints[i]
+            for rigGroup, animJoint in zip(rigGroups, animJoints):
+                # parent animJoint(s) to limb's parentJoint
                 parentAnimJoint = pm.listRelatives(animJoint, p=1)[0]
                 if parentAnimJoint not in animJoints:
                     limbJoint = pm.listConnections(rigGroup.joint)[0]
                     parentLimbJoint = pm.listRelatives(limbJoint, p=1)[0]
                     pm.parent(animJoint, parentLimbJoint, r=1)
-                pm.disconnectAttr(animJoint.group)
+
+                # Make animJoint Connections
                 pm.disconnectAttr(animJoint.limb)
+                pm.disconnectAttr(animJoint.group)
                 pm.connectAttr(rigLimb.animJoints, animJoint.limb)
                 pm.connectAttr(rigGroup.animJoint, animJoint.group)
-                allAnimJoints.append(animJoint)
+
             bakeLimbs.append(rigLimb)
         
         # Bake and Delete

@@ -212,10 +212,8 @@ class Behavior_Manager(object):
         for limb in pm.listConnections(rigRoot.limbs):
             joints = pm.listConnections(limb.joints)
             animJoints = pm.duplicate(joints, po=1, rc=1)
-            for i in range(len(joints)):
-                animJoint = animJoints[i]
+            for joint, animJoint in zip(joints, animJoints):
                 pm.connectAttr(limb.animJoints, animJoint.limb)
-                joint = joints[i]
                 jointDict[joint] = animJoint
                 group = pm.listConnections(joint.group)[0]
                 pm.connectAttr(animJoint.group, group.animJoint)
@@ -247,8 +245,9 @@ class Behavior_Manager(object):
             jointGroups = rigUtil.SortGroups(jointGroups)
             animJoints = [pm.listConnections(g.animJoint)[0] for g in jointGroups]
             bhv = self.bhvs[limb.bhvFile.get()]
-            ctrs = bhv.Setup_Constraint_ControlsToXforms(limb, animJoints, 
-                            hasPosCst, hasRotCst, hasScaleCs)
+            ctrs = bhv.Setup_Constraint_ControlsToXforms(
+                limb, animJoints, hasPosCst, hasRotCst, hasScaleCs
+            )
             controls.append(ctrs)
             cstLimbs.append(limb)
         if controls:
