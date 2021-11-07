@@ -12,20 +12,20 @@
     "quickWeightsLimbMaskMidpoints": 6, 
     "templateFolderPath": "", 
     "windowPos": [
-        201, 
-        849
+        197, 
+        1354
     ], 
     "paintWeightsMode": 1, 
     "jointUpAxis": 2, 
     "paintWeightsUseJointAnim": true, 
     "limbIndex": 2, 
-    "paintWeightsAddRadius": 1.0, 
+    "paintWeightsAddRadius": 3.1318749965110326, 
     "lControlTransparency": 0.8, 
     "controlShape_IKPV": "Sphere_Poly", 
     "version": 110, 
     "lastVersionViewed": 110, 
     "mControlTransparency": 0.8, 
-    "paintWeightsAddSoftness": 1.0, 
+    "paintWeightsAddSoftness": 2.061517859634977, 
     "controlShape_Empty": "Square_Wire", 
     "paintWeightsReplaceValue": 1.0, 
     "sideIndex": 4, 
@@ -40,7 +40,7 @@
     "controlShape_FK": "Cube_Poly", 
     "quickWeightsLimbMaskRadius": 3.0, 
     "controlShape_FKR": "Cube_Poly", 
-    "quickWeightsDisplayMode": 3, 
+    "quickWeightsDisplayMode": 2, 
     "paintWeightsAddValue": 1.0, 
     "welcomePopupSeen": true, 
     "mControlColor": [

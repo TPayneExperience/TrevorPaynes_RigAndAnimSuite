@@ -31,19 +31,26 @@ class Mesh:
         Mesh.ConnectSkin(mesh, skinCls)
     
     @staticmethod
+    def UnbindSkin(mesh):
+        pm.skinCluster(mesh, e=1, unbind=1)
+        Mesh.DisconnectSkin(mesh)
+    
+    @staticmethod
     def ConnectSkin(mesh, skinCls):
-        pm.addAttr(skinCls, ln='pfrsMeshes', dt='string')
+        if not pm.attributeQuery('pfrsMeshes', node=skinCls, exists=1):
+            pm.addAttr(skinCls, ln='pfrsMeshes', dt='string')
         pm.connectAttr(skinCls + '.pfrsMeshes', mesh.pfrsSkinCluster)
 
     @staticmethod
-    def UnbindSkin(mesh):
-        pm.skinCluster(mesh, e=1, unbind=1)
-    
+    def DisconnectSkin(mesh):
+        pm.disconnectAttr(mesh.pfrsSkinCluster)
+
     @staticmethod
     def Remove(mesh):
         log.funcFileDebug()
         pm.delete(pm.listConnections(mesh.backupMesh))
         pm.disconnectAttr(mesh.rigRoot)
+        Mesh.DisconnectSkin(mesh)
     
 # Copyright (c) 2021 Trevor Payne
 # See user license in "PayneFreeRigSuite\Data\LicenseAgreement.txt"

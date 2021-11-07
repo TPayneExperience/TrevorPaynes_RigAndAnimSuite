@@ -6,8 +6,6 @@ import webbrowser
 
 import pymel.core as pm
 
-import Operations
-import Behaviors
 import Abstracts.Abstract_OperationUI as absOpUI
 import Abstracts.Abstract_Operation as absOp
 import Utilities.Logger as log
@@ -46,7 +44,7 @@ class PayneFreeRigSuite:
 
 #=========== PUBLIC ====================================
 
-    def OpenLog(self, ignore):
+    def OpenLog(self, _):
         log.funcFileInfo()
         log.OpenLog()
 

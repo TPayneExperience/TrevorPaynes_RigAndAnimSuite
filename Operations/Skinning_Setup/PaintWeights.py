@@ -372,6 +372,7 @@ class PaintWeights(absOp.Abstract_Operation):
         start = min(values)
         end = max(values)
         pm.playbackOptions(min=start, max=end)
+        pm.currentTime(start)
 
     def _Setup_JointAnim(self, rigRoot):
         joints = rigUtil.GetSkinnableRigJoints(rigRoot)

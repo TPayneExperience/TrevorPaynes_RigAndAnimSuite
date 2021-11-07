@@ -16,7 +16,7 @@ class PFRS_Debug:
                                     'PFRS_ExternalFiles', 
                                     'TESTING_FILES')
 
-        if not os.path.isfile(__file__.replace('.pyc', '.py')):
+        if __file__.endswith('.pyd'):
             print ('>>>>>>>>>>>>>> AUTO DEBUG OFF <<<<<<<<<<<<<')
             return
         print ('>>>>>>>>>>>>>> AUTO DEBUG ON <<<<<<<<<<<<<')

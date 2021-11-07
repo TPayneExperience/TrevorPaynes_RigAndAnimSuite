@@ -12,7 +12,7 @@ class Export_UI:
         self.exporter = xprt.Export()
         pm.layoutDialog(ui=self.Setup, title='Export Anim Rigs')
 
-    def close(self):
+    def close(self, _):
         pm.layoutDialog(dis='close')
 
 #=========== SETUP UI ====================================
@@ -74,7 +74,7 @@ class Export_UI:
 
 #=========== BUTTONS ====================================
    
-    def SaveAsFile(self, ignore):
+    def SaveAsFile(self, _):
         log.funcFileInfo()
         setupFile = pm.sceneName()
         sceneFolderPath = os.path.dirname(setupFile)
@@ -93,9 +93,9 @@ class Export_UI:
                                         filePath, 
                                         reduceKeys, 
                                         removeJoints)
-        self.close()
+        self.close('')
         
-    def ExportFBX(self, ignore):
+    def ExportFBX(self, _):
         log.funcFileInfo()
         setupFile = pm.sceneName()
         sceneFolderPath = os.path.dirname(setupFile)
@@ -114,7 +114,7 @@ class Export_UI:
                                         filePath, 
                                         reduceKeys, 
                                         removeJoints)
-        self.close()
+        self.close('')
         
 
 # Copyright (c) 2021 Trevor Payne

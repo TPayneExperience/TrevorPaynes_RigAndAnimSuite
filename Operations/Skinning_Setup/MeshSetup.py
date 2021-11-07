@@ -1,6 +1,4 @@
 
-
-
 import pymel.core as pm
 
 import Abstracts.Abstract_Operation as absOp
@@ -10,6 +8,7 @@ import Utilities.General_Utilities as genUtil
 import Data.Rig_Data as rigData
 import SceneData.Mesh as msh
 import Utilities.Skin_Utilities as skinUtil
+
 
 class MeshSetup(absOp.Abstract_Operation):
     isRigBuilt = False
@@ -43,7 +42,10 @@ class MeshSetup(absOp.Abstract_Operation):
         log.funcFileInfo()
         joints = rigUtil.GetSkinnableRigJoints(rigRoot)
         for mesh in meshes:
+            # Add mesh to rig root
             msh.Mesh.Add(rigRoot, mesh)
+
+            # Update skin joint influences or bind skin
             skinCls = pm.mel.eval('findRelatedSkinCluster %s;' % mesh)
             if skinCls:
                 msh.Mesh.ConnectSkin(mesh, skinCls)
@@ -53,12 +55,14 @@ class MeshSetup(absOp.Abstract_Operation):
                     pm.skinCluster(skinCls, e=1, ai=joint)
             else:
                 msh.Mesh.BindSkin(rigRoot, mesh)
+            
+            # Add limb + joint mask attrs
             shouldUnpackWeights = True
             for limb in pm.listConnections(rigRoot.limbs):
                 if limb.limbType.get() == 0: # Empty
                     continue
                 
-                # ADD LIMB MASK
+                # Add limb mask
                 attr = 'L%03d' % limb.ID.get()
                 if not mesh.hasAttr(attr):
                     pm.addAttr(mesh, ln=attr, dt='doubleArray', h=1) # Remove Later?
@@ -72,6 +76,8 @@ class MeshSetup(absOp.Abstract_Operation):
                         pm.addAttr(mesh, ln=attr, dt='doubleArray', h=1)
                     else:
                         shouldUnpackWeights = False
+
+            # Unpack weights if no previous limb/joint masks
             if shouldUnpackWeights:
                 self._UnpackWeights(rigRoot, mesh)
 

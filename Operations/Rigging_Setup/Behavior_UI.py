@@ -169,7 +169,7 @@ class Behavior_UI(absOpUI.Abstract_OperationUI):
                 self.PopulateBhvProperties(limb)
             pm.menuItem(self._resetParent_mi, e=1, en=1)
 
-    def ResetToDefaultParent(self, ignore):
+    def ResetToDefaultParent(self, _):
         log.funcFileDebug()
         self.operation.ResetToDefaultParent(self._selectedLimbs)
         self.PopulateLimbHierNormal()
@@ -196,7 +196,7 @@ class Behavior_UI(absOpUI.Abstract_OperationUI):
         log.funcFileInfo()
         self.operation.UpdateToBeBaked(self._selectedLimbs[0])
 
-    def SavePreset(self, ignore):
+    def SavePreset(self, _):
         log.funcFileInfo()
         result = pm.promptDialog(
                 title='Save Preset',
@@ -223,17 +223,17 @@ class Behavior_UI(absOpUI.Abstract_OperationUI):
         self.PopulateLimbProperties(None)
         self.PopulateBhvProperties(None)
 
-    def EditPresets(self, ignore):
+    def EditPresets(self, _):
         log.funcFileDebug()
         editPst.EditPresets(self._rigRoot, self.operation)
         self.PopulatePresets()
 
-    def ResetControlTransforms(self, ignore):
+    def ResetControlTransforms(self, _):
         log.funcFileDebug()
         for limb in self._selectedLimbs:
             self.operation.ResetControlTransforms(limb)
 
-    def RemoveUnusedGroups(self, ignore):
+    def RemoveUnusedGroups(self, _):
         log.funcFileDebug()
         for limb in self._selectedLimbs:
             self.operation.RemoveUnusedGroups(limb)

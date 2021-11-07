@@ -109,11 +109,11 @@ class Animation_UI(absOpUI.Abstract_OperationUI):
 
 #=========== MISC ====================================
 
-    def DeleteStaticChannelsOnLimb(self, ignore):
+    def DeleteStaticChannelsOnLimb(self, _):
         for limb in self._selectedLimbs:
             self.operation.DeleteStaticChannelsOnLimb(limb)
 
-    def RemoveLimbAnimations(self, ignore):
+    def RemoveLimbAnimations(self, _):
         log.funcFileInfo()
         result = pm.confirmDialog(
                         t='Delete Animation', 
@@ -129,7 +129,7 @@ class Animation_UI(absOpUI.Abstract_OperationUI):
 
 #=========== PROPERTIES ====================================
 
-    def ImportAnimation(self, ignore):
+    def ImportAnimation(self, _):
         log.funcFileInfo()
         curFile = pm.sceneName()
         result = pm.fileDialog2(fm=1, 
@@ -139,11 +139,12 @@ class Animation_UI(absOpUI.Abstract_OperationUI):
                                 okc='Import')
         if not result:
             return
+        filePath = result[0]
         vals = pm.checkBoxGrp(self.constraints_cb, q=1, va3=1)
-        self.operation.ImportAnimation(self._selectedLimbs, self.animData,
+        self.operation.ImportAnimation(self._selectedLimbs, filePath,
                                         vals[0], vals[1], vals[2])
 
-    def ChangedConstraints(self, ignore):
+    def ChangedConstraints(self, _):
         log.funcFileInfo()
         self.UpdateApplyButton()
 

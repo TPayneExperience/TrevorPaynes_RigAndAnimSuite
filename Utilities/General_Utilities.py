@@ -111,10 +111,9 @@ class Json:
 
     @staticmethod
     def Load(filePath):
-        data = None
+        # print('loading json: ' + filePath)
         with open(filePath, 'r') as readFile:
-            data = json.load(readFile)
-        return data
+            return json.load(readFile)
 
 #=========== MISC ====================================
 

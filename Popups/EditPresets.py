@@ -72,7 +72,7 @@ class EditPresets:
         self.Populate()
         return ''
 
-    def DeletePreset(self, ignore):
+    def DeletePreset(self, _):
         log.funcFileDebug()
         presetIDStrs = pm.treeView(self.widget, q=1, selectItem=1)
         msg = 'Delete the following presets?'

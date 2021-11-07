@@ -37,7 +37,7 @@ SCRIPTS FOR HOTKEY LOVERS
                         attachControl=[(self._sl, 'bottom', 5, 
                                             self.close_btn)])
     
-    def _Close(self, ignore):
+    def _Close(self, _):
         folder = os.path.dirname(__file__)
         folder = os.path.dirname(folder)
         folder = os.path.join(folder, 'Data')

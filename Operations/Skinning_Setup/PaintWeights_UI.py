@@ -208,7 +208,7 @@ class PaintWeights_UI(absOpUI.Abstract_OperationUI):
             self.operation.SetRadius(radius)
             self.operation.SetSoftness(softness)
 
-    def GetBrush(self, ignore):
+    def GetBrush(self, _):
         self.operation.GetBrush()
 
     def PaintBrushOff(self):
@@ -258,7 +258,7 @@ class PaintWeights_UI(absOpUI.Abstract_OperationUI):
         else:
             self.operation.Teardown_AnimJoints(self._rigRoot)
 
-    def Flood(self, ignore):
+    def Flood(self, _):
         log.funcFileDebug()
         mode = self._GetMode()
         weight = self._GetValue()
@@ -273,7 +273,7 @@ class PaintWeights_UI(absOpUI.Abstract_OperationUI):
             elif mode == 2:
                 self.operation.FloodReplaceJoint(self._selectedMesh, weight)
     
-    def SetMode(self, ignore):
+    def SetMode(self, _):
         log.funcFileDebug()
         mode = self._GetMode()
         filePath = self.GetConfigFilePath()

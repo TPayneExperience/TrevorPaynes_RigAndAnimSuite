@@ -110,13 +110,13 @@ class Ghost_UI(absOpUI.Abstract_OperationUI):
         self._selectedGhosts = [self._ghostIDs[ID] for ID in ghostIDStrs]
         pm.select(self._selectedGhosts)
 
-    def AddGhost(self, ignore):
+    def AddGhost(self, _):
         log.funcFileInfo()
         self.operation.AddGhost(self._rigRoot)
         self.PopulateGhostHier()
         self.PopulateGhostMaterials()
 
-    def RemoveGhost(self, ignore):
+    def RemoveGhost(self, _):
         log.funcFileInfo()
         for ghost in self._selectedGhosts:
             self.operation.RemoveGhost(ghost)

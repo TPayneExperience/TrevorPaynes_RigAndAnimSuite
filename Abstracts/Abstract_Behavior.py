@@ -32,7 +32,7 @@ class Abstract_Behavior:
 
     @abstractproperty
     def usesJointControls(self):    # bool | True
-        pass                            #
+        pass
 
     @abstractproperty
     def usesLimbControls(self):    # bool | True

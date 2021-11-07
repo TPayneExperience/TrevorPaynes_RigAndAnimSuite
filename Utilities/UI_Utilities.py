@@ -142,7 +142,7 @@ def PopulateAttachPointsHier(widget, rigRoot):
 def SetupLimbHier(limbIDDict):
     with pm.formLayout(numberOfDivisions=100) as form:
         with pm.horizontalLayout() as hl:
-            pm.iconTextRadioCollection('whatever')
+            pm.iconTextRadioCollection()
             locations = rigData.LIMB_LOCATIONS
             b1 = pm.iconTextRadioButton( st='textOnly', 
                         l='ALL', 

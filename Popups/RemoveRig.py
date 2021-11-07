@@ -43,7 +43,7 @@ class RemoveRigRoot:
         log.funcFileInfo()
         log.debug(mode)
 
-    def Remove(self, ignore):
+    def Remove(self, _):
         log.funcFileInfo()
         vals = pm.checkBoxGrp(self.delete_cbg, q=1, va2=1)
         self._pfrs.RemoveRigRoot(self._rigRoot, vals[0], vals[1])

@@ -189,7 +189,7 @@ class QuickWeights_UI(absOpUI.Abstract_OperationUI):
 
 #=========== OPTIONS ====================================
 
-    def UpdateDisplayMode(self, ignore):
+    def UpdateDisplayMode(self, _):
         mode = pm.radioButtonGrp(self._brushMode_rb, q=1, sl=1)
         filePath = self.GetConfigFilePath()
         config = genUtil.Json.Load(filePath)   
@@ -225,7 +225,7 @@ class QuickWeights_UI(absOpUI.Abstract_OperationUI):
 
 #=========== LIMB ACTIONS ====================================
 
-    def ApplyLimbMaskSurfaceCrawl(self, ignore):
+    def ApplyLimbMaskSurfaceCrawl(self, _):
         log.funcFileInfo()
 
         # PROGRESS BAR START
@@ -261,7 +261,7 @@ class QuickWeights_UI(absOpUI.Abstract_OperationUI):
         config['quickWeightsLimbMaskRadius'] = value
         genUtil.Json.Save(filePath, config)
 
-    def ApplyLimbMaskRadius(self, ignore):
+    def ApplyLimbMaskRadius(self, _):
         log.funcFileInfo()
         radius = pm.floatFieldGrp(self.limbRadius_ff, q=1, v1=1)
         filePath = self.GetConfigFilePath()
@@ -295,7 +295,7 @@ class QuickWeights_UI(absOpUI.Abstract_OperationUI):
             pm.radioButtonGrp(self._brushMode_rb, e=1, sl=1)
         self.UpdateDisplay()
 
-    def ApplyLimbMaskSoften(self, ignore):
+    def ApplyLimbMaskSoften(self, _):
         softenSteps =  pm.intSliderGrp(self._softenLimb_is, q=1, v=1)
         vertNeighbors = self._meshVertNeighbors[self._selectedMesh]
 
@@ -339,7 +339,7 @@ class QuickWeights_UI(absOpUI.Abstract_OperationUI):
 
 #=========== JOINT ACTIONS ====================================
 
-    def ApplyJointMask(self, ignore):
+    def ApplyJointMask(self, _):
         skipLast = pm.checkBox(self.skipLast_cb, q=1, v=1)
 
         # PROGRESS BAR START
@@ -372,7 +372,7 @@ class QuickWeights_UI(absOpUI.Abstract_OperationUI):
             pm.radioButtonGrp(self._brushMode_rb, e=1, sl=2)
         self.UpdateDisplay()
 
-    def ApplyJointMaskSoften(self, ignore):
+    def ApplyJointMaskSoften(self, _):
         softenSteps = pm.intSliderGrp(self._softenJoint_is, q=1, v=1)
         vertNeighbors = self._meshVertNeighbors[self._selectedMesh]
 

@@ -119,7 +119,7 @@ class Appearance_UI(absOpUI.Abstract_OperationUI):
         self.PopulateControlMaterials()
         self.PopulateControlShapes()
 
-    def ReimportControlShapes(self, ignore):
+    def ReimportControlShapes(self, _):
         log.funcFileInfo()
         self.operation.ReimportControlShapes(self._rigRoot)
 

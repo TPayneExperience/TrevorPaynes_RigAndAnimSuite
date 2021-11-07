@@ -164,10 +164,10 @@ class EditRigRoot:
         pm.textFieldGrp(self.rootName_grp, e=1, l=msg)
         pm.button(self.save_btn, e=1, en=1)
         
-    def Cancel(self, ignore):
+    def Cancel(self, _):
         pm.layoutDialog(dis='close')
     
-    def Save(self, ignore):
+    def Save(self, _):
         pm.layoutDialog(dis='Save')
 
 

@@ -39,7 +39,7 @@ class Updates:
             with open(filePath, 'r') as txt:
                 self._texts[fileName] = txt.read()
         
-    def _Close(self, ignore):
+    def _Close(self, _):
         folder = os.path.dirname(__file__)
         folder = os.path.dirname(folder)
         folder = os.path.join(folder, 'Data')

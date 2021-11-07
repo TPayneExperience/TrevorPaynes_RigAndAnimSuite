@@ -401,6 +401,7 @@ class LimbSetup(absOp.Abstract_Operation):
         curFile = pm.sceneName()
         pm.saveFile()
         jointDict = self.bhvMng.SetupAnimJoints(rigRoot)
+        
         # Inter-Parent Anim joints between limbs
         for joint, animJoint in jointDict.items():
             parentJoint = pm.listRelatives(joint, p=1)[0]
@@ -436,9 +437,12 @@ class LimbSetup(absOp.Abstract_Operation):
         limbParentGroup.v.set(0)
 
         # Save, Reopen, disable window
-        pm.saveAs(animFilePath, f=1)
+        mayaFilePath = animFilePath + '.ma'
+        pm.saveAs(mayaFilePath, f=1)
         pm.openFile(curFile, f=1)
-        os.rename(animFilePath + '.ma', animFilePath)
+        if os.path.exists(animFilePath):
+            os.remove(animFilePath)
+        os.rename(mayaFilePath, animFilePath)
 
     def RemoveAnimation(self, rigRoot):
         log.funcFileDebug()
@@ -451,7 +455,7 @@ class LimbSetup(absOp.Abstract_Operation):
         for joint in pm.listConnections(limb.joints):
             joint.r.set(0,0,0)
 
-    def RemoveJointScale(self, limbs):
+    def FreezeJointScale(self, limbs):
         jointChildren = {}
         toDelete = []
         for limb in limbs:

@@ -97,7 +97,7 @@ class AttachPoints_UI(absOpUI.Abstract_OperationUI):
         self._selectedAPs = [self._apIDs[ID] for ID in apIDStrs]
         pm.select(self._selectedAPs)
 
-    def AddAttachPoint(self, ignore):
+    def AddAttachPoint(self, _):
         log.funcFileInfo()
         vertices = pm.ls(sl=1)
         if not vertices:
@@ -116,7 +116,7 @@ class AttachPoints_UI(absOpUI.Abstract_OperationUI):
         self.operation.AddAttachPoint(self._rigRoot, vertex)
         self.PopulateAttachPointHier()
 
-    def RemoveAttachPoint(self, ignore):
+    def RemoveAttachPoint(self, _):
         log.funcFileInfo()
         for attachPoint in self._selectedAPs:
             self.operation.RemoveAttachPoint(attachPoint)

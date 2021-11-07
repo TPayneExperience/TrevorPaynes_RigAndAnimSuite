@@ -72,7 +72,7 @@ class LoadTemplates:
         if enabled:
             self._selected = [self._files[f] for f in fileNames]
 
-    def Load(self, ignore):
+    def Load(self, _):
         log.funcFileDebug()
         limbSetup = ls.LimbSetup()
         suffix = pm.textFieldGrp(self.suffix_grp, q=1, tx=1)

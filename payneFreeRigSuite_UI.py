@@ -1,15 +1,10 @@
 
-import imp
 import os
 import webbrowser
 
 import pymel.core as pm
 
 import Data.General_Data as genData
-
-import Initializers
-import SceneData
-import Popups
 
 import Utilities.Logger as log
 import Utilities.General_Utilities as genUtil
@@ -24,7 +19,6 @@ import Popups.Welcome as wlc
 import Popups.Updates as upd
 
 import payneFreeRigSuite_backend as pfrs
-imp.reload(pfrs)
 
 import Debug.PFRS_Debug_UI as debug_ui
 
@@ -47,20 +41,20 @@ class PayneFreeRigSuite_UI:
         self.InitWelcomePopup()
         self.InitUpdatesPopup()
 
-
 #=========== SETUP ====================================
 
     def _Setup(self):
         log.funcFileDebug()
         path = os.path.dirname(__file__)
-        path = os.path.join(path, 'Data')
-        path = os.path.join(path, 'Version.json')
+        path = os.path.join(path, 
+                            'Data',
+                            'Version.json')
         version = genUtil.Json.Load(path)
-        name = 'Payne Free Rig Suite'
-        name += ' - v%02d' % version['featureVersion']
-        name += '.%03d' % version['buildVersion']
-        name += ' - by %s' % genData.__author__
-        name += ' - %s' % genData.LICENSE
+        name = ('Payne Free Rig Suite'
+                ' - v%02d' % version['featureVersion'] +
+                '.%03d' % version['buildVersion'] +
+                ' - by %s' % genData.__author__ +
+                ' - %s' % genData.LICENSES[genData.LICENSE_INDEX])
         with pm.window(mb=True,mbv=True, t=name, w=500, h=500) as self.win:
             with pm.rowLayout(nc=2):
                 with pm.columnLayout(co=('left', 10)):
@@ -70,10 +64,10 @@ class PayneFreeRigSuite_UI:
                     self.op_op = pm.optionMenu(l='Operation', 
                                                 cc=self.SetOperation)
             with pm.frameLayout(bv=0, lv=0) as self.frame:
-                msg = 'Hey talented person!'
-                msg += '\nOpen a scene with a rig, or a new scene, then update the tool!'
-                msg += '\n\nMenubar > RigRoot > New / Update Rig Root'
-                msg += '\n\nStay awesome and keep the dream alive!'
+                msg = ( 'Hey talented person!'
+                        '\nOpen a scene with a rig, or a new scene, then update the tool!'
+                        '\n\nMenubar > RigRoot > New / Update Rig Root'
+                        '\n\nStay awesome and keep the dream alive!')
                 pm.text(l=msg, en=0)
                 
         pm.window(self.win, e=1, cc=self.closeEvent)
@@ -218,24 +212,40 @@ class PayneFreeRigSuite_UI:
         for index, operation in enumerate(self.operations):
             isEnabled = True
             menuItem = self.operations_mi[index]
+            msg = ''
             if operation.operation.areLimbsRequired:
                 if not pm.listConnections(self._rigRoot.limbs):
                     isEnabled = False
             if operation.operation.areMeshesRequired:
                 if not pm.listConnections(self._rigRoot.meshes):
                     isEnabled = False
+            if operation.uiName in genData.PERSONAL_OPERATIONS:
+                msg = ' (Personal)'
+                isEnabled = False
+            if operation.uiName in genData.PROFESSIONAL_OPERATIONS:
+                msg = ' (Pro)'
+                isEnabled = False
             pm.menuItem(menuItem, e=1, en=isEnabled)
-
+            if msg:
+                l = pm.menuItem(menuItem, q=1, l=1) + msg
+                pm.menuItem(menuItem, e=1, l=l)
 
 #=========== MENUBAR FILE ====================================
 
-    def UserSettings_Dialog(self, ignore):
+    def UserSettings_Dialog(self, _):
         log.funcFileInfo()
+        if not genUtil.GetRigRoots():
+            msg = 'User Settings requires a rig root in scene'
+            pm.confirmDialog(   t='No Rig Root in Scene',
+                                icon='critical', 
+                                m=msg,
+                                button=['Ok']) 
+            return
         usr.UserSettings()
 
 #=========== MENUBAR RIG ROOT ====================================
 
-    def SaveAnimationRig(self, ignore):
+    def SaveAnimationRig(self, _):
         log.funcFileInfo()
         if not self.IsRigRootValid():
             return
@@ -258,7 +268,7 @@ class PayneFreeRigSuite_UI:
         filePath = result[0]
         self.pfrs.SaveAnimationRig(self._rigRoot, filePath)
 
-    def ExportFBX(self, ignore):
+    def ExportFBX(self, _):
         log.funcFileInfo()
         for rigRoot in self._allRigRoots:
             if rigRoot.rigMode.get() == 0:
@@ -266,12 +276,13 @@ class PayneFreeRigSuite_UI:
                 msg += '\nOnly Anim rigs may be present to export.'
                 pm.confirmDialog(
                     t='Warning: Setup rig found',
+                    icon='warning',
                     m=msg,
                     button=['Ok']) 
                 return
         xprt.Export_UI()
 
-    def RemoveRigRoot(self, ignore):
+    def RemoveRigRoot(self, _):
         log.funcFileInfo()
         rmrig.RemoveRigRoot(self._rigRoot, self.pfrs)
         if pm.objExists(str(self._rigRoot)):
@@ -279,7 +290,7 @@ class PayneFreeRigSuite_UI:
         self._rigRoot = None
         pm.frameLayout(self.frame, e=1, en=0)
 
-    def NewLoadRig(self, ignore):
+    def NewLoadRig(self, _):
         log.funcFileInfo()
         self._rigRoot = None
         self.LoadRig()
@@ -295,7 +306,7 @@ class PayneFreeRigSuite_UI:
             self._allRigRoots = rigRoots
             self.InitOptionMenues()
 
-    def EditRig_Dialog(self, ignore):
+    def EditRig_Dialog(self, _):
         log.funcFileInfo()
         if self.IsRigRootValid():
             edRt.EditRigRoot(self._rigRoot, self)
@@ -318,17 +329,17 @@ class PayneFreeRigSuite_UI:
 
 # #=========== MENUBAR PHYSICS ====================================
 
-#     def ResetPhysics(self, ignore):
+#     def ResetPhysics(self, _):
 #         log.funcFileInfo()
 #         self.pfrs.ResetPhysics()
 
-#     def EnablePhysics(self, ignore):
+#     def EnablePhysics(self, _):
 #         log.funcFileInfo()
 #         self.pfrs.EnablePhysics()
 #         pm.menuItem(self.disablePhys_mi, e=1, en=1)
 #         pm.menuItem(self.enablePhys_mi, e=1, en=0)
 
-#     def DisablePhysics(self, ignore):
+#     def DisablePhysics(self, _):
 #         log.funcFileInfo()
 #         self.pfrs.DisablePhysics()
 #         pm.menuItem(self.disablePhys_mi, e=1, en=0)
@@ -337,27 +348,27 @@ class PayneFreeRigSuite_UI:
 
 #=========== MENUBAR HELP ====================================
 
-    def SubmitFeedback(self, ignore):
+    def SubmitFeedback(self, _):
         log.funcFileInfo()
         self.pfrs.SubmitFeedback()
 
-    def OpenDocumentation(self, ignore):
+    def OpenDocumentation(self, _):
         log.funcFileInfo()
         webbrowser.open(genData.DOC_URL)
 
-    def OpenWebsite(self, ignore):
+    def OpenWebsite(self, _):
         log.funcFileInfo()
         webbrowser.open(genData.STORE_URL)
 
-    def OpenQuickstartArtist(self, ignore):
+    def OpenQuickstartArtist(self, _):
         log.funcFileInfo()
         webbrowser.open(genData.QUICKSTART_ARTIST_VIDEO)
 
-    def OpenQuickstartRigger(self, ignore):
+    def OpenQuickstartRigger(self, _):
         log.funcFileInfo()
         webbrowser.open(genData.QUICKSTART_RIGGER_VIDEO)
 
-    def OpenQuickstartAnimator(self, ignore):
+    def OpenQuickstartAnimator(self, _):
         log.funcFileInfo()
         webbrowser.open(genData.QUICKSTART_ANIMATOR_VIDEO)
 
@@ -369,15 +380,15 @@ class PayneFreeRigSuite_UI:
         if self.currentOp:
             self.currentOp.Teardown_UI()
 
-    def _UsefulScripts(self, ignore):
+    def _UsefulScripts(self, _):
         log.funcFileInfo()
         usfScr.UsefulScripts()
 
-    def _SuggestedExternalTools(self, ignore):
+    def _SuggestedExternalTools(self, _):
         log.funcFileInfo()
         sget.SuggestedExternalTools()
 
-    def _Share(self, ignore):
+    def _Share(self, _):
         log.funcFileInfo()
         shr.Share()
 
@@ -385,7 +396,7 @@ class PayneFreeRigSuite_UI:
         self.pfrs.SetDebug(isOn)
         self._CloseWindow(1)
     
-    def _CloseWindow(self, ignore):
+    def _CloseWindow(self, _):
         cmd = 'import pymel.core as pm;'
         cmd += 'pm.deleteUI("' + self.win + '", window=1)'
         pm.evalDeferred(cmd)

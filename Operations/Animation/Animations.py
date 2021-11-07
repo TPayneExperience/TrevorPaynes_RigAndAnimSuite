@@ -32,7 +32,12 @@ class Animations(absOp.Abstract_Operation):
         log.funcFileInfo()
 
         # import file
-        allNodes = pm.importFile(animFilePath, rnn=1)
+        mayaFilePath = animFilePath + '.ma'
+        print ('AnimPath: ' + animFilePath)
+        if os.path.exists(mayaFilePath):
+            os.remove(mayaFilePath)
+        os.rename(animFilePath, mayaFilePath)
+        allNodes = pm.importFile(mayaFilePath, rnn=1)
         for rigRoot in genUtil.GetRigRoots():
             if rigRoot.rigMode.get() == 3: # Baked Anims
                 break
@@ -84,6 +89,7 @@ class Animations(absOp.Abstract_Operation):
         # Bake and Delete
         self.bhvMng.ApplyAnimJoints(bakeLimbs, hasPosCst, hasRotCst, hasScaleCst)
         pm.delete(allNodes)
+        os.rename(mayaFilePath, animFilePath)
 
     def DeleteStaticChannelsOnLimb(self, limb):
         groups = pm.listConnections(limb.usedGroups)

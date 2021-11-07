@@ -182,14 +182,14 @@ class Constraints_UI(absOpUI.Abstract_OperationUI):
         if self._selectedTargetControl != self._target2:
             pm.menuItem(self.setTargetControl1_mi, e=1, en=1)
 
-    def SetControlAsTarget1(self, ignore):
+    def SetControlAsTarget1(self, _):
         self._target1 = self._selectedTargetControl
         text = 'Target 1: %s' % self._target1
         pm.text(self.target1_t, e=1, l=text)
         self.PopulateTargetableHier()
         self.UpdateApplyButton()
 
-    def SetControlAsTarget2(self, ignore):
+    def SetControlAsTarget2(self, _):
         self._target2 = self._selectedTargetControl
         text = 'Target 2: %s' % self._target2
         pm.text(self.target2_t, e=1, l=text)
@@ -218,14 +218,14 @@ class Constraints_UI(absOpUI.Abstract_OperationUI):
         if self._selectedTargetAttachPoint != self._target1:
             pm.menuItem(self.setTargetAttachPoint2_mi, e=1, en=1)
 
-    def SetAttachPointAsTarget1(self, ignore):
+    def SetAttachPointAsTarget1(self, _):
         self._target1 = self._selectedTargetAttachPoint
         text = 'Target 1: %s' % self._target1
         pm.text(self.target1_t, e=1, l=text)
         self.PopulateTargetableHier()
         self.UpdateApplyButton()
 
-    def SetAttachPointAsTarget2(self, ignore):
+    def SetAttachPointAsTarget2(self, _):
         self._target2 = self._selectedTargetAttachPoint
         text = 'Target 2: %s' % self._target2
         pm.text(self.target2_t, e=1, l=text)
@@ -260,7 +260,7 @@ class Constraints_UI(absOpUI.Abstract_OperationUI):
 
 #=========== CONSTRAINT PROPERTIES ====================================
 
-    def ApplyConstraints(self, ignore):
+    def ApplyConstraints(self, _):
         log.funcFileInfo()
         cstTypeStr = pm.optionMenu(self.cstType_om, q=1, v=1)
         index = rigData.CST_TYPES.index(cstTypeStr)
@@ -331,7 +331,7 @@ class Constraints_UI(absOpUI.Abstract_OperationUI):
         pm.select(self._selectedGroups)
         pm.menuItem(self.remove_mi, e=1, en=1)
 
-    def RemoveConstraintGroups(self, ignore):
+    def RemoveConstraintGroups(self, _):
         log.funcFileInfo()
         self.operation.RemoveConstraintGroups(self._selectedGroups)
         self.PopulateGroupHier()

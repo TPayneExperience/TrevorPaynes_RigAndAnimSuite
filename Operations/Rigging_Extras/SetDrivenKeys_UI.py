@@ -150,7 +150,7 @@ class SetDrivenKeys_UI(absOpUI.Abstract_OperationUI):
             return
         self._selectedControlGrp = self._ctrGroups[ctrGroupIDStrs[0]]
 
-    def SetControlAsDriver(self, ignore):
+    def SetControlAsDriver(self, _):
         log.funcFileInfo()
         group = self._selectedControlGrp
         self._driver = pm.listConnections(group.control)[0]
@@ -159,7 +159,7 @@ class SetDrivenKeys_UI(absOpUI.Abstract_OperationUI):
         pm.frameLayout(self.joint_fl, e=1, l='Joints')
         pm.menuItem(self.addGroup_mi, e=1, en=1)
     
-    def AddSetDrivenGroup(self, ignore):
+    def AddSetDrivenGroup(self, _):
         log.funcFileInfo()
         control = pm.listConnections(self._selectedControlGrp.control)[0]
         self.operation.AddSetDrivenGroup(self._rigRoot, 
@@ -189,7 +189,7 @@ class SetDrivenKeys_UI(absOpUI.Abstract_OperationUI):
             return
         self._selectedJoint = self._jointIDs[jointIDStrs[0]]
 
-    def SetJointAsDriver(self, ignore):
+    def SetJointAsDriver(self, _):
         log.funcFileInfo()
         self._driver = self._selectedJoint
         label = 'Joints (Driver = %s)' % self._driver
@@ -239,17 +239,17 @@ class SetDrivenKeys_UI(absOpUI.Abstract_OperationUI):
             self.PopulateGroupHier()
         return ''
 
-    def SelectGroupDriver(self, ignore):
+    def SelectGroupDriver(self, _):
         log.funcFileInfo()
         driver = pm.listConnections(self._selectedGroup.driver)[0]
         pm.select(driver)
 
-    def RemoveSetDrivenGroup(self, ignore):
+    def RemoveSetDrivenGroup(self, _):
         log.funcFileInfo()
         self.operation.RemoveSetDrivenGroup(self._selectedGroup)
         self.PopulateGroupHier()
 
-    def OpenSetDrivenKeyWindow(self, ignore):
+    def OpenSetDrivenKeyWindow(self, _):
         self.operation.OpenSetDrivenKeyWindow(self._selectedGroup)
 
 # Copyright (c) 2021 Trevor Payne

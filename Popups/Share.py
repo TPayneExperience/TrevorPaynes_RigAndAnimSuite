@@ -32,7 +32,7 @@ class Share:
         
 #=========== MISC ====================================
 
-    def CopyClose(self, ignore):
+    def CopyClose(self, _):
         pyCopy.copy(genData.STORE_URL)
         pm.layoutDialog(dis='close')
         

@@ -225,15 +225,15 @@ class UserSettings:
 
 #============ COLOR ============================
 
-    def SetLColor(self, ignore):
+    def SetLColor(self, _):
         self.config['lControlColor'] = pm.colorSliderGrp(
                                         self.lClr_csg, q=1, rgb=1)
 
-    def SetMColor(self, ignore):
+    def SetMColor(self, _):
         self.config['mControlColor'] = pm.colorSliderGrp(
                                         self.mClr_csg, q=1, rgb=1)
 
-    def SetRColor(self, ignore):
+    def SetRColor(self, _):
         self.config['rControlColor'] = pm.colorSliderGrp(
                                         self.rClr_csg, q=1, rgb=1)
 
@@ -362,7 +362,7 @@ class UserSettings:
             return
         pm.button(self.save_btn, e=1, en=1)
 
-    def Save(self, ignore):
+    def Save(self, _):
         genUtil.Json.Save(self.filePath, self.config)
         pm.layoutDialog(dis='save')
 

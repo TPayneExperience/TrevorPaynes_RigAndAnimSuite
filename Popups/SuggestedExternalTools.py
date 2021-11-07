@@ -7,7 +7,7 @@ class SuggestedExternalTools:
     def __init__(self):
         pm.layoutDialog(ui=self.Setup, title='Suggested External Tools')
 
-    def close(self, ignore):
+    def close(self, _):
         pm.layoutDialog(dis='close')
 
 #=========== SETUP UI ====================================

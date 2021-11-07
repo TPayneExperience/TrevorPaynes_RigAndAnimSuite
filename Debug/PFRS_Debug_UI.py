@@ -27,31 +27,31 @@ class PFRS_Debug_UI:
 
 # ================= TESTS =============================
 
-    def LegTest(self, ignore):
+    def LegTest(self, _):
         log.funcFileDebug()
         self.debug.LegTest()
         self.parent.NewLoadRig(1)
         self.parent.InitOptionMenues()
 
-    def FaceTest(self, ignore):
+    def FaceTest(self, _):
         log.funcFileDebug()
         self.debug.FaceTest()
         self.parent.NewLoadRig(1)
         self.parent.InitOptionMenues()
 
-    def ArmTest(self, ignore):
+    def ArmTest(self, _):
         log.funcFileDebug()
         self.debug.ArmTest()
         self.parent.NewLoadRig(1)
         self.parent.InitOptionMenues()
         
-    def SpineTest(self, ignore):
+    def SpineTest(self, _):
         log.funcFileDebug()
         self.debug.SpineTest()
         self.parent.NewLoadRig(1)
         self.parent.InitOptionMenues()
 
-    def TailTest(self, ignore):
+    def TailTest(self, _):
         log.funcFileDebug()
         self.debug.TailTest()
         self.parent.NewLoadRig(1)

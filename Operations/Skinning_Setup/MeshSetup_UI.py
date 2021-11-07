@@ -106,12 +106,12 @@ class MeshSetup_UI(absOpUI.Abstract_OperationUI):
                     pm.menuItem(self.add_mi, e=1, en=0)
         pm.select(self._selectedAvailable)
 
-    def Refresh(self, ignore):
+    def Refresh(self, _):
         self.operation.InitSceneMeshes(self._rigRoot)
         self.PopulateAvailable()
         self.PopulateSkinned()
 
-    def AddMeshes(self, ignore):
+    def AddMeshes(self, _):
         log.funcFileInfo()
         vertCount = 0
         for mesh in self._selectedAvailable:
@@ -120,14 +120,16 @@ class MeshSetup_UI(absOpUI.Abstract_OperationUI):
         if limbCount * vertCount > 5000:
             msg = 'Adding meshes with a high vertex count to '
             msg += '\na rig with many limbs may take a few minutes.' 
+            msg += "\n\n(Progress can be tracked on the bottom left"
+            msg += "\nwith Maya's Progress bar in bottom left)"
             msg += '\n\nProceed?'
-            result = pm.confirmDialog(t='"Add Mesh" may be Slow', 
-                                icon='warning', 
-                                m=msg, 
-                                b=['No', 'Yes'], 
-                                db='Yes', 
-                                cb='No', 
-                                ds='No')
+            result = pm.confirmDialog(  t='"Add Meshes" may be Slow', 
+                                        icon='warning', 
+                                        m=msg, 
+                                        b=['No', 'Yes'], 
+                                        db='Yes', 
+                                        cb='No', 
+                                        ds='No')
             if result == 'No':
                 return
         self.operation.AddMeshes(self._rigRoot, 
@@ -135,8 +137,12 @@ class MeshSetup_UI(absOpUI.Abstract_OperationUI):
         self.PopulateAvailable()
         self.PopulateSkinned()
         self._pfrsUI.EnableOperations()
+        pm.confirmDialog(   t='Add Meshes Complete', 
+                            m='Add Meshes Complete!', 
+                            b=['Ok'], 
+                            db='Ok')
 
-    def DeleteMeshes(self, ignore):
+    def DeleteMeshes(self, _):
         log.funcFileInfo()
         self.operation.DeleteMeshes(self._selectedAvailable)
         self._selectedAvailable = []
@@ -153,12 +159,12 @@ class MeshSetup_UI(absOpUI.Abstract_OperationUI):
 
 #=========== SKINNED ====================================
 
-    def CopyWeights(self, ignore):
+    def CopyWeights(self, _):
         self._sourceSkin = self._selectedSkinned[0]
         label = 'Paste Weights (from %s)' % self._sourceSkin.shortName()
         pm.menuItem(self.paste_mi, e=1, l=label, en=1)
 
-    def PasteWeights(self, ignore):
+    def PasteWeights(self, _):
         pass
 
     def PopulateSkinned(self):
@@ -186,7 +192,7 @@ class MeshSetup_UI(absOpUI.Abstract_OperationUI):
         self._selectedSkinned = [self._allMeshes[n] for n in names]
         pm.select(self._selectedSkinned)
 
-    def RemoveMeshes(self, ignore):
+    def RemoveMeshes(self, _):
         log.funcFileInfo()
         self.operation.RemoveMeshes(self._rigRoot, self._selectedSkinned)
         self.PopulateAvailable()
@@ -198,7 +204,7 @@ class MeshSetup_UI(absOpUI.Abstract_OperationUI):
         pm.menuItem(self.copy_mi, e=1, en=0)
         self._selectedSkinned = []
 
-    def RemoveDeleteMeshes(self, ignore):
+    def RemoveDeleteMeshes(self, _):
         log.funcFileInfo()
         self.operation.RemoveMeshes(self._rigRoot, self._selectedSkinned)
         self.operation.DeleteMeshes(self._selectedSkinned)
@@ -209,7 +215,7 @@ class MeshSetup_UI(absOpUI.Abstract_OperationUI):
         self.PopulateAvailable()
         self.PopulateSkinned()
 
-    def RebuildSkins(self, ignore):
+    def RebuildSkins(self, _):
         log.funcFileInfo()
         for mesh in self._selectedSkinned:
             self.operation.RebuildSkin(mesh)
