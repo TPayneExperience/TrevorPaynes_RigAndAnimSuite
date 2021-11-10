@@ -90,7 +90,7 @@ class EditRigRoot:
         # BUTTONS + LAYOUT
         self.cancel_btn = pm.button(l='Cancel', parent=form, c=self.Cancel)
         self.save_btn = pm.button(l='Save', parent=form, c=self.Save)
-        pm.formLayout(form, edit=True, width=370, height=250,
+        pm.formLayout(form, edit=True, width=500, height=250,
                         attachForm=[(ass_fl, 'top', 5), 
                                     (ass_fl, 'left', 5), 
                                     (ass_fl, 'right', 5), 

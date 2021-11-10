@@ -111,8 +111,10 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
                     self.resetScale_mi = pm.menuItem(l='Freeze Joint Scale', 
                                             en=0,
                                             c=self.FreezeJointScale)
-                    self.aimUp_mi = pm.menuItem(l='Apply Joint Aim + Up User Settings', 
-                                            en=0, c=self.ApplyJointAimUp)
+                    self.aimUp_mi = pm.menuItem(
+                        l='Apply Joint Aim + Up User Settings', 
+                        en=0, c=self.ApplyJointAimUp
+                    )
 
                     # Templates
                     pm.menuItem(l='TEMPLATES', d=1)
@@ -127,20 +129,22 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
                                             c=self.AddEmptyLimb)
                     self.duplicate_mi = pm.menuItem(l='Duplicate Limbs', 
                                             en=0, c=self.DuplicateLimbs)
-                    with pm.subMenuItem(l='Mirror Body Limbs', en=0) as self.mirrorBody_mi:
+                    with pm.subMenuItem(l='Mirror Selected Body Limbs', 
+                                        en=0) as self.mirrorBody_mi:
                         pm.menuItem(l='X Axis', 
-                                    c=pm.Callback(self.MirrorBodyLimbs, 'X'))
+                            c=pm.Callback(self.MirrorBodyLimbs, 'X'))
                         pm.menuItem(l='Y Axis', 
-                                    c=pm.Callback(self.MirrorBodyLimbs, 'Y'))
+                            c=pm.Callback(self.MirrorBodyLimbs, 'Y'))
                         pm.menuItem(l='Z Axis', 
-                                    c=pm.Callback(self.MirrorBodyLimbs, 'Z'))
-                    with pm.subMenuItem(l='Mirror Face Limbs', en=0) as self.mirrorFace_mi:
+                            c=pm.Callback(self.MirrorBodyLimbs, 'Z'))
+                    with pm.subMenuItem(l='Mirror Selected Face Limbs', 
+                                        en=0) as self.mirrorFace_mi:
                         pm.menuItem(l='X Axis', 
-                                    c=pm.Callback(self.MirrorFaceLimbs, 'X'))
+                            c=pm.Callback(self.MirrorFaceLimbs, 'X'))
                         pm.menuItem(l='Y Axis', 
-                                    c=pm.Callback(self.MirrorFaceLimbs, 'Y'))
+                            c=pm.Callback(self.MirrorFaceLimbs, 'Y'))
                         pm.menuItem(l='Z Axis', 
-                                    c=pm.Callback(self.MirrorFaceLimbs, 'Z'))
+                            c=pm.Callback(self.MirrorFaceLimbs, 'Z'))
 
                     # Less Limbs
                     pm.menuItem(l='LESS LIMBS', d=1)
@@ -322,18 +326,19 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
     def SelectedLimb(self):
         log.funcFileInfo()
         limbIDStrs = pm.treeView(self.limb_tv, q=1, selectItem=1)
-        pm.menuItem(self.removeLimbs_mi, e=1, en=bool(limbIDStrs))
-        pm.menuItem(self.removeLimbsAndJoints_mi, e=1, en=bool(limbIDStrs))
-        pm.menuItem(self.duplicate_mi, e=1, en=bool(limbIDStrs))
-        pm.menuItem(self.mirrorBody_mi, e=1, en=bool(limbIDStrs))
-        pm.menuItem(self.mirrorFace_mi, e=1, en=bool(limbIDStrs))
-        pm.menuItem(self.jro_mi, e=1, en=bool(limbIDStrs))
-        pm.menuItem(self.saveTemp_mi, e=1, en=bool(limbIDStrs))
-        pm.menuItem(self.aimUp_mi, e=1, en=bool(limbIDStrs))
-        pm.menuItem(self.xferToJntOri_mi, e=1, en=bool(limbIDStrs))
-        pm.menuItem(self.limbLoc_mi, e=1, en=bool(limbIDStrs))
-        pm.menuItem(self.zeroRot_mi, e=1, en=bool(limbIDStrs))
-        pm.menuItem(self.resetScale_mi, e=1, en=bool(limbIDStrs))
+        enabled = bool(limbIDStrs)
+        pm.menuItem(self.removeLimbs_mi, e=1, en=enabled)
+        pm.menuItem(self.removeLimbsAndJoints_mi, e=1, en=enabled)
+        pm.menuItem(self.duplicate_mi, e=1, en=enabled)
+        pm.menuItem(self.mirrorBody_mi, e=1, en=enabled)
+        pm.menuItem(self.mirrorFace_mi, e=1, en=enabled)
+        pm.menuItem(self.jro_mi, e=1, en=enabled)
+        pm.menuItem(self.saveTemp_mi, e=1, en=enabled)
+        pm.menuItem(self.aimUp_mi, e=1, en=enabled)
+        pm.menuItem(self.xferToJntOri_mi, e=1, en=enabled)
+        pm.menuItem(self.limbLoc_mi, e=1, en=enabled)
+        pm.menuItem(self.zeroRot_mi, e=1, en=enabled)
+        pm.menuItem(self.resetScale_mi, e=1, en=enabled)
         pm.menuItem(self.flipSides_mi, e=1, en=0)
         pm.menuItem(self.updateMirror_mi, e=1, en=0)
         pm.menuItem(self.exportAnim_mi, e=1, en=0)
@@ -493,7 +498,7 @@ class LimbSetup_UI(absOpUI.Abstract_OperationUI):
         if (pm.confirmDialog(   t='Remove Limbs', 
                                 icon='warning', 
                                 m=msg, 
-                                b=['Yes','No'], 
+                                b=['No', 'Yes'], 
                                 db='Yes', 
                                 cb='No', 
                                 ds='No') == 'No'):

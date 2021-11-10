@@ -16,8 +16,11 @@ class AttachPoints(absOp.Abstract_Operation):
     jointLayerState = (0, 1)    # isVis, isRef
     meshLayerState = (1, 0)     # isVis, isRef
 
-    def AddAttachPoint(self, rigRoot, vertex):
-        ap.AttachPoint.Add(rigRoot, vertex)
+    def AddAttachPointAtVert(self, rigRoot, vertex):
+        ap.AttachPoint.AddAtVert(rigRoot, vertex)
+
+    def AddAttachPoint(self, rigRoot):
+        ap.AttachPoint.Add(rigRoot)
 
     def RemoveAttachPoint(self, attachPoint):
         ap.AttachPoint.Remove(attachPoint)

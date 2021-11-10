@@ -26,8 +26,7 @@ class LoadTemplates:
                                     elc=self.IgnoreRename)
         self.suffix_grp = pm.textFieldGrp(  l='Suffix', adj=1, pht='Upper...',
                                             cw=(2,80), cal=(1,'left'), p=form)
-        self.cancel_btn = pm.button(l='Cancel', p=form, 
-                                    c=lambda x: pm.layoutDialog(dis='close'))
+        self.cancel_btn = pm.button(l='Cancel', p=form, c=self.close)
         self.load_btn = pm.button(l='Load Selected', p=form, en=0, 
                                     c=self.Load)
         pm.formLayout(form, edit=True, width=200, height=320,
@@ -71,6 +70,9 @@ class LoadTemplates:
         pm.button(self.load_btn, e=1, en=enabled)
         if enabled:
             self._selected = [self._files[f] for f in fileNames]
+
+    def close(self, _):
+        pm.layoutDialog(dis='close')
 
     def Load(self, _):
         log.funcFileDebug()

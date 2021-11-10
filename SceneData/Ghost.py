@@ -17,7 +17,8 @@ class Ghost:
         newRigRoot = pm.duplicate(rigRoot, un=1)[0]
         newRigRoot.rename('Ghost_%03d' % newID)
         newRigRoot.ID.set(newID)
-        joints = rigUtil.GetSkinnableRigJoints(rigRoot)
+        # joints = rigUtil.GetSkinnableRigJoints(rigRoot)
+        joints = rigUtil.GetSkinnableRigJoints(newRigRoot)
         start = pm.playbackOptions(q=1, ast=1)
         end = pm.playbackOptions(q=1, aet=1)
         saveGroups = pm.listConnections(newRigRoot.meshesParentGroup)

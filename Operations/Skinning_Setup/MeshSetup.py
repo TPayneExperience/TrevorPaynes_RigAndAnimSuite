@@ -135,7 +135,6 @@ class MeshSetup(absOp.Abstract_Operation):
         # create dict of limbs attrs to joint attrs
         limbs = pm.listConnections(rigRoot.limbs)
         limbs = skinUtil.GetSkeletalLimbOrder(limbs)[::-1]
-        limbIndexes = range(len(limbs))
         limbParents = genUtil.GetDefaultLimbHier(limbs)
         limbChildren = {}
         for limb in limbs:
@@ -153,7 +152,7 @@ class MeshSetup(absOp.Abstract_Operation):
         skin = pm.listConnections(mesh.pfrsSkinCluster)[0]
 
         # Get Limb Attr, Joint Attrs, empty limb/joint weight lists
-        for limb in limbs:
+        for l, limb in enumerate(limbs):
             if limb.limbType.get() == 0: # Skip empty
                 continue
             tempJoints = rigUtil.GetSortedLimbJoints(limb)
@@ -168,6 +167,7 @@ class MeshSetup(absOp.Abstract_Operation):
         progressBar = pm.mel.eval('$tmp = $gMainProgressBar')
         pm.progressBar(progressBar, e=1, beginProgress=1, max=vertCount, 
                                         st='Unpacking Skin Weights...')
+        limbIndexes = range(len(joints))
         for vert in range(vertCount):
             pm.progressBar(progressBar, e=1, pr=vert)
             vAttr = '%s.vtx[%d]' % (mesh, vert)

@@ -6,7 +6,15 @@ import Utilities.Logger as log
 
 class AttachPoint:
     @staticmethod
-    def Add(rigRoot, vertex):
+    def AddAtVert(rigRoot, vertex):
+        log.funcFileDebug()
+        attachPoint = AttachPoint.Add(rigRoot)
+        pm.select([vertex, attachPoint])
+        pm.pointOnPolyConstraint()
+        return attachPoint
+
+    @staticmethod
+    def Add(rigRoot):
         log.funcFileDebug()
         newID = rigRoot.nextAttachPointID.get()
         rigRoot.nextAttachPointID.set(newID + 1)
@@ -15,8 +23,6 @@ class AttachPoint:
         attachPoint = pm.group(locator, n='AttachPoint_%03d' % newID)
         pm.addAttr(attachPoint, ln='ID', at='short', dv=newID)
         pm.parent(attachPoint, parent)
-        pm.select([vertex, attachPoint])
-        pm.pointOnPolyConstraint()
         return attachPoint
 
     @staticmethod

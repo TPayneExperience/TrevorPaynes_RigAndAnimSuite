@@ -140,8 +140,6 @@ class LimbSetup(absOp.Abstract_Operation):
             newJoints += pm.listConnections(newLimb.joints)
         self._MirrorBodyJoints(newJoints)
         self._MirrorLimbs(limbs, newLimbs, axisLetter)
-        for limb in newLimbs + limbs:
-            limb.limbLocation.set(0) # Body
         pm.select(d=1)
     
     def MirrorFaceLimbs(self, limbs, axisLetter):

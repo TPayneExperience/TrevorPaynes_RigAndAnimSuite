@@ -37,10 +37,10 @@ class AttachPoints_UI(absOpUI.Abstract_OperationUI):
                                             elc=self.IgnoreRename,
                                             scc=self.SelectedRigRoot)
                 with pm.popupMenu():
-                    pm.menuItem(l='Add Attach Point at Selected Vertex', 
+                    pm.menuItem(l='Add Attach Point', 
                                             c=self.AddAttachPoint)
         with pm.verticalLayout():
-            with pm.frameLayout('Attach Points Created', bv=1):
+            with pm.frameLayout('Attach Points', bv=1):
                 self.ap_tv = pm.treeView(arp=0, adr=0,
                                             elc=self.RenameAttachPoint,
                                             scc=self.SelectedAttachPoint)
@@ -101,19 +101,16 @@ class AttachPoints_UI(absOpUI.Abstract_OperationUI):
         log.funcFileInfo()
         vertices = pm.ls(sl=1)
         if not vertices:
-            msg = 'Please select a Vertex to create Attach Point for'
-            pm.confirmDialog(   t='Attach Point Error', 
-                                m=msg, 
-                                icon='error', 
-                                b='Ok')
-        vertex = vertices[0]
-        if 'MeshVertex' not in str(type(vertex)):
-            msg = 'Selection must be a mesh vertex'
-            pm.confirmDialog(   t='Attach Point Error', 
-                                m=msg, 
-                                icon='error', 
-                                b='Ok')
-        self.operation.AddAttachPoint(self._rigRoot, vertex)
+            self.operation.AddAttachPoint(self._rigRoot)
+        else:
+            vertex = vertices[0]
+            if 'MeshVertex' not in str(type(vertex)):
+                msg = 'Selection must be a mesh vertex OR nothing'
+                pm.confirmDialog(   t='Attach Point Error', 
+                                    m=msg, 
+                                    icon='error', 
+                                    b='Ok')
+            self.operation.AddAttachPointAtVert(self._rigRoot, vertex)
         self.PopulateAttachPointHier()
 
     def RemoveAttachPoint(self, _):
